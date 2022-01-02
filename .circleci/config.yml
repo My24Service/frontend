@@ -59,7 +59,7 @@ workflows:
                only: main
        - build-upload:
            requires:
-             - build
+             - test
            filters:
              branches:
                only: main
