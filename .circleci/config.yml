@@ -23,7 +23,7 @@ jobs:
       - run:
           command: |
             yarn build
-       - run:
+      - run:
            command: |
              DATE=$(date +"%Y-%m-%d_%H%M")
              TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"
