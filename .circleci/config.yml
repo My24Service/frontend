@@ -36,7 +36,7 @@ jobs:
           command: yarn
       - run:
           name: Create build
-          command: yarn build
+          command: yarn ci:build
       - run:
            command: |
              DATE=$(date +"%Y-%m-%d_%H%M")

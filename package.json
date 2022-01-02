@@ -9,7 +9,8 @@
     "watch": "vue-cli-service build --mode=development --watch",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint",
-    "ci:unit": "vue-cli-service test:unit --ci --reporters=default --reporters=jest-junit"
+    "ci:unit": "vue-cli-service test:unit --ci --reporters=default --reporters=jest-junit",
+    "ci:build": "export NODE_OPTIONS=--openssl-legacy-provider; vue-cli-service build"
   },
   "dependencies": {
     "@babel/polyfill": "^7.11.5",
