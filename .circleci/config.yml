@@ -9,9 +9,20 @@ jobs:
     steps:
       - checkout
       - run:
-          command: |
-            yarn
-            yarn test:unit
+          name: Install packages
+          command: yarn
+      - run:
+          name: Install JUnit coverage reporter
+          command: yarn add --dev jest-junit
+      - run:
+          name: Run tests with JUnit as reporter
+          command: yarn ci:unit
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+      - store_test_results:
+          path: ./reports/junit/
+      - store_artifacts:
+          path: ./reports/junit
   build-upload:
     working_directory: ~/circleci-frontend
     docker:
@@ -42,7 +53,7 @@ workflows:
    version: 2
    build-main:
      jobs:
-       - build:
+       - test:
            filters:
              branches:
                only: main
@@ -52,7 +63,7 @@ workflows:
                only: main
    build-develop:
      jobs:
-       - build:
+       - test:
            filters:
              branches:
                only: develop
