@@ -1,6 +1,4 @@
 version: '2.1'
-orbs:
-  aws-s3: circleci/aws-s3@3.0
 jobs:
   test:
     working_directory: ~/circleci-frontend
@@ -23,14 +21,17 @@ jobs:
           path: ./reports/junit/
       - store_artifacts:
           path: ./reports/junit
-  build-upload:
+  build-upload-main:
     working_directory: ~/circleci-frontend
     docker:
       - image: circleci/node
         environment:
-          TGZ_NAME: /tmp/my24-master-build.tgz
+          TGZ_NAME: /tmp/my24-frontend-main-build.tgz
+          RELEASE_NAME: /tmp/frontend-release
     steps:
       - checkout
+      - run: sudo apt-get update
+      - run: sudo apt install virtualenv
       - run:
           name: Install packages
           command: yarn
@@ -38,6 +39,7 @@ jobs:
           name: Create build
           command: yarn ci:build
       - run:
+           name: Create build archive
            command: |
              DATE=$(date +"%Y-%m-%d_%H%M")
              TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"
@@ -47,11 +49,62 @@ jobs:
              cp -r public /tmp/$TARGET_DIR
              cd /tmp
              tar -zcf $TGZ_NAME $TARGET_DIR
-             echo "$TARGET_DIR" > /tmp/release
-      - aws-s3/copy:
-          aws-region: US
-          from: $TGZ_NAME
-          to: 's3://live-deployments.eu-central-1.linodeobjects.com'
+             echo "$TARGET_DIR" > $RELEASE_NAME
+      - run:
+           name: Clone build-upload repo
+           command: git clone https://github.com/My24Service/build-upload.git
+      - run:
+           name: Upload to linode
+           command: |
+              cd build-upload
+              virtualenv --python=python3 venv
+              . venv/bin/activate
+              pip install -r requirements.txt
+              cd build_upload
+              python manage.py upload_live_build --file $TGZ_NAME
+              python manage.py upload_live_build --file $RELEASE_NAME
+  build-upload-develop:
+    working_directory: ~/circleci-frontend
+    docker:
+      - image: circleci/node
+        environment:
+          TGZ_NAME: /tmp/my24-frontend-develop-build.tgz
+          RELEASE_NAME: /tmp/frontend-release
+    steps:
+      - checkout
+      - run: sudo apt-get update
+      - run: sudo apt install virtualenv
+      - run:
+          name: Install packages
+          command: yarn
+      - run:
+          name: Create build
+          command: yarn ci:build
+      - run:
+           name: Create build archive
+           command: |
+             DATE=$(date +"%Y-%m-%d_%H%M")
+             TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"
+             mkdir /tmp/$TARGET_DIR
+             cp webpack-stats.json /tmp/$TARGET_DIR
+             cp -r dist /tmp/$TARGET_DIR
+             cp -r public /tmp/$TARGET_DIR
+             cd /tmp
+             tar -zcf $TGZ_NAME $TARGET_DIR
+             echo "$TARGET_DIR" > $RELEASE_NAME
+      - run:
+           name: Clone build-upload repo
+           command: git clone https://github.com/My24Service/build-upload.git
+      - run:
+           name: Upload to linode
+           command: |
+              cd build-upload
+              virtualenv --python=python3 venv
+              . venv/bin/activate
+              pip install -r requirements.txt
+              cd build_upload
+              python manage.py upload_dev_build --file $TGZ_NAME
+              python manage.py upload_dev_build --file $RELEASE_NAME
 workflows:
    version: 2
    build-main:
@@ -60,7 +113,7 @@ workflows:
            filters:
              branches:
                only: main
-       - build-upload:
+       - build-upload-main:
            requires:
              - test
            filters:
@@ -69,6 +122,12 @@ workflows:
    build-develop:
      jobs:
        - test:
+           filters:
+             branches:
+               only: develop
+       - build-upload-develop:
+           requires:
+             - test
            filters:
              branches:
                only: develop
