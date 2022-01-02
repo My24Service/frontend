@@ -1,7 +1,8 @@
-version: 2
-
+version: '2.1'
+orbs:
+  aws-s3: circleci/aws-s3@3.0
 jobs:
-  build:
+  test:
     working_directory: ~/circleci-frontend
     docker:
       - image: circleci/node
@@ -11,12 +12,41 @@ jobs:
           command: |
             yarn
             yarn test:unit
-
+  build-upload:
+    working_directory: ~/circleci-frontend
+    docker:
+      - image: circleci/node
+        environment:
+          TGZ_NAME: /tmp/my24-master-build.tgz
+    steps:
+      - checkout
+      - run:
+          command: |
+            yarn build
+       - run:
+           command: |
+             DATE=$(date +"%Y-%m-%d_%H%M")
+             TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"
+             mkdir /tmp/$TARGET_DIR
+             cp webpack-stats.json /tmp/$TARGET_DIR
+             cp -r dist /tmp/$TARGET_DIR
+             cp -r public /tmp/$TARGET_DIR
+             cd /tmp
+             tar -zcf $TGZ_NAME $TARGET_DIR
+             echo "$TARGET_DIR" > /tmp/release
+      - aws-s3/copy:
+          aws-region: US
+          from: $TGZ_NAME
+          to: 's3://live-deployments.eu-central-1.linodeobjects.com'
 workflows:
    version: 2
    build-main:
      jobs:
        - build:
+           filters:
+             branches:
+               only: main
+       - build-upload:
            filters:
              branches:
                only: main
