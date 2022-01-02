@@ -58,6 +58,8 @@ workflows:
              branches:
                only: main
        - build-upload:
+           requires:
+             - build
            filters:
              branches:
                only: main
