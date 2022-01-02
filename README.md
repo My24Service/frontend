@@ -1,4 +1,4 @@
-# my24frontend2
+# my24frontend
 
 ## Project setup
 ```
