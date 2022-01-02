@@ -1,0 +1,28 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/circleci-frontend
+    docker:
+      - image: circleci/node
+    steps:
+      - checkout
+      - run:
+          command: |
+            yarn
+            yarn test
+
+workflows:
+   version: 2
+   build-master:
+     jobs:
+       - build:
+           filters:
+             branches:
+               only: master
+   build-develop:
+     jobs:
+       - build:
+           filters:
+             branches:
+               only: develop

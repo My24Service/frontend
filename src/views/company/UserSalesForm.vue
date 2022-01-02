@@ -1,0 +1,335 @@
+<template>
+  <b-overlay :show="isLoading" rounded="sm">
+    <div class="container app-form">
+      <b-form>
+        <h2 v-if="isCreate">{{ $trans('New sales user') }}</h2>
+        <h2 v-if="!isCreate">{{ $trans('Edit sales user') }}</h2>
+        <b-row>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Username')"
+              label-for="salesuser_username"
+            >
+              <b-form-input
+                id="salesuser_username"
+                size="sm"
+                v-model="salesuser.username"
+                :state="isSubmitClicked ? !$v.salesuser.username.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                v-if="salesuser.username === ''"
+                :state="isSubmitClicked ? $v.salesuser.username.required : null">
+                {{ $trans('Username is required') }}
+              </b-form-invalid-feedback>
+              <b-form-invalid-feedback
+                v-if="salesuser.username !== ''"
+                :state="isSubmitClicked ? $v.salesuser.username.isUnique : null">
+                {{ $trans('Username is already in use') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Password')"
+              label-for="salesuser_password"
+            >
+              <b-form-input
+                id="salesuser_password"
+                size="sm"
+                type="password"
+                v-model="salesuser.password1"
+                @blur="$v.salesuser.password1.$touch()"
+                :state="isSubmitClicked && $v.salesuser.password1 ? !$v.salesuser.password1.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked && $v.salesuser.password1 ? !$v.salesuser.password1.$error : null">
+                {{ $trans('Please enter a password') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Password again')"
+              label-for="salesuser_password_again"
+            >
+              <b-form-input
+                id="salesuser_password_again"
+                size="sm"
+                type="password"
+                v-model="salesuser.password2"
+                @blur="$v.salesuser.password2.$touch()"
+                :state="isSubmitClicked ? !$v.salesuser.password2.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? $v.salesuser.password2.sameAs : null">
+                {{ $trans('Passwords do not match') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('First name')"
+              label-for="salesuser_first_name"
+            >
+              <b-form-input
+                id="salesuser_first_name"
+                size="sm"
+                v-model="salesuser.first_name"
+                :state="isSubmitClicked ? !$v.salesuser.first_name.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.salesuser.first_name.$error : null">
+                {{ $trans('Please enter a first name') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Last name')"
+              label-for="salesuser_last_name"
+            >
+              <b-form-input
+                id="salesuser_last_name"
+                size="sm"
+                v-model="salesuser.last_name"
+                :state="isSubmitClicked ? !$v.salesuser.last_name.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.salesuser.last_name.$error : null">
+                {{ $trans('Please enter a last name') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Email')"
+              label-for="salesuser_email"
+            >
+              <b-form-input
+                id="salesuser_email"
+                size="sm"
+                v-model="salesuser.email"
+                :state="isSubmitClicked ? !$v.salesuser.email.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.salesuser.email.$error : null">
+                {{ $trans('Please enter a valid email') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+        </b-row>
+
+        <div class="mx-auto">
+          <footer class="modal-footer">
+            <b-button @click="cancelForm" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</b-button>
+            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+              {{ $trans('Submit') }}</b-button>
+          </footer>
+        </div>
+      </b-form>
+    </div>
+  </b-overlay>
+</template>
+
+<script>
+import { required, sameAs, email } from 'vuelidate/lib/validators'
+import { usernameExists } from '@/models/helpers'
+import salesUserModel from '@/models/company/UserSales'
+
+export default {
+  props: {
+    pk: {
+      type: [String, Number],
+      default: null
+    },
+  },
+  validations() {
+    let validations = {
+      salesuser: {
+        first_name: {
+          required
+        },
+        last_name: {
+          required,
+        },
+        email: {
+          required,
+          email
+        },
+        password1: {},
+        password2: {},
+      }
+    }
+
+    if (this.isCreate) {
+      validations.salesuser.username = {
+        required,
+        isUnique(value) {
+          if (value === '') return true
+
+          return usernameExists(value)
+        }
+      }
+
+      validations.salesuser.password1 = {
+        required
+      }
+
+      validations.salesuser.password2 = {
+        required,
+        sameAs: sameAs('password1')
+      }
+    } else {
+      validations.salesuser.username = {
+        required,
+        isUnique(value) {
+          if (this.orgUsername === this.salesuser.username || value === '' || value.length < 3) {
+            return true
+          }
+
+          return usernameExists(value)
+        }
+      }
+
+      validations.salesuser.password2 = {
+        sameAs: sameAs('password1')
+      }
+    }
+
+    return validations
+  },
+  data () {
+    return {
+      isLoading: false,
+      submitClicked: false,
+      buttonDisabled: false,
+      salesuser: salesUserModel.getFields(),
+      orgUsername: null,
+    }
+  },
+  computed: {
+    isCreate() {
+      return !this.pk
+    },
+    isSubmitClicked() {
+      return this.submitClicked
+    }
+  },
+  created() {
+    if (!this.isCreate) {
+      this.loadData()
+    } else {
+      this.salesuser = salesUserModel.getFields()
+    }
+  },
+  methods: {
+    preSubmitForm() {
+      this.buttonDisabled = true
+      this.submitClicked = true
+      this.$v.$touch()
+
+      setTimeout(() => {
+        this.submitForm()
+      }, 1000)
+    },
+    submitForm() {
+      this.submitClicked = true
+      this.$v.$reset()
+      this.$v.$touch()
+      if (this.$v.$invalid) {
+        console.log('invalid?', this.$v.$invalid)
+        this.buttonDisabled = false
+        return
+      }
+
+      this.isLoading = true
+
+      if (this.isCreate) {
+        this.salesuser.password = this.salesuser.password1
+        return this.$store.dispatch('getCsrfToken').then((token) => {
+          salesUserModel.insert(token, this.salesuser).then((action) => {
+            this.flashMessage.show({
+              status: 'info',
+              title: this.$trans('Created'),
+              message: this.$trans('sales user has been created')
+            })
+
+            this.isLoading = false
+            this.cancelForm()
+          }).catch(() => {
+            this.flashMessage.show({
+              status: 'error',
+              title: this.$trans('Error'),
+              message: this.$trans('Error creating sales user')
+            })
+
+            this.isLoading = false
+          })
+        })
+      }
+
+      this.$store.dispatch('getCsrfToken').then((token) => {
+        delete this.salesuser.date_joined
+        delete this.salesuser.last_login
+
+        if (this.salesuser.password1) {
+          this.salesuser.password = this.salesuser.password1
+        } else {
+          delete this.salesuser.password
+        }
+
+        salesUserModel.update(token, this.pk, this.salesuser)
+          .then(() => {
+            this.flashMessage.show({
+              status: 'info',
+              title: this.$trans('Updated'),
+              message: this.$trans('sales user has been updated')
+            })
+
+            this.isLoading = false
+            this.cancelForm()
+          })
+          .catch(() => {
+            this.flashMessage.show({
+              status: 'error',
+              title: this.$trans('Error'),
+              message: this.$trans('Error updating sales user')
+            })
+
+            this.isLoading = false
+          })
+      })
+    },
+    loadData() {
+      this.isLoading = true
+
+      salesUserModel.detail(this.pk).then((salesuser) => {
+        this.salesuser = salesuser
+        this.orgUsername = salesuser.username
+        this.isLoading = false
+      }).catch((error) => {
+        console.log('error fetching salesuser', error)
+        this.flashMessage.show({
+          status: 'error',
+          title: this.$trans('Error'),
+          message: this.$trans('Error loading sales user')
+        })
+
+        this.isLoading = false
+      })
+    },
+    cancelForm() {
+      this.$router.go(-1)
+    }
+  }
+}
+</script>

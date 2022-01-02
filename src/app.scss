@@ -1,0 +1,140 @@
+// Define variable defaults
+$my24: #ff9933;
+$primary: $my24;
+$navbar-light-color: $my24;
+// $font-family-sans-serif: 'Catamaran';
+$active-link: #222222;
+$normal-link: #fff;
+$font-size-base: 0.9rem;
+
+// Then import Bootstrap an BootstrapVue SCSS files (order is important)
+@import 'node_modules/bootstrap/scss/bootstrap.scss';
+@import 'node_modules/bootstrap-vue/src/index.scss';
+
+.btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.multiselect {
+  font-size: 14px !important;
+  min-height: 25px !important;
+}
+
+.multiselect__placeholder {
+  margin-bottom: 4px;
+}
+
+.multiselect__select {
+  padding: 8px 8px;
+  top: -6px;
+}
+
+.multiselect, .multiselect__input, .multiselect__single {
+  font-size: 14px !important;
+}
+.multiselect__single {
+  margin-bottom: 4px;
+}
+
+.multiselect__tags {
+  padding: 0 35px 0 4px !important;
+  min-height: 25px !important;
+}
+
+.main-nav-divider {
+  @extend .row;
+  @extend .align-items-center;
+  color: #6c757d;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.icon-th {
+  @extend .h4;
+  @extend .m-1;
+}
+
+.edit-icon {
+  @extend .border;
+  @extend .border-primary;
+  @extend .rounded;
+  @extend .px-2;
+}
+
+.navbar-light .navbar-nav .nav-link {
+  color: $normal-link !important
+}
+
+.navbar-light .navbar-nav .nav-link.active, .navbar-light .navbar-nav {
+  color: $active-link !important
+}
+
+.main-app-container {
+  margin-top: 70px;
+}
+
+/* main app layouts */
+.app-grid, .app-detail, .app-form {
+  margin-top: 24px;
+}
+
+.app-grid {
+
+}
+
+.app-detail {
+  @extend .mx-auto;
+  @extend .bg-light;
+  @extend .p-4;
+}
+
+.app-form {
+  @extend .mx-auto;
+  @extend .bg-light;
+  @extend .p-md-2;
+}
+
+.page-subnav {
+  margin-top: -20px;
+}
+
+.main-app-container .page-subnav {
+  padding-bottom: 8px;
+  padding-left: 168px;
+  margin-top: -48px;
+  width: 100%;
+  font-size: 12px;
+}
+
+.carousel-item img {
+  width: 640px !important;
+  height: 480px !important;
+}
+
+.navbar-nav {
+  margin-left: 145px;
+}
+
+.subnav-pills {
+  margin-top: 20px;
+}
+
+.memberLogo {
+  position: absolute;
+  top: 0;
+  z-index: 10;
+  height: 120px;
+}
+
+._vue-flash-msg-body {
+  z-index: 10000000 !important;
+}
+
+.data-table {
+  font-size: 12px;
+}
+
+.data-table table thead tr:first-child {
+  border-top-style: hidden;
+}

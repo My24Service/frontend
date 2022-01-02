@@ -1,0 +1,551 @@
+<template>
+  <b-overlay :show="isLoading" rounded="sm">
+    <div class="container app-form">
+      <b-form>
+        <h2 v-if="isCreate">{{ $trans('New member') }}</h2>
+        <h2 v-if="!isCreate">{{ $trans('Edit member') }}</h2>
+        <b-row>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Name')"
+              label-for="member_name"
+            >
+              <b-form-input
+                v-model="member.name"
+                id="member_name"
+                size="sm"
+                :state="isSubmitClicked ? !$v.member.name.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.name.$error : null">
+                {{ $trans('Please enter a name') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Company code')"
+              label-for="member_companycode"
+            >
+              <b-form-input
+                id="member_companycode"
+                size="sm"
+                v-model="member.companycode"
+                :state="isSubmitClicked ? !$v.member.companycode.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                v-if="member.companycode !== ''"
+                :state="isSubmitClicked ? $v.member.companycode.isUnique : null">
+                {{ $trans('Company code is already in use') }}
+              </b-form-invalid-feedback>
+              <b-form-invalid-feedback
+                v-if="member.companycode === ''"
+                :state="isSubmitClicked ? $v.member.companycode.required : null">
+                {{ $trans('Company code is required') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Contract')"
+              label-for="member_contract"
+            >
+              <b-form-select v-model="member.contract" :options="contracts" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Type')"
+              label-for="member_member_type"
+            >
+              <b-form-select v-model="member.member_type" :options="memberTypes" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Deleted?')"
+              label-for="member_is_deleted"
+            >
+              <b-form-select v-model="member.is_deleted" :options="isDeletedOptions" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Address')"
+              label-for="member_address"
+            >
+              <b-form-input
+                id="member_address"
+                size="sm"
+                v-model="member.address"
+                :state="isSubmitClicked ? !$v.member.address.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.address.$error : null">
+                {{ $trans('Please enter an address') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Postal')"
+              label-for="member_postal"
+            >
+              <b-form-input
+                id="member_postal"
+                size="sm"
+                v-model="member.postal"
+                :state="isSubmitClicked ? !$v.member.postal.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.postal.$error : null">
+                {{ $trans('Please enter a postal') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('City')"
+              label-for="member_city"
+            >
+              <b-form-input
+                id="member_city"
+                size="sm"
+                v-model="member.city"
+                :state="isSubmitClicked ? !$v.member.city.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.city.$error : null">
+                {{ $trans('Please enter a city') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Country')"
+              label-for="member_country"
+            >
+              <b-form-select v-model="member.country_code" :options="countries" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Tel.')"
+              label-for="member_tel"
+            >
+              <b-form-input
+                id="member_tel"
+                size="sm"
+                v-model="member.tel"
+                :state="isSubmitClicked ? !$v.member.tel.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.tel.$error : null">
+                {{ $trans('Please enter a number') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Email')"
+              label-for="member_email"
+            >
+              <b-form-input
+                id="member_email"
+                size="sm"
+                v-model="member.email"
+                :state="isSubmitClicked ? !$v.member.email.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.email.$error : null">
+                {{ $trans('Please enter a valid email') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Website (http://...)')"
+              label-for="member_www"
+            >
+              <b-form-input
+                id="member_www"
+                size="sm"
+                v-model="member.www"
+                :state="isSubmitClicked ? !$v.member.www.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.www.$error : null">
+                {{ $trans('Please enter a website') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Contacts')"
+              label-for="member_contacts"
+            >
+              <b-form-textarea
+                id="member_contacts"
+                v-model="member.contacts"
+                rows="5"
+                :state="isSubmitClicked ? !$v.member.contacts.$error : null"
+              ></b-form-textarea>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.contacts.$error : null">
+                {{ $trans('Please enter some contacts') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Activities')"
+              label-for="member_activities"
+            >
+              <b-form-textarea
+                id="member_activities"
+                v-model="member.activities"
+                rows="5"
+                :state="isSubmitClicked ? !$v.member.activities.$error : null"
+              ></b-form-textarea>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.activities.$error : null">
+                {{ $trans('Please enter some activities') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Info')"
+              label-for="member_info"
+            >
+              <b-form-textarea
+                id="member_info"
+                v-model="member.info"
+                rows="5"
+                :state="isSubmitClicked ? !$v.member.info.$error : null"
+              ></b-form-textarea>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !$v.member.info.$error : null">
+                {{ $trans('Please enter some info') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Company logo')"
+              label-for="member_companylogo"
+            >
+              <b-form-file
+                id="member_companylogo"
+                accept="image/*"
+                :placeholder="$trans('Choose a file or drop it here...')"
+                @input="imageSelected"
+              ></b-form-file>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked && $v.member.companylogo ? !$v.member.companylogo.$error : null">
+                {{ $trans('Please upload a company logo') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4">
+            <h3>{{ $trans('Current image') }}</h3>
+            <img width="200px" :src="current_image" alt=""/>
+          </b-col>
+          <b-col cols="4">
+            <h3>{{ $trans('Upload preview') }}</h3>
+            <img width="200px" :src="upload_preview" alt=""/>
+          </b-col>
+        </b-row>
+
+        <div class="mx-auto">
+          <footer class="modal-footer">
+            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+              {{ $trans('Cancel') }}
+            </b-button>
+            <b-button @click="preSubmitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+              {{ $trans('Submit') }}
+            </b-button>
+          </footer>
+        </div>
+      </b-form>
+    </div>
+  </b-overlay>
+</template>
+
+<script>
+import { url, email, required } from 'vuelidate/lib/validators'
+import memberModel from '@/models/member/Member'
+import contractModel from '@/models/member/Contract';
+
+export default {
+  props: {
+    pk: {
+      type: [String, Number],
+      default: null
+    },
+  },
+  data() {
+    return {
+      isLoading: false,
+      buttonDisabled: false,
+      submitClicked: false,
+      countries: [],
+      memberTypes: [
+        {value: 'temps', text: 'temps'},
+        {value: 'maintenance', text: 'maintenance'},
+      ],
+      contracts: [],
+      member: memberModel.getFields(),
+      orgCompanycode: null,
+      isDeletedOptions: [
+        {value: true, text: this.$trans('Is deleted')},
+        {value: false, text: this.$trans('Not deleted')},
+      ],
+      suppliers: [],
+      current_image: '/static/core/img/noimg.png',
+      upload_preview: '/static/core/img/noimg.png',
+      fileChanged: false
+    }
+  },
+  validations() {
+    let validations = {
+      member: {
+        name: {
+          required,
+        },
+        address: {
+          required,
+        },
+        postal: {
+          required,
+        },
+        city: {
+          required,
+        },
+        tel: {
+          required,
+        },
+        email: {
+          required,
+          email
+        },
+        www: {
+          required,
+          url
+        },
+        contacts: {
+          required,
+        },
+        activities: {
+          required,
+        },
+        info: {
+          required,
+        },
+      },
+    }
+
+    if (this.isCreate) {
+        validations['member']['companycode'] = {
+          required,
+          isUnique(value) {
+            if (value === '' || value.length < 3) return true
+
+            return memberModel.companycodeExists(value)
+          }
+        }
+        validations['member']['companylogo'] = {
+          required,
+        }
+    } else {
+        validations['member']['companycode'] = {
+          required,
+          isUnique(value) {
+            if (this.orgCompanycode === this.member.companycode || value === '' || value.length < 3) {
+              return true
+            }
+
+            return memberModel.companycodeExists(value)
+          }
+        }
+    }
+
+    return validations
+  },
+  computed: {
+    isCreate() {
+      return !this.pk
+    },
+    isSubmitClicked() {
+      return this.submitClicked
+    }
+  },
+  created() {
+    this.isLoading = true
+    this.$store.dispatch('getCountries').then((countries) => {
+      this.countries = countries
+
+      contractModel.list().then((data) => {
+        for(let i=0;i<data.results.length; i++) {
+          this.contracts.push({
+            value: data.results[i].id,
+            text: data.results[i].name,
+          })
+        }
+
+        if (!this.isCreate) {
+          this.loadData()
+        } else {
+          this.member = memberModel.getFields()
+          this.member.country_code = 'NL'
+          this.member.member_type = 'maintenance'
+          this.member.contract = data.results[0].id
+        }
+        this.isLoading = false
+      })
+
+    })
+  },
+  methods: {
+    imageSelected(file) {
+      const reader = new FileReader()
+      reader.onload = (f) => {
+        const b64 = f.target.result
+        this.upload_preview = b64
+        this.member.companylogo = b64
+      }
+
+      reader.readAsDataURL(file)
+      this.fileChanged = true
+      this.$v.member.companylogo.$touch()
+    },
+    selectSupplier(option) {
+      this.member.supplier_relation = option.id
+      this.member.supplier_name = option.name
+    },
+
+    preSubmitForm() {
+      this.buttonDisabled = true
+      this.submitClicked = true
+      this.$v.$touch()
+
+      setTimeout(() => {
+        this.submitForm()
+      }, 1000)
+    },
+    submitForm() {
+      this.$v.$touch()
+
+      if (this.$v.$invalid) {
+        console.log('invalid?', this.$v.$invalid, this.$v)
+        this.buttonDisabled = false
+        this.isLoading = false
+        return
+      }
+
+      this.buttonDisabled = true
+
+      if (this.isCreate) {
+        this.isLoading = true
+        return this.$store.dispatch('getCsrfToken').then((token) => {
+          memberModel.insert(token, this.member).then((member) => {
+            this.flashMessage.show({
+              status: 'info',
+              title: this.$trans('Created'),
+              message: this.$trans('Member has been created')
+            })
+
+            this.buttonDisabled = false
+            this.isLoading = false
+            this.$router.go(-1)
+          }).catch(() => {
+            this.flashMessage.show({
+              status: 'error',
+              title: this.$trans('Error'),
+              message: this.$trans('Error creating member')
+            })
+
+            this.buttonDisabled = false
+            this.isLoading = false
+          })
+        })
+      }
+
+      this.$store.dispatch('getCsrfToken').then((token) => {
+        if (!this.fileChanged) {
+          delete this.member.companylogo
+        }
+
+        this.isLoading = true
+
+        memberModel.update(token, this.pk, this.member).then(() => {
+          this.flashMessage.show({
+            status: 'info',
+            title: this.$trans('Updated'),
+            message: this.$trans('Member has been updated')
+          })
+
+          this.buttonDisabled = false
+          this.isLoading = false
+          this.$router.go(-1)
+        }).catch(() => {
+          this.flashMessage.show({
+            status: 'error',
+            title: this.$trans('Error'),
+            message: this.$trans('Error updating member')
+          })
+
+          this.isLoading = false
+          this.buttonDisabled = false
+        })
+      })
+    },
+    loadData() {
+      this.isLoading = true
+
+      memberModel.detail(this.pk).then((member) => {
+        this.member = member
+        this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
+        this.orgCompanycode = member.companycode
+        this.isLoading = false
+      }).catch((error) => {
+        console.log('error fetching member', error)
+        this.flashMessage.show({
+          status: 'error',
+          title: this.$trans('Error'),
+          message: this.$trans('Error fetching member')
+        })
+
+        this.isLoading = false
+      })
+    },
+    cancelForm() {
+      this.$router.go(-1)
+    }
+  }
+}
+</script>

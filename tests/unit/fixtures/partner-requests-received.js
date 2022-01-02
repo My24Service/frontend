@@ -1,0 +1,102 @@
+export default {
+	data: {
+	    "next": null,
+	    "previous": null,
+	    "count": 1,
+	    "num_pages": 1,
+	    "results": [
+	        {
+	            "id": 8,
+	            "from_member": 2,
+	            "to_member": 9,
+	            "status": "requested",
+	            "created": "28/12/2021 19:19",
+	            "modified": "28/12/2021 19:19",
+	            "to_member_view": {
+	                "id": 9,
+	                "companycode": "kms",
+	                "companylogo_url": "/media/logos/kms/3529fb42-642e-4161-8c5c-117d0ea561cd.jpeg",
+	                "name": "De Kerstmarktspecialist",
+	                "address": "Metaalweg 4",
+	                "tel": "033-2474013",
+	                "fax": "",
+	                "www": "http://www.kerstmarktspecialist.nl",
+	                "postal": "3751 LS",
+	                "city": "Bunschoten",
+	                "country_code": "NL",
+	                "member_type": "maintenance",
+	                "email": "info@kerstmarktspecialist.nl",
+	                "companylogo": "/media/logos/kms/3529fb42-642e-4161-8c5c-117d0ea561cd.jpeg",
+	                "activities": "De jaarlijks terugkerende vraag.\nBent u op zoek naar een alternatief voor\nhet reguliere kerstpakket? Iets unieks? Een\nbeleving? Willen uw medewerkers ook graag\nzelf iets uitzoeken? Sprankelende cadeaus?\nHeeft u nauwelijks tijd en geen zin in gedoe?",
+	                "info": "Stelt u zich eens voor: een kersttruck vol\ncadeaus die bij u komt voorrijden of uw eigen\nbedrijfslocatie omgetoverd in een sfeervolle\nkerstmarkt. In de kraampjes een breed assortiment\naan cadeaus, voor groot en klein. Super blije\ngezichten van medewerkers die zelf hun kerstpakket\nbij elkaar shoppen. Een heel persoonlijke manier\nvan het ‘geven en ontvangen’ van het\njaarlijkse kerstgeschenk. Er klinkt kerstmuziek,\ner zijn wellicht hapjes en drankjes, collega's\npraten met elkaar en het is gezellig. Iedereen is\ntevreden met zijn eigen cadeaukeuze. Ook de\nmedewerkers, die onverhoopt niet in de gelegenheid zijn om te komen, worden niet vergeten. \nMet haar jarenlange ervaring en creativiteit weet\nDe Kerstmarktspecialist ieder event tot een \nongeëvenaard succes te maken!",
+	                "contacts": "H. Buitenhuis"
+	            },
+	            "from_member_view": {
+	                "id": 2,
+	                "companycode": "Test",
+	                "companylogo_url": "/media/logos/stormy/40d62262-112d-4b2d-9d35-da1c8876300a.jpeg",
+	                "name": "Stormy Support & Service",
+	                "address": "Metaalweg 4",
+	                "tel": "033-2474020",
+	                "fax": "",
+	                "www": "http://www.stormy.nl/",
+	                "postal": "3751LS",
+	                "city": "Bunschoten-Spakenburg",
+	                "country_code": "NL",
+	                "member_type": "maintenance",
+	                "email": "planning@stormy.nl",
+	                "companylogo": "/media/logos/stormy/40d62262-112d-4b2d-9d35-da1c8876300a.jpeg",
+	                "activities": "Stormy Support & Service verleent technische ondersteuning en adviseert zakelijke partners omtrent: laadbruggen,Industriële deuren,rolluiken,branddeuren en veiligheidssystemen.",
+	                "info": "Stormy Support & Service            verleent adviserende en technische ondersteuning",
+	                "contacts": "Jeffrey Buitenhuis & Irfan Pekdal"
+	            }
+	        },
+	        {
+	            "id": 9,
+	            "from_member": 3,
+	            "to_member": 10,
+	            "status": "requested",
+	            "created": "28/12/2021 19:19",
+	            "modified": "28/12/2021 19:19",
+	            "to_member_view": {
+	                "id": 10,
+	                "companycode": "kms",
+	                "companylogo_url": "/media/logos/kms/3529fb42-642e-4161-8c5c-117d0ea561cd.jpeg",
+	                "name": "De Kerstmarktspecialist",
+	                "address": "Metaalweg 4",
+	                "tel": "033-2474013",
+	                "fax": "",
+	                "www": "http://www.kerstmarktspecialist.nl",
+	                "postal": "3751 LS",
+	                "city": "Bunschoten",
+	                "country_code": "NL",
+	                "member_type": "maintenance",
+	                "email": "info@kerstmarktspecialist.nl",
+	                "companylogo": "/media/logos/kms/3529fb42-642e-4161-8c5c-117d0ea561cd.jpeg",
+	                "activities": "De jaarlijks terugkerende vraag.\nBent u op zoek naar een alternatief voor\nhet reguliere kerstpakket? Iets unieks? Een\nbeleving? Willen uw medewerkers ook graag\nzelf iets uitzoeken? Sprankelende cadeaus?\nHeeft u nauwelijks tijd en geen zin in gedoe?",
+	                "info": "Stelt u zich eens voor: een kersttruck vol\ncadeaus die bij u komt voorrijden of uw eigen\nbedrijfslocatie omgetoverd in een sfeervolle\nkerstmarkt. In de kraampjes een breed assortiment\naan cadeaus, voor groot en klein. Super blije\ngezichten van medewerkers die zelf hun kerstpakket\nbij elkaar shoppen. Een heel persoonlijke manier\nvan het ‘geven en ontvangen’ van het\njaarlijkse kerstgeschenk. Er klinkt kerstmuziek,\ner zijn wellicht hapjes en drankjes, collega's\npraten met elkaar en het is gezellig. Iedereen is\ntevreden met zijn eigen cadeaukeuze. Ook de\nmedewerkers, die onverhoopt niet in de gelegenheid zijn om te komen, worden niet vergeten. \nMet haar jarenlange ervaring en creativiteit weet\nDe Kerstmarktspecialist ieder event tot een \nongeëvenaard succes te maken!",
+	                "contacts": "H. Buitenhuis"
+	            },
+	            "from_member_view": {
+	                "id": 3,
+	                "companycode": "Test 2",
+	                "companylogo_url": "/media/logos/stormy/40d62262-112d-4b2d-9d35-da1c8876300a.jpeg",
+	                "name": "Stormy Support & Service",
+	                "address": "Metaalweg 4",
+	                "tel": "033-2474020",
+	                "fax": "",
+	                "www": "http://www.stormy.nl/",
+	                "postal": "3751LS",
+	                "city": "Bunschoten-Spakenburg",
+	                "country_code": "NL",
+	                "member_type": "maintenance",
+	                "email": "planning@stormy.nl",
+	                "companylogo": "/media/logos/stormy/40d62262-112d-4b2d-9d35-da1c8876300a.jpeg",
+	                "activities": "Stormy Support & Service verleent technische ondersteuning en adviseert zakelijke partners omtrent: laadbruggen,Industriële deuren,rolluiken,branddeuren en veiligheidssystemen.",
+	                "info": "Stormy Support & Service            verleent adviserende en technische ondersteuning",
+	                "contacts": "Jeffrey Buitenhuis & Irfan Pekdal"
+	            }
+	        }
+	    ]
+	}
+}
