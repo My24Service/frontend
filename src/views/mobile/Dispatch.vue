@@ -1,5 +1,37 @@
 <template>
   <div class="container app-grid">
+    <b-button @click="backToTop" id="btn-back-to-top">
+      <b-icon-arrow-up-circle-fill></b-icon-arrow-up-circle-fill>
+    </b-button>
+
+    <b-modal
+      id="dispatch-search-modal"
+      ref="dispatch-search-modal"
+      v-bind:title="$trans('Search')"
+      @ok="handleSearchOk"
+    >
+      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
+        <b-container fluid>
+          <b-row role="group">
+            <b-col size="12">
+              <b-form-group
+                v-bind:label="$trans('Search')"
+                label-for="search-query"
+              >
+                <b-form-input
+                  size="sm"
+                  autofocus
+                  id="search-query"
+                  ref="searchQuery"
+                  v-model="searchQuery"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
     <b-modal
       id="dispatch-order-actions-modal"
       ref="dispatch-order-actions-modal"
@@ -100,6 +132,8 @@
             <b-link @click="function() { dispatch.drawDispatch() }">refresh</b-link>
             |
             <b-link @click="function() { loadToday() }">today</b-link>
+            |
+            <b-link @click="function() { showSearchModal() }">search</b-link>
           </b-col>
         </b-row>
       </b-col>
@@ -116,7 +150,7 @@
       </b-col>
     </b-row>
     <b-overlay :show="showOverlay" rounded="sm">
-      <canvas ref="dispatch-canvas" class="dispatchCanvas" width=1080 height=800 @mousemove="mousemove" @click="click"></canvas>
+      <canvas ref="dispatch-canvas" class="dispatchCanvas" width=1080 height=300 @mousemove="mousemove" @click="click"></canvas>
       <canvas id="tip" ref="dispatch-tip-canvas" width=200 height=100></canvas>
     </b-overlay>
   </div>
@@ -139,6 +173,8 @@ export default {
   },
   data() {
     return {
+      scrollTopButton: null,
+      searchQuery: null,
       buttonDisabled: false,
       assignMode: false,
       selectedOrders: [],
@@ -158,6 +194,26 @@ export default {
     }
   },
   methods: {
+    backToTop() {
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    },
+    handleSearchOk(bvModalEvt) {
+      bvModalEvt.preventDefault()
+      this.handleSearchSubmit()
+    },
+    handleSearchSubmit() {
+      this.$refs['dispatch-search-modal'].hide()
+      this.$bvModal.hide('dispatch-search-modal')
+
+      setTimeout(() => {
+        this.dispatch.setSearchQuery(this.searchQuery)
+        this.dispatch.search()
+      }, 500)
+    },
+    showSearchModal() {
+      this.$refs['dispatch-search-modal'].show()
+    },
     loadToday() {
       this.dispatch.loadToday()
     },
@@ -304,8 +360,17 @@ export default {
     },
     setHandlers() {
       window.onscroll = (e) => {
-        this.dispatch.reOffset();
-      };
+        this.dispatch.reOffset()
+
+        if (
+          document.body.scrollTop > 20 ||
+          document.documentElement.scrollTop > 20
+        ) {
+          this.scrollTopButton.style.display = "block"
+        } else {
+          this.scrollTopButton.style.display = "none"
+        }
+      }
 
       window.onresize = (e) => {
         this.dispatch.reOffset();
@@ -313,12 +378,13 @@ export default {
     }
   },
   mounted() {
-    this.assignMode = this.assignModeProp;
+    this.scrollTopButton = document.getElementById('btn-back-to-top')
+    this.assignMode = this.assignModeProp
 
     if (this.assignMode) {
       this.$store.dispatch('getAssignOrders').then((orders) => {
-        this.selectedOrders = orders;
-      });
+        this.selectedOrders = orders
+      })
     }
 
     this.$store.dispatch('getStatuscodes').then((statuscodes) => {
@@ -346,5 +412,11 @@ export default {
 .dispatchCanvas {
   position: relative !important;
   width: 1080px;
+}
+#btn-back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: none;
 }
 </style>

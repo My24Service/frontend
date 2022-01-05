@@ -1,73 +1,155 @@
-import axios from 'axios';
+import axios from 'axios'
 
-import my24 from '@/services/my24';
+import my24 from '@/services/my24'
 
 
 class Dispatch {
-  rowHeight = 24;
-  numSlots = 6;
-  fontface = 'Helvetica Neue';
-  fontsize = 14;
-  xPadding = 4;
-  yPadding = 14;
-  endSlotPadding = 4;
-  startSlotPadding = 4;
-  orderLineWidth = 10;
-  orderLinePaddingTop = 6;
-  orderLinePaddingBottom = 2;
-  overUserLineWidth = 4;
-  overUserLinePaddingRight = 4;
-  overUserLinePaddingTop = 2;
-  overUserLinePaddingBottom = 2;
-  overUserLineAllEmpty = true;
-  overUserLineYOffset = 110;
+  rowHeight = 24
+  numSlots = 6
+  fontface = 'Helvetica Neue'
+  fontsize = 14
+  xPadding = 4
+  yPadding = 14
+  endSlotPadding = 4
+  startSlotPadding = 4
+  orderLineWidth = 10
+  orderLinePaddingTop = 6
+  orderLinePaddingBottom = 2
+  overUserLineWidth = 4
+  overUserLinePaddingRight = 4
+  overUserLinePaddingTop = 2
+  overUserLinePaddingBottom = 2
+  overUserLineAllEmpty = true
+  overUserLineYOffset = 110
 
-  hotspots = [];
+  hotspots = []
+  rowInfoPositions = {}
 
-  canvas;
-  tipCanvas;
-  ctx;
-  tipCtx;
-  width;
-  slotWidth;
-  strokeStyle = 'red';
-  lineWidth = 1;
-  lastY = 1;
-  cw;
-  ch;
-  offsetX;
-  offsetY;
+  canvas
+  tipCanvas
+  ctx
+  tipCtx
+  width
+  slotWidth
+  strokeStyle = 'red'
+  lineWidth = 1
+  lastY = 1
+  cw
+  ch
+  offsetX
+  offsetY
 
-  component;
+  component
 
-	monday = window.locale === 'en' ? 1 : 0;
-  // monday = 1;
-  numDays = 5;
-  startDate;
-  endDate = null;
-  daysInView = [];
-  dateToIndex = {};
-  userYPositions = [];
+  searchQuery = null
 
-  debug = false;
+	monday = window.locale === 'en' ? 1 : 0
+  // monday = 1
+  numDays = 5
+  startDate
+  endDate = null
+  daysInView = []
+  dateToIndex = {}
+  userYPositions = []
 
-  statuscodes = null;
+  debug = false
 
-  url = '/company/dispatch-assignedorders-user-list-v2/';
+  statuscodes = null
+
+  url = '/company/dispatch-assignedorders-user-list-v2/'
 
   constructor(canvas, tipCanvas, statuscodes, component) {
-    this.canvas = canvas;
-    this.tipCanvas = tipCanvas;
-    this.component = component;
-    this.tipCtx = tipCanvas.getContext("2d");
-    this.ctx = canvas.getContext('2d');
+    this.canvas = canvas
+    this.tipCanvas = tipCanvas
+    this.component = component
+    this.tipCtx = tipCanvas.getContext("2d")
+    this.ctx = canvas.getContext('2d')
 
-	  this.width = canvas.clientWidth;
-	  this.slotWidth = this.width/this.numSlots;
-    this.statuscodes = statuscodes;
+	  this.width = canvas.clientWidth
+	  this.slotWidth = this.width/this.numSlots
+    this.statuscodes = statuscodes
 
     this.startDate = component.$moment().weekday(this.monday)
   }
+
+  setSearchQuery(query) {
+    this.searchQuery = query
+  }
+
+  search() {
+    for (const [posY, info] of Object.entries(this.rowInfoPositions)) {
+      let re = new RegExp(this.searchQuery, 'gi')
+      if (info.match(re)) {
+        window.scrollTo({
+          top: posY,
+          left: 0,
+          behavior: 'smooth'
+        })
+
+        const startX = this.slotWidth - this.overUserLinePaddingRight - 5
+        for (let i=0; i<this.userYPositions.length; i++) {
+          const yData = this.userYPositions[i]
+          if (posY+5 > yData.start && posY < yData.end) {
+            this.doFade(startX, yData.start+2, 5, yData.end - yData.start-4)
+            break
+          }
+        }
+
+        return
+      }
+    }
+  }
+
+  async doFade(x, y, w, h, cb) {
+    await this.fadeInRectangle(x, y, w, h, 255, 0, 0)
+    await this.fadeOutRectangle(x, y, w, h, 255, 0, 0)
+    await this.fadeInRectangle(x, y, w, h, 255, 0, 0)
+    await this.fadeOutRectangle(x, y, w, h, 255, 0, 0)
+  }
+
+  fadeOutRectangle(x, y, w, h, r, g, b) {
+    return new Promise((resolve, reject) => {
+      let steps = 50,
+        dr = (255 - r) / steps, // how much red should be added each time
+        dg = (255 - g) / steps, // green
+        db = (255 - b) / steps, // blue
+        i = 0, // step counter
+        interval = setInterval(() => {
+          this.ctx.fillStyle = 'rgb(' + Math.round(r + dr * i) + ','
+                                 + Math.round(g + dg * i) + ','
+                                 + Math.round(b + db * i) + ')'
+          this.ctx.fillRect(x, y, w, h); // will redraw the area each time
+          i++
+          if(i === steps) { // stop if done
+            clearInterval(interval)
+            resolve()
+          }
+        }, 20);
+    })
+  }
+
+  fadeInRectangle(x, y, w, h, r, g, b) {
+    return new Promise((resolve, reject) => {
+      let steps = 50,
+        dr = (255-r) / steps, // how much red should be removed each time
+        dg = (255-g) / steps, // green
+        db = (255-b) / steps, // blue
+        i = 0, // step counter
+        interval = setInterval(() => {
+          const rgb = 'rgb(' + Math.round(r - dr * i) + ','
+                             + Math.round(r - dg * i) + ','
+                             + Math.round(r- db * i) + ')'
+          this.ctx.fillStyle = rgb
+          this.ctx.fillRect(x, y, w, h); // will redraw the area each time
+          i++
+          if(i === steps) { // stop if done
+            clearInterval(interval)
+            resolve()
+          }
+        }, 30);
+      })
+  }
+
 
   loadToday() {
     this.startDate = this.component.$moment().weekday(this.monday)
@@ -77,7 +159,7 @@ class Dispatch {
   drawDispatch() {
     this.component.showOverlay = true
     this.fetchData().then((results) => {
-      this.canvas.height = results.data.length * (this.rowHeight*1.3)
+      this.canvas.height = results.data.length * this.rowHeight + 300;
 
       this.component.showOverlay = true
 
@@ -145,7 +227,7 @@ class Dispatch {
     this.ctx.lineWidth = this.lineWidth;
     this.ctx.strokeStyle = '#000';
 
-    this.ctx.moveTo(this.slotWidth, this.lastY);
+    this.ctx.moveTo(this.slotWidth-1, this.lastY);
     this.ctx.lineTo(this.width, this.lastY);
 
     this.lastY += 1;
@@ -205,12 +287,20 @@ class Dispatch {
 
   createUserRow(data) {
     const startY = this.lastY;
+    let rowInfo = []
 
     this.resetDayOrders();
     this.setText(data.full_name, 1+this.xPadding, this.lastY+this.yPadding, this.slotWidth);
+    rowInfo.push(data.full_name)
 
     for (const [date, orders] of Object.entries(data.assignedorders.start)) {
       for(let i=0; i<orders.length; i++) {
+        // fill searchable info
+        rowInfo.push(orders[i].order_pk)
+        rowInfo.push(orders[i].assignedorder_status)
+        rowInfo.push(orders[i].order_status)
+        rowInfo.push(orders[i].order_info)
+
         const endOrder = this.getEnd(orders[i].order_pk, data.assignedorders.end);
         if (this.debug) {
           console.log(`order ${orders[i].order_pk}, start: ${date}, end: ${endOrder.date}`);
@@ -285,9 +375,13 @@ class Dispatch {
           }
 
         }
-      }
-    }
+      } // for orders.length
+    } // for data.assignedorders.start
 
+    // store info positions
+    this.rowInfoPositions[this.lastY] = rowInfo.join(' ')
+
+    // vertial lines
     this.ctx.beginPath();
     this.ctx.lineWidth = this.lineWidth;
     this.ctx.strokeStyle = '#000';
@@ -545,7 +639,7 @@ class Dispatch {
           const yData = this.userYPositions[i];
           const lineStartY = yData.start + this.overUserLinePaddingTop;
           const lineEndY = yData.end - this.overUserLinePaddingBottom;
-          this.drawOverUserLine(lineStartY, lineEndY, '#fff');
+          this.drawOverUserLine(lineStartY, lineEndY, 'white');
           this.userYPositions[i].isEmpty = true;
           this.canvas.style.cursor = "default"
         }
@@ -561,7 +655,7 @@ class Dispatch {
       const lineStartY = yData.start + this.overUserLinePaddingTop
       const lineEndY = yData.end - this.overUserLinePaddingBottom
 
-      let color = '#fff'
+      let color = 'white'
       if (y > yData.start && y < yData.end) {
         this.canvas.style.cursor = "pointer"
         color = 'red'
@@ -604,30 +698,50 @@ class Dispatch {
   userAlreadySelected(user_id) {
     for( let i=0; i<this.component.selectedUsers.length; i++) {
       if (this.component.selectedUsers[i].user_id === user_id) {
-        return true;
+        return true
       }
     }
 
-    return false;
+    return false
   }
 
-  drawOverUserLine(startY, endY, color) {
-    const startX = this.slotWidth - this.overUserLinePaddingRight;
-    const endX = this.slotWidth - this.overUserLinePaddingRight;
-    let path = new Path2D();
-    this.ctx.lineWidth = this.overUserLineWidth;
-    this.ctx.strokeStyle = color;
-    path.moveTo(startX, startY);
-    path.lineTo(endX, endY);
-    this.ctx.stroke(path);
+  drawOverUserLine(startY, endY, color, alpha) {
+    const startX = this.slotWidth - this.overUserLinePaddingRight
+    const endX = this.slotWidth - this.overUserLinePaddingRight
+    let path = new Path2D()
+    this.ctx.lineWidth = this.overUserLineWidth
+    this.ctx.strokeStyle = this.getRgba(color, alpha)
+    path.moveTo(startX, startY)
+    path.lineTo(endX, endY)
+    this.ctx.stroke(path)
   }
 
   inStroke(obj, x, y) {
     for(let i=-5; i<5; i++) {
       if (this.ctx.isPointInStroke(obj, x+i, y+i)) {
-        return true;
+        return true
       }
     }
+  }
+
+  getRgba(colorString, alpha) {
+    if (!alpha) {
+      alpha = 1
+    }
+
+    if (colorString === 'red') {
+      return `rgba(255, 0, 0, ${alpha})`
+    }
+
+    if (colorString === 'white') {
+      return `rgba(0, 0, 0, ${alpha})`
+    }
+
+    if (colorString === 'black') {
+      return `rgba(255, 255, 255, ${alpha})`
+    }
+
+    throw(`unknow color: ${colorString}`)
   }
 
   timeForward() {
