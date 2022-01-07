@@ -72,10 +72,12 @@ jobs:
       - run:
            name: Create github release
            command: |
+              source $BASH_ENV
               go get github.com/tcnksm/ghr
               VERSION=$(cat /tmp/$TARGET_DIR/VERSION)
-              $HOME/go/bin/ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/$TARGET_DIR
-
+              mkdir /tmp/release
+              cp $TGZ_NAME /tmp/release/frontend-release-${VERSION}
+              $HOME/go/bin/ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/release
   build-upload-develop:
     working_directory: ~/circleci-frontend
     docker:
