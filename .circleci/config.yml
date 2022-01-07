@@ -74,7 +74,7 @@ jobs:
            command: |
               go get github.com/tcnksm/ghr
               VERSION=$(cat /tmp/$TARGET_DIR/VERSION)
-              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/$TARGET_DIR
+              $HOME/go/bin/ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/$TARGET_DIR
 
   build-upload-develop:
     working_directory: ~/circleci-frontend
