@@ -55,6 +55,9 @@
             <TheLanguageChooser />
           </b-navbar-nav>
         </b-collapse>
+
+        <Version />
+
       </b-container>
     </b-navbar>
   </div>
@@ -63,11 +66,13 @@
 <script>
 import TheLanguageChooser from "@/components/TheLanguageChooser";
 import NavBrand from "@/components/NavBrand";
+import Version from "@/components/Version"
 
 export default {
   components: {
     TheLanguageChooser,
     NavBrand,
+    Version,
   },
   name: "TheNavNotLoggedIn",
   data() {
