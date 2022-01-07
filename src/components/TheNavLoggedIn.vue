@@ -83,6 +83,9 @@
             <TheLanguageChooser />
           </b-navbar-nav>
         </b-collapse>
+
+        <Version />
+
       </b-container>
     </b-navbar>
   </div>
@@ -92,6 +95,7 @@
 import { required, sameAs } from 'vuelidate/lib/validators'
 import Password from 'vue-password-strength-meter'
 import TheLanguageChooser from "@/components/TheLanguageChooser"
+import Version from "@/components/Version"
 import NavItems from "@/components/NavItems"
 import NavBrand from "@/components/NavBrand"
 import { componentMixin } from '@/utils'
@@ -105,6 +109,7 @@ export default {
     NavItems,
     NavBrand,
     Password,
+    Version,
   },
   validations: {
     old_password: {
