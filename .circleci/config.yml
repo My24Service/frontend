@@ -31,7 +31,7 @@ jobs:
     steps:
       - checkout
       - run: sudo apt-get update
-      - run: sudo apt install virtualenv
+      - run: sudo apt install virtualenv golang-go
       - run:
           name: Install packages
           command: yarn
@@ -39,14 +39,20 @@ jobs:
           name: Create build
           command: yarn ci:build
       - run:
-           name: Create build archive
+           name: set environment var TARGET_DIR
            command: |
              DATE=$(date +"%Y-%m-%d_%H%M")
-             TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"
+             echo 'export TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
+             source $BASH_ENV
+      - run:
+           name: Create build archive
+           command: |
+             source $BASH_ENV
              mkdir /tmp/$TARGET_DIR
              cp webpack-stats.json /tmp/$TARGET_DIR
              cp -r dist /tmp/$TARGET_DIR
              cp -r public /tmp/$TARGET_DIR
+             echo $(cat src/version.js | sed -r "s/^.*'([^']+)'$/\1/") > /tmp/$TARGET_DIR/VERSION
              cd /tmp
              tar -zcf $TGZ_NAME $TARGET_DIR
              echo "$TARGET_DIR" > $RELEASE_NAME
@@ -63,6 +69,13 @@ jobs:
               cd build_upload
               python manage.py upload_live_build --file $TGZ_NAME
               python manage.py upload_live_build --file $RELEASE_NAME
+      - run:
+           name: Create github release
+           command: |
+              go get github.com/tcnksm/ghr
+              VERSION=$(cat /tmp/$TARGET_DIR/VERSION)
+              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/$TARGET_DIR
+
   build-upload-develop:
     working_directory: ~/circleci-frontend
     docker:
