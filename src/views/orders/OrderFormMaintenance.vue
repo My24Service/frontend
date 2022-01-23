@@ -326,6 +326,7 @@
             </b-form-group>
           </b-col>
         </b-row>
+
         <div class="order-orderlines">
           <h4>{{ $trans('Order lines') }}</h4>
           <b-row>
@@ -450,6 +451,35 @@
           </footer>
         </div>
 
+        <div class="assign-engineer">
+          <h4>{{ $trans('Direct assign') }}</h4>
+          <b-row>
+            <b-col cols="12" role="group">
+              <b-form-group
+                label-size="sm"
+                label-class="p-sm-0"
+                v-bind:label="$trans('Directly assign this order to these engineers')"
+                label-for="order-assign"
+              >
+                <multiselect
+                  v-model="selectedEngineers"
+                  id="order-assign"
+                  track-by="id"
+                  :max-height="600"
+                  :placeholder="$trans('Type to search')"
+                  open-direction="bottom"
+                  :options="engineers"
+                  :multiple="true"
+                  :taggable="true"
+                  @tag="addEngineer"
+                  :custom-label="engineerLabel"
+                >
+                </multiselect>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </div>
+
         <div class="mx-auto">
           <footer class="modal-footer">
             <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
@@ -461,6 +491,7 @@
           </footer>
         </div>
       </b-form>
+      <div class="bottom"></div>
     </div>
   </b-overlay>
 </template>
@@ -470,7 +501,8 @@ import Multiselect from 'vue-multiselect'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
 import { required } from 'vuelidate/lib/validators'
 import orderModel from '@/models/orders/Order'
-import customerModel from '@/models/customer/Customer';
+import customerModel from '@/models/customer/Customer'
+import engineerModel from '@/models/company/UserEngineer'
 
 export default {
   components: {
@@ -522,7 +554,9 @@ export default {
       errorMessage: null,
       customers: [],
       customerSearch: '',
-      selectedCustomer: null
+      selectedCustomer: null,
+      engineers: [],
+      selectedEngineers: []
     }
   },
   validations: {
@@ -564,17 +598,17 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
+  async created () {
+    this.countries = await this.$store.dispatch('getCountries')
+    const { results } = await engineerModel.list()
+    this.engineers = results
 
-      if (this.isCreate) {
-        this.order = orderModel.getFields()
-        this.getCustomers('')
-      } else {
-        this.loadOrder()
-      }
-    })
+    if (this.isCreate) {
+      this.order = orderModel.getFields()
+      this.getCustomers('')
+    } else {
+      this.loadOrder()
+    }
   },
   methods: {
     // order lines
@@ -643,10 +677,16 @@ export default {
       this.emptyInfoLine()
     },
 
+    engineerLabel({ full_name }) {
+      return full_name
+    },
+    addEngineer(value) {
+      console.log(value)
+    },
+
     customerLabel({ name, city}) {
       return `${name} - ${city}`
     },
-
     selectCustomer(option) {
       this.order.customer_id = option.customer_id
       this.order.order_name = option.name
@@ -661,6 +701,8 @@ export default {
       this.order.customer_remarks = option.remarks
     },
     submitForm() {
+      console.log(this.selectedEngineers)
+      return
       this.submitClicked = true
       this.$v.$touch()
       if (this.$v.$invalid) {
@@ -690,6 +732,10 @@ export default {
 
             this.buttonDisabled = false
             this.isLoading = false
+
+            // insert documents
+
+            // assign engineers
 
             if (confirm((this.$trans('Do you want to add documents to this order?')))) {
               this.$router.push({name: 'order-document-add', params: {orderPk: order.id}})
@@ -782,3 +828,8 @@ export default {
 }
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style scoped>
+div.bottom {
+  margin-bottom: 80px;
+}
+</style>
