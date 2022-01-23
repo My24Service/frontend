@@ -4,6 +4,12 @@ export const getters = {
   isLoggedIn: state => {
     return !isEmpty(state.userInfo);
   },
+  getUserPk: state => {
+    return state.userInfo.pk;
+  },
+  getMemberPk: state => {
+    return state.memberInfo.id
+  },
   getUserName: state => {
     if (state.userInfo.is_superuser) {
       return 'superuser';
