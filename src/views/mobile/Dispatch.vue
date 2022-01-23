@@ -162,6 +162,8 @@ import eachSeries from 'async/eachSeries';
 import my24 from '@/services/my24';
 import Dispatch from '@/services/dispatch';
 import orderModel from '@/models/orders/Order';
+import assign from '@/models/mobile/Assign';
+
 
 export default {
   name: 'Dispatch',
@@ -247,24 +249,20 @@ export default {
         })
 
     },
-    assignToUser(user_id, callback) {
+    async assignToUser(user_id, callback) {
       if (this.selectedOrderIds.length === 0) {
         for (let i=0; i<this.selectedOrders.length; i++) {
           this.selectedOrderIds.push(this.selectedOrders[i].order_id);
         }
       }
 
-      this.$store.dispatch('getCsrfToken').then(token => {
-        const url = `/mobile/assign-user/${user_id}/`;
-        const headers = my24.getHeaders(token);
-        const data = {order_ids: this.selectedOrderIds.join(',')}
-
-        axios.post(url, data, headers)
-          .then(() => {
-            return callback()
-          }).catch(error => {
-            return callback(error)
-          })
+      this.$store.dispatch('getCsrfToken').then(async token => {
+        try {
+          await assign.assignToUser(token, user_id, this.selectedOrderIds, true)
+          callback()
+        } catch (e) {
+          callback(e)
+        }
       })
     },
     assignToUsers() {
