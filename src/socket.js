@@ -1,6 +1,7 @@
 import Vue from "vue"
 
 class Socket {
+  protocol = document.location.protocol.indexOf('https') !== -1 ? 'wss' : 'ws'
   reconnectTimeout = 5000
   socketsUser = {}
   onmessageHandlersUser = {}
@@ -57,7 +58,7 @@ class Socket {
   }
 
   _connectUser(userPk) {
-    const socket = new WebSocket(`ws://${window.location.host}/ws/notifications-user/${userPk}/`)
+    const socket = new WebSocket(`${this.protocol}://${window.location.host}/ws/notifications-user/${userPk}/`)
     socket.onmessage = (e) => {
       if (userPk in this.onmessageHandlersUser) {
         const data = JSON.parse(e.data)
@@ -81,7 +82,7 @@ class Socket {
   }
 
   _connectMember(memberPk) {
-    const socket = new WebSocket(`ws://${window.location.host}/ws/notifications-member/`)
+    const socket = new WebSocket(`${this.protocol}://${window.location.host}/ws/notifications-member/`)
     socket.onmessage = (e) => {
       if (memberPk in this.onmessageHandlersMember) {
         const data = JSON.parse(e.data)
