@@ -100,6 +100,7 @@ import NavItems from "@/components/NavItems"
 import NavBrand from "@/components/NavBrand"
 import { componentMixin } from '@/utils'
 import accountModel from '@/models/account/Account'
+import socket from "@/socket"
 
 
 export default {
@@ -187,16 +188,28 @@ export default {
     },
     doLogout() {
       // do logout
+      const userPk = this.$store.getters.getUserPk
+      const memberPk = this.$store.getters.getMemberPk
+
       this.$store.dispatch('getCsrfToken').then((token) => {
         this.$store.dispatch('logout', token)
           .then(() => {
+            socket.removeOnmessageHandlerUser(userPk)
+            socket.removeSocketUser(userPk)
+
+            socket.removeOnmessageHandlerMember(memberPk)
+            socket.removeSocketMember(memberPk)
+
             this.flashMessage.show({
               status: 'info',
               title: this.$trans('Logged out'),
               message: this.$trans('You are now logged out')
             })
 
-            this.$router.push({path: '/'})
+            // if (this.$router.currentRoute)
+            if(this.$router.currentRoute.path !== '/') {
+              this.$router.push({path: '/'})
+            }
           })
           .catch((error) => {
             this.flashMessage.show({
