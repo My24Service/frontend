@@ -110,9 +110,6 @@
       </b-col>
       <b-col cols="8">
         <b-row>
-          <b-col cols="3">
-
-          </b-col>
           <b-col cols="3" class="my-auto">
             <div class="float-right">
               {{ $trans('show from:') }}
@@ -127,13 +124,18 @@
               :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
             ></b-form-datepicker>
           </b-col>
-          <b-col cols="3" class="my-auto">
+          <b-col cols="6" class="my-auto">
+            <b-link @click="function() { loadToday() }">{{ $trans('today') }}</b-link>
             |
-            <b-link @click="function() { dispatch.drawDispatch() }">refresh</b-link>
+            <b-link @click="function() { showSearchModal() }">{{ $trans('search') }}</b-link>
             |
-            <b-link @click="function() { loadToday() }">today</b-link>
-            |
-            <b-link @click="function() { showSearchModal() }">search</b-link>
+            <span v-if="newData">
+              <b-link @click="function() { dispatch.drawDispatch() }">
+                <span class="new-data">{{ $trans('dispatch changed, refresh now') }}</span></b-link>
+            </span>
+            <span v-if="!newData">
+              <b-link @click="function() { dispatch.drawDispatch() }">{{ $trans('refresh') }}</b-link>
+            </span>
           </b-col>
         </b-row>
       </b-col>
@@ -163,7 +165,7 @@ import my24 from '@/services/my24';
 import Dispatch from '@/services/dispatch';
 import orderModel from '@/models/orders/Order';
 import assign from '@/models/mobile/Assign';
-
+import Socket from '@/socket'
 
 export default {
   name: 'Dispatch',
@@ -186,7 +188,8 @@ export default {
       selectedOrderUserId: null,
       dispatch: null,
       showOverlay: false,
-      startDate: null
+      startDate: null,
+      newData: false
     }
   },
   watch: {
@@ -373,9 +376,18 @@ export default {
       window.onresize = (e) => {
         this.dispatch.reOffset();
       };
+    },
+    onNewData(data) {
+      if (data.type === 'dispatch') {
+        this.newData = true
+      }
     }
   },
   mounted() {
+    const memberPk = this.$store.getters.getMemberPk
+    Socket.getSocketMemberNewData(memberPk)
+    Socket.setOnmessageHandlerMemberNewData(memberPk, this.onNewData)
+
     this.scrollTopButton = document.getElementById('btn-back-to-top')
     this.assignMode = this.assignModeProp
 
@@ -395,11 +407,21 @@ export default {
     }).catch((error) => {
       console.log('error in get statuscodes', error);
     });
+  },
+  beforeDestroy() {
+    const memberPk = this.$store.getters.getMemberPk
+    Socket.removeOnmessageHandlerMemberNewData(memberPk)
+    Socket.removeSocketMemberNewData(memberPk)
   }
 }
 </script>
 
 <style scoped>
+span.new-data {
+  color: red;
+  font-style: italic;
+  font-weight: bold;
+}
 #tip {
   background-color:white;
   border:1px solid blue;

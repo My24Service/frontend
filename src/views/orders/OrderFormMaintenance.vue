@@ -480,6 +480,13 @@
             <b-row>
               <b-col cols="12">
                 <b-table v-if="documents.length > 0" small :fields="documentFields" :items="documents" responsive="md">
+                  <template #cell(icons)="data">
+                    <div class="float-right">
+                      <b-link class="h5 mx-2" @click.prevent="deleteDocument(data.index)">
+                        <b-icon-trash></b-icon-trash>
+                      </b-link>
+                    </div>
+                  </template>
                 </b-table>
               </b-col>
             </b-row>
@@ -519,7 +526,7 @@
         </div>
 
         <div class="order-done" v-if="isCreate">
-          <h4>{{ $trans('Next') }}</h4>
+          <h4>{{ $trans('Next page after create') }}</h4>
           <b-row>
             <b-col cols="12">
               <b-form-group
@@ -565,6 +572,7 @@ import orderModel from '@/models/orders/Order'
 import customerModel from '@/models/customer/Customer'
 import engineerModel from '@/models/company/UserEngineer'
 import documentModel from '@/models/orders/Document'
+import Assign from '@/models/mobile/Assign'
 
 export default {
   components: {
@@ -613,6 +621,7 @@ export default {
       ],
       documentFields: [
         { key: 'name', label: this.$trans('Name') },
+        { key: 'icons', label: '' }
       ],
       submitClicked: false,
       countries: [],
@@ -694,7 +703,6 @@ export default {
         reader.onload = (f) => {
           const b64 = f.target.result
           this.documents.push({
-            order: this.orderPk,
             file: b64,
             name: files[i].name,
             description: ''
@@ -706,12 +714,16 @@ export default {
     },
     postDocument(document, callback) {
       this.$store.dispatch('getCsrfToken').then(token => {
+        document.order = this.orderPk
         documentModel.insert(token, document).then(() => {
           return callback()
         }).catch(error => {
           return callback(error)
         })
       })
+    },
+    deleteDocument(index) {
+      this.documents.splice(index, 1)
     },
     // order lines
     deleteOrderLine(index) {
@@ -803,8 +815,6 @@ export default {
       this.order.customer_remarks = option.remarks
     },
     submitForm() {
-      console.log(this.selectedEngineers)
-      return
       this.submitClicked = true
       this.$v.$touch()
       if (this.$v.$invalid) {
@@ -855,14 +865,13 @@ export default {
                 })
 
                 this.isLoading = false
-                this.$router.push({name: 'order-documents', params: {orderPk: this.orderPk}})
               }
             })
 
             // assign engineers
             this.$store.dispatch('getCsrfToken').then(token => {
               for (let i=0; i<this.selectedEngineers.length; i++) {
-                assign.assignToUser(token, this.selectedEngineers[i].id, [order.order_id], true)
+                Assign.assignToUser(token, this.selectedEngineers[i].id, [order.order_id], true)
               }
             })
 
