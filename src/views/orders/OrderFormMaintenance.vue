@@ -28,7 +28,7 @@
                 :max-height="600"
                 :show-no-results="false"
                 :hide-selected="true"
-                @search-change="getCustomers"
+                @search-change="getCustomersDebounced"
                 @select="selectCustomer"
                 :custom-label="customerLabel"
               >
@@ -563,6 +563,7 @@
 </template>
 
 <script>
+import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import eachSeries from 'async/eachSeries'
 import Multiselect from 'vue-multiselect'
 import { required } from 'vuelidate/lib/validators'
@@ -684,13 +685,13 @@ export default {
     }
   },
   async created () {
+    this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.countries = await this.$store.dispatch('getCountries')
     const { results } = await engineerModel.list()
     this.engineers = results
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
-      this.getCustomers('')
     } else {
       this.loadOrder()
     }
@@ -919,6 +920,7 @@ export default {
       })
     },
     getCustomers(query) {
+      if (query === '') return
       this.isLoading = true
 
       customerModel.search(query).then((response) => {

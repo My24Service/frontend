@@ -408,7 +408,7 @@
                 :max-height="600"
                 :show-no-results="true"
                 :hide-selected="true"
-                @search-change="getOrders"
+                @search-change="getOrdersDebounced"
                 @select="selectOrder"
                 :custom-label="orderLabel"
               >
@@ -447,6 +447,7 @@
 </template>
 
 <script>
+import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
 import { required } from 'vuelidate/lib/validators'
 import tripModel from '@/models/mobile/Trip';
@@ -565,7 +566,7 @@ export default {
     }
   },
   created() {
-    this.getOrders('')
+    this.getOrdersDebounced = AwesomeDebouncePromise(this.getOrders, 500)
     this.$store.dispatch('getCountries').then((countries) => {
       this.countries = countries
       if (this.isCreate) {
@@ -667,6 +668,7 @@ export default {
       })
     },
     getOrders(query) {
+      if (query === '') return
       this.isLoading = true
 
       orderModel.search(query).then((response) => {
