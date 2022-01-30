@@ -3,11 +3,18 @@ const BundleTracker = require("webpack-bundle-tracker");
 module.exports = {
     filenameHashing: false,
     productionSourceMap: false,
-    publicPath: '/static/',
+    publicPath: '/',
     outputDir: './dist',
-
+    devServer: {
+      host: 'stormy.my24service.com'
+    },
+    pages: {
+      index: {
+        entry: 'src/main.js',
+        title: 'My24Service',
+      },
+    },
     chainWebpack: config => {
-
         config.optimization
             .splitChunks({
                 cacheGroups: {
@@ -19,13 +26,5 @@ module.exports = {
                     },
                 },
             });
-
-        config
-            .plugin('BundleTracker')
-            .use(BundleTracker, [{filename: './webpack-stats.json'}]);
-
-        config.resolve.alias
-            .set('__STATIC__', 'static')
-
     },
 };

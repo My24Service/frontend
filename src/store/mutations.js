@@ -3,42 +3,43 @@ import my24 from '@/services/my24';
 import {
   SET_MEMBER_INFO,
   SET_LANGUAGE,
+  SET_LANGUAGES,
+  SET_SET_LANGUAGE_URL,
   SET_USER_INFO,
   SET_TOKEN,
   SET_MEMBER_CONTRACT,
   DATA_LOADED,
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
-} from './mutation-types';
+} from './mutation-types'
 
 export const mutations = {
   [SET_ASSIGN_ORDERS](state, orders) {
-    state.assignOrders = orders;
+    state.assignOrders = orders
   },
   [SET_TOKEN](state, token) {
-    state.token = token;
+    state.token = token
   },
   [SET_MEMBER_INFO](state, memberInfo) {
-    state.memberInfo = memberInfo;
+    state.memberInfo = memberInfo
   },
   [SET_LANGUAGE](state, language) {
-    state.currentLanguage = language;
+    state.currentLanguage = language
+  },
+  [SET_LANGUAGES](state, languages) {
+    state.languages = languages
+  },
+  [SET_SET_LANGUAGE_URL](state, url) {
+    state.setLanguageUrl = url
   },
   [SET_USER_INFO](state, userInfo) {
-    state.userInfo = userInfo;
-    state.memberContract = userInfo.member_contract ? my24.getModelsFromString(userInfo.member_contract) : {};
+    state.userInfo = userInfo
+    state.memberContract = userInfo.member_contract ? my24.getModelsFromString(userInfo.member_contract) : {}
   },
   [SET_MEMBER_CONTRACT](state, contract) {
-    state.memberContract = contract;
-  },
-  [DATA_LOADED](state, data) {
-    state.data = data.results;
-    state.next = data.next || null;
-    state.previous = data.previous || null;
-    state.count = data.count || 0;
-    state.num_pages = data.num_pages || 0;
+    state.memberContract = contract
   },
   [SET_STATUSCODES](state, statuscodes) {
-    state.statuscodes = statuscodes;
+    state.statuscodes = statuscodes
   }
 };

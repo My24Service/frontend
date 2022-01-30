@@ -166,6 +166,7 @@ import Dispatch from '@/services/dispatch';
 import orderModel from '@/models/orders/Order';
 import assign from '@/models/mobile/Assign';
 import Socket from '@/socket'
+const moment = require('moment')
 
 export default {
   name: 'Dispatch',
@@ -387,6 +388,10 @@ export default {
     const memberPk = this.$store.getters.getMemberPk
     Socket.getSocketMemberNewData(memberPk)
     Socket.setOnmessageHandlerMemberNewData(memberPk, this.onNewData)
+
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
 
     this.scrollTopButton = document.getElementById('btn-back-to-top')
     this.assignMode = this.assignModeProp

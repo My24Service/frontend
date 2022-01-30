@@ -1,5 +1,4 @@
-import axios from 'axios';
-
+import axios from '@/services/api'
 
 // // Add a response interceptor
 // axios.interceptors.response.use(function (response) {

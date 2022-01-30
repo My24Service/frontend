@@ -1,9 +1,15 @@
-import axios from 'axios';
-
 import BaseModel from '@/models/base';
 
 
 class My24 extends BaseModel {
+  getInitialData() {
+    return this.axios.get('/get-initial-data/').then((response) => response.data)
+  }
+
+  getLanguageVars() {
+    return this.axios.get('/get-language-vars/').then((response) => response.data)
+  }
+
   getParameterByName(name, url) {
     if (!url) url = window.location.href
     name = name.replace(/[\[\]]/g, '\\$&');
@@ -15,7 +21,7 @@ class My24 extends BaseModel {
   }
 
   downloadItem(url, name) {
-    axios
+    this.axios
       .get(url, { responseType: 'blob' })
       .then((response) => {
         const blob = new Blob([response.data], { type: response.data.type });
@@ -95,19 +101,6 @@ class My24 extends BaseModel {
     }
 
     return memberContract;
-  }
-
-  getInitialData() {
-    return new Promise((resolve, reject) => {
-      axios.get('/get-initial-data/')
-        .then((response) => {
-          document.title = response.data.memberInfo.name;
-          resolve(response.data);
-        })
-        .catch(() => {
-          reject();
-        });
-    });
   }
 
   isAllowed(userInfo) {

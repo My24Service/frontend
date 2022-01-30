@@ -1,30 +1,36 @@
-import { isEmpty } from '@/utils';
+import { isEmpty } from '@/utils'
 
 export const getters = {
   isLoggedIn: state => {
-    return !isEmpty(state.userInfo);
+    return !isEmpty(state.userInfo)
   },
   getUserPk: state => {
-    return state.userInfo.pk;
+    return state.userInfo.pk
   },
   getMemberPk: state => {
     return state.memberInfo.id
   },
   getUserName: state => {
     if (state.userInfo.is_superuser) {
-      return 'superuser';
+      return 'superuser'
     }
 
     if (state.userInfo.first_name) {
-      return state.userInfo.first_name;
+      return state.userInfo.first_name
     }
 
-    return state.userInfo.username;
+    return state.userInfo.username
   },
   getMemberLogo(state) {
-    return state.memberInfo.companylogo;
+    return state.memberInfo.companylogo
   },
   getMemberName(state) {
-    return state.memberInfo.name;
+    return state.memberInfo.name
   },
-};
+  getCurrentLanguage(state) {
+    return state.currentLanguage
+  },
+  getLanguages(state) {
+    return state.languages
+  },
+}

@@ -1,3 +1,14 @@
+import BASE_URL from './services/base-url'
+
+const base = document.createElement("base")
+base.href = BASE_URL
+document.head.appendChild(base)
+
+const script = document.createElement("script")
+script.src = `${BASE_URL}/jsi18n/`
+script.async = false
+document.head.appendChild(script)
+
 import Vue from 'vue'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
@@ -6,7 +17,6 @@ import Loading from 'vue-loading-overlay'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import Vuelidate from 'vuelidate'
-const moment = require('moment')
 import { ColorPicker, ColorPanel } from "one-colorpicker"
 
 import { BootstrapVueIcons } from 'bootstrap-vue'
@@ -99,14 +109,14 @@ Vue.use(TabsPlugin)
 import App from './App.vue'
 import store from './store'
 import router from './router'
+import my24 from '@/services/my24'
+import auth from '@/services/auth'
+import client from '@/services/api'
+
 import './app.scss'
 import 'vue-loading-overlay/dist/vue-loading.css'
 
-
-const currentLanguageEl = document.getElementById('current_language')
-window.locale = currentLanguageEl ? JSON.parse(currentLanguageEl.textContent) : 'en'
-
-moment.locale(window.locale)
+auth.setInterceptors(client)
 
 Vue.config.productionTip = false
 
@@ -118,7 +128,6 @@ Vue.prototype.$trans = (text) => {
   return gettext(text)
 }
 
-
 Vue.use(Vuex)
 Vue.use(VueRouter)
 Vue.use(FlashMessage, {time: 2500, strategy: 'multiple'})
@@ -127,11 +136,8 @@ Vue.use(VueAxios, axios)
 Vue.use(Vuelidate)
 Vue.use(ColorPanel)
 Vue.use(ColorPicker)
-Vue.use(require('vue-moment'), {
-    moment
-})
 
-store.dispatch('initStore')
+store.dispatch('getInitialData')
   .then(() => {
     new Vue({
       store,

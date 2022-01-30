@@ -6,38 +6,40 @@
 </template>
 
 <script>
-const languagesEl = document.getElementById('languages');
-const languagesIn = languagesEl ? JSON.parse(languagesEl.textContent) : [["en", "English"]];
-let languages = [];
-
-for (let i=0;i<languagesIn.length; i++) {
-  languages.push({
-    'value': languagesIn[i][0],
-    'text': `${languagesIn[i][1]} (${languagesIn[i][0]})`
-  });
-}
+import accountModel from '@/models/account/Account'
 
 export default {
   name: "TheLanguageChooser",
-  computed: {
-    languages() {
-      return languages;
-    }
-  },
   data() {
     return {
-      selected: this.$store.state.currentLanguage
+      languages: [],
+      selected: this.$store.getters.getCurrentLanguage
     }
   },
   methods: {
-    setLanguage(event) {
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        this.$store.dispatch('setLanguage', {
-          'language': this.selected,
-          token
-        }).then(() => window.location.reload());
+    async setLanguage(event) {
+      try {
+        await accountModel.setLanguage(this.selected)
+        this.$store.dispatch('setLanguage')
+        window.location.reload()
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  },
+  mounted() {
+    console.log(this.$store.getters.getCurrentLanguage)
+    const languagesIn = this.$store.getters.getLanguages
+    let languages = [];
+
+    for (let i=0;i<languagesIn.length; i++) {
+      languages.push({
+        'value': languagesIn[i][0],
+        'text': `${languagesIn[i][1]} (${languagesIn[i][0]})`
       });
     }
+
+    this.languages = languages
   }
 }
 </script>

@@ -64,9 +64,11 @@
 </template>
 
 <script>
-import TheLanguageChooser from "@/components/TheLanguageChooser";
-import NavBrand from "@/components/NavBrand";
+import TheLanguageChooser from "@/components/TheLanguageChooser"
+import NavBrand from "@/components/NavBrand"
 import Version from "@/components/Version"
+import accountModel from '@/models/account/Account'
+import authService from '@/services/auth'
 
 export default {
   components: {
@@ -106,41 +108,56 @@ export default {
       this.password = ''
       this.passwordState = null
     },
-    doLogin() {
+    async doLogin() {
       // do login
       if (!this.checkFormValidity()) {
         return;
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        const data = {
-          token,
-          username: this.username,
-          password: this.password
-        };
+      const loader = this.$loading.show()
 
-        this.$store.dispatch('login', data)
-          .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Logged in'),
-              message: this.$trans('You are now logged in')
-            });
+      const data = {
+        username: this.username,
+        password: this.password
+      }
 
-            if (document.location.hash.indexOf('?') !== -1) {
-              const nextPart = document.location.hash.split('?')[1]
-              const nextPath = decodeURIComponent(nextPart.split('=')[1])
-              this.$router.push({path: nextPath})
-            }
-          })
-          .catch((error) => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error logging you in')
-            });
-          });
-      });
+      try {
+        const loginResult = await accountModel.login(data)
+        this.$auth.authenticate({ accessToken: loginResult.key })
+
+        await this.$store.dispatch('getInitialData')
+
+        if (this.$refs['login-modal']) {
+          this.$refs['login-modal'].hide()
+        }
+
+        loader.hide()
+
+        this.flashMessage.show({
+          status: 'info',
+          title: this.$trans('Logged in'),
+          message: this.$trans('You are now logged in')
+        });
+
+        if (document.location.hash.indexOf('?') !== -1) {
+          const nextPart = document.location.hash.split('?')[1]
+          const nextPath = decodeURIComponent(nextPart.split('=')[1])
+          this.$router.push({path: nextPath})
+        }
+      } catch (error) {
+        console.log(error)
+        loader.hide()
+
+        if (this.$refs['login-modal']) {
+          this.$refs['login-modal'].hide()
+        }
+
+        this.flashMessage.show({
+          status: 'error',
+          title: this.$trans('Error'),
+          message: this.$trans('Error logging you in')
+        });
+      }
     },
 
   }

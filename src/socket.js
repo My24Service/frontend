@@ -1,7 +1,14 @@
 import Vue from "vue"
 
+let BASE_URL = document.location.host
+
+if (document.location.port !== '') {
+  BASE_URL = BASE_URL.replace('8080', '8000')
+}
+
 class Socket {
   protocol = document.location.protocol.indexOf('https') !== -1 ? 'wss' : 'ws'
+  host = BASE_URL
   reconnectTimeout = 5000
 
   socketsUser = {}
@@ -35,7 +42,7 @@ class Socket {
   }
 
   removeSocketUser(userPk) {
-    const socket = this.socketsUser[memberPk]
+    const socket = this.socketsUser[userPk]
     delete this.socketsUser[userPk]
     socket.close()
   }
@@ -96,7 +103,7 @@ class Socket {
 
   // internal methods
   _connectUser(userPk) {
-    const socket = new WebSocket(`${this.protocol}://${window.location.host}/ws/notifications-user/${userPk}/`)
+    const socket = new WebSocket(`${this.protocol}://${this.host}/ws/notifications-user/${userPk}/`)
     socket.onmessage = (e) => {
       if (userPk in this.onmessageHandlersUser) {
         const data = JSON.parse(e.data)
@@ -106,7 +113,7 @@ class Socket {
     }
 
     socket.onclose = (e) => {
-      if (userPk in self.socketsUser) {
+      if (userPk in this.socketsUser) {
         console.log('User socket is closed. Reconnect will be attempted in 1 second.')
         setTimeout(() => {
           this._connectUser(userPk)
@@ -124,7 +131,7 @@ class Socket {
   }
 
   _connectMember(memberPk) {
-    const socket = new WebSocket(`${this.protocol}://${window.location.host}/ws/notifications-member/`)
+    const socket = new WebSocket(`${this.protocol}://${this.host}/ws/notifications-member/`)
     socket.onmessage = (e) => {
       if (memberPk in this.onmessageHandlersMember) {
         const data = JSON.parse(e.data)
@@ -152,7 +159,7 @@ class Socket {
   }
 
   _connectMemberNewData(memberPk) {
-    const socket = new WebSocket(`${this.protocol}://${window.location.host}/ws/new-data-member/`)
+    const socket = new WebSocket(`${this.protocol}://${this.host}/ws/new-data-member/`)
     socket.onmessage = (e) => {
       if (memberPk in this.onmessageHandlersMemberNewData) {
         const data = JSON.parse(e.data)

@@ -153,7 +153,6 @@ export default {
       this.$v.$touch()
 
       if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid, this.$v)
         this.buttonDisabled = false
         this.isLoading = false
         return
@@ -186,39 +185,44 @@ export default {
     logout() {
       this.$refs['logout-modal'].show()
     },
-    doLogout() {
+    async doLogout() {
       // do logout
       const userPk = this.$store.getters.getUserPk
       const memberPk = this.$store.getters.getMemberPk
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        this.$store.dispatch('logout', token)
-          .then(() => {
-            socket.removeOnmessageHandlerUser(userPk)
-            socket.removeSocketUser(userPk)
+      let loader = this.$loading.show()
 
-            socket.removeOnmessageHandlerMember(memberPk)
-            socket.removeSocketMember(memberPk)
+      try {
+        await accountModel.logout()
+        this.$auth.logout(false)
+        await this.$store.dispatch('getInitialData')
 
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Logged out'),
-              message: this.$trans('You are now logged out')
-            })
+        loader.hide()
 
-            // if (this.$router.currentRoute)
-            if(this.$router.currentRoute.path !== '/') {
-              this.$router.push({path: '/'})
-            }
-          })
-          .catch((error) => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error logging you out')
-            })
-          })
-      })
+        socket.removeOnmessageHandlerUser(userPk)
+        socket.removeSocketUser(userPk)
+
+        socket.removeOnmessageHandlerMember(memberPk)
+        socket.removeSocketMember(memberPk)
+
+        this.flashMessage.show({
+          status: 'info',
+          title: this.$trans('Logged out'),
+          message: this.$trans('You are now logged out')
+        })
+
+        if(this.$router.currentRoute.path !== '/') {
+          this.$router.push({path: '/'})
+        }
+      } catch (error) {
+        console.log(error)
+        loader.hide()
+        this.flashMessage.show({
+          status: 'error',
+          title: this.$trans('Error'),
+          message: this.$trans('Error logging you out')
+        })
+      }
     },
   },
 }

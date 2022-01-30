@@ -1,5 +1,4 @@
-import axios from 'axios'
-
+import axios from '@/services/api'
 import my24 from '@/services/my24'
 
 
