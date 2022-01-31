@@ -49,9 +49,7 @@ jobs:
            command: |
              source $BASH_ENV
              mkdir /tmp/$TARGET_DIR
-             cp webpack-stats.json /tmp/$TARGET_DIR
              cp -r dist /tmp/$TARGET_DIR
-             cp -r public /tmp/$TARGET_DIR
              echo $(cat src/version.js | sed -r "s/^.*'([^']+)'$/\1/") > /tmp/$TARGET_DIR/VERSION
              cd /tmp
              tar -zcf $TGZ_NAME $TARGET_DIR
@@ -101,9 +99,7 @@ jobs:
              DATE=$(date +"%Y-%m-%d_%H%M")
              TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"
              mkdir /tmp/$TARGET_DIR
-             cp webpack-stats.json /tmp/$TARGET_DIR
              cp -r dist /tmp/$TARGET_DIR
-             cp -r public /tmp/$TARGET_DIR
              cd /tmp
              tar -zcf $TGZ_NAME $TARGET_DIR
              echo "$TARGET_DIR" > $RELEASE_NAME
