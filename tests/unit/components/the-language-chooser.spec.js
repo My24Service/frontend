@@ -7,16 +7,20 @@ import localVue from '../index'
 
 
 describe('TheLanguageChooser.vue', () => {
-  let state
   let store
+  let getters
 
   beforeEach(() => {
-    state = {
-      currentLanguage: 'en'
+    getters = {
+      getLanguages: () => [
+        ['en', 'English'],
+        ['nl', 'Nederlands'],
+      ],
+      getCurrentLanguage: () => 'en'
     }
 
     store = new Vuex.Store({
-      state
+      getters
     })
   })
 
