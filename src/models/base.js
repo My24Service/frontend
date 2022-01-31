@@ -98,7 +98,7 @@ class BaseModel {
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
 
     return new Promise((resolve, reject) => {
-      axios.get(url).then((response) => {
+      this.axios.get(url).then((response) => {
         if ('count' in response.data) {
           this.count = response.data.count
         }
@@ -120,7 +120,7 @@ class BaseModel {
 
   detail(pk) {
     return new Promise((resolve, reject) => {
-      axios.get(this.getDetailUrl(pk))
+      this.axios.get(this.getDetailUrl(pk))
       .then((response) => {
         resolve(response.data)
       })
@@ -141,7 +141,7 @@ class BaseModel {
     obj = this.preInsert(obj)
 
     return new Promise((resolve, reject) => {
-      axios.post(this.url, obj, headers)
+      this.axios.post(this.url, obj, headers)
         .then((response) => {
           resolve(response.data)
         })
@@ -162,7 +162,7 @@ class BaseModel {
     obj = this.preUpdate(obj)
 
     return new Promise((resolve, reject) => {
-      axios.put(`${this.url}${pk}/`, obj, headers)
+      this.axios.put(`${this.url}${pk}/`, obj, headers)
         .then((response) => {
           resolve(response.data)
         })
@@ -176,7 +176,7 @@ class BaseModel {
     const headers = this.getHeaders(token)
 
     return new Promise((resolve, reject) => {
-      axios.delete(`${this.url}${pk}/`, headers)
+      this.axios.delete(`${this.url}${pk}/`, headers)
         .then(() => {
           resolve()
         })
