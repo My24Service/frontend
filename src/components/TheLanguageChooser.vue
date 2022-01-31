@@ -28,7 +28,6 @@ export default {
     }
   },
   mounted() {
-    console.log(this.$store.getters.getCurrentLanguage)
     const languagesIn = this.$store.getters.getLanguages
     let languages = [];
 
