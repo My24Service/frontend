@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from 'axios'
 import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
@@ -6,8 +6,6 @@ import flushPromises from 'flush-promises'
 import localVue from '../../index'
 import ActivityList from '@/views/company/ActivityList.vue'
 import activityResponse from '../../fixtures/activity'
-
-jest.mock('axios')
 
 
 describe('ActivityList.vue', () => {
