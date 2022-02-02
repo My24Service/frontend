@@ -92,12 +92,13 @@ export default {
       default: null
     },
   },
-  created() {
-    // set date
+  mounted () {
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-
+  },
+  created() {
+    // set date
     this.today = this.$moment().weekday()
     this.setDate()
     this.setArgs()

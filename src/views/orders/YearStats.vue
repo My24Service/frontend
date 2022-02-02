@@ -201,7 +201,7 @@ export default {
       })
     }
   },
-  async mounted () {
+  mounted () {
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)

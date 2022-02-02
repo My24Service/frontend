@@ -685,15 +685,16 @@ export default {
       return this.submitClicked
     }
   },
+  mounted () {
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+  },
   async created () {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.countries = await this.$store.dispatch('getCountries')
     const { results } = await engineerModel.list()
     this.engineers = results
-
-    const lang = this.$store.getters.getCurrentLanguage
-    this.$moment = moment
-    this.$moment.locale(lang)
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
