@@ -146,13 +146,12 @@ export default {
       this.loadData()
     }
   },
-  mounted () {
+  created() {
+    // moment
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-  },
-  created() {
-    // moment
+
     this.today = this.$moment()
 
     this.setDates()

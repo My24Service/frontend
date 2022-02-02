@@ -70,7 +70,7 @@ export default {
           active: true
         },
       ],
-      today: null,
+      today: moment(),
       startDate: null,
       memberType: 'maintenance',
       fullName: null,
@@ -92,14 +92,13 @@ export default {
       default: null
     },
   },
-  mounted () {
+  created() {
+    // set date
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-  },
-  created() {
-    // set date
-    this.today = this.$moment().weekday()
+
+    this.today = this.$moment()
     this.setDate()
     this.setArgs()
 

@@ -566,12 +566,11 @@ export default {
       return this.submitClicked
     }
   },
-  mounted () {
+  created() {
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-  },
-  created() {
+
     this.getOrdersDebounced = AwesomeDebouncePromise(this.getOrders, 500)
     this.$store.dispatch('getCountries').then((countries) => {
       this.countries = countries

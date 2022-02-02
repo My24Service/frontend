@@ -67,12 +67,11 @@ import timeSheetModel from '@/models/mobile/TimeSheet'
 
 const monday = window.locale === 'en' ? 1 : 0
 
-
 export default {
   name: "TimeSheet",
   data() {
     return {
-      today: this.$moment().weekday(monday),
+      today: null,
       startDate: null,
       memberType: 'maintenance',
       timeSheetModel,
@@ -89,13 +88,11 @@ export default {
       sortDesc: true
     }
   },
-  mounted () {
+  created() {
+    // moment
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-  },
-  created() {
-    // moment
     this.today = this.$moment().weekday(monday)
 
     this.setDate()

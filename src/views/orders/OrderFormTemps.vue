@@ -509,12 +509,11 @@ export default {
       return this.submitClicked
     }
   },
-  mounted () {
+  async created() {
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-  },
-  async created() {
+
     this.$store.dispatch('getCountries').then((countries) => {
       this.countries = countries
 
