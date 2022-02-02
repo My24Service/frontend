@@ -2,7 +2,7 @@ import axios from "axios"
 import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
-import Vuex from 'vuex';
+import Vuex from 'vuex'
 
 import localVue from '../../index'
 import NoAccess from '@/views/account/NoAccess.vue'
