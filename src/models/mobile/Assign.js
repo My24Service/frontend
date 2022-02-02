@@ -9,6 +9,13 @@ class Assign extends BaseModel {
 
     return this.axios.post(url, data, headers)
   }
+
+  unAssign(user_id, order_pk) {
+    const url = `/mobile/unassign-user/${user_id}/`
+    const data = { order_pk }
+
+    return this.axios.post(url, data)
+  }
 }
 
 

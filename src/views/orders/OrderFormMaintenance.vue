@@ -563,6 +563,7 @@
 </template>
 
 <script>
+const moment = require('moment')
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import eachSeries from 'async/eachSeries'
 import Multiselect from 'vue-multiselect'
@@ -689,6 +690,10 @@ export default {
     this.countries = await this.$store.dispatch('getCountries')
     const { results } = await engineerModel.list()
     this.engineers = results
+
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
@@ -849,25 +854,27 @@ export default {
             this.isLoading = false
 
             // insert documents
-            eachSeries(this.documents, this.postDocument, (err) => {
-              if (err) {
-                this.flashMessage.show({
-                  status: 'error',
-                  title: this.$trans('Error'),
-                  message: this.$trans('Error creating document(s)')
-                })
+            if (this.documents.length) {
+              eachSeries(this.documents, this.postDocument, (err) => {
+                if (err) {
+                  this.flashMessage.show({
+                    status: 'error',
+                    title: this.$trans('Error'),
+                    message: this.$trans('Error creating document(s)')
+                  })
 
-                this.isLoading = false
-              } else {
-                this.flashMessage.show({
-                  status: 'info',
-                  title: this.$trans('Created'),
-                  message: this.$trans('Document(s) have been created')
-                })
+                  this.isLoading = false
+                } else {
+                  this.flashMessage.show({
+                    status: 'info',
+                    title: this.$trans('Created'),
+                    message: this.$trans('Document(s) have been created')
+                  })
 
-                this.isLoading = false
-              }
-            })
+                  this.isLoading = false
+                }
+              })
+            }
 
             // assign engineers
             this.$store.dispatch('getCsrfToken').then(token => {

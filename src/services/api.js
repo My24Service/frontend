@@ -3,7 +3,7 @@ import BASE_URL from './base-url'
 
 const client = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true
+  // withCredentials: true
 })
 
 export default client

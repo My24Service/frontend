@@ -303,32 +303,28 @@ export default {
       this.showOverlay = true
 
       this.$refs['dispatch-order-actions-modal'].hide();
-      this.$root.$once('bv::modal::hidden', (bvEvent, modalId) => {
-        this.$store.dispatch('getCsrfToken').then(token => {
-          const url = `/mobile/unassign-user/${this.selectedOrderUserId}/`
-          const headers = my24.getHeaders(token)
-          const data = {order_pk: this.selectedOrder.id}
+      this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
+        try {
+          await assign.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
 
-          axios.post(url, data, headers)
-            .then(() => {
-              this.flashMessage.show({
-                status: 'info',
-                title: this.$trans('Success'),
-                message: this.$trans('Order unassigned')
-              })
+          this.flashMessage.show({
+            status: 'info',
+            title: this.$trans('Success'),
+            message: this.$trans('Order unassigned')
+          })
 
-              this.dispatch.drawDispatch()
-            })
-            .catch(error => {
-              console.log('error unassigning', error)
-              this.flashMessage.show({
-                status: 'error',
-                title: this.$trans('Error'),
-                message: this.$trans('Error unassigning order')
-              })
-            })
-            this.showOverlay = false
-        })
+          this.showOverlay = false
+          this.dispatch.drawDispatch()
+        } catch (error) {
+          console.log('error unassigning', error)
+          this.flashMessage.show({
+            status: 'error',
+            title: this.$trans('Error'),
+            message: this.$trans('Error unassigning order')
+          })
+
+          this.showOverlay = false
+        }
       })
     },
     cancelAssign() {

@@ -102,6 +102,7 @@
 </template>
 
 <script>
+const moment = require('moment')
 import assignedFinishedModel from '@/models/mobile/AssignedFinished'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch'
@@ -114,7 +115,7 @@ export default {
   },
   data() {
     return {
-      today: this.$moment(),
+      today: null,
       year: null,
       month: null,
       monthText: null,
@@ -147,6 +148,12 @@ export default {
   },
   created() {
     // moment
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+
+    this.today = this.$moment()
+
     this.setDates()
 
     // reset searchQuery
