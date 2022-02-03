@@ -87,6 +87,11 @@
           <b-icon-check2 v-if="data.item.end_order" class="h3" variant="info"></b-icon-check2>
         </div>
       </template>
+      <template #cell(after_end_order)="data">
+        <div class="text-center">
+          <b-icon-check2 v-if="data.item.after_end_order" class="h3" variant="info"></b-icon-check2>
+        </div>
+      </template>
       <template #cell(actions)="data">
         <b-table
           small
@@ -175,6 +180,7 @@ export default {
         {key: 'color', label: this.$trans('Color')},
         {key: 'start_order', label: this.$trans('Start order?')},
         {key: 'end_order', label: this.$trans('End order?')},
+        {key: 'after_end_order', label: this.$trans('After end order?')},
         {key: 'description', label: this.$trans('Description')},
         {key: 'actions', label: this.$trans('Actions')},
         {key: 'icons'},

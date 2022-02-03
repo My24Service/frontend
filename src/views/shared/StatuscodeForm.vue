@@ -24,7 +24,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="2" role="group">
+          <b-col cols="1" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Color')"
@@ -65,7 +65,7 @@
               </b-form-checkbox>
             </b-form-group>
           </b-col>
-          <b-col cols="2" role="group">
+          <b-col cols="1" role="group">
             <b-form-group
               v-if="list_type === 'order'"
               label-size="sm"
@@ -87,6 +87,20 @@
               <b-form-checkbox
                 id="statuscode_end_trip"
                 v-model="statuscode.end_trip"
+              >
+              </b-form-checkbox>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              v-if="list_type === 'order'"
+              label-size="sm"
+              v-bind:label="$trans('After end order?')"
+              label-for="statuscode_after_end_order"
+            >
+              <b-form-checkbox
+                id="statuscode_after_end_order"
+                v-model="statuscode.after_end_order"
               >
               </b-form-checkbox>
             </b-form-group>
