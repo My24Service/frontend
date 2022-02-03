@@ -1,5 +1,3 @@
-{% load i18n %}
-{% load render_bundle from webpack_loader %}
 <!DOCTYPE html>
 <html lang="">
   <head>
@@ -33,20 +31,11 @@
     <meta name="msapplication-TileImage" content="/static/core/icons/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
     <title></title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Catamaran" rel="stylesheet">
-    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
   </head>
   <body>
-  {% url 'set_language' as set_language_url %}
-  {% get_current_language as LANGUAGE_CODE %}
-  {% get_available_languages as LANGUAGES %}
-  {{ set_language_url | json_script:"set_language_url" }}
-  {{ LANGUAGES | json_script:"languages" }}
-  {{ LANGUAGE_CODE | json_script:"current_language" }}
     <noscript>
       <strong>We're sorry but this site doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"></div>
-    {% render_bundle 'app' config='VUE' %}
   </body>
 </html>

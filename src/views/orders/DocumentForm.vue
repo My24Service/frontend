@@ -74,7 +74,6 @@
 </template>
 
 <script>
-import _ from 'underscore'
 import eachSeries from 'async/eachSeries'
 import documentModel from '@/models/orders/Document'
 

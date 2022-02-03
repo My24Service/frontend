@@ -63,6 +63,7 @@
 </template>
 
 <script>
+const moment = require('moment')
 import BarChart from "@/components/BarChart"
 import OrderStatusColorSpan from '@/components/OrderStatusColorSpan'
 import OrderTypesSelect from '@/components/OrderTypesSelect';
@@ -200,7 +201,11 @@ export default {
       })
     }
   },
-  async mounted () {
+  mounted () {
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+
     // get statuscodes and load orders
     this.$store.dispatch('getStatuscodes').then((statuscodes) => {
       this.statuscodes = statuscodes

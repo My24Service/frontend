@@ -53,6 +53,7 @@
 </template>
 
 <script>
+const moment = require('moment')
 import timeSheetDetailModel from '@/models/mobile/TimeSheetDetail'
 
 export default {
@@ -69,7 +70,7 @@ export default {
           active: true
         },
       ],
-      today: null,
+      today: moment(),
       startDate: null,
       memberType: 'maintenance',
       fullName: null,
@@ -93,7 +94,11 @@ export default {
   },
   created() {
     // set date
-    this.today = this.$moment().weekday(window.locale === 'en' ? 1 : 0)
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+
+    this.today = this.$moment()
     this.setDate()
     this.setArgs()
 

@@ -4,6 +4,7 @@ import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 const moment = require('moment')
+import Vuex from 'vuex'
 
 import localVue from '../../index'
 import AssignedFinished from '@/views/mobile/AssignedFinished.vue'
@@ -22,12 +23,26 @@ const router = new VueRouter({routes})
 
 
 describe('AssignedFinished.vue', () => {
+  let store
+  let getters
+
+  beforeEach(() => {
+    getters = {
+      isLoggedIn: () => true,
+    }
+
+    store = new Vuex.Store({
+      getters,
+    })
+  })
+
   it('exists', async () => {
     axios.get.mockResolvedValueOnce(asssignedFisnihedResponse);
 
     const wrapper = mount(AssignedFinished, {
       localVue,
       router,
+      store,
       mocks: {
         $trans: (f) => f,
         $moment: moment,
@@ -46,6 +61,7 @@ describe('AssignedFinished.vue', () => {
     const wrapper = mount(AssignedFinished, {
       localVue,
       router,
+      store,
       mocks: {
         $trans: (f) => f,
         $moment: moment,
@@ -64,6 +80,7 @@ describe('AssignedFinished.vue', () => {
     const wrapper = mount(AssignedFinished, {
       localVue,
       router,
+      store,
       mocks: {
         $trans: (f) => f,
         $moment: moment,

@@ -17,6 +17,7 @@ let store = new Vuex.Store({
     urls: null,
     memberContract: null,
     currentLanguage: null,
+    languages: [],
     memberInfo: null,
     userInfo: null,
     statuscodes: [],

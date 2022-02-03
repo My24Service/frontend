@@ -8,6 +8,28 @@ class Account extends BaseModel {
 
   url = '/company/activity/'
 
+  setLanguage(language) {
+    let bodyFormData = new FormData()
+    bodyFormData.append('language', language)
+
+    return this.axios.post('/set-language/', bodyFormData)
+  }
+
+  login(data) {
+    const url = '/rest-auth/login/'
+
+    const postData = {
+      username: data.username,
+      password: data.password,
+    }
+
+    return this.axios.post(url, postData).then((response) => response.data)
+  }
+
+  logout() {
+    return this.axios.post('/rest-auth/logout/', {})
+  }
+
   sendResetPasswordLink(token, email) {
     const headers = this.getHeaders(token)
     const data = {

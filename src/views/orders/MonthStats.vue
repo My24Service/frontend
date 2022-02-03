@@ -63,6 +63,7 @@
 </template>
 
 <script>
+const moment = require('moment')
 import BarChart from "@/components/BarChart"
 import OrderStatusColorSpan from '@/components/OrderStatusColorSpan'
 import OrderTypesSelect from '@/components/OrderTypesSelect';
@@ -82,7 +83,7 @@ export default {
       customerFields: [],
       loaded: false,
       orderType: 'all',
-      today: this.$moment(),
+      today: null,
       month: null,
       year: null,
       monthTxt: null,
@@ -234,6 +235,12 @@ export default {
     }
   },
   async mounted () {
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+
+    this.today = this.$moment()
+
     this.month = this.today.month() + 1
     this.monthTxt = this.today.format('MMMM')
     this.year = this.today.year()

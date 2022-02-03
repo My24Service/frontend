@@ -415,6 +415,7 @@
 </template>
 
 <script>
+const moment = require('moment')
 import Multiselect from 'vue-multiselect'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
 import { required } from 'vuelidate/lib/validators'
@@ -508,7 +509,11 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+
     this.$store.dispatch('getCountries').then((countries) => {
       this.countries = countries
 

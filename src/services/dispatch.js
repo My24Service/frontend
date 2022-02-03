@@ -1,5 +1,4 @@
-import axios from 'axios'
-
+import axios from '@/services/api'
 import my24 from '@/services/my24'
 
 
@@ -175,6 +174,7 @@ class Dispatch {
       this.createUserRows(results.data)
 
       this.component.showOverlay = false
+      this.component.newData = false
     }).catch((error) => {
       this.component.showOverlay = false
       console.log('error fetching dispatch data', error)

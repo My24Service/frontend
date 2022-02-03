@@ -100,6 +100,7 @@ import NavItems from "@/components/NavItems"
 import NavBrand from "@/components/NavBrand"
 import { componentMixin } from '@/utils'
 import accountModel from '@/models/account/Account'
+import socket from "@/socket"
 
 
 export default {
@@ -152,7 +153,6 @@ export default {
       this.$v.$touch()
 
       if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid, this.$v)
         this.buttonDisabled = false
         this.isLoading = false
         return
@@ -185,27 +185,44 @@ export default {
     logout() {
       this.$refs['logout-modal'].show()
     },
-    doLogout() {
+    async doLogout() {
       // do logout
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        this.$store.dispatch('logout', token)
-          .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Logged out'),
-              message: this.$trans('You are now logged out')
-            })
+      const userPk = this.$store.getters.getUserPk
+      const memberPk = this.$store.getters.getMemberPk
 
-            this.$router.push({path: '/'})
-          })
-          .catch((error) => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error logging you out')
-            })
-          })
-      })
+      let loader = this.$loading.show()
+
+      try {
+        await accountModel.logout()
+        this.$auth.logout(false)
+        await this.$store.dispatch('getInitialData')
+
+        loader.hide()
+
+        socket.removeOnmessageHandlerUser(userPk)
+        socket.removeSocketUser(userPk)
+
+        socket.removeOnmessageHandlerMember(memberPk)
+        socket.removeSocketMember(memberPk)
+
+        this.flashMessage.show({
+          status: 'info',
+          title: this.$trans('Logged out'),
+          message: this.$trans('You are now logged out')
+        })
+
+        if(this.$router.currentRoute.path !== '/') {
+          this.$router.push({path: '/'})
+        }
+      } catch (error) {
+        console.log(error)
+        loader.hide()
+        this.flashMessage.show({
+          status: 'error',
+          title: this.$trans('Error'),
+          message: this.$trans('Error logging you out')
+        })
+      }
     },
   },
 }
