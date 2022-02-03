@@ -24,7 +24,8 @@ class Engineer extends BaseModel {
       'cost_price_car': 0,
       'inspection_date_tools': '',
       'cost_price_tools': 0,
-      'remarks': ''
+      'remarks': '',
+      'contract_hours_week': 38.0
     }
   }
 
