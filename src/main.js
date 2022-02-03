@@ -19,6 +19,9 @@ import VueAxios from 'vue-axios'
 import Vuelidate from 'vuelidate'
 import { ColorPicker, ColorPanel } from "one-colorpicker"
 
+import { BadgePlugin } from 'bootstrap-vue'
+Vue.use(BadgePlugin)
+
 import { BootstrapVueIcons } from 'bootstrap-vue'
 Vue.use(BootstrapVueIcons)
 

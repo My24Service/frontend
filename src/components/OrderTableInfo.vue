@@ -1,6 +1,6 @@
 <template>
   <b-container v-if="isLoaded">
-    <b-row>
+    <b-row v-if="!order.orderlines.length && !order.infolines.length">
       <b-col>
         {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
           {{ order.order_id }}
@@ -11,6 +11,35 @@
         {{ order.order_country_code }}-{{ order.order_postal }} {{ order.order_city }}<br/>
         <br/>
         <p><b>{{ order.order_type }}</b></p>
+      </b-col>
+      <b-col>
+        <span v-if="order.order_contact">{{ $trans('Contact') }}: {{ order.order_contact }}<br/></span>
+        <span v-if="order.order_mobile">{{ $trans('Mobile') }}: {{ order.order_mobile }}<br/></span>
+        <span v-if="order.order_tel">{{ $trans('Tel.') }}: {{ order.order_tel }}<br/></span>
+        <span v-if="order.order_email">{{ $trans('Email') }}: <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/></span>
+        {{ $trans('Date') }}: {{ order.order_date }}<br/>
+        {{ $trans('Created') }}: {{ order.created }}<br/>
+        memberType: {{ memberType }}
+
+        <p v-if="memberType === 'temps'">
+          {{ $trans('Required users') }}: {{ order.required_users }}<br/>
+          {{ $trans('Users set available') }}: {{ order.user_order_available_set_count }}<br/>
+          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
+        </p>
+      </b-col>
+    </b-row>
+    <b-row v-if="order.orderlines.length || order.infolines.length">
+      <b-col>
+        {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
+          {{ order.order_id }}
+        </router-link><br/>
+        {{ $trans('Customer ID') }}: {{ order.customer_id }}<br/>
+        {{ order.order_name }}<br/>
+        {{ order.order_address }}<br/>
+        {{ order.order_country_code }}-{{ order.order_postal }} {{ order.order_city }}<br/>
+        <br/>
+        <p><b>{{ order.order_type }}</b></p>
+
         <span v-if="order.order_contact">{{ $trans('Contact') }}: {{ order.order_contact }}<br/></span>
         <span v-if="order.order_mobile">{{ $trans('Mobile') }}: {{ order.order_mobile }}<br/></span>
         <span v-if="order.order_tel">{{ $trans('Tel.') }}: {{ order.order_tel }}<br/></span>
@@ -30,15 +59,16 @@
         <b-table v-if="order.infolines.length" dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"></b-table>
       </b-col>
     </b-row>
-    <b-row>
+    <b-row v-if="order.workorder_pdf_url || order.workorder_pdf_url_partner">
       <b-col cols="6">
-        <p>
-          {{ $trans('Workorder') }}
+        <p v-if="order.workorder_pdf_url">
+          {{ $trans('Workorder PDF') }}
           <b-link :href="order.workorder_pdf_url" target="_blank">
             {{ $trans('Order') }} {{ order.order_id }}
           </b-link>
-          <br/>
-          {{ $trans('Workorder partner') }}
+        </p>
+        <p v-if="order.workorder_pdf_url_partner">
+          {{ $trans('Workorder PDF partner') }}
           <b-link :href="order.workorder_pdf_url_partner" target="_blank">
             {{ $trans('Order') }} {{ order.order_id }}
           </b-link>
@@ -52,7 +82,7 @@
     </b-row>
     <b-row>
       <b-col cols="12">
-        {{ $trans('Status') }}: {{ order.last_status_full }}
+        <h6><b-badge>{{ $trans('Status') }}</b-badge><span class="info">{{ order.last_status_full }}</span></h6>
       </b-col>
     </b-row>
     <b-row>
@@ -117,3 +147,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+  span.info {
+    padding-left: 6px;
+  }
+</style>
