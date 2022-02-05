@@ -7,6 +7,7 @@ import Settings from '@/views/company/Settings'
 
 import UserEngineerList from '@/views/company/UserEngineerList'
 import UserEngineerForm from '@/views/company/UserEngineerForm'
+import UserEngineerDetail from '@/views/company/UserEngineerDetail'
 import UserSalesList from '@/views/company/UserSalesList'
 import UserSalesForm from '@/views/company/UserSalesForm'
 import UserCustomerList from '@/views/company/UserCustomerList'
@@ -79,6 +80,18 @@ export default [
       props: {
         'app-content': {},
         'app-subnav': {}
+      },
+    },
+    {
+      name: 'engineer-detail',
+      path: '/company/users/engineers/:pk',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': UserEngineerDetail,
+        'app-subnav': SubNavCompany
       },
     },
     {
