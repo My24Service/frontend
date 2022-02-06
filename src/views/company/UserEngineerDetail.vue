@@ -246,7 +246,7 @@ export default {
         }
       }
 
-      for (const [orderType, _data] of Object.entries(data.week_totals_aggregate)) {
+      for (const [orderType, _data] of Object.entries(data.work_hours_status_perc)) {
         if (!_data) {
           continue
         }
