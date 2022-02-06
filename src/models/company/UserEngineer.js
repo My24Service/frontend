@@ -31,10 +31,13 @@ class Engineer extends BaseModel {
 
   url = '/company/engineer/'
 
-  stats(pk, year) {
-    return this.axios.get(`${this.url}${pk}/stats/?year=${year}`).then((response) => response.data)
+  stats_quarter(pk, year) {
+    return this.axios.get(`${this.url}${pk}/stats_quarter/?year=${year}`).then((response) => response.data)
   }
 
+  stats_week(pk, start_date) {
+    return this.axios.get(`${this.url}${pk}/stats_week/?start_date=${start_date}`).then((response) => response.data)
+  }
 }
 
 let engineerModel = new Engineer()
