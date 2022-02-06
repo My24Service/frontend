@@ -1,8 +1,20 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-detail" v-if="!isLoading">
+    <div class="subnav-pills">
+      <b-nav pills>
+        <b-nav-item
+          v-for="item in viewMethods"
+          :active="item.value == activeViewMethod"
+          :key="item.value"
+          @click="activeViewMethod = item.value"
+          >
+          {{ item.label }}
+        </b-nav-item>
+      </b-nav>
+    </div>
 
-      <!-- week -->
+    <!-- week -->
+    <div class="app-detail" v-if="!isLoading && activeViewMethod === 'week'">
       <b-row align-v="center">
         <b-col cols="2">
           <b-link @click.prevent="backWeek" v-bind:title="$trans('Week back')">
@@ -43,8 +55,10 @@
           </p>
         </b-col>
       </b-row>
+    </div>
 
-      <!-- quarters -->
+    <!-- quarters -->
+    <div class="app-detail" v-if="!isLoading && activeViewMethod === 'quarter'">
       <b-row align-v="center">
         <b-col cols="2">
           <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
@@ -112,13 +126,13 @@
           <p class="no-data" v-if="!pieChartdataQuarters[3]">{{ $trans('No graph data for quarter 4') }}</p>
         </b-col>
       </b-row>
-
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}
-        </b-button>
-      </footer>
     </div>
+
+    <footer class="modal-footer">
+      <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
+        {{ $trans('Back') }}
+      </b-button>
+    </footer>
   </b-overlay>
 </template>
 
@@ -136,6 +150,16 @@ export default {
   },
   data() {
     return {
+      activeViewMethod: 'quarter',
+      viewMethods: [
+      {
+        label: 'Per quarter',
+        value: 'quarter'
+      },
+      {
+        label: 'Per week',
+        value: 'week'
+      }],
       options: [],
       optionsWeek: null,
       startDate: moment().weekday(monday),
@@ -164,6 +188,13 @@ export default {
       }]
     }
   },
+  watch: {
+    activeViewMethod: {
+      handler() {
+        this.render()
+      }
+    }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -171,6 +202,15 @@ export default {
     },
   },
   methods: {
+    render() {
+      if (this.activeViewMethod === 'week') {
+        this.renderWeek()
+      }
+
+      if (this.activeViewMethod === 'quarter') {
+        this.renderQuarter()
+      }
+    },
     nextYear() {
       this.year = this.year + 1
       this.renderQuarter()
@@ -350,8 +390,7 @@ export default {
     },
     async loadData() {
       try {
-        await this.renderWeek()
-        await this.renderQuarter()
+        this.render()
       } catch(error) {
         console.log('error fetching engineer details', error)
         this.flashMessage.show({
