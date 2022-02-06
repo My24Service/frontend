@@ -305,16 +305,18 @@ export default {
       this.$refs['dispatch-order-actions-modal'].hide();
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
-          await assign.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
+          this.$store.dispatch('getCsrfToken').then(async token => {
+            await assign.unAssign(token, this.selectedOrderUserId, this.selectedOrder.id)
 
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Success'),
-            message: this.$trans('Order unassigned')
+            this.flashMessage.show({
+              status: 'info',
+              title: this.$trans('Success'),
+              message: this.$trans('Order unassigned')
+            })
+
+            this.showOverlay = false
+            this.dispatch.drawDispatch()
           })
-
-          this.showOverlay = false
-          this.dispatch.drawDispatch()
         } catch (error) {
           console.log('error unassigning', error)
           this.flashMessage.show({
