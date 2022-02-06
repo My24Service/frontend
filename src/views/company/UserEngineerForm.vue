@@ -185,12 +185,12 @@
               v-bind:label="$trans('Country')"
               label-for="engineer_country_code"
             >
-              <b-form-select v-model="engineer.country_code" :options="countries" size="sm"></b-form-select>
+              <b-form-select v-model="engineer.engineer.country_code" :options="countries" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="4" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Email tablet')"
@@ -200,6 +200,19 @@
                 id="engineer_email_tablet"
                 size="sm"
                 v-model="engineer.engineer.email_tablet"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="3" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Contract hours  per week')"
+              label-for="engineer_contract_hours_week"
+            >
+              <b-form-input
+                id="engineer_contract_hours_week"
+                size="sm"
+                v-model="engineer.engineer.contract_hours_week"
               ></b-form-input>
             </b-form-group>
           </b-col>
@@ -216,7 +229,7 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('VCA')"
@@ -372,6 +385,20 @@ export default {
         console.log('invalid?', this.$v.$invalid)
         this.buttonDisabled = false
         return
+      }
+
+      // remove empty fields
+      delete this.engineer.last_login
+      const empty_fields = ['inspection_date_car', 'inspection_date_tools']
+      for (let i=0; i<empty_fields.length; i++) {
+        if (empty_fields[i] in this.engineer && (
+          this.engineer[empty_fields[i]] === null || this.studentuser[empty_fields[i]] === '')) {
+          delete this.engineer[empty_fields[i]]
+        }
+        if (empty_fields[i] in this.engineer.engineer && (
+          this.engineer.engineer[empty_fields[i]] === null || this.engineer.engineer[empty_fields[i]] === '')) {
+          delete this.engineer.engineer[empty_fields[i]]
+        }
       }
 
       this.isLoading = true
