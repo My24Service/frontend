@@ -73,10 +73,10 @@ class BaseModel {
   }
 
   getHeaders() {
-    const cookie = this.getTokenCookie('csrftoken')
+    const token = this.getTokenCookie('csrftoken')
     return {
       headers: {
-        'X-CSRFToken': token,
+        'X-CSRFToken': token ? token : '',
         'Content-Type': 'application/json',
         mode: 'same-origin'
       },
