@@ -877,11 +877,9 @@ export default {
             }
 
             // assign engineers
-            this.$store.dispatch('getCsrfToken').then(token => {
-              for (let i=0; i<this.selectedEngineers.length; i++) {
-                Assign.assignToUser(token, this.selectedEngineers[i].id, [order.order_id], true)
-              }
-            })
+            for (let i=0; i<this.selectedEngineers.length; i++) {
+              Assign.assignToUser(this.selectedEngineers[i].id, [order.order_id], true)
+            }
 
             if (this.nextField === 'orders') {
               this.$router.go(-1)
