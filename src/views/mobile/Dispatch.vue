@@ -260,14 +260,13 @@ export default {
         }
       }
 
-      this.$store.dispatch('getCsrfToken').then(async token => {
-        try {
-          await assign.assignToUser(token, user_id, this.selectedOrderIds, true)
-          callback()
-        } catch (e) {
-          callback(e)
-        }
-      })
+      try {
+        const token = this.$store.dispatch('getCsrfToken')
+        await assign.assignToUser(token, user_id, this.selectedOrderIds, true)
+        callback()
+      } catch (e) {
+        callback(e)
+      }
     },
     assignToUsers() {
       this.showOverlay = true
@@ -305,18 +304,17 @@ export default {
       this.$refs['dispatch-order-actions-modal'].hide();
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
-          this.$store.dispatch('getCsrfToken').then(async token => {
-            await assign.unAssign(token, this.selectedOrderUserId, this.selectedOrder.id)
+          const token = await this.$store.dispatch('getCsrfToken')
+          await assign.unAssign(token, this.selectedOrderUserId, this.selectedOrder.id)
 
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Success'),
-              message: this.$trans('Order unassigned')
-            })
-
-            this.showOverlay = false
-            this.dispatch.drawDispatch()
+          this.flashMessage.show({
+            status: 'info',
+            title: this.$trans('Success'),
+            message: this.$trans('Order unassigned')
           })
+
+          this.showOverlay = false
+          this.dispatch.drawDispatch()
         } catch (error) {
           console.log('error unassigning', error)
           this.flashMessage.show({
