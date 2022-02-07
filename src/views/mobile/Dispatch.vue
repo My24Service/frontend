@@ -265,6 +265,7 @@ export default {
         await assign.assignToUser(token, user_id, this.selectedOrderIds, true)
         callback()
       } catch (e) {
+        console.log(e)
         callback(e)
       }
     },
