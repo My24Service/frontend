@@ -612,11 +612,22 @@ class Dispatch {
   }
 
   showInfo(text, mouseX, mouseY) {
+    const lines=text.split('\n')
+    let maxLen = 0
+    for (let i=0; i<lines.length; i++) {
+      if (lines[i].length > maxLen) {
+        maxLen = lines[i].length
+      }
+    }
+
+    this.tipCanvas.width = maxLen * (this.fontsize-8) + 10
+    this.tipCanvas.height = lines.length * this.fontsize + 5
+
     this.tipCanvas.style.left = (mouseX + 20) + "px";
     this.tipCanvas.style.top = (mouseY) + "px";
     this.tipCtx.clearRect(0, 0, this.tipCanvas.width, this.tipCanvas.height);
 
-    for (let i=0, y=14, lines=text.split('\n'); i<lines.length; i++) {
+    for (let i=0, y=14; i<lines.length; i++) {
       this.tipCtx.fillText(lines[i], 5, y);
       y += this.fontsize;
     }

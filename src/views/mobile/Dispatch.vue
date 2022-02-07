@@ -261,8 +261,7 @@ export default {
       }
 
       try {
-        const token = this.$store.dispatch('getCsrfToken')
-        await assign.assignToUser(token, user_id, this.selectedOrderIds, true)
+        await assign.assignToUser(user_id, this.selectedOrderIds, true)
         callback()
       } catch (e) {
         console.log(e)
@@ -305,8 +304,7 @@ export default {
       this.$refs['dispatch-order-actions-modal'].hide();
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
-          const token = await this.$store.dispatch('getCsrfToken')
-          await assign.unAssign(token, this.selectedOrderUserId, this.selectedOrder.id)
+          await assign.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
 
           this.flashMessage.show({
             status: 'info',
