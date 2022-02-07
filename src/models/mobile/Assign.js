@@ -7,7 +7,7 @@ class Assign extends BaseModel {
     const headers = this.getHeaders()
     const data = {order_ids: order_ids.join(',')}
 
-    return this.axios.post(url, data)
+    return this.axios.post(url, data, headers)
   }
 
   unAssign(token, user_id, order_pk) {
@@ -15,7 +15,7 @@ class Assign extends BaseModel {
     const headers = this.getHeaders()
     const data = { order_pk }
 
-    return this.axios.post(url, data)
+    return this.axios.post(url, data, headers)
   }
 }
 
