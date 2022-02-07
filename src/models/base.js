@@ -77,7 +77,8 @@ class BaseModel {
     return {
       headers: {
         'X-CSRFToken': token,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        mode: 'same-origin'
       },
     }
   }
