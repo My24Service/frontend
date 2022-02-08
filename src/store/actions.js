@@ -30,20 +30,27 @@ export const actions = {
     commit(SET_LANGUAGE, language)
   },
   async getInitialData({ commit }) {
-    const languageVars = await my24.getLanguageVars()
-    const initialData = await my24.getInitialData()
-    const memberContract = !isEmpty(initialData.userInfo) ? my24.getModelsFromString(initialData.userInfo.member_contract) : {}
+    return new Promise(async (resolve, reject) => {
+      try {
+        const languageVars = await my24.getLanguageVars()
+        const initialData = await my24.getInitialData()
+        const memberContract = !isEmpty(initialData.userInfo) ? my24.getModelsFromString(initialData.userInfo.member_contract) : {}
 
-    document.title = initialData.memberInfo.name
-    window.member_type_text = initialData.memberInfo.member_texts
+        document.title = initialData.memberInfo.name
+        window.member_type_text = initialData.memberInfo.member_texts
 
-    commit(SET_SET_LANGUAGE_URL, languageVars.set_language_url)
-    commit(SET_LANGUAGE, languageVars.current_language)
-    commit(SET_LANGUAGES, languageVars.languages)
-    commit(SET_USER_INFO, initialData.userInfo)
-    commit(SET_MEMBER_INFO, initialData.memberInfo)
-    commit(SET_MEMBER_CONTRACT, memberContract)
-    commit(SET_STATUSCODES, initialData.statuscodes)
+        commit(SET_SET_LANGUAGE_URL, languageVars.set_language_url)
+        commit(SET_LANGUAGE, languageVars.current_language)
+        commit(SET_LANGUAGES, languageVars.languages)
+        commit(SET_USER_INFO, initialData.userInfo)
+        commit(SET_MEMBER_INFO, initialData.memberInfo)
+        commit(SET_MEMBER_CONTRACT, memberContract)
+        commit(SET_STATUSCODES, initialData.statuscodes)
+        resolve()
+      } catch(e) {
+        reject(e)
+      }
+    })
   },
   getCsrfToken({ commit }) {
     return new Promise((resolve, reject) => {

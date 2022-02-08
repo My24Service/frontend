@@ -149,5 +149,11 @@ store.dispatch('getInitialData')
     }).$mount('#app')
   })
   .catch((error) => {
-    console.log('error initStore', error)
+    if (error.response) {
+      console.log('data', error.response.data);
+      console.log('status', error.response.status);
+      if (error.response.status === 401) {
+        auth.logout()
+      }
+    }
   })
