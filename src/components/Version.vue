@@ -50,7 +50,7 @@ export default {
     }
   },
   mounted() {
-    setInterval(this.checkVersion, 1000*60*30)
+    setInterval(this.checkVersion, 1000*60*15)
     this.checkVersion()
   }
 }
