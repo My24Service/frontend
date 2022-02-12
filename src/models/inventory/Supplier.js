@@ -1,5 +1,4 @@
 import BaseModel from '@/models/base'
-import axios from 'axios';
 
 
 class Supplier extends BaseModel {

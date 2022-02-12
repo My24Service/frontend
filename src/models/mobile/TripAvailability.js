@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import BaseModel from '@/models/base';
 
 
@@ -29,7 +27,7 @@ class TripAvailability extends BaseModel {
     const data = {'trip_ids': [ trip_id ].join(','), 'set_unavailable': true}
 
     return new Promise((resolve, reject) => {
-      axios.post(url, data, headers)
+      this.axios.post(url, data, headers)
         .then((response) => {
           resolve(response.data);
         })
@@ -45,7 +43,7 @@ class TripAvailability extends BaseModel {
     const data = {trip_pk: trip_id, 'set_available': true}
 
     return new Promise((resolve, reject) => {
-      axios.post(url, data, headers)
+      this.axios.post(url, data, headers)
         .then((response) => {
           resolve(response.data);
         })

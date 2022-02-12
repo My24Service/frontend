@@ -14,7 +14,7 @@ import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import FlashMessage from '@smartweb/vue-flash-message'
 import Loading from 'vue-loading-overlay'
-import axios from 'axios'
+import axios from '@/services/api'
 import VueAxios from 'vue-axios'
 import Vuelidate from 'vuelidate'
 import { ColorPicker, ColorPanel } from "one-colorpicker"

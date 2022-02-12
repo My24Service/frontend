@@ -159,9 +159,7 @@
 </template>
 
 <script>
-import axios from 'axios';
 import eachSeries from 'async/eachSeries';
-import my24 from '@/services/my24';
 import Dispatch from '@/services/dispatch';
 import orderModel from '@/models/orders/Order';
 import assign from '@/models/mobile/Assign';

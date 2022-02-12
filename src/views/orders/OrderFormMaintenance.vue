@@ -808,6 +808,7 @@ export default {
       return `${name} - ${city}`
     },
     selectCustomer(option) {
+      this.order.customer_relation = option.id
       this.order.customer_id = option.customer_id
       this.order.order_name = option.name
       this.order.order_address = option.address
