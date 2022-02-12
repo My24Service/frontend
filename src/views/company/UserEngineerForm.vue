@@ -190,7 +190,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="3" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Email tablet')"
@@ -203,7 +203,20 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('License plate')"
+              label-for="engineer_license_plate"
+            >
+              <b-form-input
+                id="engineer_license_plate"
+                size="sm"
+                v-model="engineer.engineer.license_plate"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Contract hours  per week')"
