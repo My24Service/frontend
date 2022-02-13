@@ -18,8 +18,7 @@
         <span v-if="order.order_tel">{{ $trans('Tel.') }}: {{ order.order_tel }}<br/></span>
         <span v-if="order.order_email">{{ $trans('Email') }}: <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/></span>
         {{ $trans('Date') }}: {{ order.order_date }}<br/>
-        {{ $trans('Created') }}: {{ order.created }}<br/>
-        memberType: {{ memberType }}
+        {{ $trans('Created') }}: {{ order.created }}
 
         <p v-if="memberType === 'temps'">
           {{ $trans('Required users') }}: {{ order.required_users }}<br/>
