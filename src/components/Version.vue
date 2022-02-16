@@ -7,7 +7,7 @@
       @ok="doReload"
     >
       <p class="my-4">
-        {{ $trans('A new version is available:') }}: {{ newVersion }} {{ $trans('Do you want to reload the page?') }}
+        {{ $trans('A new version is available') }}: {{ newVersion }} {{ $trans('Do you want to reload the page?') }}
       </p>
     </b-modal>
 
