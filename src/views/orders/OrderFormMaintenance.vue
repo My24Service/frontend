@@ -21,18 +21,15 @@
                 :multiple="false"
                 :loading="isLoading"
                 :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
                 :options-limit="30"
                 :limit="10"
                 :max-height="600"
-                :show-no-results="false"
                 :hide-selected="true"
                 @search-change="getCustomersDebounced"
                 @select="selectCustomer"
                 :custom-label="customerLabel"
               >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                <span slot="noResult">{{ $trans('Nothing found.') }}</span>
               </multiselect>
             </b-form-group>
           </b-col>
