@@ -135,11 +135,11 @@
 </template>
 
 <script>
-import PillsCompanyPartners from '@/components/PillsCompanyPartners'
-import partnerRequestsReceivedModel from '@/models/company/PartnerRequestsReceived'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
+import partnerRequestsReceivedModel from '@/models/company/PartnerRequestsReceived.js'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   name: 'PartnerRequestsReceivedList',

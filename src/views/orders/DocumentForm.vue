@@ -75,7 +75,7 @@
 
 <script>
 import eachSeries from 'async/eachSeries'
-import documentModel from '@/models/orders/Document'
+import documentModel from '@/models/orders/Document.js'
 
 export default {
   name: 'DocumentForm',

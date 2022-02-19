@@ -63,11 +63,13 @@
 </template>
 
 <script>
-const moment = require('moment')
-import BarChart from "@/components/BarChart"
-import OrderStatusColorSpan from '@/components/OrderStatusColorSpan'
-import OrderTypesSelect from '@/components/OrderTypesSelect';
-import monthModel from '@/models/orders/Month'
+import moment from 'moment'
+
+import monthModel from '@/models/orders/Month.js'
+
+import BarChart from "@/components/BarChart.vue"
+import OrderStatusColorSpan from '@/components/OrderStatusColorSpan.vue'
+import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 
 export default {
   data() {

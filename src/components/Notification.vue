@@ -2,7 +2,7 @@
 	<div/>
 </template>
 <script>
-import socket from "@/socket"
+import socket from "@/socket.js"
 
 export default {
 	methods:{

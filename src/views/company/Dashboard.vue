@@ -145,12 +145,11 @@
 </template>
 
 <script>
-import BarChart from "@/components/BarChart"
-import PieChart from "@/components/PieChart"
+import BarChart from "@/components/BarChart.vue"
+import PieChart from "@/components/PieChart.vue"
+import dashboardModel from '@/models/company/Dashboard.js'
 
-import dashboardModel from '@/models/company/Dashboard'
-
-let d = new Date();
+let d = new Date()
 
 export default {
   data() {

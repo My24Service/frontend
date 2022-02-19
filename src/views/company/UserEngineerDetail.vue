@@ -137,9 +137,10 @@
 </template>
 
 <script>
-import PieChart from "@/components/PieChart"
-import engineerModel from '@/models/company/UserEngineer'
-const moment = require('moment')
+import moment from 'moment'
+
+import PieChart from "@/components/PieChart.vue"
+import engineerModel from '@/models/company/UserEngineer.js'
 
 let d = new Date();
 const monday = window.locale === 'en' ? 1 : 0

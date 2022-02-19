@@ -15,10 +15,10 @@
                 v-model="stockLocation.name"
                 id="stock-location-name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.stockLocation.name.$error : null"
+                :state="isSubmitClicked ? !v$.stockLocation.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.stockLocation.name.$error : null">
+                :state="isSubmitClicked ? !v$.stockLocation.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -53,10 +53,15 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import stockLocationModel from '@/models/inventory/StockLocation'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import stockLocationModel from '@/models/inventory/StockLocation.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -96,9 +101,9 @@ export default {
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 

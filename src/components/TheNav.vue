@@ -6,9 +6,9 @@
 </template>
 
 <script>
-import TheNavNotLoggedIn from "@/components/TheNavNotLoggedIn";
-import TheNavLoggedIn from "@/components/TheNavLoggedIn";
-import { componentMixin } from '@/utils';
+import { componentMixin } from '@/utils.js'
+import TheNavNotLoggedIn from "@/components/TheNavNotLoggedIn.vue"
+import TheNavLoggedIn from "@/components/TheNavLoggedIn.vue"
 
 export default {
   name: "empty",

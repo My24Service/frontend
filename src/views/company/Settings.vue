@@ -50,8 +50,8 @@
 </template>
 
 <script>
-import PillsCompanyCompany from "@/components/PillsCompanyCompany"
-import memberModel from '@/models/member/Member'
+import PillsCompanyCompany from "@/components/PillsCompanyCompany.vue"
+import memberModel from '@/models/member/Member.js'
 
 export default {
   components: {

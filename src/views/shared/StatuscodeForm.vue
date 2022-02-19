@@ -16,10 +16,10 @@
                 id="statuscode_statuscode"
                 size="sm"
                 v-model="statuscode.statuscode"
-                :state="isSubmitClicked ? !$v.statuscode.statuscode.$error : null"
+                :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.statuscode.statuscode.$error : null">
+                :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null">
                 {{ $trans('Please enter a statuscode') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -149,11 +149,16 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import statuscodeOrderModel from '@/models/orders/Statuscode'
-import statuscodeTripModel from '@/models/mobile/TripStatuscode'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import statuscodeOrderModel from '@/models/orders/Statuscode.js'
+import statuscodeTripModel from '@/models/mobile/TripStatuscode.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     list_type: {
       type: [String],
@@ -211,9 +216,9 @@ export default {
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 

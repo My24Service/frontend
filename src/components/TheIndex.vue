@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import SubNav from "@/components/SubNav";
+import SubNav from "@/components/SubNav.vue"
 
 export default {
   name: 'TheIndex',

@@ -15,10 +15,10 @@
                 v-model="contract.name"
                 id="contract_name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.contract.name.$error : null"
+                :state="isSubmitClicked ? !v$.contract.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.contract.name.$error : null">
+                :state="isSubmitClicked ? !v$.contract.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -67,10 +67,15 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import contractModel from '@/models/member/Contract';
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import contractModel from '@/models/member/Contract.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -155,10 +160,10 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$touch()
 
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid, this.$v)
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid, this.v$)
         this.buttonDisabled = false
         this.isLoading = false
         return

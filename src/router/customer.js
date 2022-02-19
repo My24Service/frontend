@@ -1,12 +1,12 @@
-import TheAppLayout from '@/components/TheAppLayout'
-import SubNavCustomers from '@/components/SubNavCustomers'
+import TheAppLayout from '@/components/TheAppLayout.vue'
+import SubNavCustomers from '@/components/SubNavCustomers.vue'
 
-import CustomerList from '@/views/customer/CustomerList'
-import CustomerForm from '@/views/customer/CustomerForm'
-import CustomerView from '@/views/customer/CustomerView'
+import CustomerList from '@/views/customer/CustomerList.vue'
+import CustomerForm from '@/views/customer/CustomerForm.vue'
+import CustomerView from '@/views/customer/CustomerView.vue'
 
-import DocumentList from '@/views/customer/DocumentList'
-import DocumentForm from '@/views/customer/DocumentForm'
+import DocumentList from '@/views/customer/DocumentList.vue'
+import DocumentForm from '@/views/customer/DocumentForm.vue'
 
 
 export default [

@@ -64,11 +64,11 @@
 </template>
 
 <script>
-import TheLanguageChooser from "@/components/TheLanguageChooser"
-import NavBrand from "@/components/NavBrand"
-import Version from "@/components/Version"
-import accountModel from '@/models/account/Account'
+import accountModel from '@/models/account/Account.js'
 import authService from '@/services/auth'
+import TheLanguageChooser from "@/components/TheLanguageChooser.vue"
+import NavBrand from "@/components/NavBrand.vue"
+import Version from "@/components/Version.vue"
 
 export default {
   components: {

@@ -16,10 +16,10 @@
                 id="module-part_name"
                 size="sm"
                 autofocus
-                :state="isSubmitClicked ? !$v.modulePart.name.$error : null"
+                :state="isSubmitClicked ? !v$.modulePart.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.modulePart.name.$error : null">
+                :state="isSubmitClicked ? !v$.modulePart.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -51,11 +51,16 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import modulePartModel from '@/models/member/ModulePart';
-import moduleModel from '@/models/member/Module';
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import modulePartModel from '@/models/member/ModulePart.js'
+import moduleModel from '@/models/member/Module.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -113,10 +118,10 @@ export default {
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$touch()
 
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid, this.$v)
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid, this.v$)
         this.buttonDisabled = false
         this.isLoading = false
         return

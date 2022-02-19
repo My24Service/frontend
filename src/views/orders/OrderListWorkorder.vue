@@ -157,14 +157,14 @@
 </template>
 
 <script>
-import orderWorkorderModel from '@/models/orders/OrderWorkorder'
-import statusModel from '@/models/orders/Status'
-import my24 from '@/services/my24'
-import OrderTableInfo from '@/components/OrderTableInfo'
-import IconLinkPlus from '@/components/IconLinkPlus'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkSort from '@/components/ButtonLinkSort'
+import orderWorkorderModel from '@/models/orders/OrderWorkorder.js'
+import statusModel from '@/models/orders/Status.js'
+import my24 from '@/services/my24.js'
+import OrderTableInfo from '@/components/OrderTableInfo.vue'
+import IconLinkPlus from '@/components/IconLinkPlus.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 
 export default {
   components: {

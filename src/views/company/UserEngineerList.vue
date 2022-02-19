@@ -112,15 +112,15 @@
 </template>
 
 <script>
-import my24 from '@/services/my24'
-import PillsCompanyUsers from '@/components/PillsCompanyUsers'
-import engineerModel from '@/models/company/UserEngineer'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload'
+import my24 from '@/services/my24.js'
+import PillsCompanyUsers from '@/components/PillsCompanyUsers.vue'
+import engineerModel from '@/models/company/UserEngineer.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 
 export default {
   name: 'UserEngineerList',

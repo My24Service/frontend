@@ -1,6 +1,6 @@
 import VueRouter from 'vue-router'
 
-import TheIndexLayout from '@/components/TheIndexLayout'
+import TheIndexLayout from '@/components/TheIndexLayout.vue'
 
 import store from '@/store'
 import orders from './orders'

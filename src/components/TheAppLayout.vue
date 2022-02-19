@@ -12,9 +12,8 @@
 </template>
 
 <script>
-import TheNav from './TheNav';
-import SubNav from './SubNav';
-
+import TheNav from './TheNav.vue'
+import SubNav from './SubNav.vue'
 
 export default {
   props: {

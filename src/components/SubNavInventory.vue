@@ -60,43 +60,43 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils';
+import { componentMixin } from '@/utils.js'
 
 export default {
   mixins: [componentMixin],
   methods: {
     isActive(item) {
-      const parts = this.$route.path.split('/');
-      return parts[2] === item;
+      const parts = this.$route.path.split('/')
+      return parts[2] === item
     }
   },
   computed: {
     hasPurchaseOrders() {
-      return this.hasAccessToModule('inventory', 'purchaseorders');
+      return this.hasAccessToModule('inventory', 'purchaseorders')
     },
     hasPurchaseOrderEntries() {
-      return this.hasAccessToModule('inventory', 'purchaseorder-entries');
+      return this.hasAccessToModule('inventory', 'purchaseorder-entries')
     },
     hasMaterials() {
-      return this.hasAccessToModule('inventory', 'materials');
+      return this.hasAccessToModule('inventory', 'materials')
     },
     hasSuppliers() {
-      return this.hasAccessToModule('inventory', 'suppliers');
+      return this.hasAccessToModule('inventory', 'suppliers')
     },
     hasSupplierReservations() {
-      return this.hasAccessToModule('inventory', 'supplier-reservations');
+      return this.hasAccessToModule('inventory', 'supplier-reservations')
     },
     hasStockLocations() {
-      return this.hasAccessToModule('inventory', 'stock-locations');
+      return this.hasAccessToModule('inventory', 'stock-locations')
     },
     hasMutations() {
-      return this.hasAccessToModule('inventory', 'mutations');
+      return this.hasAccessToModule('inventory', 'mutations')
     },
     hasMoveMaterial() {
-      return this.hasAccessToModule('inventory', 'move-material');
+      return this.hasAccessToModule('inventory', 'move-material')
     },
     hasStats() {
-      return this.hasAccessToModule('inventory', 'stats');
+      return this.hasAccessToModule('inventory', 'stats')
     },
   },
 }

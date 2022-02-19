@@ -62,8 +62,9 @@
 </template>
 
 <script>
-const moment = require('moment')
-import timeSheetModel from '@/models/mobile/TimeSheet'
+import moment from 'moment'
+
+import timeSheetModel from '@/models/mobile/TimeSheet.js'
 
 const monday = window.locale === 'en' ? 1 : 0
 

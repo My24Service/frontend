@@ -88,13 +88,12 @@
 </template>
 
 <script>
-import BarChart from "@/components/BarChart"
-import totalSalesModel from '@/models/inventory/TotalSales'
-import totalSalesPerSupplierModel from '@/models/inventory/TotalSalesPerSupplier'
-import totalSalesPerCustomerModel from '@/models/inventory/TotalSalesPerCustomer'
-import totalSalesPerMaterialSupplierModel from '@/models/inventory/TotalSalesPerMaterialSupplier'
-import totalSalesPerMaterialCustomerModel from '@/models/inventory/TotalSalesPerMaterialCustomer'
-
+import BarChart from "@/components/BarChart.vue"
+import totalSalesModel from '@/models/inventory/TotalSales.js'
+import totalSalesPerSupplierModel from '@/models/inventory/TotalSalesPerSupplier.js'
+import totalSalesPerCustomerModel from '@/models/inventory/TotalSalesPerCustomer.js'
+import totalSalesPerMaterialSupplierModel from '@/models/inventory/TotalSalesPerMaterialSupplier.js'
+import totalSalesPerMaterialCustomerModel from '@/models/inventory/TotalSalesPerMaterialCustomer.js'
 
 const MODES = {
   TS: 'total-material-sales',

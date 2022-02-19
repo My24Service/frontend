@@ -53,8 +53,9 @@
 </template>
 
 <script>
-const moment = require('moment')
-import timeSheetDetailModel from '@/models/mobile/TimeSheetDetail'
+import moment from 'moment'
+
+import timeSheetDetailModel from '@/models/mobile/TimeSheetDetail.js'
 
 export default {
   name: "TimeSheetDetail",

@@ -159,12 +159,13 @@
 </template>
 
 <script>
-import eachSeries from 'async/eachSeries';
-import Dispatch from '@/services/dispatch';
-import orderModel from '@/models/orders/Order';
-import assign from '@/models/mobile/Assign';
-import Socket from '@/socket'
-const moment = require('moment')
+import moment from 'moment'
+import eachSeries from 'async/eachSeries'
+
+import Dispatch from '@/services/dispatch.js'
+import orderModel from '@/models/orders/Order.js'
+import assign from '@/models/mobile/Assign.js'
+import Socket from '@/socket.js'
 
 export default {
   name: 'Dispatch',

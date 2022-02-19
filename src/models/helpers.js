@@ -2,15 +2,7 @@ import axios from '@/services/api'
 
 
 function usernameExists(username) {
-  return new Promise((resolve, reject) => {
-    axios.get(`/company/username-exists/?username=${username}`)
-      .then((response) => {
-        resolve(response.data['available'])
-      })
-      .catch((error) => {
-        reject(error)
-      })
-  })
+  return axios.get(`/company/username-exists/?username=${username}`).then((response) => response.data['available'])
 }
 
 export { usernameExists }

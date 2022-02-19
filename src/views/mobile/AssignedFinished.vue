@@ -102,10 +102,12 @@
 </template>
 
 <script>
-const moment = require('moment')
-import assignedFinishedModel from '@/models/mobile/AssignedFinished'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import moment from 'moment'
+
+import assignedFinishedModel from '@/models/mobile/AssignedFinished.js'
+
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   name: "AssignedFinished",

@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import OrderFormMaintenance from "./OrderFormMaintenance"
-import OrderFormTemps from "./OrderFormTemps"
+import OrderFormMaintenance from "./OrderFormMaintenance.vue"
+import OrderFormTemps from "./OrderFormTemps.vue"
 
 export default {
   name: "OrderForm",
