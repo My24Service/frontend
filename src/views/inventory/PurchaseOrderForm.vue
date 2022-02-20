@@ -432,25 +432,24 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
+    try {
+      this.countries = await this.$store.dispatch('getCountries')
 
       if (this.isCreateFromReservation) {
         this.purchaseOrder.supplier_reservation = this.reservation_pk
 
         this.isLoading = true
-        supplierReservationModel.detail(this.reservation_pk).then((reservation) => {
-          this.selectSupplier(reservation.supplier_view)
-          this.selectMaterial(reservation.material_view)
-          this.isLoading = false
-        }).catch(() => {
-          this.errorToast(this.$trans('Error fetching supplier'))
-        })
+
+        const reservation = await supplierReservationModel.detail(this.reservation_pk)
+
+        this.selectSupplier(reservation.supplier_view)
+        this.selectMaterial(reservation.material_view)
+        this.isLoading = false
       } else {
         if (!this.isCreate) {
           return this.loadOrder()
@@ -460,10 +459,10 @@ export default {
 
         this.getSuppliers('')
       }
-    }).catch(() => {
+    } catch {
       this.errorToast(this.$trans('Error fetching countries'))
       this.buttonDisabled = false
-    })
+    }
   },
   methods: {
     // materials
