@@ -1,6 +1,7 @@
 module.exports = {
     testEnvironment: "jsdom",
     setupFiles: [ 'jest-canvas-mock' ],
+    "setupFilesAfterEnv": ["./tests/unit/setupTests.js"],
     testTimeout: 20000,
     moduleFileExtensions: [
       "js",
