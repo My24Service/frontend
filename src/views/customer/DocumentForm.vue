@@ -172,21 +172,11 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then(token => {
           documentModel.insert(token, this.document).then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Document has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Document has been created'))
             this.isLoading = false
             this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
           }).catch(error => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating document')
-            })
-
+            this.errorToast(this.$trans('Error creating document'))
             this.isLoading = false
           })
         })
@@ -200,22 +190,12 @@ export default {
 
         documentModel.update(token, this.pk, this.document)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Document has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
             this.isLoading = false
             this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating document')
-            })
-
+            this.errorToast(this.$trans('Error updating document'))
             this.isLoading = false
           })
       })
@@ -230,12 +210,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching document', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading document')
-        })
-
+        this.errorToast(this.$trans('Error loading document'))
         this.isLoading = false
       })
     },

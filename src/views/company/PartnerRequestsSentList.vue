@@ -166,18 +166,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         partnerRequestsSentModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Partner request has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting partner request')
-          })
+          this.errorToast(this.$trans('Error deleting partner request'))
         })
       })
     },
@@ -188,13 +180,8 @@ export default {
         this.partnerRequests = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching partnerRequestsSent', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading partner requests sent')
-        })
-
+        console.log('error fetching partnerRequestsSent', error)
+        this.errorToast(this.$trans('Error loading partner requests sent'))
         this.isLoading = false
       })
     }

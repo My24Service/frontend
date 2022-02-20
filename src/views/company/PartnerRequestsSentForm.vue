@@ -120,12 +120,7 @@ export default {
         this.members = response
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching members')
-        })
-
+        this.errorToast(this.$trans('Error fetching members'))
         this.isLoading = false
       })
     },
@@ -152,21 +147,11 @@ export default {
         delete this.partnerRequest.status
 
         partnerRequestsSentModel.insert(token, this.partnerRequest).then((action) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Created'),
-            message: this.$trans('Partner request has been sent')
-          })
-
+          this.infoToast(this.$trans('Created'), this.$trans('Partner request has been sent'))
           this.isLoading = false
           this.cancelForm()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error sending partner request')
-          })
-
+          this.errorToast(this.$trans('Error sending partner request'))
           this.isLoading = false
         })
       })

@@ -82,21 +82,13 @@ export default {
       this.isLoading = true
       return this.$store.dispatch('getCsrfToken').then((token) => {
         accountModel.sendResetPasswordLink(token, this.email).then((result) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Reset link sent'),
-            message: this.$trans('Password reset link has been sent')
-          })
+          this.infoToast(this.$trans('Reset link sent'), this.$trans('Password reset link has been sent'))
 
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Something went wrong, please try again')
-          })
+          this.errorToast(this.$trans('Something went wrong, please try again'))
 
           this.buttonDisabled = false
           this.isLoading = false

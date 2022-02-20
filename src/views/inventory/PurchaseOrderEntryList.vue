@@ -166,18 +166,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         purchaseorderEntryModel.delete(token, this.entryPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Entry has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Entry has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting entry')
-          })
+          this.errorToast(this.$trans('Error deleting entry'))
         })
       })
     },
@@ -190,12 +182,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching entries', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading entries')
-          })
+          console.log('error fetching entries', error)
+          this.errorToast(this.$trans('Error loading entries'))
           this.isLoading = false
         })
     }

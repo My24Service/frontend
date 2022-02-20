@@ -294,12 +294,7 @@ export default {
           this.isLoading = false
         }).catch((error) => {
           console.log('error fetching suppliers', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching suppliers')
-          })
-
+          this.errorToast(this.$trans('Error fetching suppliers'))
           this.isLoading = false
         })
     },
@@ -319,12 +314,7 @@ export default {
           this.materials = data.results
           this.isLoading = false
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching materials')
-          })
-
+          this.errorToast(this.$trans('Error fetching materials'))
           this.isLoading = false
         })
     },
@@ -358,22 +348,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           supplierReservationModel.insert(token, this.supplierReservation).then((supplierReservation) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Reservation has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Reservation has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating reservation')
-            })
-
+            this.errorToast(this.$trans('Error creating reservation'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -382,22 +362,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         supplierReservationModel.update(token, this.pk, this.supplierReservation).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Reservation has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Reservation has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating reservation')
-          })
-
+          this.errorToast(this.$trans('Error updating reservation'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -414,12 +384,7 @@ export default {
           this.getMaterials('')
       }).catch((error) => {
           console.log('error fetching reservation', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching reservation')
-          })
-
+          this.errorToast(this.$trans('Error fetching reservation'))
           this.isLoading = false
         })
     },

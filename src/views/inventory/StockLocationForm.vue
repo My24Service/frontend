@@ -121,22 +121,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           stockLocationModel.insert(token, this.stockLocation).then((stockLocation) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Stock location has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Stock location has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating stock location')
-            })
-
+            this.errorToast(this.$trans('Error creating stock location'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -145,22 +135,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         stockLocationModel.update(token, this.pk, this.stockLocation).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Stock location has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Stock location has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating stock location')
-          })
-
+          this.errorToast(this.$trans('Error updating stock location'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -174,12 +154,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching stock location', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching stock location')
-        })
-
+        this.errorToast(this.$trans('Error fetching stock location'))
         this.isLoading = false
       })
     },

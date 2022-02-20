@@ -255,22 +255,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           supplierModel.insert(token, this.supplier).then((order) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Supplier has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Supplier has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating supplier')
-            })
-
+            this.errorToast(this.$trans('Error creating supplier'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -279,22 +269,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         supplierModel.update(token, this.pk, this.supplier).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Supplier has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Supplier has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating supplier')
-          })
-
+          this.errorToast(this.$trans('Error updating supplier'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -308,12 +288,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching supplier', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching supplier')
-        })
-
+        this.errorToast(this.$trans('Error fetching supplier'))
         this.isLoading = false
       })
     },

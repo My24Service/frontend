@@ -172,18 +172,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         planningUserModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('planning user has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('planning user has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting planning user')
-          })
+          this.errorToast(this.$trans('Error deleting planning user'))
         })
       })
     },
@@ -194,13 +186,8 @@ export default {
         this.planningusers = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching planningusers', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading planning users')
-        })
-
+        console.log('error fetching planningusers', error)
+        this.errorToast(this.$trans('Error loading planning users'))
         this.isLoading = false
       })
     }

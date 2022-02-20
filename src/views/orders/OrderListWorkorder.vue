@@ -250,20 +250,12 @@ export default {
 
       return this.$store.dispatch('getCsrfToken').then((token) => {
         statusModel.insert(token, status).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Created'),
-            message: this.$trans('Status has been created')
-          });
+          this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
           this.loadData();
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error creating status')
-          });
-        });
-      });
+          this.errorToast(this.$trans('Error creating status'))
+        })
+      })
     },
     rowStyle(item, type) {
       if (!item || type !== 'row') return
@@ -288,13 +280,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching orders', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading orders')
-          })
-
+          console.log('error fetching orders', error)
+          this.errorToast(this.$trans('Error loading orders'))
           this.isLoading = false
         })
     }

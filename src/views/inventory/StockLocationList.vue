@@ -167,18 +167,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         stockLocationModel.delete(token, this.stockLocationPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Stock location has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Stock location has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting stock location')
-          })
+          this.errorToast(this.$trans('Error deleting stock location'))
         })
       })
     },
@@ -189,12 +181,8 @@ export default {
         this.stockLocations = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching stock locations', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading stock locations')
-        })
+        console.log('error fetching stock locations', error)
+        this.errorToast(this.$trans('Error loading stock locations'))
         this.isLoading = false
       })
     }

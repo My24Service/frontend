@@ -205,18 +205,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         customerModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Customer has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Customer has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting customer')
-          })
+          this.errorToast(this.$trans('Error deleting customer'))
         })
       })
     },
@@ -227,13 +219,8 @@ export default {
         this.customers = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching customers', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading customers')
-        })
-
+        console.log('error fetching customers', error)
+        this.errorToast(this.$trans('Error loading customers'))
         this.isLoading = false
       })
     }

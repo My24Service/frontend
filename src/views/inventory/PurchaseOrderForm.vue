@@ -449,11 +449,7 @@ export default {
           this.selectMaterial(reservation.material_view)
           this.isLoading = false
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching supplier')
-          })
+          this.errorToast(this.$trans('Error fetching supplier'))
         })
       } else {
         if (!this.isCreate) {
@@ -465,12 +461,7 @@ export default {
         this.getSuppliers('')
       }
     }).catch(() => {
-      this.flashMessage.show({
-        status: 'error',
-        title: this.$trans('Error'),
-        message: this.$trans('Error fetching countries')
-      })
-
+      this.errorToast(this.$trans('Error fetching countries'))
       this.buttonDisabled = false
     })
   },
@@ -523,12 +514,7 @@ export default {
         this.suppliers = response
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching suppliers')
-        })
-
+        this.errorToast(this.$trans('Error fetching suppliers'))
         this.isLoading = false
       })
     },
@@ -546,12 +532,7 @@ export default {
         this.materials = materials
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching materials')
-        })
-
+        this.errorToast(this.$trans('Error fetching materials'))
         this.isLoading = false
       })
     },
@@ -600,12 +581,7 @@ export default {
 
         return this.$store.dispatch('getCsrfToken').then((token) => {
           purchaseOrderModel.insert(token, this.purchaseOrder).then((order) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Purchase order has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Purchase order has been created'))
             this.buttonDisabled = false
             this.isLoading = false
 
@@ -617,12 +593,7 @@ export default {
 
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating purchase order')
-            })
-
+            this.errorToast(this.$trans('Error creating purchase order'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -631,22 +602,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         purchaseOrderModel.update(token, this.pk, this.purchaseOrder).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Purchase order has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Purchase order has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating purchase order')
-          })
-
+          this.errorToast(this.$trans('Error updating purchase order'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -665,12 +626,7 @@ export default {
           this.getMaterials('')
         }).catch((error) => {
           console.log('error fetching purchase order', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching purchase order')
-          })
-
+          this.errorToast(this.$trans('Error fetching purchase order'))
           this.isLoading = false
         })
     },

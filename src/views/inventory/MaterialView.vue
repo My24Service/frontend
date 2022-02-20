@@ -118,23 +118,13 @@ export default {
             this.isLoading = false
           }).catch((error) => {
             console.log('error fetching inventory', error)
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error fetching inventory')
-            })
-
+            this.errorToast(this.$trans('Error fetching inventory'))
             this.isLoading = false
           })
         })
         .catch((error) => {
           console.log('error fetching material', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching material')
-          })
-
+          this.errorToast(this.$trans('Error fetching material'))
           this.isLoading = false
         })
     }

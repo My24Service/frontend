@@ -235,21 +235,11 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           this.statuscodeModel.insert(token, this.statuscode).then((statuscode) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Statuscode has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Statuscode has been created'))
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating statuscode')
-            })
-
+            this.errorToast(this.$trans('Error creating statuscode'))
             this.isLoading = false
           })
         })
@@ -257,21 +247,11 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         this.statuscodeModel.update(token, this.pk, this.statuscode).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Statuscode has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Statuscode has been updated'))
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating statuscode')
-          })
-
+          this.errorToast(this.$trans('Error updating statuscode'))
           this.isLoading = false
         })
       })
@@ -284,12 +264,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching statuscode', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading statuscode')
-        })
-
+        this.errorToast(this.$trans('Error loading statuscode'))
         this.isLoading = false
       })
     },

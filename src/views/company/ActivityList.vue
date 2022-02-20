@@ -132,11 +132,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching activity', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading activity')
-        })
+        this.errorToast(this.$trans('Error loading activity'))
 
         this.isLoading = false
       })

@@ -172,18 +172,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         salesUserModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Sales user has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Sales user has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting sales user')
-          })
+          this.errorToast(this.$trans('Error deleting sales user'))
         })
       })
     },
@@ -194,13 +186,8 @@ export default {
         this.salesusers = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching salesusers', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading sales users')
-        })
-
+        console.log('error fetching salesusers', error)
+        this.errorToast(this.$trans('Error loading sales users'))
         this.isLoading = false
       })
     }

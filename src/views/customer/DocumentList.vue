@@ -164,19 +164,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         documentModel.delete(token, this.documentPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Document has been deleted')
-          })
-
+          this.infoToast(this.$trans('Deleted'), this.$trans('Document has been deleted'))
           this.loadDocuments()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting document')
-          })
+          this.errorToast(this.$trans('Error deleting document'))
         })
       })
     },
@@ -188,12 +179,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching documents', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading documents')
-        })
-
+        this.errorToast(this.$trans('Error loading documents'))
         this.isLoading = false
       })
     }

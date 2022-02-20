@@ -169,18 +169,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         materialModel.delete(token, this.materialPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Material has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting material')
-          })
+          this.errorToast(this.$trans('Error deleting material'))
         })
       })
     },
@@ -193,12 +185,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching materials', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading materials')
-          })
+          console.log('error fetching materials', error)
+          this.errorToast(this.$trans('Error loading materials'))
           this.isLoading = false
         })
     }

@@ -159,12 +159,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching members', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading members')
-          })
+          console.log('error fetching members', error)
+          this.errorToast(this.$trans('Error loading members'))
           this.isLoading = false
         })
     }

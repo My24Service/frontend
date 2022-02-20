@@ -128,24 +128,14 @@ export default {
       if(this.assignMode) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           tripAvailabilityModel.assign(token, this.selectedUser.id, this.tripAvailability.trip.id).then((result) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Assigned'),
-              message: this.$trans('Trip assigned')
-            })
-
+            this.infoToast(this.$trans('Assigned'), this.$trans('Trip assigned'))
             this.loadTripAvailability()
             this.cancel()
             this.buttonDisabled = false
             this.isLoading = false
           }).catch((error) => {
             console.log('error assigning trip', error)
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error assigning trip')
-            })
-
+            this.errorToast(this.$trans('Error assigning trip'))
             this.isLoading = false
             this.buttonDisabled = false
           })
@@ -154,24 +144,14 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         tripAvailabilityModel.unAssign(token, this.selectedUser.id, this.tripAvailability.trip.id).then((result) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Unassigned'),
-            message: this.$trans('Student unassigned')
-          })
-
+          this.infoToast(this.$trans('Unassigned'), this.$trans('Student unassigned'))
           this.loadTripAvailability()
           this.cancel()
           this.buttonDisabled = false
           this.isLoading = false
         }).catch((error) => {
           console.log('error unassigning trip', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error unassigning trip')
-          })
-
+          this.errorToast(this.$trans('Error unassigning trip'))
           this.isLoading = false
           this.buttonDisabled = false
         })
@@ -193,12 +173,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching tripAvailability', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching trip availability')
-        })
-
+        this.errorToast(this.$trans('Error fetching trip availability'))
         this.isLoading = false
       })
     }

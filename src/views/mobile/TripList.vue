@@ -165,18 +165,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         tripModel.delete(token, this.orderPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Trip has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Trip has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting trip')
-          })
+          this.errorToast(this.$trans('Error deleting trip'))
         })
       })
     },
@@ -187,12 +179,8 @@ export default {
         this.trips = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching trips', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading trips')
-        })
+        console.log('error fetching trips', error)
+        this.errorToast(this.$trans('Error loading trips'))
         this.isLoading = false
       })
     }

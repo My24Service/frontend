@@ -316,20 +316,12 @@ export default {
         }
 
         memberModel.updateMe(token, this.member).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Info updated')
-          })
+          this.infoToast(this.$trans('Updated'), this.$trans('Info updated'))
 
           this.buttonDisabled = false
           this.isLoading = false
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating info')
-          })
+          this.errorToast(this.$trans('Error updating info'))
 
           this.isLoading = false
           this.buttonDisabled = false
@@ -345,12 +337,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching member/me', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching member info')
-        })
-
+        this.errorToast(this.$trans('Error fetching member info'))
         this.isLoading = false
       })
     },

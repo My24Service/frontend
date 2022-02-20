@@ -213,19 +213,10 @@ export default {
 
       return this.$store.dispatch('getCsrfToken').then((token) => {
         purchaseOrderStatusModel.insert(token, status).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Created'),
-            message: this.$trans('Status has been created')
-          })
-
+          this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error creating status')
-          })
+          this.errorToast(this.$trans('Error creating status'))
         })
       })
     },
@@ -240,18 +231,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         purchaseOrderModel.delete(token, this.purchaseOrderPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Purchase order has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Purchase order has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting purchase order')
-          })
+          this.errorToast(this.$trans('Error deleting purchase order'))
         })
       })
     },
@@ -262,12 +245,8 @@ export default {
         this.purchaseOrders = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching purchase orders', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading purchase orders')
-        })
+        console.log('error fetching purchase orders', error)
+        this.errorToast(this.$trans('Error loading purchase orders'))
         this.isLoading = false
       })
     }

@@ -631,22 +631,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           tripModel.insert(token, this.trip).then((trip) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Trip created'),
-              message: this.$trans(`Trip ${trip.id} has been created`)
-            })
-
+            this.infoToast(this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
             this.isLoading = false
             this.buttonDisabled = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating trip')
-            })
-
+            this.errorToast(this.$trans('Error creating trip'))
             this.isLoading = false
             this.buttonDisabled = false
           })
@@ -655,23 +645,13 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         tripModel.update(token, this.pk, this.trip).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Trip updated'),
-            message: this.$trans('Trip has been updated')
-          })
-
+          this.infoToast(this.$trans('Trip updated'), this.$trans('Trip has been updated'))
           this.isLoading = false
           this.buttonDisabled = false
           this.$router.go(-1)
         })
         .catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating trip')
-          })
-
+          this.errorToast(this.$trans('Error updating trip'))
           this.isLoading = false
           this.buttonDisabled = false
         })
@@ -685,12 +665,7 @@ export default {
         this.orders = response
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching orders')
-        })
-
+        this.errorToast(this.$trans('Error fetching orders'))
         this.isLoading = false
       })
     },
@@ -714,12 +689,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching order', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching trip')
-        })
-
+        this.errorToast(this.$trans('Error fetching trip'))
         this.isLoading = false
       })
     },

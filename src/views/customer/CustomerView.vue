@@ -231,22 +231,12 @@ export default {
           this.isLoading = false
         }).catch((error) => {
           console.log('error fetching orders', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching orders')
-          })
-
+          this.errorToast(this.$trans('Error fetching orders'))
           this.isLoading = false
         })
       }).catch((error) => {
         console.log('error fetching customer', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching customer')
-        })
-
+        this.errorToast(this.$trans('Error fetching customer'))
         this.isLoading = false
       })
     }

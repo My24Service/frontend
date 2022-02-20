@@ -475,21 +475,11 @@ export default {
         this.studentuser.password = this.studentuser.password1
         return this.$store.dispatch('getCsrfToken').then((token) => {
           studentUserModel.insert(token, this.studentuser).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('studentuser has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('studentuser has been created'))
             this.isLoading = false
             this.cancelForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating studentuser')
-            })
-
+            this.errorToast(this.$trans('Error creating studentuser'))
             this.isLoading = false
           })
         })
@@ -509,22 +499,12 @@ export default {
 
         studentUserModel.update(token, this.pk, this.studentuser)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('studentuser has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('studentuser has been updated'))
             this.isLoading = false
             this.cancelForm()
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating studentuser')
-            })
-
+            this.errorToast(this.$trans('Error updating studentuser'))
             this.isLoading = false
           })
       })
@@ -538,12 +518,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching studentuser', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading studentuser')
-        })
-
+        this.errorToast(this.$trans('Error loading studentuser'))
         this.isLoading = false
       })
     },

@@ -90,12 +90,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching trips', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading trips')
-        })
-
+        this.errorToast(this.$trans('Error loading trips'))
         this.isLoading = false
       })
     }

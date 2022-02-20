@@ -215,11 +215,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching assigned orders', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading orders')
-        })
+        this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       })
     }

@@ -166,13 +166,8 @@ export default {
         this.orders = data.results
         this.isLoading = false
       }).catch((error) => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading orders')
-        })
-
         console.log('error fetching past orders', error)
+        this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       })
     }

@@ -220,22 +220,12 @@ export default {
 
       return this.$store.dispatch('getCsrfToken').then((token) => {
         orderNotAcceptedModel.setAccepted(token, order_pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Accepted'),
-            message: this.$trans('Order has been accepted')
-          })
-
+          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
           this.isLoading = false
           this.loadData()
         }).catch((error) => {
           console.log('error accepting order', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error accepting order')
-          })
-
+          this.errorToast(this.$trans('Error accepting order'))
           this.isLoading = false
         })
       })
@@ -249,13 +239,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          // console.log('error fetching orders', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading orders')
-          })
-
+          console.log('error fetching orders', error)
+          this.errorToast(this.$trans('Error loading orders'))
           this.isLoading = false
         })
     }

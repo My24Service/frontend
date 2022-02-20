@@ -188,18 +188,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         engineerModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Engineer has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Engineer has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting engineer')
-          })
+          this.errorToast(this.$trans('Error deleting engineer'))
         })
       })
     },
@@ -210,13 +202,8 @@ export default {
         this.engineers = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching engineers', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading engineers')
-        })
-
+        console.log('error fetching engineers', error)
+        this.errorToast(this.$trans('Error loading engineers'))
         this.isLoading = false
       })
     }

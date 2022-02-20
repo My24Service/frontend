@@ -484,22 +484,12 @@ export default {
         this.isLoading = true
         return this.$store.dispatch('getCsrfToken').then((token) => {
           memberModel.insert(token, this.member).then((member) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Member has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating member')
-            })
-
+            this.errorToast(this.$trans('Error creating member'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -514,22 +504,12 @@ export default {
         this.isLoading = true
 
         memberModel.update(token, this.pk, this.member).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Member has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating member')
-          })
-
+          this.errorToast(this.$trans('Error updating member'))
           this.isLoading = false
           this.buttonDisabled = false
         })
@@ -545,12 +525,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching member', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching member')
-        })
-
+        this.errorToast(this.$trans('Error fetching member'))
         this.isLoading = false
       })
     },

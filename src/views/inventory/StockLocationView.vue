@@ -80,22 +80,12 @@ export default {
           this.isLoading = false
         }).catch((error) => {
           console.log('error fetching stock location', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching stock location')
-          })
-
+          this.errorToast(this.$trans('Error fetching stock location'))
           this.isLoading = false
         })
       }).catch((error) => {
         console.log('error fetching stock location', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching stock location')
-        })
-
+        this.errorToast(this.$trans('Error fetching stock location'))
         this.isLoading = false
       })
     }

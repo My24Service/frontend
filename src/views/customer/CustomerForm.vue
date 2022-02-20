@@ -341,21 +341,11 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           customerModel.insert(token, this.customer).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Customer has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
             this.isLoading = false
             this.cancelForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating customer')
-            })
-
+            this.errorToast(this.$trans('Error creating customer'))
             this.isLoading = false
           })
         })
@@ -364,22 +354,12 @@ export default {
       this.$store.dispatch('getCsrfToken').then((token) => {
         customerModel.update(token, this.pk, this.customer)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Customer has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
             this.isLoading = false
             this.cancelForm()
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating customer')
-            })
-
+            this.errorToast(this.$trans('Error updating customer'))
             this.isLoading = false
           })
       })
@@ -392,12 +372,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching customer', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading customer')
-        })
-
+        this.errorToast(this.$trans('Error loading customer'))
         this.isLoading = false
       })
     },

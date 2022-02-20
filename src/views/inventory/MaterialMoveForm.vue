@@ -248,11 +248,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('Error fetching materials', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching materials')
-        })
+        this.errorToast(this.$trans('Error fetching materials'))
         this.isLoading = false
       })
     },
@@ -276,11 +272,7 @@ export default {
         this.fromLocations = locations
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching locations')
-        })
+        this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
       })
     },
@@ -294,11 +286,7 @@ export default {
         this.toLocations = data.results
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching locations')
-        })
+        this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
       })
     },
@@ -319,23 +307,13 @@ export default {
                            this.selectedFromLocationPk,
                            this.selectedToLocationPk,
                            this.amount).then((result) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Moved'),
-            message: this.$trans('Material moved')
-          })
-
+          this.infoToast(this.$trans('Moved'), this.$trans('Material moved'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.push({name: 'mutation-list'})
         }).catch((error) => {
           console.log('error moving', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error moving material')
-          })
-
+          this.errorToast(this.$trans('Error moving material'))
           this.buttonDisabled = false
           this.isLoading = false
         })

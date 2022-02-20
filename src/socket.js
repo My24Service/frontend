@@ -3,7 +3,7 @@ import Vue from "vue"
 let BASE_URL = document.location.host
 
 if (document.location.port !== '') {
-  BASE_URL = BASE_URL.replace('8080', '8000')
+  BASE_URL = BASE_URL.replace('3000', '8000')
 }
 
 class Socket {

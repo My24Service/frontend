@@ -169,20 +169,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         accountModel.changePassword(token, this.old_password, this.new_password1, this.new_password2).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Password changed'),
-            message: this.$trans('Your password is changed')
-          });
+          this.infoToast(this.$trans('Password changed'), this.$trans('Your password is changed'))
           this.$refs['password-change-modal'].hide()
         })
         .catch((error) => {
           console.log(error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error changing your password')
-          })
+          this.errorToast(this.$trans('Error changing your password'))
         })
       })
     },
@@ -210,11 +202,7 @@ export default {
         socket.removeOnmessageHandlerMember(memberPk)
         socket.removeSocketMember(memberPk)
 
-        this.flashMessage.show({
-          status: 'info',
-          title: this.$trans('Logged out'),
-          message: this.$trans('You are now logged out')
-        })
+        this.infoToast(this.$trans('Logged out'), this.$trans('You are now logged out'))
 
         if(this.$router.currentRoute.path !== '/') {
           this.$router.push({path: '/'})
@@ -222,18 +210,12 @@ export default {
       } catch (error) {
         console.log(error)
         loader.hide()
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error logging you out')
-        })
+        this.errorToast(this.$trans('Error logging you out'))
       }
     },
   },
 }
-
 </script>
-
 <style scoped>
 .navbar {
   padding: 0 !important;

@@ -333,12 +333,7 @@ export default {
         this.customers = response
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching customers')
-        })
-
+        this.errorToast(this.$trans('Error fetching customers'))
         this.isLoading = false
       })
     },
@@ -373,21 +368,11 @@ export default {
         this.customeruser.password = this.customeruser.password1
         return this.$store.dispatch('getCsrfToken').then((token) => {
           customerUserModel.insert(token, this.customeruser).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Customer user has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Customer user has been created'))
             this.isLoading = false
             this.cancelForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating customer user')
-            })
-
+            this.errorToast(this.$trans('Error creating customer user'))
             this.isLoading = false
           })
         })
@@ -405,22 +390,12 @@ export default {
 
         customerUserModel.update(token, this.pk, this.customeruser)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Customer user has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Customer user has been updated'))
             this.isLoading = false
             this.cancelForm()
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating customer user')
-            })
-
+            this.errorToast(this.$trans('Error updating customer user'))
             this.isLoading = false
           })
       })
@@ -437,12 +412,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching customeruser', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading customer user')
-        })
-
+        this.errorToast(this.$trans('Error loading customer user'))
         this.isLoading = false
       })
     },

@@ -180,18 +180,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         supplierReservationModel.delete(token, this.supplierReservationPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Entry Reservation been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Entry Reservation been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting reservation')
-          })
+          this.errorToast(this.$trans('Error deleting reservation'))
         })
       })
     },
@@ -204,13 +196,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching reservations', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading reservations')
-          })
-
+          console.log('error fetching reservations', error)
+          this.errorToast(this.$trans('Error loading reservations'))
           this.isLoading = false
         })
     }

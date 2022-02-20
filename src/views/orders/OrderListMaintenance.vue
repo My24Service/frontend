@@ -334,19 +334,10 @@ export default {
 
       return this.$store.dispatch('getCsrfToken').then((token) => {
         statusModel.insert(token, status).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Created'),
-            message: this.$trans('Status has been created')
-          })
-
+          this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error creating status')
-          })
+          this.errorToast(this.$trans('Error creating status'))
         })
       })
     },
@@ -371,19 +362,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         orderModel.delete(token, this.orderPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Order has been deleted')
-          })
-
+          this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting order')
-          })
+          this.errorToast(this.$trans('Error deleting order'))
         })
       })
     },
@@ -395,12 +377,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching orders', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading orders')
-        })
-
+        this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       })
     }

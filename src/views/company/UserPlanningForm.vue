@@ -268,21 +268,11 @@ export default {
         this.planninguser.password = this.planninguser.password1
         return this.$store.dispatch('getCsrfToken').then((token) => {
           planningUserModel.insert(token, this.planninguser).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('planning user has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('planning user has been created'))
             this.isLoading = false
             this.cancelForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating planning user')
-            })
-
+            this.errorToast(this.$trans('Error creating planning user'))
             this.isLoading = false
           })
         })
@@ -300,22 +290,12 @@ export default {
 
         planningUserModel.update(token, this.pk, this.planninguser)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('planning user has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('planning user has been updated'))
             this.isLoading = false
             this.cancelForm()
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating planning user')
-            })
-
+            this.errorToast(this.$trans('Error updating planning user'))
             this.isLoading = false
           })
       })
@@ -329,12 +309,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching planninguser', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading planning user')
-        })
-
+        this.errorToast(this.$trans('Error loading planning user'))
         this.isLoading = false
       })
     },

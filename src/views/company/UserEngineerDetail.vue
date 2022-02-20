@@ -394,12 +394,7 @@ export default {
         this.render()
       } catch(error) {
         console.log('error fetching engineer details', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching engineer details')
-        })
-
+        this.errorToast(this.$trans('Error fetching engineer details'))
         this.isLoading = false
       }
     }

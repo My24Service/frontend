@@ -108,7 +108,7 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     this.isLoading = true
     contractModel.getModuleData().then((data) => {
       let moduleData = {}, selected = {}
@@ -130,10 +130,9 @@ export default {
       this.moduleData = moduleData
 
       if (!this.isCreate) {
-        this.loadData(() => {
-          this.isLoading = false
-          this.loaded = true
-        })
+        await this.loadData()
+        this.isLoading = false
+        this.loaded = true
       } else {
         this.contract = contractModel.getFields()
         this.isLoading = false
@@ -177,22 +176,12 @@ export default {
         this.isLoading = true
         return this.$store.dispatch('getCsrfToken').then((token) => {
           contractModel.insert(token, this.contract).then((contract) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('contract has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('contract has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating contract')
-            })
-
+            this.errorToast(this.$trans('Error creating contract'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -203,41 +192,25 @@ export default {
         this.isLoading = true
 
         contractModel.update(token, this.pk, this.contract).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('contract has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('contract has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating contract')
-          })
-
+          this.errorToast(this.$trans('Error updating contract'))
           this.isLoading = false
           this.buttonDisabled = false
         })
       })
     },
-    loadData(cb) {
-      contractModel.detail(this.pk).then((contract) => {
-        this.contract = contract
+    async loadData() {
+      try {
+        this.contract = await contractModel.detail(this.pk)
         this.fillSelected(contract.module_paths_pks)
-        cb()
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching contract', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching contract')
-        })
-        cb()
-      })
+        this.errorToast(this.$trans('Error fetching contract'))
+      }
     },
     getPathsFromModel() {
       let paths = [];

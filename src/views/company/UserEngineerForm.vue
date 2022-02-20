@@ -428,21 +428,11 @@ export default {
         this.engineer.password = this.engineer.password1
         return this.$store.dispatch('getCsrfToken').then((token) => {
           engineerModel.insert(token, this.engineer).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Engineer has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Engineer has been created'))
             this.isLoading = false
             this.cancelForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating engineer')
-            })
-
+            this.errorToast(this.$trans('Error creating engineer'))
             this.isLoading = false
           })
         })
@@ -459,22 +449,12 @@ export default {
 
         engineerModel.update(token, this.pk, this.engineer)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Engineer has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Engineer has been updated'))
             this.isLoading = false
             this.cancelForm()
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating engineer')
-            })
-
+            this.errorToast(this.$trans('Error updating engineer'))
             this.isLoading = false
           })
       })
@@ -488,12 +468,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching engineer', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading engineer')
-        })
-
+        this.errorToast(this.$trans('Error loading engineer'))
         this.isLoading = false
       })
     },

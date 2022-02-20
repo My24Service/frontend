@@ -349,12 +349,7 @@ export default {
         console.log(this.purchaseOrderMaterials)
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching purchase order materials')
-        })
-
+        this.errorToast(this.$trans('Error fetching purchase order materials'))
         this.isLoading = false
       })
 
@@ -366,11 +361,7 @@ export default {
         this.purchaseOrders = data.results
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching purchase orders')
-        })
+        this.errorToast(this.$trans('Error fetching purchase orders'))
         this.isLoading = false
       })
     },
@@ -407,22 +398,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           purchaseorderEntryModel.insert(token, this.purchaseorderEntry).then((purchaseorderEntry) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Entry has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Entry has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating entry')
-            })
-
+            this.errorToast(this.$trans('Error creating entry'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -431,22 +412,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         purchaseorderEntryModel.update(token, this.pk, this.purchaseorderEntry).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Entry has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Entry has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating entry')
-          })
-
+          this.errorToast(this.$trans('Error updating entry'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -458,15 +429,10 @@ export default {
         this.purchaseorderEntry = purchaseorderEntry
         this.selectedPurchaseOrder = purchaseorderEntry.purchase_order_material_view.purchase_order_view
         this.selectedPurchaseOrderMaterial = purchaseorderEntry.purchase_order_material_view
-        console.log(purchaseorderEntry.purchase_order_material_view)
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching entry', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching entry')
-        })
+        this.errorToast(this.$trans('Error fetching entry'))
         this.isLoading = false
       })
     },

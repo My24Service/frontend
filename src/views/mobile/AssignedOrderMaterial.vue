@@ -312,18 +312,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         assignedOrderMaterialModel.delete(token, this.assignedOrderMaterialPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Material has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
           this.geAassignedOrderMaterials()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting material')
-          })
+          this.errorToast(this.$trans('Error deleting material'))
         })
       })
     },
@@ -341,11 +333,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('Error fetching assigned orders', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching assigned orders')
-        })
+        this.errorToast(this.$trans('Error fetching assigned orders'))
         this.isLoading = false
       })
     },
@@ -358,11 +346,7 @@ export default {
         this.materials = materials
       }).catch((error) => {
         console.log('Error fetching materials', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching materials')
-        })
+        this.errorToast(this.$trans('Error fetching materials'))
       })
     },
     selectMaterial(option) {
@@ -380,11 +364,7 @@ export default {
         this.locations = locations
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching locations')
-        })
+        this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
       })
     },
@@ -404,11 +384,7 @@ export default {
         this.assignedOrderMaterials = data.results
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching assigned order materials')
-        })
+        this.errorToast(this.$trans('Error fetching assigned order materials'))
         this.isLoading = false
       })
     },
@@ -430,12 +406,7 @@ export default {
         this.editMode = true
       }).catch((error) => {
         console.log('error fetching material', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching material')
-        })
-
+        this.errorToast(this.$trans('Error fetching material'))
         this.isLoading = false
       })
     },
@@ -473,25 +444,14 @@ export default {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           assignedOrderMaterialModel.update(
             token, this.assignedOrderMaterialPk, this.assignedOrderMaterial).then((assignedOrderMaterial) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Material has been updated')
-            })
-
+            this.errorToast(this.$trans('Material has been updated'))
             this.buttonDisabled = false
             this.isLoading = false
             this.v$.$reset()
             this.submitClicked = false
-
             this.resetForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating material')
-            })
-
+            this.errorToast(this.$trans('Error updating material'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -501,12 +461,7 @@ export default {
 
       return this.$store.dispatch('getCsrfToken').then((token) => {
         assignedOrderMaterialModel.insert(token, this.assignedOrderMaterial).then((assignedOrderMaterial) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Created'),
-            message: this.$trans('Material has been created')
-          })
-
+          this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.v$.$reset()
@@ -514,12 +469,7 @@ export default {
 
           this.resetForm()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error creating material')
-          })
-
+          this.errorToast(this.$trans('Error creating material'))
           this.buttonDisabled = false
           this.isLoading = false
         })
