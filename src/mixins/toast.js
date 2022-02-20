@@ -1,15 +1,17 @@
 export default {
   methods: {
     infoToast(title, message) {
-      this.$bvToast.toast(message, {
+      this.$root.$bvToast.toast(message, {
         variant: 'info',
-        title
+        title,
+        solid: true
       });
     },
     errorToast(message, title=this.$trans('Error')) {
-      this.$bvToast.toast(message, {
+      this.$root.$bvToast.toast(message, {
         variant: 'danger',
-        title
+        title,
+        solid: true
       });
     },
   }

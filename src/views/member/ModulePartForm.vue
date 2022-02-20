@@ -93,26 +93,26 @@ export default {
   },
   async created() {
     this.isLoading = true
-    moduleModel.list().then((data) => {
-      let modules = []
-      for (let i=0; i<data.results.length; i++) {
-        modules.push({
-          value: data.results[i].id,
-          text: data.results[i].name,
-        })
-      }
-      this.modules = modules
 
-      if (!this.isCreate) {
-        await this.loadData()
-        this.isLoading = false
-      } else {
-        this.modulePart = modulePartModel.getFields()
-        this.modulePart.module = this.modules[0].value
-        this.isLoading = false
-      }
-    })
+    const data = await moduleModel.list()
 
+    let modules = []
+    for (let i=0; i<data.results.length; i++) {
+      modules.push({
+        value: data.results[i].id,
+        text: data.results[i].name,
+      })
+    }
+    this.modules = modules
+
+    if (!this.isCreate) {
+      await this.loadData()
+      this.isLoading = false
+    } else {
+      this.modulePart = modulePartModel.getFields()
+      this.modulePart.module = this.modules[0].value
+      this.isLoading = false
+    }
   },
   methods: {
     submitForm() {

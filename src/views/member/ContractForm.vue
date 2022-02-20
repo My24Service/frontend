@@ -110,35 +110,36 @@ export default {
   },
   async created() {
     this.isLoading = true
-    contractModel.getModuleData().then((data) => {
-      let moduleData = {}, selected = {}
-      for (var i=0; i<data.length; i++) {
-        const module_id = data[i].id+''
-        let parts = []
-        for (let j=0; j<data[i].parts.length; j++) {
-          data[i].parts[j].id += ''
-          parts.push(data[i].parts[j])
-        }
-        moduleData[module_id] = {
-          id: module_id,
-          name: data[i].name,
-          parts
-        }
-        selected[module_id] = []
-      }
-      this.selected = selected
-      this.moduleData = moduleData
 
-      if (!this.isCreate) {
-        await this.loadData()
-        this.isLoading = false
-        this.loaded = true
-      } else {
-        this.contract = contractModel.getFields()
-        this.isLoading = false
-        this.loaded = true
+    const data = await contractModel.getModuleData()
+
+    let moduleData = {}, selected = {}
+    for (var i=0; i<data.length; i++) {
+      const module_id = data[i].id+''
+      let parts = []
+      for (let j=0; j<data[i].parts.length; j++) {
+        data[i].parts[j].id += ''
+        parts.push(data[i].parts[j])
       }
-    })
+      moduleData[module_id] = {
+        id: module_id,
+        name: data[i].name,
+        parts
+      }
+      selected[module_id] = []
+    }
+    this.selected = selected
+    this.moduleData = moduleData
+
+    if (!this.isCreate) {
+      await this.loadData()
+      this.isLoading = false
+      this.loaded = true
+    } else {
+      this.contract = contractModel.getFields()
+      this.isLoading = false
+      this.loaded = true
+    }
   },
   methods: {
     selectNone(module_id) {
