@@ -4,6 +4,7 @@ import visualizer from 'rollup-plugin-visualizer'
 
 const path = require("path");
 export default defineConfig({
+  base: '',
   server: {
     host: 'stormy.my24service.com',
   },
