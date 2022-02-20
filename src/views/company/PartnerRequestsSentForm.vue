@@ -49,10 +49,10 @@
                 size="sm"
                 readonly
                 v-model="member_info"
-                :state="isSubmitClicked ? !$v.partnerRequest.to_member.$error : null"
+                :state="isSubmitClicked ? !v$.partnerRequest.to_member.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.partnerRequest.to_member.$error : null">
+                :state="isSubmitClicked ? !v$.partnerRequest.to_member.$error : null">
                 {{ $trans('Please select a member') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -73,12 +73,17 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required, sameAs, email } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
-import { required, sameAs, email } from 'vuelidate/lib/validators'
-import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent'
-import memberModel from '@/models/member/Member';
+
+import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent.js'
+import memberModel from '@/models/member/Member.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -115,12 +120,7 @@ export default {
         this.members = response
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching members')
-        })
-
+        this.errorToast(this.$trans('Error fetching members'))
         this.isLoading = false
       })
     },
@@ -134,10 +134,10 @@ export default {
 
     submitForm() {
       this.submitClicked = true
-      this.$v.$reset()
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$reset()
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -147,21 +147,11 @@ export default {
         delete this.partnerRequest.status
 
         partnerRequestsSentModel.insert(token, this.partnerRequest).then((action) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Created'),
-            message: this.$trans('Partner request has been sent')
-          })
-
+          this.infoToast(this.$trans('Created'), this.$trans('Partner request has been sent'))
           this.isLoading = false
           this.cancelForm()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error sending partner request')
-          })
-
+          this.errorToast(this.$trans('Error sending partner request'))
           this.isLoading = false
         })
       })

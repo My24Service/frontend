@@ -146,10 +146,10 @@
 </template>
 
 <script>
-import orderPastModel from '@/models/orders/OrderPast'
-import customerModel from '@/models/customer/Customer'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import orderPastModel from '@/models/orders/OrderPast.js'
+import customerModel from '@/models/customer/Customer.js'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   components: {
@@ -231,22 +231,12 @@ export default {
           this.isLoading = false
         }).catch((error) => {
           console.log('error fetching orders', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching orders')
-          })
-
+          this.errorToast(this.$trans('Error fetching orders'))
           this.isLoading = false
         })
       }).catch((error) => {
         console.log('error fetching customer', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching customer')
-        })
-
+        this.errorToast(this.$trans('Error fetching customer'))
         this.isLoading = false
       })
     }

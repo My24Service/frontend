@@ -104,12 +104,12 @@
 </template>
 
 <script>
-import supplierModel from '@/models/inventory/Supplier'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import supplierModel from '@/models/inventory/Supplier.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   components: {
@@ -167,21 +167,11 @@ export default {
     },
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
-        supplierModel.delete(token, this.supplierPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Supplier has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Supplier has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting supplier')
-          })
+          this.errorToast(this.$trans('Error deleting supplier'))
         })
-      })
     },
     loadData() {
       this.isLoading = true;
@@ -190,12 +180,8 @@ export default {
         this.suppliers = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching suppliers', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading suppliers')
-        })
+        console.log('error fetching suppliers', error)
+        this.errorToast(this.$trans('Error loading suppliers'))
         this.isLoading = false
       })
     }

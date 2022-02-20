@@ -103,12 +103,12 @@
 </template>
 
 <script>
-import stockLocationModel from '@/models/inventory/StockLocation'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import stockLocationModel from '@/models/inventory/StockLocation.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   components: {
@@ -167,18 +167,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         stockLocationModel.delete(token, this.stockLocationPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Stock location has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Stock location has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting stock location')
-          })
+          this.errorToast(this.$trans('Error deleting stock location'))
         })
       })
     },
@@ -189,12 +181,8 @@ export default {
         this.stockLocations = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching stock locations', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading stock locations')
-        })
+        console.log('error fetching stock locations', error)
+        this.errorToast(this.$trans('Error loading stock locations'))
         this.isLoading = false
       })
     }

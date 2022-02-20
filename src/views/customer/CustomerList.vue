@@ -138,13 +138,13 @@
 </template>
 
 <script>
-import customerModel from '@/models/customer/Customer'
-import IconLinkDocuments from '@/components/IconLinkDocuments'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import customerModel from '@/models/customer/Customer.js'
+import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   name: 'CustomerList',
@@ -205,18 +205,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         customerModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Customer has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Customer has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting customer')
-          })
+          this.errorToast(this.$trans('Error deleting customer'))
         })
       })
     },
@@ -227,13 +219,8 @@ export default {
         this.customers = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching customers', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading customers')
-        })
-
+        console.log('error fetching customers', error)
+        this.errorToast(this.$trans('Error loading customers'))
         this.isLoading = false
       })
     }

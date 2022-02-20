@@ -48,8 +48,8 @@
 </template>
 
 <script>
-import tripAvailabilityModel from '@/models/mobile/Trip'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
+import tripAvailabilityModel from '@/models/mobile/Trip.js'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 
 export default {
   name: 'TripAvailabilityList',
@@ -90,12 +90,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching trips', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading trips')
-        })
-
+        this.errorToast(this.$trans('Error loading trips'))
         this.isLoading = false
       })
     }

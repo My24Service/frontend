@@ -96,11 +96,11 @@
 </template>
 
 <script>
-import PillsCompanyPartners from '@/components/PillsCompanyPartners'
-import partnerModel from '@/models/company/Partner'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
+import partnerModel from '@/models/company/Partner.js'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   name: 'PartnerList',
@@ -159,18 +159,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         partnerModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('partner has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('partner has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting partner')
-          })
+          this.errorToast(this.$trans('Error deleting partner'))
         })
       })
     },
@@ -182,12 +174,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching partners', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading partners')
-        })
-
+        this.errorToast(this.$trans('Error loading partners'))
         this.isLoading = false
       })
     }

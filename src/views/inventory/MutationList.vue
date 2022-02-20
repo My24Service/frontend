@@ -77,9 +77,9 @@
 </template>
 
 <script>
-import mutationModel from '@/models/inventory/Mutation'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import mutationModel from '@/models/inventory/Mutation.js'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   components: {
@@ -134,12 +134,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching mutations', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading mutations')
-          })
+          console.log('error fetching mutations', error)
+          this.errorToast(this.$trans('Error loading mutations'))
           this.isLoading = false
         })
     }

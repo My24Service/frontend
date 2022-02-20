@@ -12,12 +12,13 @@ document.head.appendChild(script)
 import Vue from 'vue'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
-import FlashMessage from '@smartweb/vue-flash-message'
 import Loading from 'vue-loading-overlay'
 import axios from '@/services/api'
 import VueAxios from 'vue-axios'
-import Vuelidate from 'vuelidate'
 import { ColorPicker, ColorPanel } from "one-colorpicker"
+
+import VueCompositionAPI from '@vue/composition-api'
+Vue.use(VueCompositionAPI)
 
 import { BadgePlugin } from 'bootstrap-vue'
 Vue.use(BadgePlugin)
@@ -108,17 +109,23 @@ Vue.use(TableSimplePlugin)
 import { TabsPlugin } from 'bootstrap-vue'
 Vue.use(TabsPlugin)
 
+import { ToastPlugin } from 'bootstrap-vue'
+Vue.use(ToastPlugin)
 
 import App from './App.vue'
 import store from './store'
 import router from './router'
-import my24 from '@/services/my24'
-import auth from '@/services/auth'
-import client from '@/services/api'
 
 import './app.scss'
 import 'vue-loading-overlay/dist/vue-loading.css'
 
+// global mixins
+import toastMix from '@/mixins/toast'
+Vue.mixin(toastMix)
+
+// auth
+import auth from '@/services/auth'
+import client from '@/services/api'
 auth.setInterceptors(client)
 
 Vue.config.productionTip = false
@@ -133,10 +140,8 @@ Vue.prototype.$trans = (text) => {
 
 Vue.use(Vuex)
 Vue.use(VueRouter)
-Vue.use(FlashMessage, {time: 2500, strategy: 'multiple'})
 Vue.use(Loading)
 Vue.use(VueAxios, axios)
-Vue.use(Vuelidate)
 Vue.use(ColorPanel)
 Vue.use(ColorPicker)
 

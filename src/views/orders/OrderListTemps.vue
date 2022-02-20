@@ -204,19 +204,19 @@
 </template>
 
 <script>
-import orderModel from '@/models/orders/Order'
-import statusModel from '@/models/orders/Status'
-import OrderTableInfo from '@/components/OrderTableInfo'
-import my24 from '@/services/my24'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkPlus from '@/components/IconLinkPlus'
-import IconLinkDocuments from '@/components/IconLinkDocuments'
-import IconLinkAssign from '@/components/IconLinkAssign'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
-import ButtonLinkSort from '@/components/ButtonLinkSort'
+import orderModel from '@/models/orders/Order.js'
+import statusModel from '@/models/orders/Status.js'
+import OrderTableInfo from '@/components/OrderTableInfo.vue'
+import my24 from '@/services/my24.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkPlus from '@/components/IconLinkPlus.vue'
+import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
+import IconLinkAssign from '@/components/IconLinkAssign.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
+import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 
 export default {
   components: {
@@ -327,19 +327,10 @@ export default {
 
       return this.$store.dispatch('getCsrfToken').then((token) => {
         statusModel.insert(token, status).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Created'),
-            message: this.$trans('Status has been created')
-          })
-
+          this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error creating status')
-          })
+          this.errorToast(this.$trans('Error creating status'))
         })
       })
     },
@@ -364,19 +355,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         orderModel.delete(token, this.orderPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Order has been deleted')
-          })
-
+          this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting order')
-          })
+          this.errorToast(this.$trans('Error deleting order'))
         })
       })
     },
@@ -387,13 +369,8 @@ export default {
         this.orders = data.results
         this.isLoading = false
       }).catch((error) => {
-        // console.log('error fetching orders', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading orders')
-        })
-
+        console.log('error fetching orders', error)
+        this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       })
     }

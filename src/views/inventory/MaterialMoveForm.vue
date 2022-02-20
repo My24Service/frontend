@@ -46,7 +46,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedMaterialPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -91,7 +91,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedFromLocationPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedFromLocationPk.$error : null">
                 {{ $trans('Please select from location') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -139,7 +139,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedToLocationPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedToLocationPk.$error : null">
                 {{ $trans('Please select to location') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -156,7 +156,7 @@
                 size="sm"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.amount.$error : null">
+                :state="isSubmitClicked ? !v$.amount.$error : null">
                 {{ $trans('Please enter an amount') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -176,15 +176,20 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import inventoryModel from '@/models/inventory/Inventory'
-import materialModel from '@/models/inventory/Material'
-import stockLocationModel from '@/models/inventory/StockLocation'
+
+import inventoryModel from '@/models/inventory/Inventory.js'
+import materialModel from '@/models/inventory/Material.js'
+import stockLocationModel from '@/models/inventory/StockLocation.js'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -243,11 +248,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('Error fetching materials', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching materials')
-        })
+        this.errorToast(this.$trans('Error fetching materials'))
         this.isLoading = false
       })
     },
@@ -271,11 +272,7 @@ export default {
         this.fromLocations = locations
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching locations')
-        })
+        this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
       })
     },
@@ -289,19 +286,15 @@ export default {
         this.toLocations = data.results
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching locations')
-        })
+        this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
       })
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -314,23 +307,13 @@ export default {
                            this.selectedFromLocationPk,
                            this.selectedToLocationPk,
                            this.amount).then((result) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Moved'),
-            message: this.$trans('Material moved')
-          })
-
+          this.infoToast(this.$trans('Moved'), this.$trans('Material moved'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.push({name: 'mutation-list'})
         }).catch((error) => {
           console.log('error moving', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error moving material')
-          })
-
+          this.errorToast(this.$trans('Error moving material'))
           this.buttonDisabled = false
           this.isLoading = false
         })

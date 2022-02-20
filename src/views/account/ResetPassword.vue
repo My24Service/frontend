@@ -15,10 +15,10 @@
                 id="email"
                 size="sm"
                 autofocus
-                :state="isSubmitClicked ? !$v.email.$error : null"
+                :state="isSubmitClicked ? !v$.email.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.email.$error : null">
+                :state="isSubmitClicked ? !v$.email.$error : null">
                 {{ $trans('Please enter an email') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -38,10 +38,15 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import accountModel from '@/models/account/Account';
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import accountModel from '@/models/account/Account.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   data() {
     return {
       email: null,
@@ -63,10 +68,10 @@ export default {
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$touch()
 
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid, this.$v)
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid, this.v$)
         this.buttonDisabled = false
         this.isLoading = false
         return
@@ -77,21 +82,13 @@ export default {
       this.isLoading = true
       return this.$store.dispatch('getCsrfToken').then((token) => {
         accountModel.sendResetPasswordLink(token, this.email).then((result) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Reset link sent'),
-            message: this.$trans('Password reset link has been sent')
-          })
+          this.infoToast(this.$trans('Reset link sent'), this.$trans('Password reset link has been sent'))
 
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Something went wrong, please try again')
-          })
+          this.errorToast(this.$trans('Something went wrong, please try again'))
 
           this.buttonDisabled = false
           this.isLoading = false

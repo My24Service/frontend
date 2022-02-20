@@ -56,7 +56,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedAssignedOrderPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedAssignedOrderPk.$error : null">
                 {{ $trans('Please select an order') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -101,7 +101,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedLocationPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedLocationPk.$error : null">
                 {{ $trans('Please select a location') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -150,7 +150,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedMaterialPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -167,7 +167,7 @@
                 size="sm"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.amount.$error : null">
+                :state="isSubmitClicked ? !v$.amount.$error : null">
                 {{ $trans('Please enter an amount') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -220,19 +220,25 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import { required } from 'vuelidate/lib/validators'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import inventoryModel from '@/models/inventory/Inventory'
-import materialModel from '@/models/inventory/Material'
-import assignedOrderModel from '@/models/mobile/AssignedOrder'
-import assignedOrderMaterialModel from '@/models/mobile/AssignedOrderMaterial'
+
+import inventoryModel from '@/models/inventory/Inventory.js'
+import materialModel from '@/models/inventory/Material.js'
+import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
+import assignedOrderMaterialModel from '@/models/mobile/AssignedOrderMaterial.js'
+
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
     IconLinkEdit,
@@ -306,18 +312,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         assignedOrderMaterialModel.delete(token, this.assignedOrderMaterialPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Material has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
           this.geAassignedOrderMaterials()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting material')
-          })
+          this.errorToast(this.$trans('Error deleting material'))
         })
       })
     },
@@ -335,11 +333,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('Error fetching assigned orders', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching assigned orders')
-        })
+        this.errorToast(this.$trans('Error fetching assigned orders'))
         this.isLoading = false
       })
     },
@@ -352,11 +346,7 @@ export default {
         this.materials = materials
       }).catch((error) => {
         console.log('Error fetching materials', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching materials')
-        })
+        this.errorToast(this.$trans('Error fetching materials'))
       })
     },
     selectMaterial(option) {
@@ -374,11 +364,7 @@ export default {
         this.locations = locations
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching locations')
-        })
+        this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
       })
     },
@@ -398,11 +384,7 @@ export default {
         this.assignedOrderMaterials = data.results
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching assigned order materials')
-        })
+        this.errorToast(this.$trans('Error fetching assigned order materials'))
         this.isLoading = false
       })
     },
@@ -424,12 +406,7 @@ export default {
         this.editMode = true
       }).catch((error) => {
         console.log('error fetching material', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching material')
-        })
-
+        this.errorToast(this.$trans('Error fetching material'))
         this.isLoading = false
       })
     },
@@ -448,9 +425,9 @@ export default {
 
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -467,25 +444,14 @@ export default {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           assignedOrderMaterialModel.update(
             token, this.assignedOrderMaterialPk, this.assignedOrderMaterial).then((assignedOrderMaterial) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Material has been updated')
-            })
-
+            this.errorToast(this.$trans('Material has been updated'))
             this.buttonDisabled = false
             this.isLoading = false
-            this.$v.$reset()
+            this.v$.$reset()
             this.submitClicked = false
-
             this.resetForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating material')
-            })
-
+            this.errorToast(this.$trans('Error updating material'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -495,25 +461,15 @@ export default {
 
       return this.$store.dispatch('getCsrfToken').then((token) => {
         assignedOrderMaterialModel.insert(token, this.assignedOrderMaterial).then((assignedOrderMaterial) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Created'),
-            message: this.$trans('Material has been created')
-          })
-
+          this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
           this.buttonDisabled = false
           this.isLoading = false
-          this.$v.$reset()
+          this.v$.$reset()
           this.submitClicked = false
 
           this.resetForm()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error creating material')
-          })
-
+          this.errorToast(this.$trans('Error creating material'))
           this.buttonDisabled = false
           this.isLoading = false
         })

@@ -64,11 +64,11 @@
 </template>
 
 <script>
-import TheLanguageChooser from "@/components/TheLanguageChooser"
-import NavBrand from "@/components/NavBrand"
-import Version from "@/components/Version"
-import accountModel from '@/models/account/Account'
+import accountModel from '@/models/account/Account.js'
 import authService from '@/services/auth'
+import TheLanguageChooser from "@/components/TheLanguageChooser.vue"
+import NavBrand from "@/components/NavBrand.vue"
+import Version from "@/components/Version.vue"
 
 export default {
   components: {
@@ -133,11 +133,7 @@ export default {
 
         loader.hide()
 
-        this.flashMessage.show({
-          status: 'info',
-          title: this.$trans('Logged in'),
-          message: this.$trans('You are now logged in')
-        });
+        this.infoToast(this.$trans('Logged in'), this.$trans('You are now logged in'))
 
         if (document.location.hash.indexOf('?') !== -1) {
           const nextPart = document.location.hash.split('?')[1]
@@ -152,11 +148,7 @@ export default {
           this.$refs['login-modal'].hide()
         }
 
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error logging you in')
-        });
+        this.errorToast(this.$trans('Error logging you in'))
       }
     },
 

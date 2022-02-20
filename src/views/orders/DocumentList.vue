@@ -92,12 +92,12 @@
 </template>
 
 <script>
-import documentModel from '@/models/orders/Document'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import documentModel from '@/models/orders/Document.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   name: 'DocumentList',
@@ -165,19 +165,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         documentModel.delete(token, this.documentPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Document has been deleted')
-          })
-
+          this.infoToast(this.$trans('Deleted'), this.$trans('Document has been deleted'))
           this.loadDocuments()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting document')
-          })
+          this.errorToast(this.$trans('Error deleting document'))
         })
       })
     },
@@ -191,12 +182,7 @@ export default {
         })
         .catch((error) => {
           console.log('error fetching documents', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading documents')
-          })
-
+          this.errorToast(this.$trans('Error loading documents'))
           this.isLoading = false
         })
     }

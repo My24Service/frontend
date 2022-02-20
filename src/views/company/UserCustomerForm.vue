@@ -15,16 +15,16 @@
                 id="customeruser_username"
                 size="sm"
                 v-model="customeruser.username"
-                :state="isSubmitClicked ? !$v.customeruser.username.$error : null"
+                :state="isSubmitClicked ? !v$.customeruser.username.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
                 v-if="customeruser.username === ''"
-                :state="isSubmitClicked ? $v.customeruser.username.required : null">
+                :state="isSubmitClicked ? v$.customeruser.username.required : null">
                 {{ $trans('Username is required') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="customeruser.username !== ''"
-                :state="isSubmitClicked ? $v.customeruser.username.isUnique : null">
+                :state="isSubmitClicked ? v$.customeruser.username.isUnique : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -40,11 +40,11 @@
                 size="sm"
                 type="password"
                 v-model="customeruser.password1"
-                @blur="$v.customeruser.password1.$touch()"
-                :state="isSubmitClicked && $v.customeruser.password1 ? !$v.customeruser.password1.$error : null"
+                @blur="v$.customeruser.password1.$touch()"
+                :state="isSubmitClicked && v$.customeruser.password1 ? !v$.customeruser.password1.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked && $v.customeruser.password1 ? !$v.customeruser.password1.$error : null">
+                :state="isSubmitClicked && v$.customeruser.password1 ? !v$.customeruser.password1.$error : null">
                 {{ $trans('Please enter a password') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -60,11 +60,11 @@
                 size="sm"
                 type="password"
                 v-model="customeruser.password2"
-                @blur="$v.customeruser.password2.$touch()"
-                :state="isSubmitClicked ? !$v.customeruser.password2.$error : null"
+                @blur="v$.customeruser.password2.$touch()"
+                :state="isSubmitClicked ? !v$.customeruser.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? $v.customeruser.password2.sameAs : null">
+                :state="isSubmitClicked ? v$.customeruser.password2.sameAs : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -81,10 +81,10 @@
                 id="customeruser_first_name"
                 size="sm"
                 v-model="customeruser.first_name"
-                :state="isSubmitClicked ? !$v.customeruser.first_name.$error : null"
+                :state="isSubmitClicked ? !v$.customeruser.first_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.customeruser.first_name.$error : null">
+                :state="isSubmitClicked ? !v$.customeruser.first_name.$error : null">
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -99,10 +99,10 @@
                 id="customeruser_last_name"
                 size="sm"
                 v-model="customeruser.last_name"
-                :state="isSubmitClicked ? !$v.customeruser.last_name.$error : null"
+                :state="isSubmitClicked ? !v$.customeruser.last_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.customeruser.last_name.$error : null">
+                :state="isSubmitClicked ? !v$.customeruser.last_name.$error : null">
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -117,10 +117,10 @@
                 id="customeruser_email"
                 size="sm"
                 v-model="customeruser.email"
-                :state="isSubmitClicked ? !$v.customeruser.email.$error : null"
+                :state="isSubmitClicked ? !v$.customeruser.email.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.customeruser.email.$error : null">
+                :state="isSubmitClicked ? !v$.customeruser.email.$error : null">
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -213,13 +213,19 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required, sameAs, email } from '@vuelidate/validators'
+import { helpers } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
-import { required, sameAs, email } from 'vuelidate/lib/validators'
-import { usernameExists } from '@/models/helpers'
-import customerUserModel from '@/models/company/UserCustomer'
-import customerModel from '@/models/customer/Customer';
+
+import { usernameExists } from '@/models/helpers.js'
+import customerUserModel from '@/models/company/UserCustomer.js'
+import customerModel from '@/models/customer/Customer.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -249,13 +255,15 @@ export default {
     }
 
     if (this.isCreate) {
+      const isUniqueCreate = (value) => {
+        if (value === '') return true
+
+        return usernameExists(value)
+      }
+
       validations.customeruser.username = {
         required,
-        isUnique(value) {
-          if (value === '') return true
-
-          return usernameExists(value)
-        }
+        isUnique: helpers.withAsync(isUniqueCreate)
       }
 
       validations.customeruser.password1 = {
@@ -264,22 +272,24 @@ export default {
 
       validations.customeruser.password2 = {
         required,
-        sameAs: sameAs('password1')
+        sameAs: sameAs(this.customeruser.password1)
       }
     } else {
+      const isUniqueEdit = (value) => {
+        if (this.orgUsername === this.customeruser.username || value === '' || value.length < 3) {
+          return true
+        }
+
+        return helpers.withAsync(usernameExists(value))
+      }
+
       validations.customeruser.username = {
         required,
-        isUnique(value) {
-          if (this.orgUsername === this.customeruser.username || value === '' || value.length < 3) {
-            return true
-          }
-
-          return usernameExists(value)
-        }
+        isUnique: helpers.withAsync(isUniqueEdit)
       }
 
       validations.customeruser.password2 = {
-        sameAs: sameAs('password1')
+        sameAs: sameAs(this.customeruser.password1)
       }
     }
 
@@ -323,12 +333,7 @@ export default {
         this.customers = response
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching customers')
-        })
-
+        this.errorToast(this.$trans('Error fetching customers'))
         this.isLoading = false
       })
     },
@@ -343,43 +348,31 @@ export default {
     preSubmitForm() {
       this.buttonDisabled = true
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$reset()
+      this.v$.$touch()
+
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
+        this.buttonDisabled = false
+        return
+      }
 
       setTimeout(() => {
         this.submitForm()
       }, 1000)
     },
     submitForm() {
-      this.submitClicked = true
-      this.$v.$reset()
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
-        this.buttonDisabled = false
-        return
-      }
-
       this.isLoading = true
 
       if (this.isCreate) {
         this.customeruser.password = this.customeruser.password1
         return this.$store.dispatch('getCsrfToken').then((token) => {
           customerUserModel.insert(token, this.customeruser).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Customer user has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Customer user has been created'))
             this.isLoading = false
             this.cancelForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating customer user')
-            })
-
+            this.errorToast(this.$trans('Error creating customer user'))
             this.isLoading = false
           })
         })
@@ -397,22 +390,12 @@ export default {
 
         customerUserModel.update(token, this.pk, this.customeruser)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Customer user has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Customer user has been updated'))
             this.isLoading = false
             this.cancelForm()
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating customer user')
-            })
-
+            this.errorToast(this.$trans('Error updating customer user'))
             this.isLoading = false
           })
       })
@@ -429,12 +412,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching customeruser', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading customer user')
-        })
-
+        this.errorToast(this.$trans('Error loading customer user'))
         this.isLoading = false
       })
     },

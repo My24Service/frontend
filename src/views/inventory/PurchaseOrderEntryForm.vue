@@ -136,7 +136,7 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.purchase_order_material.$error : null">
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -195,10 +195,10 @@
                 v-model="purchaseorderEntry.amount"
                 id="purchaseorder-entry-amount"
                 size="sm"
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.amount.$error : null"
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.amount.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.amount.$error : null">
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.amount.$error : null">
                 {{ $trans('Please enter an amount') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -217,11 +217,11 @@
                 v-bind:placeholder="$trans('Choose a date')"
                 value="purchaseorderEntry.entry_date"
                 locale="nl"
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.entry_date.$error : null"
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.entry_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
               ></b-form-datepicker>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.entry_date.$error : null">
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.entry_date.$error : null">
                 {{ $trans('Please enter a date') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -260,16 +260,21 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import purchaseorderEntryModel from '@/models/inventory/PurchaseOrderEntry'
-import purchaseOrderModel from '@/models/inventory/PurchaseOrder'
-import stockLocationModel from '@/models/inventory/StockLocation'
-import materialModel from '@/models/inventory/Material';
+
+import purchaseorderEntryModel from '@/models/inventory/PurchaseOrderEntry.js'
+import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
+import stockLocationModel from '@/models/inventory/StockLocation.js'
+import materialModel from '@/models/inventory/Material.js'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -344,12 +349,7 @@ export default {
         console.log(this.purchaseOrderMaterials)
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching purchase order materials')
-        })
-
+        this.errorToast(this.$trans('Error fetching purchase order materials'))
         this.isLoading = false
       })
 
@@ -361,11 +361,7 @@ export default {
         this.purchaseOrders = data.results
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching purchase orders')
-        })
+        this.errorToast(this.$trans('Error fetching purchase orders'))
         this.isLoading = false
       })
     },
@@ -382,9 +378,9 @@ export default {
 
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -402,22 +398,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           purchaseorderEntryModel.insert(token, this.purchaseorderEntry).then((purchaseorderEntry) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Entry has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Entry has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating entry')
-            })
-
+            this.errorToast(this.$trans('Error creating entry'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -426,22 +412,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         purchaseorderEntryModel.update(token, this.pk, this.purchaseorderEntry).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Entry has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Entry has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating entry')
-          })
-
+          this.errorToast(this.$trans('Error updating entry'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -453,15 +429,10 @@ export default {
         this.purchaseorderEntry = purchaseorderEntry
         this.selectedPurchaseOrder = purchaseorderEntry.purchase_order_material_view.purchase_order_view
         this.selectedPurchaseOrderMaterial = purchaseorderEntry.purchase_order_material_view
-        console.log(purchaseorderEntry.purchase_order_material_view)
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching entry', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching entry')
-        })
+        this.errorToast(this.$trans('Error fetching entry'))
         this.isLoading = false
       })
     },

@@ -123,16 +123,15 @@
 </template>
 
 <script>
-import my24 from '@/services/my24'
-import PillsCompanyUsers from '@/components/PillsCompanyUsers'
-import studentUserModel from '@/models/company/UserStudent'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload'
-
+import my24 from '@/services/my24.js'
+import PillsCompanyUsers from '@/components/PillsCompanyUsers.vue'
+import studentUserModel from '@/models/company/UserStudent.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 
 export default {
   name: 'UserstudentuserList',
@@ -199,11 +198,7 @@ export default {
         studentUserModel.setActive(token, pk, email).then(() => {
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error setting student user active')
-          })
+          this.errorToast(this.$trans('Error setting student user active'))
         })
       })
     },
@@ -212,11 +207,7 @@ export default {
         studentUserModel.setInActive(token, pk, email).then(() => {
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error setting student user inactive')
-          })
+          this.errorToast(this.$trans('Error setting student user inactive'))
         })
       })
     },
@@ -227,18 +218,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         studentUserModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('studentuser has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting studentuser')
-          })
+          this.errorToast(this.$trans('Error deleting studentuser'))
         })
       })
     },
@@ -249,13 +232,8 @@ export default {
         this.studentusers = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching studentusers', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading studentusers')
-        })
-
+        console.log('error fetching studentusers', error)
+        this.errorToast(this.$trans('Error loading studentusers'))
         this.isLoading = false
       })
     }

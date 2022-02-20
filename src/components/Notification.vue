@@ -2,23 +2,23 @@
 	<div/>
 </template>
 <script>
-import socket from "@/socket"
+import socket from "@/socket.js"
 
 export default {
 	methods:{
     handleMessageUser(data) {
-			this.flashMessage.show({
-        status: data.level,
-        title: this.$trans('User message'),
-        message: data.message
-      })
+      if (data.level === 'error') {
+        this.errorToast(data.message, this.$trans('User message'))
+      } else {
+        this.infoToast(this.$trans('User message'), data.message)
+      }
     },
     handleMessageMember(data) {
-      this.flashMessage.show({
-        status: data.level,
-        title: this.$trans('Company message'),
-        message: data.message
-      })
+      if (data.level === 'error') {
+        this.errorToast(data.message, this.$trans('Company message'))
+      } else {
+        this.infoToast(this.$trans('Company message'), data.message)
+      }
     },
 	},
 	mounted() {

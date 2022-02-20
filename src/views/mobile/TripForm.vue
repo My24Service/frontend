@@ -38,11 +38,11 @@
                     v-bind:placeholder="$trans('Choose a date')"
                     value="trip.start_date"
                     locale="nl"
-                    :state="isSubmitClicked ? !$v.trip.start_date.$error && !trip.start_datetime_from_first_order : null"
+                    :state="isSubmitClicked ? !v$.trip.start_date.$error && !trip.start_datetime_from_first_order : null"
                     :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
                   ></b-form-datepicker>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.start_date.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.start_date.$error : null">
                     {{ $trans('Please enter a start date') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -90,10 +90,10 @@
                     v-model="trip.start_name"
                     id="trip_start_name"
                     size="sm"
-                    :state="isSubmitClicked ? !$v.trip.start_name.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.start_name.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.start_name.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.start_name.$error : null">
                     {{ $trans('Please enter a location') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -109,10 +109,10 @@
                     v-model="trip.start_city"
                     id="trip_start_city"
                     size="sm"
-                    :state="isSubmitClicked ? !$v.trip.start_city.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.start_city.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.start_city.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.start_city.$error : null">
                     {{ $trans('Please enter a city') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -130,10 +130,10 @@
                     v-model="trip.start_address"
                     id="trip_start_address"
                     size="sm"
-                    :state="isSubmitClicked ? !$v.trip.start_address.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.start_address.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.start_address.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.start_address.$error : null">
                     {{ $trans('Please enter an address') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -149,10 +149,10 @@
                     v-model="trip.start_postal"
                     id="trip_start_postal"
                     size="sm"
-                    :state="isSubmitClicked ? !$v.trip.start_postal.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.start_postal.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.start_postal.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.start_postal.$error : null">
                     {{ $trans('Please enter a postal') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -201,11 +201,11 @@
                     class="mb-2"
                     v-bind:placeholder="$trans('Choose a date')"
                     locale="nl"
-                    :state="isSubmitClicked ? !$v.trip.end_date.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.end_date.$error : null"
                     :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
                   ></b-form-datepicker>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.end_date.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.end_date.$error : null">
                     {{ $trans('Please enter an end date') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -254,10 +254,10 @@
                     v-model="trip.end_name"
                     id="trip_end_name"
                     size="sm"
-                    :state="isSubmitClicked ? !$v.trip.end_name.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.end_name.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.end_name.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.end_name.$error : null">
                     {{ $trans('Please enter a location') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -273,10 +273,10 @@
                     v-model="trip.end_city"
                     id="trip_end_city"
                     size="sm"
-                    :state="isSubmitClicked ? !$v.trip.end_city.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.end_city.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.end_city.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.end_city.$error : null">
                     {{ $trans('Please enter a city') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -294,10 +294,10 @@
                     v-model="trip.end_address"
                     id="trip_end_address"
                     size="sm"
-                    :state="isSubmitClicked ? !$v.trip.end_address.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.end_address.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.end_address.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.end_address.$error : null">
                     {{ $trans('Please enter an address') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -313,10 +313,10 @@
                     v-model="trip.end_postal"
                     id="trip_end_postal"
                     size="sm"
-                    :state="isSubmitClicked ? !$v.trip.end_postal.$error : null"
+                    :state="isSubmitClicked ? !v$.trip.end_postal.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.trip.end_postal.$error : null">
+                    :state="isSubmitClicked ? !v$.trip.end_postal.$error : null">
                     {{ $trans('Please enter a postal') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -347,10 +347,10 @@
                 id="required_users"
                 size="sm"
                 v-model="trip.required_users"
-                :state="isSubmitClicked ? !$v.trip.required_users.$error: null"
+                :state="isSubmitClicked ? !v$.trip.required_users.$error: null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.trip.required_users.$error : null">
+                :state="isSubmitClicked ? !v$.trip.required_users.$error : null">
                 {{ $trans('Please enter required users') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -447,14 +447,19 @@
 </template>
 
 <script>
-const moment = require('moment')
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import tripModel from '@/models/mobile/Trip';
-import orderModel from '@/models/orders/Order';
+
+import tripModel from '@/models/mobile/Trip.js'
+import orderModel from '@/models/orders/Order.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect
   },
@@ -606,9 +611,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true;
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -626,22 +631,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           tripModel.insert(token, this.trip).then((trip) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Trip created'),
-              message: this.$trans(`Trip ${trip.id} has been created`)
-            })
-
+            this.infoToast(this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
             this.isLoading = false
             this.buttonDisabled = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating trip')
-            })
-
+            this.errorToast(this.$trans('Error creating trip'))
             this.isLoading = false
             this.buttonDisabled = false
           })
@@ -650,23 +645,13 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         tripModel.update(token, this.pk, this.trip).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Trip updated'),
-            message: this.$trans('Trip has been updated')
-          })
-
+          this.infoToast(this.$trans('Trip updated'), this.$trans('Trip has been updated'))
           this.isLoading = false
           this.buttonDisabled = false
           this.$router.go(-1)
         })
         .catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating trip')
-          })
-
+          this.errorToast(this.$trans('Error updating trip'))
           this.isLoading = false
           this.buttonDisabled = false
         })
@@ -680,12 +665,7 @@ export default {
         this.orders = response
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching orders')
-        })
-
+        this.errorToast(this.$trans('Error fetching orders'))
         this.isLoading = false
       })
     },
@@ -709,12 +689,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching order', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching trip')
-        })
-
+        this.errorToast(this.$trans('Error fetching trip'))
         this.isLoading = false
       })
     },

@@ -48,11 +48,11 @@
                 v-bind:placeholder="$trans('Choose a date')"
                 value="order.start_date"
                 locale="nl"
-                :state="isSubmitClicked ? !$v.order.start_date.$error : null"
+                :state="isSubmitClicked ? !v$.order.start_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
               ></b-form-datepicker>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.order.start_date.$error : null">
+                :state="isSubmitClicked ? !v$.order.start_date.$error : null">
                 {{ $trans('Please enter a start date') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -87,11 +87,11 @@
                 class="mb-2"
                 v-bind:placeholder="$trans('Choose a date')"
                 locale="nl"
-                :state="isSubmitClicked ? !$v.order.end_date.$error : null"
+                :state="isSubmitClicked ? !v$.order.end_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
               ></b-form-datepicker>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.order.end_date.$error : null">
+                :state="isSubmitClicked ? !v$.order.end_date.$error : null">
                 {{ $trans('Please enter an end date') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -125,10 +125,10 @@
                 v-model="order.order_name"
                 id="order_name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.order.order_name.$error : null"
+                :state="isSubmitClicked ? !v$.order.order_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.order.order_name.$error : null">
+                :state="isSubmitClicked ? !v$.order.order_name.$error : null">
                 {{ $trans('Please enter the customer') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -144,7 +144,7 @@
                 readonly
                 id="customer_id"
                 size="sm"
-                :state="isSubmitClicked ? !$v.order.customer_id.$error : null"
+                :state="isSubmitClicked ? !v$.order.customer_id.$error : null"
               ></b-form-input>
             </b-form-group>
           </b-col>
@@ -158,10 +158,10 @@
                 id="order_address"
                 size="sm"
                 v-model="order.order_address"
-                :state="isSubmitClicked ? !$v.order.order_address.$error: null"
+                :state="isSubmitClicked ? !v$.order.order_address.$error: null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.order.order_address.$error : null">
+                :state="isSubmitClicked ? !v$.order.order_address.$error : null">
                 {{ $trans('Please enter the address') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -187,10 +187,10 @@
                 id="order_postal"
                 size="sm"
                 v-model="order.order_postal"
-                :state="isSubmitClicked ? !$v.order.order_postal.$error : null"
+                :state="isSubmitClicked ? !v$.order.order_postal.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.order.order_postal.$error : null">
+                :state="isSubmitClicked ? !v$.order.order_postal.$error : null">
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -205,10 +205,10 @@
                 id="order_city"
                 size="sm"
                 v-model="order.order_city"
-                :state="isSubmitClicked ? !$v.order.order_city.$error : null"
+                :state="isSubmitClicked ? !v$.order.order_city.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.order.order_city.$error : null">
+                :state="isSubmitClicked ? !v$.order.order_city.$error : null">
                 {{ $trans('Please enter the city') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -560,20 +560,26 @@
 </template>
 
 <script>
-const moment = require('moment')
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import eachSeries from 'async/eachSeries'
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import OrderTypesSelect from '@/components/OrderTypesSelect'
-import Collapse from '@/components/Collapse'
-import orderModel from '@/models/orders/Order'
-import customerModel from '@/models/customer/Customer'
-import engineerModel from '@/models/company/UserEngineer'
-import documentModel from '@/models/orders/Document'
-import Assign from '@/models/mobile/Assign'
+
+import orderModel from '@/models/orders/Order.js'
+import customerModel from '@/models/customer/Customer.js'
+import engineerModel from '@/models/company/UserEngineer.js'
+import documentModel from '@/models/orders/Document.js'
+import Assign from '@/models/mobile/Assign.js'
+
+import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
+import Collapse from '@/components/Collapse.vue'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
     OrderTypesSelect,
@@ -820,9 +826,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -841,13 +847,7 @@ export default {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           orderModel.insert(token, this.order).then((order) => {
             this.orderPk = order.id
-
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Order has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
             this.buttonDisabled = false
             this.isLoading = false
 
@@ -855,20 +855,10 @@ export default {
             if (this.documents.length) {
               eachSeries(this.documents, this.postDocument, (err) => {
                 if (err) {
-                  this.flashMessage.show({
-                    status: 'error',
-                    title: this.$trans('Error'),
-                    message: this.$trans('Error creating document(s)')
-                  })
-
+                  this.errorToast(this.$trans('Error creating document(s)'))
                   this.isLoading = false
                 } else {
-                  this.flashMessage.show({
-                    status: 'info',
-                    title: this.$trans('Created'),
-                    message: this.$trans('Document(s) have been created')
-                  })
-
+                  this.infoToast(this.$trans('Created'), this.$trans('Document(s) have been created'))
                   this.isLoading = false
                 }
               })
@@ -885,12 +875,7 @@ export default {
               this.$router.push({name: 'mobile-dispatch'})
             }
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating order')
-            })
-
+            this.errorToast(this.$trans('Error creating order'))
             this.isLoading = false
             this.buttonDisabled = false
           })
@@ -900,23 +885,13 @@ export default {
       this.$store.dispatch('getCsrfToken').then((token) => {
         orderModel.update(token, this.pk, this.order)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Order has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
             this.isLoading = false
             this.buttonDisabled = false
             this.$router.go(-1)
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating order')
-            })
-
+            this.errorToast(this.$trans('Error updating order'))
             this.isLoading = false
             this.buttonDisabled = false
           })
@@ -930,12 +905,7 @@ export default {
         this.customers = response
         this.isLoading = false
       }).catch(() => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching customers')
-        })
-
+        this.errorToast(this.$trans('Error fetching customers'))
         this.isLoading = false
       })
     },
@@ -955,12 +925,7 @@ export default {
       })
       .catch((error) => {
         console.log('error fetching order', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching order')
-        })
-
+        this.errorToast(this.$trans('Error fetching order'))
         this.isLoading = false
       })
     },

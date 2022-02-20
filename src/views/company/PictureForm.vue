@@ -15,10 +15,10 @@
                 v-model="picture.name"
                 id="picture_name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.picture.name.$error : null"
+                :state="isSubmitClicked ? !v$.picture.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.picture.name.$error : null">
+                :state="isSubmitClicked ? !v$.picture.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -65,10 +65,15 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import pictureModel from '@/models/company/Picture'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import pictureModel from '@/models/company/Picture.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -123,9 +128,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -135,22 +140,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           pictureModel.insert(token, this.picture).then((picture) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Picture has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Picture has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating picture')
-            })
-
+            this.errorToast(this.$trans('Error creating picture'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -163,22 +158,12 @@ export default {
         }
 
         pictureModel.update(token, this.pk, this.picture).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Picture has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Picture has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating picture')
-          })
-
+          this.errorToast(this.$trans('Error updating picture'))
           this.isLoading = false
           this.buttonDisabled = false
         })
@@ -193,12 +178,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching picture', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching picture')
-        })
-
+        this.errorToast(this.$trans('Error fetching picture'))
         this.isLoading = false
       })
     },

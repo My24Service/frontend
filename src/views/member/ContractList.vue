@@ -100,12 +100,12 @@
 </template>
 
 <script>
-import contractModel from '@/models/member/Contract'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import contractModel from '@/models/member/Contract.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   components: {
@@ -163,18 +163,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         contractModel.delete(token, this.contractPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Contract has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Contract has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting contract')
-          })
+          this.errorToast(this.$trans('Error'), this.$trans('Error deleting contract'))
         })
       })
     },
@@ -187,12 +179,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching contracts', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading contracts')
-          })
+          console.log('error fetching contracts', error)
+          this.errorToast(this.$trans('Error loading contracts'))
           this.isLoading = false
         })
     }

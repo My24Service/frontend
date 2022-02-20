@@ -159,12 +159,13 @@
 </template>
 
 <script>
-import eachSeries from 'async/eachSeries';
-import Dispatch from '@/services/dispatch';
-import orderModel from '@/models/orders/Order';
-import assign from '@/models/mobile/Assign';
-import Socket from '@/socket'
-const moment = require('moment')
+import moment from 'moment'
+import eachSeries from 'async/eachSeries'
+
+import Dispatch from '@/services/dispatch.js'
+import orderModel from '@/models/orders/Order.js'
+import assign from '@/models/mobile/Assign.js'
+import Socket from '@/socket.js'
 
 export default {
   name: 'Dispatch',
@@ -242,12 +243,8 @@ export default {
           this.$refs['dispatch-order-actions-modal'].show();
         })
         .catch((error) => {
-          console.log('error fetching order', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching order')
-          });
+          console.log('error fetching order', error)
+          this.errorToast(this.$trans('Error fetching order'))
         })
 
     },
@@ -276,20 +273,10 @@ export default {
 
       eachSeries(user_ids, this.assignToUser, (err) => {
         if (err) {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error assigning order(s)')
-          })
-
+          this.errorToast(this.$trans('Error assigning order(s)'))
           this.showOverlay = false
         } else {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Success'),
-            message: this.$trans('Order(s) assigned')
-          })
-
+          this.infoToast(this.$trans('Success'), this.$trans('Order(s) assigned'))
           this.cancelAssign()
           this.dispatch.drawDispatch()
           this.buttonDisabled = false
@@ -303,23 +290,12 @@ export default {
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
           await assign.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
-
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Success'),
-            message: this.$trans('Order unassigned')
-          })
-
+          this.infoToast(this.$trans('Success'), this.$trans('Order unassigned'))
           this.showOverlay = false
           this.dispatch.drawDispatch()
         } catch (error) {
           console.log('error unassigning', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error unassigning order')
-          })
-
+          this.errorToast(this.$trans('Error unassigning order'))
           this.showOverlay = false
         }
       })

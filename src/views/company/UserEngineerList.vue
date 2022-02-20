@@ -112,15 +112,15 @@
 </template>
 
 <script>
-import my24 from '@/services/my24'
-import PillsCompanyUsers from '@/components/PillsCompanyUsers'
-import engineerModel from '@/models/company/UserEngineer'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload'
+import my24 from '@/services/my24.js'
+import PillsCompanyUsers from '@/components/PillsCompanyUsers.vue'
+import engineerModel from '@/models/company/UserEngineer.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 
 export default {
   name: 'UserEngineerList',
@@ -188,18 +188,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         engineerModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Engineer has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Engineer has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting engineer')
-          })
+          this.errorToast(this.$trans('Error deleting engineer'))
         })
       })
     },
@@ -210,13 +202,8 @@ export default {
         this.engineers = data.results
         this.isLoading = false
       }).catch((error) => {
-        console.log('error fetching engineers', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading engineers')
-        })
-
+        console.log('error fetching engineers', error)
+        this.errorToast(this.$trans('Error loading engineers'))
         this.isLoading = false
       })
     }

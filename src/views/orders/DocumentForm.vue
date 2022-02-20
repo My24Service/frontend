@@ -75,7 +75,7 @@
 
 <script>
 import eachSeries from 'async/eachSeries'
-import documentModel from '@/models/orders/Document'
+import documentModel from '@/models/orders/Document.js'
 
 export default {
   name: 'DocumentForm',
@@ -147,20 +147,10 @@ export default {
       if (this.isCreate) {
         eachSeries(this.documents, this.postDocument, (err) => {
           if (err) {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating document(s)')
-            })
-
+            this.errorToast(this.$trans('Error creating document(s)'))
             this.isLoading = false
           } else {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Document(s) have been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Document(s) have been created'))
             this.isLoading = false
             this.$router.push({name: 'order-documents', params: {orderPk: this.orderPk}})
           }
@@ -172,21 +162,11 @@ export default {
       this.$store.dispatch('getCsrfToken').then((token) => {
         delete this.document.file
         documentModel.update(token, this.pk, this.document).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Document has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
           this.isLoading = false
           this.$router.push({name: 'order-documents', params: {orderPk: this.document.order}})
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating document')
-          })
-
+          this.errorToast(this.$trans('Error updating document'))
           this.isLoading = false
         })
       })
@@ -199,12 +179,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching document', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading document')
-        })
-
+        this.errorToast(this.$trans('Error loading document'))
         this.isLoading = false
       })
     },

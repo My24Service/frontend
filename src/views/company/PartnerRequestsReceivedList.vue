@@ -135,11 +135,11 @@
 </template>
 
 <script>
-import PillsCompanyPartners from '@/components/PillsCompanyPartners'
-import partnerRequestsReceivedModel from '@/models/company/PartnerRequestsReceived'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
+import partnerRequestsReceivedModel from '@/models/company/PartnerRequestsReceived.js'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   name: 'PartnerRequestsReceivedList',
@@ -199,18 +199,10 @@ export default {
     acceptRequest() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         partnerRequestsReceivedModel.accept(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Accepted'),
-            message: this.$trans('Partner request has been accepted')
-          })
+          this.infoToast(this.$trans('Accepted'), this.$trans('Partner request has been accepted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error accepting partner request')
-          })
+          this.errorToast(this.$trans('Error accepting partner request'))
         })
       })
     },
@@ -221,18 +213,10 @@ export default {
     rejectRequest() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         partnerRequestsReceivedModel.reject(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Rejected'),
-            message: this.$trans('Partner request has been rejected')
-          })
+          this.infoToast(this.$trans('Rejected'), this.$trans('Partner request has been rejected'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error rejecting partner request')
-          })
+          this.errorToast(this.$trans('Error rejecting partner request'))
         })
       })
     },
@@ -243,18 +227,10 @@ export default {
     doDelete(id) {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         partnerRequestsReceivedModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Partner request has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting partner request')
-          })
+          this.errorToast(this.$trans('Error deleting partner request'))
         })
       })
     },
@@ -266,12 +242,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching partnerRequestsReceived', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading partner requests sent')
-        })
-
+        this.errorToast(this.$trans('Error loading partner requests sent'))
         this.isLoading = false
       })
     }

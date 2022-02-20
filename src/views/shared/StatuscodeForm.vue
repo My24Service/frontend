@@ -16,10 +16,10 @@
                 id="statuscode_statuscode"
                 size="sm"
                 v-model="statuscode.statuscode"
-                :state="isSubmitClicked ? !$v.statuscode.statuscode.$error : null"
+                :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.statuscode.statuscode.$error : null">
+                :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null">
                 {{ $trans('Please enter a statuscode') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -149,11 +149,16 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import statuscodeOrderModel from '@/models/orders/Statuscode'
-import statuscodeTripModel from '@/models/mobile/TripStatuscode'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import statuscodeOrderModel from '@/models/orders/Statuscode.js'
+import statuscodeTripModel from '@/models/mobile/TripStatuscode.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     list_type: {
       type: [String],
@@ -211,9 +216,9 @@ export default {
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -230,21 +235,11 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           this.statuscodeModel.insert(token, this.statuscode).then((statuscode) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Statuscode has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Statuscode has been created'))
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating statuscode')
-            })
-
+            this.errorToast(this.$trans('Error creating statuscode'))
             this.isLoading = false
           })
         })
@@ -252,21 +247,11 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         this.statuscodeModel.update(token, this.pk, this.statuscode).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Statuscode has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Statuscode has been updated'))
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating statuscode')
-          })
-
+          this.errorToast(this.$trans('Error updating statuscode'))
           this.isLoading = false
         })
       })
@@ -279,12 +264,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching statuscode', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading statuscode')
-        })
-
+        this.errorToast(this.$trans('Error loading statuscode'))
         this.isLoading = false
       })
     },

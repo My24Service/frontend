@@ -16,10 +16,10 @@
                 id="module-part_name"
                 size="sm"
                 autofocus
-                :state="isSubmitClicked ? !$v.modulePart.name.$error : null"
+                :state="isSubmitClicked ? !v$.modulePart.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.modulePart.name.$error : null">
+                :state="isSubmitClicked ? !v$.modulePart.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -51,11 +51,16 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import modulePartModel from '@/models/member/ModulePart';
-import moduleModel from '@/models/member/Module';
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import modulePartModel from '@/models/member/ModulePart.js'
+import moduleModel from '@/models/member/Module.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -86,37 +91,36 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     this.isLoading = true
-    moduleModel.list().then((data) => {
-      let modules = []
-      for (let i=0; i<data.results.length; i++) {
-        modules.push({
-          value: data.results[i].id,
-          text: data.results[i].name,
-        })
-      }
-      this.modules = modules
 
-      if (!this.isCreate) {
-        this.loadData(() => {
-          this.isLoading = false
-        })
-      } else {
-        this.modulePart = modulePartModel.getFields()
-        this.modulePart.module = this.modules[0].value
-        this.isLoading = false
-      }
-    })
+    const data = await moduleModel.list()
 
+    let modules = []
+    for (let i=0; i<data.results.length; i++) {
+      modules.push({
+        value: data.results[i].id,
+        text: data.results[i].name,
+      })
+    }
+    this.modules = modules
+
+    if (!this.isCreate) {
+      await this.loadData()
+      this.isLoading = false
+    } else {
+      this.modulePart = modulePartModel.getFields()
+      this.modulePart.module = this.modules[0].value
+      this.isLoading = false
+    }
   },
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$touch()
 
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid, this.$v)
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid, this.v$)
         this.buttonDisabled = false
         this.isLoading = false
         return
@@ -128,22 +132,12 @@ export default {
         this.isLoading = true
         return this.$store.dispatch('getCsrfToken').then((token) => {
           modulePartModel.insert(token, this.modulePart).then((modulePart) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Module part has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Module part has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating module part')
-            })
-
+            this.errorToast(this.$trans('Error creating module part'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -154,40 +148,23 @@ export default {
         this.isLoading = true
 
         modulePartModel.update(token, this.pk, this.modulePart).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Module part has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Module part has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating module part')
-          })
-
+          this.errorToast(this.$trans('Error updating module part'))
           this.isLoading = false
           this.buttonDisabled = false
         })
       })
     },
-    loadData(cb) {
-      modulePartModel.detail(this.pk).then((modulePart) => {
-        this.modulePart = modulePart
-        cb()
-      }).catch((error) => {
-        console.log('error fetching module part', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching module part')
-        })
-        cb()
-      })
+    async loadData() {
+      try {
+        this.modulePart = await modulePartModel.detail(this.pk)
+      } catch {
+        this.errorToast(this.$trans('Error fetching module part'))
+      }
     },
     cancelForm() {
       this.$router.go(-1)

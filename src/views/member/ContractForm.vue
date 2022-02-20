@@ -15,10 +15,10 @@
                 v-model="contract.name"
                 id="contract_name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.contract.name.$error : null"
+                :state="isSubmitClicked ? !v$.contract.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.contract.name.$error : null">
+                :state="isSubmitClicked ? !v$.contract.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -67,10 +67,15 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import contractModel from '@/models/member/Contract';
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import contractModel from '@/models/member/Contract.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -103,38 +108,38 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     this.isLoading = true
-    contractModel.getModuleData().then((data) => {
-      let moduleData = {}, selected = {}
-      for (var i=0; i<data.length; i++) {
-        const module_id = data[i].id+''
-        let parts = []
-        for (let j=0; j<data[i].parts.length; j++) {
-          data[i].parts[j].id += ''
-          parts.push(data[i].parts[j])
-        }
-        moduleData[module_id] = {
-          id: module_id,
-          name: data[i].name,
-          parts
-        }
-        selected[module_id] = []
-      }
-      this.selected = selected
-      this.moduleData = moduleData
 
-      if (!this.isCreate) {
-        this.loadData(() => {
-          this.isLoading = false
-          this.loaded = true
-        })
-      } else {
-        this.contract = contractModel.getFields()
-        this.isLoading = false
-        this.loaded = true
+    const data = await contractModel.getModuleData()
+
+    let moduleData = {}, selected = {}
+    for (var i=0; i<data.length; i++) {
+      const module_id = data[i].id+''
+      let parts = []
+      for (let j=0; j<data[i].parts.length; j++) {
+        data[i].parts[j].id += ''
+        parts.push(data[i].parts[j])
       }
-    })
+      moduleData[module_id] = {
+        id: module_id,
+        name: data[i].name,
+        parts
+      }
+      selected[module_id] = []
+    }
+    this.selected = selected
+    this.moduleData = moduleData
+
+    if (!this.isCreate) {
+      await this.loadData()
+      this.isLoading = false
+      this.loaded = true
+    } else {
+      this.contract = contractModel.getFields()
+      this.isLoading = false
+      this.loaded = true
+    }
   },
   methods: {
     selectNone(module_id) {
@@ -155,10 +160,10 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$touch()
 
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid, this.$v)
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid, this.v$)
         this.buttonDisabled = false
         this.isLoading = false
         return
@@ -172,22 +177,12 @@ export default {
         this.isLoading = true
         return this.$store.dispatch('getCsrfToken').then((token) => {
           contractModel.insert(token, this.contract).then((contract) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('contract has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('contract has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating contract')
-            })
-
+            this.errorToast(this.$trans('Error creating contract'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -198,41 +193,25 @@ export default {
         this.isLoading = true
 
         contractModel.update(token, this.pk, this.contract).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('contract has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('contract has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating contract')
-          })
-
+          this.errorToast(this.$trans('Error updating contract'))
           this.isLoading = false
           this.buttonDisabled = false
         })
       })
     },
-    loadData(cb) {
-      contractModel.detail(this.pk).then((contract) => {
-        this.contract = contract
+    async loadData() {
+      try {
+        this.contract = await contractModel.detail(this.pk)
         this.fillSelected(contract.module_paths_pks)
-        cb()
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching contract', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching contract')
-        })
-        cb()
-      })
+        this.errorToast(this.$trans('Error fetching contract'))
+      }
     },
     getPathsFromModel() {
       let paths = [];

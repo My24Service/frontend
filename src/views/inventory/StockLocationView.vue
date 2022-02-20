@@ -44,8 +44,8 @@
 </template>
 
 <script>
-import stockLocationModel from '@/models/inventory/StockLocation'
-import inventoryModel from '@/models/inventory/Inventory';
+import stockLocationModel from '@/models/inventory/StockLocation.js'
+import inventoryModel from '@/models/inventory/Inventory.js'
 
 export default {
   data() {
@@ -80,22 +80,12 @@ export default {
           this.isLoading = false
         }).catch((error) => {
           console.log('error fetching stock location', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching stock location')
-          })
-
+          this.errorToast(this.$trans('Error fetching stock location'))
           this.isLoading = false
         })
       }).catch((error) => {
         console.log('error fetching stock location', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching stock location')
-        })
-
+        this.errorToast(this.$trans('Error fetching stock location'))
         this.isLoading = false
       })
     }

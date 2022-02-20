@@ -1,23 +1,23 @@
-import TheAppLayout from '@/components/TheAppLayout'
-import SubNavOrders from '@/components/SubNavOrders'
+import TheAppLayout from '@/components/TheAppLayout.vue'
+import SubNavOrders from '@/components/SubNavOrders.vue'
 
-import StatuscodeList from '@/views/shared/StatuscodeList'
-import StatuscodeForm from '@/views/shared/StatuscodeForm'
-import ActionForm from '@/views/shared/ActionForm'
+import StatuscodeList from '@/views/shared/StatuscodeList.vue'
+import StatuscodeForm from '@/views/shared/StatuscodeForm.vue'
+import ActionForm from '@/views/shared/ActionForm.vue'
 
-import OrderList from '@/views/orders/OrderList'
-import OrderListPast from '@/views/orders/OrderListPast'
-import OrderListSales from '@/views/orders/OrderListSales'
-import OrderListNotAccepted from '@/views/orders/OrderListNotAccepted'
-import OrderListWorkorder from '@/views/orders/OrderListWorkorder'
-import OrderForm from '@/views/orders/OrderForm'
-import OrderView from '@/views/orders/OrderView'
+import OrderList from '@/views/orders/OrderList.vue'
+import OrderListPast from '@/views/orders/OrderListPast.vue'
+import OrderListSales from '@/views/orders/OrderListSales.vue'
+import OrderListNotAccepted from '@/views/orders/OrderListNotAccepted.vue'
+import OrderListWorkorder from '@/views/orders/OrderListWorkorder.vue'
+import OrderForm from '@/views/orders/OrderForm.vue'
+import OrderView from '@/views/orders/OrderView.vue'
 
-import DocumentList from '@/views/orders/DocumentList'
-import DocumentForm from '@/views/orders/DocumentForm'
+import DocumentList from '@/views/orders/DocumentList.vue'
+import DocumentForm from '@/views/orders/DocumentForm.vue'
 
-import YearStats from '@/views/orders/YearStats'
-import MonthStats from '@/views/orders/MonthStats';
+import YearStats from '@/views/orders/YearStats.vue'
+import MonthStats from '@/views/orders/MonthStats.vue'
 
 
 export default [

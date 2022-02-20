@@ -54,11 +54,11 @@
 </template>
 
 <script>
-import my24 from '@/services/my24'
-import orderSalesModel from '@/models/orders/OrderSales'
-import OrderTableInfo from '@/components/OrderTableInfo'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import my24 from '@/services/my24.js'
+import orderSalesModel from '@/models/orders/OrderSales.js'
+import OrderTableInfo from '@/components/OrderTableInfo.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   components: {
@@ -133,13 +133,8 @@ export default {
         this.orders = data.results
         this.isLoading = false
       }).catch((error) => {
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading orders')
-        })
-
         console.log('error fetching past orders', error)
+        this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       })
     }

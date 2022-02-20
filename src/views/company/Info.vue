@@ -17,10 +17,10 @@
                 v-model="member.name"
                 id="member_name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.member.name.$error : null"
+                :state="isSubmitClicked ? !v$.member.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.member.name.$error : null">
+                :state="isSubmitClicked ? !v$.member.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -51,10 +51,10 @@
                 id="member_address"
                 size="sm"
                 v-model="member.address"
-                :state="isSubmitClicked ? !$v.member.address.$error : null"
+                :state="isSubmitClicked ? !v$.member.address.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.member.address.$error : null">
+                :state="isSubmitClicked ? !v$.member.address.$error : null">
                 {{ $trans('Please enter an address') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -69,10 +69,10 @@
                 id="member_postal"
                 size="sm"
                 v-model="member.postal"
-                :state="isSubmitClicked ? !$v.member.postal.$error : null"
+                :state="isSubmitClicked ? !v$.member.postal.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.member.postal.$error : null">
+                :state="isSubmitClicked ? !v$.member.postal.$error : null">
                 {{ $trans('Please enter an postal code') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -87,10 +87,10 @@
                 id="member_city"
                 size="sm"
                 v-model="member.city"
-                :state="isSubmitClicked ? !$v.member.city.$error : null"
+                :state="isSubmitClicked ? !v$.member.city.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.member.city.$error : null">
+                :state="isSubmitClicked ? !v$.member.city.$error : null">
                 {{ $trans('Please enter a city') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -225,11 +225,17 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import PillsCompanyCompany from "@/components/PillsCompanyCompany"
-import memberModel from '@/models/member/Member'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import memberModel from '@/models/member/Member.js'
+
+import PillsCompanyCompany from "@/components/PillsCompanyCompany.vue"
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     PillsCompanyCompany,
   },
@@ -287,9 +293,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -310,20 +316,12 @@ export default {
         }
 
         memberModel.updateMe(token, this.member).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Info updated')
-          })
+          this.infoToast(this.$trans('Updated'), this.$trans('Info updated'))
 
           this.buttonDisabled = false
           this.isLoading = false
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating info')
-          })
+          this.errorToast(this.$trans('Error updating info'))
 
           this.isLoading = false
           this.buttonDisabled = false
@@ -339,12 +337,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching member/me', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching member info')
-        })
-
+        this.errorToast(this.$trans('Error fetching member info'))
         this.isLoading = false
       })
     },

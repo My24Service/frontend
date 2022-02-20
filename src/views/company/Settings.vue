@@ -50,8 +50,8 @@
 </template>
 
 <script>
-import PillsCompanyCompany from "@/components/PillsCompanyCompany"
-import memberModel from '@/models/member/Member'
+import PillsCompanyCompany from "@/components/PillsCompanyCompany.vue"
+import memberModel from '@/models/member/Member.js'
 
 export default {
   components: {
@@ -118,21 +118,11 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         memberModel.updateSettings(token, newValues).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Settings updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
           this.buttonDisabled = false
           this.isLoading = false
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating settings')
-          })
-
+          this.errorToast(this.$trans('Error updating settings'))
           this.isLoading = false
           this.buttonDisabled = false
         })
@@ -146,12 +136,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching settings', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching settings')
-        })
-
+        this.errorToast(this.$trans('Error fetching settings'))
         this.isLoading = false
       })
     },

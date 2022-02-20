@@ -95,11 +95,11 @@
 </template>
 
 <script>
-import memberModel from '@/models/member/Member'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import memberModel from '@/models/member/Member.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   components: {
@@ -159,12 +159,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching members', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading members')
-          })
+          console.log('error fetching members', error)
+          this.errorToast(this.$trans('Error loading members'))
           this.isLoading = false
         })
     }

@@ -114,13 +114,13 @@
 </template>
 
 <script>
-import supplierReservationModel from '@/models/inventory/SupplierReservation'
-import IconLinkPlus from '@/components/IconLinkPlus'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
+import IconLinkPlus from '@/components/IconLinkPlus.vue'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   components: {
@@ -180,18 +180,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         supplierReservationModel.delete(token, this.supplierReservationPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Entry Reservation been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Entry Reservation been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting reservation')
-          })
+          this.errorToast(this.$trans('Error deleting reservation'))
         })
       })
     },
@@ -204,13 +196,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching reservations', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading reservations')
-          })
-
+          console.log('error fetching reservations', error)
+          this.errorToast(this.$trans('Error loading reservations'))
           this.isLoading = false
         })
     }

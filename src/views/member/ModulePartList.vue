@@ -100,12 +100,12 @@
 </template>
 
 <script>
-import modulePartModel from '@/models/member/ModulePart'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import modulePartModel from '@/models/member/ModulePart.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   components: {
@@ -163,18 +163,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         modulePartModel.delete(token, this.modulePartPk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Module part has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Module part has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting module part')
-          })
+          this.errorToast(this.$trans('Error deleting module part'))
         })
       })
     },
@@ -187,12 +179,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching module parts', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading module parts')
-          })
+          console.log('error fetching module parts', error)
+          this.errorToast(this.$trans('Error loading module parts'))
           this.isLoading = false
         })
     }

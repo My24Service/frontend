@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-    <FlashMessage :position="'right top'"></FlashMessage>
     <Notification v-if="isLoggedIn" />
     <router-view/>
   </div>

@@ -78,8 +78,8 @@
 </template>
 
 <script>
-import supplierModel from '@/models/inventory/Supplier'
-import materialModel from '@/models/inventory/Material';
+import supplierModel from '@/models/inventory/Supplier.js'
+import materialModel from '@/models/inventory/Material.js'
 
 export default {
   data() {
@@ -115,22 +115,12 @@ export default {
           this.isLoading = false
         }).catch((error) => {
           console.log('error fetching materials', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching materials')
-          })
-
+          this.errorToast(this.$trans('Error fetching materials'))
           this.isLoading = false
         })
       }).catch((error) => {
         console.log('error fetching supplier', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching supplier')
-        })
-
+        this.errorToast(this.$trans('Error fetching supplier'))
         this.isLoading = false
       })
     }

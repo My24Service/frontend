@@ -1,33 +1,33 @@
-import TheAppLayout from '@/components/TheAppLayout'
-import SubNavInventory from '@/components/SubNavInventory'
+import TheAppLayout from '@/components/TheAppLayout.vue'
+import SubNavInventory from '@/components/SubNavInventory.vue'
 
-import PurchaseOrderList from '@/views/inventory/PurchaseOrderList'
-import PurchaseOrderForm from '@/views/inventory/PurchaseOrderForm'
-import PurchaseOrderView from '@/views/inventory/PurchaseOrderView'
+import PurchaseOrderList from '@/views/inventory/PurchaseOrderList.vue'
+import PurchaseOrderForm from '@/views/inventory/PurchaseOrderForm.vue'
+import PurchaseOrderView from '@/views/inventory/PurchaseOrderView.vue'
 
-import MaterialList from '@/views/inventory/MaterialList'
-import MaterialView from '@/views/inventory/MaterialView'
-import MaterialForm from '@/views/inventory/MaterialForm'
-import MaterialMoveForm from '@/views/inventory/MaterialMoveForm'
+import MaterialList from '@/views/inventory/MaterialList.vue'
+import MaterialView from '@/views/inventory/MaterialView.vue'
+import MaterialForm from '@/views/inventory/MaterialForm.vue'
+import MaterialMoveForm from '@/views/inventory/MaterialMoveForm.vue'
 
-import SupplierList from '@/views/inventory/SupplierList'
-import SupplierForm from '@/views/inventory/SupplierForm'
-import SupplierView from '@/views/inventory/SupplierView'
+import SupplierList from '@/views/inventory/SupplierList.vue'
+import SupplierForm from '@/views/inventory/SupplierForm.vue'
+import SupplierView from '@/views/inventory/SupplierView.vue'
 
-import StockLocationList from '@/views/inventory/StockLocationList'
-import StockLocationView from '@/views/inventory/StockLocationView'
-import StockLocationForm from '@/views/inventory/StockLocationForm'
+import StockLocationList from '@/views/inventory/StockLocationList.vue'
+import StockLocationView from '@/views/inventory/StockLocationView.vue'
+import StockLocationForm from '@/views/inventory/StockLocationForm.vue'
 
-import MutationList from '@/views/inventory/MutationList'
+import MutationList from '@/views/inventory/MutationList.vue'
 
-import PurchaseOrderEntryList from '@/views/inventory/PurchaseOrderEntryList'
-import PurchaseOrderEntryView from '@/views/inventory/PurchaseOrderEntryView'
-import PurchaseOrderEntryForm from '@/views/inventory/PurchaseOrderEntryForm'
+import PurchaseOrderEntryList from '@/views/inventory/PurchaseOrderEntryList.vue'
+import PurchaseOrderEntryView from '@/views/inventory/PurchaseOrderEntryView.vue'
+import PurchaseOrderEntryForm from '@/views/inventory/PurchaseOrderEntryForm.vue'
 
-import SupplierReservationList from '@/views/inventory/SupplierReservationList'
-import SupplierReservationForm from '@/views/inventory/SupplierReservationForm'
+import SupplierReservationList from '@/views/inventory/SupplierReservationList.vue'
+import SupplierReservationForm from '@/views/inventory/SupplierReservationForm.vue'
 
-import Stats from '@/views/inventory/Stats'
+import Stats from '@/views/inventory/Stats.vue'
 
 
 export default [

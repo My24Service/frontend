@@ -15,10 +15,10 @@
                 id="customer-document-name"
                 size="sm"
                 v-model="document.name"
-                :state="isSubmitClicked ? !$v.document.name.$error : null"
+                :state="isSubmitClicked ? !v$.document.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.document.name.$error : null">
+                :state="isSubmitClicked ? !v$.document.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -34,11 +34,11 @@
                 v-model="file"
                 v-bind:placeholder="$trans('Choose a file or drop it here...')"
                 @input="fileSelected"
-                :state="isSubmitClicked ? !$v.document.file.$error : null"
+                :state="isSubmitClicked ? !v$.document.file.$error : null"
               ></b-form-file>
               {{ current_file }}
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.document.file.$error : null">
+                :state="isSubmitClicked ? !v$.document.file.$error : null">
                 {{ $trans('Please select a file') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -87,10 +87,15 @@
 </template>
 
 <script>
-import documentModel from '@/models/customer/Document'
-import { required } from 'vuelidate/lib/validators'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import documentModel from '@/models/customer/Document.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     customerPk: {
       type: [String, Number],
@@ -156,9 +161,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -167,21 +172,11 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then(token => {
           documentModel.insert(token, this.document).then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Document has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Document has been created'))
             this.isLoading = false
             this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
           }).catch(error => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating document')
-            })
-
+            this.errorToast(this.$trans('Error creating document'))
             this.isLoading = false
           })
         })
@@ -195,22 +190,12 @@ export default {
 
         documentModel.update(token, this.pk, this.document)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Document has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
             this.isLoading = false
             this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating document')
-            })
-
+            this.errorToast(this.$trans('Error updating document'))
             this.isLoading = false
           })
       })
@@ -225,12 +210,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching document', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading document')
-        })
-
+        this.errorToast(this.$trans('Error loading document'))
         this.isLoading = false
       })
     },

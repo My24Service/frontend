@@ -15,16 +15,16 @@
                 id="engineer_username"
                 size="sm"
                 v-model="engineer.username"
-                :state="isSubmitClicked ? !$v.engineer.username.$error : null"
+                :state="isSubmitClicked ? !v$.engineer.username.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
                 v-if="engineer.username === ''"
-                :state="isSubmitClicked ? $v.engineer.username.required : null">
+                :state="isSubmitClicked ? v$.engineer.username.required : null">
                 {{ $trans('Username is required') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="engineer.username !== ''"
-                :state="isSubmitClicked ? $v.engineer.username.isUnique : null">
+                :state="isSubmitClicked ? v$.engineer.username.isUnique : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -40,11 +40,11 @@
                 size="sm"
                 type="password"
                 v-model="engineer.password1"
-                @blur="$v.engineer.password1.$touch()"
-                :state="isSubmitClicked && $v.engineer.password1 ? !$v.engineer.password1.$error : null"
+                @blur="v$.engineer.password1.$touch()"
+                :state="isSubmitClicked && v$.engineer.password1 ? !v$.engineer.password1.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked && $v.engineer.password1 ? !$v.engineer.password1.$error : null">
+                :state="isSubmitClicked && v$.engineer.password1 ? !v$.engineer.password1.$error : null">
                 {{ $trans('Please enter a password') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -60,11 +60,11 @@
                 size="sm"
                 type="password"
                 v-model="engineer.password2"
-                @blur="$v.engineer.password2.$touch()"
-                :state="isSubmitClicked ? !$v.engineer.password2.$error : null"
+                @blur="v$.engineer.password2.$touch()"
+                :state="isSubmitClicked ? !v$.engineer.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? $v.engineer.password2.sameAs : null">
+                :state="isSubmitClicked ? v$.engineer.password2.sameAs : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -81,10 +81,10 @@
                 id="engineer_first_name"
                 size="sm"
                 v-model="engineer.first_name"
-                :state="isSubmitClicked ? !$v.engineer.first_name.$error : null"
+                :state="isSubmitClicked ? !v$.engineer.first_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.engineer.first_name.$error : null">
+                :state="isSubmitClicked ? !v$.engineer.first_name.$error : null">
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -99,10 +99,10 @@
                 id="engineer_last_name"
                 size="sm"
                 v-model="engineer.last_name"
-                :state="isSubmitClicked ? !$v.engineer.last_name.$error : null"
+                :state="isSubmitClicked ? !v$.engineer.last_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.engineer.last_name.$error : null">
+                :state="isSubmitClicked ? !v$.engineer.last_name.$error : null">
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -117,10 +117,10 @@
                 id="engineer_email"
                 size="sm"
                 v-model="engineer.email"
-                :state="isSubmitClicked ? !$v.engineer.email.$error : null"
+                :state="isSubmitClicked ? !v$.engineer.email.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.engineer.email.$error : null">
+                :state="isSubmitClicked ? !v$.engineer.email.$error : null">
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -284,11 +284,17 @@
 </template>
 
 <script>
-import { required, sameAs, email } from 'vuelidate/lib/validators'
-import { usernameExists } from '@/models/helpers'
-import engineerModel from '@/models/company/UserEngineer'
+import { useVuelidate } from '@vuelidate/core'
+import { required, sameAs, email } from '@vuelidate/validators'
+import { helpers } from '@vuelidate/validators'
+
+import { usernameExists } from '@/models/helpers.js'
+import engineerModel from '@/models/company/UserEngineer.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -315,13 +321,15 @@ export default {
     }
 
     if (this.isCreate) {
+      const isUniqueCreate = (value) => {
+        if (value === '') return true
+
+        return usernameExists(value)
+      }
+
       validations.engineer.username = {
         required,
-        isUnique(value) {
-          if (value === '') return true
-
-          return usernameExists(value)
-        }
+        isUnique: helpers.withAsync(isUniqueCreate)
       }
 
       validations.engineer.password1 = {
@@ -330,22 +338,24 @@ export default {
 
       validations.engineer.password2 = {
         required,
-        sameAs: sameAs('password1')
+        sameAs: sameAs(this.engineer.password1)
       }
     } else {
+      const isUniqueEdit = (value) => {
+        if (this.orgUsername === this.customeruser.username || value === '' || value.length < 3) {
+          return true
+        }
+
+        return helpers.withAsync(usernameExists(value))
+      }
+
       validations.engineer.username = {
         required,
-        isUnique(value) {
-          if (this.orgUsername === this.engineer.username || value === '' || value.length < 3) {
-            return true
-          }
-
-          return usernameExists(value)
-        }
+        isUnique: helpers.withAsync(isUniqueEdit)
       }
 
       validations.engineer.password2 = {
-        sameAs: sameAs('password1')
+        sameAs: sameAs(this.engineer.password1)
       }
     }
 
@@ -384,22 +394,20 @@ export default {
     preSubmitForm() {
       this.buttonDisabled = true
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$reset()
+      this.v$.$touch()
+
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
+        this.buttonDisabled = false
+        return
+      }
 
       setTimeout(() => {
         this.submitForm()
       }, 1000)
     },
     submitForm() {
-      this.submitClicked = true
-      this.$v.$reset()
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
-        this.buttonDisabled = false
-        return
-      }
-
       // remove empty fields
       delete this.engineer.last_login
       const empty_fields = ['inspection_date_car', 'inspection_date_tools']
@@ -420,21 +428,11 @@ export default {
         this.engineer.password = this.engineer.password1
         return this.$store.dispatch('getCsrfToken').then((token) => {
           engineerModel.insert(token, this.engineer).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Engineer has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Engineer has been created'))
             this.isLoading = false
             this.cancelForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating engineer')
-            })
-
+            this.errorToast(this.$trans('Error creating engineer'))
             this.isLoading = false
           })
         })
@@ -451,22 +449,12 @@ export default {
 
         engineerModel.update(token, this.pk, this.engineer)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Engineer has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Engineer has been updated'))
             this.isLoading = false
             this.cancelForm()
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating engineer')
-            })
-
+            this.errorToast(this.$trans('Error updating engineer'))
             this.isLoading = false
           })
       })
@@ -480,12 +468,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching engineer', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading engineer')
-        })
-
+        this.errorToast(this.$trans('Error loading engineer'))
         this.isLoading = false
       })
     },

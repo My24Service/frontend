@@ -178,11 +178,7 @@ class Dispatch {
     }).catch((error) => {
       this.component.showOverlay = false
       console.log('error fetching dispatch data', error)
-      this.component.flashMessage.show({
-        status: 'error',
-        title: this.component.$trans('Error'),
-        message: this.component.$trans('Error loading dispatch data')
-      })
+      this.component.errorToast(this.component.$trans('Error loading dispatch data'))
     })
   }
 

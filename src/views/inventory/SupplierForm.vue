@@ -28,10 +28,10 @@
                 v-model="supplier.name"
                 id="supplier-name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.supplier.name.$error : null"
+                :state="isSubmitClicked ? !v$.supplier.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplier.name.$error : null">
+                :state="isSubmitClicked ? !v$.supplier.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -46,10 +46,10 @@
                 v-model="supplier.address"
                 id="supplier-address"
                 size="sm"
-                :state="isSubmitClicked ? !$v.supplier.address.$error : null"
+                :state="isSubmitClicked ? !v$.supplier.address.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplier.address.$error : null">
+                :state="isSubmitClicked ? !v$.supplier.address.$error : null">
                 {{ $trans('Please enter an address') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -64,10 +64,10 @@
                 id="supplier-postal"
                 size="sm"
                 v-model="supplier.postal"
-                :state="isSubmitClicked ? !$v.supplier.postal.$error : null"
+                :state="isSubmitClicked ? !v$.supplier.postal.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplier.postal.$error : null">
+                :state="isSubmitClicked ? !v$.supplier.postal.$error : null">
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -82,10 +82,10 @@
                 id="supplier-city"
                 size="sm"
                 v-model="supplier.city"
-                :state="isSubmitClicked ? !$v.supplier.city.$error : null"
+                :state="isSubmitClicked ? !v$.supplier.city.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplier.city.$error : null">
+                :state="isSubmitClicked ? !v$.supplier.city.$error : null">
                 {{ $trans('Please enter the city') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -171,10 +171,15 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import supplierModel from '@/models/inventory/Supplier'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import supplierModel from '@/models/inventory/Supplier.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -230,9 +235,9 @@ export default {
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -250,22 +255,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           supplierModel.insert(token, this.supplier).then((order) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Supplier has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Supplier has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating supplier')
-            })
-
+            this.errorToast(this.$trans('Error creating supplier'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -274,22 +269,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         supplierModel.update(token, this.pk, this.supplier).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Supplier has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Supplier has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating supplier')
-          })
-
+          this.errorToast(this.$trans('Error updating supplier'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -303,12 +288,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching supplier', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching supplier')
-        })
-
+        this.errorToast(this.$trans('Error fetching supplier'))
         this.isLoading = false
       })
     },

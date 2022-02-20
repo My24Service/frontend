@@ -27,10 +27,10 @@
                     id="action_name"
                     size="sm"
                     v-model="action.name"
-                    :state="isSubmitClicked ? !$v.action.name.$error : null"
+                    :state="isSubmitClicked ? !v$.action.name.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.action.name.$error : null">
+                    :state="isSubmitClicked ? !v$.action.name.$error : null">
                     {{ $trans('Please enter a name') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -280,13 +280,17 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import actionOrderModel from '@/models/orders/Action'
-import actionTripModel from '@/models/mobile/TripStatuscodeAction'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 
-import partnerModel from '@/models/company/Partner'
+import actionOrderModel from '@/models/orders/Action.js'
+import actionTripModel from '@/models/mobile/TripStatuscodeAction.js'
+import partnerModel from '@/models/company/Partner.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     list_type: {
       type: [String],
@@ -402,21 +406,11 @@ export default {
 
       return this.$store.dispatch('getCsrfToken').then((token) => {
         this.actionModel.delete(token, this.pk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Action has been deleted')
-          })
-
+          this.infoToast(this.$trans('Deleted'), this.$trans('Action has been deleted'))
           this.isLoading = false
           this.cancelForm()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting action')
-          })
-
+          this.errorToast(this.$trans('Error deleting action'))
           this.isLoading = false
         })
       })
@@ -433,9 +427,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -453,22 +447,12 @@ export default {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           this.action.statuscode = this.statuscode_pk
           this.actionModel.insert(token, this.action).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Action has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Action has been created'))
             this.isLoading = false
             this.$router.go(-1)
           }).catch((error) => {
             console.log('error creating action', error)
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating action')
-            })
-
+            this.errorToast(this.$trans('Error creating action'))
             this.isLoading = false
           })
         })
@@ -476,22 +460,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         this.actionModel.update(token, this.pk, this.action).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Action has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Action has been updated'))
           this.isLoading = false
           this.$router.go(-1)
         }).catch((error) => {
           console.log('error updating action', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating action')
-          })
-
+          this.errorToast(this.$trans('Error updating action'))
           this.isLoading = false
         })
       })
@@ -504,12 +478,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching action', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading action')
-        })
-
+        this.errorToast(this.$trans('Error loading action'))
         this.isLoading = false
       })
     },

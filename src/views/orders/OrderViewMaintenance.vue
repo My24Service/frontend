@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import orderModel from '@/models/orders/Order'
+import orderModel from '@/models/orders/Order.js'
 
 export default {
   data() {
@@ -189,22 +189,13 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then(token => {
         orderModel.recreateWorkorderPdf(token).then((response) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Success'),
-            message: this.$trans('Workorder recreated')
-          })
+          this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
           this.isLoading = false
           this.buttonDisabled = false
           this.loadOrder()
         })
         .catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error recreating workorder')
-          })
-
+          this.errorToast(this.$trans('Error recreating workorder'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -221,12 +212,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching order', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching order')
-        })
-
+        this.errorToast(this.$trans('Error fetching order'))
         this.isLoading = false
       })
     }

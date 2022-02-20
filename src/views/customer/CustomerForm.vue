@@ -16,10 +16,10 @@
                 size="sm"
                 v-model="customer.customer_id"
                 :readonly="customerIdCreated"
-                :state="isSubmitClicked ? !$v.customer.customer_id.$error : null"
+                :state="isSubmitClicked ? !v$.customer.customer_id.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.customer.customer_id.$error : null">
+                :state="isSubmitClicked ? !v$.customer.customer_id.$error : null">
                 {{ $trans('Please enter a customer ID') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -48,10 +48,10 @@
                 id="customer_name"
                 size="sm"
                 v-model="customer.name"
-                :state="isSubmitClicked ? !$v.customer.name.$error : null"
+                :state="isSubmitClicked ? !v$.customer.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.customer.name.$error : null">
+                :state="isSubmitClicked ? !v$.customer.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -66,10 +66,10 @@
                 id="customer_address"
                 size="sm"
                 v-model="customer.address"
-                :state="isSubmitClicked ? !$v.customer.address.$error : null"
+                :state="isSubmitClicked ? !v$.customer.address.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.customer.address.$error : null">
+                :state="isSubmitClicked ? !v$.customer.address.$error : null">
                 {{ $trans('Please enter an address') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -84,10 +84,10 @@
                 id="customer_postal"
                 size="sm"
                 v-model="customer.postal"
-                :state="isSubmitClicked ? !$v.customer.postal.$error : null"
+                :state="isSubmitClicked ? !v$.customer.postal.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.customer.postal.$error : null">
+                :state="isSubmitClicked ? !v$.customer.postal.$error : null">
                 {{ $trans('Please enter a postal') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -104,10 +104,10 @@
                 id="customer_city"
                 size="sm"
                 v-model="customer.city"
-                :state="isSubmitClicked ? !$v.customer.city.$error : null"
+                :state="isSubmitClicked ? !v$.customer.city.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.customer.city.$error : null">
+                :state="isSubmitClicked ? !v$.customer.city.$error : null">
                 {{ $trans('Please enter a city') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -246,10 +246,15 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import customerModel from '@/models/customer/Customer'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import customerModel from '@/models/customer/Customer.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -317,9 +322,9 @@ export default {
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -336,21 +341,11 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           customerModel.insert(token, this.customer).then((action) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Customer has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
             this.isLoading = false
             this.cancelForm()
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating customer')
-            })
-
+            this.errorToast(this.$trans('Error creating customer'))
             this.isLoading = false
           })
         })
@@ -359,22 +354,12 @@ export default {
       this.$store.dispatch('getCsrfToken').then((token) => {
         customerModel.update(token, this.pk, this.customer)
           .then(() => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Updated'),
-              message: this.$trans('Customer has been updated')
-            })
-
+            this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
             this.isLoading = false
             this.cancelForm()
           })
           .catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error updating customer')
-            })
-
+            this.errorToast(this.$trans('Error updating customer'))
             this.isLoading = false
           })
       })
@@ -387,12 +372,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching customer', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading customer')
-        })
-
+        this.errorToast(this.$trans('Error loading customer'))
         this.isLoading = false
       })
     },

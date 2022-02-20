@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import TheNav from './TheNav';
-import TheIndex from './TheIndex';
+import TheNav from './TheNav.vue'
+import TheIndex from './TheIndex.vue'
 
 export default {
   components: {

@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import purchaseOrderModel from '@/models/inventory/PurchaseOrder'
+import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
 
 export default {
   data() {
@@ -143,12 +143,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching purchase order', error)
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error fetching purchase order')
-        })
-
+        this.errorToast(this.$trans('Error fetching purchase order'))
         this.isLoading = false
       })
     }

@@ -16,12 +16,12 @@
                 size="sm"
                 type='password'
                 autofocus
-                @blur="$v.password1.$touch()"
-                :state="isSubmitClicked ? !$v.password1.$error : null"
+                @blur="v$.password1.$touch()"
+                :state="isSubmitClicked ? !v$.password1.$error : null"
               ></b-form-input>
               <password v-model="password1" :strength-meter-only="true"/>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.password1.$error : null">
+                :state="isSubmitClicked ? !v$.password1.$error : null">
                 {{ $trans('Please enter a password') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -39,11 +39,11 @@
                 id="password2"
                 size="sm"
                 type='password'
-                @blur="$v.password2.$touch()"
-                :state="isSubmitClicked ? !$v.password2.$error : null"
+                @blur="v$.password2.$touch()"
+                :state="isSubmitClicked ? !v$.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? $v.password2.sameAs : null">
+                :state="isSubmitClicked ? v$.password2.sameAs : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -63,11 +63,16 @@
 </template>
 
 <script>
-import { required, sameAs } from 'vuelidate/lib/validators'
+import { useVuelidate } from '@vuelidate/core'
+import { required, sameAs } from '@vuelidate/validators'
 import Password from 'vue-password-strength-meter'
-import accountModel from '@/models/account/Account'
+
+import accountModel from '@/models/account/Account.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Password,
   },
@@ -97,10 +102,10 @@ export default {
   methods: {
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$touch()
 
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid, this.$v)
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid, this.v$)
         this.buttonDisabled = false
         this.isLoading = false
         return
@@ -111,21 +116,13 @@ export default {
       this.isLoading = true
       return this.$store.dispatch('getCsrfToken').then((token) => {
         accountModel.resetPassword(token, this.password1).then((result) => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Password reset'),
-            message: this.$trans('Reset password successful')
-          })
+          this.infoToast(this.$trans('Password reset'), this.$trans('Reset password successful'))
 
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.push({path: '/'})
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Something went wrong, please try again')
-          })
+          this.errorToast(this.$trans('Something went wrong, please try again'))
 
           this.buttonDisabled = false
           this.isLoading = false

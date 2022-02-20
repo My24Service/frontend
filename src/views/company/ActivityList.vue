@@ -75,9 +75,9 @@
 </template>
 
 <script>
-import activityModel from '@/models/company/Activity'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import activityModel from '@/models/company/Activity.js'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   name: 'ActivityList',
@@ -132,11 +132,7 @@ export default {
         this.isLoading = false
       }).catch((error) => {
         console.log('error fetching activity', error);
-        this.flashMessage.show({
-          status: 'error',
-          title: this.$trans('Error'),
-          message: this.$trans('Error loading activity')
-        })
+        this.errorToast(this.$trans('Error loading activity'))
 
         this.isLoading = false
       })

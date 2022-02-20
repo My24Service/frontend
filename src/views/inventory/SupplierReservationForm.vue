@@ -33,7 +33,7 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplierReservation.supplier.$error : null">
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
                 {{ $trans('Please select a supplier') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -126,7 +126,7 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplierReservation.material.$error : null">
+                :state="isSubmitClicked ? !v$.supplierReservation.material.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -171,10 +171,10 @@
                 v-model="supplierReservation.amount"
                 id="supplier-reservation-amount"
                 size="sm"
-                :state="isSubmitClicked ? !$v.supplierReservation.amount.$error : null"
+                :state="isSubmitClicked ? !v$.supplierReservation.amount.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplierReservation.amount.$error : null">
+                :state="isSubmitClicked ? !v$.supplierReservation.amount.$error : null">
                 {{ $trans('Please enter an amount') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -210,15 +210,20 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import supplierReservationModel from '@/models/inventory/SupplierReservation'
-import supplierModel from '@/models/inventory/Supplier'
-import materialModel from '@/models/inventory/Material';
+
+import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
+import supplierModel from '@/models/inventory/Supplier.js'
+import materialModel from '@/models/inventory/Material.js'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -289,12 +294,7 @@ export default {
           this.isLoading = false
         }).catch((error) => {
           console.log('error fetching suppliers', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching suppliers')
-          })
-
+          this.errorToast(this.$trans('Error fetching suppliers'))
           this.isLoading = false
         })
     },
@@ -314,12 +314,7 @@ export default {
           this.materials = data.results
           this.isLoading = false
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching materials')
-          })
-
+          this.errorToast(this.$trans('Error fetching materials'))
           this.isLoading = false
         })
     },
@@ -333,9 +328,9 @@ export default {
 
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -353,22 +348,12 @@ export default {
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
           supplierReservationModel.insert(token, this.supplierReservation).then((supplierReservation) => {
-            this.flashMessage.show({
-              status: 'info',
-              title: this.$trans('Created'),
-              message: this.$trans('Reservation has been created')
-            })
-
+            this.infoToast(this.$trans('Created'), this.$trans('Reservation has been created'))
             this.buttonDisabled = false
             this.isLoading = false
             this.$router.go(-1)
           }).catch(() => {
-            this.flashMessage.show({
-              status: 'error',
-              title: this.$trans('Error'),
-              message: this.$trans('Error creating reservation')
-            })
-
+            this.errorToast(this.$trans('Error creating reservation'))
             this.buttonDisabled = false
             this.isLoading = false
           })
@@ -377,22 +362,12 @@ export default {
 
       this.$store.dispatch('getCsrfToken').then((token) => {
         supplierReservationModel.update(token, this.pk, this.supplierReservation).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Updated'),
-            message: this.$trans('Reservation has been updated')
-          })
-
+          this.infoToast(this.$trans('Updated'), this.$trans('Reservation has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error updating reservation')
-          })
-
+          this.errorToast(this.$trans('Error updating reservation'))
           this.buttonDisabled = false
           this.isLoading = false
         })
@@ -409,12 +384,7 @@ export default {
           this.getMaterials('')
       }).catch((error) => {
           console.log('error fetching reservation', error)
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error fetching reservation')
-          })
-
+          this.errorToast(this.$trans('Error fetching reservation'))
           this.isLoading = false
         })
     },

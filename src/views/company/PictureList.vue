@@ -103,12 +103,12 @@
 </template>
 
 <script>
-import pictureModel from '@/models/company/Picture'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
+import pictureModel from '@/models/company/Picture.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 
 export default {
   components: {
@@ -165,18 +165,10 @@ export default {
     doDelete() {
       return this.$store.dispatch('getCsrfToken').then((token) => {
         pictureModel.delete(token, this.picturePk).then(() => {
-          this.flashMessage.show({
-            status: 'info',
-            title: this.$trans('Deleted'),
-            message: this.$trans('Picture has been deleted')
-          })
+          this.infoToast(this.$trans('Deleted'), this.$trans('Picture has been deleted'))
           this.loadData()
         }).catch(() => {
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error deleting picture')
-          })
+          this.errorToast(this.$trans('Error deleting picture'))
         })
       })
     },
@@ -189,12 +181,8 @@ export default {
           this.isLoading = false
         })
         .catch((error) => {
-          console.log('error fetching pictures', error);
-          this.flashMessage.show({
-            status: 'error',
-            title: this.$trans('Error'),
-            message: this.$trans('Error loading pictures')
-          })
+          console.log('error fetching pictures', error)
+          this.errorToast(this.$trans('Error loading pictures'))
           this.isLoading = false
         })
     }
