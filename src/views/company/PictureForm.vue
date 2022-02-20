@@ -15,10 +15,10 @@
                 v-model="picture.name"
                 id="picture_name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.picture.name.$error : null"
+                :state="isSubmitClicked ? !v$.picture.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.picture.name.$error : null">
+                :state="isSubmitClicked ? !v$.picture.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -65,10 +65,15 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import pictureModel from '@/models/company/Picture'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
+import pictureModel from '@/models/company/Picture.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -123,9 +128,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 

@@ -203,20 +203,19 @@
 </template>
 
 <script>
-import orderModel from '@/models/orders/Order'
-import statusModel from '@/models/orders/Status'
-import my24 from '@/services/my24'
-import OrderTableInfo from '@/components/OrderTableInfo'
-import IconLinkEdit from '@/components/IconLinkEdit'
-import IconLinkPlus from '@/components/IconLinkPlus'
-import IconLinkDocuments from '@/components/IconLinkDocuments'
-import IconLinkAssign from '@/components/IconLinkAssign'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd'
-import ButtonLinkSort from '@/components/ButtonLinkSort'
-
+import orderModel from '@/models/orders/Order.js'
+import statusModel from '@/models/orders/Status.js'
+import my24 from '@/services/my24.js'
+import OrderTableInfo from '@/components/OrderTableInfo.vue'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkPlus from '@/components/IconLinkPlus.vue'
+import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
+import IconLinkAssign from '@/components/IconLinkAssign.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
+import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 
 export default {
   components: {

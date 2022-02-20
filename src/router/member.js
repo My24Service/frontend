@@ -1,14 +1,14 @@
-import TheAppLayout from '@/components/TheAppLayout'
-import SubNavMembers from '@/components/SubNavMembers'
+import TheAppLayout from '@/components/TheAppLayout.vue'
+import SubNavMembers from '@/components/SubNavMembers.vue'
 
-import MemberList from '@/views/member/MemberList'
-import MemberForm from '@/views/member/MemberForm'
-import ContractList from '@/views/member/ContractList'
-import ContractForm from '@/views/member/ContractForm'
-import ModuleList from '@/views/member/ModuleList'
-import ModuleForm from '@/views/member/ModuleForm'
-import ModulePartList from '@/views/member/ModulePartList'
-import ModulePartForm from '@/views/member/ModulePartForm'
+import MemberList from '@/views/member/MemberList.vue'
+import MemberForm from '@/views/member/MemberForm.vue'
+import ContractList from '@/views/member/ContractList.vue'
+import ContractForm from '@/views/member/ContractForm.vue'
+import ModuleList from '@/views/member/ModuleList.vue'
+import ModuleForm from '@/views/member/ModuleForm.vue'
+import ModulePartList from '@/views/member/ModulePartList.vue'
+import ModulePartForm from '@/views/member/ModulePartForm.vue'
 
 
 export default [

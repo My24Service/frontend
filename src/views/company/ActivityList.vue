@@ -75,9 +75,9 @@
 </template>
 
 <script>
-import activityModel from '@/models/company/Activity'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import activityModel from '@/models/company/Activity.js'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   name: 'ActivityList',

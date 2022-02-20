@@ -1,8 +1,8 @@
-import TheAppLayout from '@/components/TheAppLayout'
+import TheAppLayout from '@/components/TheAppLayout.vue'
 
-import TheNoAccessLayout from '@/views/account/NoAccess'
-import ResetPassword from '@/views/account/ResetPassword'
-import ResetPasswordConfirm from '@/views/account/ResetPasswordConfirm'
+import TheNoAccessLayout from '@/views/account/NoAccess.vue'
+import ResetPassword from '@/views/account/ResetPassword.vue'
+import ResetPasswordConfirm from '@/views/account/ResetPasswordConfirm.vue'
 
 
 export default [{

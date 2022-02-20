@@ -33,7 +33,7 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplierReservation.supplier.$error : null">
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
                 {{ $trans('Please select a supplier') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -126,7 +126,7 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplierReservation.material.$error : null">
+                :state="isSubmitClicked ? !v$.supplierReservation.material.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -171,10 +171,10 @@
                 v-model="supplierReservation.amount"
                 id="supplier-reservation-amount"
                 size="sm"
-                :state="isSubmitClicked ? !$v.supplierReservation.amount.$error : null"
+                :state="isSubmitClicked ? !v$.supplierReservation.amount.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.supplierReservation.amount.$error : null">
+                :state="isSubmitClicked ? !v$.supplierReservation.amount.$error : null">
                 {{ $trans('Please enter an amount') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -210,15 +210,20 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import supplierReservationModel from '@/models/inventory/SupplierReservation'
-import supplierModel from '@/models/inventory/Supplier'
-import materialModel from '@/models/inventory/Material';
+
+import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
+import supplierModel from '@/models/inventory/Supplier.js'
+import materialModel from '@/models/inventory/Material.js'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -333,9 +338,9 @@ export default {
 
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 

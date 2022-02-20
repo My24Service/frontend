@@ -78,8 +78,8 @@
 </template>
 
 <script>
-import supplierModel from '@/models/inventory/Supplier'
-import materialModel from '@/models/inventory/Material';
+import supplierModel from '@/models/inventory/Supplier.js'
+import materialModel from '@/models/inventory/Material.js'
 
 export default {
   data() {

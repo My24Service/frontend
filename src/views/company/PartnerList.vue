@@ -96,11 +96,11 @@
 </template>
 
 <script>
-import PillsCompanyPartners from '@/components/PillsCompanyPartners'
-import partnerModel from '@/models/company/Partner'
-import IconLinkDelete from '@/components/IconLinkDelete'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
+import partnerModel from '@/models/company/Partner.js'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   name: 'PartnerList',

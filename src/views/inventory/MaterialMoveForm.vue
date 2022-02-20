@@ -46,7 +46,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedMaterialPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -91,7 +91,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedFromLocationPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedFromLocationPk.$error : null">
                 {{ $trans('Please select from location') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -139,7 +139,7 @@
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.selectedToLocationPk.$error : null">
+                :state="isSubmitClicked ? !v$.selectedToLocationPk.$error : null">
                 {{ $trans('Please select to location') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -156,7 +156,7 @@
                 size="sm"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.amount.$error : null">
+                :state="isSubmitClicked ? !v$.amount.$error : null">
                 {{ $trans('Please enter an amount') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -176,15 +176,20 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import inventoryModel from '@/models/inventory/Inventory'
-import materialModel from '@/models/inventory/Material'
-import stockLocationModel from '@/models/inventory/StockLocation'
+
+import inventoryModel from '@/models/inventory/Inventory.js'
+import materialModel from '@/models/inventory/Material.js'
+import stockLocationModel from '@/models/inventory/StockLocation.js'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -299,9 +304,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 

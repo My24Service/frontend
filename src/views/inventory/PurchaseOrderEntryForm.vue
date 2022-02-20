@@ -136,7 +136,7 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.purchase_order_material.$error : null">
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -195,10 +195,10 @@
                 v-model="purchaseorderEntry.amount"
                 id="purchaseorder-entry-amount"
                 size="sm"
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.amount.$error : null"
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.amount.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.amount.$error : null">
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.amount.$error : null">
                 {{ $trans('Please enter an amount') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -217,11 +217,11 @@
                 v-bind:placeholder="$trans('Choose a date')"
                 value="purchaseorderEntry.entry_date"
                 locale="nl"
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.entry_date.$error : null"
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.entry_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
               ></b-form-datepicker>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.purchaseorderEntry.entry_date.$error : null">
+                :state="isSubmitClicked ? !v$.purchaseorderEntry.entry_date.$error : null">
                 {{ $trans('Please enter a date') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -260,16 +260,21 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import purchaseorderEntryModel from '@/models/inventory/PurchaseOrderEntry'
-import purchaseOrderModel from '@/models/inventory/PurchaseOrder'
-import stockLocationModel from '@/models/inventory/StockLocation'
-import materialModel from '@/models/inventory/Material';
+
+import purchaseorderEntryModel from '@/models/inventory/PurchaseOrderEntry.js'
+import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
+import stockLocationModel from '@/models/inventory/StockLocation.js'
+import materialModel from '@/models/inventory/Material.js'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -382,9 +387,9 @@ export default {
 
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 

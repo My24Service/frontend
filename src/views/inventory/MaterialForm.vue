@@ -15,10 +15,10 @@
                 v-model="material.name"
                 id="material_name"
                 size="sm"
-                :state="isSubmitClicked ? !$v.material.name.$error : null"
+                :state="isSubmitClicked ? !v$.material.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.material.name.$error : null">
+                :state="isSubmitClicked ? !v$.material.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -256,12 +256,17 @@
 </template>
 
 <script>
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
+
 import Multiselect from 'vue-multiselect'
-import { required } from 'vuelidate/lib/validators'
-import materialModel from '@/models/inventory/Material'
-import supplierModel from '@/models/inventory/Supplier';
+import materialModel from '@/models/inventory/Material.js'
+import supplierModel from '@/models/inventory/Supplier.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   components: {
     Multiselect,
   },
@@ -328,9 +333,9 @@ export default {
 
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 

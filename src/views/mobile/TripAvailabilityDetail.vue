@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import tripAvailabilityModel from '@/models/mobile/TripAvailability'
+import tripAvailabilityModel from '@/models/mobile/TripAvailability.js'
 
 export default {
   name: "TripAvailabilityDetail",

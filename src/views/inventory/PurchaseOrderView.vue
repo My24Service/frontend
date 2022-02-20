@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import purchaseOrderModel from '@/models/inventory/PurchaseOrder'
+import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
 
 export default {
   data() {

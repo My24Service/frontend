@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils'
+import { componentMixin } from '@/utils.js'
 
 export default {
   mixins: [componentMixin],

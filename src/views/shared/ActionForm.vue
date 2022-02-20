@@ -27,10 +27,10 @@
                     id="action_name"
                     size="sm"
                     v-model="action.name"
-                    :state="isSubmitClicked ? !$v.action.name.$error : null"
+                    :state="isSubmitClicked ? !v$.action.name.$error : null"
                   ></b-form-input>
                   <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !$v.action.name.$error : null">
+                    :state="isSubmitClicked ? !v$.action.name.$error : null">
                     {{ $trans('Please enter a name') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
@@ -280,13 +280,17 @@
 </template>
 
 <script>
-import { required } from 'vuelidate/lib/validators'
-import actionOrderModel from '@/models/orders/Action'
-import actionTripModel from '@/models/mobile/TripStatuscodeAction'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 
-import partnerModel from '@/models/company/Partner'
+import actionOrderModel from '@/models/orders/Action.js'
+import actionTripModel from '@/models/mobile/TripStatuscodeAction.js'
+import partnerModel from '@/models/company/Partner.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     list_type: {
       type: [String],
@@ -433,9 +437,9 @@ export default {
     },
     submitForm() {
       this.submitClicked = true
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
         return
       }
 

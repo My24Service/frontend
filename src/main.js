@@ -16,8 +16,10 @@ import FlashMessage from '@smartweb/vue-flash-message'
 import Loading from 'vue-loading-overlay'
 import axios from '@/services/api'
 import VueAxios from 'vue-axios'
-import Vuelidate from 'vuelidate'
 import { ColorPicker, ColorPanel } from "one-colorpicker"
+
+import VueCompositionAPI from '@vue/composition-api'
+Vue.use(VueCompositionAPI)
 
 import { BadgePlugin } from 'bootstrap-vue'
 Vue.use(BadgePlugin)
@@ -136,7 +138,6 @@ Vue.use(VueRouter)
 Vue.use(FlashMessage, {time: 2500, strategy: 'multiple'})
 Vue.use(Loading)
 Vue.use(VueAxios, axios)
-Vue.use(Vuelidate)
 Vue.use(ColorPanel)
 Vue.use(ColorPicker)
 

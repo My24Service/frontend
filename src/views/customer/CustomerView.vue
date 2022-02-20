@@ -146,10 +146,10 @@
 </template>
 
 <script>
-import orderPastModel from '@/models/orders/OrderPast'
-import customerModel from '@/models/customer/Customer'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
+import orderPastModel from '@/models/orders/OrderPast.js'
+import customerModel from '@/models/customer/Customer.js'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 
 export default {
   components: {

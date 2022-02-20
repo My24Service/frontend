@@ -18,10 +18,10 @@
             id="old-password-input"
             v-model="old_password"
             type="password"
-            :state="isSubmitClicked ? !$v.old_password.$error : null"
+            :state="isSubmitClicked ? !v$.old_password.$error : null"
           ></b-form-input>
           <b-form-invalid-feedback
-            :state="isSubmitClicked ? !$v.old_password.$error : null">
+            :state="isSubmitClicked ? !v$.old_password.$error : null">
             {{ $trans('Please enter your old password') }}
           </b-form-invalid-feedback>
         </b-form-group>
@@ -33,11 +33,11 @@
             id="new-password1-input"
             type="password"
             v-model="new_password1"
-            :state="isSubmitClicked ? !$v.new_password1.$error : null"
+            :state="isSubmitClicked ? !v$.new_password1.$error : null"
           ></b-form-input>
           <password v-model="new_password1" :strength-meter-only="true"/>
           <b-form-invalid-feedback
-            :state="isSubmitClicked ? !$v.new_password1.$error : null">
+            :state="isSubmitClicked ? !v$.new_password1.$error : null">
             {{ $trans('Please enter a new password') }}
           </b-form-invalid-feedback>
         </b-form-group>
@@ -49,10 +49,10 @@
             id="new-password2-input"
             type="password"
             v-model="new_password2"
-            :state="isSubmitClicked ? !$v.new_password1.$error : null"
+            :state="isSubmitClicked ? !v$.new_password1.$error : null"
           ></b-form-input>
           <b-form-invalid-feedback
-            :state="isSubmitClicked ? $v.new_password2.sameAs : null">
+            :state="isSubmitClicked ? v$.new_password2.sameAs : null">
             {{ $trans('Passwords do not match') }}
           </b-form-invalid-feedback>
         </b-form-group>
@@ -92,18 +92,23 @@
 </template>
 
 <script>
-import { required, sameAs } from 'vuelidate/lib/validators'
+import { useVuelidate } from '@vuelidate/core'
+import { required, sameAs } from '@vuelidate/validators'
 import Password from 'vue-password-strength-meter'
-import TheLanguageChooser from "@/components/TheLanguageChooser"
-import Version from "@/components/Version"
-import NavItems from "@/components/NavItems"
-import NavBrand from "@/components/NavBrand"
-import { componentMixin } from '@/utils'
-import accountModel from '@/models/account/Account'
-import socket from "@/socket"
 
+import accountModel from '@/models/account/Account.js'
+import { componentMixin } from '@/utils.js'
+import socket from "@/socket.js"
+
+import TheLanguageChooser from "@/components/TheLanguageChooser.vue"
+import Version from "@/components/Version.vue"
+import NavItems from "@/components/NavItems.vue"
+import NavBrand from "@/components/NavBrand.vue"
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   mixins: [componentMixin],
   components: {
     TheLanguageChooser,
@@ -150,9 +155,9 @@ export default {
     },
     doPasswordChange() {
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$touch()
 
-      if (this.$v.$invalid) {
+      if (this.v$.$invalid) {
         this.buttonDisabled = false
         this.isLoading = false
         return

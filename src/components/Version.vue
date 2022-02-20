@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import { VERSION } from '@/version'
-import axios from '@/services/api'
+import { VERSION } from '@/version.js'
+import axios from '@/services/api.js'
 
 export default {
   name: "Version",

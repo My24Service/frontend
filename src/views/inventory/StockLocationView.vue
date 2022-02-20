@@ -44,8 +44,8 @@
 </template>
 
 <script>
-import stockLocationModel from '@/models/inventory/StockLocation'
-import inventoryModel from '@/models/inventory/Inventory';
+import stockLocationModel from '@/models/inventory/StockLocation.js'
+import inventoryModel from '@/models/inventory/Inventory.js'
 
 export default {
   data() {

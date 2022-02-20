@@ -15,16 +15,16 @@
                 id="salesuser_username"
                 size="sm"
                 v-model="salesuser.username"
-                :state="isSubmitClicked ? !$v.salesuser.username.$error : null"
+                :state="isSubmitClicked ? !v$.salesuser.username.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
                 v-if="salesuser.username === ''"
-                :state="isSubmitClicked ? $v.salesuser.username.required : null">
+                :state="isSubmitClicked ? v$.salesuser.username.required : null">
                 {{ $trans('Username is required') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="salesuser.username !== ''"
-                :state="isSubmitClicked ? $v.salesuser.username.isUnique : null">
+                :state="isSubmitClicked ? v$.salesuser.username.isUnique : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -40,11 +40,11 @@
                 size="sm"
                 type="password"
                 v-model="salesuser.password1"
-                @blur="$v.salesuser.password1.$touch()"
-                :state="isSubmitClicked && $v.salesuser.password1 ? !$v.salesuser.password1.$error : null"
+                @blur="v$.salesuser.password1.$touch()"
+                :state="isSubmitClicked && v$.salesuser.password1 ? !v$.salesuser.password1.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked && $v.salesuser.password1 ? !$v.salesuser.password1.$error : null">
+                :state="isSubmitClicked && v$.salesuser.password1 ? !v$.salesuser.password1.$error : null">
                 {{ $trans('Please enter a password') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -60,11 +60,11 @@
                 size="sm"
                 type="password"
                 v-model="salesuser.password2"
-                @blur="$v.salesuser.password2.$touch()"
-                :state="isSubmitClicked ? !$v.salesuser.password2.$error : null"
+                @blur="v$.salesuser.password2.$touch()"
+                :state="isSubmitClicked ? !v$.salesuser.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? $v.salesuser.password2.sameAs : null">
+                :state="isSubmitClicked ? v$.salesuser.password2.sameAs : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -81,10 +81,10 @@
                 id="salesuser_first_name"
                 size="sm"
                 v-model="salesuser.first_name"
-                :state="isSubmitClicked ? !$v.salesuser.first_name.$error : null"
+                :state="isSubmitClicked ? !v$.salesuser.first_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.salesuser.first_name.$error : null">
+                :state="isSubmitClicked ? !v$.salesuser.first_name.$error : null">
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -99,10 +99,10 @@
                 id="salesuser_last_name"
                 size="sm"
                 v-model="salesuser.last_name"
-                :state="isSubmitClicked ? !$v.salesuser.last_name.$error : null"
+                :state="isSubmitClicked ? !v$.salesuser.last_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.salesuser.last_name.$error : null">
+                :state="isSubmitClicked ? !v$.salesuser.last_name.$error : null">
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -117,10 +117,10 @@
                 id="salesuser_email"
                 size="sm"
                 v-model="salesuser.email"
-                :state="isSubmitClicked ? !$v.salesuser.email.$error : null"
+                :state="isSubmitClicked ? !v$.salesuser.email.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !$v.salesuser.email.$error : null">
+                :state="isSubmitClicked ? !v$.salesuser.email.$error : null">
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -141,11 +141,17 @@
 </template>
 
 <script>
-import { required, sameAs, email } from 'vuelidate/lib/validators'
-import { usernameExists } from '@/models/helpers'
-import salesUserModel from '@/models/company/UserSales'
+import { useVuelidate } from '@vuelidate/core'
+import { required, sameAs, email } from '@vuelidate/validators'
+import { helpers } from '@vuelidate/validators'
+
+import { usernameExists } from '@/models/helpers.js'
+import salesUserModel from '@/models/company/UserSales.js'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -171,13 +177,15 @@ export default {
     }
 
     if (this.isCreate) {
+      const isUniqueCreate = (value) => {
+        if (value === '') return true
+
+        return usernameExists(value)
+      }
+
       validations.salesuser.username = {
         required,
-        isUnique(value) {
-          if (value === '') return true
-
-          return usernameExists(value)
-        }
+        isUnique: helpers.withAsync(isUniqueCreate)
       }
 
       validations.salesuser.password1 = {
@@ -186,22 +194,24 @@ export default {
 
       validations.salesuser.password2 = {
         required,
-        sameAs: sameAs('password1')
+        sameAs: sameAs(this.salesuser.password1)
       }
     } else {
+      const isUniqueEdit = (value) => {
+        if (this.orgUsername === this.customeruser.username || value === '' || value.length < 3) {
+          return true
+        }
+
+        return helpers.withAsync(usernameExists(value))
+      }
+
       validations.salesuser.username = {
         required,
-        isUnique(value) {
-          if (this.orgUsername === this.salesuser.username || value === '' || value.length < 3) {
-            return true
-          }
-
-          return usernameExists(value)
-        }
+        isUnique: helpers.withAsync(isUniqueEdit)
       }
 
       validations.salesuser.password2 = {
-        sameAs: sameAs('password1')
+        sameAs: sameAs(this.salesuser.password1)
       }
     }
 
@@ -235,22 +245,20 @@ export default {
     preSubmitForm() {
       this.buttonDisabled = true
       this.submitClicked = true
-      this.$v.$touch()
+      this.v$.$reset()
+      this.v$.$touch()
+
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
+        this.buttonDisabled = false
+        return
+      }
 
       setTimeout(() => {
         this.submitForm()
       }, 1000)
     },
     submitForm() {
-      this.submitClicked = true
-      this.$v.$reset()
-      this.$v.$touch()
-      if (this.$v.$invalid) {
-        console.log('invalid?', this.$v.$invalid)
-        this.buttonDisabled = false
-        return
-      }
-
       this.isLoading = true
 
       if (this.isCreate) {

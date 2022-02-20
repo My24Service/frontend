@@ -82,8 +82,8 @@
 </template>
 
 <script>
-import materialModel from '@/models/inventory/Material'
-import inventoryModel from '@/models/inventory/Inventory'
+import materialModel from '@/models/inventory/Material.js'
+import inventoryModel from '@/models/inventory/Inventory.js'
 
 export default {
   data() {

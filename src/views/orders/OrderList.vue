@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import OrderListMaintenance from "./OrderListMaintenance";
-import OrderListTemps from "./OrderListTemps";
+import OrderListMaintenance from "./OrderListMaintenance.vue"
+import OrderListTemps from "./OrderListTemps.vue"
 
 export default {
   props: {

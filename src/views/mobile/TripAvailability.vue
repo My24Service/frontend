@@ -48,8 +48,8 @@
 </template>
 
 <script>
-import tripAvailabilityModel from '@/models/mobile/Trip'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
+import tripAvailabilityModel from '@/models/mobile/Trip.js'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 
 export default {
   name: 'TripAvailabilityList',

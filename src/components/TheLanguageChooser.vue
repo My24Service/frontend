@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import accountModel from '@/models/account/Account'
+import accountModel from '@/models/account/Account.js'
 
 export default {
   name: "TheLanguageChooser",

@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import OrderViewMaintenance from "./OrderViewMaintenance";
-import OrderViewTemps from "./OrderViewTemps";
+import OrderViewMaintenance from "./OrderViewMaintenance.vue"
+import OrderViewTemps from "./OrderViewTemps.vue"
 
 export default {
   name: "OrderView",

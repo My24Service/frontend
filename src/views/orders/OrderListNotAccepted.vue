@@ -114,12 +114,12 @@
 </template>
 
 <script>
-import orderNotAcceptedModel from '@/models/orders/OrderNotAccepted'
-import my24 from '@/services/my24'
-import OrderTableInfo from '@/components/OrderTableInfo'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch'
-import ButtonLinkSort from '@/components/ButtonLinkSort'
+import orderNotAcceptedModel from '@/models/orders/OrderNotAccepted.js'
+import my24 from '@/services/my24.js'
+import OrderTableInfo from '@/components/OrderTableInfo.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 
 export default {
   components: {
