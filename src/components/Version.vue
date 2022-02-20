@@ -37,10 +37,14 @@ export default {
   methods: {
     async checkVersion() {
       const data = await axios.get('/frontend-version/').then((response) => response.data)
-      if (data.version !== this.version) {
+
+      if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
         this.newVersionAvailable = true
         this.newVersion = data.version
       }
+    },
+    versionToInt(version) {
+      return parseInt(version.slice(1).replaceAll('.', ''))
     },
     openReloadModal() {
       this.$refs['reload-modal'].show()
@@ -50,7 +54,7 @@ export default {
     }
   },
   mounted() {
-    setInterval(this.checkVersion, 1000*60*15)
+    setInterval(this.checkVersion, 1000*60*5)
     this.checkVersion()
   }
 }
