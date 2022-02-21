@@ -31,7 +31,8 @@ export default {
     return {
       version: VERSION,
       newVersionAvailable: false,
-      newVersion: null
+      newVersion: null,
+      intervalId: null
     }
   },
   methods: {
@@ -41,9 +42,12 @@ export default {
       if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
         this.newVersionAvailable = true
         this.newVersion = data.version
+      } else {
+        this.newVersionAvailable = false
       }
     },
     versionToInt(version) {
+      console.log(`|${version}|`)
       return parseInt(version.slice(1).replaceAll('.', ''))
     },
     openReloadModal() {
@@ -54,8 +58,11 @@ export default {
     }
   },
   mounted() {
-    setInterval(this.checkVersion, 1000*60*5)
+    this.intervalId = setInterval(this.checkVersion, 1000*60*15)
     this.checkVersion()
+  },
+  beforeDestroy() {
+    clearInterval(this.intervalId)
   }
 }
 </script>
