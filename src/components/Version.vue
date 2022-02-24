@@ -31,16 +31,23 @@ export default {
     return {
       version: VERSION,
       newVersionAvailable: false,
-      newVersion: null
+      newVersion: null,
+      intervalId: null
     }
   },
   methods: {
     async checkVersion() {
       const data = await axios.get('/frontend-version/').then((response) => response.data)
-      if (data.version !== this.version) {
+
+      if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
         this.newVersionAvailable = true
         this.newVersion = data.version
+      } else {
+        this.newVersionAvailable = false
       }
+    },
+    versionToInt(version) {
+      return parseInt(version.slice(1).replaceAll('.', ''))
     },
     openReloadModal() {
       this.$refs['reload-modal'].show()
@@ -50,8 +57,11 @@ export default {
     }
   },
   mounted() {
-    setInterval(this.checkVersion, 1000*60*15)
+    this.intervalId = setInterval(this.checkVersion, 1000*60*15)
     this.checkVersion()
+  },
+  beforeDestroy() {
+    clearInterval(this.intervalId)
   }
 }
 </script>

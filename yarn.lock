@@ -1242,11 +1242,6 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@smartweb/vue-flash-message@^0.6.10":
-  "integrity" "sha512-ceDUUzXI6FDscev36kZQvc2BO+MayOt6uJ2HSh9zoOkfa0PVIhmaoB56InlTTsK7MmlSIvPJpRB+Habdx3MtNw=="
-  "resolved" "https://registry.npmjs.org/@smartweb/vue-flash-message/-/vue-flash-message-0.6.10.tgz"
-  "version" "0.6.10"
-
 "@testing-library/dom@^7.26.6":
   "integrity" "sha512-3UqjCpey6HiTZT92vODYLPxTBWlM8ZOOjr3LX5F37/VRipW2M1kX6I/Cm4VXzteZqfGfagg8yXywpcOgQBlNsQ=="
   "resolved" "https://registry.npmjs.org/@testing-library/dom/-/dom-7.31.2.tgz"
