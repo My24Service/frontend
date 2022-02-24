@@ -42,8 +42,7 @@ class Dispatch {
 
   searchQuery = null
 
-	monday = window.locale === 'en' ? 1 : 0
-  // monday = 1
+	monday
   numDays = 5
   startDate
   endDate = null
@@ -57,10 +56,11 @@ class Dispatch {
 
   url = '/company/dispatch-assignedorders-user-list-v2/'
 
-  constructor(canvas, tipCanvas, statuscodes, component) {
+  constructor(canvas, tipCanvas, statuscodes, component, monday) {
     this.canvas = canvas
     this.tipCanvas = tipCanvas
     this.component = component
+    this.monday = monday
     this.tipCtx = tipCanvas.getContext("2d")
     this.ctx = canvas.getContext('2d')
 
@@ -69,6 +69,10 @@ class Dispatch {
     this.statuscodes = statuscodes
 
     this.startDate = component.$moment().weekday(this.monday)
+  }
+
+  setMonday(day) {
+    this.om
   }
 
   setSearchQuery(query) {
@@ -439,7 +443,7 @@ class Dispatch {
   setText(text, xPosition, yPosition, maxWidth) {
     let fontsize = this.fontsize;
 
-    if (process.env.JEST_WORKER_ID === undefined && this.ctx.measureText(text).width > maxWidth) {
+    if (import.meta.env.JEST_WORKER_ID === undefined && this.ctx.measureText(text).width > maxWidth) {
       do {
         fontsize--;
         this.ctx.font = `${fontsize}px ${this.fontface}`;

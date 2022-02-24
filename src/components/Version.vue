@@ -47,7 +47,6 @@ export default {
       }
     },
     versionToInt(version) {
-      console.log(`|${version}|`)
       return parseInt(version.slice(1).replaceAll('.', ''))
     },
     openReloadModal() {

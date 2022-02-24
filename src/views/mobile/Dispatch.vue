@@ -129,7 +129,7 @@
             |
             <b-link @click="function() { showSearchModal() }">{{ $trans('search') }}</b-link>
             |
-            <span v-if="newData">
+            <span v-if="newData && !showOverlay">
               <b-link @click="function() { dispatch.drawDispatch() }">
                 <span class="new-data">{{ $trans('dispatch changed, refresh now') }}</span></b-link>
             </span>
@@ -159,7 +159,7 @@
 </template>
 
 <script>
-import moment from 'moment'
+import moment from 'moment/min/moment-with-locales'
 import eachSeries from 'async/eachSeries'
 
 import Dispatch from '@/services/dispatch.js'
@@ -248,40 +248,30 @@ export default {
         })
 
     },
-    async assignToUser(user_id, callback) {
+    async assignToUsers() {
+      this.showOverlay = true
+      this.buttonDisabled = true
+      let user_ids = this.selectedUsers.map(o => o.user_id)
+
       if (this.selectedOrderIds.length === 0) {
-        for (let i=0; i<this.selectedOrders.length; i++) {
-          this.selectedOrderIds.push(this.selectedOrders[i].order_id);
-        }
+        this.selectedOrderIds = this.selectedOrders.map(o => o.order_id)
       }
 
       try {
-        await assign.assignToUser(user_id, this.selectedOrderIds, true)
-        callback()
-      } catch (e) {
-        console.log(e)
-        callback(e)
-      }
-    },
-    assignToUsers() {
-      this.showOverlay = true
-      this.buttonDisabled = true;
-      let user_ids = [];
-      for (let i=0; i<this.selectedUsers.length; i++) {
-        user_ids.push(this.selectedUsers[i].user_id)
-      }
-
-      eachSeries(user_ids, this.assignToUser, (err) => {
-        if (err) {
-          this.errorToast(this.$trans('Error assigning order(s)'))
-          this.showOverlay = false
-        } else {
-          this.infoToast(this.$trans('Success'), this.$trans('Order(s) assigned'))
-          this.cancelAssign()
-          this.dispatch.drawDispatch()
-          this.buttonDisabled = false
+        for (const user_id of user_ids) {
+          await assign.assignToUser(user_id, this.selectedOrderIds, true)
         }
-      });
+
+        this.infoToast(this.$trans('Success'), this.$trans('Order(s) assigned'))
+        this.cancelAssign()
+        this.dispatch.drawDispatch()
+        this.buttonDisabled = false
+        this.showOverlay = false
+      } catch (e) {
+        this.errorToast(this.$trans('Error assigning order(s)'))
+        this.showOverlay = false
+        this.buttonDisabled = false
+      }
     },
     postUnassign() {
       this.showOverlay = true
@@ -290,7 +280,7 @@ export default {
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
           await assign.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
-          this.infoToast(this.$trans('Success'), this.$trans('Order unassigned'))
+          this.infoToast(this.$trans('Success'), this.$trans('Order removed from planning'))
           this.showOverlay = false
           this.dispatch.drawDispatch()
         } catch (error) {
@@ -359,6 +349,7 @@ export default {
     Socket.setOnmessageHandlerMemberNewData(memberPk, this.onNewData)
 
     const lang = this.$store.getters.getCurrentLanguage
+    const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
 
@@ -375,7 +366,7 @@ export default {
       const canvas = this.$refs['dispatch-canvas'];
       const tipCanvas = this.$refs['dispatch-tip-canvas'];
 
-      this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this);
+      this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday);
       this.startDate = this.dispatch.startDate.toDate();
       this.setHandlers();
     }).catch((error) => {
