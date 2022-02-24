@@ -16,5 +16,8 @@ module.exports = {
     },
     moduleNameMapper: {
       "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    'vue-jest': {
+      babelConfig: true,
     }
 }
