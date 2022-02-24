@@ -21,7 +21,7 @@
   "resolved" "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.17.0.tgz"
   "version" "7.17.0"
 
-"@babel/core@^7.0.0", "@babel/core@^7.0.0-0", "@babel/core@^7.1.0", "@babel/core@^7.12.0", "@babel/core@^7.12.3", "@babel/core@^7.13.0", "@babel/core@^7.15.8", "@babel/core@^7.17.5", "@babel/core@^7.4.0-0", "@babel/core@^7.7.2", "@babel/core@^7.8.0":
+"@babel/core@^7.0.0", "@babel/core@^7.0.0-0", "@babel/core@^7.1.0", "@babel/core@^7.10.0", "@babel/core@^7.12.0", "@babel/core@^7.12.3", "@babel/core@^7.13.0", "@babel/core@^7.15.8", "@babel/core@^7.17.5", "@babel/core@^7.4.0-0", "@babel/core@^7.7.2", "@babel/core@^7.8.0":
   "integrity" "sha512-/BBMw4EvjmyquN5O+t5eh0+YqB3XXJkYD2cjKpYtWOfFy4lQ4UozNSmxAcWT8r2XtZs0ewG+zrfsqeR15i1ajA=="
   "resolved" "https://registry.npmjs.org/@babel/core/-/core-7.17.5.tgz"
   "version" "7.17.5"
@@ -925,7 +925,7 @@
   dependencies:
     "regenerator-runtime" "^0.13.4"
 
-"@babel/template@^7.16.7", "@babel/template@^7.3.3":
+"@babel/template@^7.16.7", "@babel/template@^7.3.3", "@babel/template@^7.4.4":
   "integrity" "sha512-I8j/x8kHUrbYRTUxXrrMbfCa7jxkE7tZre39x3kjr9hvI82cK1FfqLygotcWN5kdPGWcLdWMHpSBavse5tWw3w=="
   "resolved" "https://registry.npmjs.org/@babel/template/-/template-7.16.7.tgz"
   "version" "7.16.7"
@@ -1241,11 +1241,6 @@
   "version" "8.1.0"
   dependencies:
     "@sinonjs/commons" "^1.7.0"
-
-"@smartweb/vue-flash-message@^0.6.10":
-  "integrity" "sha512-ceDUUzXI6FDscev36kZQvc2BO+MayOt6uJ2HSh9zoOkfa0PVIhmaoB56InlTTsK7MmlSIvPJpRB+Habdx3MtNw=="
-  "resolved" "https://registry.npmjs.org/@smartweb/vue-flash-message/-/vue-flash-message-0.6.10.tgz"
-  "version" "0.6.10"
 
 "@testing-library/dom@^7.26.6":
   "integrity" "sha512-3UqjCpey6HiTZT92vODYLPxTBWlM8ZOOjr3LX5F37/VRipW2M1kX6I/Cm4VXzteZqfGfagg8yXywpcOgQBlNsQ=="
@@ -2177,6 +2172,14 @@
     "babel-helper-builder-binary-assignment-operator-visitor" "^6.24.1"
     "babel-plugin-syntax-exponentiation-operator" "^6.8.0"
     "babel-runtime" "^6.22.0"
+
+"babel-plugin-transform-import-meta@^2.1.1":
+  "integrity" "sha512-XWEzH1lKhpNDGqZRIPSHbS77tJbPKpRzydQRoJ6KLj0eynQy+MJSo/C75GtMNWnJsP1sGOAvlWcTMMHnWNBSXg=="
+  "resolved" "https://registry.npmjs.org/babel-plugin-transform-import-meta/-/babel-plugin-transform-import-meta-2.1.1.tgz"
+  "version" "2.1.1"
+  dependencies:
+    "@babel/template" "^7.4.4"
+    "tslib" "^2.2.0"
 
 "babel-plugin-transform-regenerator@^6.22.0":
   "integrity" "sha1-4HA2lvveJ/Cj78rPi03KL3s6jy8="
