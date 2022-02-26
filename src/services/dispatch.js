@@ -189,6 +189,7 @@ class Dispatch {
   async drawDispatch() {
     this.component.showOverlay = true
     try {
+      this.userYPositions = []
       const results = await this.fetchData()
       this.canvas.height = results.data.length * this.rowHeight + 300
       this._draw(results.data)
@@ -543,7 +544,20 @@ class Dispatch {
 
     this.lastY += rowHeight
 
+    const shape = new Path2D()
+    shape.moveTo(1, startY)
+    shape.lineTo(1, this.lastY)
+    shape.lineTo(this.width, this.lastY)
+    shape.lineTo(this.width, startY)
+    shape.closePath()
+
+    const image = this.ctx.getImageData(this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
+
     this.userYPositions.push({
+      hover: false,
+      transImage: this.createTransparentImg(image),
+      image,
+      shape,
       start: startY,
       end: this.lastY,
       user_id: data.user_id,
@@ -801,6 +815,33 @@ class Dispatch {
     }
   }
 
+  overUser = {}
+
+  createTransparentImg(image) {
+    this.ctx.globalAlpha = .5
+    const imageDataCopy = new ImageData(
+      new Uint8ClampedArray(image.data),
+      image.width,
+      image.height
+    )
+
+    let imageData = imageDataCopy.data
+    length = imageData.length
+
+    for (let i=3; i < length; i+=4) {
+      imageData[i-3] = imageData[i-3] + 100
+      imageData[i-2] = imageData[i-2] + 100
+      imageData[i-1] = imageData[i-1] + 100
+      imageData[i] = 40
+    }
+
+    // after the manipulation, reset the data
+    imageDataCopy.data.set(imageData)
+
+    this.ctx.globalAlpha = 1
+    return imageDataCopy
+  }
+
   handleClick(e) {
     e.preventDefault()
     e.stopPropagation()
@@ -830,7 +871,15 @@ class Dispatch {
     const mouseY = parseInt(e.clientY - this.offsetY)
 
     if (this.component.assignMode) {
-      this.checkOverUser(mouseX, mouseY)
+      this.userYPositions.forEach(position => position.hover = this.ctx.isPointInPath(position.shape, mouseX, mouseY))
+
+      this.userYPositions.forEach(position => {
+        if (position.hover || this.userAlreadySelected(position.user_id)) {
+          this.ctx.putImageData(position.transImage, this.slotWidth, position.start)
+        } else {
+          this.ctx.putImageData(position.image, this.slotWidth, position.start)
+        }
+      })
     }
 
     this.ctx.clearRect(0, 0, this.cw, this.ch)
@@ -881,98 +930,24 @@ class Dispatch {
     }
   }
 
-  checkOverUser(x, y) {
-    const startX = 1
-    const endX = startX + this.slotWidth
-
-    if (x < startX || x > endX) {
-      // only loop if not all empty
-      this.canvas.style.cursor = "default"
-
-      if (this.overUserLineAllEmpty) {
-        return
-      }
-
-      for (let i=0; i<this.userYPositions.length; i++) {
-        if (!this.userYPositions[i].isEmpty) {
-          const yData = this.userYPositions[i]
-          const lineStartY = yData.start + this.overUserLinePaddingTop
-          const lineEndY = yData.end - this.overUserLinePaddingBottom
-          this.drawOverUserLine(lineStartY, lineEndY, 'white')
-          this.userYPositions[i].isEmpty = true
-          this.canvas.style.cursor = "default"
-        }
-      }
-
-      this.overUserLineAllEmpty = true
-
-      return
-    }
-
-    for (let i=0; i<this.userYPositions.length; i++) {
-      const yData = this.userYPositions[i]
-      const lineStartY = yData.start + this.overUserLinePaddingTop
-      const lineEndY = yData.end - this.overUserLinePaddingBottom
-
-      let color = 'white'
-      if (y > yData.start && y < yData.end) {
-        this.canvas.style.cursor = "pointer"
-        color = 'red'
-      }
-
-      this.drawOverUserLine(lineStartY, lineEndY, color)
-
-      if (color === 'red') {
-        this.overUserLineAllEmpty = false
-        this.userYPositions[i].isEmpty = false
-      }
-    }
-  }
-
   checkOverUserClick(x, y) {
-    const startX = 1
-    const endX = startX + this.slotWidth
+    const position = this.userYPositions.find(position => position.hover)
 
-    if (x < startX || x > endX) {
+    if (this.userAlreadySelected(position.user_id)) {
+      console.log('userAlreadySelected', this.userAlreadySelected(position.user_id))
+      this.component.selectedUsers = this.component.selectedUsers.filter(user => user.user_id !== position.user_id)
+    } else {
+      console.log('NOT userAlreadySelected')
+      this.component.selectedUsers.push({
+        user_id: position.user_id,
+        full_name: position.full_name
+      })
       return
-    }
-
-    for (let i=0; i<this.userYPositions.length; i++) {
-      const yData = this.userYPositions[i]
-
-      if (y > yData.start && y < yData.end) {
-        if (!this.userAlreadySelected(yData.user_id)) {
-          if (this.debug) {
-            console.log(`adding ${yData.full_name} to selectedUsers`)
-          }
-          this.component.selectedUsers.push({
-            user_id: yData.user_id,
-            full_name: yData.full_name
-          })
-        }
-      }
     }
   }
 
   userAlreadySelected(user_id) {
-    for( let i=0; i<this.component.selectedUsers.length; i++) {
-      if (this.component.selectedUsers[i].user_id === user_id) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  drawOverUserLine(startY, endY, color, alpha) {
-    const startX = this.slotWidth - this.overUserLinePaddingRight
-    const endX = this.slotWidth - this.overUserLinePaddingRight
-    let path = new Path2D()
-    this.ctx.lineWidth = this.overUserLineWidth
-    this.ctx.strokeStyle = this.getRgba(color, alpha)
-    path.moveTo(startX, startY)
-    path.lineTo(endX, endY)
-    this.ctx.stroke(path)
+    return this.component.selectedUsers.find(user => user.user_id === user_id)
   }
 
   inStroke(obj, x, y) {
@@ -1000,26 +975,6 @@ class Dispatch {
       // return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',1)';
     }
     throw new Error('Bad Hex');
-  }
-
-  getRgba(colorString, alpha) {
-    if (!alpha) {
-      alpha = 1
-    }
-
-    if (colorString === 'red') {
-      return `rgba(255, 0, 0, ${alpha})`
-    }
-
-    if (colorString === 'white') {
-      return `rgba(0, 0, 0, ${alpha})`
-    }
-
-    if (colorString === 'black') {
-      return `rgba(255, 255, 255, ${alpha})`
-    }
-
-    throw(`unknow color: ${colorString}`)
   }
 
   timeForward() {

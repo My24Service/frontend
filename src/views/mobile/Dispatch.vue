@@ -67,7 +67,7 @@
       </template>
     </b-modal>
 
-    <div v-if="assignMode && selectedOrders.length > 0">
+    <div class="heading" v-if="assignMode && selectedOrders.length > 0">
       <b-row>
         <b-col cols="12">
           <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
@@ -409,7 +409,6 @@ span.new-data {
   position:absolute;
   left:-2000px;
 }
-
 .dispatchCanvas {
   position: relative !important;
   width: 1080px;
@@ -419,5 +418,12 @@ span.new-data {
   bottom: 20px;
   right: 20px;
   display: none;
+}
+.heading {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  opacity: .9;
+  z-index: 1000;
 }
 </style>
