@@ -111,11 +111,9 @@
       <b-col cols="8">
         <b-row>
           <b-col cols="3" class="my-auto">
-            <div class="float-right">
+            <div class="">
               {{ $trans('show from:') }}
             </div>
-          </b-col>
-          <b-col cols="3">
             <b-form-datepicker
               v-model="startDate"
               size="sm"
@@ -124,7 +122,7 @@
               :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
             ></b-form-datepicker>
           </b-col>
-          <b-col cols="6" class="my-auto">
+          <b-col cols="4" class="my-auto">
             <b-link @click="function() { loadToday() }">{{ $trans('today') }}</b-link>
             |
             <b-link @click="function() { showSearchModal() }">{{ $trans('search') }}</b-link>
@@ -136,6 +134,16 @@
             <span v-if="!newData">
               <b-link @click="function() { dispatch.drawDispatch() }">{{ $trans('refresh') }}</b-link>
             </span>
+          </b-col>
+          <b-col cols="4" class="my-auto">
+            <b-form-radio-group
+              id="order-done-next"
+              v-model="mode"
+              :options="modeOptions"
+              class="mb-3"
+              value-field="item"
+              text-field="name"
+            ></b-form-radio-group>
           </b-col>
         </b-row>
       </b-col>
@@ -177,6 +185,11 @@ export default {
   },
   data() {
     return {
+      mode: 'wide',
+      modeOptions: [
+        { item: 'compact', name: this.$trans('Compact') },
+        { item: 'wide', name: this.$trans('Wide') },
+      ],
       scrollTopButton: null,
       searchQuery: null,
       buttonDisabled: false,
@@ -193,6 +206,10 @@ export default {
     }
   },
   watch: {
+    mode: function(val) {
+      this.dispatch.setMode(val)
+      this.dispatch.drawDispatch()
+    },
     startDate: function(val) {
       this.dispatch.setStartDate(val)
       this.dispatch.drawDispatch()
@@ -363,14 +380,15 @@ export default {
     }
 
     this.$store.dispatch('getStatuscodes').then((statuscodes) => {
-      const canvas = this.$refs['dispatch-canvas'];
-      const tipCanvas = this.$refs['dispatch-tip-canvas'];
+      const canvas = this.$refs['dispatch-canvas']
+      const tipCanvas = this.$refs['dispatch-tip-canvas']
 
-      this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday);
-      this.startDate = this.dispatch.startDate.toDate();
-      this.setHandlers();
+      this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday)
+      this.dispatch.setMode(this.mode)
+      this.startDate = this.dispatch.startDate.toDate()
+      this.setHandlers()
     }).catch((error) => {
-      console.log('error in get statuscodes', error);
+      console.log('error in get statuscodes', error)
     });
   },
   beforeDestroy() {
