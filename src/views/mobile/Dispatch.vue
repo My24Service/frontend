@@ -99,7 +99,7 @@
     </div>
 
     <b-row class="py-2">
-      <b-col cols="2">
+      <b-col cols="1">
         <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
           <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
         </b-link>
@@ -108,9 +108,9 @@
           <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
         </b-link>
       </b-col>
-      <b-col cols="8">
+      <b-col cols="10">
         <b-row>
-          <b-col cols="3" class="my-auto">
+          <b-col cols="2" class="my-auto">
             <b-form-datepicker
               v-model="startDate"
               size="sm"
@@ -132,19 +132,18 @@
               <b-link @click="function() { dispatch.drawDispatch() }">{{ $trans('refresh') }}</b-link>
             </span>
           </b-col>
-          <b-col cols="3" class="float-right">
+          <b-col cols="4" class="float-right">
             <b-form-radio-group
-              id="order-done-next"
               v-model="mode"
               :options="modeOptions"
-              class="mb-3"
+              class="mb-1"
               value-field="item"
               text-field="name"
             ></b-form-radio-group>
           </b-col>
         </b-row>
       </b-col>
-      <b-col cols="2">
+      <b-col cols="1">
         <div class="float-right">
           <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
             <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
