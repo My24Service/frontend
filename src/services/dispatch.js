@@ -233,6 +233,7 @@ class Dispatch {
     }
 
     if (finalLastY - this.lastY < 0) {
+      console.log('second pass', timesDone)
       if (timesDone > 2) {
         throw 'HELP'
       }
@@ -644,11 +645,17 @@ class Dispatch {
      *
      **/
 
-    // draw the line with alpha to .2
-    const rgb = this.hexToRgbA(color)
-    const rgbString = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, .2)`
+    let rgbString
+    try {
+      // draw the line with alpha to .2
+      const rgb = this.hexToRgbA(color)
+      rgbString = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, .2)`
+    } catch (e) {
+      // bad hex, fallback to normal color string
+      rgbString = color
+    }
 
-    let path = new Path2D()
+    const path = new Path2D()
     this.ctx.lineWidth = this.getOrderLineWidth()
     this.ctx.strokeStyle = rgbString
     path.moveTo(startX, yPos + 6)
@@ -969,7 +976,8 @@ class Dispatch {
   }
 
   inStroke(obj, x, y) {
-    for(let i=-5; i<5; i++) {
+    const height = this.mode === COMPACT ? 5 : this.getRowHeight() + 10
+    for(let i=-1*height; i<height; i++) {
       if (this.ctx.isPointInStroke(obj, x+i, y+i)) {
         return true
       }

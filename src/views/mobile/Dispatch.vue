@@ -111,9 +111,6 @@
       <b-col cols="8">
         <b-row>
           <b-col cols="3" class="my-auto">
-            <div class="">
-              {{ $trans('show from:') }}
-            </div>
             <b-form-datepicker
               v-model="startDate"
               size="sm"
@@ -122,7 +119,7 @@
               :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
             ></b-form-datepicker>
           </b-col>
-          <b-col cols="4" class="my-auto">
+          <b-col cols="6" class="my-auto">
             <b-link @click="function() { loadToday() }">{{ $trans('today') }}</b-link>
             |
             <b-link @click="function() { showSearchModal() }">{{ $trans('search') }}</b-link>
@@ -135,7 +132,7 @@
               <b-link @click="function() { dispatch.drawDispatch() }">{{ $trans('refresh') }}</b-link>
             </span>
           </b-col>
-          <b-col cols="4" class="my-auto">
+          <b-col cols="3" class="float-right">
             <b-form-radio-group
               id="order-done-next"
               v-model="mode"
