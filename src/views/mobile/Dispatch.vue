@@ -133,24 +133,26 @@
             </span>
           </b-col>
           <b-col cols="4" class="float-right">
-            <b-form-radio-group
-              v-model="mode"
-              :options="modeOptions"
-              class="mb-1"
-              value-field="item"
-              text-field="name"
-            ></b-form-radio-group>
+            <div>
+              <b-form-radio-group
+                v-model="mode"
+                :options="modeOptions"
+                class="mb-1"
+                value-field="item"
+                text-field="name"
+              ></b-form-radio-group>
+            </div>
           </b-col>
         </b-row>
       </b-col>
       <b-col cols="1">
         <div class="float-right">
-          <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
-            <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
-          </b-link>
-          &nbsp;
           <b-link class="px-1" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
             <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+          </b-link>
+          &nbsp;
+          <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
+            <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
           </b-link>
         </div>
       </b-col>
