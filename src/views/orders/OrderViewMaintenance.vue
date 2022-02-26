@@ -183,23 +183,22 @@ export default {
     },
   },
   methods: {
-    recreateWorkorderPdf() {
+    async recreateWorkorderPdf() {
       this.isLoading = true
       this.buttonDisabled = true
 
-      this.$store.dispatch('getCsrfToken').then(token => {
-        orderModel.recreateWorkorderPdf(token).then((response) => {
-          this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-          this.isLoading = false
-          this.buttonDisabled = false
-          this.loadOrder()
-        })
-        .catch(() => {
-          this.errorToast(this.$trans('Error recreating workorder'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        })
-      })
+      try {
+        await orderModel.recreateWorkorderPdf(this.pk)
+        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
+        this.isLoading = false
+        this.buttonDisabled = false
+        this.loadOrder()
+      } catch(err) {
+        console.log('Error recreating workorder', err)
+        this.errorToast(this.$trans('Error recreating workorder'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     },
     goBack() {
       this.$router.go(-1)
