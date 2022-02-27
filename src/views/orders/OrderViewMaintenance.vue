@@ -85,7 +85,7 @@
           ></b-table>
           </b-col>
       </b-row>
-      <b-row v-if="order.infolines.length > 0">
+      <b-row v-if="!isCustomer && order.infolines.length > 0">
         <b-col cols="12">
           <h4>{{ $trans('Infolines') }}</h4>
           <b-table dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"></b-table>
@@ -133,7 +133,7 @@
       </b-row>
       <footer class="modal-footer">
         <b-button
-          v-if="!past"
+          v-if="!past && !isCustomer"
           id="recreateWorkorderPdfButton"
           @click="recreateWorkorderPdf"
           :disabled="buttonDisabled"
@@ -151,8 +151,10 @@
 
 <script>
 import orderModel from '@/models/orders/Order.js'
+import { componentMixin } from '@/utils'
 
 export default {
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,

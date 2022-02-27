@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Notification v-if="isLoggedIn" />
+    <Notification v-if="isLoggedIn && !isCustomer" />
     <router-view/>
   </div>
 </template>

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <OrderFormMaintenance v-if="memberType === 'maintenance'" v-bind:pk="pk" />
-    <OrderFormTemps v-if="memberType === 'temps'" v-bind:pk="pk" />
+    <OrderFormMaintenance v-if="memberType === 'maintenance'" :pk="pk" />
+    <OrderFormTemps v-if="memberType === 'temps'" :pk="pk" />
   </div>
 </template>
 
@@ -26,12 +26,8 @@ export default {
     OrderFormMaintenance,
     OrderFormTemps,
   },
-  created() {
-    // get member type
-    this.$store.dispatch('getMemberType')
-      .then((memberType) => {
-        this.memberType = memberType
-      })
+  async created() {
+    this.memberType = await this.$store.dispatch('getMemberType')
   },
 }
 </script>

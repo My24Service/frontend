@@ -2,6 +2,15 @@
   <div class="app-grid" ref="order-list-not-accepted">
 
     <b-modal
+      id="delete-order-modal"
+      ref="delete-order-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
+    </b-modal>
+
+    <b-modal
       id="sort-modal"
       ref="sort-modal"
       v-bind:title="$trans('Sort')"
@@ -104,9 +113,23 @@
       </template>
       <template #cell(icons)="data">
         <div class="h2 float-right">
-          <b-link class="px-1" v-bind:title="$trans('Accept')" v-on:click="setAccepted(data.item.id)">
+          <b-link
+            class="px-1"
+            v-if="!isCustomer"
+            v-bind:title="$trans('Accept')"
+            v-on:click="setAccepted(data.item.id)"
+            >
             <b-icon-check2-square class="edit-icon"></b-icon-check2-square>
           </b-link>
+          <IconLinkEdit
+            router_name="order-edit"
+            v-bind:router_params="{pk: data.item.id}"
+            v-bind:title="$trans('Edit')"
+          />
+          <IconLinkDelete
+            v-bind:title="$trans('Delete')"
+            v-bind:method="function() { showDeleteModal(data.item.id) }"
+          />
         </div>
       </template>
     </b-table>
@@ -115,18 +138,25 @@
 
 <script>
 import orderNotAcceptedModel from '@/models/orders/OrderNotAccepted.js'
+import orderModel from '@/models/orders/Order.js'
 import my24 from '@/services/my24.js'
 import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import { componentMixin } from '@/utils'
 
 export default {
+  mixins: [componentMixin],
   components: {
     OrderTableInfo,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkSort,
+    IconLinkDelete,
+    IconLinkEdit,
   },
   props: {
     dispatch: {
@@ -185,6 +215,20 @@ export default {
       })
   },
   methods: {
+    doDelete(id) {
+      return this.$store.dispatch('getCsrfToken').then((token) => {
+        orderModel.delete(token, this.orderPk).then(() => {
+          this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+          this.loadData()
+        }).catch(() => {
+          this.errorToast(this.$trans('Error deleting order'))
+        })
+      })
+    },
+    showDeleteModal(id) {
+      this.orderPk = id
+      this.$refs['delete-order-modal'].show()
+    },
     showSortModal() {
       this.$refs['sort-modal'].show()
     },

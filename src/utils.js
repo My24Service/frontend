@@ -7,6 +7,27 @@ function isEmpty(obj) {
 
 let componentMixin = {
   computed: {
+    isStaff() {
+      return this.$store.state.userInfo.is_staff
+    },
+    isSuperuser() {
+      return this.$store.state.userInfo.is_superuser
+    },
+    isPlanning() {
+      return this.$store.state.userInfo.planning_user
+    },
+    isCustomer() {
+      return this.$store.state.userInfo.customer_user
+    },
+    isEngineer() {
+      this.$store.state.userInfo.engineer
+    },
+    isSales() {
+      this.$store.state.userInfo.sales_user
+    },
+    isStudent() {
+      this.$store.state.userInfo.student_user
+    },
     isLoggedIn() {
       return this.$store.getters.isLoggedIn
     },
@@ -17,8 +38,8 @@ let componentMixin = {
   methods: {
     hasAccessToModule(module, part) {
       return my24.hasAccessToModule({
-        isStaff: this.$store.state.userInfo.is_staff,
-        isSuperuser: this.$store.state.userInfo.is_superuser,
+        isStaff: this.isStaff,
+        isSuperuser: this.isSuperuser,
         contract: this.$store.state.memberContract,
         module,
         part,

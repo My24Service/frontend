@@ -1,27 +1,56 @@
 <template>
   <span>
-    <b-navbar-nav v-if="isLoaded" ref="nav-items">
-      <b-nav-item :active="isActive('orders')" v-if="hasOrders" to="/orders/orders">{{ $trans('Orders') }}</b-nav-item>
-      <div class="main-nav-divider">
+    <b-navbar-nav ref="nav-items">
+      <b-nav-item
+        :active="isActive('orders')"
+        v-if="isStaff || isSuperuser || (hasOrders && (isPlanning || isCustomer))"
+        to="/orders/orders">{{ $trans('Orders') }}
+      </b-nav-item>
+      <div
+        v-if="isStaff || isSuperuser || (hasCustomers && isPlanning)"
+        class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
-      <b-nav-item :active="isActive('customers')" v-if="hasCustomers" to="/customers/customers">{{ $trans('Customers') }}</b-nav-item>
-      <div class="main-nav-divider">
+      <b-nav-item
+        :active="isActive('customers')"
+        v-if="isStaff || isSuperuser || (hasCustomers && isPlanning)"
+        to="/customers/customers">{{ $trans('Customers') }}
+      </b-nav-item>
+      <div
+        v-if="isStaff || isSuperuser || (hasInventory && isPlanning)"
+        class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
-      <b-nav-item :active="isActive('inventory')" v-if="hasInventory" to="/inventory/purchaseorders">{{ $trans('Inventory') }}</b-nav-item>
-      <div class="main-nav-divider">
+      <b-nav-item
+        :active="isActive('inventory')"
+        v-if="isStaff || isSuperuser || (hasInventory && isPlanning)"
+        to="/inventory/purchaseorders">{{ $trans('Inventory') }}
+      </b-nav-item>
+      <div
+        v-if="isStaff || isSuperuser || (hasMobile && isPlanning)"
+        class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
-      <b-nav-item :active="isActive('mobile')" v-if="hasMobile" to="/mobile/dispatch">{{ $trans('Mobile') }}</b-nav-item>
-      <div class="main-nav-divider">
+      <b-nav-item
+        :active="isActive('mobile')"
+        v-if="isStaff || isSuperuser || (hasMobile && isPlanning)"
+        to="/mobile/dispatch">{{ $trans('Mobile') }}
+      </b-nav-item>
+      <div
+        v-if="isStaff || isSuperuser || (hasCompany && isPlanning)"
+        class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
 <!--       <b-nav-item :active="isActive('quotations')" v-if="hasQuotations" to="/quotations/quotations">{{ $trans('Quotations') }}</b-nav-item>
       <div class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
- -->      <b-nav-item :active="isActive('company')" v-if="hasCompany" to="/company/dashboard">{{ $trans('Company') }}</b-nav-item>
+ -->
+      <b-nav-item
+        :active="isActive('company')"
+        v-if="isStaff || isSuperuser || (hasCompany && isPlanning)"
+        to="/company/dashboard">{{ $trans('Company') }}
+      </b-nav-item>
       <div v-if="hasMembers" class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
@@ -37,9 +66,6 @@ export default {
   mixins: [componentMixin],
   data() {
     return {
-      isStaff: false,
-      isSuperuser: false,
-      isLoaded: false
     }
   },
   methods: {
@@ -70,19 +96,7 @@ export default {
     hasMembers() {
       return this.isStaff && this.isSuperuser
     }
-  },
-  created() {
-    // get user types
-    this.$store.dispatch('getIsStaff').then((isStaff) => {
-      this.isStaff = isStaff
-
-      this.$store.dispatch('getIsSuperuser').then((isSuperuser) => {
-        this.isSuperuser = isSuperuser
-
-        this.isLoaded = true
-      })
-    })
-  },
+  }
 }
 </script>
 
