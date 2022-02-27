@@ -1,22 +1,31 @@
 import axios from "axios"
 import { expect } from 'chai'
-import { shallowMount, mount } from '@vue/test-utils'
-import { render } from '@vue/server-test-utils'
+import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 const moment = require('moment')
 
 import localVue from '../../index'
-import OrderFormTemps from '@/views/orders/OrderFormTemps.vue'
+import OrderFormMaintenanceCustomer from '@/views/orders/OrderFormMaintenanceCustomer.vue'
 import orderResponse from '../../fixtures/order'
+import customerResponse from '../../fixtures/customer';
 
-jest.mock('axios')
+const userResponse = {
+  user: {
+    customer_user: {
+      customer: 1
+    }
+  }
+}
+
 axios.get.mockImplementation((url) => {
   switch (url) {
+    case '/customer/customer/1/':
+      return Promise.resolve(customerResponse)
+    case '/company/user-info/1/':
+      return Promise.resolve({data: userResponse})
     case '/order/order/1/':
       return Promise.resolve(orderResponse)
-    case '/customer/customer/autocomplete/?q=':
-      return Promise.resolve({data: []})
     default:
       console.log(url)
       return Promise.reject(new Error('not found'))
@@ -24,11 +33,16 @@ axios.get.mockImplementation((url) => {
 })
 
 
-describe('OrderFormTemps.vue temps', () => {
+describe('OrderFormMaintenanceCustomer.vue temps', () => {
   let store
   let actions
+  let getters
 
   beforeEach(() => {
+    getters = {
+      getCurrentLanguage: () => 'nl'
+    }
+
     actions = {
       getCountries: () => [],
       getOrderTypes: () => [],
@@ -36,6 +50,7 @@ describe('OrderFormTemps.vue temps', () => {
 
     store = new Vuex.Store({
       actions,
+      getters,
       state: {
         userInfo: {
           pk: 1,
@@ -47,7 +62,7 @@ describe('OrderFormTemps.vue temps', () => {
   })
 
   it('exists', async () => {
-    const wrapper = mount(OrderFormTemps, {
+    const wrapper = mount(OrderFormMaintenanceCustomer, {
       localVue,
       store,
       mocks: {
@@ -61,12 +76,12 @@ describe('OrderFormTemps.vue temps', () => {
 
     let el
 
-    el = wrapper.findComponent(OrderFormTemps)
+    el = wrapper.findComponent(OrderFormMaintenanceCustomer)
     expect(el.exists()).to.be.true
   })
 
   it('insert, contains "New order"', async () => {
-    const wrapper = mount(OrderFormTemps, {
+    const wrapper = mount(OrderFormMaintenanceCustomer, {
       localVue,
       store,
       mocks: {
@@ -83,7 +98,7 @@ describe('OrderFormTemps.vue temps', () => {
   })
 
   it('edit, contains "Edit order"', async () => {
-    const wrapper = mount(OrderFormTemps, {
+    const wrapper = mount(OrderFormMaintenanceCustomer, {
       localVue,
       store,
       mocks: {
@@ -102,8 +117,8 @@ describe('OrderFormTemps.vue temps', () => {
     expect(html).to.contain('<h2>Edit order</h2>')
   })
 
-  it('contains "Required users"', async () => {
-    const wrapper = mount(OrderFormTemps, {
+  it('does not contain "Required users"', async () => {
+    const wrapper = mount(OrderFormMaintenanceCustomer, {
       localVue,
       store,
       mocks: {
@@ -115,7 +130,7 @@ describe('OrderFormTemps.vue temps', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('Required users')
+    expect(html).not.to.contain('Required users')
   })
 
 })
