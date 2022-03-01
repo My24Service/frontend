@@ -86,7 +86,10 @@ class Account extends BaseModel {
           reject(error)
         })
     })
+  }
 
+  getUserInfo(pk) {
+    return this.axios.get(`/company/user-info/${pk}/`).then(response => response.data)
   }
 
 }

@@ -52,6 +52,7 @@
     </b-modal>
 
     <b-modal
+      v-if="!isCustomer"
       id="delete-order-modal"
       ref="delete-order-modal"
       v-bind:title="$trans('Delete?')"
@@ -61,6 +62,7 @@
     </b-modal>
 
     <b-modal
+      v-if="!isCustomer"
       id="change-status-modal"
       ref="change-status-modal"
       v-bind:title="$trans('Add status')"
@@ -101,7 +103,7 @@
       </form>
     </b-modal>
 
-    <b-row v-if="dispatch && selectedOrders.length > 0">
+    <b-row v-if="!isCustomer && dispatch && selectedOrders.length > 0">
       <b-col cols="12">
         <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
         <span v-for="(order, index) in selectedOrders" :key="order.id">
@@ -177,6 +179,7 @@
             v-bind:title="$trans('Edit')"
           />
           <IconLinkPlus
+            v-if="!isCustomer"
             type="tr"
             v-bind:title="$trans('Change status')"
             v-bind:method="function() { showChangeStatusModal(data.item.id) }"
@@ -188,11 +191,12 @@
             v-bind:title="$trans('Documents')"
           />
           <IconLinkAssign
-            v-if="dispatch"
+            v-if="!isCustomer && dispatch"
             v-bind:title="$trans('Assign')"
             v-bind:method="function() { selectOrder(data.item) }"
           />
           <IconLinkDelete
+            v-if="!isCustomer"
             v-bind:title="$trans('Delete')"
             v-bind:method="function() { showDeleteModal(data.item.id) }"
           />
@@ -216,8 +220,10 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
+import { componentMixin } from '@/utils';
 
 export default {
+  mixins: [componentMixin],
   components: {
     OrderTableInfo,
     IconLinkEdit,

@@ -3,47 +3,50 @@
     <b-nav tabs>
       <b-nav-item
         :active="isActive('orders')"
-        v-if="hasOrders"
+        v-if="isStaff || isSuperuser || (hasOrders && (isPlanning || isCustomer))"
         :to="{ name: 'order-list' }">
         {{ $trans('Orders') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('orders-not-accepted')"
-        v-if="hasNotAcceptedOrders"
+        v-if="isStaff || isSuperuser || (hasNotAcceptedOrders && (isPlanning || isCustomer))"
         :to="{ name: 'orders-not-accepted' }">
         {{ $trans('Not accepted orders') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('past-orders')"
-        v-if="hasPastOrders"
+        v-if="isStaff || isSuperuser || (hasPastOrders && (isPlanning || isCustomer))"
         :to="{ name: 'past-order-list' }">
         {{ $trans('Past orders') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('sales-orders')"
-        v-if="hasSalesOrders"
+        v-if="isStaff || isSuperuser || (hasSalesOrders && (isPlanning || isSales))"
         :to="{ name: 'order-list-sales' }">
         {{ $trans('Sales orders') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('workorder-orders')"
-        v-if="hasWorkorderOrders"
+        v-if="isStaff || isSuperuser || (hasWorkorderOrders && isPlanning)"
         :to="{ name: 'workorder-orders' }">
         {{ $trans('Workorder orders') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('statuscodes')"
-        v-if="hasStatuscodes"
+        v-if="isStaff || isSuperuser || (hasStatuscodes && isPlanning)"
         :to="{ name: 'order-statuscode-list' }">
         {{ $trans('Statuscodes') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('year-stats')"
-        v-if="hasYearStats"
+        v-if="isStaff || isSuperuser || (hasYearStats && (isPlanning || isSales || isCustomer))"
         :to="{ name: 'order-year-stats' }">
         {{ $trans('Year') }}
       </b-nav-item>
-      <b-nav-item :active="isActive('month-stats')" v-if="hasMonthStats" to="/orders/month-stats">
+      <b-nav-item
+        :active="isActive('month-stats')"
+        v-if="isStaff || isSuperuser || (hasMonthStats && (isPlanning || isSales || isCustomer))"
+        to="/orders/month-stats">
         {{ $trans('Month') }}
       </b-nav-item>
     </b-nav>

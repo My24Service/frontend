@@ -67,16 +67,8 @@ class Order extends BaseModel {
     return fields
   }
 
-  recreateWorkorderPdf(token) {
-    const headers = this.getHeaders(token)
-
-    return new Promise((resolve, reject) => {
-      this.axios.post(`${this.url}${this.pk}/recreate_pdf/`, {}, headers).then((response) => {
-        resolve(response)
-      }).catch((error) => {
-        reject(error)
-      })
-    })
+  recreateWorkorderPdf(pk) {
+    return this.axios.post(`${this.url}${pk}/recreate_pdf/`)
   }
 
   preInsert(order) {

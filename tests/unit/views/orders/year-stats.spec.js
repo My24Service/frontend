@@ -24,6 +24,13 @@ describe('YearStats.vue', () => {
 
     store = new Vuex.Store({
       actions,
+      state: {
+        userInfo: {
+          pk: 1,
+          is_staff: true,
+          customer_user: null
+        }
+      }
     })
   })
 

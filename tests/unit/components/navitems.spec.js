@@ -45,7 +45,8 @@ describe('Navitems.vue no staff & no superuser', () => {
       memberContract: my24.getModelsFromString(resultCertainModules.userInfo.member_contract),
       userInfo: {
         is_staff: false,
-        is_superuser: false
+        is_superuser: false,
+        customer_user: null
       }
     }
 
@@ -71,7 +72,7 @@ describe('Navitems.vue no staff & no superuser', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('has 7 items', async () => {
+  it('has 0 items', async () => {
     const wrapper = shallowMount(NavItems, {
       localVue,
       router,
@@ -84,10 +85,77 @@ describe('Navitems.vue no staff & no superuser', () => {
     await flushPromises()
 
     const navbar = wrapper.findComponent({ ref: 'nav-items' })
-    expect(navbar.element.children.length).to.eq(7)
+    expect(navbar.element.children.length).to.eq(0)
+  })
+})
+
+describe('Navitems.vue no customer', () => {
+  let state
+  let store
+  let actions
+
+  beforeEach(() => {
+    actions = {
+      getIsStaff: () => {
+        return new Promise((resolve) => {
+          resolve(false)
+        })
+      },
+      getIsSuperuser: () => {
+        return new Promise((resolve) => {
+          resolve(false)
+        })
+      }
+    }
+
+    state = {
+      memberContract: my24.getModelsFromString(resultCertainModules.userInfo.member_contract),
+      userInfo: {
+        is_staff: false,
+        is_superuser: false,
+        customer_user: 10
+      }
+    }
+
+    store = new Vuex.Store({
+      state,
+      actions
+    })
   })
 
-  it('contains Orders, Mobile, Company', async () => {
+  it('exists', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      store,
+      router,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.exists()).to.be.true
+  })
+
+  it('has 1 items', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      router,
+      store,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.element.children.length).to.eq(1)
+  })
+
+  it('contains Orders', async () => {
     const wrapper = shallowMount(NavItems, {
       localVue,
       router,
@@ -101,8 +169,6 @@ describe('Navitems.vue no staff & no superuser', () => {
 
     const navbar = wrapper.findComponent({ ref: 'nav-items' })
     expect(navbar.html()).to.contain('/orders')
-    expect(navbar.html()).to.contain('/mobile')
-    expect(navbar.html()).to.contain('/company')
   })
 
   it('does not contain Inventory', async () => {
@@ -136,7 +202,6 @@ describe('Navitems.vue no staff & no superuser', () => {
     const navbar = wrapper.findComponent({ ref: 'nav-items' })
     expect(navbar.html()).not.to.contain('/members')
   })
-
 })
 
 describe('Navitems.vue staff & superuser', () => {

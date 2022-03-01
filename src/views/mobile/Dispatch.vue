@@ -67,7 +67,7 @@
       </template>
     </b-modal>
 
-    <div v-if="assignMode && selectedOrders.length > 0">
+    <div class="heading" v-if="assignMode && selectedOrders.length > 0">
       <b-row>
         <b-col cols="12">
           <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
@@ -99,7 +99,7 @@
     </div>
 
     <b-row class="py-2">
-      <b-col cols="2">
+      <b-col cols="1">
         <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
           <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
         </b-link>
@@ -108,14 +108,9 @@
           <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
         </b-link>
       </b-col>
-      <b-col cols="8">
+      <b-col cols="10">
         <b-row>
-          <b-col cols="3" class="my-auto">
-            <div class="float-right">
-              {{ $trans('show from:') }}
-            </div>
-          </b-col>
-          <b-col cols="3">
+          <b-col cols="2" class="my-auto">
             <b-form-datepicker
               v-model="startDate"
               size="sm"
@@ -137,16 +132,27 @@
               <b-link @click="function() { dispatch.drawDispatch() }">{{ $trans('refresh') }}</b-link>
             </span>
           </b-col>
+          <b-col cols="4" class="float-right">
+            <div>
+              <b-form-radio-group
+                v-model="mode"
+                :options="modeOptions"
+                class="mb-1"
+                value-field="item"
+                text-field="name"
+              ></b-form-radio-group>
+            </div>
+          </b-col>
         </b-row>
       </b-col>
-      <b-col cols="2">
+      <b-col cols="1">
         <div class="float-right">
-          <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
-            <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
-          </b-link>
-          &nbsp;
           <b-link class="px-1" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
             <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+          </b-link>
+          &nbsp;
+          <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
+            <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
           </b-link>
         </div>
       </b-col>
@@ -177,6 +183,11 @@ export default {
   },
   data() {
     return {
+      mode: 'wide',
+      modeOptions: [
+        { item: 'compact', name: this.$trans('Compact') },
+        { item: 'wide', name: this.$trans('Wide') },
+      ],
       scrollTopButton: null,
       searchQuery: null,
       buttonDisabled: false,
@@ -193,6 +204,10 @@ export default {
     }
   },
   watch: {
+    mode: function(val) {
+      this.dispatch.setMode(val)
+      this.dispatch.drawDispatch()
+    },
     startDate: function(val) {
       this.dispatch.setStartDate(val)
       this.dispatch.drawDispatch()
@@ -363,14 +378,15 @@ export default {
     }
 
     this.$store.dispatch('getStatuscodes').then((statuscodes) => {
-      const canvas = this.$refs['dispatch-canvas'];
-      const tipCanvas = this.$refs['dispatch-tip-canvas'];
+      const canvas = this.$refs['dispatch-canvas']
+      const tipCanvas = this.$refs['dispatch-tip-canvas']
 
-      this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday);
-      this.startDate = this.dispatch.startDate.toDate();
-      this.setHandlers();
+      this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday)
+      this.dispatch.setMode(this.mode)
+      this.startDate = this.dispatch.startDate.toDate()
+      this.setHandlers()
     }).catch((error) => {
-      console.log('error in get statuscodes', error);
+      console.log('error in get statuscodes', error)
     });
   },
   beforeDestroy() {
@@ -393,7 +409,6 @@ span.new-data {
   position:absolute;
   left:-2000px;
 }
-
 .dispatchCanvas {
   position: relative !important;
   width: 1080px;
@@ -403,5 +418,12 @@ span.new-data {
   bottom: 20px;
   right: 20px;
   display: none;
+}
+.heading {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  opacity: .9;
+  z-index: 1000;
 }
 </style>

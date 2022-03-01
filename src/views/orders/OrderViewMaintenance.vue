@@ -85,7 +85,7 @@
           ></b-table>
           </b-col>
       </b-row>
-      <b-row v-if="order.infolines.length > 0">
+      <b-row v-if="!isCustomer && order.infolines.length > 0">
         <b-col cols="12">
           <h4>{{ $trans('Infolines') }}</h4>
           <b-table dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"></b-table>
@@ -133,7 +133,7 @@
       </b-row>
       <footer class="modal-footer">
         <b-button
-          v-if="!past"
+          v-if="!past && !isCustomer"
           id="recreateWorkorderPdfButton"
           @click="recreateWorkorderPdf"
           :disabled="buttonDisabled"
@@ -151,8 +151,10 @@
 
 <script>
 import orderModel from '@/models/orders/Order.js'
+import { componentMixin } from '@/utils'
 
 export default {
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
@@ -183,23 +185,22 @@ export default {
     },
   },
   methods: {
-    recreateWorkorderPdf() {
+    async recreateWorkorderPdf() {
       this.isLoading = true
       this.buttonDisabled = true
 
-      this.$store.dispatch('getCsrfToken').then(token => {
-        orderModel.recreateWorkorderPdf(token).then((response) => {
-          this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-          this.isLoading = false
-          this.buttonDisabled = false
-          this.loadOrder()
-        })
-        .catch(() => {
-          this.errorToast(this.$trans('Error recreating workorder'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        })
-      })
+      try {
+        await orderModel.recreateWorkorderPdf(this.pk)
+        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
+        this.isLoading = false
+        this.buttonDisabled = false
+        this.loadOrder()
+      } catch(err) {
+        console.log('Error recreating workorder', err)
+        this.errorToast(this.$trans('Error recreating workorder'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     },
     goBack() {
       this.$router.go(-1)

@@ -35,31 +35,30 @@ class My24 extends BaseModel {
   }
 
   status2color(statuscodes, status) {
+    const defaultColor = '#ccc'
     if (!status) {
-      console.log('no status');
-      return;
+      console.log('no status')
+      return defaultColor
     }
 
     for (let i=0; i<statuscodes.length; i++) {
-      const statuscode = statuscodes[i];
-      let color = statuscode.color;
+      const statuscode = statuscodes[i]
+      let color = statuscode.color
 
-      if (color.substr(0, 1) !== '#') color = '#' + color;
+      if (color.substr(0, 1) !== '#') color = '#' + color
 
       // first try regex
       const re = new RegExp(statuscode.statuscode, 'i');
       if (re.test(status)) {
-        return color;
-        // return resolve(color);
+        return color
       }
 
       if (status === statuscode) {
-        return color;
-        // return resolve(color);
+        return color
       }
     }
 
-    return '';
+    return defaultColor
   }
 
   hasAccessToModule(config) {
