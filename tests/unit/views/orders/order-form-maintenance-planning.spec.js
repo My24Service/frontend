@@ -1,18 +1,19 @@
 import axios from "axios"
 import { expect } from 'chai'
-import { shallowMount, mount } from '@vue/test-utils'
-import { render } from '@vue/server-test-utils'
+import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 const moment = require('moment')
 
 import localVue from '../../index'
-import OrderFormTemps from '@/views/orders/OrderFormTemps.vue'
+import OrderFormMaintenancePlanning from '@/views/orders/OrderFormMaintenancePlanning.vue'
 import orderResponse from '../../fixtures/order'
+import engineersResponse from '../../fixtures/user-engineers.js'
 
-jest.mock('axios')
 axios.get.mockImplementation((url) => {
   switch (url) {
+    case '/company/engineer/?page=1':
+      return Promise.resolve(engineersResponse)
     case '/order/order/1/':
       return Promise.resolve(orderResponse)
     case '/customer/customer/autocomplete/?q=':
@@ -24,7 +25,7 @@ axios.get.mockImplementation((url) => {
 })
 
 
-describe('OrderFormTemps.vue temps', () => {
+describe('OrderFormMaintenance.vue temps', () => {
   let store
   let actions
 
@@ -47,7 +48,7 @@ describe('OrderFormTemps.vue temps', () => {
   })
 
   it('exists', async () => {
-    const wrapper = mount(OrderFormTemps, {
+    const wrapper = mount(OrderFormMaintenancePlanning, {
       localVue,
       store,
       mocks: {
@@ -61,12 +62,12 @@ describe('OrderFormTemps.vue temps', () => {
 
     let el
 
-    el = wrapper.findComponent(OrderFormTemps)
+    el = wrapper.findComponent(OrderFormMaintenancePlanning)
     expect(el.exists()).to.be.true
   })
 
   it('insert, contains "New order"', async () => {
-    const wrapper = mount(OrderFormTemps, {
+    const wrapper = mount(OrderFormMaintenancePlanning, {
       localVue,
       store,
       mocks: {
@@ -83,7 +84,7 @@ describe('OrderFormTemps.vue temps', () => {
   })
 
   it('edit, contains "Edit order"', async () => {
-    const wrapper = mount(OrderFormTemps, {
+    const wrapper = mount(OrderFormMaintenancePlanning, {
       localVue,
       store,
       mocks: {
@@ -102,8 +103,8 @@ describe('OrderFormTemps.vue temps', () => {
     expect(html).to.contain('<h2>Edit order</h2>')
   })
 
-  it('contains "Required users"', async () => {
-    const wrapper = mount(OrderFormTemps, {
+  it('does not contain "Required users"', async () => {
+    const wrapper = mount(OrderFormMaintenancePlanning, {
       localVue,
       store,
       mocks: {
@@ -115,7 +116,6 @@ describe('OrderFormTemps.vue temps', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('Required users')
+    expect(html).not.to.contain('Required users')
   })
-
 })

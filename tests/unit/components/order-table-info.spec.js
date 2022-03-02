@@ -1,6 +1,5 @@
 import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
-import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
@@ -26,7 +25,14 @@ describe('OrderTableInfo.vue temps', () => {
     }
 
     store = new Vuex.Store({
-      actions
+      actions,
+      state: {
+        userInfo: {
+          is_staff: false,
+          is_superuser: false,
+          customer_user: 10
+        }
+      }
     })
   })
 
@@ -77,7 +83,14 @@ describe('OrderTableInfo.vue maintenance', () => {
     }
 
     store = new Vuex.Store({
-      actions
+      actions,
+      state: {
+        userInfo: {
+          is_staff: false,
+          is_superuser: false,
+          customer_user: 10
+        }
+      }
     })
   })
 

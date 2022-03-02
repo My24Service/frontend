@@ -1,35 +1,48 @@
 import axios from "axios"
 import { expect } from 'chai'
-import { shallowMount, mount } from '@vue/test-utils'
-import { render } from '@vue/server-test-utils'
+import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
-const moment = require('moment')
 
 import localVue from '../../index'
 import OrderFormMaintenance from '@/views/orders/OrderFormMaintenance.vue'
-import orderResponse from '../../fixtures/order'
+import OrderFormMaintenancePlanning from '@/views/orders/OrderFormMaintenancePlanning.vue'
+import OrderFormMaintenanceCustomer from '@/views/orders/OrderFormMaintenanceCustomer.vue'
+import customerResponse from '../../fixtures/customer.js'
+import engineersResponse from '../../fixtures/user-engineers.js'
 
-jest.mock('axios')
+const userResponse = {
+  user: {
+    customer_user: {
+      customer: 1
+    }
+  }
+}
 
 axios.get.mockImplementation((url) => {
   switch (url) {
-    case '/order/order/1/':
-      return Promise.resolve(orderResponse)
-    case '/customer/customer/autocomplete/?q=':
-      return Promise.resolve({data: []})
+    case '/company/engineer/?page=1':
+      return Promise.resolve(engineersResponse)
+    case '/customer/customer/1/':
+      return Promise.resolve(customerResponse)
+    case '/company/user-info/1/':
+      return Promise.resolve({data: userResponse})
     default:
       console.log(url)
       return Promise.reject(new Error('not found'))
   }
 })
 
-
-describe('OrderFormMaintenance.vue temps', () => {
+describe('OrderFormMaintenance staff', () => {
   let store
   let actions
+  let getters
 
   beforeEach(() => {
+    getters = {
+      getCurrentLanguage: () => 'nl'
+    }
+
     actions = {
       getCountries: () => [],
       getOrderTypes: () => [],
@@ -37,79 +50,103 @@ describe('OrderFormMaintenance.vue temps', () => {
 
     store = new Vuex.Store({
       actions,
+      getters,
+      state: {
+        userInfo: {
+          pk: 1,
+          is_staff: true,
+          customer_user: null
+        }
+      }
     })
   })
 
-  it('exists', async () => {
-    const wrapper = mount(OrderFormMaintenance, {
+  it('has OrderFormMaintenancePlanning component', async () => {
+    const wrapper = shallowMount(OrderFormMaintenance, {
       localVue,
       store,
       mocks: {
-        $trans: (f) => f,
-        $moment: moment,
+        $trans: (f) => f
       },
-      stubs: ['multiselect', 'OrderTypesSelect']
     })
 
     await flushPromises()
 
-    let el
-
-    el = wrapper.findComponent(OrderFormMaintenance)
+    const el = wrapper.findComponent(OrderFormMaintenancePlanning)
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New order"', async () => {
-    const wrapper = mount(OrderFormMaintenance, {
+  it('does not have OrderFormMaintenanceCustomer component', async () => {
+    const wrapper = shallowMount(OrderFormMaintenance, {
       localVue,
       store,
       mocks: {
-        $trans: (f) => f,
-        $moment: moment,
-      },
-      stubs: ['multiselect', 'OrderTypesSelect']
-    })
-
-    await flushPromises()
-
-    const html = wrapper.html()
-    expect(html).to.contain('<h2>New order</h2>')
-  })
-
-  it('edit, contains "Edit order"', async () => {
-    const wrapper = mount(OrderFormMaintenance, {
-      localVue,
-      store,
-      mocks: {
-        $trans: (f) => f,
-        $moment: moment,
-      },
-      propsData: {
-        pk: 1
-      },
-      stubs: ['multiselect', 'OrderTypesSelect']
-    })
-
-    await flushPromises()
-
-    const html = wrapper.html()
-    expect(html).to.contain('<h2>Edit order</h2>')
-  })
-
-  it('does not contain "Required users"', async () => {
-    const wrapper = mount(OrderFormMaintenance, {
-      localVue,
-      store,
-      mocks: {
-        $trans: (f) => f,
-        $moment: moment,
+        $trans: (f) => f
       },
     })
 
     await flushPromises()
 
-    const html = wrapper.html()
-    expect(html).not.to.contain('Required users')
+    const el = wrapper.findComponent(OrderFormMaintenanceCustomer)
+    expect(el.exists()).not.to.be.true
+  })
+})
+
+describe('OrderFormMaintenanceCustomer.vue maintenance', () => {
+  let store
+  let actions
+  let getters
+
+  beforeEach(() => {
+    getters = {
+      getCurrentLanguage: () => 'nl'
+    }
+
+    actions = {
+      getCountries: () => [],
+      getOrderTypes: () => [],
+    }
+
+    store = new Vuex.Store({
+      actions,
+      getters,
+      state: {
+        userInfo: {
+          pk: 1,
+          is_staff: false,
+          customer_user: 1
+        }
+      }
+    })
   })
 
+  it('has OrderFormMaintenanceCustomer component', async () => {
+    const wrapper = shallowMount(OrderFormMaintenance, {
+      localVue,
+      store,
+      mocks: {
+        $trans: (f) => f
+      },
+    })
+
+    await flushPromises()
+
+    const el = wrapper.findComponent(OrderFormMaintenanceCustomer)
+    expect(el.exists()).to.be.true
+  })
+
+  it('does not have OrderFormMaintenancePlanning component', async () => {
+    const wrapper = shallowMount(OrderFormMaintenance, {
+      localVue,
+      store,
+      mocks: {
+        $trans: (f) => f
+      },
+    })
+
+    await flushPromises()
+
+    const el = wrapper.findComponent(OrderFormMaintenancePlanning)
+    expect(el.exists()).not.to.be.true
+  })
 })

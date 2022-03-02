@@ -1,7 +1,7 @@
 <template>
   <div>
-    <OrderFormMaintenancePlanning v-if="!isCustomer" :pk="pk" />
-    <OrderFormMaintenanceCustomer v-if="isCustomer" :pk="pk" />
+    <OrderFormMaintenancePlanning v-if="!isCustomer || isStaff || isSuperuser" :pk="pk" />
+    <OrderFormMaintenanceCustomer v-if="isCustomer && !isStaff && !isSuperuser" :pk="pk" />
   </div>
 </template>
 

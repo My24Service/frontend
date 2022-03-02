@@ -207,7 +207,7 @@ export default {
     async loadData() {
       try {
         this.contract = await contractModel.detail(this.pk)
-        this.fillSelected(contract.module_paths_pks)
+        this.fillSelected(this.contract.module_paths_pks)
       } catch(error) {
         console.log('error fetching contract', error)
         this.errorToast(this.$trans('Error fetching contract'))

@@ -1,7 +1,6 @@
 import axios from "axios"
 import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
-import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
@@ -31,6 +30,13 @@ describe('OrderView.vue temps', () => {
 
     store = new Vuex.Store({
       actions,
+      state: {
+        userInfo: {
+          pk: 1,
+          is_staff: true,
+          customer_user: null
+        }
+      }
     })
   })
 
