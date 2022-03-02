@@ -203,6 +203,7 @@ class Dispatch {
     }
   }
 
+  lastYPlus = 150
   _draw(data, timesDone=0) {
     if (this.debug) {
       console.log('Doing empty run to get lastY')
@@ -210,7 +211,7 @@ class Dispatch {
 
     this.lastY = 1
     this.setLastY(data)
-    let finalLastY = this.lastY + 250
+    let finalLastY = this.lastY + this.lastYPlus
     this.canvas.height = finalLastY
 
     if (this.debug) {
@@ -234,6 +235,8 @@ class Dispatch {
     }
 
     if (finalLastY - this.lastY < 0) {
+      this.lastYPlus = this.lastY - finalLastY + 30
+      console.log(finalLastY, this.lastY, finalLastY - this.lastY)
       console.log('second pass', timesDone)
       if (timesDone > 2) {
         throw 'HELP'
