@@ -580,8 +580,8 @@ class Dispatch {
 
 
     if (data.is_partner) {
-      const image = this.ctx.getImageData(1, startY, this.width, this.lastY - startY)
-      this.ctx.putImageData(this.createTransparentImg(image), 1, startY)
+      const image = this.ctx.getImageData(this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
+      this.ctx.putImageData(this.createTransparentImg(image), this.slotWidth, startY)
     } else {
       const image = this.ctx.getImageData(this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
       this.userYPositions.push({
