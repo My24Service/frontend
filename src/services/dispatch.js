@@ -210,7 +210,7 @@ class Dispatch {
 
     this.lastY = 1
     this.setLastY(data)
-    let finalLastY = this.lastY + 150
+    let finalLastY = this.lastY + 250
     this.canvas.height = finalLastY
 
     if (this.debug) {
