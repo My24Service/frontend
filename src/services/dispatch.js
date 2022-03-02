@@ -210,11 +210,11 @@ class Dispatch {
 
     this.lastY = 1
     this.setLastY(data)
-    let finalLastY = this.lastY + 50
+    let finalLastY = this.lastY + 150
     this.canvas.height = finalLastY
 
     if (this.debug) {
-      console.log(`empty run done, lastY: ${finalLastY}`)
+      console.log(`------------- empty run done, lastY: ${finalLastY}`)
     }
 
     this.component.showOverlay = true
@@ -395,6 +395,15 @@ class Dispatch {
     this.setText(data.full_name, 1+this.xPadding, this.lastY+this.getYPadding(), this.slotWidth)
     rowInfo.push(data.full_name)
 
+    // prio 1 = start outside, end within window
+    // prio 2 = start inside, end outside window
+    // prio 3 = start/end inside window
+    // prio 4 = same day
+    let rowOrderLinesPrio1 = []
+    let rowOrderLinesPrio2 = []
+    let rowOrderLinesPrio3 = []
+    let rowOrderLinesPrio4 = []
+
     for (const [date, orders] of Object.entries(data.assignedorders.start)) {
       for(let i=0; i<orders.length; i++) {
         // fill searchable info
@@ -410,103 +419,115 @@ class Dispatch {
 
         // start outside window, end within
         if (!(date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
-          if (this.debug) {
-            console.log('drawOrderLine: start outside window, end within')
-          }
-          const endIndex = this.dateToIndex[endOrder.date]
-          const startPosX = this.getSlotsStartX()
-          const endPosX = this.getEndXPos(endIndex)
-
-          // find an empty slot in index 0
-          const ySlot = this.findEmptyYSlot(0)
-
-          // set y slots in all slots
-          this.setYSlot(orders[i].order_pk, ySlot, 0, endIndex)
-
-          // draw the line
-          if (this.mode == COMPACT) {
-            this.drawOrderLine(startPosX, endPosX, ySlot, orders[i], data.user_id)
-          } else {
-            this.drawOrderLineWide(startPosX, endPosX, ySlot, orders[i], data.user_id)
-          }
+          rowOrderLinesPrio1.push({
+            order: orders[i],
+            startIndex: 0,
+            endIndex: this.dateToIndex[endOrder.date],
+            startPosX: this.getSlotsStartX(),
+            endPosX: this.getEndXPos(this.dateToIndex[endOrder.date]),
+          })
         }
 
         // start inside window, end outside
         else if ((date in this.dateToIndex) && !(endOrder.date in this.dateToIndex)) {
-          if (this.debug) {
-            console.log('drawOrderLine: start inside window, end outside')
-          }
-          const startIndex = this.dateToIndex[date]
-          const startPosX = this.getStartXPos(startIndex)
-          const endPosX = this.getSlotsEndX()
-
-          // find an empty slot
-          const ySlot = this.findEmptyYSlot(startIndex)
-
-          // set y slots in all slots
-          this.setYSlot(orders[i].order_pk, ySlot, startIndex, this.numSlots-2)
-
-          // draw the line
-          if (this.mode == COMPACT) {
-            this.drawOrderLine(startPosX, endPosX, ySlot, orders[i], data.user_id)
-          } else {
-            this.drawOrderLineWide(startPosX, endPosX, ySlot, orders[i], data.user_id)
-          }
+          rowOrderLinesPrio2.push({
+            order: orders[i],
+            startIndex: this.dateToIndex[date],
+            endIndex: this.numSlots-2,
+            startPosX:this.getStartXPos(this.dateToIndex[date]),
+            endPosX: this.getSlotsEndX(),
+          })
         }
 
         // start & end inside window
         else if ((date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
-          // same day
-          if (date === endOrder.date) {
-            if (this.debug) {
-              console.log('drawOrderLine: start & end inside window, same day')
-            }
-            const index = this.dateToIndex[date]
-
-            const startPosX = this.getStartXPosSameDay(index)
-            const endPosX = this.getEndXPosSameDay(index)
-            if (this.debug) {
-              console.log(`same day index: ${index}, startPosX: ${startPosX}, endPosX: ${endPosX}`)
-            }
-
-            // find an empty slot
-            const ySlot = this.findEmptyYSlot(index)
-
-            // set y slots in all slots
-            this.setYSlot(orders[i].order_pk, ySlot, index, index)
-
-            // draw the line
-            if (this.mode == COMPACT) {
-              this.drawOrderLine(startPosX, endPosX, ySlot, orders[i], data.user_id)
-            } else {
-              this.drawOrderLineWide(startPosX, endPosX, ySlot, orders[i], data.user_id)
-            }
+          // not same day
+          if (date !== endOrder.date) {
+            rowOrderLinesPrio3.push({
+              order: orders[i],
+              startIndex: this.dateToIndex[date],
+              endIndex: this.dateToIndex[endOrder.date],
+              startPosX: this.getStartXPos(this.dateToIndex[date]),
+              endPosX: this.getEndXPos(this.dateToIndex[endOrder.date]),
+            })
           } else {
-            if (this.debug) {
-              console.log('drawOrderLine: start & end inside window, not same day')
-            }
-            const startIndex = this.dateToIndex[date]
-            const endIndex = this.dateToIndex[endOrder.date]
-            const startPosX = this.getStartXPos(startIndex)
-            const endPosX = this.getEndXPos(endIndex)
-
-            // find an empty slot
-            const ySlot = this.findEmptyYSlot(startIndex)
-
-            // set y slots in all slots
-            this.setYSlot(orders[i].order_pk, ySlot, startIndex, endIndex)
-
-            // draw the line
-            if (this.mode == COMPACT) {
-              this.drawOrderLine(startPosX, endPosX, ySlot, orders[i], data.user_id)
-            } else {
-              this.drawOrderLineWide(startPosX, endPosX, ySlot, orders[i], data.user_id)
-            }
+            rowOrderLinesPrio4.push({
+              order: orders[i],
+              startIndex: this.dateToIndex[date],
+              endIndex: this.dateToIndex[date],
+              startPosX: this.getStartXPosSameDay(this.dateToIndex[date]),
+              endPosX: this.getEndXPosSameDay(this.dateToIndex[date]),
+            })
           }
 
         }
       } // for orders.length
     } // for data.assignedorders.start
+
+    // draw order lines
+    rowOrderLinesPrio1.forEach(lineData => {
+      // find an empty slot
+      const ySlot = this.findEmptyYSlot(0)
+
+      if (this.debug) {
+        console.log('drawOrderLine: start outside window, end within')
+        console.log(`order_pk=${lineData.order.order_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+      }
+
+      // set y slots in all slots
+      this.setYSlot(lineData.order.order_pk, ySlot, lineData.startIndex, lineData.endIndex)
+
+      // draw the line
+      this._drawOrderLine(lineData, ySlot, data.user_id)
+    })
+
+    rowOrderLinesPrio2.forEach(lineData => {
+      // find an empty slot
+      const ySlot = this.findEmptyYSlot(lineData.startIndex)
+
+      if (this.debug) {
+        console.log('drawOrderLine: start inside window, end outside')
+        console.log(`order_pk=${lineData.order.order_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+      }
+
+      // set y slots in all slots
+      this.setYSlot(lineData.order.order_pk, ySlot, lineData.startIndex, lineData.endIndex)
+
+      // draw the line
+      this._drawOrderLine(lineData, ySlot, data.user_id)
+    })
+
+    rowOrderLinesPrio3.forEach(lineData => {
+      // find an empty slot
+      const ySlot = this.findEmptyYSlot(lineData.startIndex)
+
+      if (this.debug) {
+        console.log('drawOrderLine: start & end inside window, not same day')
+        console.log(`order_pk=${lineData.order.order_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+      }
+
+      // set y slots in all slots
+      this.setYSlot(lineData.order.order_pk, ySlot, lineData.startIndex, lineData.endIndex)
+
+      // draw the line
+      this._drawOrderLine(lineData, ySlot, data.user_id)
+    })
+
+    rowOrderLinesPrio4.forEach(lineData => {
+      if (this.debug) {
+        console.log('drawOrderLine: start & end inside window, same day')
+        console.log(`same day index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
+      }
+
+      // find an empty slot
+      const ySlot = this.findEmptyYSlot(lineData.startIndex)
+
+      // set y slots in all slots
+      this.setYSlot(lineData.order.order_pk, ySlot, lineData.startIndex, lineData.endIndex)
+
+      // draw the line
+      this._drawOrderLine(lineData, ySlot, data.user_id)
+    })
 
     // store info positions
     this.rowInfoPositions[this.lastY] = rowInfo.join(' ')
@@ -542,6 +563,9 @@ class Dispatch {
     this.ctx.lineTo(this.width-1, this.lastY + rowHeight)
     this.ctx.stroke()
 
+    if (this.debug) {
+      console.log(`updating lastY (${this.lastY}) with height ${rowHeight}`)
+    }
     this.lastY += rowHeight
 
     const shape = new Path2D()
@@ -610,6 +634,14 @@ class Dispatch {
 
   getYPosForYSlot(ySlot) {
     return ySlot*this.getSlotHeight() + this.orderLinePaddingTop + 2
+  }
+
+  _drawOrderLine(lineData, ySlot, user_id) {
+    if (this.mode == COMPACT) {
+      this.drawOrderLine(lineData.startPosX, lineData.endPosX, ySlot, lineData.order, user_id)
+    } else {
+      this.drawOrderLineWide(lineData.startPosX, lineData.endPosX, ySlot, lineData.order, user_id)
+    }
   }
 
   drawOrderLine(startX, endX, ySlot, order, user_id) {
@@ -751,13 +783,14 @@ class Dispatch {
 
   setYSlot(orderPk, ySlot, startIndex, endIndex) {
     if (this.debug) {
-      console.log(`setYSlot(${orderPk}, ${ySlot}, ${startIndex}, ${endIndex})`)
+      console.log(`setYSlot(${orderPk}, ySlot=${ySlot}, startIndex=${startIndex}, endIndex=${endIndex})`)
     }
 
     for(let i=startIndex; i<=endIndex; i++) {
       if (this.debug) {
         console.log(`${this.daysInView[i].dateFormated}, index=${i}`)
       }
+
       this.daysInView[i].orders[ySlot] = orderPk
     }
   }
