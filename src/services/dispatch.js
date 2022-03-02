@@ -578,19 +578,24 @@ class Dispatch {
     shape.lineTo(this.width, startY)
     shape.closePath()
 
-    const image = this.ctx.getImageData(this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
 
-    this.userYPositions.push({
-      hover: false,
-      transImage: this.createTransparentImg(image),
-      image,
-      shape,
-      start: startY,
-      end: this.lastY,
-      user_id: data.user_id,
-      full_name: data.full_name,
-      isEmpty: true
-    })
+    if (data.is_partner) {
+      const image = this.ctx.getImageData(this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
+      this.ctx.putImageData(this.createTransparentImg(image), this.slotWidth, startY)
+    } else {
+      const image = this.ctx.getImageData(this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
+      this.userYPositions.push({
+        hover: false,
+        transImage: this.createTransparentImg(image),
+        image,
+        shape,
+        start: startY,
+        end: this.lastY,
+        user_id: data.user_id,
+        full_name: data.full_name,
+        isEmpty: true
+      })
+    }
 
     this.horizontalLine(this.lastY)
     if (this.debug) {
