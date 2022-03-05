@@ -1,6 +1,6 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-detail">
+    <div class="app-detail" v-if="order">
       <h3>{{ $trans('Order info') }}</h3>
       <b-row>
         <b-col cols="6">
@@ -127,6 +127,18 @@
         <b-col cols="12">
           <h4>{{ $trans('Workorder documents') }}</h4>
           <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents" responsive="sm">
+            <template #cell(url)="data">
+              <b-link class="px-1" :href="data.item.url" target="_blank">
+                {{ $trans('Order') }} {{ order.order_id }}
+              </b-link>
+            </template>
+          </b-table>
+        </b-col>
+      </b-row>
+      <b-row class="my-2" v-if="order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
+        <b-col cols="12">
+          <h4>{{ $trans('Workorder documents partner') }}</h4>
+          <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents_partners" responsive="sm">
             <template #cell(url)="data">
               <b-link class="px-1" :href="data.item.url" target="_blank">
                 {{ $trans('Order') }} {{ order.order_id }}
