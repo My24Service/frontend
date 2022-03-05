@@ -64,6 +64,7 @@ class Dispatch {
   daysInView = []
   dateToIndex = {}
   userYPositions = []
+  partnerYPositions = []
 
   debug = false
   debugNumUsers = 300
@@ -190,9 +191,9 @@ class Dispatch {
   async drawDispatch() {
     this.component.showOverlay = true
     try {
+      this.partnerYPositions = []
       this.userYPositions = []
       const results = await this.fetchData()
-      this.canvas.height = results.data.length * this.rowHeight + 300
       this._draw(results.data)
       this.component.showOverlay = false
       this.component.newData = false
@@ -307,7 +308,7 @@ class Dispatch {
       if (this.debug) {
         console.log(`creating row for ${data[i].full_name}, lastY=${this.lastY}`)
       }
-      this.createUserRow(data[i])
+      this.createUserRow(data[i], i)
 
       if (this.debug&& this.debugNumUsers === i+1) {
         break
@@ -316,14 +317,23 @@ class Dispatch {
 
     if (this.debug) {
       for(let i=0; i<this.daysInView.length; i++) {
-        console.log(`${this.daysInView[i].dateFormated}`, this.daysInView[i].orders)
+        console.log(`days in view: ${this.daysInView[i].dateFormated}`, this.daysInView[i].orders)
       }
     }
   }
 
-  createUserRow(data) {
+  createUserRow(data, index) {
     const startY = this.lastY
     let rowInfo = []
+
+    // draw partners with a grey background
+    if (data.is_partner && this.partnerYPositions.length) {
+      const positions = this.partnerYPositions.find(position => position.user_id == data.user_id)
+      if (positions) {
+        this.ctx.fillStyle = "#e5e5e5"
+        this.ctx.fillRect(1, positions.start, this.width-1, positions.end)
+      }
+    }
 
     this.resetDayOrders()
     this.setText(data.full_name, 1+this.xPadding, this.lastY+this.getYPadding(), this.slotWidth)
@@ -509,10 +519,14 @@ class Dispatch {
     shape.lineTo(this.width, startY)
     shape.closePath()
 
-
     if (data.is_partner) {
-      const image = this.ctx.getImageData(this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
-      this.ctx.putImageData(this.createTransparentImg(image), this.slotWidth, startY)
+      if (!this.partnerYPositions.find(position => position.user_id == data.user_id)) {
+        this.partnerYPositions.push({
+          start: startY,
+          end: rowHeight,
+          user_id: data.user_id
+        })
+      }
     } else {
       const image = this.ctx.getImageData(this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
       this.userYPositions.push({
@@ -680,6 +694,7 @@ class Dispatch {
       } while(fontsize > 10 && this.ctx.measureText(text).width > maxWidth)
     }
 
+    this.ctx.fillStyle = '#000'
     this.ctx.font = `${fontsize}px ${this.fontface}`
     this.ctx.fillText(text, xPosition, yPosition)
     this.ctx.font = `${this.getFontsize()}px ${this.fontface}`
