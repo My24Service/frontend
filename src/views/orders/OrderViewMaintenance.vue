@@ -109,6 +109,10 @@
             <b-link class="px-1" :href="order.workorder_url" target="_blank">
               {{ order.order_id }}
             </b-link>
+            HALLO
+            <b-link class="px-1" @click="openWorkorder()" target="_blank">
+              {{ $trans('Order') }} {{ order.order_id }} (new workorder)
+            </b-link>
           </b-col>
       </b-row>
       <b-row class="my-2" v-if="order.workorder_pdf_url != ''">
@@ -185,6 +189,11 @@ export default {
     },
   },
   methods: {
+    openWorkorder() {
+      const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
+      console.log(routeData)
+      window.open(`${document.location.origin}/${routeData.href}`, '_blank')
+    },
     async recreateWorkorderPdf() {
       this.isLoading = true
       this.buttonDisabled = true

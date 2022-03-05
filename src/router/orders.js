@@ -1,3 +1,6 @@
+import TheAppLayoutEmpty from '@/components/TheAppLayoutEmpty.vue'
+import Workorder from '@/views/orders/Workorder.vue'
+
 import TheAppLayout from '@/components/TheAppLayout.vue'
 import SubNavOrders from '@/components/SubNavOrders.vue'
 
@@ -12,7 +15,6 @@ import OrderListNotAccepted from '@/views/orders/OrderListNotAccepted.vue'
 import OrderListWorkorder from '@/views/orders/OrderListWorkorder.vue'
 import OrderForm from '@/views/orders/OrderForm.vue'
 import OrderView from '@/views/orders/OrderView.vue'
-
 import DocumentList from '@/views/orders/DocumentList.vue'
 import DocumentForm from '@/views/orders/DocumentForm.vue'
 
@@ -22,6 +24,22 @@ import MonthStats from '@/views/orders/MonthStats.vue'
 
 export default [
 // orders
+{
+  component: TheAppLayoutEmpty,
+  path: '/orders',
+  children: [
+      {
+        name: 'workorder-view',
+        path: '/orders/workorder/:uuid',
+        components: {
+          'app-content': Workorder,
+        },
+        props: {
+          'app-content': route => ({...route.params})
+        },
+      }
+  ]
+},
 {
   path: '/orders',
   component: TheAppLayout,

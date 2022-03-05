@@ -120,15 +120,11 @@ class Order extends BaseModel {
   }
 
   search(query) {
-    return new Promise((resolve, reject) => {
-      this.axios.get(`${this.url}autocomplete/?q=${query}`)
-      .then((response) => {
-        resolve(response.data)
-      })
-      .catch((error) => {
-        reject(error)
-      })
-    })
+    return this.axios.get(`${this.url}autocomplete/?q=${query}`).then(response => response.data)
+  }
+
+  getWorkorderData(uuid) {
+    return this.axios.get(`/order/workorder-data/${uuid}/`).then(response => response.data)
   }
 }
 

@@ -66,7 +66,8 @@ class Dispatch {
   userYPositions = []
 
   debug = false
-  debugNumUsers = 3
+  debugNumUsers = 300
+  debugSubstr = 'heerink'
 
   statuscodes = null
 
@@ -205,18 +206,7 @@ class Dispatch {
 
   lastYPlus = 150
   _draw(data, timesDone=0) {
-    if (this.debug) {
-      console.log('Doing empty run to get lastY')
-    }
-
-    this.lastY = 1
-    this.setLastY(data)
-    let finalLastY = this.lastY + this.lastYPlus
-    this.canvas.height = finalLastY
-
-    if (this.debug) {
-      console.log(`------------- empty run done, lastY: ${finalLastY}`)
-    }
+    this.canvas.height = this.lastYPlus
 
     this.component.showOverlay = true
 
@@ -230,18 +220,9 @@ class Dispatch {
 
     this.reOffset()
     this.createUserRows(data)
-    if (this.debug) {
-      console.log(finalLastY, this.lastY, finalLastY - this.lastY)
-    }
 
-    if (finalLastY - this.lastY < 0) {
-      this.lastYPlus = this.lastY - finalLastY + 30
-      console.log(finalLastY, this.lastY, finalLastY - this.lastY)
-      console.log('second pass', timesDone)
-      if (timesDone > 2) {
-        throw 'HELP'
-      }
-
+    if (timesDone == 0) {
+      this.lastYPlus = this.lastY + 30
       this._draw(data, ++timesDone)
     }
   }
@@ -312,73 +293,23 @@ class Dispatch {
     this.horizontalLine(this.lastY)
   }
 
-  setLastY(data) {
-    this.headerLastY()
-    for (let i=0; i<data.length; i++) {
-      this.updateLastYUser(data[i])
-      if (this.debug && this.debugNumUsers === i+1) {
-        break
-      }
-    }
-  }
-
-  headerLastY() {
-    this.lastY += 1
-    this.lastY += 1
-    this.lastY += this.getRowHeightInt()
-  }
-
-  updateLastYUser(data) {
-    const startY = this.lastY
-    const rowHeight = this.getRowHeight()
-    this.resetDayOrders()
-
-    for (const [date, orders] of Object.entries(data.assignedorders.start)) {
-      for(let i=0; i<orders.length; i++) {
-        const endOrder = this.getEnd(orders[i].order_pk, data.assignedorders.end)
-
-        // start outside window, end within
-        if (!(date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
-          const endIndex = this.dateToIndex[endOrder.date]
-          const ySlot = this.findEmptyYSlot(0)
-          this.setYSlot(orders[i].order_pk, ySlot, 0, endIndex)
-        }
-
-        // start inside window, end outside
-        else if ((date in this.dateToIndex) && !(endOrder.date in this.dateToIndex)) {
-          const startIndex = this.dateToIndex[date]
-          const ySlot = this.findEmptyYSlot(startIndex)
-          this.setYSlot(orders[i].order_pk, ySlot, startIndex, this.numSlots-2)
-        }
-
-        // start & end inside window
-        else if ((date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
-          // same day
-          if (date === endOrder.date) {
-            const index = this.dateToIndex[date]
-            const ySlot = this.findEmptyYSlot(index)
-            this.setYSlot(orders[i].order_pk, ySlot, index, index)
-          } else {
-            const startIndex = this.dateToIndex[date]
-            const endIndex = this.dateToIndex[endOrder.date]
-            const ySlot = this.findEmptyYSlot(startIndex)
-            this.setYSlot(orders[i].order_pk, ySlot, startIndex, endIndex)
-          }
-        }
-      } // for orders.length
-    } // for data.assignedorders.start
-
-    this.lastY += rowHeight
-  }
 
   createUserRows(data) {
+    const userRegex = new RegExp(this.debugSubstr, 'i')
+
     for (let i=0; i<data.length; i++) {
+      if (this.debug) {
+        if (this.debugSubstr && data[i].full_name.search(userRegex) === -1) {
+          continue
+        }
+      }
+
       if (this.debug) {
         console.log(`creating row for ${data[i].full_name}, lastY=${this.lastY}`)
       }
       this.createUserRow(data[i])
 
-      if (this.debug && this.debugNumUsers === i+1) {
+      if (this.debug&& this.debugNumUsers === i+1) {
         break
       }
     }
@@ -417,7 +348,7 @@ class Dispatch {
 
         const endOrder = this.getEnd(orders[i].order_pk, data.assignedorders.end)
         if (this.debug) {
-          console.log(`order ${orders[i].order_pk}, start: ${date}, end: ${endOrder.date}`)
+          console.log(`order ${orders[i].order_id}, start: ${date}, end: ${endOrder.date}`)
         }
 
         // start outside window, end within
@@ -470,15 +401,15 @@ class Dispatch {
     // draw order lines
     rowOrderLinesPrio1.forEach(lineData => {
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(0)
+      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex)
 
       if (this.debug) {
         console.log('drawOrderLine: start outside window, end within')
-        console.log(`order_pk=${lineData.order.order_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+        console.log(`order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
       }
 
       // set y slots in all slots
-      this.setYSlot(lineData.order.order_pk, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.order_id, ySlot, lineData.startIndex, lineData.endIndex)
 
       // draw the line
       this._drawOrderLine(lineData, ySlot, data.user_id)
@@ -486,15 +417,15 @@ class Dispatch {
 
     rowOrderLinesPrio2.forEach(lineData => {
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(lineData.startIndex)
+      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex)
 
       if (this.debug) {
         console.log('drawOrderLine: start inside window, end outside')
-        console.log(`order_pk=${lineData.order.order_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+        console.log(`order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
       }
 
       // set y slots in all slots
-      this.setYSlot(lineData.order.order_pk, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.order_id, ySlot, lineData.startIndex, lineData.endIndex)
 
       // draw the line
       this._drawOrderLine(lineData, ySlot, data.user_id)
@@ -502,15 +433,15 @@ class Dispatch {
 
     rowOrderLinesPrio3.forEach(lineData => {
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(lineData.startIndex)
+      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex)
 
       if (this.debug) {
         console.log('drawOrderLine: start & end inside window, not same day')
-        console.log(`order_pk=${lineData.order.order_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+        console.log(`order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
       }
 
       // set y slots in all slots
-      this.setYSlot(lineData.order.order_pk, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.order_id, ySlot, lineData.startIndex, lineData.endIndex)
 
       // draw the line
       this._drawOrderLine(lineData, ySlot, data.user_id)
@@ -519,14 +450,14 @@ class Dispatch {
     rowOrderLinesPrio4.forEach(lineData => {
       if (this.debug) {
         console.log('drawOrderLine: start & end inside window, same day')
-        console.log(`same day index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
+        console.log(`order_id=${lineData.order.order_id}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
       }
 
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(lineData.startIndex)
+      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex)
 
       // set y slots in all slots
-      this.setYSlot(lineData.order.order_pk, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.order_id, ySlot, lineData.startIndex, lineData.endIndex)
 
       // draw the line
       this._drawOrderLine(lineData, ySlot, data.user_id)
@@ -657,7 +588,7 @@ class Dispatch {
     const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
     const color = my24.status2color(this.statuscodes, status)
     if (this.debug) {
-      console.log(`yPos for line=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
+      console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
 
     let path = new Path2D()
@@ -682,7 +613,7 @@ class Dispatch {
     const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
     const color = my24.status2color(this.statuscodes, status)
     if (this.debug) {
-      console.log(`yPos for line=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}`)
+      console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
 
     /**   -------------------------
@@ -789,26 +720,35 @@ class Dispatch {
     return height > this.getRowHeightInt() ? height : this.getRowHeightInt()
   }
 
-  setYSlot(orderPk, ySlot, startIndex, endIndex) {
+  setYSlot(order_id, ySlot, startIndex, endIndex) {
     if (this.debug) {
-      console.log(`setYSlot(${orderPk}, ySlot=${ySlot}, startIndex=${startIndex}, endIndex=${endIndex})`)
+      console.log(`setYSlot(order_id=${order_id}, ySlot=${ySlot}, startIndex=${startIndex}, endIndex=${endIndex})`)
     }
 
     for(let i=startIndex; i<=endIndex; i++) {
-      if (this.debug) {
-        console.log(`${this.daysInView[i].dateFormated}, index=${i}`)
-      }
-
-      this.daysInView[i].orders[ySlot] = orderPk
+      this.daysInView[i].orders[ySlot] = order_id
     }
   }
 
-  findEmptyYSlot(slotIndex) {
+  findEmptyYSlot(startIndex, endIndex) {
+    const nextFreeStart = this.daysInView[startIndex].orders.length
+    const nextFreeEnd = this.daysInView[endIndex].orders.length
+
     if (this.debug) {
-      console.log(`empty slot for index ${slotIndex}: ${this.daysInView[slotIndex].orders.length}`)
+      console.log(`findEmptyYSlot: startIndex=${startIndex}, endIndex=${endIndex}, nextFreeStart=${nextFreeStart}, nextFreeEnd=${nextFreeEnd}`)
     }
 
-    return this.daysInView[slotIndex].orders.length
+    if (nextFreeEnd > nextFreeStart) {
+      if (this.debug) {
+        console.log(`findEmptyYSlot: returning ${nextFreeEnd}`)
+      }
+      return nextFreeEnd
+    }
+
+    if (this.debug) {
+      console.log(`findEmptyYSlot: returning ${nextFreeStart}`)
+    }
+    return nextFreeStart
   }
 
   getSlotsStartX() {
@@ -926,16 +866,14 @@ class Dispatch {
     this.ctx.clearRect(0, 0, this.cw, this.ch)
 
     let hit = false
-
-    for (let i=0; i<this.hotspots.length; i++) {
-      const h = this.hotspots[i]
-
-      if (this.inStroke(h.obj, mouseX, mouseY)) {
+    this.hotspots.forEach(spot => {
+      if (this.inStroke(spot.obj,mouseX, mouseY)) {
         this.canvas.style.cursor = "pointer"
-        this.showInfo(h.order.order_info, mouseX, mouseY)
+        this.showInfo(spot.order.order_info, mouseX, mouseY)
         hit = true
+        return
       }
-    }
+    })
 
     if (!hit) {
       this.hideTipCanvas()
@@ -992,9 +930,9 @@ class Dispatch {
   }
 
   inStroke(obj, x, y) {
-    const height = this.mode === COMPACT ? 5 : this.getRowHeight() + 10
+    const height = this.getRowHeightInt()
     for(let i=-1*height; i<height; i++) {
-      if (this.ctx.isPointInStroke(obj, x+i, y+i)) {
+      if (this.ctx.isPointInStroke(obj, x, y+i)) {
         return true
       }
     }
