@@ -109,7 +109,7 @@
             <b-link class="px-1" :href="order.workorder_url" target="_blank">
               {{ order.order_id }}
             </b-link>
-            HALLO
+            &nbsp;
             <b-link class="px-1" @click="openWorkorder()" target="_blank">
               {{ $trans('Order') }} {{ order.order_id }} (new workorder)
             </b-link>
