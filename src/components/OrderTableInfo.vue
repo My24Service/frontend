@@ -10,7 +10,9 @@
         {{ order.order_address }}<br/>
         {{ order.order_country_code }}-{{ order.order_postal }} {{ order.order_city }}<br/>
         <br/>
-        <p><b>{{ order.order_type }}</b></p>
+        <p>
+          {{ $trans('Order type') }}: <b>{{ order.order_type }}</b><br/>
+          {{ $trans('Order reference') }}: <b>{{ order.order_reference }}</b></p>
       </b-col>
       <b-col>
         <span v-if="order.order_contact">{{ $trans('Contact') }}: {{ order.order_contact }}<br/></span>
