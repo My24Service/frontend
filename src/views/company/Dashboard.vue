@@ -75,7 +75,7 @@
             id="pie-chart-order-types"
             v-if="!isLoading"
             :chart-data="pieChartdataOrderTypes"
-            :options="options"
+            :options="pieOptions"
           />
         </b-col>
       </b-row>
@@ -94,7 +94,7 @@
             id="pie-chart-order-types"
             v-if="!isLoading"
             :chart-data="pieChartdataOrderTypes"
-            :options="options"
+            :options="pieOptions"
           />
         </b-col>
       </b-row>
@@ -135,7 +135,7 @@
             id="pie-chart-transactions"
             v-if="!isLoading"
             :chart-data="pieChartdataTransactions"
-            :options="options"
+            :options="pieOptions"
           />
         </b-col>
       </b-row>
@@ -148,6 +148,7 @@
 import BarChart from "@/components/BarChart.vue"
 import PieChart from "@/components/PieChart.vue"
 import dashboardModel from '@/models/company/Dashboard.js'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 let d = new Date()
 
@@ -173,6 +174,25 @@ export default {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+      },
+      pieOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+         datalabels: {
+            formatter: (value, ctx) => {
+              let datasets = ctx.chart.data.datasets;
+              if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
+                let sum = datasets[0].data.reduce((a, b) => a + b, 0);
+                let percentage = Math.round((value / sum) * 100) + '%';
+                return percentage;
+              } else {
+                return percentage;
+              }
+            },
+            color: '#fff',
+          }
+        }
       },
       isLoading: false,
       year: d.getYear() + 1900,

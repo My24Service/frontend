@@ -62,11 +62,9 @@
 </template>
 
 <script>
-import moment from 'moment'
+import moment from 'moment/min/moment-with-locales'
 
 import timeSheetModel from '@/models/mobile/TimeSheet.js'
-
-const monday = window.locale === 'en' ? 1 : 0
 
 export default {
   name: "TimeSheet",
@@ -92,6 +90,7 @@ export default {
   created() {
     // moment
     const lang = this.$store.getters.getCurrentLanguage
+    const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
     this.today = this.$moment().weekday(monday)

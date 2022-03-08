@@ -20,6 +20,7 @@
     "bootstrap": "^4.5.2",
     "bootstrap-vue": "^2.21.2",
     "chart.js": "2",
+    "chartjs-plugin-datalabels": "^0.4.0",
     "mutationobserver-shim": "^0.3.7",
     "one-colorpicker": "^1.0.12",
     "popper.js": "^1.16.1",

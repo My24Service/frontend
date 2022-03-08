@@ -1309,9 +1309,9 @@
     "@babel/types" "^7.3.0"
 
 "@types/chart.js@^2.7.55":
-  "integrity" "sha512-CtZVk+kh1IN67dv+fB0CWmCLCRrDJgqOj15qPic2B1VCMovNO6B7Vhf/TgPpNscjhAL1j+qUntDMWb9A4ZmPTg=="
-  "resolved" "https://registry.npmjs.org/@types/chart.js/-/chart.js-2.9.34.tgz"
-  "version" "2.9.34"
+  "integrity" "sha512-MWx/zZlh4wHBbM4Tm4YsZyYGb1/LkTiFLFwX/FXb0EJCvXX2xWTRHwlJ2RAAEXWxLrOdaAWP8vFtJXny+4CpEw=="
+  "resolved" "https://registry.npmjs.org/@types/chart.js/-/chart.js-2.9.35.tgz"
+  "version" "2.9.35"
   dependencies:
     "moment" "^2.10.2"
 
@@ -2471,7 +2471,7 @@
   "resolved" "https://registry.npmjs.org/charcodes/-/charcodes-0.2.0.tgz"
   "version" "0.2.0"
 
-"chart.js@>= 2.5", "chart.js@2":
+"chart.js@>= 2.5", "chart.js@>= 2.7.0 < 3", "chart.js@2":
   "integrity" "sha512-B07aAzxcrikjAPyV+01j7BmOpxtQETxTSlQ26BEYJ+3iUkbNKaOJ/nDbT6JjyqYxseM0ON12COHYdU2cTIjC7A=="
   "resolved" "https://registry.npmjs.org/chart.js/-/chart.js-2.9.4.tgz"
   "version" "2.9.4"
@@ -2493,6 +2493,11 @@
   dependencies:
     "chartjs-color-string" "^0.6.0"
     "color-convert" "^1.9.3"
+
+"chartjs-plugin-datalabels@^0.4.0":
+  "integrity" "sha512-nC755jEZFl45KtUPEGMrH+f3/F/u8RbRS328yP+puca7/DBgkCA/n99DovFbsSc6/FgYmn/Z3+/MUQFl77qv8w=="
+  "resolved" "https://registry.npmjs.org/chartjs-plugin-datalabels/-/chartjs-plugin-datalabels-0.4.0.tgz"
+  "version" "0.4.0"
 
 "check-error@^1.0.2":
   "integrity" "sha1-V00xLt2Iu13YkS6Sht1sCu1KrII="

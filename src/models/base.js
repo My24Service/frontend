@@ -139,15 +139,7 @@ class BaseModel {
     // pre-process data
     obj = this.preInsert(obj)
 
-    return new Promise((resolve, reject) => {
-      this.axios.post(this.url, obj, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.post(this.url, obj, headers).then(response => response.data)
   }
 
   preUpdate(obj) {

@@ -138,8 +138,6 @@ export default {
         {key: 'activity_totals.distance_back_total', label: this.$trans('Distance back'), sortable: true},
         {key: 'icons'}
       ],
-      sortBy: "activity_totals.work_total",
-      sortDesc: true
     }
   },
   watch: {

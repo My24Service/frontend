@@ -845,7 +845,7 @@ export default {
 
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
-          orderModel.insert(token, this.order).then((order) => {
+          orderModel.insert(token, this.order).then(async (order) => {
             this.orderPk = order.id
             this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
             this.buttonDisabled = false
@@ -865,8 +865,8 @@ export default {
             }
 
             // assign engineers
-            for (let i=0; i<this.selectedEngineers.length; i++) {
-              Assign.assignToUser(this.selectedEngineers[i].id, [order.order_id], true)
+            for (const engineer of this.selectedEngineers) {
+              await Assign.assignToUser(engineer.id, [order.order_id], true)
             }
 
             if (this.nextField === 'orders') {
