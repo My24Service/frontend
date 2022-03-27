@@ -264,6 +264,10 @@
           </b-col>
         </b-row>
 
+        <div class="well">
+            <a href="https://my24service.github.io/docs/#order-fields" target="_blank">documentation</a>
+        </div>
+
         <div class="mx-auto">
           <footer class="modal-footer">
             <b-button @click="cancelForm" type="button" variant="secondary">
