@@ -8,6 +8,8 @@ import CustomerView from '@/views/customer/CustomerView.vue'
 import DocumentList from '@/views/customer/DocumentList.vue'
 import DocumentForm from '@/views/customer/DocumentForm.vue'
 
+import MaintenanceProductsAll from '@/views/customer/MaintenanceProductsAll.vue'
+import MaintenanceProductList from '@/views/customer/MaintenanceProductList.vue'
 
 export default [
 {
@@ -95,7 +97,31 @@ export default [
         'app-subnav': SubNavCustomers
       },
       props: {
-        'app-content': route => ({...route.params, edit: true}),
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-products-all',
+      path: '/customers/maintenance-products-all',
+      components: {
+        'app-content': MaintenanceProductsAll,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-products',
+      path: '/customers/maintenance-products/:customer_pk',
+      components: {
+        'app-content': MaintenanceProductList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
         'app-subnav': true
       },
     },
