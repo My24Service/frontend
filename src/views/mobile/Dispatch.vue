@@ -114,7 +114,7 @@
             <b-form-datepicker
               v-model="startDate"
               size="sm"
-              placeholder="Show data from"
+              placeholder="Start date"
               locale="nl"
               :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
             ></b-form-datepicker>
@@ -183,7 +183,7 @@ export default {
   },
   data() {
     return {
-      mode: 'wide',
+      mode: null,
       modeOptions: [
         { item: 'compact', name: this.$trans('Compact') },
         { item: 'wide', name: this.$trans('Wide') },
@@ -205,6 +205,7 @@ export default {
   },
   watch: {
     mode: function(val) {
+      localStorage.setItem('displayMode', JSON.stringify(val))
       this.dispatch.setMode(val)
       this.dispatch.drawDispatch()
     },
@@ -363,6 +364,14 @@ export default {
     Socket.getSocketMemberNewData(memberPk)
     Socket.setOnmessageHandlerMemberNewData(memberPk, this.onNewData)
 
+    const displayMode = JSON.parse(localStorage.getItem('displayMode'))
+    let mode
+    if (displayMode) {
+      mode = displayMode
+    } else {
+      mode = 'wide'
+    }
+
     const lang = this.$store.getters.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
@@ -382,8 +391,9 @@ export default {
       const tipCanvas = this.$refs['dispatch-tip-canvas']
 
       this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday)
-      this.dispatch.setMode(this.mode)
-      this.startDate = this.dispatch.startDate.toDate()
+      this.mode = mode
+      // this.dispatch.setMode(mode)
+      // this.startDate = this.dispatch.startDate.toDate()
       this.setHandlers()
     }).catch((error) => {
       console.log('error in get statuscodes', error)
