@@ -63,8 +63,6 @@
       :items="assignedOrders"
       responsive="md"
       class="data-table"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
     >
       <template #head(icons)="">
         <div class="float-right">

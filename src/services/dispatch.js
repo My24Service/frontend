@@ -17,6 +17,7 @@ class Dispatch {
   fontsizeCompact = 14
   fontsizeWide = 16
   fontPaddingWide = 4
+  fontPaddingCompact = 4
 
   xPadding = 4
   yPaddingCompact = 14
@@ -25,7 +26,7 @@ class Dispatch {
   endSlotPadding = 6
   startSlotPadding = 6
 
-  orderLineWidth = 10
+  orderLineWidth = 20
   orderLinePaddingTop = 6
   orderLinePaddingBottom = 2
 
@@ -608,9 +609,12 @@ class Dispatch {
     let path = new Path2D()
     this.ctx.lineWidth = this.getOrderLineWidth()
     this.ctx.strokeStyle = color
-    path.moveTo(startX, yPos)
-    path.lineTo(endX, yPos)
+    path.moveTo(startX, yPos+this.orderLinePaddingTop)
+    path.lineTo(endX, yPos+this.orderLinePaddingTop)
     this.ctx.stroke(path)
+
+    const textY = yPos + this.orderLinePaddingTop + this.fontPaddingCompact
+    this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX)
 
     this.hotspots.push({
       obj: path,
