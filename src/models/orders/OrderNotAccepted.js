@@ -12,15 +12,14 @@ class OrderNotAccepted extends BaseModel {
     const headers = this.getHeaders(token)
     const url = `/order/order/${order_pk}/set_order_accepted/`
 
-    return new Promise((resolve, reject) => {
-      this.axios.post(url, {}, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return new this.axios.post(url, {}, headers).then(response => response.data)
+  }
+
+  setRejected(token, order_pk) {
+    const headers = this.getHeaders(token)
+    const url = `/order/order/${order_pk}/set_order_rejected/`
+
+    return new this.axios.post(url, {}, headers).then(response => response.data)
   }
 }
 

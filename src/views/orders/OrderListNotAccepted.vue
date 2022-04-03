@@ -113,17 +113,10 @@
       </template>
       <template #cell(icons)="data">
         <div class="h2 float-right">
-          <b-link
-            class="px-1"
-            v-if="!isCustomer"
-            v-bind:title="$trans('Accept')"
-            v-on:click="setAccepted(data.item.id)"
-            >
-            <b-icon-check2-square class="edit-icon"></b-icon-check2-square>
-          </b-link>
           <IconLinkEdit
+            v-if="data.item.last_accepted_status == 'not_yet_accepted'"
             router_name="order-edit"
-            v-bind:router_params="{pk: data.item.id}"
+            v-bind:router_params="{pk: data.item.id, unaccepted: true}"
             v-bind:title="$trans('Edit')"
           />
           <IconLinkDelete
@@ -258,21 +251,6 @@ export default {
     },
     status2color(status) {
       return my24.status2color(this.statuscodes, status)
-    },
-    setAccepted(order_pk) {
-      this.isLoading = true
-
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        orderNotAcceptedModel.setAccepted(token, order_pk).then(() => {
-          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
-          this.isLoading = false
-          this.loadData()
-        }).catch((error) => {
-          console.log('error accepting order', error)
-          this.errorToast(this.$trans('Error accepting order'))
-          this.isLoading = false
-        })
-      })
     },
     async loadData() {
       this.isLoading = true
