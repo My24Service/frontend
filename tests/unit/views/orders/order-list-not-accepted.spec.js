@@ -92,22 +92,4 @@ describe('OrderListNotAccepted.vue', () => {
     const trs = wrapper.findAll('#order-table > tbody > tr')
     expect(trs.length).to.equal(2)
   })
-
-  it('not dispatch: contains title="Accept"', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
-
-    const wrapper = mount(OrderListNotAccepted, {
-      localVue,
-      store,
-      router,
-      mocks: {
-        $trans: (f) => f
-      },
-    })
-
-    await flushPromises()
-
-    const html = wrapper.html()
-    expect(html).to.contain('title="Accept"')
-  })
 })
