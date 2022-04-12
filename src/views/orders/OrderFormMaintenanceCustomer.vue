@@ -619,7 +619,6 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        this.order.customer_relation =
         return this.$store.dispatch('getCsrfToken').then((token) => {
           orderModel.insert(token, this.order).then((order) => {
             this.orderPk = order.id
@@ -687,11 +686,10 @@ export default {
 
     try {
       this.countries = await this.$store.dispatch('getCountries')
+      const user = await accountModel.getUserInfo(this.$store.state.userInfo.pk)
+      const customer = await customerModel.detail(user.user.customer_user.customer)
 
       if (this.isCreate) {
-        const user = await accountModel.getUserInfo(this.$store.state.userInfo.pk)
-        const customer = await customerModel.detail(user.user.customer_user.customer)
-
         this.order = orderModel.getFields()
         this.order.customer_relation = customer.id
         this.order.customer_id = customer.customer_id
@@ -702,6 +700,8 @@ export default {
         this.order.order_country_code = customer.country_code
       } else {
         this.order = await this.loadOrder()
+        this.order.customer_relation = customer.id
+        this.order.customer_id = customer.customer_id
       }
       this.isLoading = false
     } catch (error) {
