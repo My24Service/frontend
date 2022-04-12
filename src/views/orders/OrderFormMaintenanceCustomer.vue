@@ -619,6 +619,7 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
+        this.order.customer_relation =
         return this.$store.dispatch('getCsrfToken').then((token) => {
           orderModel.insert(token, this.order).then((order) => {
             this.orderPk = order.id
@@ -692,6 +693,7 @@ export default {
         const customer = await customerModel.detail(user.user.customer_user.customer)
 
         this.order = orderModel.getFields()
+        this.order.customer_relation = customer.id
         this.order.customer_id = customer.customer_id
         this.order.order_name = customer.name
         this.order.order_address = customer.address
