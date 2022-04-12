@@ -686,12 +686,12 @@ export default {
 
     try {
       this.countries = await this.$store.dispatch('getCountries')
+      const user = await accountModel.getUserInfo(this.$store.state.userInfo.pk)
+      const customer = await customerModel.detail(user.user.customer_user.customer)
 
       if (this.isCreate) {
-        const user = await accountModel.getUserInfo(this.$store.state.userInfo.pk)
-        const customer = await customerModel.detail(user.user.customer_user.customer)
-
         this.order = orderModel.getFields()
+        this.order.customer_relation = customer.id
         this.order.customer_id = customer.customer_id
         this.order.order_name = customer.name
         this.order.order_address = customer.address
@@ -700,6 +700,8 @@ export default {
         this.order.order_country_code = customer.country_code
       } else {
         this.order = await this.loadOrder()
+        this.order.customer_relation = customer.id
+        this.order.customer_id = customer.customer_id
       }
       this.isLoading = false
     } catch (error) {
