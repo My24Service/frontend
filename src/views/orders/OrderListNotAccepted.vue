@@ -86,6 +86,10 @@
         <div class="float-right">
           <b-button-toolbar>
             <b-button-group class="mr-1">
+              <ButtonLinkAdd
+                router_name="order-add"
+                v-bind:title="$trans('New order')"
+              />
               <ButtonLinkRefresh
                 v-bind:method="function() { loadData() }"
                 v-bind:title="$trans('Refresh')"
@@ -137,6 +141,7 @@ import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import { componentMixin } from '@/utils'
@@ -148,6 +153,7 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkSort,
+    ButtonLinkAdd,
     IconLinkDelete,
     IconLinkEdit,
   },
