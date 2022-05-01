@@ -19,6 +19,12 @@
         :to="{ name: 'maintenance-order-year' }">
         {{ $trans('Maintenance orders/year') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('calendar')"
+        v-if="hasMaintenanceOrdersPerYear"
+        :to="{ name: 'maintenance-products-calendar' }">
+        {{ $trans('Calendar') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>

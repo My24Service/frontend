@@ -11,6 +11,7 @@ import DocumentForm from '@/views/customer/DocumentForm.vue'
 import MaintenanceProductsAll from '@/views/customer/MaintenanceProductsAll.vue'
 import MaintenanceProductList from '@/views/customer/MaintenanceProductList.vue'
 import MaintenanceProductForm from '@/views/customer/MaintenanceProductForm.vue'
+import Calendar from '@/views/customer/Calendar.vue'
 
 export default [
 {
@@ -132,6 +133,19 @@ export default [
       path: '/customers/maintenance-products/form',
       components: {
         'app-content': MaintenanceProductForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    // calendar
+    {
+      name: 'maintenance-products-calendar',
+      path: '/customers/calendar',
+      components: {
+        'app-content': Calendar,
         'app-subnav': SubNavCustomers
       },
       props: {

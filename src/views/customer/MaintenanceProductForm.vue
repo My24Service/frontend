@@ -348,7 +348,6 @@ export default {
       this.maintenanceProduct = maintenanceProductModel.getFields()
 
       if (!this.withCustomerSearch) {
-        console.log('filling customer')
         this.customer = await customerModel.detail(this.customerPk)
         this.$refs.product.focus()
       } else {

@@ -143,7 +143,7 @@ export default {
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'amount', label: this.$trans('Amount'), sortable: true},
         {key: 'times_per_year', label: this.$trans('Times/year'), sortable: true},
-        {key: 'created_count', label: this.$trans('# Orders'), sortable: true},
+        {key: 'created_orders', label: this.$trans('# Orders'), sortable: true},
         {key: 'icons'}
       ],
       breadcrumb: [

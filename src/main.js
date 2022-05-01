@@ -112,6 +112,9 @@ Vue.use(TabsPlugin)
 import { ToastPlugin } from 'bootstrap-vue'
 Vue.use(ToastPlugin)
 
+import VCalendar from 'v-calendar'
+Vue.use(VCalendar)
+
 import App from './App.vue'
 import store from './store'
 import router from './router'
