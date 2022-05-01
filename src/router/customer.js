@@ -10,6 +10,7 @@ import DocumentForm from '@/views/customer/DocumentForm.vue'
 
 import MaintenanceProductsAll from '@/views/customer/MaintenanceProductsAll.vue'
 import MaintenanceProductList from '@/views/customer/MaintenanceProductList.vue'
+import MaintenanceProductForm from '@/views/customer/MaintenanceProductForm.vue'
 
 export default [
 {
@@ -101,6 +102,7 @@ export default [
         'app-subnav': true
       },
     },
+    // maintenance products
     {
       name: 'maintenance-products-all',
       path: '/customers/maintenance-products-all',
@@ -118,6 +120,18 @@ export default [
       path: '/customers/maintenance-products/:customer_pk',
       components: {
         'app-content': MaintenanceProductList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-product-add',
+      path: '/customers/maintenance-products/form',
+      components: {
+        'app-content': MaintenanceProductForm,
         'app-subnav': SubNavCustomers
       },
       props: {

@@ -54,6 +54,7 @@
             <b-button-group class="mr-1">
               <ButtonLinkAdd
                 router_name="maintenance-product-add"
+                :router_params="{ withCustomerSearch: true }"
                 v-bind:title="$trans('New maintenance-product')"
               />
               <ButtonLinkRefresh

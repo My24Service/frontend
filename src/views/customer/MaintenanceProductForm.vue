@@ -4,7 +4,7 @@
       <b-form>
         <h2 v-if="isCreate">{{ $trans('New maintenance product') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit maintenance product') }}</h2>
-        <b-row>
+        <b-row v-if="withCustomerSearch">
           <b-col cols="12" role="group">
             <b-form-group
               label-size="sm"
@@ -28,7 +28,7 @@
                 :max-height="600"
                 :show-no-results="false"
                 :hide-selected="true"
-                @search-change="getCustomers"
+                @search-change="getCustomersDebounced"
                 @select="selectCustomer"
                 :custom-label="customerLabel"
               >
@@ -36,6 +36,24 @@
               </multiselect>
             </b-form-group>
           </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="12" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Customer')"
+              label-for="maintenance_product_name"
+            >
+              <b-form-input
+                id="maintenance_product_name"
+                size="sm"
+                v-model="customer.name"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
           <b-col cols="6" role="group">
             <b-form-group
               label-size="sm"
@@ -46,6 +64,7 @@
                 id="maintenance_product_address"
                 size="sm"
                 v-model="customer.address"
+                readonly
               ></b-form-input>
             </b-form-group>
           </b-col>
@@ -56,10 +75,10 @@
               label-for="maintenance_product_city"
             >
               <b-form-input
-                autofocus
                 id="maintenance_product_city"
                 size="sm"
                 v-model="customer.city"
+                readonly
               ></b-form-input>
             </b-form-group>
           </b-col>
@@ -70,10 +89,10 @@
               label-for="maintenance_product_country_code"
             >
               <b-form-input
-                autofocus
                 id="maintenance_product_country_code"
                 size="sm"
                 v-model="customer.country_code"
+                readonly
               ></b-form-input>
             </b-form-group>
           </b-col>
@@ -87,6 +106,7 @@
                 id="maintenance_product_tel"
                 size="sm"
                 v-model="customer.tel"
+                readonly
               ></b-form-input>
             </b-form-group>
           </b-col>
@@ -101,11 +121,12 @@
               <b-form-input
                 id="maintenance_product_product"
                 size="sm"
-                v-model="maintenanceProduct.product"
-                :state="isSubmitClicked ? !v$.maintenanceProduct.product.$error : null"
+                ref="product"
+                v-model="maintenanceProduct.product_name"
+                :state="isSubmitClicked ? !v$.maintenanceProduct.product_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.maintenanceProduct.product.$error : null">
+                :state="isSubmitClicked ? !v$.maintenanceProduct.product_name.$error : null">
                 {{ $trans('Please enter a product') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -155,45 +176,66 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="6" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Contact')"
-              label-for="maintenance_product_contact"
+              v-bind:label="$trans('Installation date')"
+              label-for="maintenance_product_installation_date"
             >
-              <b-form-textarea
-                id="maintenance_product_contact"
-                v-model="maintenance_product.contact"
-                rows="5"
-              ></b-form-textarea>
+              <b-form-datepicker
+                id="maintenance_product_installation_date"
+                size="sm"
+                class="p-sm-0"
+                v-model="maintenanceProduct.installation_date"
+                v-bind:placeholder="$trans('Choose a date')"
+                value="maintenanceProduct.installation_date"
+                locale="nl"
+                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+              ></b-form-datepicker>
             </b-form-group>
           </b-col>
-          <b-col cols="6" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Remarks')"
-              label-for="maintenance_product_remarks"
+              v-bind:label="$trans('Production date')"
+              label-for="maintenance_product_production_date"
             >
-              <b-form-textarea
-                id="maintenance_product_remarks"
-                v-model="maintenance_product.remarks"
-                rows="5"
-              ></b-form-textarea>
+              <b-form-datepicker
+                id="maintenance_product_production_date"
+                size="sm"
+                class="p-sm-0"
+                v-model="maintenanceProduct.production_date"
+                v-bind:placeholder="$trans('Choose a date')"
+                value="maintenanceProduct.production_date"
+                locale="nl"
+                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+              ></b-form-datepicker>
             </b-form-group>
           </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="7" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Maintenance contract')"
-              label-for="maintenance_product_maintenance_contract"
+              v-bind:label="$trans('Serial number')"
+              label-for="maintenance_product_serialnumber"
             >
-              <b-form-textarea
-                id="maintenance_product_maintenance_contract"
-                v-model="maintenance_product.maintenance_contract"
-                rows="5"
-              ></b-form-textarea>
+              <b-form-input
+                id="maintenance_product_serialnumber"
+                size="sm"
+                v-model="maintenanceProduct.serialnumber"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Contract value')"
+              label-for="maintenance_product_contract_value"
+            >
+              <b-form-input
+                id="maintenance_product_contract_value"
+                size="sm"
+                v-model="maintenanceProduct.contract_value"
+              ></b-form-input>
             </b-form-group>
           </b-col>
           <b-col cols="2" role="group">
@@ -205,22 +247,21 @@
               <b-form-input
                 id="maintenance_product_standard_hours_hour"
                 size="sm"
-                v-model="maintenance_product.standard_hours_hour"
+                v-model="maintenanceProduct.standard_hours_hour"
               ></b-form-input>
-              <b-form-select v-model="maintenance_product.standard_hours_minute" :options="minutes" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="12" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Products without tax?')"
-              label-for="maintenance_product_products_without_tax"
+              v-bind:label="$trans('Remarks')"
+              label-for="maintenance_product_remarks"
             >
-              <b-form-checkbox
-                id="maintenance_product_products_without_tax"
-                v-model="maintenance_product.products_without_tax"
-              >
-              </b-form-checkbox>
+                <b-form-textarea
+                  id="maintenance_product_remarks"
+                  v-model="maintenanceProduct.remarks"
+                  rows="1"
+                ></b-form-textarea>
             </b-form-group>
           </b-col>
         </b-row>
@@ -241,6 +282,8 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import Multiselect from 'vue-multiselect'
+import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
 import customerModel from '@/models/customer/Customer.js'
 import maintenanceProductModel from '@/models/customer/MaintenanceProduct.js'
@@ -249,8 +292,19 @@ export default {
   setup() {
     return { v$: useVuelidate() }
   },
+  components: {
+    Multiselect,
+  },
   props: {
     pk: {
+      type: [String, Number],
+      default: null
+    },
+    withCustomerSearch: {
+      type: [Boolean],
+      default: false
+    },
+    customerPk: {
       type: [String, Number],
       default: null
     },
@@ -260,18 +314,15 @@ export default {
       customer: {
         required
       },
-      name: {
+      product_name: {
         required,
       },
-      address: {
+      amount: {
         required,
       },
-      postal: {
+      contract_value: {
         required,
-      },
-      city: {
-        required,
-      },
+      }
     }
   },
   data () {
@@ -280,8 +331,8 @@ export default {
       submitClicked: false,
       maintenanceProduct: maintenanceProductModel.getFields(),
       errorMessage: null,
+      customer: {},
       customers: [],
-      customer_info: '',
     }
   },
   computed: {
@@ -293,10 +344,17 @@ export default {
     }
   },
   async created() {
-    this.countries = await this.$store.dispatch('getCountries')
-
     if (this.isCreate) {
       this.maintenanceProduct = maintenanceProductModel.getFields()
+
+      if (!this.withCustomerSearch) {
+        console.log('filling customer')
+        this.customer = await customerModel.detail(this.customerPk)
+        this.$refs.product.focus()
+      } else {
+        this.customer = customerModel.getFields()
+        this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
+      }
     } else {
       this.loadData()
     }
@@ -304,17 +362,12 @@ export default {
   methods: {
     clearCustomer() {
       this.maintenanceProduct.customer = null
-      this.customer_info = ''
     },
     getCustomers(query) {
-      this.isLoading = true
-
       customerModel.search(query).then((response) => {
         this.customers = response
-        this.isLoading = false
       }).catch(() => {
         this.errorToast(this.$trans('Error fetching customers'))
-        this.isLoading = false
       })
     },
     customerLabel({ name, city}) {
@@ -322,7 +375,12 @@ export default {
     },
     selectCustomer(option) {
       this.maintenanceProduct.customer = option.id
-      this.customer_info = `${option.name}, ${option.address}, ${option.city}`
+      this.customer.name = option.name
+      this.customer.address = option.address
+      this.customer.city = option.city
+      this.customer.country_code = option.country_code
+      this.customer.tel = option.tel
+      this.$refs.product.focus()
     },
 
     submitForm() {
@@ -345,7 +403,7 @@ export default {
 
       if (this.isCreate) {
         return this.$store.dispatch('getCsrfToken').then((token) => {
-          maintenanceProductModel.insert(token, this.maintenance_product).then((action) => {
+          maintenanceProductModel.insert(token, this.maintenanceProduct).then((action) => {
             this.infoToast(this.$trans('Created'), this.$trans('Maintenance product has been created'))
             this.isLoading = false
             this.cancelForm()

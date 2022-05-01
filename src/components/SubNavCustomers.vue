@@ -8,7 +8,7 @@
         {{ $trans('Customers') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('all-maintenance-products') || isActive('maintenance-products')"
+        :active="isActive('maintenance-products-all') || isActive('maintenance-products')"
         v-if="hasAllMaintenanceProducts"
         :to="{ name: 'maintenance-products-all' }">
         {{ $trans('All maintenance products') }}

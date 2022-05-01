@@ -4,7 +4,6 @@ import BaseModel from '@/models/base'
 class MaintenanceProduct extends BaseModel {
   fields = {
     'customer': null,
-    // 'product_inventory': 0,
     'product_name': '',
     'brand': '',
     'amount': 0,
@@ -14,7 +13,7 @@ class MaintenanceProduct extends BaseModel {
     'production_date': '',
     'serialnumber': '',
     'contract_value': 0.00,
-    'standard_hours': 0,
+    'standard_hours': '0:00',
     'materials': ''
   }
 
