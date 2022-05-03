@@ -17,6 +17,7 @@ class Dispatch {
   fontsizeCompact = 14
   fontsizeWide = 16
   fontPaddingWide = 4
+  fontPaddingCompact = 4
 
   xPadding = 4
   yPaddingCompact = 14
@@ -25,7 +26,7 @@ class Dispatch {
   endSlotPadding = 6
   startSlotPadding = 6
 
-  orderLineWidth = 10
+  orderLineWidth = 20
   orderLinePaddingTop = 6
   orderLinePaddingBottom = 2
 
@@ -599,8 +600,8 @@ class Dispatch {
 
   drawOrderLine(startX, endX, ySlot, order, user_id) {
     const yPos = this.getYPosForYSlot(ySlot) + this.lastY
-    const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-    const color = my24.status2color(this.statuscodes, status)
+    // const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
+    const color = my24.status2color(this.statuscodes, order.order_status)
     if (this.debug) {
       console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
@@ -608,9 +609,12 @@ class Dispatch {
     let path = new Path2D()
     this.ctx.lineWidth = this.getOrderLineWidth()
     this.ctx.strokeStyle = color
-    path.moveTo(startX, yPos)
-    path.lineTo(endX, yPos)
+    path.moveTo(startX, yPos+this.orderLinePaddingTop)
+    path.lineTo(endX, yPos+this.orderLinePaddingTop)
     this.ctx.stroke(path)
+
+    const textY = yPos + this.orderLinePaddingTop + this.fontPaddingCompact
+    this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX)
 
     this.hotspots.push({
       obj: path,
@@ -624,8 +628,8 @@ class Dispatch {
 
   drawOrderLineWide(startX, endX, ySlot, order, user_id) {
     const yPos = this.getYPosForYSlot(ySlot) + this.lastY + this.getRowHeightInt() + 4
-    const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-    const color = my24.status2color(this.statuscodes, status)
+    // const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
+    const color = my24.status2color(this.statuscodes, order.order_status)
     if (this.debug) {
       console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }

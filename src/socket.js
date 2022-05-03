@@ -68,7 +68,9 @@ class Socket {
 
     const socket = this.socketsUser[key]
     delete this.socketsUser[userPk]
-    socket.close()
+    if (socket) {
+      socket.close()
+    }
   }
 
   // notifications to member
@@ -95,7 +97,9 @@ class Socket {
   removeSocketMember(memberPk) {
     const socket = this.socketsMember[memberPk]
     delete this.socketsMember[memberPk]
-    socket.close()
+    if (socket) {
+      socket.close()
+    }
   }
 
   // new data messages to member

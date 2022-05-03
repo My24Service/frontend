@@ -130,7 +130,7 @@
           </div>
         </template>
         <template #cell(workorder_url)="data">
-          <b-link :href="data.item.value" target="_blank">{{ $trans('View') }}</b-link>
+          <b-link :href="data.item.workorder_url" target="_blank">{{ $trans('View') }}</b-link>
         </template>
         <template #cell(orderlines)="data">
           <b-table dark borderless small :fields="orderLineFields" :items="data.item.orderlines" responsive="sm"></b-table>

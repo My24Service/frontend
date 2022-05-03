@@ -1,6 +1,6 @@
 <template>
   <div>
-    <OrderFormMaintenancePlanning v-if="!isCustomer || isStaff || isSuperuser" :pk="pk" />
+    <OrderFormMaintenancePlanning v-if="!isCustomer || isStaff || isSuperuser" :pk="pk" :unaccepted="unaccepted" />
     <OrderFormMaintenanceCustomer v-if="isCustomer && !isStaff && !isSuperuser" :pk="pk" />
   </div>
 </template>
@@ -18,6 +18,10 @@ export default {
       type: [String, Number],
       default: null
     },
+    unaccepted: {
+      type: [Boolean],
+      default: false
+    }
   },
   components: {
     OrderFormMaintenancePlanning,
