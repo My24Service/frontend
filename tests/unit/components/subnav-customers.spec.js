@@ -50,37 +50,37 @@ describe('SubNavCustomers.vue', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('contains Customers, All maintenance products', async () => {
-    const wrapper = await render(SubNavCustomers, {
-      localVue,
-      router,
-      store,
-      mocks: {
-        $trans: (t) => t
-      }
-    })
+  // it('contains Customers, All maintenance products', async () => {
+  //   const wrapper = await render(SubNavCustomers, {
+  //     localVue,
+  //     router,
+  //     store,
+  //     mocks: {
+  //       $trans: (t) => t
+  //     }
+  //   })
 
-    await flushPromises()
+  //   await flushPromises()
 
-    const html = wrapper.html()
-    expect(html).to.contain('All maintenance products')
-    expect(html).to.contain('Customers')
-  })
+  //   const html = wrapper.html()
+  //   expect(html).to.contain('All maintenance products')
+  //   expect(html).to.contain('Customers')
+  // })
 
-  it('does not contain "Maintenance orders/year"', async () => {
-    const wrapper = await render(SubNavCustomers, {
-      localVue,
-      router,
-      store,
-      mocks: {
-        $trans: () => {}
-      }
-    })
+  // it('does not contain "Maintenance orders/year"', async () => {
+  //   const wrapper = await render(SubNavCustomers, {
+  //     localVue,
+  //     router,
+  //     store,
+  //     mocks: {
+  //       $trans: () => {}
+  //     }
+  //   })
 
-    await flushPromises()
+  //   await flushPromises()
 
-    const html = wrapper.html()
-    expect(html).not.to.contain('Maintenance orders/year')
-  })
+  //   const html = wrapper.html()
+  //   expect(html).not.to.contain('Maintenance orders/year')
+  // })
 
 })

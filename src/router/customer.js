@@ -8,6 +8,10 @@ import CustomerView from '@/views/customer/CustomerView.vue'
 import DocumentList from '@/views/customer/DocumentList.vue'
 import DocumentForm from '@/views/customer/DocumentForm.vue'
 
+import MaintenanceProductsAll from '@/views/customer/MaintenanceProductsAll.vue'
+import MaintenanceProductList from '@/views/customer/MaintenanceProductList.vue'
+import MaintenanceProductForm from '@/views/customer/MaintenanceProductForm.vue'
+import Calendar from '@/views/customer/Calendar.vue'
 
 export default [
 {
@@ -95,7 +99,57 @@ export default [
         'app-subnav': SubNavCustomers
       },
       props: {
-        'app-content': route => ({...route.params, edit: true}),
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    // maintenance products
+    {
+      name: 'maintenance-products-all',
+      path: '/customers/maintenance-products-all',
+      components: {
+        'app-content': MaintenanceProductsAll,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-products',
+      path: '/customers/maintenance-products/:customer_pk',
+      components: {
+        'app-content': MaintenanceProductList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-product-add',
+      path: '/customers/maintenance-products/form',
+      components: {
+        'app-content': MaintenanceProductForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    // calendar
+    {
+      name: 'maintenance-products-calendar',
+      path: '/customers/calendar',
+      components: {
+        'app-content': Calendar,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
         'app-subnav': true
       },
     },

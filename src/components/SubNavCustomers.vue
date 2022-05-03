@@ -7,10 +7,10 @@
         :to="{ name: 'customer-list' }">
         {{ $trans('Customers') }}
       </b-nav-item>
-      <b-nav-item
-        :active="isActive('all-maintenance-products')"
+<!--       <b-nav-item
+        :active="isActive('maintenance-products-all') || isActive('maintenance-products')"
         v-if="hasAllMaintenanceProducts"
-        :to="{ name: 'all-maintenance-products' }">
+        :to="{ name: 'maintenance-products-all' }">
         {{ $trans('All maintenance products') }}
       </b-nav-item>
       <b-nav-item
@@ -19,7 +19,13 @@
         :to="{ name: 'maintenance-order-year' }">
         {{ $trans('Maintenance orders/year') }}
       </b-nav-item>
-    </b-nav>
+      <b-nav-item
+        :active="isActive('calendar')"
+        v-if="hasMaintenanceOrdersPerYear"
+        :to="{ name: 'maintenance-products-calendar' }">
+        {{ $trans('Calendar') }}
+      </b-nav-item>
+ -->    </b-nav>
   </div>
 </template>
 

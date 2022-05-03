@@ -1,11 +1,11 @@
 <template>
-	<div/>
+  <div/>
 </template>
 <script>
 import socket from "@/socket.js"
 
 export default {
-	methods:{
+  methods:{
     handleMessageUser(data) {
       if (data.level === 'error') {
         this.errorToast(data.message, this.$trans('User message'))
@@ -20,16 +20,16 @@ export default {
         this.infoToast(this.$trans('Company message'), data.message)
       }
     },
-	},
-	mounted() {
+  },
+  mounted() {
     const userPk = this.$store.getters.getUserPk
     const memberPk = this.$store.getters.getMemberPk
 
-    socket.setOnmessageHandlerUser(userPk, this.handleMessageUser)
-  	socket.getSocketUser(userPk)
+    socket.setOnmessageHandlerUser(memberPk, userPk, this.handleMessageUser)
+    socket.getSocketUser(memberPk, userPk)
 
     socket.setOnmessageHandlerMember(memberPk, this.handleMessageMember)
     socket.getSocketMember(memberPk)
-	},
+  },
 }
 </script>
