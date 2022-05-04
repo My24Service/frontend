@@ -619,6 +619,8 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
+        this.order.customer_order_accepted = false
+
         return this.$store.dispatch('getCsrfToken').then((token) => {
           orderModel.insert(token, this.order).then((order) => {
             this.orderPk = order.id
