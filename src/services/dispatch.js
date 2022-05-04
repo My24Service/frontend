@@ -73,7 +73,7 @@ class Dispatch {
 
   statuscodes = null
 
-  url = '/company/dispatch-assignedorders-user-list-v2/'
+  url = '/company/dispatch-assignedorders-user-list-v3/'
 
   constructor(canvas, tipCanvas, statuscodes, component, monday) {
     this.canvas = canvas
@@ -600,8 +600,8 @@ class Dispatch {
 
   drawOrderLine(startX, endX, ySlot, order, user_id) {
     const yPos = this.getYPosForYSlot(ySlot) + this.lastY
-    // const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-    const color = my24.status2color(this.statuscodes, order.order_status)
+    const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
+    const color = my24.status2color(this.statuscodes, status)
     if (this.debug) {
       console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
@@ -628,8 +628,8 @@ class Dispatch {
 
   drawOrderLineWide(startX, endX, ySlot, order, user_id) {
     const yPos = this.getYPosForYSlot(ySlot) + this.lastY + this.getRowHeightInt() + 4
-    // const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-    const color = my24.status2color(this.statuscodes, order.order_status)
+    const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
+    const color = my24.status2color(this.statuscodes, status)
     if (this.debug) {
       console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
