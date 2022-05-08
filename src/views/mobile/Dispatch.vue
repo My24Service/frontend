@@ -33,6 +33,99 @@
     </b-modal>
 
     <b-modal
+      id="dispatch-change-date-modal"
+      ref="dispatch-change-date-modal"
+      v-bind:title="$trans('Change date')"
+      @ok="changeDateOk"
+      v-if="assignedOrder !== null"
+    >
+      <form ref="change-date-form" @submit.stop.prevent="changeDateSubmit">
+        <b-container fluid>
+          <b-row role="group">
+            <b-col size="6">
+              <b-form-group
+                v-bind:label="$trans('Start date')"
+                label-for="alt-start-date"
+              >
+                <b-form-datepicker
+                  id="alt-start-date"
+                  size="sm"
+                  class="p-sm-0"
+                  v-model="assignedOrder.alt_start_date"
+                  v-bind:placeholder="$trans('Choose a date')"
+                  locale="nl"
+                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  :min="minDate"
+                  :max="maxDate"
+                  value-as-date
+                ></b-form-datepicker>
+              </b-form-group>
+            </b-col>
+            <b-col size="6">
+              <b-form-group
+                v-bind:label="$trans('Start time')"
+                label-for="alt-start-time"
+              >
+              <b-form-timepicker
+                id="alt-start-time"
+                size="sm"
+                v-model="assignedOrder.alt_start_time"
+                class="mb-2"
+                v-bind:placeholder="$trans('Choose a time')"
+                :hour12=false
+              ></b-form-timepicker>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+            <b-col size="6">
+              <b-form-group
+                v-bind:label="$trans('End date')"
+                label-for="alt-end-date"
+              >
+                <b-form-datepicker
+                  id="alt-end-date"
+                  size="sm"
+                  class="p-sm-0"
+                  v-model="assignedOrder.alt_end_date"
+                  v-bind:placeholder="$trans('Choose a date')"
+                  locale="nl"
+                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  :min="minDate"
+                  :max="maxDate"
+                  value-as-date
+                ></b-form-datepicker>
+              </b-form-group>
+            </b-col>
+            <b-col size="6">
+              <b-form-group
+                v-bind:label="$trans('End time')"
+                label-for="alt-end-time"
+              >
+              <b-form-timepicker
+                id="alt-end-time"
+                size="sm"
+                v-model="assignedOrder.alt_end_time"
+                class="mb-2"
+                v-bind:placeholder="$trans('Choose a time')"
+                :hour12=false
+              ></b-form-timepicker>
+            </b-form-group>
+          </b-col>
+          </b-row>
+          <b-row>
+            <b-col size="6"></b-col>
+            <b-col size="6" class="text-right">
+              <b-link class="px-1" title="clear" v-on:click.native="clearAssignedorderDates()">
+                {{ $trans('clear') }}
+              </b-link>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
+    <b-modal
       id="dispatch-order-actions-modal"
       ref="dispatch-order-actions-modal"
       v-bind:title="$trans('Order actions')"
@@ -42,7 +135,10 @@
         {{ selectedOrder.order_name }}<br/>
         {{ selectedOrder.order_address }}<br/>
         {{ selectedOrder.order_postal }} {{ selectedOrder.order_city }}<br/>
-        {{ $trans('Date') }}: {{ selectedOrder.order_date }}<br/>
+        {{ $trans('Order date') }}: {{ selectedOrder.order_date }}<br/>
+        <span v-if="assignedOrder.assignedorder_date != ''">
+            {{ $trans('User date') }}: {{ assignedOrder.assignedorder_date }}<br/>
+        </span>
         <span v-if="selectedOrder.order_reference != ''">
             {{ $trans('Reference') }}: {{ selectedOrder.order_reference }}<br/>
         </span>
@@ -50,16 +146,19 @@
 
       <template #modal-footer="{ cancel }">
         <b-row>
-          <b-col cols="2">
+          <b-col cols="1" class="mx-1">
             <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
           </b-col>
-          <b-col cols="2">
+          <b-col cols="1" class="mx-1">
             <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
           </b-col>
-          <b-col cols="4">
+          <b-col cols="4" class="mx-1">
+            <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
+          </b-col>
+          <b-col cols="2" class="mx-1">
             <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
           </b-col>
-          <b-col cols="4">
+          <b-col cols="2" class="mx-1">
             <b-button size="sm" @click="cancel()">{{ $trans('Cancel') }}</b-button>
           </b-col>
         </b-row>
@@ -170,6 +269,7 @@ import eachSeries from 'async/eachSeries'
 
 import Dispatch from '@/services/dispatch.js'
 import orderModel from '@/models/orders/Order.js'
+import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
 import assign from '@/models/mobile/Assign.js'
 import Socket from '@/socket.js'
 
@@ -197,10 +297,14 @@ export default {
       selectedUsers: [],
       selectedOrder: null,
       selectedOrderUserId: null,
+      assignedOrder: null,
+      assignedOrderPk: null,
       dispatch: null,
       showOverlay: false,
       startDate: null,
-      newData: false
+      newData: false,
+      minDate: null,
+      maxDate: null
     }
   },
   watch: {
@@ -215,6 +319,34 @@ export default {
     }
   },
   methods: {
+    clearAssignedorderDates() {
+      this.assignedOrder.alt_start_date = null
+      this.assignedOrder.alt_end_date = null
+      this.assignedOrder.alt_start_time = null
+      this.assignedOrder.alt_end_time = null
+    },
+    changeDate() {
+      this.$refs['dispatch-order-actions-modal'].hide()
+      this.$refs['dispatch-change-date-modal'].show()
+    },
+    changeDateOk(bvModalEvt) {
+      bvModalEvt.preventDefault()
+      this.changeDateSubmit()
+    },
+    async changeDateSubmit() {
+        this.showOverlay = true
+
+        try {
+          await assignedOrderModel.updateDetailChangeDate(this.assignedOrderPk, this.assignedOrder)
+          this.$refs['dispatch-change-date-modal'].hide();
+          this.showOverlay = false
+          this.dispatch.drawDispatch()
+        } catch(error) {
+          console.log('error updating assignedOrder dates', error)
+          this.errorToast(this.$trans('Error updating dates'))
+          this.showOverlay = false
+        }
+    },
     backToTop() {
       document.body.scrollTop = 0;
       document.documentElement.scrollTop = 0;
@@ -250,19 +382,28 @@ export default {
         this.$router.push({name: 'order-edit', params: {pk: this.selectedOrder.id}})
       })
     },
-    openActionsModal(order_pk) {
+    async openActionsModal(order_pk, assignedorder_pk) {
       this.dispatch.hideTipCanvas()
+      this.assignedOrderPk = assignedorder_pk
 
-      orderModel.detail(order_pk)
-        .then((order) => {
-          this.selectedOrder = order;
-          this.$refs['dispatch-order-actions-modal'].show();
-        })
-        .catch((error) => {
+      try {
+        this.showOverlay = true
+        this.selectedOrder = await orderModel.detail(order_pk)
+
+        this.assignedOrder = await assignedOrderModel.getDetailChangeDate(assignedorder_pk)
+        const alt_start_date = this.$moment(this.assignedOrder.alt_start_date, 'DD/MM/YYYY')
+        const alt_end_date = this.$moment(this.assignedOrder.alt_end_date, 'DD/MM/YYYY')
+        this.assignedOrder.alt_start_date = alt_start_date.toDate()
+        this.assignedOrder.alt_end_date = alt_end_date.toDate()
+
+        this.minDate = this.assignedOrder.order_start_date
+        this.maxDate = this.assignedOrder.order_end_date
+        this.showOverlay = false
+        this.$refs['dispatch-order-actions-modal'].show();
+      } catch (error) {
           console.log('error fetching order', error)
           this.errorToast(this.$trans('Error fetching order'))
-        })
-
+      }
     },
     async assignToUsers() {
       this.showOverlay = true

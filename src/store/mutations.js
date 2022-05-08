@@ -11,9 +11,13 @@ import {
   DATA_LOADED,
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
+  SET_UNACCEPTED_COUNT,
 } from './mutation-types'
 
 export const mutations = {
+  [SET_UNACCEPTED_COUNT](state, count) {
+    state.unacceptedCount = count
+  },
   [SET_ASSIGN_ORDERS](state, orders) {
     state.assignOrders = orders
   },

@@ -1,4 +1,5 @@
 import my24 from '@/services/my24'
+import orderNotAcceptedModel from '@/models/orders/OrderNotAccepted.js'
 
 
 function isEmpty(obj) {
@@ -36,6 +37,12 @@ let componentMixin = {
     },
   },
   methods: {
+    async doFetchUnacceptedCountAndUpdateStore() {
+      const countResult = await orderNotAcceptedModel.getCount()
+      if (countResult && countResult.count > 0) {
+        this.$store.dispatch('setUnacceptedCount', countResult.count)
+      }
+    },
     hasAccessToModule(module, part) {
       return my24.hasAccessToModule({
         isStaff: this.isStaff,

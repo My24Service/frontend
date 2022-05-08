@@ -342,7 +342,7 @@ export default {
       }
     } else {
       const isUniqueEdit = (value) => {
-        if (this.orgUsername === this.customeruser.username || value === '' || value.length < 3) {
+        if (this.orgUsername === value || value === '' || value.length < 3) {
           return true
         }
 
@@ -351,7 +351,10 @@ export default {
 
       validations.engineer.username = {
         required,
-        isUnique: helpers.withAsync(isUniqueEdit)
+        isUnique: isUniqueEdit
+      }
+
+      validations.engineer.password1 = {
       }
 
       validations.engineer.password2 = {
@@ -363,7 +366,7 @@ export default {
   },
   data () {
     return {
-      isLoading: false,
+      isLoading: true,
       countries: [],
       submitClicked: false,
       buttonDisabled: false,
@@ -379,16 +382,14 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
+  async created() {
+    this.countries = await this.$store.dispatch('getCountries')
 
-      if (!this.isCreate) {
-        this.loadData()
-      } else {
-        this.engineer = engineerModel.getFields()
-      }
-    })
+    if (!this.isCreate) {
+      this.loadData()
+    } else {
+      this.engineer = engineerModel.getFields()
+    }
   },
   methods: {
     preSubmitForm() {

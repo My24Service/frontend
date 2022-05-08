@@ -22,6 +22,7 @@ let store = new Vuex.Store({
     userInfo: null,
     statuscodes: [],
     token: undefined,
+    unacceptedCount: null,
   },
   actions,
   getters,

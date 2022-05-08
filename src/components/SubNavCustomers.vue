@@ -7,7 +7,7 @@
         :to="{ name: 'customer-list' }">
         {{ $trans('Customers') }}
       </b-nav-item>
-<!--       <b-nav-item
+      <b-nav-item
         :active="isActive('maintenance-products-all') || isActive('maintenance-products')"
         v-if="hasAllMaintenanceProducts"
         :to="{ name: 'maintenance-products-all' }">
@@ -25,7 +25,7 @@
         :to="{ name: 'maintenance-products-calendar' }">
         {{ $trans('Calendar') }}
       </b-nav-item>
- -->    </b-nav>
+    </b-nav>
   </div>
 </template>
 

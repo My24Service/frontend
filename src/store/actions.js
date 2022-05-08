@@ -15,9 +15,13 @@ import {
   DATA_LOADED,
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
+  SET_UNACCEPTED_COUNT,
 } from './mutation-types'
 
 export const actions = {
+  setUnacceptedCount({commit}, count) {
+    commit(SET_UNACCEPTED_COUNT, count)
+  },
   setAssignOrders({commit}, orders) {
     commit(SET_ASSIGN_ORDERS, orders)
   },

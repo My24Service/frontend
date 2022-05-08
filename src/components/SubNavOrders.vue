@@ -12,6 +12,7 @@
         v-if="isStaff || isSuperuser || (hasNotAcceptedOrders && (isPlanning || isCustomer))"
         :to="{ name: 'orders-not-accepted' }">
         {{ $trans('Not accepted orders') }}
+        <b-badge v-if="unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
       </b-nav-item>
       <b-nav-item
         :active="isActive('past-orders')"
@@ -64,6 +65,10 @@ export default {
       return parts[2] === item
     }
   },
+  data() {
+    return {
+    }
+  },
   computed: {
     hasOrders() {
       return this.hasAccessToModule('orders', 'orders');
@@ -89,7 +94,14 @@ export default {
     hasMonthStats() {
       return this.hasAccessToModule('orders', 'month-stats');
     },
+    unacceptedCount() {
+      return this.$store.state.unacceptedCount
+    }
   },
+  watch: {
+    unacceptedCount (oldValue, newValue) {
+    }
+  }
 }
 </script>
 

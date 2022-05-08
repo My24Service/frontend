@@ -378,6 +378,8 @@ export default {
     async loadData() {
       this.isLoading = true
 
+      this.doFetchUnacceptedCountAndUpdateStore()
+
       orderModel.list().then((data) => {
         this.orders = data.results
         this.isLoading = false

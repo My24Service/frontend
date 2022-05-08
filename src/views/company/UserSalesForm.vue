@@ -198,7 +198,7 @@ export default {
       }
     } else {
       const isUniqueEdit = (value) => {
-        if (this.orgUsername === this.customeruser.username || value === '' || value.length < 3) {
+        if (this.orgUsername === value || value === '' || value.length < 3) {
           return true
         }
 
@@ -207,7 +207,10 @@ export default {
 
       validations.salesuser.username = {
         required,
-        isUnique: helpers.withAsync(isUniqueEdit)
+        isUnique: isUniqueEdit
+      }
+
+      validations.salesuser.password1 = {
       }
 
       validations.salesuser.password2 = {

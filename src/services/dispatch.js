@@ -600,8 +600,7 @@ class Dispatch {
 
   drawOrderLine(startX, endX, ySlot, order, user_id) {
     const yPos = this.getYPosForYSlot(ySlot) + this.lastY
-    const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-    const color = my24.status2color(this.statuscodes, status)
+    const color = my24.status2color(this.statuscodes, this.getStatus(order))
     if (this.debug) {
       console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
@@ -626,10 +625,13 @@ class Dispatch {
     }
   }
 
+  getStatus(order) {
+    return order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
+  }
+
   drawOrderLineWide(startX, endX, ySlot, order, user_id) {
     const yPos = this.getYPosForYSlot(ySlot) + this.lastY + this.getRowHeightInt() + 4
-    const status = order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-    const color = my24.status2color(this.statuscodes, status)
+    const color = my24.status2color(this.statuscodes, this.getStatus(order))
     if (this.debug) {
       console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
@@ -858,7 +860,7 @@ class Dispatch {
 
       if (this.inStroke(h.obj, mouseX, mouseY)) {
         this.component.selectedOrderUserId = h.user_id
-        this.component.openActionsModal(h.order.order_pk)
+        this.component.openActionsModal(h.order.order_pk, h.order.assignedorder_pk)
       }
     }
   }
@@ -888,7 +890,7 @@ class Dispatch {
     this.hotspots.forEach(spot => {
       if (this.inStroke(spot.obj,mouseX, mouseY)) {
         this.canvas.style.cursor = "pointer"
-        this.showInfo(spot.order.order_info, mouseX, mouseY)
+        this.showInfo(`${spot.order.order_info}\nStatus: ${this.getStatus(spot.order)}`, mouseX, mouseY)
         hit = true
         return
       }
