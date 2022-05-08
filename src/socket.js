@@ -198,30 +198,27 @@ class Socket {
   _connectMemberNewData(memberPk, type) {
     const socket = new WebSocket(`${this.protocol}://${this.host}/ws/new-data-member/${memberPk}/`)
     socket.onmessage = (e) => {
-      console.log(`_connectMemberNewData: new data: ${e.data}, type: ${type}`)
       if (memberPk in this.onmessageHandlersMemberNewData && type in this.onmessageHandlersMemberNewData[memberPk]) {
         const handler = this.onmessageHandlersMemberNewData[memberPk][type]
         const data = JSON.parse(e.data)
-        console.log(`_connectMemberNewData: sending message to: ${handler}, type: ${type}`, handler)
         handler(data.message)
       } else {
-        console.log(`member ${memberPk} and type ${type}  not in this.onmessageHandlersMemberNewData`)
+        console.log(`member ${memberPk} and type ${type} not in this.onmessageHandlersMemberNewData`)
       }
     }
 
     socket.onclose = (e) => {
       if (memberPk in this.socketsMemberNewData && type in this.onmessageHandlersMemberNewData[memberPk]) {
-        console.log(`Member socket for new data is closed (type ${type}. Reconnect will be attempted in 1 second.`)
         setTimeout(() => {
           this._connectMember(memberPk, type)
         }, this.reconnectTimeout)
       } else {
-        console.log(`Member socket for new data is closed, not reconnecting (member ${memberPk} and type ${type} not found`)
+        console.log(`Member socket for new data is closed, not reconnecting (member ${memberPk} and type ${type}) not found`)
       }
     }
 
     socket.onopen = (e) => {
-      console.log('Member socket for new data is connected (member ${memberPk} and type ${type}).')
+      console.log(`Member socket for new data is connected (member ${memberPk} and type ${type}).`)
     }
 
     return socket

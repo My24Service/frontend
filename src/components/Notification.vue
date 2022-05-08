@@ -27,8 +27,6 @@ export default {
       if (!doPoll) {
         console.debug('no polling')
         return
-      } else {
-        console.log('setting up polling')
       }
 
       setTimeout(async () => {
@@ -40,9 +38,7 @@ export default {
       }, 5*60*1000)
     },
     onNewData(data) {
-      console.log('onNewData: ', data)
       if (data.type === 'unaccepted_order_event') {
-        console.log('received new_unaccepted_order: do fetch and refresh store')
         this.doFetchUnacceptedCountAndUpdateStore()
       }
     }
@@ -62,8 +58,6 @@ export default {
 
     // unaccepted orders polling
     this.setupPolling()
-
-    console.log('Notification: mounted and all handlers installed')
   },
 }
 </script>
