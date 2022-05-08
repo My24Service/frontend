@@ -191,6 +191,7 @@ class Socket {
   _connectMemberNewData(memberPk) {
     const socket = new WebSocket(`${this.protocol}://${this.host}/ws/new-data-member/${memberPk}/`)
     socket.onmessage = (e) => {
+      console.log(`_connectMemberNewData: new data: ${data.message}`)
       if (memberPk in this.onmessageHandlersMemberNewData) {
         const data = JSON.parse(e.data)
         const handler = this.onmessageHandlersMemberNewData[memberPk]
