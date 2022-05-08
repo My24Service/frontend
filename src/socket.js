@@ -195,6 +195,8 @@ class Socket {
         const data = JSON.parse(e.data)
         const handler = this.onmessageHandlersMemberNewData[memberPk]
         handler(data.message)
+      } else {
+        console.log(`member ${memberPk} not in this.onmessageHandlersMemberNewData`)
       }
     }
 
