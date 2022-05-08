@@ -18,7 +18,7 @@
     "awesome-debounce-promise": "^2.1.0",
     "axios": "^0.21.2",
     "bootstrap": "^4.5.2",
-    "bootstrap-vue": "^2.21.2",
+    "bootstrap-vue": "^2.22.0",
     "chart.js": "2",
     "chartjs-plugin-datalabels": "^0.4.0",
     "is-ci": "^3.0.1",

@@ -1,7 +1,6 @@
 import axios from "axios"
 import { expect } from 'chai'
-import { shallowMount, mount } from '@vue/test-utils'
-import { render } from '@vue/server-test-utils'
+import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
@@ -42,7 +41,8 @@ describe('OrderList.vue temps', () => {
   beforeEach(() => {
     actions = {
       getStatuscodes: () => [],
-      getMemberType: () => 'temps'
+      getMemberType: () => 'temps',
+      setUnacceptedCount: () => null
     }
 
     store = new Vuex.Store({
@@ -88,7 +88,8 @@ describe('OrderList.vue maintenance', () => {
   beforeEach(() => {
     actions = {
       getStatuscodes: () => [],
-      getMemberType: () => 'maintenance'
+      getMemberType: () => 'maintenance',
+      setUnacceptedCount: () => null
     }
 
     store = new Vuex.Store({

@@ -8,7 +8,6 @@ import flushPromises from 'flush-promises'
 import localVue from '../../index'
 import OrderListMaintenance from '@/views/orders/OrderListMaintenance.vue'
 import ordersResponse from '../../fixtures/orders'
-import supplierResponse from "../../fixtures/supplier";
 
 jest.mock('axios')
 
@@ -17,6 +16,7 @@ axios.get.mockImplementation((url) => {
     case '/order/order/?page=1':
       return Promise.resolve(ordersResponse)
     default:
+      console.error(`${url} not found`)
       return Promise.reject(new Error(`${url} not found`))
   }
 })
@@ -51,7 +51,7 @@ describe('OrderListMaintenance.vue', () => {
     actions = {
       getStatuscodes: () => [],
       getMemberType: () => 'maintenance',
-      setUnacceptedCount: () => 1
+      setUnacceptedCount: () => null
     }
 
     store = new Vuex.Store({
