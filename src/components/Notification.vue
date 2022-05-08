@@ -38,6 +38,7 @@ export default {
       }, 5*60*1000)
     },
     onNewData(data) {
+      console.log('onNewData: ', data)
       if (data.type === 'unaccepted_order_event') {
         console.log('received new_unaccepted_order: do fetch and refresh store')
         this.doFetchUnacceptedCountAndUpdateStore()
