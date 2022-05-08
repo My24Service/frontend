@@ -27,6 +27,8 @@ export default {
       if (!doPoll) {
         console.debug('no polling')
         return
+      } else {
+        console.log('setting up polling')
       }
 
       setTimeout(async () => {
@@ -60,6 +62,8 @@ export default {
 
     // unaccepted orders polling
     this.setupPolling()
+
+    console.log('Notification: mounted and all handlers installed')
   },
 }
 </script>
