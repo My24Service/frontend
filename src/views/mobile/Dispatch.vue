@@ -502,8 +502,8 @@ export default {
   },
   mounted() {
     const memberPk = this.$store.getters.getMemberPk
-    Socket.getSocketMemberNewData(memberPk)
-    Socket.setOnmessageHandlerMemberNewData(memberPk, this.onNewData)
+    Socket.getSocketMemberNewData(memberPk, 'dispatch')
+    Socket.setOnmessageHandlerMemberNewData(memberPk, 'dispatch', this.onNewData)
 
     const displayMode = JSON.parse(localStorage.getItem('displayMode'))
     let mode
@@ -542,8 +542,8 @@ export default {
   },
   beforeDestroy() {
     const memberPk = this.$store.getters.getMemberPk
-    Socket.removeOnmessageHandlerMemberNewData(memberPk)
-    Socket.removeSocketMemberNewData(memberPk)
+    Socket.removeOnmessageHandlerMemberNewData(memberPk, 'dispatch')
+    Socket.removeSocketMemberNewData(memberPk, 'dispatch')
   }
 }
 </script>

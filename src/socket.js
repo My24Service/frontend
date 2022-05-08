@@ -103,29 +103,36 @@ class Socket {
   }
 
   // new data messages to member
-  setOnmessageHandlerMemberNewData(memberPk, func) {
-    this.onmessageHandlersMemberNewData[memberPk] = func
+  setOnmessageHandlerMemberNewData(memberPk, type, func) {
+    if (!(memberPk in this.onmessageHandlersMemberNewData)) {
+      this.onmessageHandlersMemberNewData[memberPk] = {}
+    }
+    this.onmessageHandlersMemberNewData[memberPk][type] = func
   }
 
-  removeOnmessageHandlerMemberNewData(memberPk) {
-    delete this.onmessageHandlersMemberNewData[memberPk]
+  removeOnmessageHandlerMemberNewData(memberPk, type) {
+    delete this.onmessageHandlersMemberNewData[memberPk][type]
   }
 
-  getSocketMemberNewData(memberPk) {
-    if (memberPk in this.socketsMemberNewData) {
-      return this.socketsMemberNewData[memberPk]
+  getSocketMemberNewData(memberPk, type) {
+    if (memberPk in this.socketsMemberNewData && type in this.socketsMemberNewData[memberPk]) {
+      return this.socketsMemberNewData[memberPk][type]
     }
 
-    const socket = this._connectMemberNewData(memberPk)
+    if (!(memberPk in this.socketsMemberNewData)) {
+      this.socketsMemberNewData[memberPk] = {}
+    }
 
-    this.socketsMemberNewData[memberPk] = socket
+    const socket = this._connectMemberNewData(memberPk, type)
+
+    this.socketsMemberNewData[memberPk][type] = socket
 
     return socket
   }
 
-  removeSocketMemberNewData(memberPk) {
-    const socket = this.socketsMemberNewData[memberPk]
-    delete this.socketsMemberNewData[memberPk]
+  removeSocketMemberNewData(memberPk, type) {
+    const socket = this.socketsMemberNewData[memberPk][type]
+    delete this.socketsMemberNewData[memberPk][type]
     socket.close()
   }
 
@@ -188,33 +195,33 @@ class Socket {
     return socket
   }
 
-  _connectMemberNewData(memberPk) {
+  _connectMemberNewData(memberPk, type) {
     const socket = new WebSocket(`${this.protocol}://${this.host}/ws/new-data-member/${memberPk}/`)
     socket.onmessage = (e) => {
-      console.log(`_connectMemberNewData: new data: ${e.data}`)
-      if (memberPk in this.onmessageHandlersMemberNewData) {
-        const handler = this.onmessageHandlersMemberNewData[memberPk]
+      console.log(`_connectMemberNewData: new data: ${e.data}, type: ${type}`)
+      if (memberPk in this.onmessageHandlersMemberNewData && type in this.onmessageHandlersMemberNewData[memberPk]) {
+        const handler = this.onmessageHandlersMemberNewData[memberPk][type]
         const data = JSON.parse(e.data)
-        console.log(`_connectMemberNewData: sending message to: ${handler}`, handler)
+        console.log(`_connectMemberNewData: sending message to: ${handler}, type: ${type}`, handler)
         handler(data.message)
       } else {
-        console.log(`member ${memberPk} not in this.onmessageHandlersMemberNewData`)
+        console.log(`member ${memberPk} and type ${type}  not in this.onmessageHandlersMemberNewData`)
       }
     }
 
     socket.onclose = (e) => {
-      if (memberPk in this.socketsMemberNewData) {
-        console.log('Member socket for new data is closed. Reconnect will be attempted in 1 second.')
+      if (memberPk in this.socketsMemberNewData && type in this.onmessageHandlersMemberNewData[memberPk]) {
+        console.log(`Member socket for new data is closed (type ${type}. Reconnect will be attempted in 1 second.`)
         setTimeout(() => {
-          this._connectMember(memberPk)
+          this._connectMember(memberPk, type)
         }, this.reconnectTimeout)
       } else {
-        console.log('Member socket for new data is closed, not reconnecting')
+        console.log(`Member socket for new data is closed, not reconnecting (member ${memberPk} and type ${type} not found`)
       }
     }
 
     socket.onopen = (e) => {
-      console.log('Member socket for new data is connected.')
+      console.log('Member socket for new data is connected (member ${memberPk} and type ${type}).')
     }
 
     return socket

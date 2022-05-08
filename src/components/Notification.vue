@@ -57,8 +57,8 @@ export default {
     Socket.setOnmessageHandlerMember(memberPk, this.handleMessageMember)
     Socket.getSocketMember(memberPk)
 
-    Socket.getSocketMemberNewData(memberPk)
-    Socket.setOnmessageHandlerMemberNewData(memberPk, this.onNewData)
+    Socket.getSocketMemberNewData(memberPk, 'unaccepted_orders')
+    Socket.setOnmessageHandlerMemberNewData(memberPk, 'unaccepted_orders', this.onNewData)
 
     // unaccepted orders polling
     this.setupPolling()
