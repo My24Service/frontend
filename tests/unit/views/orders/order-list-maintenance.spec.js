@@ -1,7 +1,6 @@
 import axios from "axios"
 import { expect } from 'chai'
-import { shallowMount, mount } from '@vue/test-utils'
-import { render } from '@vue/server-test-utils'
+import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
@@ -9,8 +8,18 @@ import flushPromises from 'flush-promises'
 import localVue from '../../index'
 import OrderListMaintenance from '@/views/orders/OrderListMaintenance.vue'
 import ordersResponse from '../../fixtures/orders'
+import supplierResponse from "../../fixtures/supplier";
 
 jest.mock('axios')
+
+axios.get.mockImplementation((url) => {
+  switch (url) {
+    case '/order/order/?page=1':
+      return Promise.resolve(ordersResponse)
+    default:
+      return Promise.reject(new Error(`${url} not found`))
+  }
+})
 
 const routes = [
 {
@@ -41,7 +50,8 @@ describe('OrderListMaintenance.vue', () => {
   beforeEach(() => {
     actions = {
       getStatuscodes: () => [],
-      getMemberType: () => 'maintenance'
+      getMemberType: () => 'maintenance',
+      setUnacceptedCount: () => 1
     }
 
     store = new Vuex.Store({
