@@ -195,6 +195,7 @@ class Socket {
       if (memberPk in this.onmessageHandlersMemberNewData) {
         const handler = this.onmessageHandlersMemberNewData[memberPk]
         const data = JSON.parse(e.data)
+        console.log(`_connectMemberNewData: sending message to: ${handler}`)
         handler(data.message)
       } else {
         console.log(`member ${memberPk} not in this.onmessageHandlersMemberNewData`)
