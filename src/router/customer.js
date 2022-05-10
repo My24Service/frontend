@@ -8,7 +8,8 @@ import CustomerView from '@/views/customer/CustomerView.vue'
 import DocumentList from '@/views/customer/DocumentList.vue'
 import DocumentForm from '@/views/customer/DocumentForm.vue'
 
-import MaintenanceProductsAll from '@/views/customer/MaintenanceProductsAll.vue'
+import MaintenanceContractList from '@/views/customer/MaintenanceContractList.vue'
+import MaintenanceContractForm from '@/views/customer/MaintenanceContractForm.vue'
 import MaintenanceProductList from '@/views/customer/MaintenanceProductList.vue'
 import MaintenanceProductForm from '@/views/customer/MaintenanceProductForm.vue'
 import Calendar from '@/views/customer/Calendar.vue'
@@ -103,12 +104,12 @@ export default [
         'app-subnav': true
       },
     },
-    // maintenance products
+    // maintenance contracts
     {
-      name: 'maintenance-products-all',
-      path: '/customers/maintenance-products-all',
+      name: 'maintenance-contracts',
+      path: '/customers/maintenance-contracts',
       components: {
-        'app-content': MaintenanceProductsAll,
+        'app-content': MaintenanceContractList,
         'app-subnav': SubNavCustomers
       },
       props: {
@@ -116,6 +117,31 @@ export default [
         'app-subnav': true
       },
     },
+    {
+      name: 'maintenance-contract-edit',
+      path: '/customers/maintenance-contracts/:pk',
+      components: {
+        'app-content': MaintenanceContractForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-contract-add',
+      path: '/customers/maintenance-contracts/form',
+      components: {
+        'app-content': MaintenanceContractForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    // maintenance products
     {
       name: 'maintenance-products',
       path: '/customers/maintenance-products/:customer_pk',

@@ -8,10 +8,10 @@
         {{ $trans('Customers') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('maintenance-products-all') || isActive('maintenance-products')"
-        v-if="hasAllMaintenanceProducts"
-        :to="{ name: 'maintenance-products-all' }">
-        {{ $trans('All maintenance products') }}
+        :active="isActive('maintenance-contracts') || isActive('maintenance-products')"
+        v-if="hasMaintenanceContracts"
+        :to="{ name: 'maintenance-contracts' }">
+        {{ $trans('Maintenance contracts') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('maintenance-order-year')"
@@ -44,8 +44,8 @@ export default {
     hasCustomers() {
       return this.hasAccessToModule('customers', 'customers')
     },
-    hasAllMaintenanceProducts() {
-      return this.hasAccessToModule('customers', 'all-maintenance-products')
+    hasMaintenanceContracts() {
+      return this.hasAccessToModule('customers', 'maintenance-contracts')
     },
     hasMaintenanceOrdersPerYear() {
       return this.hasAccessToModule('customers', 'maintenance-order-year')
