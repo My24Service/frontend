@@ -543,9 +543,7 @@ export default {
     });
   },
   beforeDestroy() {
-    const memberPk = this.$store.getters.getMemberPk
-    Socket.removeOnmessageHandlerMemberNewData(memberPk, 'dispatch')
-    Socket.removeSocketMemberNewData(memberPk, 'dispatch')
+    memberNewDataSocket.removeOnmessageHandler('dispatch')
   }
 }
 </script>

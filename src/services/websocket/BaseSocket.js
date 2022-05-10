@@ -52,7 +52,7 @@ class BaseSocket {
 
   _getRoomFromStorage(url, room) {
     const key = this._getStorageKey(url)
-    return JSON.parse(localStorage.getItem(room))
+    return JSON.parse(localStorage.getItem(key))
   }
 
   async _getRoom(url, postData) {
