@@ -4,6 +4,9 @@
 <script>
 import Socket from "@/socket.js"
 import { componentMixin } from '@/utils.js'
+import userSocket from '@/services/websocket/UserSocket.js'
+import memberSocket from '@/services/websocket/MemberSocket.js'
+import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
 
 export default {
   mixins: [componentMixin],
@@ -43,18 +46,21 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     const userPk = this.$store.getters.getUserPk
     const memberPk = this.$store.getters.getMemberPk
 
-    Socket.setOnmessageHandlerUser(memberPk, userPk, this.handleMessageUser)
-    Socket.getSocketUser(memberPk, userPk)
+    await userSocket.init(userPk)
+    userSocket.setOnmessageHandler(this.handleMessageUser)
+    userSocket.getSocket()
 
-    Socket.setOnmessageHandlerMember(memberPk, this.handleMessageMember)
-    Socket.getSocketMember(memberPk)
+    await memberSocket.init()
+    memberSocket.setOnmessageHandler(this.handleMessageMember)
+    memberSocket.getSocket()
 
-    Socket.getSocketMemberNewData(memberPk, 'unaccepted_orders')
-    Socket.setOnmessageHandlerMemberNewData(memberPk, 'unaccepted_orders', this.onNewData)
+    await memberNewDataSocket.init('unaccepted_orders')
+    memberNewDataSocket.setOnmessageHandler(this.onNewData)
+    memberNewDataSocket.getSocket()
 
     // unaccepted orders polling
     this.setupPolling()

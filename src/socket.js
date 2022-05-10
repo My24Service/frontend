@@ -11,8 +11,6 @@ class Socket {
   host = BASE_URL
   reconnectTimeout = 5000
 
-  socketsUser = {}
-  onmessageHandlersUser = {}
 
   socketsMember = {}
   onmessageHandlersMember = {}
@@ -22,56 +20,6 @@ class Socket {
 
   userKeys = {}
 
-  createUserKey(memberPk, userPk) {
-    const key = `${memberPk}/${userPk}`
-    this.userKeys[userPk] = key
-
-    return key
-  }
-
-  getUserKey(userPk) {
-    if (userPk in this.userKeys) {
-      return this.userKeys[userPk]
-    }
-
-    return undefined
-  }
-
-  // notifications to user
-  setOnmessageHandlerUser(memberPk, userPk, func) {
-    const key = this.createUserKey(memberPk, userPk)
-    this.onmessageHandlersUser[key] = func
-  }
-
-  removeOnmessageHandlerUser(userPk) {
-    const key = this.getUserKey(userPk)
-
-    delete this.onmessageHandlersUser[key]
-  }
-
-  getSocketUser(memberPk, userPk) {
-    const key = this.createUserKey(memberPk, userPk)
-
-    if (key in this.socketsUser) {
-      return this.socketsUser[key]
-    }
-
-    const socket = this._connectUser(memberPk, userPk)
-
-    this.socketsUser[key] = socket
-
-    return socket
-  }
-
-  removeSocketUser(userPk) {
-    const key = this.getUserKey(userPk)
-
-    const socket = this.socketsUser[key]
-    delete this.socketsUser[userPk]
-    if (socket) {
-      socket.close()
-    }
-  }
 
   // notifications to member
   setOnmessageHandlerMember(memberPk, func) {
@@ -134,37 +82,6 @@ class Socket {
     const socket = this.socketsMemberNewData[memberPk][type]
     delete this.socketsMemberNewData[memberPk][type]
     socket.close()
-  }
-
-  // internal methods
-  _connectUser(memberPk, userPk) {
-    const key = this.createUserKey(memberPk, userPk)
-
-    const socket = new WebSocket(`${this.protocol}://${this.host}/ws/notifications-user/${key}/`)
-    socket.onmessage = (e) => {
-      if (key in this.onmessageHandlersUser) {
-        const data = JSON.parse(e.data)
-        const handler = this.onmessageHandlersUser[key]
-        handler(data.message)
-      }
-    }
-
-    socket.onclose = (e) => {
-      if (key in this.socketsUser) {
-        console.log('User socket is closed. Reconnect will be attempted in 1 second.')
-        setTimeout(() => {
-          this._connectUser(memberPk, userPk)
-        }, this.reconnectTimeout)
-      } else {
-        console.log('User socket is closed, not reconnecting')
-      }
-    }
-
-    socket.onopen = (e) => {
-      console.log('User socket is connected.')
-    }
-
-    return socket
   }
 
   _connectMember(memberPk) {

@@ -5,7 +5,7 @@
         :active="isActive('orders')"
         v-if="isStaff || isSuperuser || (hasOrders && (isPlanning || isCustomer))"
         to="/orders/orders">{{ $trans('Orders') }}
-        <b-badge v-if="unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
+        <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
       </b-nav-item>
       <div
         v-if="isStaff || isSuperuser || (hasCustomers && isPlanning)"

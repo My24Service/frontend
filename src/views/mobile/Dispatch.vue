@@ -271,7 +271,7 @@ import Dispatch from '@/services/dispatch.js'
 import orderModel from '@/models/orders/Order.js'
 import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
 import assign from '@/models/mobile/Assign.js'
-import Socket from '@/socket.js'
+import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
 
 export default {
   name: 'Dispatch',
@@ -500,10 +500,12 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     const memberPk = this.$store.getters.getMemberPk
-    Socket.getSocketMemberNewData(memberPk, 'dispatch')
-    Socket.setOnmessageHandlerMemberNewData(memberPk, 'dispatch', this.onNewData)
+
+    await memberNewDataSocket.init('dispatch')
+    memberNewDataSocket.setOnmessageHandler(this.onNewData)
+    memberNewDataSocket.getSocket()
 
     const displayMode = JSON.parse(localStorage.getItem('displayMode'))
     let mode

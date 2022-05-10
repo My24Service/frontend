@@ -39,9 +39,7 @@ let componentMixin = {
   methods: {
     async doFetchUnacceptedCountAndUpdateStore() {
       const countResult = await orderNotAcceptedModel.getCount()
-      if (countResult && countResult.count > 0) {
-        this.$store.dispatch('setUnacceptedCount', countResult.count)
-      }
+      this.$store.dispatch('setUnacceptedCount', countResult.count)
     },
     hasAccessToModule(module, part) {
       return my24.hasAccessToModule({
