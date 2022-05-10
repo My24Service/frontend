@@ -55,15 +55,15 @@ class BaseSocket {
     return JSON.parse(localStorage.getItem(key))
   }
 
-  async _getRoom(url, postData) {
+  async _getRoom(url) {
     const room = this._getRoomFromStorage(url)
     if (room) {
       console.log(`${this.name}: got room from storage: ${room}`)
       return room
     }
 
-    const result = await axios.post(url, postData).then((response) => response.data)
-    console.log(`${this.name}: got room from post: ${result.room}`)
+    const result = await axios.get(url).then((response) => response.data)
+    console.log(`${this.name}: got room from backend: ${result.room}`)
     this._storeRoom(url, result.room)
 
     return result.room

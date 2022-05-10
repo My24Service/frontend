@@ -11,7 +11,7 @@ class MemberNewDataSocket extends BaseSocket {
 
   async init(type) {
     this.type = this
-    this.room = await this._getRoom('/get-member-new-data-room/', {})
+    this.room = await this._getRoom('/get-member-new-data-room/')
     console.log(`${this.name}: received room: ${this.room}`)
   }
 

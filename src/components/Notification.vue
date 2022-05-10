@@ -47,10 +47,7 @@ export default {
     }
   },
   async mounted() {
-    const userPk = this.$store.getters.getUserPk
-    const memberPk = this.$store.getters.getMemberPk
-
-    await userSocket.init(userPk)
+    await userSocket.init()
     userSocket.setOnmessageHandler(this.handleMessageUser)
     userSocket.getSocket()
 

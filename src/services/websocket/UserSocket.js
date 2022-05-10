@@ -4,14 +4,12 @@ import BaseSocket from '@/services/websocket/BaseSocket.js'
 // notifications to user
 class UserSocket extends BaseSocket {
   name = 'UserSocket'
-  userPk = null
   room = null
   socket = null
   onmessageHandler = null
 
-  async init(userPk) {
-    this.userPk = userPk
-    this.room = await this._getRoom('/get-user-room/', {user_pk: this.userPk})
+  async init() {
+    this.room = await this._getRoom('/get-user-room/')
     console.log(`${this.name}: received room: ${this.room}`)
   }
 

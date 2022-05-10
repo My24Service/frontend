@@ -7,6 +7,9 @@ export const getters = {
   getUserPk: state => {
     return state.userInfo.pk
   },
+  getUserUUID: state => {
+    return state.userInfo.uuid
+  },
   getMemberPk: state => {
     return state.memberInfo.id
   },

@@ -9,7 +9,7 @@ class MemberSocket extends BaseSocket {
   onmessageHandler = null
 
   async init() {
-    this.room = await this._getRoom('/get-member-room/', {})
+    this.room = await this._getRoom('/get-member-room/')
     console.log(`${this.name}: received room: ${this.room}`)
   }
 
