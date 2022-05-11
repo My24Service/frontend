@@ -73,25 +73,25 @@ describe('StatuscodeList.vue - order', () => {
     expect(trs.length).to.equal(2)
   })
 
-  it('contains "Start order?" - order', async () => {
-    axios.get.mockResolvedValueOnce(statuscodesResponse);
-
-    const wrapper = mount(StatuscodeList, {
-      localVue,
-      router,
-      mocks: {
-        $trans: (f) => f
-      },
-      propsData: {
-        list_type: 'order',
-      }
-    })
-
-    await flushPromises()
-
-    const html = wrapper.html()
-    expect(html).to.contain('Start order?')
-  })
+  // it('contains "Start order?" - order', async () => {
+  //   axios.get.mockResolvedValueOnce(statuscodesResponse);
+  //
+  //   const wrapper = mount(StatuscodeList, {
+  //     localVue,
+  //     router,
+  //     mocks: {
+  //       $trans: (f) => f
+  //     },
+  //     propsData: {
+  //       list_type: 'order',
+  //     }
+  //   })
+  //
+  //   await flushPromises()
+  //
+  //   const html = wrapper.html()
+  //   expect(html).to.contain('Start order?')
+  // })
 
   it('does not contain "Start trip?" - order', async () => {
     axios.get.mockResolvedValueOnce(statuscodesResponse);
