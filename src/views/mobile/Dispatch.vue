@@ -274,7 +274,7 @@ import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from '../../constants';
 
 export default {
-  name: 'Dispatch',
+  name: 'DispatchComponent',
   props: {
     assignModeProp: {
       type: [Boolean],

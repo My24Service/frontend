@@ -98,7 +98,9 @@ import Password from 'vue-password-strength-meter'
 
 import accountModel from '@/models/account/Account.js'
 import { componentMixin } from '@/utils.js'
-import socket from "@/socket.js"
+import userSocket from '@/services/websocket/UserSocket.js'
+import memberSocket from '@/services/websocket/MemberSocket.js'
+import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
 
 import TheLanguageChooser from "@/components/TheLanguageChooser.vue"
 import Version from "@/components/Version.vue"
@@ -196,11 +198,17 @@ export default {
 
         loader.hide()
 
-        socket.removeOnmessageHandlerUser(userPk)
-        socket.removeSocketUser(userPk)
+        await userSocket.init()
+        userSocket.removeOnmessageHandler()
+        userSocket.removeSocket()
 
-        socket.removeOnmessageHandlerMember(memberPk)
-        socket.removeSocketMember(memberPk)
+        await memberSocket.init()
+        memberSocket.removeOnmessageHandler()
+        memberSocket.removeSocket()
+
+        await memberNewDataSocket.init('unaccepted_orders')
+        memberNewDataSocket.removeOnmessageHandler()
+        memberNewDataSocket.removeSocket()
 
         this.infoToast(this.$trans('Logged out'), this.$trans('You are now logged out'))
 
