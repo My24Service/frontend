@@ -265,13 +265,13 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
-import eachSeries from 'async/eachSeries'
 
 import Dispatch from '@/services/dispatch.js'
 import orderModel from '@/models/orders/Order.js'
 import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
 import assign from '@/models/mobile/Assign.js'
 import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
+import {NEW_DATA_EVENTS} from '../../constants';
 
 export default {
   name: 'Dispatch',
@@ -495,14 +495,12 @@ export default {
       };
     },
     onNewData(data) {
-      if (data.type === 'dispatch') {
+      if (data.type === NEW_DATA_EVENTS.DISPATCH) {
         this.newData = true
       }
     }
   },
   async mounted() {
-    const memberPk = this.$store.getters.getMemberPk
-
     await memberNewDataSocket.init('dispatch')
     memberNewDataSocket.setOnmessageHandler(this.onNewData)
     memberNewDataSocket.getSocket()

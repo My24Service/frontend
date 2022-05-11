@@ -5,7 +5,7 @@
         <h2 v-if="isCreate">{{ $trans('New statuscode') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit statuscode') }}</h2>
         <b-row>
-          <b-col cols="6" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Statuscode')"
@@ -24,7 +24,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="1" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Color')"
@@ -34,6 +34,21 @@
                 id="statuscode_color"
                 class="color-picker-placeholder"
                 v-model="statuscode.color"
+                :position="{ left: '-180px', top: '40px' }"
+              >
+              </color-picker>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Text color')"
+              label-for="statuscode_text_color"
+            >
+              <color-picker
+                id="statuscode_text_color"
+                class="color-picker-placeholder"
+                v-model="statuscode.text_color"
                 :position="{ left: '-180px', top: '40px' }"
               >
               </color-picker>

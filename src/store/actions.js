@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import axios from '@/services/api'
 
 import my24 from '@/services/my24'

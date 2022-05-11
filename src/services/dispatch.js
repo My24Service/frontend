@@ -521,7 +521,7 @@ class Dispatch {
     shape.closePath()
 
     if (data.is_partner) {
-      if (!this.partnerYPositions.find(position => position.user_id == data.user_id)) {
+      if (!this.partnerYPositions.find(position => position.user_id === data.user_id)) {
         this.partnerYPositions.push({
           start: startY,
           end: rowHeight,
@@ -591,7 +591,7 @@ class Dispatch {
   }
 
   _drawOrderLine(lineData, ySlot, user_id) {
-    if (this.mode == COMPACT) {
+    if (this.mode === COMPACT) {
       this.drawOrderLine(lineData.startPosX, lineData.endPosX, ySlot, lineData.order, user_id)
     } else {
       this.drawOrderLineWide(lineData.startPosX, lineData.endPosX, ySlot, lineData.order, user_id)
@@ -613,7 +613,9 @@ class Dispatch {
     this.ctx.stroke(path)
 
     const textY = yPos + this.orderLinePaddingTop + this.fontPaddingCompact
-    this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX)
+    const text_color = my24.status2color(this.statuscodes, this.getStatus(order), true)
+
+    this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
 
     this.hotspots.push({
       obj: path,
@@ -654,7 +656,7 @@ class Dispatch {
     try {
       // draw the line with alpha to .2
       const rgb = this.hexToRgbA(color)
-      rgbString = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, .2)`
+      rgbString = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b})`
     } catch (e) {
       // bad hex, fallback to normal color string
       rgbString = color
@@ -668,17 +670,18 @@ class Dispatch {
     this.ctx.stroke(path)
 
     let textY = yPos + this.fontPaddingWide - this.getRowHeightInt() + 4
+    const text_color = my24.status2color(this.statuscodes, this.getStatus(order), true)
 
-    this.setText(order.order_id, startX + 4, textY, endX - startX)
-
-    textY += this.getFontsize() + this.fontPaddingWide
-    this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX)
+    this.setText(order.order_id, startX + 4, textY, endX - startX, text_color)
 
     textY += this.getFontsize() + this.fontPaddingWide
-    this.setText(`${order.order_city.slice(0, 20)}`, startX + 4, textY, endX - startX)
+    this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
 
     textY += this.getFontsize() + this.fontPaddingWide
-    this.setText(order.order_type, startX + 4, textY, endX - startX)
+    this.setText(`${order.order_city.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
+
+    textY += this.getFontsize() + this.fontPaddingWide
+    this.setText(order.order_type, startX + 4, textY, endX - startX, text_color)
 
     this.hotspots.push({
       obj: path,
@@ -690,7 +693,7 @@ class Dispatch {
     }
   }
 
-  setText(text, xPosition, yPosition, maxWidth) {
+  setText(text, xPosition, yPosition, maxWidth, color='#000') {
     let fontsize = this.getFontsize()
 
     if (import.meta.env.JEST_WORKER_ID === undefined && this.ctx.measureText(text).width > maxWidth) {
@@ -700,7 +703,7 @@ class Dispatch {
       } while(fontsize > 10 && this.ctx.measureText(text).width > maxWidth)
     }
 
-    this.ctx.fillStyle = '#000'
+    this.ctx.fillStyle = color
     this.ctx.font = `${fontsize}px ${this.fontface}`
     this.ctx.fillText(text, xPosition, yPosition)
     this.ctx.font = `${this.getFontsize()}px ${this.fontface}`

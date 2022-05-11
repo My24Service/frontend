@@ -34,26 +34,26 @@ class My24 extends BaseModel {
       .catch(console.error);
   }
 
-  status2color(statuscodes, status) {
+  status2color(statuscodes, status, text_color=false) {
     const defaultColor = '#ccc'
+    const defaultTextColor = '#000'
     if (!status) {
-      console.log('no status')
-      return defaultColor
+      console.log(`no status, returning ${text_color ? 'text color' : 'color'} ${text_color ? defaultTextColor : defaultColor}`)
+      return text_color ? defaultTextColor : defaultColor
     }
 
     for (let i=0; i<statuscodes.length; i++) {
       const statuscode = statuscodes[i]
-      let color = statuscode.color
-
-      if (color.substr(0, 1) !== '#') color = '#' + color
-
-      // first try regex
-      const re = new RegExp(statuscode.statuscode, 'i');
-      if (re.test(status)) {
-        return color
+      let color = text_color ? statuscode.text_color : statuscode.color
+      if (!color) {
+        color = text_color ? defaultTextColor : defaultColor
+        console.log(`could not find ${text_color ? 'text color' : 'color'} for: ${statuscode.statuscode}, defaulting to ${color}`)
       }
 
-      if (status === statuscode) {
+      if (color.substring(0, 1) !== '#') color = '#' + color
+
+      const re = new RegExp(statuscode.statuscode, 'i');
+      if (re.test(status) || status === statuscode) {
         return color
       }
     }

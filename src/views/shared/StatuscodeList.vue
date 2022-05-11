@@ -76,20 +76,23 @@
         <span v-bind:style="{ backgroundColor: data.item.color }">
           <img width="12" src="/static/core/img/pixel.png" />
         </span>
+        <div class="color_text">{{data.item.color }}</div>
       </template>
-      <template #cell(start_order)="data">
-        <div class="text-center">
-          <b-icon-check2 v-if="data.item.start_order" class="h3" variant="info"></b-icon-check2>
+      <template #cell(text_color)="data">
+        <span v-bind:style="{ width: '10px', backgroundColor: data.item.text_color }">
+          <img width="10" src="/static/core/img/pixel.png" />
+        </span>
+        <div class="color_text">{{data.item.text_color }}</div>
+      </template>
+      <template #cell(type)="data">
+        <div v-if="data.item.start_order">
+          <span class="statuscode_type">{{ $trans('Start order') }}</span>
         </div>
-      </template>
-      <template #cell(end_order)="data">
-        <div class="text-center">
-          <b-icon-check2 v-if="data.item.end_order" class="h3" variant="info"></b-icon-check2>
+        <div v-if="data.item.end_order">
+          <span class="statuscode_type">{{ $trans('End order') }}</span>
         </div>
-      </template>
-      <template #cell(after_end_order)="data">
-        <div class="text-center">
-          <b-icon-check2 v-if="data.item.after_end_order" class="h3" variant="info"></b-icon-check2>
+        <div v-if="data.item.after_end_order">
+          <span class="statuscode_type">{{ $trans('After end order') }}</span>
         </div>
       </template>
       <template #cell(actions)="data">
@@ -178,10 +181,9 @@ export default {
       fieldsOrder: [
         {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '15%'}},
         {key: 'color', label: this.$trans('Color'), thAttr: {width: '5%'}},
-        {key: 'start_order', label: this.$trans('Start order?'), thAttr: {width: '10%'}},
-        {key: 'end_order', label: this.$trans('End order?'), thAttr: {width: '10%'}},
-        {key: 'after_end_order', label: this.$trans('After end order?'), thAttr: {width: '10%'}},
-        {key: 'description', label: this.$trans('Description'), thAttr: {width: '15%'}},
+        {key: 'text_color', label: this.$trans('Text color'), thAttr: {width: '10%'}},
+        {key: 'type', label: this.$trans('Type'), thAttr: {width: '10%'}},
+        {key: 'description', label: this.$trans('Description'), thAttr: {width: '25%'}},
         {key: 'actions', label: this.$trans('Actions'), thAttr: {width: '20%'}},
         {key: 'icons', thAttr: {width: '15%'}},
       ],
@@ -266,3 +268,12 @@ export default {
   }
 }
 </script>
+<style scoped>
+span.statuscode_type {
+  font-style: italic;
+}
+.color_text {
+  font-weight: bold;
+  font-style: italic;
+}
+</style>

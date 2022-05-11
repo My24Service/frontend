@@ -2,11 +2,11 @@
   <div/>
 </template>
 <script>
-import Socket from "@/socket.js"
 import { componentMixin } from '@/utils.js'
 import userSocket from '@/services/websocket/UserSocket.js'
 import memberSocket from '@/services/websocket/MemberSocket.js'
 import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
+import { NEW_DATA_EVENTS } from '@/constants'
 
 export default {
   mixins: [componentMixin],
@@ -41,8 +41,12 @@ export default {
       }, 5*60*1000)
     },
     onNewData(data) {
-      if (data.type === 'unaccepted_order_event') {
+      if (data.type === NEW_DATA_EVENTS.UNACCEPTED_ORDER) {
         this.doFetchUnacceptedCountAndUpdateStore()
+      }
+
+      if (data.type === NEW_DATA_EVENTS.REFRESH_INITIAL) {
+        this.$store.dispatch('getInitialData')
       }
     }
   },
