@@ -85,14 +85,15 @@ export default {
     async loadData() {
       this.isLoading = true;
 
-      tripAvailabilityModel.list().then((data) => {
+      try {
+        const data = tripAvailabilityModel.list()
         this.tripAvailability = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching trips', error);
         this.errorToast(this.$trans('Error loading trips'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

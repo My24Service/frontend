@@ -132,56 +132,49 @@ export default {
         reader.readAsDataURL(files[i])
       }
     },
-    postDocument(document, callback) {
-      this.$store.dispatch('getCsrfToken').then(token => {
-        documentModel.insert(token, document).then(() => {
-          return callback()
-        }).catch(error => {
-          return callback(error)
-        })
-      })
-    },
-    submitForm() {
+    async submitForm() {
       this.isLoading = true
 
       if (this.isCreate) {
-        eachSeries(this.documents, this.postDocument, (err) => {
-          if (err) {
-            this.errorToast(this.$trans('Error creating document(s)'))
-            this.isLoading = false
-          } else {
-            this.infoToast(this.$trans('Created'), this.$trans('Document(s) have been created'))
-            this.isLoading = false
-            this.$router.push({name: 'order-documents', params: {orderPk: this.orderPk}})
+        try {
+          for (const document of this.documents) {
+            await documentModel.insert(document)
           }
-        })
+        } catch(error) {
+          this.errorToast(this.$trans('Error creating document(s)'))
+          this.isLoading = false
+        }
+
+        this.infoToast(this.$trans('Created'), this.$trans('Document(s) have been created'))
+        this.isLoading = false
+        this.$router.push({name: 'order-documents', params: {orderPk: this.orderPk}})
 
         return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         delete this.document.file
-        documentModel.update(token, this.pk, this.document).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
-          this.isLoading = false
-          this.$router.push({name: 'order-documents', params: {orderPk: this.document.order}})
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating document'))
-          this.isLoading = false
-        })
-      })
+        await documentModel.update(this.pk, this.document)
+        this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
+        this.isLoading = false
+        this.$router.push({name: 'order-documents', params: {orderPk: this.document.order}})
+      } catch(error) {
+        console.log('Error updating document', error)
+        this.errorToast(this.$trans('Error updating document'))
+        this.isLoading = false
+      }
     },
-    loadDocument() {
+    async loadDocument() {
       this.isLoading = true
 
-      documentModel.detail(this.pk).then((document) => {
-        this.document = document
+      try {
+        this.document = await documentModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching document', error)
         this.errorToast(this.$trans('Error loading document'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

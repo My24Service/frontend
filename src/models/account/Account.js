@@ -15,22 +15,27 @@ class Account extends BaseModel {
     return this.axios.post('/set-language/', bodyFormData)
   }
 
-  login(data) {
+  async login(username, password) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
     const url = '/rest-auth/login/'
 
     const postData = {
-      username: data.username,
-      password: data.password,
+      username: username,
+      password: password,
     }
 
-    return this.axios.post(url, postData).then((response) => response.data)
+    return this.axios.post(url, postData, headers).then((response) => response.data)
   }
 
-  logout() {
-    return this.axios.post('/rest-auth/logout/', {})
+  async logout() {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    return this.axios.post('/rest-auth/logout/', {}, headers)
   }
 
-  sendResetPasswordLink(token, email) {
+  async sendResetPasswordLink(email) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const data = {
       login: email,
@@ -38,18 +43,11 @@ class Account extends BaseModel {
       isVue: true
     }
 
-    return new Promise((resolve, reject) => {
-      this.axios.post('/accounts/send-reset-password-link/', data, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.post('/accounts/send-reset-password-link/', data, headers).then((response) => response.data)
   }
 
-  resetPassword(token, password) {
+  async resetPassword(password) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const data = {
       user_id: my24.getParameterByName('user_id'),
@@ -58,18 +56,11 @@ class Account extends BaseModel {
       password
     }
 
-    return new Promise((resolve, reject) => {
-      this.axios.post('/accounts/reset-password/', data, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.post('/accounts/reset-password/', data, headers).then((response) => response.data)
   }
 
-  changePassword(token, old_password, new_password1, new_password2) {
+  async changePassword(old_password, new_password1, new_password2) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const data = {
       old_password,
@@ -77,21 +68,12 @@ class Account extends BaseModel {
       new_password2,
     }
 
-    return new Promise((resolve, reject) => {
-      this.axios.post('/rest-auth/password/change/', data, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.post('/rest-auth/password/change/', data, headers).then((response) => response.data)
   }
 
   getUserInfo(pk) {
     return this.axios.get(`/company/user-info/${pk}/`).then(response => response.data)
   }
-
 }
 
 let accountModel = new Account()

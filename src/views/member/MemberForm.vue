@@ -37,7 +37,7 @@
               ></b-form-input>
               <b-form-invalid-feedback
                 v-if="member.companycode !== ''"
-                :state="isSubmitClicked ? v$.member.companycode.isUnique : null">
+                :state="isSubmitClicked ? !v$.member.companycode.isUnique.$invalid : null">
                 {{ $trans('Company code is already in use') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
@@ -415,31 +415,32 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     this.isLoading = true
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
+    this.countries = await this.$store.dispatch('getCountries')
 
-      contractModel.list().then((data) => {
-        for(let i=0;i<data.results.length; i++) {
-          this.contracts.push({
-            value: data.results[i].id,
-            text: data.results[i].name,
-          })
-        }
+    try {
+      const data = await contractModel.list()
+      for(let i=0;i<data.results.length; i++) {
+        this.contracts.push({
+          value: data.results[i].id,
+          text: data.results[i].name,
+        })
+      }
+    } catch(error) {
+      console.log('error fetching contracts', error)
+      return
+    }
 
-        if (!this.isCreate) {
-          this.loadData()
-        } else {
-          this.member = memberModel.getFields()
-          this.member.country_code = 'NL'
-          this.member.member_type = 'maintenance'
-          this.member.contract = data.results[0].id
-        }
-        this.isLoading = false
-      })
-
-    })
+    if (!this.isCreate) {
+      this.loadData()
+    } else {
+      this.member = memberModel.getFields()
+      this.member.country_code = 'NL'
+      this.member.member_type = 'maintenance'
+      this.member.contract = data.results[0].id
+    }
+    this.isLoading = false
   },
   methods: {
     imageSelected(file) {
@@ -468,7 +469,7 @@ export default {
         this.submitForm()
       }, 1000)
     },
-    submitForm() {
+    async submitForm() {
       this.v$.$touch()
 
       if (this.v$.$invalid) {
@@ -482,52 +483,54 @@ export default {
 
       if (this.isCreate) {
         this.isLoading = true
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          memberModel.insert(token, this.member).then((member) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating member'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
+        try {
+          await memberModel.insert(this.member)
+          this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
+          this.buttonDisabled = false
+          this.isLoading = false
+          this.$router.go(-1)
+        } catch(error) {
+          console.log('Error creating member', error)
+          this.errorToast(this.$trans('Error creating member'))
+          this.buttonDisabled = false
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         if (!this.fileChanged) {
           delete this.member.companylogo
         }
 
         this.isLoading = true
 
-        memberModel.update(token, this.pk, this.member).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating member'))
-          this.isLoading = false
-          this.buttonDisabled = false
-        })
-      })
+        await memberModel.update(this.pk, this.member)
+        this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating member', error)
+        this.errorToast(this.$trans('Error updating member'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      memberModel.detail(this.pk).then((member) => {
-        this.member = member
+      try {
+        this.member = await memberModel.detail(this.pk)
         this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
         this.orgCompanycode = member.companycode
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching member', error)
         this.errorToast(this.$trans('Error fetching member'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

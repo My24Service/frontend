@@ -198,7 +198,7 @@ export default {
       this.loadData()
     }
   },
-  created() {
+  async created() {
     // set queryMode
     orderNotAcceptedModel.queryMode = this.queryMode
 
@@ -206,23 +206,20 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.$store.dispatch('getStatuscodes')
-      .then((statuscodes) => {
-        this.statuscodes = statuscodes
-        this.currentPage = this.orderNotAcceptedModel.currentPage
-        this.loadData()
-      })
+    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.currentPage = this.orderNotAcceptedModel.currentPage
+    this.loadData()
   },
   methods: {
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        orderModel.delete(token, this.orderPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting order'))
-        })
-      })
+    async doDelete() {
+      try {
+        await orderModel.delete(this.orderPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting order', error)
+        this.errorToast(this.$trans('Error deleting order'))
+      }
     },
     showDeleteModal(id) {
       this.orderPk = id
@@ -261,16 +258,15 @@ export default {
     async loadData() {
       this.isLoading = true
 
-      orderNotAcceptedModel.list()
-        .then((data) => {
-          this.orders = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching orders', error)
-          this.errorToast(this.$trans('Error loading orders'))
-          this.isLoading = false
-        })
+      try {
+        const data = await orderNotAcceptedModel.list()
+        this.orders = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching orders', error)
+        this.errorToast(this.$trans('Error loading orders'))
+        this.isLoading = false
+      }
     }
   }
 }

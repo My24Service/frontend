@@ -214,11 +214,12 @@ export default {
       this.year = this.year - 1
       this.loadData()
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
       dashboardModel.setListArgs(`year=${this.year}`)
-      dashboardModel.list().then((data) => {
+      try {
+        const data = await dashboardModel.list()
 
         // bar graph top customers
         let graphDataCustomers = [], labelsCustomers = [];
@@ -415,10 +416,10 @@ export default {
         }
 
         this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
+      } catch(error) {
+        console.log('error getting dashboard data', error)
         this.isLoading = false
-      })
+      }
     }
   },
 }

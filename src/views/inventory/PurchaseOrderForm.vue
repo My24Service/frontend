@@ -506,34 +506,35 @@ export default {
       })
       this.emptyMaterial()
     },
-
-    getSuppliers(query) {
+    async getSuppliers(query) {
       this.isLoading = true
-      supplierModel.search(query).then((response) => {
-        this.suppliers = response
+      try {
+        this.suppliers = await supplierModel.search(query)
         this.isLoading = false
-      }).catch(() => {
+      } catch(error) {
+        console.log('Error fetching suppliers', error)
         this.errorToast(this.$trans('Error fetching suppliers'))
         this.isLoading = false
-      })
+      }
     },
     supplierLabel ({ name, city }) {
       return `${name} - ${city}`
     },
-    getMaterials(query) {
+    async getMaterials(query) {
       if (!this.purchaseOrder.supplier) {
         return
       }
 
       this.isLoading = true
 
-      materialModel.search(query, this.purchaseOrder.supplier).then((materials) => {
-        this.materials = materials
+      try {
+        this.materials = await materialModel.search(query, this.purchaseOrder.supplier)
         this.isLoading = false
-      }).catch(() => {
+      } catch(error) {
+        console.log('Error fetching materials', error)
         this.errorToast(this.$trans('Error fetching materials'))
         this.isLoading = false
-      })
+      }
     },
     selectSupplier(option) {
       this.purchaseOrder.supplier = option.id
@@ -556,7 +557,7 @@ export default {
       this.material_name = option.name
     },
 
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -578,56 +579,58 @@ export default {
       if (this.isCreate || this.isCreateFromReservation) {
         delete this.purchaseOrder.purchase_order_id
 
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          purchaseOrderModel.insert(token, this.purchaseOrder).then((order) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Purchase order has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
+        try {
+          await purchaseOrderModel.insert(this.purchaseOrder)
+          this.infoToast(this.$trans('Created'), this.$trans('Purchase order has been created'))
+          this.buttonDisabled = false
+          this.isLoading = false
 
-            if (this.isCreateFromReservation) {
-              this.$router.push({name: 'supplier-reservation-list'})
+          if (this.isCreateFromReservation) {
+            this.$router.push({name: 'supplier-reservation-list'})
 
-              return
-            }
+            return
+          }
 
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating purchase order'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
+          this.$router.go(-1)
+        } catch(error) {
+          console.log('Error creating purchase order', error)
+          this.errorToast(this.$trans('Error creating purchase order'))
+          this.buttonDisabled = false
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        purchaseOrderModel.update(token, this.pk, this.purchaseOrder).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Purchase order has been updated'))
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating purchase order'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        })
-      })
+      try {
+        await purchaseOrderModel.update(this.pk, this.purchaseOrder)
+        this.infoToast(this.$trans('Updated'), this.$trans('Purchase order has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating purchase order', error)
+        this.errorToast(this.$trans('Error updating purchase order'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     },
-    loadOrder() {
+    async loadOrder() {
       this.isLoading = true
       let expected_entry_date
 
-      purchaseOrderModel.detail(this.pk).then((purchaseOrder) => {
-          expected_entry_date = this.$moment(purchaseOrder.expected_entry_date, 'YYYY-MM-DD')
-          this.purchaseOrder = purchaseOrder
-          this.purchaseOrder.expected_entry_date = expected_entry_date.toDate()
-          this.isLoading = false
+      try {
+        this.purchaseOrder = await purchaseOrderModel.detail(this.pk)
+        expected_entry_date = this.$moment(this.purchaseOrder.expected_entry_date, 'YYYY-MM-DD')
+        this.purchaseOrder.expected_entry_date = expected_entry_date.toDate()
+        this.isLoading = false
 
-          this.getMaterials('')
-        }).catch((error) => {
-          console.log('error fetching purchase order', error)
-          this.errorToast(this.$trans('Error fetching purchase order'))
-          this.isLoading = false
-        })
+        this.getMaterials('')
+      } catch(error) {
+        console.log('error fetching purchase order', error)
+        this.errorToast(this.$trans('Error fetching purchase order'))
+        this.isLoading = false
+      }
     },
     cancelForm() {
       this.$router.go(-1)

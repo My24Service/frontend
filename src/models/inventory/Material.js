@@ -28,7 +28,8 @@ class Material extends BaseModel {
 
   url = '/inventory/material/'
 
-  move(token, materialPk, fromLoctionPk, toLocationPk, amount) {
+  move(materialPk, fromLoctionPk, toLocationPk, amount) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const url = `${this.url}${materialPk}/move/`
     const body = {
@@ -37,38 +38,17 @@ class Material extends BaseModel {
       amount,
     }
 
-    return new Promise((resolve, reject) => {
-      this.axios.post(url, body, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
-
+    return this.axios.post(url, body, headers).then((response) => response.data)
   }
 
   search(query, supplier) {
     const url = supplier ? `${this.url}autocomplete/?supplier=${supplier}&q=${query}` : `${this.url}?q=${query}`
 
-    return new Promise((resolve, reject) => {
-      this.axios.get(url).then((response) => {
-          resolve(response.data)
-        }).catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.get(url).then((response) => response.data)
   }
 
   getForSupplier(supplier) {
-    return new Promise((resolve, reject) => {
-      this.axios.get(`${this.url}?supplier_relation=${supplier}`).then((response) => {
-          resolve(response.data.results)
-        }).catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.get(`${this.url}?supplier_relation=${supplier}`).then((response) => response.data.results)
   }
 }
 

@@ -11,8 +11,7 @@ class BaseSocket {
   protocol = document.location.protocol.indexOf('https') !== -1 ? 'wss' : 'ws'
   host = BASE_URL
   reconnectTimeout = 5000
-
-  userKeys = {}
+  debug = false
 
   setOnmessageHandler(func) {
     this.onmessageHandler = func
@@ -58,12 +57,16 @@ class BaseSocket {
   async _getRoom(url) {
     const room = this._getRoomFromStorage(url)
     if (room) {
-      console.log(`${this.name}: got room from storage: ${room}`)
+      if (this.debug) {
+        console.log(`${this.name}: got room from storage: ${room}`)
+      }
       return room
     }
 
     const result = await axios.get(url).then((response) => response.data)
-    console.log(`${this.name}: got room from backend: ${result.room}`)
+    if (this.debug) {
+      console.log(`${this.name}: got room from backend: ${result.room}`)
+    }
     this._storeRoom(url, result.room)
 
     return result.room
@@ -84,22 +87,30 @@ class BaseSocket {
 
   _onCloseMethod(e) {
     if (this.root.socket) {
-      console.log(`${this.root.name}: socket is closed. Reconnect will be attempted in 1 second.`)
+      if (this.debug) {
+        console.log(`${this.root.name}: socket is closed. Reconnect will be attempted in 1 second.`)
+      }
       setTimeout(() => {
         this.root._connect()
       }, this.reconnectTimeout)
     } else {
-      console.log(`${this.root.name}: socket is closed, not reconnecting.`)
+      if (this.debug) {
+        console.log(`${this.root.name}: socket is closed, not reconnecting.`)
+      }
     }
   }
 
   _onOpenMethod(e) {
-    console.log(`${this.root.name}: socket is connected.`)
+    if (this.debug) {
+      console.log(`${this.root.name}: socket is connected.`)
+    }
   }
 
   _connect() {
     const url = this._getWsUrl()
-    console.debug(`${this.name}: connecting to: ${url}`)
+    if (this.debug) {
+      console.debug(`${this.name}: connecting to: ${url}`)
+    }
     const socket = new WebSocket(url)
     socket.root = this
 

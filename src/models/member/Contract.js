@@ -14,15 +14,7 @@ class Contract extends BaseModel {
   getModuleData() {
     const url = '/member/get-module-data/'
 
-    return new Promise((resolve, reject) => {
-      this.axios.get(url)
-      .then((response) => {
-        resolve(response.data)
-      })
-      .catch((error) => {
-        reject(error)
-      })
-    })
+    return this.axios.get(url).then((response) => response.data)
   }
 
 }

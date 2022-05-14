@@ -24,7 +24,7 @@
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="engineer.username !== ''"
-                :state="isSubmitClicked ? v$.engineer.username.isUnique : null">
+                :state="isSubmitClicked ? v$.engineer.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -64,7 +64,7 @@
                 :state="isSubmitClicked ? !v$.engineer.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? v$.engineer.password2.sameAs : null">
+                :state="isSubmitClicked ? v$.engineer.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -408,7 +408,7 @@ export default {
         this.submitForm()
       }, 1000)
     },
-    submitForm() {
+    async submitForm() {
       // remove empty fields
       delete this.engineer.last_login
       const empty_fields = ['inspection_date_car', 'inspection_date_tools']
@@ -427,19 +427,20 @@ export default {
 
       if (this.isCreate) {
         this.engineer.password = this.engineer.password1
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          engineerModel.insert(token, this.engineer).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Engineer has been created'))
-            this.isLoading = false
-            this.cancelForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating engineer'))
-            this.isLoading = false
-          })
-        })
+        try {
+          await engineerModel.insert(this.engineer)
+          this.infoToast(this.$trans('Created'), this.$trans('Engineer has been created'))
+          this.isLoading = false
+          this.cancelForm()
+        } catch() {
+          this.errorToast(this.$trans('Error creating engineer'))
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         delete this.engineer.date_joined
 
         if (this.engineer.password1) {
@@ -448,30 +449,27 @@ export default {
           delete this.engineer.password
         }
 
-        engineerModel.update(token, this.pk, this.engineer)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('Engineer has been updated'))
-            this.isLoading = false
-            this.cancelForm()
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating engineer'))
-            this.isLoading = false
-          })
-      })
+        await engineerModel.update(this.pk, this.engineer)
+        this.infoToast(this.$trans('Updated'), this.$trans('Engineer has been updated'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch() {
+        this.errorToast(this.$trans('Error updating engineer'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      engineerModel.detail(this.pk).then((engineer) => {
-        this.engineer = engineer
+      try {
+        this.engineer = await engineerModel.detail(this.pk)
         this.orgUsername = engineer.username
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching engineer', error)
         this.errorToast(this.$trans('Error loading engineer'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

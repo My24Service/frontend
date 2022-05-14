@@ -156,27 +156,27 @@ export default {
       this.pk = id
       this.$refs['delete-partner-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        partnerModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('partner has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting partner'))
-        })
-      })
+    async doDelete() {
+      try {
+        await partnerModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('partner has been deleted'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error deleting partner'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      partnerModel.list().then((data) => {
+      try {
+        const data = await partnerModel.list()
         this.partners = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching partners', error);
         this.errorToast(this.$trans('Error loading partners'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

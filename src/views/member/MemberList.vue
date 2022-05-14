@@ -150,19 +150,18 @@ export default {
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      memberModel.list()
-        .then((data) => {
-          this.members = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching members', error)
-          this.errorToast(this.$trans('Error loading members'))
-          this.isLoading = false
-        })
+      try {
+        const data = await memberModel.list()
+        this.members = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching members', error)
+        this.errorToast(this.$trans('Error loading members'))
+        this.isLoading = false
+      }
     }
   }
 }

@@ -202,27 +202,27 @@ export default {
       this.pk = id
       this.$refs['delete-customer-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        customerModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Customer has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting customer'))
-        })
-      })
+    async doDelete() {
+      try {
+        await customerModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Customer has been deleted'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error deleting customer'))
+      }
     },
     async loadData() {
       this.isLoading = true;
 
-      customerModel.list().then((data) => {
+      try {
+        const data = await customerModel.list()
         this.customers = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching customers', error)
         this.errorToast(this.$trans('Error loading customers'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

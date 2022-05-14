@@ -259,7 +259,6 @@ export default {
   },
   async created() {
     this.data = await orderModel.getWorkorderData(this.uuid)
-    console.log(this.data)
   }
 }
 </script>

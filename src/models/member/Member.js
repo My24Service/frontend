@@ -26,83 +26,34 @@ class Member extends BaseModel {
   url = '/member/member/'
 
   getMe() {
-    return new Promise((resolve, reject) => {
-      this.axios.get(`${this.url}me/`)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.get(`${this.url}me/`).then((response) => response.data)
   }
 
-  updateMe(token, obj) {
+  updateMe(obj) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return new Promise((resolve, reject) => {
-      this.axios.put(`${this.url}me/`, obj, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.put(`${this.url}me/`, obj, headers).then((response) => response.data)
   }
 
   getSettings() {
-    return new Promise((resolve, reject) => {
-      this.axios.get(`${this.url}my_settings/`)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.get(`${this.url}my_settings/`).then((response) => response.data)
   }
 
-  updateSettings(token, obj) {
+  updateSettings(obj) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return new Promise((resolve, reject) => {
-      this.axios.put(`${this.url}my_settings/`, obj, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.put(`${this.url}my_settings/`, obj, headers).then((response) => response.data)
   }
 
   getForPartnerSelect(query) {
-    return new Promise((resolve, reject) => {
-      this.axios.get(`${this.url}get_for_partner_select/?q=${query}`)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
-
+    return this.axios.get(`${this.url}get_for_partner_select/?q=${query}`).then((response) => response.data)
   }
 
   companycodeExists(companycode) {
-    return new Promise((resolve, reject) => {
-      this.axios.get(`/member/companycode-exists/?companycode=${companycode}`)
-        .then((response) => {
-          resolve(response.data['available'])
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
-
+    return this.axios.get(`/member/companycode-exists/?companycode=${companycode}`).then((response) => response.data['available'])
   }
-
 }
 
 let memberModel = new Member()

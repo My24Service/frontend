@@ -215,27 +215,27 @@ export default {
       this.pk = id
       this.$refs['delete-studentuser-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        studentUserModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting studentuser'))
-        })
-      })
+    async doDelete() {
+      try {
+        await studentUserModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
+        await this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error deleting studentuser'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      studentUserModel.list().then((data) => {
+      try {
+        const data = await studentUserModel.list()
         this.studentusers = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching studentusers', error)
         this.errorToast(this.$trans('Error loading studentusers'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

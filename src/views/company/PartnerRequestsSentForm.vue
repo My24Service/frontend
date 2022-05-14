@@ -113,16 +113,16 @@ export default {
     this.getMembers('')
   },
   methods: {
-    getMembers(query) {
+    async getMembers(query) {
       this.isLoading = true
 
-      memberModel.getForPartnerSelect(query).then((response) => {
-        this.members = response
+      try {
+        this.members = await memberModel.getForPartnerSelect(query)
         this.isLoading = false
-      }).catch(() => {
+      } catch() {
         this.errorToast(this.$trans('Error fetching members'))
         this.isLoading = false
-      })
+      }
     },
     memberLabel({ name, city}) {
       return `${name} - ${city}`
@@ -132,7 +132,7 @@ export default {
       this.member_info = `${option.companycode}, ${option.name}, ${option.city}`
     },
 
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$reset()
       this.v$.$touch()
@@ -143,18 +143,17 @@ export default {
 
       this.isLoading = true
 
-      return this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         delete this.partnerRequest.status
 
-        partnerRequestsSentModel.insert(token, this.partnerRequest).then((action) => {
-          this.infoToast(this.$trans('Created'), this.$trans('Partner request has been sent'))
-          this.isLoading = false
-          this.cancelForm()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error sending partner request'))
-          this.isLoading = false
-        })
-      })
+        await partnerRequestsSentModel.insert(this.partnerRequest)
+        this.infoToast(this.$trans('Created'), this.$trans('Partner request has been sent'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch() {
+        this.errorToast(this.$trans('Error sending partner request'))
+        this.isLoading = false
+      }
     },
     cancelForm() {
       this.$router.go(-1)

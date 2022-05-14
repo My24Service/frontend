@@ -164,27 +164,28 @@ export default {
       this.stockLocationPk = id
       this.$refs['delete-stock-location-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        stockLocationModel.delete(token, this.stockLocationPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Stock location has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting stock location'))
-        })
-      })
+    async doDelete() {
+      try {
+        await stockLocationModel.delete(this.stockLocationPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Stock location has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting stock location', error)
+        this.errorToast(this.$trans('Error deleting stock location'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      stockLocationModel.list().then((data) => {
+      try {
+        const data = await stockLocationModel.list()
         this.stockLocations = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error){
         console.log('error fetching stock locations', error)
         this.errorToast(this.$trans('Error loading stock locations'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

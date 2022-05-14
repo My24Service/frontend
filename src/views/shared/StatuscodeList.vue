@@ -242,28 +242,28 @@ export default {
       this.statuscodePk = id
       this.$refs['delete-statuscode-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        this.statuscodeModel.delete(token, this.statuscodePk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Statuscode has been deleted'))
-          this.loadData()
-        }).catch((error) => {
-          console.log('error deleting statuscodes', error)
-          this.errorToast(this.$trans('Error deleting statuscode'))
-        })
-      })
+    async doDelete() {
+      try {
+        await this.statuscodeModel.delete(this.statuscodePk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Statuscode has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('error deleting statuscodes', error)
+        this.errorToast(this.$trans('Error deleting statuscode'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      this.statuscodeModel.list().then((data) => {
+      try {
+        const data = await this.statuscodeModel.list()
         this.statuscodes = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching statuscodes', error)
         this.errorToast(this.$trans('Error loading statuscodes'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

@@ -56,7 +56,20 @@ class BaseModel {
     this.listArgs = listArgs
   }
 
-  getHeaders() {
+  getCsrfToken() {
+    return axios.get('/get-csrf-token/').then((response) => response.data.token)
+  }
+
+  getHeaders(token) {
+    if (token) {
+      return {
+        headers: {
+          'X-CSRFToken': token,
+          'Content-Type': 'application/json'
+        }
+      }
+    }
+
     return {
       headers: {
         'Content-Type': 'application/json',
@@ -77,7 +90,7 @@ class BaseModel {
     return this.url
   }
 
-  list() {
+  async list() {
     let listArgs = []
 
     listArgs.push(`page=${this.currentPage}`)
@@ -96,21 +109,16 @@ class BaseModel {
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
 
-    return new Promise((resolve, reject) => {
-      this.axios.get(url).then((response) => {
-        if ('count' in response.data) {
-          this.count = response.data.count
-        }
+    const response = await this.axios.get(url)
+    if ('count' in response.data) {
+      this.count = response.data.count
+    }
 
-        if ('num_pages' in response.data) {
-          this.numPages = response.data.num_pages
-        }
+    if ('num_pages' in response.data) {
+      this.numPages = response.data.num_pages
+    }
 
-        resolve(response.data)
-      }).catch((error) => {
-        reject(error)
-      })
-    })
+    return response.data
   }
 
   getDetailUrl(pk) {
@@ -118,63 +126,36 @@ class BaseModel {
   }
 
   detail(pk) {
-    return new Promise((resolve, reject) => {
-      this.axios.get(this.getDetailUrl(pk))
-      .then((response) => {
-        resolve(response.data)
-      })
-      .catch((error) => {
-        reject(error)
-      })
-    })
+    return this.axios.get(this.getDetailUrl(pk)).then((response) => response.data)
   }
 
   preInsert(obj) {
     return obj
   }
 
-  insert(token, obj) {
+  async insert(obj) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    // pre-process data
-    obj = this.preInsert(obj)
-
-    return this.axios.post(this.url, obj, headers).then(response => response.data)
+    return this.axios.post(this.url, this.preInsert(obj), headers).then(response => response.data)
   }
 
   preUpdate(obj) {
     return obj
   }
 
-  update(token, pk, obj) {
+  async update(pk, obj) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    // pre-process data
-    obj = this.preUpdate(obj)
-
-    return new Promise((resolve, reject) => {
-      this.axios.put(`${this.url}${pk}/`, obj, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.put(`${this.url}${pk}/`, this.preUpdate(obj), headers).then((response) => response.data)
   }
 
-  delete(token, pk) {
+  async delete(pk) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return new Promise((resolve, reject) => {
-      this.axios.delete(`${this.url}${pk}/`, headers)
-        .then(() => {
-          resolve()
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.delete(`${this.url}${pk}/`, headers)
   }
 }
 

@@ -94,7 +94,7 @@ export default {
     }
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
 
@@ -109,41 +109,46 @@ export default {
 
       if (this.isCreate) {
         this.isLoading = true
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          moduleModel.insert(token, this.module).then((module) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Module has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating module'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        this.isLoading = true
-
-        moduleModel.update(token, this.pk, this.module).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Module has been updated'))
+        try {
+          await moduleModel.insert(this.module)
+          this.infoToast(this.$trans('Created'), this.$trans('Module has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating module'))
-          this.isLoading = false
+        } catch(error) {
+          console.log('Error creating module', error)
+          this.errorToast(this.$trans('Error creating module'))
           this.buttonDisabled = false
-        })
-      })
+          this.isLoading = false
+        }
+
+        return
+      }
+
+      try {
+        this.isLoading = true
+
+        await moduleModel.update(this.pk, this.module)
+        this.infoToast(this.$trans('Updated'), this.$trans('Module has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating module', error)
+        this.errorToast(this.$trans('Error updating module'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
     async loadData() {
+      this.isLoading = true
       try {
         this.module = await moduleModel.detail(this.pk)
+        this.isLoading = false
       } catch(error) {
         console.log('error fetching module', error)
         this.errorToast(this.$trans('Error fetching module'))
+        this.isLoading = false
       }
     },
     cancelForm() {

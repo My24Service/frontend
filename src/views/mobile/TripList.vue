@@ -124,6 +124,7 @@ export default {
       tripModel,
       isLoading: false,
       trips: [],
+      tripPk: null,
       fields: [
         {key: 'trip_date', label: this.$trans('Date'), sortable: true},
         {key: 'last_status', label: this.$trans('Status'), sortable: true},
@@ -159,30 +160,31 @@ export default {
       this.$refs['search-modal'].show()
     },
     showDeleteModal(id) {
-      this.orderPk = id
+      this.tripPk = id
       this.$refs['delete-trip-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        tripModel.delete(token, this.orderPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Trip has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting trip'))
-        })
-      })
+    async doDelete() {
+      try {
+        await tripModel.delete(this.tripPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Trip has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting trip', error)
+        this.errorToast(this.$trans('Error deleting trip'))
+      }
     },
     async loadData() {
       this.isLoading = true;
 
-      tripModel.list().then((data) => {
+      try {
+        const data = await tripModel.list()
         this.trips = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching trips', error)
         this.errorToast(this.$trans('Error loading trips'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

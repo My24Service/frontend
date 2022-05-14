@@ -69,25 +69,18 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      stockLocationModel.detail(this.pk).then((stockLocation) => {
-        this.stockLocation = stockLocation
-
-        inventoryModel.getMaterialsForLocation(this.pk).then((inventory) => {
-          this.inventory = inventory
-          this.isLoading = false
-        }).catch((error) => {
-          console.log('error fetching stock location', error)
-          this.errorToast(this.$trans('Error fetching stock location'))
-          this.isLoading = false
-        })
-      }).catch((error) => {
-        console.log('error fetching stock location', error)
-        this.errorToast(this.$trans('Error fetching stock location'))
+      try {
+        this.stockLocation = await stockLocationModel.detail(this.pk)
+        this.inventory = await inventoryModel.getMaterialsForLocation(this.pk)
         this.isLoading = false
-      })
+      } catch(error) {
+        console.log('error fetching stock location/inventory', error)
+        this.errorToast(this.$trans('Error fetching stock location/inventory'))
+        this.isLoading = false
+      }
     }
   },
   created() {

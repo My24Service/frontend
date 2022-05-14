@@ -37,11 +37,8 @@ export default {
     OrderListMaintenance,
     OrderListTemps,
   },
-  created() {
-    // get member type
-    this.$store.dispatch('getMemberType').then((memberType) => {
-      this.memberType = memberType
-    })
+  async created() {
+    this.memberType = await this.$store.dispatch('getMemberType')
   },
 }
 </script>

@@ -49,14 +49,15 @@
             id="new-password2-input"
             type="password"
             v-model="new_password2"
-            :state="isSubmitClicked ? !v$.new_password1.$error : null"
+            :state="isSubmitClicked ? !v$.new_password2.$error : null"
           ></b-form-input>
           <b-form-invalid-feedback
-            :state="isSubmitClicked ? v$.new_password2.sameAs : null">
+            :state="isSubmitClicked ? v$.new_password2.sameAs.$invalid : null">
             {{ $trans('Passwords do not match') }}
           </b-form-invalid-feedback>
         </b-form-group>
       </form>
+      {{ v$.new_password2.sameAs }}
     </b-modal>
 
     <b-modal
@@ -67,6 +68,7 @@
     >
       <p class="my-4">{{ $trans('Are you sure you want to log out?') }}</p>
     </b-modal>
+
     <b-navbar toggleable="sm" variant="primary">
       <b-container>
 
@@ -119,16 +121,18 @@ export default {
     Password,
     Version,
   },
-  validations: {
-    old_password: {
-      required
-    },
-    new_password1: {
-      required
-    },
-    new_password2: {
-      required,
-      sameAs: sameAs('new_password1')
+  validations() {
+    return {
+      old_password: {
+        required
+      },
+      new_password1: {
+        required
+      },
+      new_password2: {
+        required,
+        sameAs: sameAs(this.new_password1)
+      }
     }
   },
   computed: {
@@ -162,6 +166,7 @@ export default {
       if (this.v$.$invalid) {
         this.buttonDisabled = false
         this.isLoading = false
+        console.log('invalid', this.v$)
         return
       }
 

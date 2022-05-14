@@ -24,7 +24,7 @@
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="studentuser.username !== ''"
-                :state="isSubmitClicked ? v$.studentuser.username.isUnique : null">
+                :state="isSubmitClicked ? v$.studentuser.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -82,7 +82,7 @@
                 :state="isSubmitClicked ? !v$.studentuser.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? v$.studentuser.password2.sameAs : null">
+                :state="isSubmitClicked ? v$.studentuser.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -455,7 +455,7 @@ export default {
         this.submitForm()
       }, 1000)
     },
-    submitForm() {
+    async submitForm() {
       // remove empty fields
       const empty_fields = ['iban', 'dob']
       for (let i=0; i<empty_fields.length; i++) {
@@ -473,19 +473,20 @@ export default {
 
       if (this.isCreate) {
         this.studentuser.password = this.studentuser.password1
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          studentUserModel.insert(token, this.studentuser).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('studentuser has been created'))
-            this.isLoading = false
-            this.cancelForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating studentuser'))
-            this.isLoading = false
-          })
-        })
+        try {
+          await studentUserModel.insert(this.studentuser)
+          this.infoToast(this.$trans('Created'), this.$trans('studentuser has been created'))
+          this.isLoading = false
+          this.cancelForm()
+        } catch(){
+          this.errorToast(this.$trans('Error creating studentuser'))
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         delete this.studentuser.date_joined
         delete this.studentuser.last_login
         delete this.studentuser.student_user.picture
@@ -497,30 +498,27 @@ export default {
           delete this.studentuser.password
         }
 
-        studentUserModel.update(token, this.pk, this.studentuser)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('studentuser has been updated'))
-            this.isLoading = false
-            this.cancelForm()
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating studentuser'))
-            this.isLoading = false
-          })
-      })
+        await studentUserModel.update(this.pk, this.studentuser)
+        this.infoToast(this.$trans('Updated'), this.$trans('studentuser has been updated'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch() {
+        this.errorToast(this.$trans('Error updating studentuser'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      studentUserModel.detail(this.pk).then((studentuser) => {
-        this.studentuser = studentuser
+      try {
+        this.studentuser = await studentUserModel.detail(this.pk)
         this.orgUsername = studentuser.username
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching studentuser', error)
         this.errorToast(this.$trans('Error loading studentuser'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

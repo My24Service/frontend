@@ -107,26 +107,18 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      materialModel.detail(this.pk).then((material) => {
-        this.material = material
-
-        inventoryModel.getLocationsForMaterial(this.pk).then((inventory) => {
-            this.inventory = inventory
-            this.isLoading = false
-          }).catch((error) => {
-            console.log('error fetching inventory', error)
-            this.errorToast(this.$trans('Error fetching inventory'))
-            this.isLoading = false
-          })
-        })
-        .catch((error) => {
-          console.log('error fetching material', error)
-          this.errorToast(this.$trans('Error fetching material'))
-          this.isLoading = false
-        })
+      try {
+        this.material = await materialModel.detail(this.pk)
+        this.inventory = await inventoryModel.getLocationsForMaterial(this.pk)
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching inventory', error)
+        this.errorToast(this.$trans('Error fetching inventory'))
+        this.isLoading = false
+      }
     }
   },
   created() {

@@ -241,16 +241,16 @@ export default {
       this.selectedMaterialPk = option.material_id
       this.getFromLocations()
     },
-    getMaterials(query) {
+    async getMaterials(query) {
       this.isLoading = true
-      inventoryModel.getMaterials(query).then((materials) => {
-        this.materials = materials
+      try {
+        this.materials = await inventoryModel.getMaterials(query)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('Error fetching materials', error)
-        this.errorToast(this.$trans('Error fetching materials'))
         this.isLoading = false
-      })
+        this.errorToast(this.$trans('Error fetching materials'))
+      }
     },
     materialLabel(material) {
       const text = this.$trans('in stock')
@@ -266,31 +266,33 @@ export default {
       this.selectedFromLocation = option
       this.selectedFromLocationPk = option.location_id
     },
-    getFromLocations() {
+    async getFromLocations() {
       this.isLoading = true
-      inventoryModel.getLocationsForMaterial(this.selectedMaterial.material_id).then((locations) => {
-        this.fromLocations = locations
+      try {
+        this.fromLocations = await inventoryModel.getLocationsForMaterial(this.selectedMaterial.material_id)
         this.isLoading = false
-      }).catch(() => {
+      } catch() {
         this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
-      })
+      }
     },
     selectToLocation(option) {
       this.selectedToLocation = option
       this.selectedToLocationPk = option.id
     },
-    getToLocations() {
+    async getToLocations() {
       this.isLoading = true
-      stockLocationModel.list().then((data) => {
+
+      try {
+        const data = await stockLocationModel.list()
         this.toLocations = data.results
         this.isLoading = false
-      }).catch(() => {
+      } catch() {
         this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
-      })
+      }
     },
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -301,23 +303,21 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        materialModel.move(token,
-                           this.selectedMaterialPk,
-                           this.selectedFromLocationPk,
-                           this.selectedToLocationPk,
-                           this.amount).then((result) => {
+      try {
+        await materialModel.move(this.selectedMaterialPk,
+                                 this.selectedFromLocationPk,
+                                 this.selectedToLocationPk,
+                                 this.amount)
           this.infoToast(this.$trans('Moved'), this.$trans('Material moved'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.push({name: 'mutation-list'})
-        }).catch((error) => {
-          console.log('error moving', error)
-          this.errorToast(this.$trans('Error moving material'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        })
-      })
+      } catch(error) {
+        console.log('error moving', error)
+        this.errorToast(this.$trans('Error moving material'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     },
     cancelForm() {
       this.$router.go(-1)
