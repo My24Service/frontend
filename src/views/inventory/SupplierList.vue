@@ -175,7 +175,7 @@ export default {
         this.errorToast(this.$trans('Error deleting supplier'))
       }
     },
-    asynv loadData() {
+    async loadData() {
       this.isLoading = true;
 
       try {

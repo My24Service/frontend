@@ -156,7 +156,7 @@ export default {
       this.pk = id
       this.$refs['delete-partner-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await partnerModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('partner has been deleted'))

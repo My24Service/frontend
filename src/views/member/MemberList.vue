@@ -150,7 +150,7 @@ export default {
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
-    asynv loadData() {
+    async loadData() {
       this.isLoading = true;
 
       try {

@@ -162,7 +162,7 @@ export default {
       this.documentPk = id
       this.$refs['delete-order-document-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await documentModel.delete(this.documentPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Document has been deleted'))

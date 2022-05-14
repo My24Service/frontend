@@ -169,7 +169,7 @@ export default {
       this.pk = id
       this.$refs['delete-salesuser-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await salesUserModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Sales user has been deleted'))

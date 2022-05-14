@@ -185,7 +185,7 @@ export default {
       this.pk = id
       this.$refs['delete-engineer-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await engineerModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Engineer has been deleted'))

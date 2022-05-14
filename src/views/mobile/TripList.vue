@@ -124,6 +124,7 @@ export default {
       tripModel,
       isLoading: false,
       trips: [],
+      tripPk: null,
       fields: [
         {key: 'trip_date', label: this.$trans('Date'), sortable: true},
         {key: 'last_status', label: this.$trans('Status'), sortable: true},
@@ -159,12 +160,12 @@ export default {
       this.$refs['search-modal'].show()
     },
     showDeleteModal(id) {
-      this.orderPk = id
+      this.tripPk = id
       this.$refs['delete-trip-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
-        await tripModel.delete(this.orderPk)
+        await tripModel.delete(this.tripPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Trip has been deleted'))
         this.loadData()
       } catch(error) {

@@ -186,7 +186,7 @@ export default {
       this.pk = id
       this.$refs['delete-maintenance-product-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await maintenanceProductModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance product has been deleted'))

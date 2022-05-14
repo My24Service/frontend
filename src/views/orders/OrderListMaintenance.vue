@@ -281,7 +281,7 @@ export default {
       this.loadData()
     }
   },
-  created() {
+  async created() {
     // set queryMode
     orderModel.queryMode = this.queryMode
 
@@ -289,11 +289,9 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.$store.dispatch('getStatuscodes').then((statuscodes) => {
-      this.statuscodes = statuscodes
-      this.currentPage = this.orderModel.currentPage
-      this.loadData()
-    })
+    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.currentPage = this.orderModel.currentPage
+    this.loadData()
   },
   methods: {
     showSortModal() {
@@ -332,20 +330,20 @@ export default {
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
     },
-    changeStatus() {
+    async changeStatus() {
       const status = {
         order: this.orderPk,
         status: this.status.extra_text !== '' ? `${this.status.statuscode} ${this.status.extra_text}` : this.status.statuscode
       }
 
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        statusModel.insert(token, status).then(() => {
-          this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error creating status'))
-        })
-      })
+      try {
+        await statusModel.insert(status)
+        this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error creating status', error)
+        this.errorToast(this.$trans('Error creating status'))
+      }
     },
     rowStyle(item, type) {
       if (!item || type !== 'row') return
@@ -365,7 +363,7 @@ export default {
       this.orderPk = id
       this.$refs['change-status-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await orderModel.delete(this.orderPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))

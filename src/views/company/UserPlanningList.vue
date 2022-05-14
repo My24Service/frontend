@@ -169,7 +169,7 @@ export default {
       this.pk = id
       this.$refs['delete-planninguser-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await planningUserModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('planning user has been deleted'))

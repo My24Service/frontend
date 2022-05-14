@@ -413,7 +413,7 @@ export default {
       }
 
       try {
-        await purchaseorderEntryModel.update(token, this.pk, this.purchaseorderEntry)
+        await purchaseorderEntryModel.update(this.pk, this.purchaseorderEntry)
         this.infoToast(this.$trans('Updated'), this.$trans('Entry has been updated'))
         this.buttonDisabled = false
         this.isLoading = false

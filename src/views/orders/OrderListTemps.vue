@@ -324,7 +324,7 @@ export default {
       }
 
       try {
-        await statusModel.insert(token, status)
+        await statusModel.insert(status)
         this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
         this.loadData()
       } catch(error) {

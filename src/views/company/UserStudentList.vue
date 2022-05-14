@@ -215,7 +215,7 @@ export default {
       this.pk = id
       this.$refs['delete-studentuser-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await studentUserModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))

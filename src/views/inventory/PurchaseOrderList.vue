@@ -205,20 +205,20 @@ export default {
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
-    changeStatus() {
+    async changeStatus() {
       const status = {
         purchase_order: this.purchaseOrderPk,
         status: this.status.status
       }
 
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        purchaseOrderStatusModel.insert(token, status).then(() => {
-          this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error creating status'))
-        })
-      })
+      try {
+        await purchaseOrderStatusModel.insert(status)
+        this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error creating status', error)
+        this.errorToast(this.$trans('Error creating status'))
+      }
     },
     showChangeStatusModal(id) {
       this.purchaseOrderPk = id

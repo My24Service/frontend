@@ -169,7 +169,7 @@ export default {
       this.pk = id
       this.$refs['delete-maintenance-contract-modal'].show()
     },
-    async doDelete(id) {
+    async doDelete() {
       try {
         await maintenanceContractModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))

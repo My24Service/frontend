@@ -211,7 +211,7 @@ export default {
     this.loadData()
   },
   methods: {
-    async doDelete(id) {
+    async doDelete() {
       try {
         await orderModel.delete(this.orderPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
