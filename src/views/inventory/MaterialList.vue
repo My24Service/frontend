@@ -166,29 +166,28 @@ export default {
       this.materialPk = id
       this.$refs['delete-material-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        materialModel.delete(token, this.materialPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting material'))
-        })
-      })
+    async doDelete() {
+      try {
+        await materialModel.delete(this.materialPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('error deleting material', error)
+        this.errorToast(this.$trans('Error deleting material'))
+      }
     },
     async loadData() {
       this.isLoading = true;
 
-      materialModel.list()
-        .then((data) => {
-          this.materials = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching materials', error)
-          this.errorToast(this.$trans('Error loading materials'))
-          this.isLoading = false
-        })
+      try {
+        const data = await materialModel.list()
+        this.materials = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching materials', error)
+        this.errorToast(this.$trans('Error loading materials'))
+        this.isLoading = false
+      }
     }
   }
 }

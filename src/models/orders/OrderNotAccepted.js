@@ -8,25 +8,24 @@ class OrderNotAccepted extends BaseModel {
 
   url = '/order/order/all_for_customer_not_accepted/'
 
-  setAccepted(token, order_pk) {
-    const headers = this.getHeaders()
+  setAccepted(order_pk) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
     const url = `/order/order/${order_pk}/set_order_accepted/`
 
     return new this.axios.post(url, {}, headers).then(response => response.data)
   }
 
-  setRejected(token, order_pk) {
-    const headers = this.getHeaders()
+  setRejected(order_pk) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
     const url = `/order/order/${order_pk}/set_order_rejected/`
 
     return new this.axios.post(url, {}, headers).then(response => response.data)
   }
 
   getCount() {
-    const headers = this.getHeaders()
-    const url = '/order/order/all_for_customer_not_accepted_count/'
-
-    return new this.axios.get(url, headers).then(response => response.data)
+    return new this.axios.get('/order/order/all_for_customer_not_accepted_count/').then(response => response.data)
   }
 }
 

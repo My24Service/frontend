@@ -309,12 +309,14 @@ export default {
       default: null
     },
   },
-  validations: {
-    action: {
-      name: {
-        required,
-      },
-    },
+  validations() {
+    return {
+      action: {
+        name: {
+          required,
+        },
+      }
+    }
   },
   data() {
     return {
@@ -364,26 +366,26 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     switch(this.list_type) {
       case 'order':
         this.actionTypes = this.actionTypesOrder
         this.actionModel = actionOrderModel
 
-        partnerModel.list().then((partners) => {
-          for (let i=0; i<partners.results.length; i++) {
-            this.partners.push({
-              value: partners.results[i].id,
-              text: partners.results[i].partner_view.name
-            })
-          }
+        const partners = await partnerModel.list()
+        for (let i=0; i<partners.results.length; i++) {
+          this.partners.push({
+            value: partners.results[i].id,
+            text: partners.results[i].partner_view.name
+          })
+        }
 
-          if (this.isCreate) {
-            this.action = this.actionModel.getFields()
-          } else {
-            this.loadData()
-          }
-        })
+        if (this.isCreate) {
+          this.action = this.actionModel.getFields()
+        } else {
+          this.loadData()
+        }
+
         break
       case 'trip':
         this.actionTypes = this.actionTypesTrip
@@ -405,19 +407,19 @@ export default {
     showDeleteModal() {
       this.$refs['delete-action-modal'].show()
     },
-    doDelete() {
+    async doDelete() {
       this.isLoading = true
 
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        this.actionModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Action has been deleted'))
-          this.isLoading = false
-          this.cancelForm()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting action'))
-          this.isLoading = false
-        })
-      })
+      try {
+        await this.actionModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Action has been deleted'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch(error) {
+        console.log('Error deleting action', error)
+        this.errorToast(this.$trans('Error deleting action'))
+        this.isLoading = false
+      }
     },
     addCondition() {
       this.action.json_conditions.push({
@@ -429,7 +431,7 @@ export default {
     deleteCondition(index) {
       this.action.json_conditions.splice(index, 1)
     },
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -448,43 +450,43 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
+        try {
           this.action.statuscode = this.statuscode_pk
-          this.actionModel.insert(token, this.action).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Action has been created'))
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch((error) => {
-            console.log('error creating action', error)
-            this.errorToast(this.$trans('Error creating action'))
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        this.actionModel.update(token, this.pk, this.action).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Action has been updated'))
+          await this.actionModel.insert(this.action)
+          this.infoToast(this.$trans('Created'), this.$trans('Action has been created'))
           this.isLoading = false
           this.$router.go(-1)
-        }).catch((error) => {
-          console.log('error updating action', error)
-          this.errorToast(this.$trans('Error updating action'))
+        } catch(error) {
+          console.log('error creating action', error)
+          this.errorToast(this.$trans('Error creating action'))
           this.isLoading = false
-        })
-      })
+        }
+
+        return
+      }
+
+      try {
+        await this.actionModel.update(this.pk, this.action)
+        this.infoToast(this.$trans('Updated'), this.$trans('Action has been updated'))
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('error updating action', error)
+        this.errorToast(this.$trans('Error updating action'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      this.actionModel.detail(this.pk).then((action) => {
-        this.action = action
+      try {
+        this.action = await this.actionModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching action', error)
         this.errorToast(this.$trans('Error loading action'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

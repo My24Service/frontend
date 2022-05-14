@@ -365,29 +365,30 @@ export default {
       this.orderPk = id
       this.$refs['change-status-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        orderModel.delete(token, this.orderPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting order'))
-        })
-      })
+    async doDelete(id) {
+      try {
+        await orderModel.delete(this.orderPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting order', error)
+        this.errorToast(this.$trans('Error deleting order'))
+      }
     },
     async loadData() {
       this.isLoading = true
 
       this.doFetchUnacceptedCountAndUpdateStore()
 
-      orderModel.list().then((data) => {
+      try {
+        const data = await orderModel.list()
         this.orders = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching orders', error)
         this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

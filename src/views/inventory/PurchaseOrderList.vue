@@ -228,27 +228,28 @@ export default {
       this.purchaseOrderPk = id
       this.$refs['delete-purchaseorder-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        purchaseOrderModel.delete(token, this.purchaseOrderPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Purchase order has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting purchase order'))
-        })
-      })
+    async doDelete() {
+      try {
+        await purchaseOrderModel.delete(this.purchaseOrderPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Purchase order has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting purchase order', error)
+        this.errorToast(this.$trans('Error deleting purchase order'))
+      }
     },
     async loadData() {
       this.isLoading = true;
 
-      purchaseOrderModel.list().then((data) => {
+      try {
+        const data = await purchaseOrderModel.list()
         this.purchaseOrders = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching purchase orders', error)
         this.errorToast(this.$trans('Error loading purchase orders'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

@@ -169,22 +169,21 @@ export default {
       this.pk = id
       this.$refs['delete-maintenance-contract-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        maintenanceContractModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting maintenance contract'))
-        })
-      })
+    async doDelete(id) {
+      try {
+        await maintenanceContractModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error deleting maintenance contract'))
+      }
     },
     async loadData() {
       this.isLoading = true
 
       try {
-        const result = await maintenanceContractModel.list()
-        this.maintenanceContracts = result.results
+        const data = await maintenanceContractModel.list()
+        this.maintenanceContracts = data.results
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)

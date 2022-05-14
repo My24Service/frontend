@@ -238,7 +238,7 @@ export default {
       this.$refs.contract_value.focus()
     },
 
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -257,30 +257,30 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          maintenanceContractModel.insert(token, this.maintenanceContract).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Maintenance contract has been created'))
-            this.isLoading = false
-            this.cancelForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating maintenance contract'))
-            this.isLoading = false
-          })
-        })
+        try {
+          await maintenanceContractModel.insert(this.maintenanceContract)
+          this.infoToast(this.$trans('Created'), this.$trans('Maintenance contract has been created'))
+          this.isLoading = false
+          this.cancelForm()
+        } catch(error) {
+          console.log('Error creating maintenance_contract', error)
+          this.errorToast(this.$trans('Error creating maintenance contract'))
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        maintenanceContractModel.update(token, this.pk, this.maintenanceContract)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('Maintenance contract has been updated'))
-            this.isLoading = false
-            this.cancelForm()
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating maintenance_contract'))
-            this.isLoading = false
-          })
-      })
+      try {
+        await maintenanceContractModel.update(this.pk, this.maintenanceContract)
+        this.infoToast(this.$trans('Updated'), this.$trans('Maintenance contract has been updated'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch(error) {
+        console.log('Error updating maintenance_contract', error)
+        this.errorToast(this.$trans('Error updating maintenance_contract'))
+        this.isLoading = false
+      }
     },
     async loadData() {
       this.isLoading = true

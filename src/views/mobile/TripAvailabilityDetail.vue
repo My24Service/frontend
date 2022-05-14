@@ -121,41 +121,41 @@ export default {
       this.unAssignMode = true
       this.selectedUser = user
     },
-    proceed() {
+    async proceed() {
       this.buttonDisabled = true
       this.isLoading = true
 
       if(this.assignMode) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          tripAvailabilityModel.assign(token, this.selectedUser.id, this.tripAvailability.trip.id).then((result) => {
-            this.infoToast(this.$trans('Assigned'), this.$trans('Trip assigned'))
-            this.loadTripAvailability()
-            this.cancel()
-            this.buttonDisabled = false
-            this.isLoading = false
-          }).catch((error) => {
-            console.log('error assigning trip', error)
-            this.errorToast(this.$trans('Error assigning trip'))
-            this.isLoading = false
-            this.buttonDisabled = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        tripAvailabilityModel.unAssign(token, this.selectedUser.id, this.tripAvailability.trip.id).then((result) => {
-          this.infoToast(this.$trans('Unassigned'), this.$trans('Student unassigned'))
+        try {
+          await tripAvailabilityModel.assign(this.selectedUser.id, this.tripAvailability.trip.id)
+          this.infoToast(this.$trans('Assigned'), this.$trans('Trip assigned'))
           this.loadTripAvailability()
           this.cancel()
           this.buttonDisabled = false
           this.isLoading = false
-        }).catch((error) => {
-          console.log('error unassigning trip', error)
-          this.errorToast(this.$trans('Error unassigning trip'))
+        } catch(error) {
+          console.log('error assigning trip', error)
+          this.errorToast(this.$trans('Error assigning trip'))
           this.isLoading = false
           this.buttonDisabled = false
-        })
-      })
+        }
+
+        return
+      }
+
+      try {
+        await tripAvailabilityModel.unAssign(this.selectedUser.id, this.tripAvailability.trip.id)
+        this.infoToast(this.$trans('Unassigned'), this.$trans('Student unassigned'))
+        this.loadTripAvailability()
+        this.cancel()
+        this.buttonDisabled = false
+        this.isLoading = false
+      } catch(error) {
+        console.log('error unassigning trip', error)
+        this.errorToast(this.$trans('Error unassigning trip'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
     cancel() {
       this.assignMode = false
@@ -165,17 +165,17 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
-    loadTripAvailability() {
+    async loadTripAvailability() {
       this.isLoading = true
 
-      tripAvailabilityModel.detail(this.pk).then((tripAvailability) => {
-        this.tripAvailability = tripAvailability
+      try {
+        this.tripAvailability = await tripAvailabilityModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching tripAvailability', error)
         this.errorToast(this.$trans('Error fetching trip availability'))
         this.isLoading = false
-      })
+      }
     }
   },
   created() {

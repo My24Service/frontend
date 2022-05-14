@@ -105,24 +105,18 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
-      supplierModel.detail(this.pk).then((supplier) => {
-        this.supplier = supplier
 
-        materialModel.getForSupplier(this.pk).then((materials) => {
-          this.materials = materials
-          this.isLoading = false
-        }).catch((error) => {
-          console.log('error fetching materials', error)
-          this.errorToast(this.$trans('Error fetching materials'))
-          this.isLoading = false
-        })
-      }).catch((error) => {
-        console.log('error fetching supplier', error)
-        this.errorToast(this.$trans('Error fetching supplier'))
+      try {
+        this.supplier = await supplierModel.detail(this.pk)
+        this.materials = await materialModel.getForSupplier(this.pk)
         this.isLoading = false
-      })
+      } catch(error) {
+        console.log('error fetching supplier/materials', error)
+        this.errorToast(this.$trans('Error fetching supplier/materials'))
+        this.isLoading = false
+      }
     }
   },
   created() {

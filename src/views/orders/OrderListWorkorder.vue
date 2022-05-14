@@ -206,7 +206,7 @@ export default {
       this.loadData()
     }
   },
-  created() {
+  async created() {
     // set queryMode
     orderWorkorderModel.queryMode = this.queryMode
 
@@ -214,12 +214,9 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.$store.dispatch('getStatuscodes')
-      .then((statuscodes) => {
-        this.statuscodes = statuscodes
-        this.currentPage = this.orderWorkorderModel.currentPage
-        this.loadData()
-      })
+    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.currentPage = this.orderWorkorderModel.currentPage
+    this.loadData()
   },
   methods: {
     showSortModal() {
@@ -242,20 +239,20 @@ export default {
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
-    changeStatus() {
+    async changeStatus() {
       const status = {
         order: this.orderPk,
         status: this.status.extra_text !== '' ? `${this.status.statuscode} ${this.status.extra_text}` : this.status.statuscode
       }
 
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        statusModel.insert(token, status).then(() => {
-          this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
-          this.loadData();
-        }).catch(() => {
-          this.errorToast(this.$trans('Error creating status'))
-        })
-      })
+      try {
+        await statusModel.insert(token, status)
+        this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
+        this.loadData();
+      } catch(error) {
+        console.log('Error creating status', error)
+        this.errorToast(this.$trans('Error creating status'))
+      }
     },
     rowStyle(item, type) {
       if (!item || type !== 'row') return
@@ -271,19 +268,18 @@ export default {
       this.orderPk = id;
       this.$refs['change-status-modal'].show();
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      orderWorkorderModel.list()
-        .then((data) => {
-          this.orders = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching orders', error)
-          this.errorToast(this.$trans('Error loading orders'))
-          this.isLoading = false
-        })
+      try {
+        const data = await orderWorkorderModel.list()
+        this.orders = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching orders', error)
+        this.errorToast(this.$trans('Error loading orders'))
+        this.isLoading = false
+      }
     }
   }
 }

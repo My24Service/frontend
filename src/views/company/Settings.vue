@@ -110,35 +110,35 @@ export default {
 
       return newValues
   	},
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.buttonDisabled = true
       this.isLoading = true
       const newValues = this.fromForm(this.settings)
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        memberModel.updateSettings(token, newValues).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
-          this.buttonDisabled = false
-          this.isLoading = false
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating settings'))
-          this.isLoading = false
-          this.buttonDisabled = false
-        })
-      })
+      try {
+        await memberModel.updateSettings(newValues)
+        this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      } catch() {
+        this.errorToast(this.$trans('Error updating settings'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
     async loadData() {
       this.isLoading = true
 
-      memberModel.getSettings().then((settings) => {
-        this.settings = this.toForm(settings)
+      try {
+        const data = await memberModel.getSettings()
+        this.settings = this.toForm(data)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching settings', error)
         this.errorToast(this.$trans('Error fetching settings'))
         this.isLoading = false
-      })
+      }
     },
   }
 }

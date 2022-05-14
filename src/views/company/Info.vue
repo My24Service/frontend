@@ -291,7 +291,7 @@ export default {
       reader.readAsDataURL(file)
       this.fileChanged = true
     },
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -310,36 +310,35 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         if (!this.fileChanged) {
           delete this.member.companylogo
         }
 
-        memberModel.updateMe(token, this.member).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Info updated'))
+        await memberModel.updateMe(this.member)
+        this.infoToast(this.$trans('Updated'), this.$trans('Info updated'))
 
-          this.buttonDisabled = false
-          this.isLoading = false
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating info'))
-
-          this.isLoading = false
-          this.buttonDisabled = false
-        })
-      })
+        this.buttonDisabled = false
+        this.isLoading = false
+      } catch(error) {
+        console.log('error updating member/me', error)
+        this.errorToast(this.$trans('Error updating info'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
     async loadData() {
       this.isLoading = true
 
-      memberModel.getMe().then((member) => {
-        this.member = member
+      try {
+        this.member = await memberModel.getMe()
         this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching member/me', error)
         this.errorToast(this.$trans('Error fetching member info'))
         this.isLoading = false
-      })
+      }
     },
   }
 }

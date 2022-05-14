@@ -125,19 +125,18 @@ export default {
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      mutationModel.list()
-        .then((data) => {
-          this.mutations = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching mutations', error)
-          this.errorToast(this.$trans('Error loading mutations'))
-          this.isLoading = false
-        })
+      try {
+        const data = await mutationModel.list()
+        this.mutations = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching mutations', error)
+        this.errorToast(this.$trans('Error loading mutations'))
+        this.isLoading = false
+      }
     }
   }
 }

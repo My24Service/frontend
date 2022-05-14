@@ -136,16 +136,17 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
-      purchaseOrderModel.detail(this.pk).then((purchaseOrder) => {
-        this.purchaseOrder = purchaseOrder
+
+      try {
+        this.purchaseOrder = await purchaseOrderModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching purchase order', error)
         this.errorToast(this.$trans('Error fetching purchase order'))
         this.isLoading = false
-      })
+      }
     }
   },
   created() {

@@ -23,6 +23,9 @@ class AssignedOrder extends BaseModel {
   }
 
   updateDetailChangeDate(pk, data) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+
     // check date types
     if (data.alt_start_date !== null && typeof data.alt_start_date === 'object') {
       data.alt_start_date = moment(data.alt_start_date).format('YYYY-MM-DD')
@@ -32,7 +35,7 @@ class AssignedOrder extends BaseModel {
       data.alt_end_date = moment(data.alt_end_date).format('YYYY-MM-DD')
     }
 
-    return this.axios.put(`${this.url}${pk}/detail_change_date/`, data).then((response) => response.data)
+    return this.axios.put(`${this.url}${pk}/detail_change_date/`, data, headers).then((response) => response.data)
   }
 }
 

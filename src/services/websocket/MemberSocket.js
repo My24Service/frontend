@@ -10,7 +10,9 @@ class MemberSocket extends BaseSocket {
 
   async init() {
     this.room = await this._getRoom('/get-member-room/')
-    console.log(`${this.name}: received room: ${this.room}`)
+    if (this.debug) {
+      console.log(`${this.name}: received room: ${this.room}`)
+    }
   }
 
   _getWsUrl() {

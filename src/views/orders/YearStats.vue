@@ -149,10 +149,12 @@ export default {
     getCustomerTotal: function (name) {
       return name in this.customerTotals ? this.customerTotals[name] : 0
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
-      yearModel.setListArgs(`order_type=${this.orderType}&year=${this.year}`)
-      yearModel.getYearData(this.statuscodes).then((results) => {
+
+      try {
+        yearModel.setListArgs(`order_type=${this.orderType}&year=${this.year}`)
+        const results = await yearModel.getYearData(this.statuscodes)
         this.setMonthTotals(results)
         this.customerData = results
         this.customerFields = [{
@@ -198,21 +200,19 @@ export default {
 
         this.loaded = true
         this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
-      })
+      } catch(error) {
+        console.log('error fetching year data', error)
+      }
     }
   },
-  mounted () {
+  async mounted () {
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     // get statuscodes and load orders
-    this.$store.dispatch('getStatuscodes').then((statuscodes) => {
-      this.statuscodes = statuscodes
-      this.loadData()
-    })
+    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.loadData()
   }
 }
 </script>

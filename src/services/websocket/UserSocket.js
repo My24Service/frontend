@@ -10,7 +10,9 @@ class UserSocket extends BaseSocket {
 
   async init() {
     this.room = await this._getRoom('/get-user-room/')
-    console.log(`${this.name}: received room: ${this.room}`)
+    if (this.debug) {
+      console.log(`${this.name}: received room: ${this.room}`)
+    }
   }
 
   _getWsUrl() {

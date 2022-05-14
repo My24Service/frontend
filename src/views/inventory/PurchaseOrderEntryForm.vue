@@ -339,31 +339,33 @@ export default {
     })
   },
   methods: {
-    selectPurchaseOrder(option) {
+    async selectPurchaseOrder(option) {
       this.purchaseorderEntry.purchase_order = option.id
       this.selectedPurchaseOrder = option
 
       this.isLoading = true
-      purchaseOrderModel.detail(option.id).then((purhcaseOrder) => {
-        this.purchaseOrderMaterials = purhcaseOrder.purchase_order_materials
-        console.log(this.purchaseOrderMaterials)
+      try {
+        const data = await purchaseOrderModel.detail(option.id)
+        this.purchaseOrderMaterials = data.purchase_order_materials
         this.isLoading = false
-      }).catch(() => {
+      } catch(error) {
+        console.log('Error fetching purchase order materials', error)
         this.errorToast(this.$trans('Error fetching purchase order materials'))
         this.isLoading = false
-      })
-
+      }
     },
-    getPurchaseOrders(query) {
+    async getPurchaseOrders(query) {
       this.isLoading = true
-      purchaseOrderModel.setSearchQuery(query)
-      purchaseOrderModel.list().then((data) => {
+
+      try {
+        purchaseOrderModel.setSearchQuery(query)
+        const data = await purchaseOrderModel.list()
         this.purchaseOrders = data.results
         this.isLoading = false
-      }).catch(() => {
+      } catch() {
         this.errorToast(this.$trans('Error fetching purchase orders'))
         this.isLoading = false
-      })
+      }
     },
     purchaseOrderLabel (purchaseOrder) {
       return `${purchaseOrder.purchase_order_id} - ${purchaseOrder.order_name}, ${purchaseOrder.order_city} (materials: ${purchaseOrder.num_materials})`
@@ -375,8 +377,7 @@ export default {
     purchaseOrderMaterialLabel(purchaseOrderMaterial) {
       return `${purchaseOrderMaterial.material_name} (ordered: ${purchaseOrderMaterial.amount}, entries: ${purchaseOrderMaterial.num_entries})`
     },
-
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -396,45 +397,47 @@ export default {
       this.buttonDisabled = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          purchaseorderEntryModel.insert(token, this.purchaseorderEntry).then((purchaseorderEntry) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Entry has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating entry'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        purchaseorderEntryModel.update(token, this.pk, this.purchaseorderEntry).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Entry has been updated'))
+        try {
+          await purchaseorderEntryModel.insert(this.purchaseorderEntry)
+          this.infoToast(this.$trans('Created'), this.$trans('Entry has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating entry'))
+        } catch() {
+          this.errorToast(this.$trans('Error creating entry'))
           this.buttonDisabled = false
           this.isLoading = false
-        })
-      })
+        }
+
+        return
+      }
+
+      try {
+        await purchaseorderEntryModel.update(token, this.pk, this.purchaseorderEntry)
+        this.infoToast(this.$trans('Updated'), this.$trans('Entry has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating entry', error)
+        this.errorToast(this.$trans('Error updating entry'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
-      purchaseorderEntryModel.detail(this.pk).then((purchaseorderEntry) => {
-        this.purchaseorderEntry = purchaseorderEntry
+
+      try {
+        this.purchaseorderEntry = await purchaseorderEntryModel.detail(this.pk)
         this.selectedPurchaseOrder = purchaseorderEntry.purchase_order_material_view.purchase_order_view
         this.selectedPurchaseOrderMaterial = purchaseorderEntry.purchase_order_material_view
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching entry', error)
         this.errorToast(this.$trans('Error fetching entry'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

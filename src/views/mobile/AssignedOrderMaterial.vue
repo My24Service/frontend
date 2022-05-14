@@ -279,20 +279,22 @@ export default {
       amount: null,
     }
   },
-  validations: {
-    selectedAssignedOrderPk: {
-      required,
-    },
-    selectedLocationPk: {
-      required,
-    },
-    selectedMaterialPk: {
-      required,
-    },
-    amount: {
-      required,
-      greaterThanZero
-    },
+  validations() {
+    return {
+      selectedAssignedOrderPk: {
+        required,
+      },
+      selectedLocationPk: {
+        required,
+      },
+      selectedMaterialPk: {
+        required,
+      },
+      amount: {
+        required,
+        greaterThanZero
+      },
+    }
   },
   computed: {
     isSubmitClicked() {
@@ -309,45 +311,45 @@ export default {
       this.assignedOrderMaterialPk = id
       this.$refs['delete-assignedorder-material-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        assignedOrderMaterialModel.delete(token, this.assignedOrderMaterialPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
-          this.geAassignedOrderMaterials()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting material'))
-        })
-      })
+    async doDelete() {
+      try {
+        await assignedOrderMaterialModel.delete(this.assignedOrderMaterialPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
+        this.geAassignedOrderMaterials()
+      } catch(error) {
+        console.log('Error deleting material', error)
+        this.errorToast(this.$trans('Error deleting material'))
+      }
     },
-
     selectAssignedOrder(option) {
       this.selectedAssignedOrderPk = option.id
       this.selectedAssignedOrderInfo = `${option.order_date}, ${option.user_full_name} - ${option.order_name}, ${option.order_city}`
       this.geAassignedOrderMaterials()
     },
-    getAssignedOrders(query) {
+    async getAssignedOrders(query) {
       this.isLoading = true
-      assignedOrderModel.setSearchQuery(query ? query : '')
-      assignedOrderModel.list().then((data) => {
+
+      try {
+        assignedOrderModel.setSearchQuery(query ? query : '')
+        const data = await assignedOrderModel.list()
         this.assignedOrders = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) => {
         console.log('Error fetching assigned orders', error)
         this.errorToast(this.$trans('Error fetching assigned orders'))
         this.isLoading = false
-      })
+      }
     },
     assignedOrderLabel(assignedOrder) {
       return `${assignedOrder.order_date}, ${assignedOrder.user_full_name} - ${assignedOrder.order_name}, ${assignedOrder.order_city}`
     },
-
-    getMaterials(query) {
-      inventoryModel.getMaterialsForLocation(this.selectedLocationPk, query).then((materials) => {
-        this.materials = materials
-      }).catch((error) => {
+    async getMaterials(query) {
+      try {
+        this.materials = await inventoryModel.getMaterialsForLocation(this.selectedLocationPk, query)
+      } catch(error) {
         console.log('Error fetching materials', error)
         this.errorToast(this.$trans('Error fetching materials'))
-      })
+      }
     },
     selectMaterial(option) {
       this.selectedMaterialName = option.material_name
@@ -357,16 +359,17 @@ export default {
       const text = this.$trans('in stock')
       return `${material.material_name}, ${text}: ${material.total_amount}`
     },
-
-    getLocations() {
+    async getLocations() {
       this.isLoading = true
-      inventoryModel.getLocations().then((locations) => {
-        this.locations = locations
+
+      try {
+        this.locations = await inventoryModel.getLocations()
         this.isLoading = false
-      }).catch(() => {
+      } catch(error) {
+        console.log('Error fetching locations', error)
         this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
-      })
+      }
     },
     selectLocation(option) {
       this.selectedLocationName = option.location_name
@@ -376,23 +379,25 @@ export default {
     locationLabel(location) {
       return `${location.location_name} (${location.total_amount})`
     },
-
-    geAassignedOrderMaterials() {
+    async geAassignedOrderMaterials() {
       this.isLoading = true
-      assignedOrderMaterialModel.setListArgs(`assigned_order=${this.selectedAssignedOrderPk}`)
-      assignedOrderMaterialModel.list().then((data) => {
+
+      try {
+        assignedOrderMaterialModel.setListArgs(`assigned_order=${this.selectedAssignedOrderPk}`)
+        const data = await assignedOrderMaterialModel.list()
         this.assignedOrderMaterials = data.results
         this.isLoading = false
-      }).catch(() => {
+      } catch(error) {
+        console.log('Error fetching assigned order materials', error)
         this.errorToast(this.$trans('Error fetching assigned order materials'))
         this.isLoading = false
-      })
+      }
     },
-
-    loadAssignedOrderMaterial(pk) {
+    async loadAssignedOrderMaterial(pk) {
       this.isLoading = true
 
-      assignedOrderMaterialModel.detail(pk).then((assignedOrderMaterial) => {
+      try {
+        const assignedOrderMaterial = await assignedOrderMaterialModel.detail(pk)
         this.assignedOrderMaterialPk = assignedOrderMaterial.id
         this.assignedOrderMaterial = assignedOrderMaterial
         this.selectedLocationPk = assignedOrderMaterial.location
@@ -404,17 +409,15 @@ export default {
 
         this.isLoading = false
         this.editMode = true
-      }).catch((error) => {
+      } catch(error) => {
         console.log('error fetching material', error)
         this.errorToast(this.$trans('Error fetching material'))
         this.isLoading = false
-      })
+      }
     },
-
     cancelEdit() {
       this.resetForm()
     },
-
     resetForm() {
       this.assignedOrderMaterial = assignedOrderMaterialModel.getFields()
       this.selectedMaterialPk = null
@@ -422,8 +425,7 @@ export default {
       this.amount = 0
       this.editMode = false
     },
-
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -441,39 +443,39 @@ export default {
       this.isLoading = true
 
       if (this.editMode) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          assignedOrderMaterialModel.update(
-            token, this.assignedOrderMaterialPk, this.assignedOrderMaterial).then((assignedOrderMaterial) => {
-            this.errorToast(this.$trans('Material has been updated'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.v$.$reset()
-            this.submitClicked = false
-            this.resetForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error updating material'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
-
-      }
-
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        assignedOrderMaterialModel.insert(token, this.assignedOrderMaterial).then((assignedOrderMaterial) => {
-          this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
+        try {
+          await assignedOrderMaterialModel.update(this.assignedOrderMaterialPk, this.assignedOrderMaterial)
+          this.errorToast(this.$trans('Material has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.v$.$reset()
           this.submitClicked = false
-
           this.resetForm()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error creating material'))
+        } catch(error) {
+          console.log('Error updating material', error)
+          this.errorToast(this.$trans('Error updating material'))
           this.buttonDisabled = false
           this.isLoading = false
-        })
-      })
+        }
+
+        return
+      }
+
+      try {
+        await assignedOrderMaterialModel.insert(this.assignedOrderMaterial)
+        this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.v$.$reset()
+        this.submitClicked = false
+
+        this.resetForm()
+      } catch(error) {
+        console.log('Error creating material', error)
+        this.errorToast(this.$trans('Error creating material'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     }
   }
 }

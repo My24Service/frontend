@@ -21,36 +21,22 @@ class TripAvailability extends BaseModel {
     return `/mobile/trip/${pk}/trip_availability_detail/`
   }
 
-  assign(token, user_id, trip_id) {
-    const headers = this.getHeaders(token);
+  assign(user_id, trip_id) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
     const url = `/mobile/assign-user-trip/${user_id}/`
     const data = {'trip_ids': [ trip_id ].join(','), 'set_unavailable': true}
 
-    return new Promise((resolve, reject) => {
-      this.axios.post(url, data, headers)
-        .then((response) => {
-          resolve(response.data);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+    return this.axios.post(url, data, headers).then((response) => response.data);
   }
 
-  unAssign(token, user_id, trip_id) {
-    const headers = this.getHeaders(token);
+  unAssign(user_id, trip_id) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
     const url = `/mobile/unassign-user-trip/${user_id}/`
     const data = {trip_pk: trip_id, 'set_available': true}
 
-    return new Promise((resolve, reject) => {
-      this.axios.post(url, data, headers)
-        .then((response) => {
-          resolve(response.data);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+    return this.axios.post(url, data, headers).then((response) => response.data);
   }
 
 }

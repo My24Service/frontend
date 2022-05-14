@@ -179,61 +179,61 @@ export default {
 
       return total
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
       monthModel.setListArgs(`order_type=${this.orderType}&year=${this.year}&month=${this.month}`)
-      monthModel.getMonthData(this.statuscodes)
-        .then((results) => {
-          this.weeks = results.weeks
-          const monthResults = results.results
 
-          this.setWeekTotals(monthResults)
-          this.customerData = monthResults
-          this.customerFields = [{
-            key: 'name',
-            label: this.$trans('Customer'),
-            thAttr: {width: '30%'}
-          }]
+      try {
+        const data = await monthModel.getMonthData(this.statuscodes)
+        this.weeks = data.weeks
+        const monthResults = data.results
 
-          const weekWidth = Math.ceil((100-30-5)/this.weeks.length)
+        this.setWeekTotals(monthResults)
+        this.customerData = monthResults
+        this.customerFields = [{
+          key: 'name',
+          label: this.$trans('Customer'),
+          thAttr: {width: '30%'}
+        }]
 
-          for (let i = 0; i<this.weeks.length; i++) {
-            const label = `${this.$trans('week')} ${this.weeks[i]} (${this.getWeekTotal(this.weeks[i])})`
+        const weekWidth = Math.ceil((100-30-5)/this.weeks.length)
 
-            this.customerFields.push({
-              key: `week${this.weeks[i]}`,
-              label,
-              thAttr: {width: `${weekWidth}%`}
-            })
-          }
+        for (let i = 0; i<this.weeks.length; i++) {
+          const label = `${this.$trans('week')} ${this.weeks[i]} (${this.getWeekTotal(this.weeks[i])})`
 
           this.customerFields.push({
-            key: 'totals',
-            label: this.$trans('Totals'),
-            thAttr: {width: '5%'}
+            key: `week${this.weeks[i]}`,
+            label,
+            thAttr: {width: `${weekWidth}%`}
           })
+        }
 
-          let monthData = [], labels = []
-          for (let day=1; day<=this.today.daysInMonth(); day++) {
-            monthData.push(this.getTotalForDay(monthResults, day))
-            labels.push(day)
+        this.customerFields.push({
+          key: 'totals',
+          label: this.$trans('Totals'),
+          thAttr: {width: '5%'}
+        })
+
+        let monthData = [], labels = []
+        for (let day=1; day<=this.today.daysInMonth(); day++) {
+          monthData.push(this.getTotalForDay(monthResults, day))
+          labels.push(day)
+        }
+
+        this.chartdata = {
+            labels,
+            datasets: [{
+              label: `Total orders for order type: ${this.orderType}`,
+              data: monthData,
+              backgroundColor: '#f87979',
+            }]
           }
 
-          this.chartdata = {
-              labels,
-              datasets: [{
-                label: `Total orders for order type: ${this.orderType}`,
-                data: monthData,
-                backgroundColor: '#f87979',
-              }]
-            }
-
-            this.loaded = true
-            this.isLoading = false
-         })
-        .catch((error) => {
-          console.log(error)
-        })
+          this.loaded = true
+          this.isLoading = false
+       } catch(error) {
+        console.log(error)
+      }
     }
   },
   async mounted () {
@@ -248,11 +248,8 @@ export default {
     this.year = this.today.year()
 
     // get statuscodes and load orders
-    this.$store.dispatch('getStatuscodes')
-      .then((statuscodes) => {
-        this.statuscodes = statuscodes
-        this.loadData()
-      })
+    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.loadData()
   }
 }
 </script>

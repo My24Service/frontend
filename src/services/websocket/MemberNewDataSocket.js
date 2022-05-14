@@ -12,7 +12,9 @@ class MemberNewDataSocket extends BaseSocket {
   async init(type) {
     this.type = this
     this.room = await this._getRoom('/get-member-new-data-room/')
-    console.log(`${this.name}: received room: ${this.room}`)
+    if (this.debug) {
+      console.log(`${this.name}: received room: ${this.room}`)
+    }
   }
 
   setOnmessageHandler(func) {
@@ -32,10 +34,11 @@ class MemberNewDataSocket extends BaseSocket {
       const data = JSON.parse(e.data)
       this.root.onmessageHandlers[this.root.type](data.message)
     } else {
-      console.log(`${this.root.name}: ${this.root.type} not found in this.onmessageHandlers:`, this.root.onmessageHandlers)
+      if (this.debug) {
+        console.log(`${this.root.name}: ${this.root.type} not found in this.onmessageHandlers:`, this.root.onmessageHandlers)
+      }
     }
   }
-
 }
 
 export default new MemberNewDataSocket()

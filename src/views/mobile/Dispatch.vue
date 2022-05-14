@@ -522,23 +522,18 @@ export default {
     this.assignMode = this.assignModeProp
 
     if (this.assignMode) {
-      this.$store.dispatch('getAssignOrders').then((orders) => {
-        this.selectedOrders = orders
-      })
+      this.selectedOrders = await this.$store.dispatch('getAssignOrders')
     }
 
-    this.$store.dispatch('getStatuscodes').then((statuscodes) => {
-      const canvas = this.$refs['dispatch-canvas']
-      const tipCanvas = this.$refs['dispatch-tip-canvas']
+    const statuscodes = await this.$store.dispatch('getStatuscodes')
+    const canvas = this.$refs['dispatch-canvas']
+    const tipCanvas = this.$refs['dispatch-tip-canvas']
 
-      this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday)
-      this.mode = mode
-      // this.dispatch.setMode(mode)
-      // this.startDate = this.dispatch.startDate.toDate()
-      this.setHandlers()
-    }).catch((error) => {
-      console.log('error in get statuscodes', error)
-    });
+    this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday)
+    this.mode = mode
+    // this.dispatch.setMode(mode)
+    // this.startDate = this.dispatch.startDate.toDate()
+    this.setHandlers()
   },
   beforeDestroy() {
     memberNewDataSocket.removeOnmessageHandler('dispatch')

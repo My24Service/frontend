@@ -169,27 +169,27 @@ export default {
       this.pk = id
       this.$refs['delete-salesuser-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        salesUserModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Sales user has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting sales user'))
-        })
-      })
+    async doDelete(id) {
+      try {
+        await salesUserModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Sales user has been deleted'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error deleting sales user'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      salesUserModel.list().then((data) => {
+      try {
+        const data = await salesUserModel.list()
         this.salesusers = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching salesusers', error)
         this.errorToast(this.$trans('Error loading sales users'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

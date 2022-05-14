@@ -158,7 +158,7 @@ export default {
       }
       throw(`module_id "${module_id}" not found`)
     },
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
 
@@ -175,34 +175,36 @@ export default {
 
       if (this.isCreate) {
         this.isLoading = true
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          contractModel.insert(token, this.contract).then((contract) => {
-            this.infoToast(this.$trans('Created'), this.$trans('contract has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating contract'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        this.isLoading = true
-
-        contractModel.update(token, this.pk, this.contract).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('contract has been updated'))
+        try {
+          await contractModel.insert(this.contract)
+          this.infoToast(this.$trans('Created'), this.$trans('contract has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating contract'))
-          this.isLoading = false
+        } catch(error) {
+          console.log('Error creating contract', error)
+          this.errorToast(this.$trans('Error creating contract'))
           this.buttonDisabled = false
-        })
-      })
+          this.isLoading = false
+        }
+
+        return
+      }
+
+      try {
+        this.isLoading = true
+
+        await contractModel.update(this.pk, this.contract)
+        this.infoToast(this.$trans('Updated'), this.$trans('contract has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating contract', error)
+        this.errorToast(this.$trans('Error updating contract'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
     async loadData() {
       try {

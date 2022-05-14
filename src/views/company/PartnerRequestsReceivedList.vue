@@ -196,55 +196,53 @@ export default {
       this.pk = id
       this.$refs['accept-receievd-partner-request-modal'].show()
     },
-    acceptRequest() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        partnerRequestsReceivedModel.accept(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Accepted'), this.$trans('Partner request has been accepted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error accepting partner request'))
-        })
-      })
+    async acceptRequest() {
+      try {
+        await partnerRequestsReceivedModel.accept(this.pk)
+        this.infoToast(this.$trans('Accepted'), this.$trans('Partner request has been accepted'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error accepting partner request'))
+      }
     },
     showRejectRequestModal(id) {
       this.pk = id
       this.$refs['reject-receievd-partner-request-modal'].show()
     },
-    rejectRequest() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        partnerRequestsReceivedModel.reject(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Rejected'), this.$trans('Partner request has been rejected'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error rejecting partner request'))
-        })
-      })
+    async rejectRequest() {
+      try {
+        await partnerRequestsReceivedModel.reject(this.pk)
+        this.infoToast(this.$trans('Rejected'), this.$trans('Partner request has been rejected'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error rejecting partner request'))
+      }
     },
     showDeleteModal(id) {
       this.pk = id
       this.$refs['delete-receievd-partner-request-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        partnerRequestsReceivedModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting partner request'))
-        })
-      })
+    async doDelete(id) {
+      try {
+        await partnerRequestsReceivedModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error deleting partner request'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      partnerRequestsReceivedModel.list().then((data) => {
+      try {
+        const data = await partnerRequestsReceivedModel.list()
         this.partnerRequests = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching partnerRequestsReceived', error);
         this.errorToast(this.$trans('Error loading partner requests sent'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

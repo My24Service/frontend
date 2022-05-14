@@ -160,29 +160,28 @@ export default {
       this.contractPk = id
       this.$refs['delete-contract-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        contractModel.delete(token, this.contractPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Contract has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error'), this.$trans('Error deleting contract'))
-        })
-      })
+    async doDelete() {
+      try {
+        await contractModel.delete(this.contractPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Contract has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting contract', error)
+        this.errorToast(this.$trans('Error deleting contract'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      contractModel.list()
-        .then((data) => {
-          this.contracts = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching contracts', error)
-          this.errorToast(this.$trans('Error loading contracts'))
-          this.isLoading = false
-        })
+      try {
+        const data = await contractModel.list()
+        this.contracts = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching contracts', error)
+        this.errorToast(this.$trans('Error loading contracts'))
+        this.isLoading = false
+      }
     }
   }
 }

@@ -24,7 +24,7 @@
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="planninguser.username !== ''"
-                :state="isSubmitClicked ? v$.planninguser.username.isUnique : null">
+                :state="isSubmitClicked ? !v$.planninguser.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -64,7 +64,7 @@
                 :state="isSubmitClicked ? !v$.planninguser.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? v$.planninguser.password2.sameAs : null">
+                :state="isSubmitClicked ? !v$.planninguser.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -256,6 +256,7 @@ export default {
 
       if (this.v$.$invalid) {
         console.log('invalid?', this.v$.$invalid)
+        this.submitClicked = false
         this.buttonDisabled = false
         return
       }
@@ -264,57 +265,55 @@ export default {
         this.submitForm()
       }, 1000)
     },
-    submitForm() {
+    async submitForm() {
       this.isLoading = true
 
       if (this.isCreate) {
         this.planninguser.password = this.planninguser.password1
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          planningUserModel.insert(token, this.planninguser).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('planning user has been created'))
-            this.isLoading = false
-            this.cancelForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating planning user'))
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        delete this.planninguser.date_joined
-        delete this.planninguser.last_login
-
-        if (this.planninguser.password1) {
-          this.planninguser.password = this.planninguser.password1
-        } else {
-          delete this.planninguser.password
+        try {
+          await planningUserModel.insert(this.planninguser)
+          this.infoToast(this.$trans('Created'), this.$trans('planning user has been created'))
+          this.isLoading = false
+          this.cancelForm()
+        } catch(error) {
+          this.errorToast(this.$trans('Error creating planning user'))
+          this.isLoading = false
         }
 
-        planningUserModel.update(token, this.pk, this.planninguser)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('planning user has been updated'))
-            this.isLoading = false
-            this.cancelForm()
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating planning user'))
-            this.isLoading = false
-          })
-      })
+        return
+      }
+
+      delete this.planninguser.date_joined
+      delete this.planninguser.last_login
+
+      if (this.planninguser.password1) {
+        this.planninguser.password = this.planninguser.password1
+      } else {
+        delete this.planninguser.password
+      }
+
+      try {
+        await planningUserModel.update(this.pk, this.planninguser)
+        this.infoToast(this.$trans('Updated'), this.$trans('planning user has been updated'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch(error) {
+        this.errorToast(this.$trans('Error updating planning user'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      planningUserModel.detail(this.pk).then((planninguser) => {
-        this.planninguser = planninguser
-        this.orgUsername = planninguser.username
+      try {
+        this.planninguser  = await planningUserModel.detail(this.pk)
+        this.orgUsername = this.planninguser.username
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching planninguser', error)
         this.errorToast(this.$trans('Error loading planning user'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

@@ -124,18 +124,19 @@ export default {
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      activityModel.list().then((data) => {
+      try {
+        const data = activityModel.list()
         this.activity = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching activity', error);
         this.errorToast(this.$trans('Error loading activity'))
 
         this.isLoading = false
-      })
+      }
     }
   }
 }

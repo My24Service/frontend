@@ -169,27 +169,27 @@ export default {
       this.pk = id
       this.$refs['delete-planninguser-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        planningUserModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('planning user has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting planning user'))
-        })
-      })
+    async doDelete(id) {
+      try {
+        await planningUserModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('planning user has been deleted'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error deleting planning user'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      planningUserModel.list().then((data) => {
+      try {
+        const data = await planningUserModel.list()
         this.planningusers = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching planningusers', error)
         this.errorToast(this.$trans('Error loading planning users'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

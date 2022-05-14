@@ -219,26 +219,20 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
       orderPastModel.setListArgs(`customer_relation=${this.pk}`)
 
-      customerModel.detail(this.pk).then((customer) => {
-        this.customer = customer
-
-        orderPastModel.list().then((result) => {
-          this.orders = result.results
-          this.isLoading = false
-        }).catch((error) => {
-          console.log('error fetching orders', error)
-          this.errorToast(this.$trans('Error fetching orders'))
-          this.isLoading = false
-        })
-      }).catch((error) => {
-        console.log('error fetching customer', error)
-        this.errorToast(this.$trans('Error fetching customer'))
+      try {
+        this.customer = await customerModel.detail(this.pk)
+        const results = await orderPastModel.list()
+        this.orders = result.results
         this.isLoading = false
-      })
+      } catch(error) {
+        console.log('error fetching orders or customer detail', error)
+        this.errorToast(this.$trans('Error fetching orders'))
+        this.isLoading = false
+      }
     }
   },
   created() {

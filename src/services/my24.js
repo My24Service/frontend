@@ -38,7 +38,7 @@ class My24 extends BaseModel {
     const defaultColor = '#ccc'
     const defaultTextColor = '#000'
     if (!status) {
-      console.log(`no status, returning ${text_color ? 'text color' : 'color'} ${text_color ? defaultTextColor : defaultColor}`)
+      //console.log(`no status, returning ${text_color ? 'text color' : 'color'} ${text_color ? defaultTextColor : defaultColor}`)
       return text_color ? defaultTextColor : defaultColor
     }
 
@@ -47,7 +47,7 @@ class My24 extends BaseModel {
       let color = text_color ? statuscode.text_color : statuscode.color
       if (!color) {
         color = text_color ? defaultTextColor : defaultColor
-        console.log(`could not find ${text_color ? 'text color' : 'color'} for: ${statuscode.statuscode}, defaulting to ${color}`)
+        //console.log(`could not find ${text_color ? 'text color' : 'color'} for: ${statuscode.statuscode}, defaulting to ${color}`)
       }
 
       if (color.substring(0, 1) !== '#') color = '#' + color

@@ -36,38 +36,24 @@ class StudentUser extends BaseModel {
 
   url = '/company/studentuser/'
 
-  setInActive(token, pk, email) {
+  setInActive(pk, email) {
     const data = {
       email,
       'student_user': {},
       'is_active': false
     }
 
-    return new Promise((resolve, reject) => {
-      this.update(token, pk, data).then(() => {
-        resolve()
-      })
-      .catch(() => {
-        reject()
-      })
-    })
+    return this.update(pk, data)
   }
 
-  setActive(token, pk, email) {
+  setActive(pk, email) {
     const data = {
       email,
       'student_user': {},
       'is_active': true
     }
 
-    return new Promise((resolve, reject) => {
-      this.update(token, pk, data).then(() => {
-        resolve()
-      })
-      .catch(() => {
-        reject()
-      })
-    })
+    return this.update(pk, data)
   }
 }
 

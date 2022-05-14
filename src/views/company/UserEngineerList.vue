@@ -185,27 +185,27 @@ export default {
       this.pk = id
       this.$refs['delete-engineer-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        engineerModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Engineer has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting engineer'))
-        })
-      })
+    async doDelete(id) {
+      try {
+        await engineerModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Engineer has been deleted'))
+        this.loadData()
+      } catch() {
+        this.errorToast(this.$trans('Error deleting engineer'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      engineerModel.list().then((data) => {
+      try {
+        const data = await engineerModel.list()
         this.engineers = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching engineers', error)
         this.errorToast(this.$trans('Error loading engineers'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

@@ -184,12 +184,14 @@ export default {
       default: null
     }
   },
-  validations: {
-    statuscode: {
+  validations() {
+    return {
       statuscode: {
-        required,
-      },
-    },
+        statuscode: {
+          required,
+        },
+      }
+    }
   },
   data() {
     return {
@@ -229,7 +231,7 @@ export default {
     }
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -248,40 +250,42 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          this.statuscodeModel.insert(token, this.statuscode).then((statuscode) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Statuscode has been created'))
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating statuscode'))
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        this.statuscodeModel.update(token, this.pk, this.statuscode).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Statuscode has been updated'))
+        try {
+          await this.statuscodeModel.insert(this.statuscode)
+          this.infoToast(this.$trans('Created'), this.$trans('Statuscode has been created'))
           this.isLoading = false
           this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating statuscode'))
+        } catch(error) {
+          console.log('Error creating statuscode', error)
+          this.errorToast(this.$trans('Error creating statuscode'))
           this.isLoading = false
-        })
-      })
+        }
+
+        return
+      }
+
+      try {
+        await this.statuscodeModel.update(this.pk, this.statuscode)
+        this.infoToast(this.$trans('Updated'), this.$trans('Statuscode has been updated'))
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating statuscode', error)
+        this.errorToast(this.$trans('Error updating statuscode'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      this.statuscodeModel.detail(this.pk).then((statuscode) => {
-        this.statuscode = statuscode
+      try {
+        this.statuscode = await this.statuscodeModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching statuscode', error)
         this.errorToast(this.$trans('Error loading statuscode'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

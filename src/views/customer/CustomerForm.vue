@@ -261,23 +261,25 @@ export default {
       default: null
     },
   },
-  validations: {
-    customer: {
-      customer_id: {
-        required
-      },
-      name: {
-        required,
-      },
-      address: {
-        required,
-      },
-      postal: {
-        required,
-      },
-      city: {
-        required,
-      },
+  validations() {
+    return {
+      customer: {
+        customer_id: {
+          required
+        },
+        name: {
+          required,
+        },
+        address: {
+          required,
+        },
+        postal: {
+          required,
+        },
+        city: {
+          required,
+        },
+      }
     }
   },
   data () {
@@ -300,27 +302,24 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
+  async created() {
+    this.countries = await this.$store.dispatch('getCountries')
 
-      if (this.isCreate) {
-        this.customer = customerModel.getFields()
-        customerModel.getCustomerId().then((result) => {
-          if (result.created) {
-            this.customerIdCreated = true
-            this.customer.customer_id = result.customer_id
-          } else {
-            this.customerIdCreated = false
-          }
-        })
+    if (this.isCreate) {
+      this.customer = customerModel.getFields()
+      const result = await customerModel.getCustomerId()
+      if (result.created) {
+        this.customerIdCreated = true
+        this.customer.customer_id = result.customer_id
       } else {
-        this.loadData()
+        this.customerIdCreated = false
       }
-    })
+    } else {
+      this.loadData()
+    }
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -339,42 +338,40 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          customerModel.insert(token, this.customer).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
-            this.isLoading = false
-            this.cancelForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating customer'))
-            this.isLoading = false
-          })
-        })
+        try {
+          await customerModel.insert(this.customer)
+          this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
+          this.isLoading = false
+          this.cancelForm()
+        } catch() {
+          this.errorToast(this.$trans('Error creating customer'))
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        customerModel.update(token, this.pk, this.customer)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
-            this.isLoading = false
-            this.cancelForm()
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating customer'))
-            this.isLoading = false
-          })
-      })
+      try {
+        await customerModel.update(this.pk, this.customer)
+        this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch() {
+        this.errorToast(this.$trans('Error updating customer'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      customerModel.detail(this.pk).then((customer) => {
-        this.customer = customer
+      try {
+        this.customer = await customerModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching customer', error)
         this.errorToast(this.$trans('Error loading customer'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)
