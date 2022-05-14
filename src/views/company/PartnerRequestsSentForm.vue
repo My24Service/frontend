@@ -119,7 +119,8 @@ export default {
       try {
         this.members = await memberModel.getForPartnerSelect(query)
         this.isLoading = false
-      } catch() {
+      } catch(error) {
+        console.log('Error fetching members', error)
         this.errorToast(this.$trans('Error fetching members'))
         this.isLoading = false
       }
@@ -150,7 +151,8 @@ export default {
         this.infoToast(this.$trans('Created'), this.$trans('Partner request has been sent'))
         this.isLoading = false
         this.cancelForm()
-      } catch() {
+      } catch(error) {
+        console.log('Error sending partner request', error)
         this.errorToast(this.$trans('Error sending partner request'))
         this.isLoading = false
       }

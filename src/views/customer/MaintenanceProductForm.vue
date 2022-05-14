@@ -355,7 +355,7 @@ export default {
         this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
       }
     } else {
-      this.loadData()
+      await this.loadData()
     }
   },
   methods: {
@@ -365,7 +365,8 @@ export default {
     async getCustomers(query) {
       try {
         this.customers = await customerModel.search(query)
-      } catch() {
+      } catch(error) {
+        console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
       }
     },

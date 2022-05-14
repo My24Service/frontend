@@ -206,8 +206,9 @@ export default {
       try {
         await customerModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Customer has been deleted'))
-        this.loadData()
-      } catch() {
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting customer', error)
         this.errorToast(this.$trans('Error deleting customer'))
       }
     },

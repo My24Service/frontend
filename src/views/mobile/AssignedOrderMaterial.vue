@@ -334,7 +334,7 @@ export default {
         const data = await assignedOrderModel.list()
         this.assignedOrders = data.results
         this.isLoading = false
-      } catch(error) => {
+      } catch(error) {
         console.log('Error fetching assigned orders', error)
         this.errorToast(this.$trans('Error fetching assigned orders'))
         this.isLoading = false
@@ -409,7 +409,7 @@ export default {
 
         this.isLoading = false
         this.editMode = true
-      } catch(error) => {
+      } catch(error) {
         console.log('error fetching material', error)
         this.errorToast(this.$trans('Error fetching material'))
         this.isLoading = false

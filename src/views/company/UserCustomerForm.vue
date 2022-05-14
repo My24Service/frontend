@@ -408,9 +408,9 @@ export default {
 
       try {
         this.customeruser = await customerUserModel.detail(this.pk)
-        this.orgUsername = customeruser.username
-        if (customeruser.customer_user.customer !== null) {
-          this.customer_info = `${customeruser.customer_details.name}, ${customeruser.customer_details.address}, ${customeruser.customer_details.city}`
+        this.orgUsername = this.customeruser.username
+        if (this.customeruser.customer_user.customer !== null) {
+          this.customer_info = `${this.customeruser.customer_details.name}, ${this.customeruser.customer_details.address}, ${this.customeruser.customer_details.city}`
         }
         this.isLoading = false
       } catch(error) {

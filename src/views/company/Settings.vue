@@ -121,7 +121,8 @@ export default {
         this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
-      } catch() {
+      } catch(error) {
+        console.log('Error updating settings', error)
         this.errorToast(this.$trans('Error updating settings'))
         this.isLoading = false
         this.buttonDisabled = false

@@ -432,7 +432,8 @@ export default {
           this.infoToast(this.$trans('Created'), this.$trans('Engineer has been created'))
           this.isLoading = false
           this.cancelForm()
-        } catch() {
+        } catch(error) {
+          console.log('Error creating engineer', error)
           this.errorToast(this.$trans('Error creating engineer'))
           this.isLoading = false
         }
@@ -453,7 +454,8 @@ export default {
         this.infoToast(this.$trans('Updated'), this.$trans('Engineer has been updated'))
         this.isLoading = false
         this.cancelForm()
-      } catch() {
+      } catch(error) {
+        console.log('Error updating engineer', error)
         this.errorToast(this.$trans('Error updating engineer'))
         this.isLoading = false
       }
@@ -463,7 +465,7 @@ export default {
 
       try {
         this.engineer = await engineerModel.detail(this.pk)
-        this.orgUsername = engineer.username
+        this.orgUsername = this.engineer.username
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineer', error)

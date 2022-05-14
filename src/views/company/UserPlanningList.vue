@@ -173,8 +173,9 @@ export default {
       try {
         await planningUserModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('planning user has been deleted'))
-        this.loadData()
-      } catch() {
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting planning user', error)
         this.errorToast(this.$trans('Error deleting planning user'))
       }
     },

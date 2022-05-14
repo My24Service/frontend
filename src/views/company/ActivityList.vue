@@ -128,7 +128,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = activityModel.list()
+        const data = await activityModel.list()
         this.activity = data.results
         this.isLoading = false
       } catch(error) {

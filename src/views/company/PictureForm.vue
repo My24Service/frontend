@@ -126,7 +126,7 @@ export default {
       reader.readAsDataURL(file)
       this.fileChanged = true
     },
-    await submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -144,7 +144,8 @@ export default {
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        } catch() {
+        } catch(error) {
+          console.log('Error creating picture', error)
           this.errorToast(this.$trans('Error creating picture'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -153,22 +154,21 @@ export default {
         return
       }
 
-      try {
-        if (!this.fileChanged) {
-          delete this.picture.image
-        }
+      if (!this.fileChanged) {
+        delete this.picture.image
+      }
 
-        try {
-          await pictureModel.update(this.pk, this.picture)
-          this.infoToast(this.$trans('Updated'), this.$trans('Picture has been updated'))
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        } catch() {
-          this.errorToast(this.$trans('Error updating picture'))
-          this.isLoading = false
-          this.buttonDisabled = false
-        }
+      try {
+        await pictureModel.update(this.pk, this.picture)
+        this.infoToast(this.$trans('Updated'), this.$trans('Picture has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating picture', error)
+        this.errorToast(this.$trans('Error updating picture'))
+        this.isLoading = false
+        this.buttonDisabled = false
       }
     },
     async loadData() {

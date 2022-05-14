@@ -433,12 +433,12 @@ export default {
     }
 
     if (!this.isCreate) {
-      this.loadData()
+      await this.loadData()
     } else {
       this.member = memberModel.getFields()
       this.member.country_code = 'NL'
       this.member.member_type = 'maintenance'
-      this.member.contract = data.results[0].id
+      this.member.contract = this.contracts[0].value
     }
     this.isLoading = false
   },
@@ -524,7 +524,7 @@ export default {
       try {
         this.member = await memberModel.detail(this.pk)
         this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
-        this.orgCompanycode = member.companycode
+        this.orgCompanycode = this.member.companycode
         this.isLoading = false
       } catch(error) {
         console.log('error fetching member', error)

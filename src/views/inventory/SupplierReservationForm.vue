@@ -248,19 +248,21 @@ export default {
       selectedMaterial: {},
     }
   },
-  validations: {
-    supplierReservation: {
-      supplier: {
-        required,
+  validations() {
+    return {
+      supplierReservation: {
+        supplier: {
+          required,
+        },
+        material: {
+          required,
+        },
+        amount: {
+          required,
+          greaterThanZero
+        },
       },
-      material: {
-        required,
-      },
-      amount: {
-        required,
-        greaterThanZero
-      },
-    },
+    }
   },
   computed: {
     isCreate() {
@@ -291,7 +293,7 @@ export default {
 
       try {
         supplierModel.setSearchQuery(query)
-        const data = supplierModel.list()
+        const data = await supplierModel.list()
         this.suppliers = data.results
         this.isLoading = false
       } catch(error) {
@@ -312,7 +314,7 @@ export default {
         this.isLoading = true
         materialModel.setListArgs(`supplier_relation=${this.selectedSupplier.id}`)
         materialModel.setSearchQuery(query)
-        const data = materialModel.list()
+        const data = await materialModel.list()
         this.materials = data.results
         this.isLoading = false
       } catch(error) {
@@ -383,8 +385,8 @@ export default {
 
       try {
         this.supplierReservation = await supplierReservationModel.detail(this.pk)
-        this.selectedSupplier = supplierReservation.supplier_view
-        this.selectedMaterial = supplierReservation.material_view
+        this.selectedSupplier = this.supplierReservation.supplier_view
+        this.selectedMaterial = this.supplierReservation.material_view
         this.isLoading = false
 
         this.getMaterials('')

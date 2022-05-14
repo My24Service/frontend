@@ -21,7 +21,7 @@ class TripAvailability extends BaseModel {
     return `/mobile/trip/${pk}/trip_availability_detail/`
   }
 
-  assign(user_id, trip_id) {
+  async assign(user_id, trip_id) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const url = `/mobile/assign-user-trip/${user_id}/`
@@ -30,7 +30,7 @@ class TripAvailability extends BaseModel {
     return this.axios.post(url, data, headers).then((response) => response.data);
   }
 
-  unAssign(user_id, trip_id) {
+  async unAssign(user_id, trip_id) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const url = `/mobile/unassign-user-trip/${user_id}/`

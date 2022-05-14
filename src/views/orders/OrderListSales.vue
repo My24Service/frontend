@@ -94,7 +94,7 @@ export default {
       this.loadData()
     }
   },
-  created() {
+  async created() {
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
     this.currentPage = this.orderSalesModel.currentPage

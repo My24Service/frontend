@@ -362,7 +362,8 @@ export default {
         const data = await purchaseOrderModel.list()
         this.purchaseOrders = data.results
         this.isLoading = false
-      } catch() {
+      } catch(error) {
+        console.log('Error fetching purchase orders', error)
         this.errorToast(this.$trans('Error fetching purchase orders'))
         this.isLoading = false
       }
@@ -403,7 +404,8 @@ export default {
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        } catch() {
+        } catch(error) {
+          console.log('Error creating entry', error)
           this.errorToast(this.$trans('Error creating entry'))
           this.buttonDisabled = false
           this.isLoading = false

@@ -173,8 +173,9 @@ export default {
       try {
         await maintenanceContractModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))
-        this.loadData()
-      } catch() {
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting maintenance contract', error)
         this.errorToast(this.$trans('Error deleting maintenance contract'))
       }
     },

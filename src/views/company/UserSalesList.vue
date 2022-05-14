@@ -174,7 +174,8 @@ export default {
         await salesUserModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Sales user has been deleted'))
         this.loadData()
-      } catch() {
+      } catch(error) {
+        console.log('Error deleting sales user', error)
         this.errorToast(this.$trans('Error deleting sales user'))
       }
     },

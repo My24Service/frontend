@@ -6,7 +6,7 @@ import Vuex from 'vuex';
 
 import localVue from '../../index'
 import SupplierForm from '@/views/inventory/SupplierForm.vue'
-import supplierResponse from '../../fixtures/supplier'
+import supplierResponse from '../../fixtures/supplier-autocomplete'
 
 jest.mock('axios')
 

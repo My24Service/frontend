@@ -189,8 +189,9 @@ export default {
       try {
         await engineerModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Engineer has been deleted'))
-        this.loadData()
-      } catch() {
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting engineer', error)
         this.errorToast(this.$trans('Error deleting engineer'))
       }
     },

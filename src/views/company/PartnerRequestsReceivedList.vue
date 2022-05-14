@@ -201,7 +201,8 @@ export default {
         await partnerRequestsReceivedModel.accept(this.pk)
         this.infoToast(this.$trans('Accepted'), this.$trans('Partner request has been accepted'))
         this.loadData()
-      } catch() {
+      } catch(error) {
+        console.log('Error accepting partner request', error)
         this.errorToast(this.$trans('Error accepting partner request'))
       }
     },
@@ -214,7 +215,8 @@ export default {
         await partnerRequestsReceivedModel.reject(this.pk)
         this.infoToast(this.$trans('Rejected'), this.$trans('Partner request has been rejected'))
         this.loadData()
-      } catch() {
+      } catch(error) {
+        console.log('Error rejecting partner request', error)
         this.errorToast(this.$trans('Error rejecting partner request'))
       }
     },
@@ -227,7 +229,8 @@ export default {
         await partnerRequestsReceivedModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
         this.loadData()
-      } catch() {
+      } catch(error) {
+        console.log('Error deleting partner request', error)
         this.errorToast(this.$trans('Error deleting partner request'))
       }
     },

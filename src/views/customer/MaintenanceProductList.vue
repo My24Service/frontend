@@ -191,7 +191,7 @@ export default {
         await maintenanceProductModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance product has been deleted'))
         this.loadData()
-      } catch(error) => {
+      } catch(error) {
         console.log('Error deleting maintenance product', error)
         this.errorToast(this.$trans('Error deleting maintenance product'))
       }

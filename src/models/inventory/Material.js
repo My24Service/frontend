@@ -28,7 +28,7 @@ class Material extends BaseModel {
 
   url = '/inventory/material/'
 
-  move(materialPk, fromLoctionPk, toLocationPk, amount) {
+  async move(materialPk, fromLoctionPk, toLocationPk, amount) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const url = `${this.url}${materialPk}/move/`

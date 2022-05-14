@@ -660,8 +660,8 @@ export default {
 
       try {
         this.order = await orderModel.detail(this.pk)
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY')
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY')
+        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)

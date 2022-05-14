@@ -343,7 +343,8 @@ export default {
           this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
           this.isLoading = false
           this.cancelForm()
-        } catch() {
+        } catch(error) {
+          console.log('Error creating customer', error)
           this.errorToast(this.$trans('Error creating customer'))
           this.isLoading = false
         }
@@ -356,7 +357,8 @@ export default {
         this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
         this.isLoading = false
         this.cancelForm()
-      } catch() {
+      } catch(error) {
+        console.log('Error updating customer', error)
         this.errorToast(this.$trans('Error updating customer'))
         this.isLoading = false
       }

@@ -15,6 +15,8 @@ axios.get.mockImplementation((url) => {
   switch (url) {
     case '/order/order/?page=1':
       return Promise.resolve(ordersResponse)
+    case '/order/order/all_for_customer_not_accepted_count/':
+      return Promise.resolve({count: 1})
     default:
       console.error(`${url} not found`)
       return Promise.reject(new Error(`${url} not found`))
@@ -51,7 +53,7 @@ describe('OrderListMaintenance.vue', () => {
     actions = {
       getStatuscodes: () => [],
       getMemberType: () => 'maintenance',
-      setUnacceptedCount: () => null
+      setUnacceptedCount: () => 1
     }
 
     store = new Vuex.Store({

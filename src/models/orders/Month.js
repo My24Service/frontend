@@ -12,9 +12,9 @@ class Month extends BaseModel {
       let results = [], weekObjs = {}
 
       // add status color to orders
-      for (let i=0; i<monthData.length; i++) {
+      for (let i = 0; i < monthData.length; i++) {
         for (const [week, data] of Object.entries(monthData[i].weeks)) {
-          for(let j=0; j<data.length; j++) {
+          for (let j = 0; j < data.length; j++) {
             data[j].color = my24.status2color(statuscodes, data[j].status)
           }
 
@@ -29,13 +29,10 @@ class Month extends BaseModel {
         weeks.push(week)
       }
 
-      resolve({
+      return {
         results: monthData,
         weeks
-      })
-    })
-    .catch((error) => {
-      reject(error)
+      }
     })
   }
 }

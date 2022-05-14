@@ -478,7 +478,8 @@ export default {
           this.infoToast(this.$trans('Created'), this.$trans('studentuser has been created'))
           this.isLoading = false
           this.cancelForm()
-        } catch(){
+        } catch(error) {
+          console.log('Error creating studentuser', error)
           this.errorToast(this.$trans('Error creating studentuser'))
           this.isLoading = false
         }
@@ -502,7 +503,8 @@ export default {
         this.infoToast(this.$trans('Updated'), this.$trans('studentuser has been updated'))
         this.isLoading = false
         this.cancelForm()
-      } catch() {
+      } catch(error) {
+        console.log('Error updating studentuser', error)
         this.errorToast(this.$trans('Error updating studentuser'))
         this.isLoading = false
       }
@@ -512,7 +514,7 @@ export default {
 
       try {
         this.studentuser = await studentUserModel.detail(this.pk)
-        this.orgUsername = studentuser.username
+        this.orgUsername = this.studentuser.username
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentuser', error)

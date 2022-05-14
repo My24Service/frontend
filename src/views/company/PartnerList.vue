@@ -160,8 +160,9 @@ export default {
       try {
         await partnerModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('partner has been deleted'))
-        this.loadData()
-      } catch() {
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting partner', error)
         this.errorToast(this.$trans('Error deleting partner'))
       }
     },

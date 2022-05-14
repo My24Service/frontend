@@ -18,14 +18,14 @@ class PartnerRequestsReceived extends BaseModel {
     return '/company/partner-request/received/'
   }
 
-  accept(id) {
+  async accept(id) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
     return this.axios.put(`${this.url}${id}/accept/`, {}, headers).then((response) => response.data)
   }
 
-  reject(id) {
+  async reject(id) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 

@@ -193,7 +193,8 @@ export default {
         this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
         this.isLoading = false
         this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
-      } catch() {
+      } catch(error) {
+        console.log('Error updating document', error)
         this.errorToast(this.$trans('Error updating document'))
         this.isLoading = false
       }

@@ -367,7 +367,7 @@ export default {
       try {
         await orderModel.delete(this.orderPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
         this.errorToast(this.$trans('Error deleting order'))
@@ -376,7 +376,7 @@ export default {
     async loadData() {
       this.isLoading = true
 
-      this.doFetchUnacceptedCountAndUpdateStore()
+      await this.doFetchUnacceptedCountAndUpdateStore()
 
       try {
         const data = await orderModel.list()

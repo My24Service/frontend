@@ -551,7 +551,7 @@ export default {
         reader.readAsDataURL(files[i])
       }
     },
-    deleteDocument(index) {
+    async deleteDocument(index) {
       const deleted = this.documents.splice(index, 1)
       try {
         for (const document of deleted) {
@@ -620,8 +620,9 @@ export default {
       if (this.isCreate) {
         this.order.customer_order_accepted = false
 
+        let newOrder
         try {
-          const order = await orderModel.insert(this.order)
+          const newOrder = await orderModel.insert(this.order)
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -636,7 +637,7 @@ export default {
         // insert documents
         try {
           for (const document of this.documents) {
-            document.order = order.id
+            document.order = newOrder.id
             await documentModel.insert(document)
           }
         } catch(error) {
@@ -661,10 +662,8 @@ export default {
     },
     async loadOrder() {
       const order = await orderModel.detail(this.pk)
-      const start_date = this.$moment(order.start_date, 'DD/MM/YYYY')
-      const end_date = this.$moment(order.end_date, 'DD/MM/YYYY')
-      order.start_date = start_date.toDate()
-      order.end_date = end_date.toDate()
+      this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+      this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
 
       return order
     },

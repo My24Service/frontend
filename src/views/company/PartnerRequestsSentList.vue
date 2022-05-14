@@ -167,8 +167,9 @@ export default {
       try {
         partnerRequestsSentModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
-        this.loadData()
-      } catch() {
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting partner request', error)
         this.errorToast(this.$trans('Error deleting partner request'))
       }
     },

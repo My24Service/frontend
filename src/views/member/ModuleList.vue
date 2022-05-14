@@ -163,7 +163,7 @@ export default {
       try {
         await moduleModel.delete(this.modulePk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Module has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting module', error)
         this.errorToast(this.$trans('Error deleting module'))
@@ -173,7 +173,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = moduleModel.list()
+        const data = await moduleModel.list()
         this.modules = data.results
         this.isLoading = false
       } catch(error) {

@@ -202,7 +202,6 @@ class Dispatch {
       this.component.showOverlay = false
       console.log('error fetching dispatch data', error)
       this.component.errorToast(this.component.$trans('Error loading dispatch data'))
-      return
     }
   }
 

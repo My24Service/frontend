@@ -166,8 +166,9 @@ export default {
       try {
         await pictureModel.delete(this.picturePk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Picture has been deleted'))
-        this.loadData()
-      } catch() {
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting picture', error)
         this.errorToast(this.$trans('Error deleting picture'))
       }
     },

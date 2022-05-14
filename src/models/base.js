@@ -110,6 +110,7 @@ class BaseModel {
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
 
     const response = await this.axios.get(url)
+
     if ('count' in response.data) {
       this.count = response.data.count
     }

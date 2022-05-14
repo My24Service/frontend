@@ -136,7 +136,7 @@ export default {
       this.isLoading = true
 
       try {
-        const data = timeSheetDetailModel.list()
+        const data = await timeSheetDetailModel.list()
         this.fullName = data.full_name
         let header_columns = [{label: this.$trans('Field'), key: 'field'}]
 
@@ -234,8 +234,8 @@ export default {
         this.assignedOrders = results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching assigned orders', error)
-        this.errorToast(this.$trans('Error loading orders'))
+        console.log('error fetching timesheet details', error)
+        this.errorToast(this.$trans('Error fetching timesheet details'))
         this.isLoading = false
       }
     }

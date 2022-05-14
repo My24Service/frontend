@@ -166,7 +166,7 @@ export default {
         await documentModel.delete(this.documentPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Document has been deleted'))
         this.loadDocuments()
-      } catch() {
+      } catch(error) {
         console.log('error deleting document', error)
         this.errorToast(this.$trans('Error deleting document'))
       }

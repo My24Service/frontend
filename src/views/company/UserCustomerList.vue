@@ -183,7 +183,8 @@ export default {
         await customerUserModel.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Customer user has been deleted'))
         await this.loadData()
-      } catch() {
+      } catch(error) {
+        console.log('Error deleting customer user', error)
         this.errorToast(this.$trans('Error deleting customer user'))
       }
     },

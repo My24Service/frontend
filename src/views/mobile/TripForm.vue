@@ -678,13 +678,13 @@ export default {
 
       try {
         this.trip = await tripModel.detail(this.pk)
-        if (trip.start_date) {
-          start_date = this.$moment(trip.start_date, 'YYYY-MM-DD')
+        if (this.trip.start_date) {
+          start_date = this.$moment(this.trip.start_date, 'YYYY-MM-DD')
           this.trip.start_date = start_date.toDate()
         }
 
-        if (trip.end_date) {
-          end_date = this.$moment(trip.end_date, 'YYYY-MM-DD')
+        if (this.trip.end_date) {
+          end_date = this.$moment(this.trip.end_date, 'YYYY-MM-DD')
           this.trip.end_date = end_date.toDate()
         }
 

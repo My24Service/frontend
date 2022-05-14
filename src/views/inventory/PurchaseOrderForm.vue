@@ -402,24 +402,26 @@ export default {
       materialSearch: null
     }
   },
-  validations: {
-    purchaseOrder: {
-      order_name: {
-        required,
+  validations() {
+    return {
+      purchaseOrder: {
+        order_name: {
+          required,
+        },
+        order_address: {
+          required,
+        },
+        order_postal: {
+          required,
+        },
+        order_city: {
+          required,
+        },
+        expected_entry_date: {
+          required,
+        },
       },
-      order_address: {
-        required,
-      },
-      order_postal: {
-        required,
-      },
-      order_city: {
-        required,
-      },
-      expected_entry_date: {
-        required,
-      },
-    },
+    }
   },
   computed: {
     isCreate() {
@@ -457,7 +459,7 @@ export default {
           this.purchaseOrder = purchaseOrderModel.getFields()
         }
 
-        this.getSuppliers('')
+        await this.getSuppliers('')
       }
     } catch {
       this.errorToast(this.$trans('Error fetching countries'))

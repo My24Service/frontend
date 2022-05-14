@@ -271,7 +271,8 @@ export default {
       try {
         this.fromLocations = await inventoryModel.getLocationsForMaterial(this.selectedMaterial.material_id)
         this.isLoading = false
-      } catch() {
+      } catch(error) {
+        console.log('error fetching locations', error)
         this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
       }
@@ -287,7 +288,8 @@ export default {
         const data = await stockLocationModel.list()
         this.toLocations = data.results
         this.isLoading = false
-      } catch() {
+      } catch(error) {
+        console.log('Error fetching locations', error)
         this.errorToast(this.$trans('Error fetching locations'))
         this.isLoading = false
       }

@@ -169,7 +169,7 @@ export default {
       try {
         await supplierModel.delete(this.supplierPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Supplier has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting supplier', error)
         this.errorToast(this.$trans('Error deleting supplier'))
@@ -179,7 +179,8 @@ export default {
       this.isLoading = true;
 
       try {
-        this.suppliers = await supplierModel.list()
+        const data = await supplierModel.list()
+        this.suppliers = data.results
         this.isLoading = false
       } catch(error) {
         console.log('error fetching suppliers', error)

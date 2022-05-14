@@ -271,7 +271,8 @@ export default {
           this.infoToast(this.$trans('Created'), this.$trans('sales user has been created'))
           this.isLoading = false
           this.cancelForm()
-        } catch() {
+        } catch(error) {
+          console.log('Error creating sales user', error)
           this.errorToast(this.$trans('Error creating sales user'))
           this.isLoading = false
         }
@@ -293,7 +294,8 @@ export default {
         this.infoToast(this.$trans('Updated'), this.$trans('sales user has been updated'))
         this.isLoading = false
         this.cancelForm()
-      } catch() {
+      } catch(error) {
+        console.log('Error updating sales user', error)
         this.errorToast(this.$trans('Error updating sales user'))
         this.isLoading = false
       }
@@ -303,7 +305,7 @@ export default {
 
       try {
         this.salesuser = await salesUserModel.detail(this.pk)
-        this.orgUsername = salesuser.username
+        this.orgUsername = this.salesuser.username
         this.isLoading = false
       } catch(error) {
         console.log('error fetching salesuser', error)

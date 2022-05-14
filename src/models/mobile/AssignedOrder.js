@@ -22,7 +22,7 @@ class AssignedOrder extends BaseModel {
     return this.axios.get(`${this.url}${pk}/detail_change_date/`).then((response) => response.data)
   }
 
-  updateDetailChangeDate(pk, data) {
+  async updateDetailChangeDate(pk, data) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 

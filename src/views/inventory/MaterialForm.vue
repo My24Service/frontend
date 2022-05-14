@@ -357,7 +357,8 @@ export default {
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        } catch() {
+        } catch(error) {
+          console.log('Error creating material', error)
           this.errorToast(this.$trans('Error creating material'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -376,7 +377,8 @@ export default {
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
-      } catch() {
+      } catch(error) {
+        console.log('Error updating material', error)
         this.errorToast(this.$trans('Error updating material'))
         this.isLoading = false
         this.buttonDisabled = false
@@ -387,7 +389,8 @@ export default {
       try {
         this.suppliers = await supplierModel.search(query)
         this.isLoading = false
-      } catch() {
+      } catch(error) {
+        console.log('Error fetching suppliers', error)
         this.errorToast(this.$trans('Error fetching suppliers'))
         this.isLoading = false
       }

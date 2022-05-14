@@ -31,10 +31,7 @@ class Year extends BaseModel {
         });
       }
 
-      resolve(results)
-    })
-    .catch((error) => {
-      reject(error)
+      return results
     })
   }
 }

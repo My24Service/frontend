@@ -86,7 +86,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = tripAvailabilityModel.list()
+        const data = await tripAvailabilityModel.list()
         this.tripAvailability = data.results
         this.isLoading = false
       } catch(error) {

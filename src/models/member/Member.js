@@ -29,7 +29,7 @@ class Member extends BaseModel {
     return this.axios.get(`${this.url}me/`).then((response) => response.data)
   }
 
-  updateMe(obj) {
+  async updateMe(obj) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
@@ -40,7 +40,7 @@ class Member extends BaseModel {
     return this.axios.get(`${this.url}my_settings/`).then((response) => response.data)
   }
 
-  updateSettings(obj) {
+  async updateSettings(obj) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 

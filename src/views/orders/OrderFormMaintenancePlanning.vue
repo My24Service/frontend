@@ -886,9 +886,10 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
+      let newOrder
       if (this.isCreate) {
         try {
-          const order = await orderModel.insert(this.order)
+          newOrder = await orderModel.insert(this.order)
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -903,7 +904,7 @@ export default {
         // insert documents
         try {
           for (const document of this.documents) {
-            document.order = order.id
+            document.order = newOrder.id
             await documentModel.insert(document)
           }
         } catch(error) {
@@ -973,13 +974,11 @@ export default {
     },
     async loadOrder() {
       this.isLoading = true
-      let start_date
-      let end_date
 
       try {
         this.order = await orderModel.detail(this.pk)
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY')
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY')
+        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
