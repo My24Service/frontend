@@ -203,17 +203,18 @@ export default {
 
       this.loadData()
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      assignedFinishedModel.list().then((data) => {
+      try {
+        const data = await assignedFinishedModel.list()
         this.assignedOrders = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching assigned orders', error)
         this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

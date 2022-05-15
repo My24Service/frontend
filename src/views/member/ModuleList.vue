@@ -159,29 +159,28 @@ export default {
       this.modulePk = id
       this.$refs['delete-module-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        moduleModel.delete(token, this.modulePk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Module has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting module'))
-        })
-      })
+    async doDelete() {
+      try {
+        await moduleModel.delete(this.modulePk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Module has been deleted'))
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting module', error)
+        this.errorToast(this.$trans('Error deleting module'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      moduleModel.list()
-        .then((data) => {
-          this.modules = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching modules', error)
-          this.errorToast(this.$trans('Error loading modules'))
-          this.isLoading = false
-        })
+      try {
+        const data = await moduleModel.list()
+        this.modules = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching modules', error)
+        this.errorToast(this.$trans('Error loading modules'))
+        this.isLoading = false
+      }
     }
   }
 }

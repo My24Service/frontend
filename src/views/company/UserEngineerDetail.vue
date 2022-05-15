@@ -203,30 +203,30 @@ export default {
     },
   },
   methods: {
-    render() {
+    async render() {
       if (this.activeViewMethod === 'week') {
-        this.renderWeek()
+        await this.renderWeek()
       }
 
       if (this.activeViewMethod === 'quarter') {
-        this.renderQuarter()
+        await this.renderQuarter()
       }
     },
-    nextYear() {
+    async nextYear() {
       this.year = this.year + 1
-      this.renderQuarter()
+      await this.renderQuarter()
     },
-    backYear() {
+    async backYear() {
       this.year = this.year - 1
-      this.renderQuarter()
+      await this.renderQuarter()
     },
-    nextWeek() {
+    async nextWeek() {
       this.startDate.add(7, 'days');
-      this.renderWeek();
+      await this.renderWeek();
     },
-    backWeek() {
+    async backWeek() {
       this.startDate.subtract(7, 'days');
-      this.renderWeek();
+      await this.renderWeek();
     },
     goBack() {
       this.$router.push({name: 'users-engineers'})
@@ -391,7 +391,7 @@ export default {
     },
     async loadData() {
       try {
-        this.render()
+        await this.render()
       } catch(error) {
         console.log('error fetching engineer details', error)
         this.errorToast(this.$trans('Error fetching engineer details'))
@@ -399,8 +399,8 @@ export default {
       }
     }
   },
-  created() {
-    this.loadData()
+  async created() {
+    await this.loadData()
   }
 }
 </script>

@@ -609,7 +609,7 @@ export default {
     orderLabel({ order_id, orderDate, orderName, orderCity}) {
       return `${order_id}, ${orderDate} ${orderName} - ${orderCity}`
     },
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true;
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -629,69 +629,71 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          tripModel.insert(token, this.trip).then((trip) => {
+        try {
+          await tripModel.insert(this.trip)
             this.infoToast(this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
             this.isLoading = false
             this.buttonDisabled = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating trip'))
-            this.isLoading = false
-            this.buttonDisabled = false
-          })
-        })
+          this.$router.go(-1)
+        } catch(error) {
+          console.log('Error creating trip', error)
+          this.errorToast(this.$trans('Error creating trip'))
+          this.isLoading = false
+          this.buttonDisabled = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        tripModel.update(token, this.pk, this.trip).then(() => {
-          this.infoToast(this.$trans('Trip updated'), this.$trans('Trip has been updated'))
-          this.isLoading = false
-          this.buttonDisabled = false
-          this.$router.go(-1)
-        })
-        .catch(() => {
-          this.errorToast(this.$trans('Error updating trip'))
-          this.isLoading = false
-          this.buttonDisabled = false
-        })
-      })
+      try {
+        await tripModel.update(this.pk, this.trip)
+        this.infoToast(this.$trans('Trip updated'), this.$trans('Trip has been updated'))
+        this.isLoading = false
+        this.buttonDisabled = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating trip', error)
+        this.errorToast(this.$trans('Error updating trip'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
-    getOrders(query) {
+    async getOrders(query) {
       if (query === '') return
       this.isLoading = true
 
-      orderModel.search(query).then((response) => {
-        this.orders = response
+      try {
+        this.orders = await orderModel.search(query)
         this.isLoading = false
-      }).catch(() => {
+      } catch(error) {
+        console.log('Error fetching orders', error)
         this.errorToast(this.$trans('Error fetching orders'))
         this.isLoading = false
-      })
+      }
     },
-    loadData() {
+    async loadData() {
       let start_date
       let end_date
       this.isLoading = true
 
-      tripModel.detail(this.pk).then((trip) => {
-        this.trip = trip
-        if (trip.start_date) {
-          start_date = this.$moment(trip.start_date, 'YYYY-MM-DD')
+      try {
+        this.trip = await tripModel.detail(this.pk)
+        if (this.trip.start_date) {
+          start_date = this.$moment(this.trip.start_date, 'YYYY-MM-DD')
           this.trip.start_date = start_date.toDate()
         }
 
-        if (trip.end_date) {
-          end_date = this.$moment(trip.end_date, 'YYYY-MM-DD')
+        if (this.trip.end_date) {
+          end_date = this.$moment(this.trip.end_date, 'YYYY-MM-DD')
           this.trip.end_date = end_date.toDate()
         }
 
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching order', error)
         this.errorToast(this.$trans('Error fetching trip'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

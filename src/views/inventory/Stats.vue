@@ -265,20 +265,20 @@ export default {
       this.loaded = true
       this.isLoading = false
     },
-    doFetchRender(model, label, fields) {
+    async doFetchRender(model, label, fields) {
       if (this.cachedData[this.currentMode]) {
-        console.log(`using cached data for ${this.currentMode}`)
         this.renderGraph(this.cachedData[this.currentMode], label, fields)
       } else {
-        console.log(`fetching/caching data for ${this.currentMode}`)
-        model.setListArgs(`year=${this.year}`)
-        model.list().then((data) => {
+
+        try {
+          model.setListArgs(`year=${this.year}`)
+          const data = model.list()
           this.cachedData[this.currentMode] = data.result
 
           this.renderGraph(data.result, label, fields)
-        }).catch((error) => {
+        } catch(error) {
           console.log(error)
-        })
+        }
       }
     },
     loadData() {

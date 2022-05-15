@@ -355,19 +355,20 @@ export default {
         this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
       }
     } else {
-      this.loadData()
+      await this.loadData()
     }
   },
   methods: {
     clearCustomer() {
       this.maintenanceProduct.customer = null
     },
-    getCustomers(query) {
-      customerModel.search(query).then((response) => {
-        this.customers = response
-      }).catch(() => {
+    async getCustomers(query) {
+      try {
+        this.customers = await customerModel.search(query)
+      } catch(error) {
+        console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
-      })
+      }
     },
     customerLabel({ name, city}) {
       return `${name} - ${city}`
@@ -382,7 +383,7 @@ export default {
       this.$refs.product.focus()
     },
 
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -401,42 +402,42 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          maintenanceProductModel.insert(token, this.maintenanceProduct).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Maintenance product has been created'))
-            this.isLoading = false
-            this.cancelForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating maintenance product'))
-            this.isLoading = false
-          })
-        })
+        try {
+          await maintenanceProductModel.insert(this.maintenanceProduct)
+          this.infoToast(this.$trans('Created'), this.$trans('Maintenance product has been created'))
+          this.isLoading = false
+          this.cancelForm()
+        } catch(error) {
+          console.log('Error creating maintenance_product', error)
+          this.errorToast(this.$trans('Error creating maintenance product'))
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        maintenanceProductModel.update(token, this.pk, this.maintenanceProduct)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('Maintenance product has been updated'))
-            this.isLoading = false
-            this.cancelForm()
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating maintenance_product'))
-            this.isLoading = false
-          })
-      })
+      try {
+        await maintenanceProductModel.update(this.pk, this.maintenanceProduct)
+        this.infoToast(this.$trans('Updated'), this.$trans('Maintenance product has been updated'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch(error) {
+        console.log('Error updating maintenance_product', error)
+        this.errorToast(this.$trans('Error updating maintenance_product'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      maintenanceProductModel.detail(this.pk).then((maintenance_product) => {
-        this.maintenanceProduct = maintenance_product
+      try {
+        this.maintenanceProduct = await maintenanceProductModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching maintenance product', error)
         this.errorToast(this.$trans('Error loading maintenance product'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

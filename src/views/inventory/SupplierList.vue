@@ -165,25 +165,28 @@ export default {
       this.supplierPk = id
       this.$refs['delete-supplier-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Supplier has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting supplier'))
-        })
+    async doDelete() {
+      try {
+        await supplierModel.delete(this.supplierPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Supplier has been deleted'))
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting supplier', error)
+        this.errorToast(this.$trans('Error deleting supplier'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      supplierModel.list().then((data) => {
+      try {
+        const data = await supplierModel.list()
         this.suppliers = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching suppliers', error)
         this.errorToast(this.$trans('Error loading suppliers'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

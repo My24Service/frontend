@@ -8,37 +8,31 @@ class Month extends BaseModel {
   url = '/order/order/month_list/'
 
   getMonthData(statuscodes) {
-    return new Promise((resolve, reject) => {
-      this.list()
-        .then((monthData) => {
-          let results = [], weekObjs = {}
+    return this.list().then((monthData) => {
+      let results = [], weekObjs = {}
 
-          // add status color to orders
-          for (let i=0; i<monthData.length; i++) {
-            for (const [week, data] of Object.entries(monthData[i].weeks)) {
-              for(let j=0; j<data.length; j++) {
-                data[j].color = my24.status2color(statuscodes, data[j].status)
-              }
-
-              if (!(week in weekObjs)) {
-                weekObjs[week] = 1
-              }
-            }
+      // add status color to orders
+      for (let i = 0; i < monthData.length; i++) {
+        for (const [week, data] of Object.entries(monthData[i].weeks)) {
+          for (let j = 0; j < data.length; j++) {
+            data[j].color = my24.status2color(statuscodes, data[j].status)
           }
 
-          let weeks = []
-          for (const [week, _] of Object.entries(weekObjs)) {
-            weeks.push(week)
+          if (!(week in weekObjs)) {
+            weekObjs[week] = 1
           }
+        }
+      }
 
-          resolve({
-            results: monthData,
-            weeks
-          })
-        })
-        .catch((error) => {
-          reject(error)
-        })
+      let weeks = []
+      for (const [week, _] of Object.entries(weekObjs)) {
+        weeks.push(week)
+      }
+
+      return {
+        results: monthData,
+        weeks
+      }
     })
   }
 }

@@ -55,10 +55,12 @@ export default {
       submitClicked: false,
     }
   },
-  validations: {
-    email: {
-      required,
-    },
+  validations() {
+    return {
+      email: {
+        required,
+      },
+    }
   },
   computed: {
     isSubmitClicked() {
@@ -66,7 +68,7 @@ export default {
     }
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
 
@@ -80,20 +82,19 @@ export default {
       this.buttonDisabled = true
 
       this.isLoading = true
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        accountModel.sendResetPasswordLink(token, this.email).then((result) => {
-          this.infoToast(this.$trans('Reset link sent'), this.$trans('Password reset link has been sent'))
+      try {
+        const result = await accountModel.sendResetPasswordLink(this.email)
+        this.infoToast(this.$trans('Reset link sent'), this.$trans('Password reset link has been sent'))
 
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Something went wrong, please try again'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        this.errorToast(this.$trans('Something went wrong, please try again'))
 
-          this.buttonDisabled = false
-          this.isLoading = false
-        })
-      })
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     },
   }
 }

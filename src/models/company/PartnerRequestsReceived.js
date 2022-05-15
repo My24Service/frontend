@@ -18,32 +18,18 @@ class PartnerRequestsReceived extends BaseModel {
     return '/company/partner-request/received/'
   }
 
-  accept(token, id) {
+  async accept(id) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return new Promise((resolve, reject) => {
-      this.axios.put(`${this.url}${id}/accept/`, {}, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.put(`${this.url}${id}/accept/`, {}, headers).then((response) => response.data)
   }
 
-  reject(token, id) {
+  async reject(id) {
+    const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return new Promise((resolve, reject) => {
-      this.axios.put(`${this.url}${id}/reject/`, {}, headers)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.put(`${this.url}${id}/reject/`, {}, headers).then((response) => response.data)
   }
 
 }

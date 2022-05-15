@@ -24,7 +24,7 @@
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="customeruser.username !== ''"
-                :state="isSubmitClicked ? v$.customeruser.username.isUnique : null">
+                :state="isSubmitClicked ? !v$.customeruser.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -64,7 +64,7 @@
                 :state="isSubmitClicked ? !v$.customeruser.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? v$.customeruser.password2.sameAs : null">
+                :state="isSubmitClicked ? !v$.customeruser.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -317,9 +317,9 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     if (!this.isCreate) {
-      this.loadData()
+      await this.loadData()
     } else {
       this.customeruser = customerUserModel.getFields()
     }
@@ -364,24 +364,27 @@ export default {
         this.submitForm()
       }, 1000)
     },
-    submitForm() {
+    async submitForm() {
       this.isLoading = true
 
       if (this.isCreate) {
         this.customeruser.password = this.customeruser.password1
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          customerUserModel.insert(token, this.customeruser).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Customer user has been created'))
-            this.isLoading = false
-            this.cancelForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating customer user'))
-            this.isLoading = false
-          })
-        })
+
+        try {
+          await customerUserModel.insert(this.customeruser)
+          this.infoToast(this.$trans('Created'), this.$trans('Customer user has been created'))
+          this.isLoading = false
+          this.cancelForm()
+        } catch(error) {
+          this.errorToast(this.$trans('Error creating customer user'))
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+
+      try {
         delete this.customeruser.date_joined
         delete this.customeruser.last_login
 
@@ -391,33 +394,30 @@ export default {
           delete this.customeruser.password
         }
 
-        customerUserModel.update(token, this.pk, this.customeruser)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('Customer user has been updated'))
-            this.isLoading = false
-            this.cancelForm()
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating customer user'))
-            this.isLoading = false
-          })
-      })
+        await customerUserModel.update(this.pk, this.customeruser)
+        this.infoToast(this.$trans('Updated'), this.$trans('Customer user has been updated'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch(error) {
+        this.errorToast(this.$trans('Error updating customer user'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      customerUserModel.detail(this.pk).then((customeruser) => {
-        this.customeruser = customeruser
-        this.orgUsername = customeruser.username
-        if (customeruser.customer_user.customer !== null) {
-          this.customer_info = `${customeruser.customer_details.name}, ${customeruser.customer_details.address}, ${customeruser.customer_details.city}`
+      try {
+        this.customeruser = await customerUserModel.detail(this.pk)
+        this.orgUsername = this.customeruser.username
+        if (this.customeruser.customer_user.customer !== null) {
+          this.customer_info = `${this.customeruser.customer_details.name}, ${this.customeruser.customer_details.address}, ${this.customeruser.customer_details.city}`
         }
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching customeruser', error)
         this.errorToast(this.$trans('Error loading customer user'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

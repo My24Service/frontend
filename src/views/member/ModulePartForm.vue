@@ -115,7 +115,7 @@ export default {
     }
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
 
@@ -130,40 +130,45 @@ export default {
 
       if (this.isCreate) {
         this.isLoading = true
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          modulePartModel.insert(token, this.modulePart).then((modulePart) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Module part has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating module part'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        this.isLoading = true
-
-        modulePartModel.update(token, this.pk, this.modulePart).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Module part has been updated'))
+        try {
+          await modulePartModel.insert(this.modulePart)
+          this.infoToast(this.$trans('Created'), this.$trans('Module part has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating module part'))
-          this.isLoading = false
+        } catch(error) {
+          console.log('Error creating module part', error)
+          this.errorToast(this.$trans('Error creating module part'))
           this.buttonDisabled = false
-        })
-      })
+          this.isLoading = false
+        }
+
+        return
+      }
+
+      try {
+        this.isLoading = true
+
+        await modulePartModel.update(this.pk, this.modulePart)
+        this.infoToast(this.$trans('Updated'), this.$trans('Module part has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating module part', error)
+        this.errorToast(this.$trans('Error updating module part'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
     async loadData() {
+      this.isLoading = true
       try {
         this.modulePart = await modulePartModel.detail(this.pk)
+        this.isLoading = false
       } catch {
         this.errorToast(this.$trans('Error fetching module part'))
+        this.isLoading = false
       }
     },
     cancelForm() {

@@ -19,15 +19,7 @@ class Supplier extends BaseModel {
   url = '/inventory/supplier/'
 
   search(query) {
-    return new Promise((resolve, reject) => {
-      this.axios.get(`${this.url}autocomplete/?q=${query}`)
-        .then((response) => {
-          resolve(response.data)
-        })
-        .catch((error) => {
-          reject(error)
-        })
-    })
+    return this.axios.get(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
   }
 }
 

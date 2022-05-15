@@ -160,29 +160,28 @@ export default {
       this.modulePartPk = id
       this.$refs['delete-module-part-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        modulePartModel.delete(token, this.modulePartPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Module part has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting module part'))
-        })
-      })
+    async doDelete() {
+      try {
+        await modulePartModel.delete(this.modulePartPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Module part has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting module part', error)
+        this.errorToast(this.$trans('Error deleting module part'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      modulePartModel.list()
-        .then((data) => {
-          this.moduleParts = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching module parts', error)
-          this.errorToast(this.$trans('Error loading module parts'))
-          this.isLoading = false
-        })
+      try {
+        const data = await modulePartModel.list()
+        this.moduleParts = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching module parts', error)
+        this.errorToast(this.$trans('Error loading module parts'))
+        this.isLoading = false
+      }
     }
   }
 }

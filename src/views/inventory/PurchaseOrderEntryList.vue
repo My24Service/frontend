@@ -163,29 +163,28 @@ export default {
       this.entryPk = id
       this.$refs['delete-purchaseorder-entry-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        purchaseorderEntryModel.delete(token, this.entryPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Entry has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting entry'))
-        })
-      })
+    async doDelete() {
+      try {
+        await purchaseorderEntryModel.delete(this.entryPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Entry has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting entry', error)
+        this.errorToast(this.$trans('Error deleting entry'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      purchaseorderEntryModel.list()
-        .then((data) => {
-          this.entries = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching entries', error)
-          this.errorToast(this.$trans('Error loading entries'))
-          this.isLoading = false
-        })
+      try {
+        const data = purchaseorderEntryModel.list()
+        this.entries = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching entries', error)
+        this.errorToast(this.$trans('Error loading entries'))
+        this.isLoading = false
+      }
     }
   }
 }

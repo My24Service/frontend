@@ -186,30 +186,31 @@ export default {
       this.pk = id
       this.$refs['delete-maintenance-product-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        maintenanceProductModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance product has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting maintenance product'))
-        })
-      })
+    async doDelete() {
+      try {
+        await maintenanceProductModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance product has been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting maintenance product', error)
+        this.errorToast(this.$trans('Error deleting maintenance product'))
+      }
     },
     async loadData() {
       this.isLoading = true
 
-      this.customer = await customerModel.detail(this.customer_pk)
-      maintenanceProductModel.setListArgs(`customer=${this.customer_pk}`)
+      try {
+        this.customer = await customerModel.detail(this.customer_pk)
+        maintenanceProductModel.setListArgs(`customer=${this.customer_pk}`)
 
-      maintenanceProductModel.list().then((data) => {
+        const data = await maintenanceProductModel.list()
         this.maintenanceProducts = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching maintenance products', error)
         this.errorToast(this.$trans('Error loading maintenance products'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

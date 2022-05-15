@@ -87,8 +87,7 @@ export default {
       sortDesc: true
     }
   },
-  created() {
-    // moment
+  async created() {
     const lang = this.$store.getters.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
@@ -98,11 +97,8 @@ export default {
     this.setDate()
     this.setArgs()
 
-    // get member type
-    this.$store.dispatch('getMemberType').then((memberType) => {
-      this.memberType = memberType
-      this.loadData()
-    })
+    this.memberType = await this.$store.dispatch('getMemberType')
+    this.loadData()
   },
   methods: {
     setArgs() {
@@ -132,7 +128,8 @@ export default {
     async loadData() {
       this.isLoading = true
 
-      timeSheetModel.list().then((data) => {
+      try {
+        const data = await timeSheetModel.list()
         let header_columns = []
 
         if(data.submodel === 'engineer') {
@@ -207,11 +204,11 @@ export default {
 
         this.assignedOrders = results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching assigned orders', error)
         this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

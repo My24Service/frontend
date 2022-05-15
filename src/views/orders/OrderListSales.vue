@@ -94,13 +94,11 @@ export default {
       this.loadData()
     }
   },
-  created() {
+  async created() {
     // get statuscodes and load orders
-    this.$store.dispatch('getStatuscodes').then((statuscodes) => {
-      this.statuscodes = statuscodes
-      this.currentPage = this.orderSalesModel.currentPage
-      this.loadData()
-    })
+    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.currentPage = this.orderSalesModel.currentPage
+    this.loadData()
   },
   methods: {
     handleSearchOk(bvModalEvt) {
@@ -126,17 +124,18 @@ export default {
     status2color(status) {
       return my24.status2color(this.statuscodes, status)
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      orderSalesModel.list().then((data) => {
+      try {
+        const data = await orderSalesModel.list()
         this.orders = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching past orders', error)
         this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

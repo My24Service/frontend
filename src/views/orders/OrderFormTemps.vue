@@ -476,30 +476,32 @@ export default {
       selectedCustomer: null
     }
   },
-  validations: {
-    order: {
-      customer_id: {
-        required,
-      },
-      order_name: {
-        required,
-      },
-      order_address: {
-        required,
-      },
-      order_postal: {
-        required,
-      },
-      order_city: {
-        required,
-      },
-      start_date: {
-        required,
-      },
-      end_date: {
-        required,
-      },
-    },
+  validations() {
+    return {
+      order: {
+        customer_id: {
+          required,
+        },
+        order_name: {
+          required,
+        },
+        order_address: {
+          required,
+        },
+        order_postal: {
+          required,
+        },
+        order_city: {
+          required,
+        },
+        start_date: {
+          required,
+        },
+        end_date: {
+          required,
+        },
+      }
+    }
   },
   computed: {
     startDate() {
@@ -520,20 +522,15 @@ export default {
     this.$moment = moment
     this.$moment.locale(lang)
 
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
+    this.countries = await this.$store.dispatch('getCountries')
+    this.orderTypes = await this.$store.dispatch('getOrderTypes')
 
-      this.$store.dispatch('getOrderTypes').then((order_types) => {
-        this.orderTypes = order_types
-
-        if (this.isCreate) {
-          this.order = orderModel.getFields()
-          this.getCustomers('')
-        } else {
-          this.loadOrder()
-        }
-      })
-    })
+    if (this.isCreate) {
+      this.order = orderModel.getFields()
+      this.getCustomers('')
+    } else {
+      this.loadOrder()
+    }
   },
   methods: {
     // order lines
@@ -590,7 +587,7 @@ export default {
       this.order.order_contact = option.contact
       this.order.customer_remarks = option.remarks
     },
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -610,69 +607,67 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          orderModel.insert(token, this.order).then((order) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
+        try {
+          await orderModel.insert(this.order)
+          this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+          this.buttonDisabled = false
+          this.isLoading = false
 
-            if (confirm((this.$trans('Do you want to add documents to this order?')))) {
-              this.$router.push({name: 'order-document-add', params: {orderPk: order.id}})
-            } else {
-              this.$router.go(-1)
-            }
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating order'))
-            this.isLoading = false
-            this.buttonDisabled = false
-          })
-        })
+          if (confirm((this.$trans('Do you want to add documents to this order?')))) {
+            this.$router.push({name: 'order-document-add', params: {orderPk: order.id}})
+          } else {
+            this.$router.go(-1)
+          }
+        } catch(error) {
+          console.log('Error creating order', error)
+          this.errorToast(this.$trans('Error creating order'))
+          this.isLoading = false
+          this.buttonDisabled = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        orderModel.update(token, this.pk, this.order)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
-            this.isLoading = false
-            this.buttonDisabled = false
-            this.$router.go(-1)
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating order'))
-            this.isLoading = false
-            this.buttonDisabled = false
-          })
-      })
+      try {
+        await orderModel.update(this.pk, this.order)
+        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+        this.isLoading = false
+        this.buttonDisabled = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating order', error)
+        this.errorToast(this.$trans('Error updating order'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
-    getCustomers(query) {
+    async getCustomers(query) {
       this.isLoading = true
 
-      customerModel.search(query).then((response) => {
-        this.customers = response
+      try {
+        this.customers = await customerModel.search(query)
         this.isLoading = false
-      }).catch(() => {
+      } catch(error) {
+        console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
         this.isLoading = false
-      })
+      }
     },
-    loadOrder() {
+    async loadOrder() {
       this.isLoading = true
       let start_date
       let end_date
 
-      orderModel.detail(this.pk).then((order) => {
-        start_date = this.$moment(order.start_date, 'DD/MM/YYYY')
-        end_date = this.$moment(order.end_date, 'DD/MM/YYYY')
-        this.order = order
-        this.order.start_date = start_date.toDate()
-        this.order.end_date = end_date.toDate()
-
+      try {
+        this.order = await orderModel.detail(this.pk)
+        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching order', error)
         this.errorToast(this.$trans('Error fetching order'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

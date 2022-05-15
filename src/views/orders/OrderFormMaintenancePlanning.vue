@@ -685,30 +685,32 @@ export default {
       isAssignOpen: false
     }
   },
-  validations: {
-    order: {
-      customer_id: {
-        required,
+  validations() {
+    return {
+      order: {
+        customer_id: {
+          required,
+        },
+        order_name: {
+          required,
+        },
+        order_address: {
+          required,
+        },
+        order_postal: {
+          required,
+        },
+        order_city: {
+          required,
+        },
+        start_date: {
+          required,
+        },
+        end_date: {
+          required,
+        },
       },
-      order_name: {
-        required,
-      },
-      order_address: {
-        required,
-      },
-      order_postal: {
-        required,
-      },
-      order_city: {
-        required,
-      },
-      start_date: {
-        required,
-      },
-      end_date: {
-        required,
-      },
-    },
+    }
   },
   computed: {
     startDate() {
@@ -757,18 +759,15 @@ export default {
         reader.readAsDataURL(files[i])
       }
     },
-    postDocument(document, callback) {
-      this.$store.dispatch('getCsrfToken').then(token => {
-        document.order = this.orderPk
-        documentModel.insert(token, document).then(() => {
-          return callback()
-        }).catch(error => {
-          return callback(error)
-        })
-      })
-    },
-    deleteDocument(index) {
-      this.documents.splice(index, 1)
+    async deleteDocument(index) {
+      const deleted = this.documents.splice(index, 1)
+      try {
+        for (const document of deleted) {
+          await documentModel.delete(document.id)
+        }
+      } catch(error) {
+        console.log('Error deleting documents', error)
+      }
     },
     // order lines
     deleteOrderLine(index) {
@@ -835,14 +834,12 @@ export default {
       })
       this.emptyInfoLine()
     },
-
     engineerLabel({ full_name }) {
       return full_name
     },
     addEngineer(value) {
       console.log(value)
     },
-
     customerLabel({ name, city}) {
       return `${name} - ${city}`
     },
@@ -860,19 +857,16 @@ export default {
       this.order.order_contact = option.contact
       this.order.customer_remarks = option.remarks
     },
-
     async editAndAccept() {
       this.buttonDisabled = true
       this.acceptOrder = true
       this.submitForm()
     },
     async reject() {
-      const token = await this.$store.dispatch('getCsrfToken')
-      await orderNotAcceptedModel.setRejected(token, this.pk)
+      await orderNotAcceptedModel.setRejected(this.pk)
       this.cancelForm()
     },
-
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -891,99 +885,107 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
+      let newOrder
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          orderModel.insert(token, this.order).then(async (order) => {
-            this.orderPk = order.id
-            this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
+        try {
+          newOrder = await orderModel.insert(this.order)
+          this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+          this.buttonDisabled = false
+          this.isLoading = false
+        } catch(error) {
+          console.log('Error creating order', error)
+          this.errorToast(this.$trans('Error creating order'))
+          this.isLoading = false
+          this.buttonDisabled = false
+          return
+        }
 
-            // insert documents
-            if (this.documents.length) {
-              eachSeries(this.documents, this.postDocument, (err) => {
-                if (err) {
-                  this.errorToast(this.$trans('Error creating document(s)'))
-                  this.isLoading = false
-                } else {
-                  this.infoToast(this.$trans('Created'), this.$trans('Document(s) have been created'))
-                  this.isLoading = false
-                }
-              })
-            }
+        // insert documents
+        try {
+          for (const document of this.documents) {
+            document.order = newOrder.id
+            await documentModel.insert(document)
+          }
 
-            // assign engineers
-            for (const engineer of this.selectedEngineers) {
-              await Assign.assignToUser(engineer.id, [order.order_id], true)
-            }
+          this.infoToast(this.$trans('Created'), this.$trans('Document(s) added'))
+        } catch(error) {
+          console.log('Error creating documents', error)
+        }
 
-            if (this.nextField === 'orders') {
-              this.$router.go(-1)
-            } else if (this.nextField === 'dispatch') {
-              this.$router.push({name: 'mobile-dispatch'})
-            }
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating order'))
-            this.isLoading = false
-            this.buttonDisabled = false
-          })
-        })
+        // assign engineers
+        try {
+          for (const engineer of this.selectedEngineers) {
+            await Assign.assignToUser(engineer.id, [order.order_id], true)
+          }
+        } catch(error) {
+          console.log('error assigning to users', error)
+          this.errorToast(this.$trans('Error assigning to users'))
+          this.isLoading = false
+          this.buttonDisabled = false
+          return
+        }
+
+        if (this.nextField === 'orders') {
+          this.$router.go(-1)
+        } else if (this.nextField === 'dispatch') {
+          this.$router.push({name: 'mobile-dispatch'})
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         delete this.order.customer_order_accepted
-        orderModel.update(token, this.pk, this.order)
-          .then(async () => {
-            this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
-            this.isLoading = false
-            this.buttonDisabled = false
+        await orderModel.update(this.pk, this.order)
+        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      } catch(error) {
+        console.log('Error updating order', error)
+        this.errorToast(this.$trans('Error updating order'))
+        this.isLoading = false
+        this.buttonDisabled = false
+        return
+      }
 
-            if (this.acceptOrder) {
-              const token = await this.$store.dispatch('getCsrfToken')
-              await orderNotAcceptedModel.setAccepted(token, this.pk)
-              this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
-            }
+      if (this.acceptOrder) {
+        try {
+          await orderNotAcceptedModel.setAccepted(this.pk)
+          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
+        } catch(error) {
+          console.log('Error accepting order', error)
+          this.errorToast(this.$trans('Error accepting order'))
+        }
+      }
 
-            this.$router.go(-1)
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating order'))
-            this.isLoading = false
-            this.buttonDisabled = false
-          })
-      })
+      this.$router.go(-1)
     },
-    getCustomers(query) {
+    async getCustomers(query) {
       if (query === '') return
       this.isLoading = true
 
-      customerModel.search(query).then((response) => {
-        this.customers = response
+      try {
+        this.customers = await customerModel.search(query)
         this.isLoading = false
-      }).catch(() => {
+      } catch(error) {
+        console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
         this.isLoading = false
-      })
+      }
     },
-    loadOrder() {
+    async loadOrder() {
       this.isLoading = true
-      let start_date
-      let end_date
 
-      orderModel.detail(this.pk).then((order) => {
-        start_date = this.$moment(order.start_date, 'DD/MM/YYYY')
-        end_date = this.$moment(order.end_date, 'DD/MM/YYYY')
-        this.order = order
-        this.order.start_date = start_date.toDate()
-        this.order.end_date = end_date.toDate()
-
+      try {
+        this.order = await orderModel.detail(this.pk)
+        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.isLoading = false
-      })
-      .catch((error) => {
+      } catch(error) {
         console.log('error fetching order', error)
         this.errorToast(this.$trans('Error fetching order'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

@@ -202,7 +202,6 @@ class Dispatch {
       this.component.showOverlay = false
       console.log('error fetching dispatch data', error)
       this.component.errorToast(this.component.$trans('Error loading dispatch data'))
-      return
     }
   }
 
@@ -600,7 +599,11 @@ class Dispatch {
 
   drawOrderLine(startX, endX, ySlot, order, user_id) {
     const yPos = this.getYPosForYSlot(ySlot) + this.lastY
-    const color = my24.status2color(this.statuscodes, this.getStatus(order))
+
+    const statuscode = my24.getStatuscodeForOrder(this.statuscodes, order)
+    const color = my24.getStatuscodeColor(statuscode)
+    const text_color = my24.getStatuscodeColor(statuscode, true)
+
     if (this.debug) {
       console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
@@ -613,8 +616,6 @@ class Dispatch {
     this.ctx.stroke(path)
 
     const textY = yPos + this.orderLinePaddingTop + this.fontPaddingCompact
-    const text_color = my24.status2color(this.statuscodes, this.getStatus(order), true)
-
     this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
 
     this.hotspots.push({
@@ -627,13 +628,13 @@ class Dispatch {
     }
   }
 
-  getStatus(order) {
-    return order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-  }
-
   drawOrderLineWide(startX, endX, ySlot, order, user_id) {
     const yPos = this.getYPosForYSlot(ySlot) + this.lastY + this.getRowHeightInt() + 4
-    const color = my24.status2color(this.statuscodes, this.getStatus(order))
+
+    const statuscode = my24.getStatuscodeForOrder(this.statuscodes, order)
+    const color = my24.getStatuscodeColor(statuscode)
+    const text_color = my24.getStatuscodeColor(statuscode, true)
+
     if (this.debug) {
       console.log(`drawOrderLine: order_id=${order.order_id}, yPos=${yPos}, lastY=${this.lastY}, ySlot=${ySlot}, color: ${color}, startX=${startX}, endX=${endX}`)
     }
@@ -652,26 +653,14 @@ class Dispatch {
      *
      **/
 
-    let rgbString
-    try {
-      // draw the line with alpha to .2
-      const rgb = this.hexToRgbA(color)
-      rgbString = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b})`
-    } catch (e) {
-      // bad hex, fallback to normal color string
-      rgbString = color
-    }
-
     const path = new Path2D()
     this.ctx.lineWidth = this.getOrderLineWidth()
-    this.ctx.strokeStyle = rgbString
+    this.ctx.strokeStyle = color
     path.moveTo(startX, yPos + 6)
     path.lineTo(endX, yPos + 6)
     this.ctx.stroke(path)
 
     let textY = yPos + this.fontPaddingWide - this.getRowHeightInt() + 4
-    const text_color = my24.status2color(this.statuscodes, this.getStatus(order), true)
-
     this.setText(order.order_id, startX + 4, textY, endX - startX, text_color)
 
     textY += this.getFontsize() + this.fontPaddingWide
@@ -720,6 +709,10 @@ class Dispatch {
     this.ctx.stroke()
 
     this.lastY += this.lineWidth
+  }
+
+  getStatus(order) {
+    return order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
   }
 
   resetDayOrders() {

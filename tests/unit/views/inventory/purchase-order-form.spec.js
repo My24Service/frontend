@@ -8,6 +8,8 @@ const moment = require('moment')
 import localVue from '../../index'
 import PurchaseOrderForm from '@/views/inventory/PurchaseOrderForm.vue'
 import purchaseOrderResponse from '../../fixtures/purchaseorder'
+import supplierResponse from '../../fixtures/supplier-autocomplete'
+import materialResponse from '../../fixtures/material-autocomplete'
 
 jest.mock('axios')
 
@@ -15,6 +17,10 @@ axios.get.mockImplementation((url) => {
   switch (url) {
     case '/inventory/purchaseorder/1/':
       return Promise.resolve(purchaseOrderResponse)
+    case '/inventory/supplier/autocomplete/?q=':
+      return Promise.resolve(supplierResponse)
+    case '/inventory/material/autocomplete/?supplier=3&q=':
+      return Promise.resolve(materialResponse)
     default:
       return Promise.reject(new Error(`${url} not found`))
   }

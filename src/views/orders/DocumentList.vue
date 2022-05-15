@@ -162,29 +162,28 @@ export default {
       this.documentPk = id
       this.$refs['delete-order-document-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        documentModel.delete(token, this.documentPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Document has been deleted'))
-          this.loadDocuments()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting document'))
-        })
-      })
+    async doDelete() {
+      try {
+        await documentModel.delete(this.documentPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Document has been deleted'))
+        this.loadDocuments()
+      } catch(error) {
+        console.log('Error deleting document', error)
+        this.errorToast(this.$trans('Error deleting document'))
+      }
     },
     async loadDocuments() {
       this.isLoading = true
 
-      documentModel.list()
-        .then((data) => {
-          this.documents = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching documents', error)
-          this.errorToast(this.$trans('Error loading documents'))
-          this.isLoading = false
-        })
+      try {
+        const data = await documentModel.list()
+        this.documents = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching documents', error)
+        this.errorToast(this.$trans('Error loading documents'))
+        this.isLoading = false
+      }
     }
   }
 }

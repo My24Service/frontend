@@ -162,29 +162,28 @@ export default {
       this.picturePk = id
       this.$refs['delete-picture-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        pictureModel.delete(token, this.picturePk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Picture has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting picture'))
-        })
-      })
+    async doDelete() {
+      try {
+        await pictureModel.delete(this.picturePk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Picture has been deleted'))
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting picture', error)
+        this.errorToast(this.$trans('Error deleting picture'))
+      }
     },
     async loadData() {
       this.isLoading = true;
 
-      pictureModel.list()
-        .then((data) => {
-          this.pictures = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching pictures', error)
-          this.errorToast(this.$trans('Error loading pictures'))
-          this.isLoading = false
-        })
+      try {
+        const data = await pictureModel.list()
+        this.pictures = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching pictures', error)
+        this.errorToast(this.$trans('Error loading pictures'))
+        this.isLoading = false
+      }
     }
   }
 }

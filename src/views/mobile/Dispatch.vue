@@ -391,10 +391,9 @@ export default {
         this.selectedOrder = await orderModel.detail(order_pk)
 
         this.assignedOrder = await assignedOrderModel.getDetailChangeDate(assignedorder_pk)
-        const alt_start_date = this.$moment(this.assignedOrder.alt_start_date, 'DD/MM/YYYY')
-        const alt_end_date = this.$moment(this.assignedOrder.alt_end_date, 'DD/MM/YYYY')
-        this.assignedOrder.alt_start_date = alt_start_date.toDate()
-        this.assignedOrder.alt_end_date = alt_end_date.toDate()
+
+        this.assignedOrder.alt_start_date = this.$moment(this.assignedOrder.alt_start_date, 'DD/MM/YYYY').toDate()
+        this.assignedOrder.alt_end_date = this.$moment(this.assignedOrder.alt_end_date, 'DD/MM/YYYY').toDate()
 
         this.minDate = this.assignedOrder.order_start_date
         this.maxDate = this.assignedOrder.order_end_date
@@ -506,12 +505,7 @@ export default {
     memberNewDataSocket.getSocket()
 
     const displayMode = JSON.parse(localStorage.getItem('displayMode'))
-    let mode
-    if (displayMode) {
-      mode = displayMode
-    } else {
-      mode = 'wide'
-    }
+    const mode = displayMode ? displayMode : 'wide'
 
     const lang = this.$store.getters.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
@@ -522,23 +516,18 @@ export default {
     this.assignMode = this.assignModeProp
 
     if (this.assignMode) {
-      this.$store.dispatch('getAssignOrders').then((orders) => {
-        this.selectedOrders = orders
-      })
+      this.selectedOrders = await this.$store.dispatch('getAssignOrders')
     }
 
-    this.$store.dispatch('getStatuscodes').then((statuscodes) => {
-      const canvas = this.$refs['dispatch-canvas']
-      const tipCanvas = this.$refs['dispatch-tip-canvas']
+    const statuscodes = await this.$store.dispatch('getStatuscodes')
+    const canvas = this.$refs['dispatch-canvas']
+    const tipCanvas = this.$refs['dispatch-tip-canvas']
 
-      this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday)
-      this.mode = mode
-      // this.dispatch.setMode(mode)
-      // this.startDate = this.dispatch.startDate.toDate()
-      this.setHandlers()
-    }).catch((error) => {
-      console.log('error in get statuscodes', error)
-    });
+    this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday)
+    this.mode = mode
+    // this.dispatch.setMode(mode)
+    // this.startDate = this.dispatch.startDate.toDate()
+    this.setHandlers()
   },
   beforeDestroy() {
     memberNewDataSocket.removeOnmessageHandler('dispatch')

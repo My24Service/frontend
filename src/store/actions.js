@@ -55,19 +55,6 @@ export const actions = {
       }
     })
   },
-  getCsrfToken({ commit }) {
-    return new Promise((resolve, reject) => {
-      axios.get('/get-csrf-token/')
-        .then((response) => {
-          commit(SET_TOKEN, response.data.token)
-          resolve(response.data.token)
-        })
-        .catch((error) => {
-          console.log('Error getting token')
-          reject()
-        })
-    })
-  },
   hasAccessToRoute({ state }, route) {
     let parts = route.split('/')
     parts.shift()

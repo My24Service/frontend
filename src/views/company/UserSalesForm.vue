@@ -24,7 +24,7 @@
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="salesuser.username !== ''"
-                :state="isSubmitClicked ? v$.salesuser.username.isUnique : null">
+                :state="isSubmitClicked ? v$.salesuser.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -64,7 +64,7 @@
                 :state="isSubmitClicked ? !v$.salesuser.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? v$.salesuser.password2.sameAs : null">
+                :state="isSubmitClicked ? v$.salesuser.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -261,24 +261,26 @@ export default {
         this.submitForm()
       }, 1000)
     },
-    submitForm() {
+    async submitForm() {
       this.isLoading = true
 
       if (this.isCreate) {
         this.salesuser.password = this.salesuser.password1
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          salesUserModel.insert(token, this.salesuser).then((action) => {
-            this.infoToast(this.$trans('Created'), this.$trans('sales user has been created'))
-            this.isLoading = false
-            this.cancelForm()
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating sales user'))
-            this.isLoading = false
-          })
-        })
+        try {
+          await salesUserModel.insert(this.salesuser)
+          this.infoToast(this.$trans('Created'), this.$trans('sales user has been created'))
+          this.isLoading = false
+          this.cancelForm()
+        } catch(error) {
+          console.log('Error creating sales user', error)
+          this.errorToast(this.$trans('Error creating sales user'))
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         delete this.salesuser.date_joined
         delete this.salesuser.last_login
 
@@ -288,30 +290,28 @@ export default {
           delete this.salesuser.password
         }
 
-        salesUserModel.update(token, this.pk, this.salesuser)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('sales user has been updated'))
-            this.isLoading = false
-            this.cancelForm()
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating sales user'))
-            this.isLoading = false
-          })
-      })
+        await salesUserModel.update(this.pk, this.salesuser)
+        this.infoToast(this.$trans('Updated'), this.$trans('sales user has been updated'))
+        this.isLoading = false
+        this.cancelForm()
+      } catch(error) {
+        console.log('Error updating sales user', error)
+        this.errorToast(this.$trans('Error updating sales user'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      salesUserModel.detail(this.pk).then((salesuser) => {
-        this.salesuser = salesuser
-        this.orgUsername = salesuser.username
+      try {
+        this.salesuser = await salesUserModel.detail(this.pk)
+        this.orgUsername = this.salesuser.username
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching salesuser', error)
         this.errorToast(this.$trans('Error loading sales user'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

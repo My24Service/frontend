@@ -248,19 +248,21 @@ export default {
       selectedMaterial: {},
     }
   },
-  validations: {
-    supplierReservation: {
-      supplier: {
-        required,
+  validations() {
+    return {
+      supplierReservation: {
+        supplier: {
+          required,
+        },
+        material: {
+          required,
+        },
+        amount: {
+          required,
+          greaterThanZero
+        },
       },
-      material: {
-        required,
-      },
-      amount: {
-        required,
-        greaterThanZero
-      },
-    },
+    }
   },
   computed: {
     isCreate() {
@@ -286,37 +288,40 @@ export default {
 
       this.getMaterials('')
     },
-    getSuppliers(query) {
+    async getSuppliers(query) {
       this.isLoading = true
-      supplierModel.setSearchQuery(query)
-      supplierModel.list().then((data) => {
-          this.suppliers = data.results
-          this.isLoading = false
-        }).catch((error) => {
-          console.log('error fetching suppliers', error)
-          this.errorToast(this.$trans('Error fetching suppliers'))
-          this.isLoading = false
-        })
+
+      try {
+        supplierModel.setSearchQuery(query)
+        const data = await supplierModel.list()
+        this.suppliers = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching suppliers', error)
+        this.errorToast(this.$trans('Error fetching suppliers'))
+        this.isLoading = false
+      }
     },
     supplierLabel (supplier) {
       return `${supplier.name}, - ${supplier.city}`
     },
-
-    getMaterials(query) {
+    async getMaterials(query) {
       if (!this.selectedSupplier.id) {
         return
       }
 
-      this.isLoading = true
-      materialModel.setListArgs(`supplier_relation=${this.selectedSupplier.id}`)
-      materialModel.setSearchQuery(query)
-      materialModel.list().then((data) => {
-          this.materials = data.results
-          this.isLoading = false
-        }).catch(() => {
-          this.errorToast(this.$trans('Error fetching materials'))
-          this.isLoading = false
-        })
+      try {
+        this.isLoading = true
+        materialModel.setListArgs(`supplier_relation=${this.selectedSupplier.id}`)
+        materialModel.setSearchQuery(query)
+        const data = await materialModel.list()
+        this.materials = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching materials', error)
+        this.errorToast(this.$trans('Error fetching materials'))
+        this.isLoading = false
+      }
     },
     selectMaterial(option) {
       this.supplierReservation.material = option.id
@@ -326,7 +331,7 @@ export default {
       return `${material.name}`
     },
 
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -346,47 +351,50 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          supplierReservationModel.insert(token, this.supplierReservation).then((supplierReservation) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Reservation has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating reservation'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        supplierReservationModel.update(token, this.pk, this.supplierReservation).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Reservation has been updated'))
+        try {
+          await supplierReservationModel.insert(this.supplierReservation)
+          this.infoToast(this.$trans('Created'), this.$trans('Reservation has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating reservation'))
+        } catch(error) {
+          console.log('Error creating reservation', error)
+          this.errorToast(this.$trans('Error creating reservation'))
           this.buttonDisabled = false
           this.isLoading = false
-        })
-      })
-    },
-    loadData() {
-      this.isLoading = true
-      supplierReservationModel.detail(this.pk).then((supplierReservation) => {
-          this.supplierReservation = supplierReservation
-          this.selectedSupplier = supplierReservation.supplier_view
-          this.selectedMaterial = supplierReservation.material_view
-          this.isLoading = false
+        }
 
-          this.getMaterials('')
-      }).catch((error) => {
+        return
+      }
+
+      try {
+        await supplierReservationModel.update(this.pk, this.supplierReservation)
+        this.infoToast(this.$trans('Updated'), this.$trans('Reservation has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating reservation', error)
+        this.errorToast(this.$trans('Error updating reservation'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
+    },
+    async loadData() {
+      this.isLoading = true
+
+      try {
+        this.supplierReservation = await supplierReservationModel.detail(this.pk)
+        this.selectedSupplier = this.supplierReservation.supplier_view
+        this.selectedMaterial = this.supplierReservation.material_view
+        this.isLoading = false
+
+        this.getMaterials('')
+      } catch(error) {
           console.log('error fetching reservation', error)
           this.errorToast(this.$trans('Error fetching reservation'))
           this.isLoading = false
-        })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

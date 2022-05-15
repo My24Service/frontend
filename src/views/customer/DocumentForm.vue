@@ -159,7 +159,7 @@ export default {
       reader.readAsDataURL(file)
       this.fileChanged = true
     },
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -170,49 +170,48 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then(token => {
-          documentModel.insert(token, this.document).then(() => {
-            this.infoToast(this.$trans('Created'), this.$trans('Document has been created'))
-            this.isLoading = false
-            this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
-          }).catch(error => {
-            this.errorToast(this.$trans('Error creating document'))
-            this.isLoading = false
-          })
-        })
+        try {
+          await documentModel.insert(this.document)
+          this.infoToast(this.$trans('Created'), this.$trans('Document has been created'))
+          this.isLoading = false
+          this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
+        } catch(error) {
+          this.errorToast(this.$trans('Error creating document'))
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         // file didn't change? remove from update data
         if (!this.fileChanged) {
           delete this.document.file
         }
 
-        documentModel.update(token, this.pk, this.document)
-          .then(() => {
-            this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
-            this.isLoading = false
-            this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
-          })
-          .catch(() => {
-            this.errorToast(this.$trans('Error updating document'))
-            this.isLoading = false
-          })
-      })
+        await documentModel.update(this.pk, this.document)
+        this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
+        this.isLoading = false
+        this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
+      } catch(error) {
+        console.log('Error updating document', error)
+        this.errorToast(this.$trans('Error updating document'))
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      documentModel.detail(this.pk).then((document) => {
-        this.document = document
+      try {
+        this.document = await documentModel.detail(this.pk)
         this.document.file = document.file
         this.current_file = document.filename
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching document', error)
         this.errorToast(this.$trans('Error loading document'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

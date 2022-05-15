@@ -39,13 +39,10 @@ export default {
     OrderViewMaintenance,
     OrderViewTemps,
   },
-  created() {
+  async created() {
     // get member type
-    this.$store.dispatch('getMemberType')
-      .then((memberType) => {
-        this.memberType = memberType
-        this.isLoaded = true
-      })
+    this.memberType = await this.$store.dispatch('getMemberType')
+    this.isLoaded = true
   },
 }
 </script>

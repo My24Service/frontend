@@ -16,7 +16,6 @@
           :state="usernameState"
         >
           <b-form-input
-            autofocus
             id="username-input"
             v-model="username"
             :state="usernameState"
@@ -114,22 +113,17 @@ export default {
         return;
       }
 
-      const loader = this.$loading.show()
-
-      const data = {
-        username: this.username,
-        password: this.password
+      if (this.$refs['login-modal']) {
+        this.$refs['login-modal'].hide()
       }
 
+      const loader = this.$loading.show()
+
       try {
-        const loginResult = await accountModel.login(data)
+        const loginResult = await accountModel.login(this.username, this.password)
         this.$auth.authenticate({ accessToken: loginResult.key })
 
         await this.$store.dispatch('getInitialData')
-
-        if (this.$refs['login-modal']) {
-          this.$refs['login-modal'].hide()
-        }
 
         loader.hide()
 

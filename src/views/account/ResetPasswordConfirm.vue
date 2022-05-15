@@ -85,13 +85,16 @@ export default {
       submitClicked: false,
     }
   },
-  validations: {
-    password1: {
-      required
-    },
-    password2: {
-      required,
-      sameAs: sameAs('password1')
+  validations() {
+    return {
+      password1: {
+        required
+      },
+      password2: {
+        required,
+        sameAs: sameAs(this.password1)
+      }
+
     }
   },
   computed: {
@@ -100,7 +103,7 @@ export default {
     }
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
 
@@ -112,22 +115,20 @@ export default {
       }
 
       this.buttonDisabled = true
-
       this.isLoading = true
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        accountModel.resetPassword(token, this.password1).then((result) => {
-          this.infoToast(this.$trans('Password reset'), this.$trans('Reset password successful'))
+      try {
+        const result = await accountModel.resetPassword(this.password1)
+        this.infoToast(this.$trans('Password reset'), this.$trans('Reset password successful'))
 
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.push({path: '/'})
-        }).catch(() => {
-          this.errorToast(this.$trans('Something went wrong, please try again'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.push({path: '/'})
+      } catch(error) {
+        this.errorToast(this.$trans('Something went wrong, please try again'))
 
-          this.buttonDisabled = false
-          this.isLoading = false
-        })
-      })
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     },
   }
 }

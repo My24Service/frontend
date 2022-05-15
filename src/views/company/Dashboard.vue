@@ -61,7 +61,7 @@
       <b-row v-if="barChartdataOrderTypes.labels && barChartdataOrderTypes.labels.length > orderTypeDisplayThreshold">
         <b-col cols="12">
           <bar-chart
-            id="bar-chart-order-types"
+            id="bar-chart-order-types-1"
             v-if="!isLoading"
             :chart-data="barChartdataOrderTypes"
             :options="options"
@@ -72,7 +72,7 @@
       <b-row v-if="barChartdataOrderTypes.labels && barChartdataOrderTypes.labels.length > orderTypeDisplayThreshold">
         <b-col cols="12">
           <pie-chart
-            id="pie-chart-order-types"
+            id="pie-chart-order-types-2"
             v-if="!isLoading"
             :chart-data="pieChartdataOrderTypes"
             :options="pieOptions"
@@ -83,7 +83,7 @@
       <b-row v-if="barChartdataOrderTypes.labels && barChartdataOrderTypes.labels.length <= orderTypeDisplayThreshold">
         <b-col cols="6">
           <bar-chart
-            id="bar-chart-order-types"
+            id="bar-chart-order-types-3"
             v-if="!isLoading"
             :chart-data="barChartdataOrderTypes"
             :options="options"
@@ -91,7 +91,7 @@
         </b-col>
         <b-col cols="6">
           <pie-chart
-            id="pie-chart-order-types"
+            id="pie-chart-order-types-4"
             v-if="!isLoading"
             :chart-data="pieChartdataOrderTypes"
             :options="pieOptions"
@@ -214,11 +214,12 @@ export default {
       this.year = this.year - 1
       this.loadData()
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
       dashboardModel.setListArgs(`year=${this.year}`)
-      dashboardModel.list().then((data) => {
+      try {
+        const data = await dashboardModel.list()
 
         // bar graph top customers
         let graphDataCustomers = [], labelsCustomers = [];
@@ -415,10 +416,10 @@ export default {
         }
 
         this.isLoading = false
-      }).catch((error) => {
-        console.log(error)
+      } catch(error) {
+        console.log('error getting dashboard data', error)
         this.isLoading = false
-      })
+      }
     }
   },
 }

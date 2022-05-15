@@ -126,7 +126,7 @@ export default {
       reader.readAsDataURL(file)
       this.fileChanged = true
     },
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -138,49 +138,51 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          pictureModel.insert(token, this.picture).then((picture) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Picture has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating picture'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        if (!this.fileChanged) {
-          delete this.picture.image
-        }
-
-        pictureModel.update(token, this.pk, this.picture).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Picture has been updated'))
+        try {
+          await pictureModel.insert(this.picture)
+          this.infoToast(this.$trans('Created'), this.$trans('Picture has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating picture'))
-          this.isLoading = false
+        } catch(error) {
+          console.log('Error creating picture', error)
+          this.errorToast(this.$trans('Error creating picture'))
           this.buttonDisabled = false
-        })
-      })
+          this.isLoading = false
+        }
+
+        return
+      }
+
+      if (!this.fileChanged) {
+        delete this.picture.image
+      }
+
+      try {
+        await pictureModel.update(this.pk, this.picture)
+        this.infoToast(this.$trans('Updated'), this.$trans('Picture has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating picture', error)
+        this.errorToast(this.$trans('Error updating picture'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      pictureModel.detail(this.pk).then((picture) => {
-        this.picture = picture
+      try {
+        this.picture = await pictureModel.detail(this.pk)
         this.current_image = this.picture.picture ? this.picture.picture : '/static/core/img/noimg.png'
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching picture', error)
         this.errorToast(this.$trans('Error fetching picture'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

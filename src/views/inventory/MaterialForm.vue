@@ -331,7 +331,7 @@ export default {
       this.material.supplier_name = option.name
     },
 
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -351,59 +351,62 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          materialModel.insert(token, this.material).then((material) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating material'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
+        try {
+          await materialModel.insert(this.material)
+          this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
+          this.buttonDisabled = false
+          this.isLoading = false
+          this.$router.go(-1)
+        } catch(error) {
+          console.log('Error creating material', error)
+          this.errorToast(this.$trans('Error creating material'))
+          this.buttonDisabled = false
+          this.isLoading = false
+        }
+
+        return
       }
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
+      try {
         if (!this.fileChanged) {
           delete this.material.image
         }
 
-        materialModel.update(token, this.pk, this.material).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Material has been updated'))
-          this.buttonDisabled = false
-          this.isLoading = false
-          this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating material'))
-          this.isLoading = false
-          this.buttonDisabled = false
-        })
-      })
-    },
-    getSuppliers(query) {
-      this.isLoading = true
-      supplierModel.search(query).then((response) => {
-        this.suppliers = response
+        await materialModel.update(this.pk, this.material)
+        this.infoToast(this.$trans('Updated'), this.$trans('Material has been updated'))
+        this.buttonDisabled = false
         this.isLoading = false
-      }).catch(() => {
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating material', error)
+        this.errorToast(this.$trans('Error updating material'))
+        this.isLoading = false
+        this.buttonDisabled = false
+      }
+    },
+    async getSuppliers(query) {
+      this.isLoading = true
+      try {
+        this.suppliers = await supplierModel.search(query)
+        this.isLoading = false
+      } catch(error) {
+        console.log('Error fetching suppliers', error)
         this.errorToast(this.$trans('Error fetching suppliers'))
         this.isLoading = false
-      })
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      materialModel.detail(this.pk).then((material) => {
-        this.material = material
+      try {
+        this.material = await materialModel.detail(this.pk)
         this.current_image = this.material.image ? this.material.image : '/static/core/img/noimg.png'
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching material', error)
         this.errorToast(this.$trans('Error fetching material'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

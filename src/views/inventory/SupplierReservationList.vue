@@ -177,29 +177,28 @@ export default {
       this.supplierReservationPk = id
       this.$refs['delete-supplier-reservation-modal'].show()
     },
-    doDelete() {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        supplierReservationModel.delete(token, this.supplierReservationPk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('Entry Reservation been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting reservation'))
-        })
-      })
+    async doDelete() {
+      try {
+        await supplierReservationModel.delete(this.supplierReservationPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Entry Reservation been deleted'))
+        this.loadData()
+      } catch(error) {
+        console.log('Error deleting reservation', error)
+        this.errorToast(this.$trans('Error deleting reservation'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      supplierReservationModel.list()
-        .then((data) => {
-          this.reservations = data.results
-          this.isLoading = false
-        })
-        .catch((error) => {
-          console.log('error fetching reservations', error)
-          this.errorToast(this.$trans('Error loading reservations'))
-          this.isLoading = false
-        })
+      try {
+        const data = await supplierReservationModel.list()
+        this.reservations = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching reservations', error)
+        this.errorToast(this.$trans('Error loading reservations'))
+        this.isLoading = false
+      }
     }
   }
 }

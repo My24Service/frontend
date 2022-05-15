@@ -99,7 +99,7 @@ export default {
     }
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -119,44 +119,46 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        return this.$store.dispatch('getCsrfToken').then((token) => {
-          stockLocationModel.insert(token, this.stockLocation).then((stockLocation) => {
-            this.infoToast(this.$trans('Created'), this.$trans('Stock location has been created'))
-            this.buttonDisabled = false
-            this.isLoading = false
-            this.$router.go(-1)
-          }).catch(() => {
-            this.errorToast(this.$trans('Error creating stock location'))
-            this.buttonDisabled = false
-            this.isLoading = false
-          })
-        })
-      }
-
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        stockLocationModel.update(token, this.pk, this.stockLocation).then(() => {
-          this.infoToast(this.$trans('Updated'), this.$trans('Stock location has been updated'))
+        try {
+          await stockLocationModel.insert(this.stockLocation)
+          this.infoToast(this.$trans('Created'), this.$trans('Stock location has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
-        }).catch(() => {
-          this.errorToast(this.$trans('Error updating stock location'))
+        } catch(error) {
+          console.log('Error creating stock location', error)
+          this.errorToast(this.$trans('Error creating stock location'))
           this.buttonDisabled = false
           this.isLoading = false
-        })
-      })
+        }
+
+        return
+      }
+
+      try {
+        await stockLocationModel.update(this.pk, this.stockLocation)
+        this.infoToast(this.$trans('Updated'), this.$trans('Stock location has been updated'))
+        this.buttonDisabled = false
+        this.isLoading = false
+        this.$router.go(-1)
+      } catch(error) {
+        console.log('Error updating stock location', error)
+        this.errorToast(this.$trans('Error updating stock location'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true
 
-      stockLocationModel.detail(this.pk).then((stockLocation) => {
-        this.stockLocation = stockLocation
+      try {
+        this.stockLocation = await stockLocationModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching stock location', error)
         this.errorToast(this.$trans('Error fetching stock location'))
         this.isLoading = false
-      })
+      }
     },
     cancelForm() {
       this.$router.go(-1)

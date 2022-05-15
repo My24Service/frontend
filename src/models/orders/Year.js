@@ -8,36 +8,30 @@ class Year extends BaseModel {
   url = '/order/order/year_list/'
 
   getYearData(statuscodes) {
-    return new Promise((resolve, reject) => {
-      this.list()
-        .then((yearData) => {
-          let results = []
+    return this.list().then((yearData) => {
+      let results = []
 
-          // add status color to orders
-          for (let i=0; i<yearData.length; i++) {
-            let months = []
+      // add status color to orders
+      for (let i=0; i<yearData.length; i++) {
+        let months = []
 
-            for (let month = 1; month <= 12; month++) {
-              if (month in yearData[i].months) {
-                for (let j = 0; j < yearData[i].months[month].length; j++) {
-                  yearData[i].months[month][j].color = my24.status2color(statuscodes, yearData[i].months[month][j].status)
-                }
-              }
-
-              months.push(yearData[i].months[month])
+        for (let month = 1; month <= 12; month++) {
+          if (month in yearData[i].months) {
+            for (let j = 0; j < yearData[i].months[month].length; j++) {
+              yearData[i].months[month][j].color = my24.status2color(statuscodes, yearData[i].months[month][j].status)
             }
-
-            results.push({
-              name: yearData[i].name,
-              months: months
-            });
           }
 
-          resolve(results)
-        })
-        .catch((error) => {
-          reject(error)
-        })
+          months.push(yearData[i].months[month])
+        }
+
+        results.push({
+          name: yearData[i].name,
+          months: months
+        });
+      }
+
+      return results
     })
   }
 }

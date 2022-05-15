@@ -193,49 +193,50 @@ export default {
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
-    setActive(pk, email) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        studentUserModel.setActive(token, pk, email).then(() => {
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error setting student user active'))
-        })
-      })
+    async setActive(pk, email) {
+      try {
+        await studentUserModel.setActive(pk, email)
+        await this.loadData()
+      } catch(error) {
+        console.log('Error setting student user active', error)
+        this.errorToast(this.$trans('Error setting student user active'))
+      }
     },
-    setInActive(pk, email) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        studentUserModel.setInActive(token, pk, email).then(() => {
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error setting student user inactive'))
-        })
-      })
+    async setInActive(pk, email) {
+      try {
+        await studentUserModel.setInActive(pk, email)
+        await this.loadData()
+      } catch(error) {
+        console.log('Error setting student user inactive', error)
+        this.errorToast(this.$trans('Error setting student user inactive'))
+      }
     },
     showDeleteModal(id) {
       this.pk = id
       this.$refs['delete-studentuser-modal'].show()
     },
-    doDelete(id) {
-      return this.$store.dispatch('getCsrfToken').then((token) => {
-        studentUserModel.delete(token, this.pk).then(() => {
-          this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
-          this.loadData()
-        }).catch(() => {
-          this.errorToast(this.$trans('Error deleting studentuser'))
-        })
-      })
+    async doDelete() {
+      try {
+        await studentUserModel.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting studentuser', error)
+        this.errorToast(this.$trans('Error deleting studentuser'))
+      }
     },
-    loadData() {
+    async loadData() {
       this.isLoading = true;
 
-      studentUserModel.list().then((data) => {
+      try {
+        const data = await studentUserModel.list()
         this.studentusers = data.results
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching studentusers', error)
         this.errorToast(this.$trans('Error loading studentusers'))
         this.isLoading = false
-      })
+      }
     }
   }
 }

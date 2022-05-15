@@ -150,17 +150,17 @@ export default {
     goBack() {
       this.$router.go(-1)
     },
-    loadOrder() {
+    async loadOrder() {
       this.isLoading = true
 
-      orderModel.detail(this.pk).then((order) => {
-        this.order = order
+      try {
+        this.order = await orderModel.detail(this.pk)
         this.isLoading = false
-      }).catch((error) => {
+      } catch(error) {
         console.log('error fetching order', error)
         this.errorToast(this.$trans('Error fetching order'))
         this.isLoading = false
-      })
+      }
     }
   },
   created() {

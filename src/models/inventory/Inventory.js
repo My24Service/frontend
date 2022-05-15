@@ -18,13 +18,7 @@ class Inventory extends BaseModel {
 
     const url = `/inventory/inventory-locations/?q=${query}`
 
-    return new Promise((resolve, reject) => {
-      this.axios.get(url).then((result) => {
-        resolve(result.data)
-      }).catch((error) => {
-        reject(error)
-      })
-    })
+    return this.axios.get(url).then((result) => result.data)
   }
 
   getMaterials(query) {
@@ -34,25 +28,13 @@ class Inventory extends BaseModel {
 
     const url = `/inventory/inventory-materials/?q=${query}`
 
-    return new Promise((resolve, reject) => {
-      this.axios.get(url).then((result) => {
-        resolve(result.data)
-      }).catch((error) => {
-        reject(error)
-      })
-    })
+    return this.axios.get(url).then((result) => result.data)
   }
 
   getLocationsForMaterial(material_pk) {
     const url = `/inventory/inventory-locations-for-material/?material=${material_pk}`
 
-    return new Promise((resolve, reject) => {
-      this.axios.get(url).then((result) => {
-        resolve(result.data)
-      }).catch((error) => {
-        reject(error)
-      })
-    })
+    return this.axios.get(url).then((result) => result.data)
   }
 
   getMaterialsForLocation(stocklocation_pk, query) {
@@ -65,13 +47,7 @@ class Inventory extends BaseModel {
     }
 
     const url = `/inventory/inventory-materials-for-location/?location=${stocklocation_pk}&q=${query}`
-    return new Promise((resolve, reject) => {
-      this.axios.get(url).then((result) => {
-        resolve(result.data)
-      }).catch((error) => {
-        reject(error)
-      })
-    })
+    return this.axios.get(url).then((result) => result.data)
   }
 }
 
