@@ -26,7 +26,7 @@ describe('Dispatch.vue', () => {
   })
 
   it('exists', async () => {
-    axios.get.mockResolvedValueOnce(dispatchResponse);
+    axios.get.mockResolvedValue(dispatchResponse)
 
     const wrapper = shallowMount(Dispatch, {
       localVue,

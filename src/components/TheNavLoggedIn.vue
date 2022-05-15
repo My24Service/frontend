@@ -159,7 +159,7 @@ export default {
       this.new_password1 = ''
       this.new_password2 = ''
     },
-    doPasswordChange() {
+    async doPasswordChange() {
       this.submitClicked = true
       this.v$.$touch()
 
@@ -174,18 +174,15 @@ export default {
 
       this.isLoading = true
 
-      this.$store.dispatch('getCsrfToken').then((token) => {
-        accountModel.changePassword(token, this.old_password, this.new_password1, this.new_password2).then(() => {
-          this.infoToast(this.$trans('Password changed'), this.$trans('Your password is changed'))
-          this.$refs['password-change-modal'].hide()
-        })
-        .catch((error) => {
-          console.log(error)
-          this.errorToast(this.$trans('Error changing your password'))
-        })
-      })
+      try {
+        await accountModel.changePassword(this.old_password, this.new_password1, this.new_password2)
+        this.infoToast(this.$trans('Password changed'), this.$trans('Your password is changed'))
+        this.$refs['password-change-modal'].hide()
+      } catch(error) {
+        console.log(error)
+        this.errorToast(this.$trans('Error changing your password'))
+      }
     },
-
     logout() {
       this.$refs['logout-modal'].show()
     },

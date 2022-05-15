@@ -61,6 +61,53 @@ class My24 extends BaseModel {
     return defaultColor
   }
 
+  getStatuscode(statuscodes, status) {
+    if (!status) {
+      console.log('getStatuscode: no status, return')
+      return null
+    }
+
+    for (let i=0; i<statuscodes.length; i++) {
+      const statuscode = statuscodes[i]
+      const re = new RegExp(statuscode.statuscode, 'i');
+      if (re.test(status) || status === statuscode) {
+        return statuscode
+      }
+    }
+
+    return null
+  }
+
+  getStatuscodeForOrder(statuscodes, order) {
+    const statuscode = this.getStatuscode(statuscodes, order.order_status)
+    if (!statuscode) {
+      console.log(`no statuscode found for "${order.order_status}"`)
+      return
+    }
+
+    if (statuscode.color_for_assignedorders || order.assignedorder_status === null) {
+      return statuscode
+    }
+
+    return this.getStatuscode(this.statuscodes, order.assignedorder_status)
+  }
+
+  getStatuscodeColor(statuscode, text_color=false) {
+    const defaultColor = '#ccc'
+    const defaultTextColor = '#000'
+    if (!statuscode) {
+      return text_color ? defaultTextColor : defaultColor
+    }
+
+    let color = text_color ? statuscode.text_color : statuscode.color
+    if (!color) {
+      color = text_color ? defaultTextColor : defaultColor
+    }
+
+    if (color.substring(0, 1) !== '#') color = '#' + color
+    return color
+  }
+
   hasAccessToModule(config) {
     // console.log(config)
     // staff and superuser can see all

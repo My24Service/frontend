@@ -10,7 +10,8 @@ class Statuscode extends BaseModel {
     'end_order': false,
     'after_end_order': false,
     'description': '',
-    'new_status_template': ''
+    'new_status_template': '',
+    'color_for_assignedorders': false
   }
 
   url = '/order/statuscode/'

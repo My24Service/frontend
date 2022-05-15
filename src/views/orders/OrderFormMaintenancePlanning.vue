@@ -863,8 +863,7 @@ export default {
       this.submitForm()
     },
     async reject() {
-      const token = await this.$store.dispatch('getCsrfToken')
-      await orderNotAcceptedModel.setRejected(token, this.pk)
+      await orderNotAcceptedModel.setRejected(this.pk)
       this.cancelForm()
     },
     async submitForm() {
@@ -907,6 +906,8 @@ export default {
             document.order = newOrder.id
             await documentModel.insert(document)
           }
+
+          this.infoToast(this.$trans('Created'), this.$trans('Document(s) added'))
         } catch(error) {
           console.log('Error creating documents', error)
         }
