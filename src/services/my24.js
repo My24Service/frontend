@@ -89,7 +89,7 @@ class My24 extends BaseModel {
       return statuscode
     }
 
-    return this.getStatuscode(this.statuscodes, order.assignedorder_status)
+    return this.getStatuscode(statuscodes, order.assignedorder_status)
   }
 
   getStatuscodeColor(statuscode, text_color=false) {
