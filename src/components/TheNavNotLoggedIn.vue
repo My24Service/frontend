@@ -17,6 +17,7 @@
         >
           <b-form-input
             id="username-input"
+            autofocus
             v-model="username"
             :state="usernameState"
             required

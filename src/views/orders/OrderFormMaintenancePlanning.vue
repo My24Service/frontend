@@ -907,15 +907,24 @@ export default {
             await documentModel.insert(document)
           }
 
-          this.infoToast(this.$trans('Created'), this.$trans('Document(s) added'))
+          if (this.documents.length) {
+            this.infoToast(this.$trans('Created'), this.$trans('Document(s) added'))
+          }
         } catch(error) {
           console.log('Error creating documents', error)
+          this.errorToast(this.$trans('Error creating documents'))
+          this.isLoading = false
+          this.buttonDisabled = false
         }
 
         // assign engineers
         try {
           for (const engineer of this.selectedEngineers) {
-            await Assign.assignToUser(engineer.id, [order.order_id], true)
+            await Assign.assignToUser(engineer.id, [newOrder.order_id], true)
+          }
+
+          if (this.selectedEngineers.length) {
+            this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
           }
         } catch(error) {
           console.log('error assigning to users', error)
