@@ -226,7 +226,7 @@ export default {
       try {
         this.customer = await customerModel.detail(this.pk)
         const results = await orderPastModel.list()
-        this.orders = result.results
+        this.orders = results.results
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders or customer detail', error)
