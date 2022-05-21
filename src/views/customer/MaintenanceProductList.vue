@@ -39,7 +39,11 @@
     </b-modal>
 
     <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-    <h2>{{ $trans('Maintenance products for ') }} {{ customer.name }}</h2>
+    <h2>{{ $trans('Maintenance products for ') }} {{ contract.customer_view.name }}</h2>
+    <div v-if="selectedMaintenanceProducts.length">
+      Create order with these {{ selectedMaintenanceProducts.length }} products.
+      <b-button size="sm">Go</b-button>
+    </div>
 
     <b-pagination
       v-if="this.maintenanceProductModel.count > 20"
@@ -66,7 +70,7 @@
             <b-button-group class="mr-1">
               <ButtonLinkAdd
                 router_name="maintenance-product-add"
-                :router_params="{customerPk: customer.id, withCustomerSearch: false}"
+                :router_params="{contractPk: contract.id}"
                 v-bind:title="$trans('New maintenance-product')"
               />
               <ButtonLinkRefresh
@@ -86,7 +90,12 @@
           <strong>{{ $trans('Loading...') }}</strong>
         </div>
       </template>
-      <template #cell(id)="data">
+      <template #cell(checkbox)="data">
+        <b-form-checkbox
+          v-model="selectedMaintenanceProducts"
+          :value="data.item.id"
+        >
+        </b-form-checkbox>
       </template>
       <template #cell(icons)="data">
         <div class="h2 float-right">
@@ -108,6 +117,7 @@
 <script>
 import maintenanceProductModel from '@/models/customer/MaintenanceProduct.js'
 import customerModel from '@/models/customer/Customer.js'
+import maintenanceContractModel from '@/models/customer/MaintenanceContract.js'
 
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
@@ -125,20 +135,22 @@ export default {
     ButtonLinkAdd,
   },
   props: {
-    customer_pk: {
+    contractPk  : {
       type: [String, Number],
       default: null
     },
   },
   data() {
     return {
-      customer: null,
+      contract: null,
       currentPage: 1,
       searchQuery: null,
       maintenanceProductModel,
       isLoading: false,
+      selectedMaintenanceProducts: [],
       maintenanceProducts: [],
       maintenanceProductFields: [
+        {key: 'checkbox', label: ''},
         {key: 'product_name', label: this.$trans('Product'), sortable: true},
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'amount', label: this.$trans('Amount'), sortable: true},
@@ -148,8 +160,8 @@ export default {
       ],
       breadcrumb: [
         {
-          text: this.$trans('All maintenance products'),
-          to: {name: 'maintenance-products-all'}
+          text: this.$trans('Maintenance contracts'),
+          to: {name: 'maintenance-contracts'}
         },
         {
           text: this.$trans('Maintenance products'),
@@ -200,8 +212,8 @@ export default {
       this.isLoading = true
 
       try {
-        this.customer = await customerModel.detail(this.customer_pk)
-        maintenanceProductModel.setListArgs(`customer=${this.customer_pk}`)
+        this.contract = await maintenanceContractModel.detail(this.contractPk)
+        maintenanceProductModel.setListArgs(`contract=${this.contractPk}`)
 
         const data = await maintenanceProductModel.list()
         this.maintenanceProducts = data.results

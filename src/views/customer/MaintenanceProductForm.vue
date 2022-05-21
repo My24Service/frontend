@@ -4,39 +4,6 @@
       <b-form>
         <h2 v-if="isCreate">{{ $trans('New maintenance product') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit maintenance product') }}</h2>
-        <b-row v-if="withCustomerSearch">
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              label-class="p-sm-0"
-              v-bind:label="$trans('Search customer')"
-              label-for="maintenance_product_customer_search"
-            >
-              <multiselect
-                id="maintenance_product_customer_search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="customers"
-                :multiple="false"
-                :loading="isLoading"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                :hide-selected="true"
-                @search-change="getCustomersDebounced"
-                @select="selectCustomer"
-                :custom-label="customerLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-        </b-row>
         <b-row>
           <b-col cols="12" role="group">
             <b-form-group

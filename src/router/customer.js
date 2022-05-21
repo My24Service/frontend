@@ -119,7 +119,7 @@ export default [
     },
     {
       name: 'maintenance-contract-edit',
-      path: '/customers/maintenance-contracts/:pk',
+      path: '/customers/maintenance-contracts/form/:pk',
       components: {
         'app-content': MaintenanceContractForm,
         'app-subnav': SubNavCustomers
@@ -144,7 +144,7 @@ export default [
     // maintenance products
     {
       name: 'maintenance-products',
-      path: '/customers/maintenance-products/:customer_pk',
+      path: '/customers/maintenance-products/:contractPk',
       components: {
         'app-content': MaintenanceProductList,
         'app-subnav': SubNavCustomers
@@ -157,6 +157,18 @@ export default [
     {
       name: 'maintenance-product-add',
       path: '/customers/maintenance-products/form',
+      components: {
+        'app-content': MaintenanceProductForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-product-edit',
+      path: '/customers/maintenance-products/form/:pk',
       components: {
         'app-content': MaintenanceProductForm,
         'app-subnav': SubNavCustomers

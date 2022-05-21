@@ -66,6 +66,7 @@
       ref="logout-modal"
       v-bind:title="$trans('Log out?')"
       @ok="doLogout"
+      auto-focus-button="ok"
     >
       <p class="my-4">{{ $trans('Are you sure you want to log out?') }}</p>
     </b-modal>

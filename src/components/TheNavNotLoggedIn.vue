@@ -8,7 +8,7 @@
       @hidden="resetModal"
       @ok="handleOk"
     >
-      <form ref="login-form" @submit.stop.prevent="doLogin">
+      <form ref="login-form" @submit="doLogin">
         <b-form-group
           v-bind:label="$trans('Username')"
           label-for="username-input"
@@ -35,6 +35,7 @@
             v-model="password"
             :state="passwordState"
             required
+            v-on:keyup.enter="doLogin"
           ></b-form-input>
         </b-form-group>
         <div>
@@ -114,9 +115,9 @@ export default {
         return;
       }
 
-      if (this.$refs['login-modal']) {
-        this.$refs['login-modal'].hide()
-      }
+      this.$nextTick(() => {
+        this.$bvModal.hide('login-modal')
+      })
 
       const loader = this.$loading.show()
 
@@ -145,7 +146,8 @@ export default {
 
         this.errorToast(this.$trans('Error logging you in'))
       }
-    },
+
+    }
 
   }
 }
