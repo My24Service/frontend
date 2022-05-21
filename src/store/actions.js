@@ -37,7 +37,7 @@ export const actions = {
       try {
         const languageVars = await my24.getLanguageVars()
         const initialData = await my24.getInitialData()
-        const memberContract = !isEmpty(initialData.userInfo) ? my24.getModelsFromString(initialData.userInfo.member_contract) : {}
+        const memberContract = !isEmpty(initialData.memberInfo) && initialData.memberInfo.contract ? my24.getModelsFromString(initialData.memberInfo.contract.member_contract) : {}
 
         document.title = initialData.memberInfo.name
         window.member_type_text = initialData.memberInfo.member_texts
