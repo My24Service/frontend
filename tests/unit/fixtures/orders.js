@@ -82,6 +82,7 @@ export default {
                         "purchase_order_material": 510
                     },
                 ],
+                'maintenance_product_lines': [],
                 "required_assigned": "-",
                 "required_users": 1,
                 "user_order_available_set_count": 0,
@@ -162,6 +163,7 @@ export default {
                         "purchase_order_material": 434
                     },
                 ],
+                'maintenance_product_lines': [],
                 "required_assigned": "-",
                 "required_users": 1,
                 "user_order_available_set_count": 0,

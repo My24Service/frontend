@@ -199,7 +199,6 @@ export default {
   },
   methods: {
     cancelCreateMaintenanceOrder() {
-      console.log('cancelCreateMaintenanceOrder')
       this.selectedMaintenanceProducts = []
       this.$store.dispatch('setMaintenanceProducts', null)
     },
