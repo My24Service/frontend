@@ -42,18 +42,8 @@ class Order extends BaseModel {
     'orderlines': [],
     'infolines': [],
     'workorder_documents': [],
+    'maintenance_product_lines': [],
 
-    // used in maintenance orders for display
-    'product_name': '',
-    'brand': '',
-    'amount': '',
-    'times_per_year': 0,
-    'installation_date': '',
-    'production_date': '',
-    'serialnumber': '',
-    'contract_value': 0.00,
-    'standard_hours': 0,
-    'maintenanceproduct_relation': null,
     'workorder_pdf_url': '',
     'workorder_pdf_url_partner': ''
   }

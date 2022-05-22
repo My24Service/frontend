@@ -41,8 +41,13 @@
     <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
     <h2>{{ $trans('Maintenance products for ') }} {{ contract.customer_view.name }}</h2>
     <div v-if="selectedMaintenanceProducts.length">
-      Create order with these {{ selectedMaintenanceProducts.length }} products.
-      <b-button size="sm">Go</b-button>
+      {{ $trans('Create order with these') }} {{ selectedMaintenanceProducts.length }} {{ $trans('products') }}.
+      <b-button size="sm" variant="primary" class="mx-2 btn btn-primary" @click.prevent="createMaintenanceOrder">
+        {{ $trans('Go') }}
+      </b-button>
+      <b-button size="sm" variant="secondary" class="btn btn-secondary" @click.prevent="cancelCreateMaintenanceOrder">
+        {{ $trans('Cancel') }}
+      </b-button>
     </div>
 
     <b-pagination
@@ -96,6 +101,9 @@
           :value="data.item.id"
         >
         </b-form-checkbox>
+      </template>
+      <template #cell(totals)="data">
+        {{ data.item.created_orders }} / {{ data.item.num_products }}
       </template>
       <template #cell(icons)="data">
         <div class="h2 float-right">
@@ -155,7 +163,7 @@ export default {
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'amount', label: this.$trans('Amount'), sortable: true},
         {key: 'times_per_year', label: this.$trans('Times/year'), sortable: true},
-        {key: 'created_orders', label: this.$trans('# Orders'), sortable: true},
+        {key: 'totals', label: this.$trans('# Orders/Products'), sortable: true},
         {key: 'icons'}
       ],
       breadcrumb: [
@@ -176,11 +184,34 @@ export default {
       this.loadData()
     }
   },
-  created() {
+  async created() {
+    this.isLoading = true
     this.currentPage = this.maintenanceProductModel.currentPage
-    this.loadData()
+
+    const data = await this.$store.dispatch('getMaintenanceProducts')
+    if (data) {
+      const { maintenanceProducts, customer } = data
+      this.selectedMaintenanceProducts = maintenanceProducts
+    }
+
+    await this.loadData()
+    this.isLoading = false
   },
   methods: {
+    cancelCreateMaintenanceOrder() {
+      console.log('cancelCreateMaintenanceOrder')
+      this.selectedMaintenanceProducts = []
+      this.$store.dispatch('setMaintenanceProducts', null)
+    },
+    createMaintenanceOrder() {
+      const data = {
+        'maintenanceProducts': this.selectedMaintenanceProducts,
+        'customer_id': this.contract.customer
+      }
+
+      this.$store.dispatch('setMaintenanceProducts', data)
+      this.$router.push({name: 'order-add-maintenance'})
+    },
     handleSearchOk(bvModalEvt) {
       bvModalEvt.preventDefault()
       this.handleSearchSubmit()
@@ -209,19 +240,15 @@ export default {
       }
     },
     async loadData() {
-      this.isLoading = true
-
       try {
         this.contract = await maintenanceContractModel.detail(this.contractPk)
         maintenanceProductModel.setListArgs(`contract=${this.contractPk}`)
 
         const data = await maintenanceProductModel.list()
         this.maintenanceProducts = data.results
-        this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance products', error)
         this.errorToast(this.$trans('Error loading maintenance products'))
-        this.isLoading = false
       }
     }
   }

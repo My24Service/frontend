@@ -454,6 +454,59 @@
           </Collapse>
         </div>
 
+        <div class="maintenance_product_lines section">
+          <Collapse
+            ref="maintenance-product-lines"
+            :title="$trans('Maintenance product lines')"
+          >
+            <b-row>
+              <b-col cols="12">
+                <b-table v-if="order.maintenance_product_lines.length > 0" small :fields="maintenanceProductLineFields" :items="order.maintenance_product_lines" responsive="md">
+                  <template #cell()="data">
+                    {{ data.value }}
+                  </template>
+
+                  <template #cell(location)="data">
+                    <b-form-input
+                      style="width: 180px !important; float:left !important;"
+                      size="sm"
+                      v-model="order.maintenance_product_lines[data.index].location"
+                    ></b-form-input>
+                  </template>
+
+                  <template #cell(amount)="data">
+                    <b-form-input
+                      style="width: 60px !important; float:left !important;"
+                      size="sm"
+                      v-model="order.maintenance_product_lines[data.index].amount"
+                    ></b-form-input>
+                  </template>
+
+                  <template #cell(done_needed)="data">
+                    {{ data.item.done_needed }}
+                  </template>
+
+                  <template #cell(remarks)="data">
+                    <b-form-textarea
+                      v-model="order.maintenance_product_lines[data.index].remarks"
+                      rows="1"
+                    ></b-form-textarea>
+                  </template>
+
+                  <template #cell(icons)="data">
+                    <div class="float-right">
+                      <b-link class="h5 mx-2" @click.prevent="deleteMaintenanceProductLine(data.index)">
+                        <b-icon-trash></b-icon-trash>
+                      </b-link>
+                    </div>
+                  </template>
+                </b-table>
+              </b-col>
+            </b-row>
+            {{ order.maintenance_product_lines }}
+          </Collapse>
+        </div>
+
         <div class="order-documents section" v-if="isCreate">
           <Collapse
             :title="$trans('Documents')"
@@ -602,6 +655,7 @@ import orderModel from '@/models/orders/Order.js'
 import customerModel from '@/models/customer/Customer.js'
 import engineerModel from '@/models/company/UserEngineer.js'
 import documentModel from '@/models/orders/Document.js'
+import maintenanceProductModel from '@/models/customer/MaintenanceProduct.js'
 import Assign from '@/models/mobile/Assign.js'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
@@ -624,7 +678,11 @@ export default {
     unaccepted: {
       type: [Boolean],
       default: false
-    }
+    },
+    maintenance: {
+      type: [Boolean],
+      default: false
+    },
   },
   watch: {
     startDate(val) {
@@ -643,13 +701,22 @@ export default {
       isLoading: false,
       buttonDisabled: false,
       editIndex: null,
-      isEditOrderLine: false,
-      isEditInfoLine: false,
       acceptOrder: false,
+
       product: '',
       location: '',
       remarks: '',
+      isEditOrderLine: false,
+
+      maintenance_product_line_product: '',
+      maintenance_product_line_location: '',
+      maintenance_product_line_remarks: '',
+      maintenance_product_line_amount: '',
+      isEditMaintenanceProductLine: false,
+
       info: '',
+      isEditInfoLine: false,
+
       orderLineFields: [
         { key: 'product', label: this.$trans('Product') },
         { key: 'location', label: this.$trans('Location') },
@@ -658,6 +725,14 @@ export default {
       ],
       infoLineFields: [
         { key: 'info', label: this.$trans('Info') },
+        { key: 'icons', label: '' }
+      ],
+      maintenanceProductLineFields: [
+        { key: 'product', label: this.$trans('Product') },
+        { key: 'location', label: this.$trans('Location') },
+        { key: 'amount', label: this.$trans('Amount') },
+        { key: 'done_needed', label: this.$trans('Needed / ceated') },
+        { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       documentFields: [
@@ -682,7 +757,8 @@ export default {
         { item: 'dispatch', name: this.$trans('Dispatch') },
       ],
       isDocumentsOpen: false,
-      isAssignOpen: false
+      isAssignOpen: false,
+      maintenanceProducts: []
     }
   },
   validations() {
@@ -713,6 +789,9 @@ export default {
     }
   },
   computed: {
+    maintenanceProductLinesIsOpened() {
+      return this.maintenance
+    },
     startDate() {
       return this.order.start_date
     },
@@ -738,6 +817,32 @@ export default {
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
+
+      if (this.maintenance) {
+        this.isLoading = true
+        const data = await this.$store.dispatch('getMaintenanceProducts')
+        if (data) {
+          const { maintenanceProducts, customer_id } = data
+
+          const customer = await customerModel.detail(customer_id)
+          this.fillCustomer(customer)
+
+          for (const product of maintenanceProducts) {
+            const maintenanceProduct = await maintenanceProductModel.detail(product)
+
+            this.order.maintenance_product_lines.push({
+              'maintenance_product': maintenanceProduct.id,
+              'product': maintenanceProduct.product_name,
+              'location': '',
+              'amount': 0,
+              'done_needed': `${maintenanceProduct.amount} / ${maintenanceProduct.num_products ?? 0}`
+            })
+          }
+
+          this.$refs['maintenance-product-lines'].isOpen = true
+        }
+        this.isLoading = false
+      }
     } else {
       this.loadOrder()
     }
@@ -834,6 +939,12 @@ export default {
       })
       this.emptyInfoLine()
     },
+
+    // maintenance product lines
+    deleteMaintenanceProductLine(index) {
+      this.order.maintenance_product_lines.splice(index, 1)
+    },
+
     engineerLabel({ full_name }) {
       return full_name
     },
@@ -844,18 +955,21 @@ export default {
       return `${name} - ${city}`
     },
     selectCustomer(option) {
-      this.order.customer_relation = option.id
-      this.order.customer_id = option.customer_id
-      this.order.order_name = option.name
-      this.order.order_address = option.address
-      this.order.order_city = option.city
-      this.order.order_postal = option.postal
-      this.order.order_country_code = option.country_code
-      this.order.order_tel = option.tel
-      this.order.order_mobile = option.mobile
-      this.order.order_email = option.email
-      this.order.order_contact = option.contact
-      this.order.customer_remarks = option.remarks
+      this.fillCustomer(option)
+    },
+    fillCustomer(customer) {
+      this.order.customer_relation = customer.id
+      this.order.customer_id = customer.customer_id
+      this.order.order_name = customer.name
+      this.order.order_address = customer.address
+      this.order.order_city = customer.city
+      this.order.order_postal = customer.postal
+      this.order.order_country_code = customer.country_code
+      this.order.order_tel = customer.tel
+      this.order.order_mobile = customer.mobile
+      this.order.order_email = customer.email
+      this.order.order_contact = customer.contact
+      this.order.customer_remarks = customer.remarks
     },
     async editAndAccept() {
       this.buttonDisabled = true
@@ -933,6 +1047,9 @@ export default {
           this.buttonDisabled = false
           return
         }
+
+        // clear maintenance products
+        this.$store.dispatch('setMaintenanceProducts', null)
 
         if (this.nextField === 'orders') {
           this.$router.go(-1)

@@ -15,6 +15,7 @@ import {
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
   SET_UNACCEPTED_COUNT,
+  SET_MAINTENANCE_PRODUCTS,
 } from './mutation-types'
 
 export const actions = {
@@ -24,10 +25,8 @@ export const actions = {
   setAssignOrders({commit}, orders) {
     commit(SET_ASSIGN_ORDERS, orders)
   },
-  getAssignOrders({state}) {
-    return new Promise((resolve) => {
-      resolve(state.assignOrders)
-    })
+  setMaintenanceProducts({commit}, maintenanceProducts) {
+    commit(SET_MAINTENANCE_PRODUCTS, maintenanceProducts)
   },
   setLanguage({commit}, language) {
     commit(SET_LANGUAGE, language)
@@ -128,5 +127,15 @@ export const actions = {
     return new Promise((resolve) => {
       resolve(state.userInfo.is_superuser)
     })
-  }
+  },
+  getMaintenanceProducts({ state }) {
+    return new Promise((resolve) => {
+      resolve(state.maintenanceProducts)
+    })
+  },
+  getAssignOrders({state}) {
+    return new Promise((resolve) => {
+      resolve(state.assignOrders)
+    })
+  },
 }

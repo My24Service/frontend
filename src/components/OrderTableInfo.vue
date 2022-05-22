@@ -29,7 +29,7 @@
         </p>
       </b-col>
     </b-row>
-    <b-row v-if="order.orderlines.length || order.infolines.length">
+    <b-row v-if="order.orderlines.length || order.infolines.length || order.maintenance_product_lines.length" >
       <b-col>
         {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
           {{ order.order_id }}
@@ -57,6 +57,7 @@
       </b-col>
       <b-col>
         <b-table v-if="order.orderlines.length" dark borderless small :fields="orderLineFields" :items="order.orderlines" responsive="sm"></b-table>
+        <b-table v-if="order.maintenance_product_lines.length" dark borderless small :fields="maintenanceProductLineFields" :items="order.maintenance_product_lines" responsive="sm"></b-table>
         <b-table v-if="!isCustomer && order.infolines.length" dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"></b-table>
       </b-col>
     </b-row>
@@ -136,7 +137,13 @@ export default {
       ],
       infoLineFields: [
         { key: 'info', label: this.$trans('Infolines') }
-      ]
+      ],
+      maintenanceProductLineFields: [
+        { key: 'product_name', label: this.$trans('Maintenance product') },
+        { key: 'location', label: this.$trans('Location') },
+        { key: 'amount', label: this.$trans('Amount') },
+        { key: 'remarks', label: this.$trans('Remarks') },
+      ],
     }
   },
   props: {

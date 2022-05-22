@@ -55,7 +55,7 @@ export default [
     },
     {
       name: 'order-edit',
-      path: '/orders/orders/form/:pk',
+      path: '/orders/orders/form/:pk(\\d+)',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': true
@@ -73,10 +73,22 @@ export default [
         'app-subnav': SubNavOrders
       },
       props: {
-        'app-content': {},
+        'app-content': route => ({...route.params}),
         'app-subnav': true
       },
 	  },
+    {
+      name: 'order-add-maintenance',
+      path: '/orders/orders/form-maintenance',
+      components: {
+        'app-content': OrderForm,
+        'app-subnav': SubNavOrders
+      },
+      props: {
+        'app-content': {maintenance: true},
+        'app-subnav': true
+      },
+    },
     {
       name: 'order-view',
       path: '/orders/orders/view/:pk',
