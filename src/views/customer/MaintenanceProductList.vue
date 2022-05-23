@@ -39,7 +39,16 @@
     </b-modal>
 
     <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-    <h2>{{ $trans('Maintenance products for ') }} {{ customer.name }}</h2>
+    <h2>{{ $trans('Maintenance products for ') }} {{ contract.customer_view.name }}</h2>
+    <div v-if="selectedMaintenanceProducts.length">
+      {{ $trans('Create order with these') }} {{ selectedMaintenanceProducts.length }} {{ $trans('products') }}.
+      <b-button size="sm" variant="primary" class="mx-2 btn btn-primary" @click.prevent="createMaintenanceOrder">
+        {{ $trans('Go') }}
+      </b-button>
+      <b-button size="sm" variant="secondary" class="btn btn-secondary" @click.prevent="cancelCreateMaintenanceOrder">
+        {{ $trans('Cancel') }}
+      </b-button>
+    </div>
 
     <b-pagination
       v-if="this.maintenanceProductModel.count > 20"
@@ -66,7 +75,7 @@
             <b-button-group class="mr-1">
               <ButtonLinkAdd
                 router_name="maintenance-product-add"
-                :router_params="{customerPk: customer.id, withCustomerSearch: false}"
+                :router_params="{contractPk: contract.id}"
                 v-bind:title="$trans('New maintenance-product')"
               />
               <ButtonLinkRefresh
@@ -86,7 +95,15 @@
           <strong>{{ $trans('Loading...') }}</strong>
         </div>
       </template>
-      <template #cell(id)="data">
+      <template #cell(checkbox)="data">
+        <b-form-checkbox
+          v-model="selectedMaintenanceProducts"
+          :value="data.item.id"
+        >
+        </b-form-checkbox>
+      </template>
+      <template #cell(totals)="data">
+        {{ data.item.created_orders }} / {{ data.item.num_products }}
       </template>
       <template #cell(icons)="data">
         <div class="h2 float-right">
@@ -108,6 +125,7 @@
 <script>
 import maintenanceProductModel from '@/models/customer/MaintenanceProduct.js'
 import customerModel from '@/models/customer/Customer.js'
+import maintenanceContractModel from '@/models/customer/MaintenanceContract.js'
 
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
@@ -125,31 +143,33 @@ export default {
     ButtonLinkAdd,
   },
   props: {
-    customer_pk: {
+    contractPk  : {
       type: [String, Number],
       default: null
     },
   },
   data() {
     return {
-      customer: null,
+      contract: null,
       currentPage: 1,
       searchQuery: null,
       maintenanceProductModel,
       isLoading: false,
+      selectedMaintenanceProducts: [],
       maintenanceProducts: [],
       maintenanceProductFields: [
+        {key: 'checkbox', label: ''},
         {key: 'product_name', label: this.$trans('Product'), sortable: true},
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'amount', label: this.$trans('Amount'), sortable: true},
         {key: 'times_per_year', label: this.$trans('Times/year'), sortable: true},
-        {key: 'created_orders', label: this.$trans('# Orders'), sortable: true},
+        {key: 'totals', label: this.$trans('# Orders/Products'), sortable: true},
         {key: 'icons'}
       ],
       breadcrumb: [
         {
-          text: this.$trans('All maintenance products'),
-          to: {name: 'maintenance-products-all'}
+          text: this.$trans('Maintenance contracts'),
+          to: {name: 'maintenance-contracts'}
         },
         {
           text: this.$trans('Maintenance products'),
@@ -164,11 +184,33 @@ export default {
       this.loadData()
     }
   },
-  created() {
+  async created() {
+    this.isLoading = true
     this.currentPage = this.maintenanceProductModel.currentPage
-    this.loadData()
+
+    const data = await this.$store.dispatch('getMaintenanceProducts')
+    if (data) {
+      const { maintenanceProducts, customer } = data
+      this.selectedMaintenanceProducts = maintenanceProducts
+    }
+
+    await this.loadData()
+    this.isLoading = false
   },
   methods: {
+    cancelCreateMaintenanceOrder() {
+      this.selectedMaintenanceProducts = []
+      this.$store.dispatch('setMaintenanceProducts', null)
+    },
+    createMaintenanceOrder() {
+      const data = {
+        'maintenanceProducts': this.selectedMaintenanceProducts,
+        'customer_id': this.contract.customer
+      }
+
+      this.$store.dispatch('setMaintenanceProducts', data)
+      this.$router.push({name: 'order-add-maintenance'})
+    },
     handleSearchOk(bvModalEvt) {
       bvModalEvt.preventDefault()
       this.handleSearchSubmit()
@@ -197,19 +239,15 @@ export default {
       }
     },
     async loadData() {
-      this.isLoading = true
-
       try {
-        this.customer = await customerModel.detail(this.customer_pk)
-        maintenanceProductModel.setListArgs(`customer=${this.customer_pk}`)
+        this.contract = await maintenanceContractModel.detail(this.contractPk)
+        maintenanceProductModel.setListArgs(`contract=${this.contractPk}`)
 
         const data = await maintenanceProductModel.list()
         this.maintenanceProducts = data.results
-        this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance products', error)
         this.errorToast(this.$trans('Error loading maintenance products'))
-        this.isLoading = false
       }
     }
   }

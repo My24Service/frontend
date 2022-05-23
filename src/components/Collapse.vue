@@ -27,7 +27,7 @@ export default {
   props: {
     title: {
       type: [String],
-    }
+    },
   },
   data() {
   	return {

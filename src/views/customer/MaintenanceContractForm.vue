@@ -13,6 +13,7 @@
               label-for="maintenance_contract_customer_search"
             >
               <multiselect
+                v-if="!isLoading"
                 id="maintenance_contract_customer_search"
                 track-by="id"
                 :placeholder="$trans('Type to search')"
@@ -194,6 +195,7 @@ export default {
       errorMessage: null,
       customer: {},
       customers: [],
+      getCustomersDebounced: null
     }
   },
   computed: {
@@ -206,10 +208,12 @@ export default {
   },
   async created() {
     if (this.isCreate) {
+      this.isLoading = true
       this.maintenancecontract = maintenanceContractModel.getFields()
 
       this.customer = await customerModel.getFields()
       this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
+      this.isLoading = false
     } else {
       this.loadData()
     }
@@ -218,12 +222,13 @@ export default {
     clearCustomer() {
       this.maintenancecontract.customer = null
     },
-    getCustomers(query) {
-      customerModel.search(query).then((response) => {
-        this.customers = response
-      }).catch(() => {
+    async getCustomers(query) {
+      try {
+        this.customers = await customerModel.search(query)
+      } catch(error) {
+        console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
-      })
+      }
     },
     customerLabel({ name, city}) {
       return `${name} - ${city}`

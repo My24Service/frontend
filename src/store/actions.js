@@ -15,6 +15,7 @@ import {
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
   SET_UNACCEPTED_COUNT,
+  SET_MAINTENANCE_PRODUCTS,
 } from './mutation-types'
 
 export const actions = {
@@ -24,10 +25,8 @@ export const actions = {
   setAssignOrders({commit}, orders) {
     commit(SET_ASSIGN_ORDERS, orders)
   },
-  getAssignOrders({state}) {
-    return new Promise((resolve) => {
-      resolve(state.assignOrders)
-    })
+  setMaintenanceProducts({commit}, maintenanceProducts) {
+    commit(SET_MAINTENANCE_PRODUCTS, maintenanceProducts)
   },
   setLanguage({commit}, language) {
     commit(SET_LANGUAGE, language)
@@ -37,7 +36,7 @@ export const actions = {
       try {
         const languageVars = await my24.getLanguageVars()
         const initialData = await my24.getInitialData()
-        const memberContract = !isEmpty(initialData.userInfo) ? my24.getModelsFromString(initialData.userInfo.member_contract) : {}
+        const memberContract = !isEmpty(initialData.memberInfo) && initialData.memberInfo.contract ? my24.getModelsFromString(initialData.memberInfo.contract.member_contract) : {}
 
         document.title = initialData.memberInfo.name
         window.member_type_text = initialData.memberInfo.member_texts
@@ -128,5 +127,15 @@ export const actions = {
     return new Promise((resolve) => {
       resolve(state.userInfo.is_superuser)
     })
-  }
+  },
+  getMaintenanceProducts({ state }) {
+    return new Promise((resolve) => {
+      resolve(state.maintenanceProducts)
+    })
+  },
+  getAssignOrders({state}) {
+    return new Promise((resolve) => {
+      resolve(state.assignOrders)
+    })
+  },
 }

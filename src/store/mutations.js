@@ -12,11 +12,15 @@ import {
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
   SET_UNACCEPTED_COUNT,
+  SET_MAINTENANCE_PRODUCTS,
 } from './mutation-types'
 
 export const mutations = {
   [SET_UNACCEPTED_COUNT](state, count) {
     state.unacceptedCount = count
+  },
+  [SET_MAINTENANCE_PRODUCTS](state, maintenanceProducts) {
+    state.maintenanceProducts = maintenanceProducts
   },
   [SET_ASSIGN_ORDERS](state, orders) {
     state.assignOrders = orders

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Notification v-if="isLoggedIn && !isCustomer" />
     <b-modal
       id="password-change-modal"
       ref="password-change-modal"
@@ -65,6 +66,7 @@
       ref="logout-modal"
       v-bind:title="$trans('Log out?')"
       @ok="doLogout"
+      auto-focus-button="ok"
     >
       <p class="my-4">{{ $trans('Are you sure you want to log out?') }}</p>
     </b-modal>
@@ -108,6 +110,7 @@ import TheLanguageChooser from "@/components/TheLanguageChooser.vue"
 import Version from "@/components/Version.vue"
 import NavItems from "@/components/NavItems.vue"
 import NavBrand from "@/components/NavBrand.vue"
+import Notification from '@/components/Notification'
 
 export default {
   setup() {
@@ -120,6 +123,7 @@ export default {
     NavBrand,
     Password,
     Version,
+    Notification,
   },
   validations() {
     return {
