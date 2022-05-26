@@ -10,6 +10,11 @@ import { NEW_DATA_EVENTS } from '@/constants'
 
 export default {
   mixins: [componentMixin],
+  data() {
+    return {
+      intervalId: null
+    }
+  },
   methods:{
     handleMessageUser(data) {
       if (data.level === 'error') {
@@ -36,7 +41,7 @@ export default {
         await this.doFetchUnacceptedCountAndUpdateStore()
       }, 1000)
 
-      setInterval(async () => {
+      this.intervalId = setInterval(async () => {
         await this.doFetchUnacceptedCountAndUpdateStore()
       }, 5*60*1000)
     },
@@ -65,6 +70,11 @@ export default {
 
     // unaccepted orders polling
     this.setupPolling()
+  },
+  beforeDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId)
+    }
   },
 }
 </script>

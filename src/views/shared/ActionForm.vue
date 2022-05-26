@@ -336,7 +336,7 @@ export default {
       submitClicked: false,
       action: actionOrderModel.getFields(),
       errorMessage: null,
-      operators: ['=', '!=', '<', '<=', '>', '>=', 'REGEXP', 'NOTREGEXP'],
+      operators: ['=', '!=', '<', '<=', '>', '>=', 'REGEXP', 'NOTREGEXP', 'CONTAINS'],
       querymodes: [
         {value: 'and', text: this.$trans('must match all of the conditions')},
         {value: 'or', text: this.$trans('match any of the conditions')},

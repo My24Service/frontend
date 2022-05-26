@@ -7,11 +7,11 @@
 
 <script>
 import { componentMixin } from '@/utils.js'
-import TheNavNotLoggedIn from "@/components/TheNavNotLoggedIn.vue"
-import TheNavLoggedIn from "@/components/TheNavLoggedIn.vue"
+import TheNavNotLoggedIn from '@/components/TheNavNotLoggedIn.vue'
+import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
 
 export default {
-  name: "empty",
+  name: "TheNav",
   mixins: [componentMixin],
 	components: {
 	  TheNavNotLoggedIn,

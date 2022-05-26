@@ -1,6 +1,11 @@
 <template>
   <div>
-    <OrderFormMaintenance v-if="memberType === 'maintenance'" :pk="pk" :unaccepted="unaccepted" />
+    <OrderFormMaintenance
+      v-if="memberType === 'maintenance'"
+      :pk="pk"
+      :unaccepted="unaccepted"
+      :maintenance="maintenance"
+    />
     <OrderFormTemps v-if="memberType === 'temps'" :pk="pk" />
   </div>
 </template>
@@ -24,7 +29,11 @@ export default {
     unaccepted: {
       type: [Boolean],
       default: false
-    }
+    },
+    maintenance: {
+      type: [Boolean],
+      default: false
+    },
   },
   components: {
     OrderFormMaintenance,

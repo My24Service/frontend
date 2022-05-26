@@ -82,7 +82,8 @@
           <strong>{{ $trans('Loading...') }}</strong>
         </div>
       </template>
-      <template #cell(id)="data">
+      <template #cell(customer_view.name)="data">
+        <router-link :to="{name: 'maintenance-products', params: {contractPk: data.item.id}}">{{ data.item.customer_view.name }}</router-link>
       </template>
       <template #cell(icons)="data">
         <div class="h2 float-right">
