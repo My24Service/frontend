@@ -272,7 +272,7 @@ export default {
 
         try {
           model.setListArgs(`year=${this.year}`)
-          const data = model.list()
+          const data = await model.list()
           this.cachedData[this.currentMode] = data.result
 
           this.renderGraph(data.result, label, fields)
