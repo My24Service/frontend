@@ -339,7 +339,7 @@ export default {
       try {
         await statusModel.insert(status)
         this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
         this.errorToast(this.$trans('Error creating status'))

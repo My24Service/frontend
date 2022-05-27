@@ -1,6 +1,6 @@
 <template>
   <b-container v-if="isLoaded">
-    <b-row v-if="!order.orderlines.length && !order.infolines.length">
+    <b-row v-if="!order.orderlines.length && !order.infolines.length && !order.maintenance_product_lines.length">
       <b-col>
         {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
           {{ order.order_id }}
@@ -115,16 +115,9 @@ import { componentMixin } from '@/utils.js'
 
 export default {
   mixins: [componentMixin],
-  created() {
-    // get member type
-    this.$store.dispatch('getMemberType').then((memberType) => {
-      this.memberType = memberType
-      this.isLoaded = true
-    }).catch((error) => {
-      this.memberType = 'maintenance'
-      this.isLoaded = true
-      console.log('getMemberType error', error)
-    })
+  async created() {
+    this.memberType = await this.$store.dispatch('getMemberType')
+    this.isLoaded = true
   },
   data() {
     return {
