@@ -386,10 +386,11 @@ export default {
     this.countries = await this.$store.dispatch('getCountries')
 
     if (!this.isCreate) {
-      this.loadData()
+      await this.loadData()
     } else {
       this.engineer = engineerModel.getFields()
     }
+    this.isLoading = false
   },
   methods: {
     preSubmitForm() {

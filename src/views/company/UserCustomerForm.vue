@@ -323,6 +323,7 @@ export default {
     } else {
       this.customeruser = customerUserModel.getFields()
     }
+    this.isLoading = false
   },
   methods: {
     clearCustomer() {

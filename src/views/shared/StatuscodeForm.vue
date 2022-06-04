@@ -58,7 +58,9 @@
               label-size="sm"
               v-bind:label="$trans('Color')"
               label-for="statuscode_color"
+              :state="isSubmitClicked ? !v$.statuscode.color.$error : null"
               description="Use this color in dispatch."
+              invalid-feedback="Please choose a color"
             >
               <color-picker
                 id="statuscode_color"
@@ -173,8 +175,6 @@
           </b-col>
         </b-row>
 
-        </b-row>
-
         <div class="mx-auto">
           <footer class="modal-footer">
             <b-button @click="cancelForm" type="button" variant="secondary">
@@ -215,6 +215,9 @@ export default {
         statuscode: {
           required,
         },
+        color: {
+          required,
+        }
       }
     }
   },
@@ -265,7 +268,7 @@ export default {
       }
 
       // remove null fields
-      const null_fields = ['new_status_template']
+      const null_fields = ['new_status_template', 'description']
       for (let i=0; i<null_fields.length; i++) {
         if (this.statuscode[null_fields[i]] === null || this.statuscode[null_fields[i]] === '') {
           delete this.statuscode[null_fields[i]]
