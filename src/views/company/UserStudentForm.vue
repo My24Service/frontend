@@ -427,16 +427,15 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
+  async created() {
+    this.countries = await this.$store.dispatch('getCountries')
 
-      if (!this.isCreate) {
-        this.loadData()
-      } else {
-        this.studentuser = studentUserModel.getFields()
-      }
-    })
+    if (!this.isCreate) {
+      await this.loadData()
+    } else {
+      this.studentuser = studentUserModel.getFields()
+    }
+    this.isLoading = false
   },
   methods: {
     preSubmitForm() {

@@ -237,12 +237,13 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     if (!this.isCreate) {
-      this.loadData()
+      await this.loadData()
     } else {
       this.salesuser = salesUserModel.getFields()
     }
+    this.isLoading = false
   },
   methods: {
     preSubmitForm() {
