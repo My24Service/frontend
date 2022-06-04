@@ -220,7 +220,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
-import { componentMixin } from '@/utils';
+import { componentMixin } from '@/utils'
 
 export default {
   mixins: [componentMixin],
