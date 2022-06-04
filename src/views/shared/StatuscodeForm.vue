@@ -42,7 +42,7 @@
               label-size="sm"
               v-bind:label="$trans('New status template')"
               label-for="statuscode_new_status_template"
-              description="For order statusses that are not set by the application."
+              :description="$trans('For order statusses that are not set by the application.')"
             >
               <b-form-input
                 id="statuscode_new_status_template"
@@ -59,7 +59,7 @@
               v-bind:label="$trans('Color')"
               label-for="statuscode_color"
               :state="isSubmitClicked ? !v$.statuscode.color.$error : null"
-              description="Use this color in dispatch."
+              :description="$trans('Use this color in dispatch.')"
               invalid-feedback="Please choose a color"
             >
               <color-picker
@@ -76,7 +76,7 @@
               label-size="sm"
               v-bind:label="$trans('Text color')"
               label-for="statuscode_text_color"
-              description="Use this text color in dispatch."
+              :description="$trans('Use this text color in dispatch.')"
             >
               <color-picker
                 id="statuscode_text_color"
@@ -93,7 +93,7 @@
               label-size="sm"
               v-bind:label="$trans('Color in dispatch?')"
               label-for="statuscode_color_for_assignedorders"
-              description="Use this color for all assigned orders in dispatch."
+              :description="$trans('Use this color for all assigned orders in dispatch.')"
             >
               <b-form-checkbox
                 id="statuscode_color_for_assignedorders"
@@ -108,7 +108,7 @@
               label-size="sm"
               v-bind:label="$trans('Start order?')"
               label-for="statuscode_start_order"
-              description="This statuscode marks the start of an order. This is be used in the App."
+              :description="$trans('This statuscode marks the start of an order. This is used in the App for the start order button.')"
             >
               <b-form-checkbox
                 id="statuscode_start_order"
@@ -121,7 +121,7 @@
               label-size="sm"
               v-bind:label="$trans('Start trip?')"
               label-for="statuscode_start_trip"
-              description="This statuscode marks the start of a trip. This is be used in the App."
+              :description="$trans('This statuscode marks the start of a trip. This is used in the App for the start trip button.')"
             >
               <b-form-checkbox
                 id="statuscode_start_trip"
@@ -136,7 +136,7 @@
               label-size="sm"
               v-bind:label="$trans('End order?')"
               label-for="statuscode_end_order"
-              description="This statuscode marks the end of an order. This is be used in the App."
+              :description="$trans('This statuscode marks the end of an order. This is used in the App for the end order button.')"
             >
               <b-form-checkbox
                 id="statuscode_end_order"
@@ -149,7 +149,7 @@
               label-size="sm"
               v-bind:label="$trans('End trip?')"
               label-for="statuscode_end_trip"
-              description="This statuscode marks the end of a trip. This is be used in the App."
+              :description="$trans('This statuscode marks the end of a trip. This is used in the App for the end trip button.')"
             >
               <b-form-checkbox
                 id="statuscode_end_trip"
@@ -164,7 +164,7 @@
               label-size="sm"
               v-bind:label="$trans('After end order?')"
               label-for="statuscode_after_end_order"
-              description="These statuscodes will show up in the App after the order is completed."
+              :description="$trans('These statuscodes will show up as buttons in the App after the order is completed.')"
             >
               <b-form-checkbox
                 id="statuscode_after_end_order"
