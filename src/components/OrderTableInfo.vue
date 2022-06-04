@@ -12,7 +12,8 @@
         <br/>
         <p>
           {{ $trans('Order type') }}: <b>{{ order.order_type }}</b><br/>
-          {{ $trans('Order reference') }}: <b>{{ order.order_reference }}</b></p>
+          {{ $trans('Order reference') }}: <b>{{ order.order_reference }}</b>
+        </p>
       </b-col>
       <b-col>
         <span v-if="order.order_contact">{{ $trans('Contact') }}: {{ order.order_contact }}<br/></span>
@@ -39,7 +40,10 @@
         {{ order.order_address }}<br/>
         {{ order.order_country_code }}-{{ order.order_postal }} {{ order.order_city }}<br/>
         <br/>
-        <p><b>{{ order.order_type }}</b></p>
+        <p>
+          {{ $trans('Order type') }}: <b>{{ order.order_type }}</b><br/>
+          {{ $trans('Order reference') }}: <b>{{ order.order_reference }}</b>
+        </p>
 
         <span v-if="order.order_contact">{{ $trans('Contact') }}: {{ order.order_contact }}<br/></span>
         <span v-if="order.order_mobile">{{ $trans('Mobile') }}: {{ order.order_mobile }}<br/></span>
@@ -47,7 +51,6 @@
         <span v-if="order.order_email">{{ $trans('Email') }}: <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/></span>
         {{ $trans('Date') }}: {{ order.order_date }}<br/>
         {{ $trans('Created') }}: {{ order.created }}<br/>
-        memberType: {{ memberType }}
 
         <p v-if="memberType === 'temps'">
           {{ $trans('Required users') }}: {{ order.required_users }}<br/>
