@@ -192,7 +192,8 @@ export default {
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
     this.currentPage = this.orderPastModel.currentPage
-    this.loadData()
+    this.currentPage = 1
+    await this.loadData()
   },
   methods: {
     handleSearchOk(bvModalEvt) {

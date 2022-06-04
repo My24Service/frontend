@@ -127,9 +127,9 @@ export default {
       isLoaded: false,
       memberType: null,
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') }
+        { key: 'product', label: this.$trans('Product'), thAttr: {width: '25%'} },
+        { key: 'location', label: this.$trans('Location'), thAttr: {width: '25%'} },
+        { key: 'remarks', label: this.$trans('Remarks'), thAttr: {width: '50%'} }
       ],
       infoLineFields: [
         { key: 'info', label: this.$trans('Infolines') }

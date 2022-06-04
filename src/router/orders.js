@@ -30,7 +30,7 @@ export default [
   children: [
       {
         name: 'workorder-view',
-        path: '/orders/workorder/:uuid',
+        path: '/orders/orders/workorder/:uuid',
         components: {
           'app-content': Workorder,
         },
