@@ -2,33 +2,11 @@
   <div class="app-grid">
     <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
 
-    <b-modal
+    <SearchModal
       id="search-modal"
       ref="search-modal"
-      v-bind:title="$trans('Search')"
-      @ok="handleSearchOk"
-    >
-      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Search')"
-                label-for="search-query"
-              >
-                <b-form-input
-                  size="sm"
-                  autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  v-model="searchQuery"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+      @do-search="handleSearchOk"
+    />
 
     <b-modal
       id="delete-order-document-modal"
@@ -98,6 +76,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
+import SearchModal from '@/components/SearchModal.vue'
 
 export default {
   name: 'DocumentList',
@@ -107,6 +86,7 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkAdd,
+    SearchModal,
   },
   props: {
     orderPk: {
@@ -142,21 +122,19 @@ export default {
   created () {
     documentModel.setListArgs(`order=${this.orderPk}`)
     this.currentPage = documentModel.currentPage
-    this.loadDocuments()
+    this.loadData()
   },
   methods: {
-    handleSearchOk(bvModalEvt) {
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    // search
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      documentModel.setSearchQuery(this.searchQuery)
+      documentModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // delete
     showDeleteModal(id) {
       this.documentPk = id
       this.$refs['delete-order-document-modal'].show()
@@ -165,13 +143,14 @@ export default {
       try {
         await documentModel.delete(this.documentPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Document has been deleted'))
-        this.loadDocuments()
+        this.loadData()
       } catch(error) {
         console.log('Error deleting document', error)
         this.errorToast(this.$trans('Error deleting document'))
       }
     },
-    async loadDocuments() {
+    // rest
+    async loadData() {
       this.isLoading = true
 
       try {

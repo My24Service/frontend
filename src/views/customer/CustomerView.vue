@@ -62,33 +62,11 @@
         </b-col>
       </b-row>
 
-      <b-modal
+      <SearchModal
         id="search-modal"
         ref="search-modal"
-        v-bind:title="$trans('Search')"
-        @ok="handleSearchOk"
-      >
-        <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-          <b-container fluid>
-            <b-row role="group">
-              <b-col size="12">
-                <b-form-group
-                  v-bind:label="$trans('Search')"
-                  label-for="search-query"
-                >
-                  <b-form-input
-                    size="sm"
-                    autofocus
-                    id="search-query"
-                    ref="searchQuery"
-                    v-model="searchQuery"
-                  ></b-form-input>
-                </b-form-group>
-              </b-col>
-            </b-row>
-          </b-container>
-        </form>
-      </b-modal>
+        @do-search="handleSearchOk"
+      />
 
       <b-pagination
         v-if="this.orderPastModel.count > 20"
@@ -150,12 +128,14 @@ import customerModel from '@/models/customer/Customer.js'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import OrderTableInfo from '@/components/OrderTableInfo.vue'
+import SearchModal from '@/components/SearchModal.vue'
 
 export default {
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     OrderTableInfo,
+    SearchModal,
   },
   data() {
     return {
@@ -195,18 +175,16 @@ export default {
     }
   },
   methods: {
-    handleSearchOk(bvModalEvt) {
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    // search
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      orderPastModel.setSearchQuery(this.searchQuery)
-      this.loadHistory()
+      orderPastModel.setSearchQuery(val)
+      this.loadData()
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // rest
     goBack() {
       this.$router.go(-1)
     },

@@ -6,7 +6,7 @@
       v-bind:title="$trans('Search')"
       @ok="doSearch"
     >
-      <form ref="search-form">
+      <form ref="search-form" @submit.stop.prevent="doSearch">
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
@@ -17,10 +17,7 @@
                 <b-form-input
                   size="sm"
                   autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  :value="value"
-                  @input="handleInput"
+                  v-model="query"
                 ></b-form-input>
               </b-form-group>
             </b-col>
@@ -33,24 +30,20 @@
 
 <script>
 export default {
-  props: {
-    value: {
-      type: String
-    },
-    searchMethod: {
-      type: Function
+  data() {
+    return {
+      query: null
     }
   },
   methods: {
-    handleInput(val) {
-      this.$emit('input', val)
-    },
     doSearch() {
-      this.$refs['search-modal'].hide()
-      this.searchMethod()
+      this.$emit('do-search', this.query)
     },
-    showSearchModal() {
+    show() {
       this.$refs['search-modal'].show()
+    },
+    hide() {
+      this.$refs['search-modal'].hide()
     }
   },
 }

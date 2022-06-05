@@ -4,15 +4,15 @@
     <b-modal
       id="sort-modal"
       ref="sort-modal"
-      v-bind:title="$trans('Sort')"
+      :title="$trans('Sort')"
       @ok="doSort"
     >
-      <form ref="search-form">
+      <form ref="sort-form">
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
               <div>
-                <b-form-group label="Individual radios">
+                <b-form-group :label="$trans('Sort')">
                   <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
                   <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
                 </b-form-group>
@@ -23,33 +23,11 @@
       </form>
     </b-modal>
 
-    <b-modal
+    <SearchModal
       id="search-modal"
       ref="search-modal"
-      v-bind:title="$trans('Search')"
-      @ok="handleSearchOk"
-    >
-      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Search')"
-                label-for="search-query"
-              >
-                <b-form-input
-                  size="sm"
-                  autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  v-model="searchQuery"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+      @do-search="handleSearchOk"
+    />
 
     <b-modal
       v-if="!isCustomer"
@@ -220,6 +198,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
+import SearchModal from '@/components/SearchModal.vue'
 import { componentMixin } from '@/utils'
 
 export default {
@@ -235,6 +214,7 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     ButtonLinkSort,
+    SearchModal,
   },
   props: {
     dispatch: {
@@ -301,13 +281,9 @@ export default {
       orderModel.setSort(this.sortMode)
       this.loadData()
     },
-    handleSearchOk(bvModalEvt) {
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      orderModel.setSearchQuery(this.searchQuery)
+      orderModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {

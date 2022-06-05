@@ -1,33 +1,11 @@
 <template>
   <div class="app-grid" ref="order-list-past">
 
-    <b-modal
+    <SearchModal
       id="search-modal"
       ref="search-modal"
-      v-bind:title="$trans('Search')"
-      @ok="handleSearchOk"
-    >
-      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Search')"
-                label-for="search-query"
-              >
-                <b-form-input
-                  size="sm"
-                  autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  v-model="searchQuery"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+      @do-search="handleSearchOk"
+    />
 
     <b-modal
       v-if="!isCustomer"
@@ -145,6 +123,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 import IconLinkPlus from '@/components/IconLinkPlus.vue'
+import SearchModal from '@/components/SearchModal.vue'
 import { componentMixin } from '@/utils'
 
 export default {
@@ -155,6 +134,7 @@ export default {
     ButtonLinkSearch,
     ButtonLinkSort,
     IconLinkPlus,
+    SearchModal,
   },
   data() {
     return {
@@ -196,18 +176,16 @@ export default {
     await this.loadData()
   },
   methods: {
-    handleSearchOk(bvModalEvt) {
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    // search
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      orderPastModel.setSearchQuery(this.searchQuery)
+      orderPastModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // change status
     showChangeStatusModal(id) {
       this.orderPk = id
       this.$refs['change-status-modal'].show()
@@ -227,6 +205,7 @@ export default {
         this.errorToast(this.$trans('Error creating status'))
       }
     },
+    // rest
     rowStyle(item, type) {
       if (!item || type !== 'row') return
 

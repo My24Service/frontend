@@ -4,33 +4,11 @@
       <b-icon-arrow-up-circle-fill></b-icon-arrow-up-circle-fill>
     </b-button>
 
-    <b-modal
-      id="dispatch-search-modal"
-      ref="dispatch-search-modal"
-      v-bind:title="$trans('Search')"
-      @ok="handleSearchOk"
-    >
-      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Search')"
-                label-for="search-query"
-              >
-                <b-form-input
-                  size="sm"
-                  autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  v-model="searchQuery"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
 
     <b-modal
       id="dispatch-change-date-modal"
@@ -270,11 +248,15 @@ import Dispatch from '@/services/dispatch.js'
 import orderModel from '@/models/orders/Order.js'
 import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
 import assign from '@/models/mobile/Assign.js'
+import SearchModal from '@/components/SearchModal.vue'
 import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from '../../constants';
 
 export default {
   name: 'DispatchComponent',
+  components: {
+    SearchModal,
+  },
   props: {
     assignModeProp: {
       type: [Boolean],
@@ -319,6 +301,7 @@ export default {
     }
   },
   methods: {
+    // dates
     clearAssignedorderDates() {
       this.assignedOrder.alt_start_date = null
       this.assignedOrder.alt_end_date = null
@@ -347,26 +330,24 @@ export default {
           this.showOverlay = false
         }
     },
+    // nav
     backToTop() {
       document.body.scrollTop = 0;
       document.documentElement.scrollTop = 0;
     },
-    handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
-      this.$refs['dispatch-search-modal'].hide()
-      this.$bvModal.hide('dispatch-search-modal')
-
+    // search
+    handleSearchOk(val) {
+      this.$refs['search-modal'].hide()
       setTimeout(() => {
-        this.dispatch.setSearchQuery(this.searchQuery)
+        this.dispatch.setSearchQuery(val)
         this.dispatch.search()
       }, 500)
+      this.loadData()
     },
     showSearchModal() {
-      this.$refs['dispatch-search-modal'].show()
+      this.$refs['search-modal'].show()
     },
+    // rest
     loadToday() {
       this.dispatch.loadToday()
     },

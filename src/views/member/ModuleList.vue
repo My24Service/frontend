@@ -10,33 +10,11 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this module?') }}</p>
     </b-modal>
 
-    <b-modal
+    <SearchModal
       id="search-modal"
       ref="search-modal"
-      v-bind:title="$trans('Search')"
-      @ok="handleSearchOk"
-    >
-      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Search')"
-                label-for="search-query"
-              >
-                <b-form-input
-                  size="sm"
-                  autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  v-model="searchQuery"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+      @do-search="handleSearchOk"
+    />
 
     <b-pagination
       v-if="this.moduleModel.count > 20"
@@ -106,6 +84,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
+import SearchModal from '@/components/SearchModal.vue'
 
 export default {
   components: {
@@ -114,6 +93,7 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkAdd,
+    SearchModal,
   },
   data() {
     return {
@@ -142,18 +122,16 @@ export default {
     this.loadData()
   },
   methods: {
-    handleSearchOk(bvModalEvt) {
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    // search
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      moduleModel.setSearchQuery(this.searchQuery)
+      moduleModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // delete
     showDeleteModal(id) {
       this.modulePk = id
       this.$refs['delete-module-modal'].show()
@@ -168,6 +146,7 @@ export default {
         this.errorToast(this.$trans('Error deleting module'))
       }
     },
+    // rest
     async loadData() {
       this.isLoading = true;
 
