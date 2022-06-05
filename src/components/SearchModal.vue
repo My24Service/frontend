@@ -46,6 +46,7 @@ export default {
       this.$emit('input', val)
     },
     doSearch() {
+      this.$refs['search-modal'].hide()
       this.searchMethod()
     },
     showSearchModal() {

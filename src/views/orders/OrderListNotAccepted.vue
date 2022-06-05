@@ -233,7 +233,6 @@ export default {
       this.loadData()
     },
     handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
       this.handleSearchSubmit()
     },
     handleSearchSubmit() {

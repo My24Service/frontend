@@ -212,7 +212,6 @@ export default {
       this.$router.push({name: 'order-add-maintenance'})
     },
     handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
       this.handleSearchSubmit()
     },
     handleSearchSubmit() {

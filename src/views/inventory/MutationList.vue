@@ -113,7 +113,6 @@ export default {
   },
   methods: {
     handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
       this.handleSearchSubmit()
     },
     handleSearchSubmit() {
