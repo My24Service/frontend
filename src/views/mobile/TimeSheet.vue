@@ -152,12 +152,14 @@ export default {
         this.materials = data.materials
 
         // get all weekdays from the first user
-        for(let i=0; i<data.activity[0].totals.length; i++) {
-          header_columns.push({
-            key: `day${i}`,
-            label: data.activity[0].totals[i].weekday,
-            sortable: true
-          })
+        if (data.activity.length) {
+          for(let i=0; i<data.activity[0].totals.length; i++) {
+            header_columns.push({
+              key: `day${i}`,
+              label: data.activity[0].totals[i].weekday,
+              sortable: true
+            })
+          }
         }
 
         header_columns.push({

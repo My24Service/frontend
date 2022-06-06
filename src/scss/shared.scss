@@ -1,16 +1,3 @@
-// Define variable defaults
-$my24: #ff9933;
-$primary: $my24;
-$navbar-light-color: $my24;
-// $font-family-sans-serif: 'Catamaran';
-$active-link: #222222;
-$normal-link: #fff;
-$font-size-base: 0.9rem;
-
-// Then import Bootstrap an BootstrapVue SCSS files (order is important)
-@import 'node_modules/bootstrap/scss/bootstrap.scss';
-@import 'node_modules/bootstrap-vue/src/index.scss';
-
 .btn:focus {
   outline: none;
   box-shadow: none;
@@ -80,7 +67,6 @@ $font-size-base: 0.9rem;
 }
 
 .app-grid {
-
 }
 
 .app-detail {
@@ -118,13 +104,6 @@ $font-size-base: 0.9rem;
 
 .subnav-pills {
   margin-top: 20px;
-}
-
-.memberLogo {
-  position: absolute;
-  top: 0;
-  z-index: 10;
-  height: 120px;
 }
 
 .data-table {
