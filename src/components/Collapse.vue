@@ -1,7 +1,7 @@
 <template>
 	<div>
     <b-link @click="isOpen = !isOpen">
-      <div class="section-header">
+      <div class="section-header bg-primary">
         <h4>{{ title }}</h4>
         <div class="section-header-icon float-right h4 mb-2">
           <b-icon-arrow-up-short v-if="isOpen"></b-icon-arrow-up-short>
@@ -43,7 +43,6 @@ div.section {
 }
 div.section-header {
   padding: 4px;
-  background-color: #ff9933;
   color: #fff;
 }
 div.section a {

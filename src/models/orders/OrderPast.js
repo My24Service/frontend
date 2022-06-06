@@ -5,7 +5,7 @@ import orderModel from './Order'
 class OrderPast extends BaseModel {
   fields = orderModel.fields
 
-  url = '/order/order/pastv2/'
+  url = '/order/order/past/'
 
 }
 

@@ -19,4 +19,11 @@ export default {
 </script>
 
 <style>
+.memberLogo {
+  position: absolute;
+  top: 0;
+  z-index: 10;
+  max-height: 120px;
+  max-width: 120px;
+}
 </style>
