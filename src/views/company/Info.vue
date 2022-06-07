@@ -211,6 +211,30 @@
             <img width="200px" :src="upload_preview" alt=""/>
           </b-col>
         </b-row>
+        <b-row>
+          <b-col cols="4">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Optional logo for on the workorder')"
+              label-for="member_companylogo_workorder"
+            >
+              <b-form-file
+                id="member_companylogo_workorder"
+                accept="image/*"
+                :placeholder="$trans('Choose a file or drop it here...')"
+                @input="imageWorkorderSelected"
+              ></b-form-file>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4">
+            <h3>{{ $trans('Current image') }}</h3>
+            <img width="200px" :src="current_image_workorder" alt=""/>
+          </b-col>
+          <b-col cols="4">
+            <h3>{{ $trans('Upload preview') }}</h3>
+            <img width="200px" :src="upload_preview_workorder" alt=""/>
+          </b-col>
+        </b-row>
 
         <div class="mx-auto">
           <footer class="modal-footer">
@@ -249,7 +273,10 @@ export default {
       errorMessage: null,
       current_image: '/static/core/img/noimg.png',
       upload_preview: '/static/core/img/noimg.png',
-      fileChanged: false
+      current_image_workorder: '/static/core/img/noimg.png',
+      upload_preview_workorder: '/static/core/img/noimg.png',
+      fileChanged: false,
+      fileWorkorderChanged: false,
     }
   },
   validations: {
@@ -290,6 +317,17 @@ export default {
 
       reader.readAsDataURL(file)
       this.fileChanged = true
+    },
+    imageWorkorderSelected(file) {
+      const reader = new FileReader()
+      reader.onload = (f) => {
+        const b64 = f.target.result
+        this.upload_preview_workorder = b64
+        this.member.companylogo_workorder = b64
+      }
+
+      reader.readAsDataURL(file)
+      this.fileWorkorderChanged = true
     },
     async submitForm() {
       this.submitClicked = true
@@ -333,6 +371,7 @@ export default {
       try {
         this.member = await memberModel.getMe()
         this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
+        this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : '/static/core/img/noimg.png'
         this.isLoading = false
       } catch(error) {
         console.log('error fetching member/me', error)
