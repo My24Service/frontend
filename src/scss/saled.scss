@@ -1,8 +1,15 @@
 // Define variable defaults
-$my24: #1700ff;
+
+// Primair, groen, #c4d82e
+// Secundair, antraciet, #293133
+// Tertiair, blauw, #14377d
+
+$my24: #c4d82e;
 $primary: $my24;
+$secondary: #293133;
+
 $navbar-light-color: $my24;
-$active-link: #222222;
+$active-link: #14377d;
 $normal-link: #fff;
 $font-size-base: 0.9rem;
 
