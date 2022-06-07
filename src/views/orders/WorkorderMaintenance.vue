@@ -262,11 +262,11 @@ export default {
   },
   methods: {
     getCompanyLogo() {
-      if (data.member.companylogo_workorder_url) {
-        return data.member.companylogo_workorder_url
+      if (this.data.member.companylogo_workorder_url) {
+        return this.data.member.companylogo_workorder_url
       }
 
-      return data.member.companylogo_url
+      return this.data.member.companylogo_url
     }
   }
 }
