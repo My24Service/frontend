@@ -519,12 +519,12 @@ export default {
 
       this.buttonDisabled = true
 
-      // remove null fields
-      const null_fields = ['companylogo_workorder']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.member[null_fields[i]] === null) {
-          delete this.member[null_fields[i]]
-        }
+      if (!this.fileChanged) {
+        delete this.member.companylogo
+      }
+
+      if (!this.fileWorkorderChanged) {
+        delete this.member.companylogo_workorder
       }
 
       if (this.isCreate) {
@@ -570,6 +570,7 @@ export default {
       try {
         this.member = await memberModel.detail(this.pk)
         this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
+        this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : '/static/core/img/noimg.png'
         this.orgCompanycode = this.member.companycode
         this.isLoading = false
       } catch(error) {
