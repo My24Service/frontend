@@ -2,7 +2,7 @@
     <div class="pdf-container" v-if="data">
         <div class="row">
             <div class="col-sm-2 logo">
-                <img class="thumbnail" :src="data.member.companylogo_url" style="border:0; height: 120px;" :alt="data.member.name" />
+                <img class="thumbnail" :src="getCompanyLogo()" style="border:0; max-height: 120px; max-width: 120px" :alt="data.member.name" />
             </div>
 
             <div class="col-sm-4 info">
@@ -259,6 +259,15 @@ export default {
   },
   async created() {
     this.data = await orderModel.getWorkorderData(this.uuid)
+  },
+  methods: {
+    getCompanyLogo() {
+      if (this.data.member.companylogo_workorder_url) {
+        return this.data.member.companylogo_workorder_url
+      }
+
+      return this.data.member.companylogo_url
+    }
   }
 }
 </script>
