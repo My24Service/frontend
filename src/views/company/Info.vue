@@ -338,7 +338,7 @@ export default {
       }
 
       // remove null fields
-      const null_fields = ['companylogo']
+      const null_fields = ['companylogo', 'companylogo_workorder']
       for (let i=0; i<null_fields.length; i++) {
         if (this.member[null_fields[i]] === null) {
           delete this.member[null_fields[i]]
