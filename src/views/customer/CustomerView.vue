@@ -62,33 +62,11 @@
         </b-col>
       </b-row>
 
-      <b-modal
+      <SearchModal
         id="search-modal"
         ref="search-modal"
-        v-bind:title="$trans('Search')"
-        @ok="handleSearchOk"
-      >
-        <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-          <b-container fluid>
-            <b-row role="group">
-              <b-col size="12">
-                <b-form-group
-                  v-bind:label="$trans('Search')"
-                  label-for="search-query"
-                >
-                  <b-form-input
-                    size="sm"
-                    autofocus
-                    id="search-query"
-                    ref="searchQuery"
-                    v-model="searchQuery"
-                  ></b-form-input>
-                </b-form-group>
-              </b-col>
-            </b-row>
-          </b-container>
-        </form>
-      </b-modal>
+        @do-search="handleSearchOk"
+      />
 
       <b-pagination
         v-if="this.orderPastModel.count > 20"
@@ -129,11 +107,10 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #cell(workorder_url)="data">
-          <b-link :href="data.item.workorder_url" target="_blank">{{ $trans('View') }}</b-link>
-        </template>
-        <template #cell(orderlines)="data">
-          <b-table dark borderless small :fields="orderLineFields" :items="data.item.orderlines" responsive="sm"></b-table>
+        <template #cell(id)="data">
+          <OrderTableInfo
+            v-bind:order="data.item"
+          />
         </template>
       </b-table>
 
@@ -150,11 +127,15 @@ import orderPastModel from '@/models/orders/OrderPast.js'
 import customerModel from '@/models/customer/Customer.js'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import OrderTableInfo from '@/components/OrderTableInfo.vue'
+import SearchModal from '@/components/SearchModal.vue'
 
 export default {
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
+    OrderTableInfo,
+    SearchModal,
   },
   data() {
     return {
@@ -165,18 +146,9 @@ export default {
       buttonDisabled: false,
       customer: customerModel.fields,
       orders: [],
-      orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') }
-      ],
       orderPastFields: [
-        { key: 'order_id', label: this.$trans('Order ID'), sortable: true, thAttr: {width: '10%'} },
-        { key: 'order_date', label: this.$trans('Date'), sortable: true, thAttr: {width: '20%'} },
-        { key: 'order_type', label: this.$trans('Type'), sortable: true, thAttr: {width: '10%'} },
-        { key: 'workorder_url', label: this.$trans('Workorder'), sortable: true, thAttr: {width: '10%'} },
-        { key: 'orderlines', label: this.$trans('Orderlines'), thAttr: {width: '40%'}, tdAttr: {colspan: 2} },
-        { key: 'icons', thAttr: {width: '10%'} },
+        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
+        { key: 'icons', thAttr: {width: '5%'} },
       ],
       breadcrumb: [
         {
@@ -203,19 +175,16 @@ export default {
     }
   },
   methods: {
-    handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    // search
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      orderPastModel.setSearchQuery(this.searchQuery)
+      orderPastModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // rest
     goBack() {
       this.$router.go(-1)
     },
@@ -225,11 +194,23 @@ export default {
 
       try {
         this.customer = await customerModel.detail(this.pk)
+        await this.loadHistory()
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching orders or customer detail', error)
+        this.errorToast(this.$trans('Error fetching orders'))
+        this.isLoading = false
+      }
+    },
+    async loadHistory() {
+      this.isLoading = true
+
+      try {
         const results = await orderPastModel.list()
         this.orders = results.results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching orders or customer detail', error)
+        console.log('error fetching history orders', error)
         this.errorToast(this.$trans('Error fetching orders'))
         this.isLoading = false
       }

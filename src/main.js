@@ -1,5 +1,5 @@
 import BASE_URL from './services/base-url'
-
+const companycode = BASE_URL.split('//')[1].split('.')[0]
 const base = document.createElement("base")
 base.href = BASE_URL
 document.head.appendChild(base)
@@ -119,8 +119,22 @@ import App from './App.vue'
 import store from './store'
 import router from './router'
 
-import './app.scss'
+import './scss/app.scss'
 import 'vue-loading-overlay/dist/vue-loading.css'
+import './scss/shared.scss'
+
+// themes
+const defaultTheme = 'theme-default'
+const themes = {
+  'saled': 'theme-saled'
+}
+const theme = companycode in themes ? themes[companycode] : defaultTheme
+console.log(`${companycode} in themes`, companycode in themes)
+
+import { toggleTheme } from "@zougt/vite-plugin-theme-preprocessor/dist/browser-utils";
+toggleTheme({
+  scopeName: theme,
+});
 
 // global mixins
 import toastMix from '@/mixins/toast'

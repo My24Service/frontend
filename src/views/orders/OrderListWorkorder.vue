@@ -1,33 +1,11 @@
 <template>
   <div class="app-grid">
 
-    <b-modal
+    <SearchModal
       id="search-modal"
       ref="search-modal"
-      v-bind:title="$trans('Search')"
-      @ok="handleSearchOk"
-    >
-      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Search')"
-                label-for="search-query"
-              >
-                <b-form-input
-                  size="sm"
-                  autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  v-model="searchQuery"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+      @do-search="handleSearchOk"
+    />
 
     <b-modal
       id="sort-modal"
@@ -35,7 +13,7 @@
       v-bind:title="$trans('Sort')"
       @ok="doSort"
     >
-      <form ref="search-form">
+      <form ref="sort-form">
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
@@ -165,6 +143,7 @@ import IconLinkPlus from '@/components/IconLinkPlus.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
+import SearchModal from '@/components/SearchModal.vue'
 
 export default {
   components: {
@@ -173,6 +152,7 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkSort,
+    SearchModal,
   },
   props: {
     queryMode: {
@@ -219,6 +199,7 @@ export default {
     this.loadData()
   },
   methods: {
+    // sort
     showSortModal() {
       this.$refs['sort-modal'].show()
     },
@@ -226,19 +207,16 @@ export default {
       orderWorkorderModel.setSort(this.sortMode)
       this.loadData()
     },
-    handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    // search
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      orderWorkorderModel.setSearchQuery(this.searchQuery)
+      orderWorkorderModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // rest
     async changeStatus() {
       const status = {
         order: this.orderPk,

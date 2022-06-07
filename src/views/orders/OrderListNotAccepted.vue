@@ -16,12 +16,12 @@
       v-bind:title="$trans('Sort')"
       @ok="doSort"
     >
-      <form ref="search-form">
+      <form ref="sort-form">
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
               <div>
-                <b-form-group label="Individual radios">
+                <b-form-group :label="$trans('Sort')">
                   <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
                   <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
                 </b-form-group>
@@ -32,33 +32,11 @@
       </form>
     </b-modal>
 
-    <b-modal
+    <SearchModal
       id="search-modal"
       ref="search-modal"
-      v-bind:title="$trans('Search')"
-      @ok="handleSearchOk"
-    >
-      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Search')"
-                label-for="search-query"
-              >
-                <b-form-input
-                  size="sm"
-                  autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  v-model="searchQuery"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+      @do-search="handleSearchOk"
+    />
 
     <b-pagination
       v-if="this.orderNotAcceptedModel.count > 20"
@@ -144,6 +122,7 @@ import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import SearchModal from '@/components/SearchModal.vue'
 import { componentMixin } from '@/utils'
 
 export default {
@@ -156,6 +135,7 @@ export default {
     ButtonLinkAdd,
     IconLinkDelete,
     IconLinkEdit,
+    SearchModal,
   },
   props: {
     dispatch: {
@@ -211,6 +191,7 @@ export default {
     this.loadData()
   },
   methods: {
+    // delete
     async doDelete() {
       try {
         await orderModel.delete(this.orderPk)
@@ -225,6 +206,7 @@ export default {
       this.orderPk = id
       this.$refs['delete-order-modal'].show()
     },
+    // sort
     showSortModal() {
       this.$refs['sort-modal'].show()
     },
@@ -232,19 +214,16 @@ export default {
       orderNotAcceptedModel.setSort(this.sortMode)
       this.loadData()
     },
-    handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    // search
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      orderNotAcceptedModel.setSearchQuery(this.searchQuery)
+      orderNotAcceptedModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // rest
     rowStyle(item, type) {
       if (!item || type !== 'row') return
 

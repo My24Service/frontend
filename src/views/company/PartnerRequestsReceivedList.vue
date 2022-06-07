@@ -1,33 +1,11 @@
 <template>
   <div class="app-grid">
 
-    <b-modal
+    <SearchModal
       id="search-modal"
       ref="search-modal"
-      v-bind:title="$trans('Search')"
-      @ok="handleSearchOk"
-    >
-      <form ref="search-form" @submit.stop.prevent="handleSearchSubmit">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Search')"
-                label-for="search-query"
-              >
-                <b-form-input
-                  size="sm"
-                  autofocus
-                  id="search-query"
-                  ref="searchQuery"
-                  v-model="searchQuery"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+      @do-search="handleSearchOk"
+    />
 
     <b-modal
       id="delete-receievd-partner-request-modal"
@@ -140,6 +118,7 @@ import partnerRequestsReceivedModel from '@/models/company/PartnerRequestsReceiv
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import SearchModal from '@/components/SearchModal.vue'
 
 export default {
   name: 'PartnerRequestsReceivedList',
@@ -148,6 +127,7 @@ export default {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
+    SearchModal,
   },
   data() {
     return {
@@ -179,19 +159,16 @@ export default {
     this.loadData()
   },
   methods: {
-    handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    // search
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      partnerRequestsReceivedModel.setSearchQuery(this.searchQuery)
+      partnerRequestsReceivedModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // requests
     showAcceptRequestModal(id) {
       this.pk = id
       this.$refs['accept-receievd-partner-request-modal'].show()
@@ -220,6 +197,7 @@ export default {
         this.errorToast(this.$trans('Error rejecting partner request'))
       }
     },
+    // delete
     showDeleteModal(id) {
       this.pk = id
       this.$refs['delete-receievd-partner-request-modal'].show()
@@ -234,6 +212,7 @@ export default {
         this.errorToast(this.$trans('Error deleting partner request'))
       }
     },
+    // rest
     async loadData() {
       this.isLoading = true;
 

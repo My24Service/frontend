@@ -1,6 +1,12 @@
 <template>
   <div class="app-grid" ref="order-list-past">
 
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
     <b-pagination
       v-if="this.orderSalesModel.count > 20"
       class="pt-4"
@@ -59,12 +65,14 @@ import orderSalesModel from '@/models/orders/OrderSales.js'
 import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import SearchModal from '@/components/SearchModal.vue'
 
 export default {
   components: {
     OrderTableInfo,
     ButtonLinkRefresh,
     ButtonLinkSearch,
+    SearchModal,
   },
   data() {
     return {
@@ -101,14 +109,9 @@ export default {
     this.loadData()
   },
   methods: {
-    handleSearchOk(bvModalEvt) {
-      bvModalEvt.preventDefault()
-      this.handleSearchSubmit()
-    },
-    handleSearchSubmit() {
+    handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-
-      orderSalesModel.setSearchQuery(this.searchQuery)
+      orderSalesModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
