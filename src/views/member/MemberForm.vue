@@ -280,6 +280,30 @@
             <img width="200px" :src="upload_preview" alt=""/>
           </b-col>
         </b-row>
+        <b-row>
+          <b-col cols="4">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Optional logo for on the workorder')"
+              label-for="member_companylogo_workorder"
+            >
+              <b-form-file
+                id="member_companylogo_workorder"
+                accept="image/*"
+                :placeholder="$trans('Choose a file or drop it here...')"
+                @input="imageWorkorderSelected"
+              ></b-form-file>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4">
+            <h3>{{ $trans('Current image') }}</h3>
+            <img width="200px" :src="current_image_workorder" alt=""/>
+          </b-col>
+          <b-col cols="4">
+            <h3>{{ $trans('Upload preview') }}</h3>
+            <img width="200px" :src="upload_preview_workorder" alt=""/>
+          </b-col>
+        </b-row>
 
         <div class="mx-auto">
           <footer class="modal-footer">
@@ -334,7 +358,10 @@ export default {
       suppliers: [],
       current_image: '/static/core/img/noimg.png',
       upload_preview: '/static/core/img/noimg.png',
-      fileChanged: false
+      current_image_workorder: '/static/core/img/noimg.png',
+      upload_preview_workorder: '/static/core/img/noimg.png',
+      fileChanged: false,
+      fileWorkorderChanged: false,
     }
   },
   validations() {
@@ -455,6 +482,17 @@ export default {
       this.fileChanged = true
       this.v$.member.companylogo.$touch()
     },
+    imageWorkorderSelected(file) {
+      const reader = new FileReader()
+      reader.onload = (f) => {
+        const b64 = f.target.result
+        this.upload_preview_workorder = b64
+        this.member.companylogo_workorder = b64
+      }
+
+      reader.readAsDataURL(file)
+      this.fileWorkorderChanged = true
+    },
     selectSupplier(option) {
       this.member.supplier_relation = option.id
       this.member.supplier_name = option.name
@@ -480,6 +518,14 @@ export default {
       }
 
       this.buttonDisabled = true
+
+      if (!this.fileChanged) {
+        delete this.member.companylogo
+      }
+
+      if (!this.fileWorkorderChanged) {
+        delete this.member.companylogo_workorder
+      }
 
       if (this.isCreate) {
         this.isLoading = true
@@ -524,6 +570,7 @@ export default {
       try {
         this.member = await memberModel.detail(this.pk)
         this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
+        this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : '/static/core/img/noimg.png'
         this.orgCompanycode = this.member.companycode
         this.isLoading = false
       } catch(error) {

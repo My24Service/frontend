@@ -337,20 +337,16 @@ export default {
         return
       }
 
-      // remove null fields
-      const null_fields = ['companylogo']
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.member[null_fields[i]] === null) {
-          delete this.member[null_fields[i]]
-        }
-      }
-
       this.buttonDisabled = true
       this.isLoading = true
 
       try {
         if (!this.fileChanged) {
           delete this.member.companylogo
+        }
+
+        if (!this.fileWorkorderChanged) {
+          delete this.member.companylogo_workorder
         }
 
         await memberModel.updateMe(this.member)
