@@ -18,6 +18,7 @@
                 :readonly="customerIdCreated"
                 :state="isSubmitClicked ? !v$.customer.customer_id.$error : null"
               ></b-form-input>
+              <p v-if="!customer.customer_id"><b-link @click="getNewCustomerIdFromLatest">{{ $trans('generate new') }}</b-link></p>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.customer.customer_id.$error : null">
                 {{ $trans('Please enter a customer ID') }}
@@ -319,6 +320,10 @@ export default {
     }
   },
   methods: {
+    async getNewCustomerIdFromLatest() {
+      const data = await customerModel.getNewCustomerIdFromLatest()
+      this.customer.customer_id = data.result.last_customer_id
+    },
     async submitForm() {
       this.submitClicked = true
       this.v$.$touch()

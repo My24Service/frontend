@@ -145,12 +145,12 @@ export default {
       isLoading: false,
       customers: [],
       customerFields: [
-        {key: 'id', label: this.$trans('Company'), sortable: true},
-        {key: 'tel', label: this.$trans('Tel.'), sortable: true},
-        {key: 'address', label: this.$trans('Address'), sortable: true},
-        {key: 'country_code', label: this.$trans('Postal'), sortable: true},
-        {key: 'city', label: this.$trans('City'), sortable: true},
-        {key: 'icons'}
+        {key: 'id', label: this.$trans('Company'), sortable: true, thAttr: {width: '25%'}},
+        {key: 'tel', label: this.$trans('Tel.'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'address', label: this.$trans('Address'), sortable: true, thAttr: {width: '20%'}},
+        {key: 'country_code', label: this.$trans('Postal'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'city', label: this.$trans('City'), sortable: true, thAttr: {width: '20%'}},
+        {key: 'icons', thAttr: {width: '15%'}}
       ],
     }
   },

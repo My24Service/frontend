@@ -38,6 +38,10 @@ class Customer extends BaseModel {
   search(query) {
     return this.axios.get(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
   }
+
+  getNewCustomerIdFromLatest() {
+    return this.axios.get(`${this.url}get_new_customer_id_from_latest/`).then((result) => result.data)
+  }
 }
 
 let customerModel = new Customer()
