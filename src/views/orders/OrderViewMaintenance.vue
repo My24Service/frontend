@@ -106,12 +106,8 @@
       <b-row class="my-2">
           <b-col cols="2"><strong>{{ $trans('Workorder online') }}</strong></b-col>
           <b-col cols="9">
-            <b-link class="px-1" :href="order.workorder_url" target="_blank">
-              {{ order.order_id }}
-            </b-link>
-            &nbsp;
             <b-link class="px-1" @click="openWorkorder()" target="_blank">
-              {{ $trans('Order') }} {{ order.order_id }} (new workorder)
+              {{ $trans('Order') }} {{ order.order_id }}
             </b-link>
           </b-col>
       </b-row>

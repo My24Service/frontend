@@ -123,7 +123,7 @@ export default {
 
       try {
         const loginResult = await accountModel.login(this.username, this.password)
-        this.$auth.authenticate({ accessToken: loginResult.key })
+        this.$auth.authenticate({ accessToken: loginResult.token })
 
         await this.$store.dispatch('getInitialData')
 

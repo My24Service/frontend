@@ -18,6 +18,19 @@ class Account extends BaseModel {
   async login(username, password) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
+    const url = '/jwt-token/'
+
+    const postData = {
+      username: username,
+      password: password,
+    }
+
+    return this.axios.post(url, postData, headers).then((response) => response.data)
+  }
+
+  async loginOld(username, password) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
     const url = '/rest-auth/login/'
 
     const postData = {
