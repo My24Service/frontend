@@ -129,7 +129,6 @@ const themes = {
   'saled': 'theme-saled'
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
-console.log(`${companycode} in themes`, companycode in themes)
 
 import { toggleTheme } from "@zougt/vite-plugin-theme-preprocessor/dist/browser-utils";
 toggleTheme({
