@@ -9,9 +9,14 @@ export default (client, auth) => {
 
     const token = auth.getAccessToken()
     if (token) {
+      // request.headers = {
+      //   ...request.headers || {},
+      //   Authorization: `Token ${token}`
+      // }
+
       request.headers = {
         ...request.headers || {},
-        Authorization: `Token ${token}`
+        Authorization: `Bearer ${token}`
       }
     }
 

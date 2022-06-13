@@ -57,7 +57,7 @@ class BaseModel {
   }
 
   getCsrfToken() {
-    return axios.get('/get-csrf-token/').then((response) => response.data.token)
+    return this.axios.get('/get-csrf-token/').then((response) => response.data.token)
   }
 
   getHeaders(token) {
