@@ -58,28 +58,6 @@
         </b-col>
       </b-row>
 
-      <b-row v-if="barChartdataOrderTypes.labels && barChartdataOrderTypes.labels.length > orderTypeDisplayThreshold">
-        <b-col cols="12">
-          <bar-chart
-            id="bar-chart-order-types-1"
-            v-if="!isLoading"
-            :chart-data="barChartdataOrderTypes"
-            :options="options"
-          />
-        </b-col>
-      </b-row>
-
-      <b-row v-if="barChartdataOrderTypes.labels && barChartdataOrderTypes.labels.length > orderTypeDisplayThreshold">
-        <b-col cols="12">
-          <pie-chart
-            id="pie-chart-order-types-2"
-            v-if="!isLoading"
-            :chart-data="pieChartdataOrderTypes"
-            :options="pieOptions"
-          />
-        </b-col>
-      </b-row>
-
       <b-row v-if="barChartdataOrderTypes.labels && barChartdataOrderTypes.labels.length <= orderTypeDisplayThreshold">
         <b-col cols="6">
           <bar-chart
@@ -94,6 +72,25 @@
             id="pie-chart-order-types-4"
             v-if="!isLoading"
             :chart-data="pieChartdataOrderTypes"
+            :options="pieOptions"
+          />
+        </b-col>
+      </b-row>
+
+      <b-row v-if="barChartdataOrderStatuses.labels">
+        <b-col cols="6">
+          <bar-chart
+            id="bar-chart-order-statuses-1"
+            v-if="!isLoading"
+            :chart-data="barChartdataOrderStatuses"
+            :options="options"
+          />
+        </b-col>
+        <b-col cols="6">
+          <pie-chart
+            id="pie-chart-order-statuses-2"
+            v-if="!isLoading"
+            :chart-data="pieChartdataOrderStatuses"
             :options="pieOptions"
           />
         </b-col>
@@ -161,6 +158,10 @@ export default {
       pieChartdataOrderTypes: {},
       barChartdataOrderTypes: {},
 
+      orderStatusDisplayThreshold: 50,
+      pieChartdataOrderStatuses: {},
+      barChartdataOrderStatuses: {},
+
       pieChartdataTransactions: {},
       barChartdataTransactions: {},
 
@@ -221,7 +222,7 @@ export default {
       try {
         const data = await dashboardModel.list()
 
-        // bar graph top customers
+        // CUSTOMERS: bar graph top customers
         let graphDataCustomers = [], labelsCustomers = [];
         for (let i=0; i<data.top_50_customers.length; i++) {
           if (data.top_50_customers[i].count === 0) {
@@ -241,7 +242,51 @@ export default {
           }]
         }
 
-        // pie & bar graph, percentages
+        // STATUSES: pie & bar graph, percentages
+        let pieGraphDataOrderStatuses = [], barGraphDataOrderStatuses = [], labelsOrderStatuses = [];
+        for (const [orderStatus, _data] of Object.entries(data.order_status_counts)) {
+          if (orderStatus === 'total') {
+            continue;
+          }
+
+          if (_data.total === 0) {
+            continue;
+          }
+
+          labelsOrderStatuses.push(_data.text)
+          pieGraphDataOrderStatuses.push(_data.perc)
+          barGraphDataOrderStatuses.push(_data.total)
+        }
+
+        this.pieChartdataOrderStatuses = {
+          labels: labelsOrderStatuses,
+          datasets: [{
+            label: `Order statuses in ${this.year}`,
+            data: pieGraphDataOrderStatuses,
+            backgroundColor: [
+              '#4dc9f6',
+              '#f67019',
+              '#f53794',
+              '#537bc4',
+              '#acc236',
+              '#166a8f',
+              '#00a950',
+              '#58595b',
+              '#8549ba'
+            ],
+          }]
+        }
+
+        this.barChartdataOrderStatuses = {
+          labels: labelsOrderStatuses,
+          datasets: [{
+            label: `Order statuses in ${this.year}`,
+            data: barGraphDataOrderStatuses,
+            backgroundColor: '#f87979',
+          }]
+        }
+
+        // ORDER TYPES: pie & bar graph, percentages
         let pieGraphDataOrderTypes = [], barGraphDataOrderTypes = [], labelsOrderTypes = [];
         for (const [orderType, _data] of Object.entries(data.order_type_counts)) {
           if (orderType === 'total') {
