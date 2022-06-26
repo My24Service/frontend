@@ -53,7 +53,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="2" role="group">
+          <b-col cols="1" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Color')"
@@ -71,7 +71,7 @@
               </color-picker>
             </b-form-group>
           </b-col>
-          <b-col cols="2" role="group">
+          <b-col cols="1" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Text color')"
@@ -169,6 +169,21 @@
               <b-form-checkbox
                 id="statuscode_after_end_order"
                 v-model="statuscode.after_end_order"
+              >
+              </b-form-checkbox>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              v-if="list_type === 'order'"
+              label-size="sm"
+              v-bind:label="$trans('Re-assignable?')"
+              label-for="statuscode_can_be_reassigned_after_end"
+              :description="$trans('When checked, the order can be re-assigned after ending it. For example after no workorder has been reported.')"
+            >
+              <b-form-checkbox
+                id="statuscode_can_be_reassigned_after_end"
+                v-model="statuscode.can_be_reassigned_after_end"
               >
               </b-form-checkbox>
             </b-form-group>
