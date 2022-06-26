@@ -711,10 +711,6 @@ class Dispatch {
     this.lastY += this.lineWidth
   }
 
-  getStatus(order) {
-    return order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-  }
-
   resetDayOrders() {
     for(let i=0; i<this.daysInView.length; i++) {
       this.daysInView[i].orders = []
@@ -886,7 +882,9 @@ class Dispatch {
     this.hotspots.forEach(spot => {
       if (this.inStroke(spot.obj,mouseX, mouseY)) {
         this.canvas.style.cursor = "pointer"
-        this.showInfo(`${spot.order.order_info}\nStatus: ${this.getStatus(spot.order)}`, mouseX, mouseY)
+        this.showInfo(
+          `${spot.order.order_info}\nOrder status: ${spot.order.order_status}\nAssigned order status: ${spot.order.assignedorder_status ?? ''}\n`, mouseX, mouseY
+        )
         hit = true
         return
       }
