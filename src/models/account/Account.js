@@ -18,7 +18,7 @@ class Account extends BaseModel {
   async login(username, password) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
-    const url = '/jwt-token/'
+    const url = '/jwt-token-kid/'
 
     const postData = {
       username: username,
