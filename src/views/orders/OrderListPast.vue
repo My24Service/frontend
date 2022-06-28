@@ -49,6 +49,12 @@
       </form>
     </b-modal>
 
+    <OrderFilters
+      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+      @set-filter="setStatusFilter"
+      @remove-filter="removeStatusFilter"
+    />
+
     <b-pagination
       v-if="this.orderPastModel.count > 20"
       class="pt-4"
@@ -124,6 +130,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 import IconLinkPlus from '@/components/IconLinkPlus.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import OrderFilters from "@/components/OrderFilters"
 import { componentMixin } from '@/utils'
 
 export default {
@@ -135,6 +142,7 @@ export default {
     ButtonLinkSort,
     IconLinkPlus,
     SearchModal,
+    OrderFilters,
   },
   data() {
     return {
@@ -176,6 +184,16 @@ export default {
     await this.loadData()
   },
   methods: {
+    // filters
+    setStatusFilter(statuscode) {
+      orderPastModel.addListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
+    removeStatusFilter(statuscode) {
+      console.log('removing', { statuscode })
+      orderPastModel.removeListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

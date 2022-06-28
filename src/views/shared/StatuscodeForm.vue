@@ -106,6 +106,23 @@
             <b-form-group
               v-if="list_type === 'order'"
               label-size="sm"
+              v-bind:label="$trans('As filter?')"
+              label-for="statuscode_as_filter"
+              :description="$trans('Use this statuscode for filters in order lists.')"
+            >
+              <b-form-checkbox
+                id="statuscode_as_filter"
+                v-model="statuscode.as_filter"
+              >
+              </b-form-checkbox>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="2" role="group">
+            <b-form-group
+              v-if="list_type === 'order'"
+              label-size="sm"
               v-bind:label="$trans('Start order?')"
               label-for="statuscode_start_order"
               :description="$trans('This statuscode marks the start of an order. This is used in the App for the start order button.')"

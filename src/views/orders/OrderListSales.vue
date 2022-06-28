@@ -7,6 +7,12 @@
       @do-search="handleSearchOk"
     />
 
+    <OrderFilters
+      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+      @set-filter="setStatusFilter"
+      @remove-filter="removeStatusFilter"
+    />
+
     <b-pagination
       v-if="this.orderSalesModel.count > 20"
       class="pt-4"
@@ -66,6 +72,7 @@ import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import OrderFilters from "@/components/OrderFilters";
 
 export default {
   components: {
@@ -73,6 +80,7 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
+    OrderFilters,
   },
   data() {
     return {
@@ -109,6 +117,17 @@ export default {
     this.loadData()
   },
   methods: {
+    // filters
+    setStatusFilter(statuscode) {
+      orderSalesModel.addListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
+    removeStatusFilter(statuscode) {
+      console.log('removing', { statuscode })
+      orderSalesModel.removeListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
+    // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
       orderSalesModel.setSearchQuery(val)
@@ -117,6 +136,7 @@ export default {
     showSearchModal() {
       this.$refs['search-modal'].show()
     },
+    // rest
     rowStyle(item, type) {
       if (!item || type !== 'row') return
 

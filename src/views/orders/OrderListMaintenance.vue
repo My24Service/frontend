@@ -81,6 +81,12 @@
       </form>
     </b-modal>
 
+    <OrderFilters
+      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+      @set-filter="setStatusFilter"
+      @remove-filter="removeStatusFilter"
+    />
+
     <b-row v-if="!isCustomer && dispatch && selectedOrders.length > 0">
       <b-col cols="12">
         <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
@@ -199,6 +205,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import OrderFilters from "@/components/OrderFilters"
 import { componentMixin } from '@/utils'
 
 export default {
@@ -215,6 +222,7 @@ export default {
     ButtonLinkAdd,
     ButtonLinkSort,
     SearchModal,
+    OrderFilters
   },
   props: {
     dispatch: {
@@ -274,6 +282,16 @@ export default {
     this.loadData()
   },
   methods: {
+    // filters
+    setStatusFilter(statuscode) {
+      orderModel.addListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
+    removeStatusFilter(statuscode) {
+      console.log('removing', { statuscode })
+      orderModel.removeListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
     showSortModal() {
       this.$refs['sort-modal'].show()
     },
