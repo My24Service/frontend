@@ -38,6 +38,12 @@
       @do-search="handleSearchOk"
     />
 
+    <OrderFilters
+      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+      @set-filter="setStatusFilter"
+      @remove-filter="removeStatusFilter"
+    />
+
     <b-pagination
       v-if="this.orderNotAcceptedModel.count > 20"
       class="pt-4"
@@ -123,6 +129,7 @@ import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import OrderFilters from "@/components/OrderFilters"
 import { componentMixin } from '@/utils'
 
 export default {
@@ -136,6 +143,7 @@ export default {
     IconLinkDelete,
     IconLinkEdit,
     SearchModal,
+    OrderFilters,
   },
   props: {
     dispatch: {
@@ -191,6 +199,16 @@ export default {
     this.loadData()
   },
   methods: {
+    // filters
+    setStatusFilter(statuscode) {
+      orderModel.addListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
+    removeStatusFilter(statuscode) {
+      console.log('removing', { statuscode })
+      orderModel.removeListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
     // delete
     async doDelete() {
       try {

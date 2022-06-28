@@ -70,6 +70,12 @@
       </form>
     </b-modal>
 
+    <OrderFilters
+      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+      @set-filter="setStatusFilter"
+      @remove-filter="removeStatusFilter"
+    />
+
     <b-pagination
       v-if="this.orderWorkorderModel.count > 20"
       class="pt-4"
@@ -144,6 +150,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import OrderFilters from "@/components/OrderFilters";
 
 export default {
   components: {
@@ -153,6 +160,7 @@ export default {
     ButtonLinkSearch,
     ButtonLinkSort,
     SearchModal,
+    OrderFilters,
   },
   props: {
     queryMode: {
@@ -199,6 +207,16 @@ export default {
     this.loadData()
   },
   methods: {
+    // filters
+    setStatusFilter(statuscode) {
+      orderWorkorderModel.addListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
+    removeStatusFilter(statuscode) {
+      console.log('removing', { statuscode })
+      orderWorkorderModel.removeListArg(`last_status=${statuscode}`)
+      this.loadData()
+    },
     // sort
     showSortModal() {
       this.$refs['sort-modal'].show()

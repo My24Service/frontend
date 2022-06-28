@@ -30,7 +30,7 @@ class BaseModel {
   component = null
   fields = {}
   url = ''
-  listArgs = null
+  listArgs = []
   queryArgs = []
   searchQuery = null
   sort = null
@@ -52,8 +52,16 @@ class BaseModel {
     this.component = component
   }
 
+  addListArg(arg) {
+    this.listArgs.push(arg)
+  }
+
+  removeListArg(arg) {
+    this.listArgs = this.listArgs.filter(thisArg => arg !== thisArg)
+  }
+
   setListArgs(listArgs) {
-    this.listArgs = listArgs
+    this.listArgs = [listArgs]
   }
 
   getCsrfToken() {
@@ -103,9 +111,13 @@ class BaseModel {
       listArgs.push(`order_by=${this.sort}`)
     }
 
-    if (this.listArgs) {
-      listArgs.push(this.listArgs)
+    if (this.listArgs.length) {
+      for (const arg of this.listArgs) {
+        console.log({arg})
+        listArgs.push(arg)
+      }
     }
+    console.log(listArgs)
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
 
