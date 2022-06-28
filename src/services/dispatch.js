@@ -415,11 +415,11 @@ class Dispatch {
 
       if (this.debug) {
         console.log('drawOrderLine: start outside window, end within')
-        console.log(`order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
       }
 
       // set y slots in all slots
-      this.setYSlot(lineData.order.order_id, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.assignedorder_pk, ySlot, lineData.startIndex, lineData.endIndex)
 
       // draw the line
       this._drawOrderLine(lineData, ySlot, data.user_id)
@@ -431,7 +431,7 @@ class Dispatch {
 
       if (this.debug) {
         console.log('drawOrderLine: start inside window, end outside')
-        console.log(`order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
       }
 
       // set y slots in all slots
@@ -447,11 +447,11 @@ class Dispatch {
 
       if (this.debug) {
         console.log('drawOrderLine: start & end inside window, not same day')
-        console.log(`order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
       }
 
       // set y slots in all slots
-      this.setYSlot(lineData.order.order_id, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.assignedorder_pk, ySlot, lineData.startIndex, lineData.endIndex)
 
       // draw the line
       this._drawOrderLine(lineData, ySlot, data.user_id)
@@ -460,14 +460,14 @@ class Dispatch {
     rowOrderLinesPrio4.forEach(lineData => {
       if (this.debug) {
         console.log('drawOrderLine: start & end inside window, same day')
-        console.log(`order_id=${lineData.order.order_id}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
       }
 
       // find an empty slot
       const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex)
 
       // set y slots in all slots
-      this.setYSlot(lineData.order.order_id, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.assignedorder_pk, ySlot, lineData.startIndex, lineData.endIndex)
 
       // draw the line
       this._drawOrderLine(lineData, ySlot, data.user_id)
@@ -711,10 +711,6 @@ class Dispatch {
     this.lastY += this.lineWidth
   }
 
-  getStatus(order) {
-    return order.assignedorder_status !== null ? order.assignedorder_status : order.order_status
-  }
-
   resetDayOrders() {
     for(let i=0; i<this.daysInView.length; i++) {
       this.daysInView[i].orders = []
@@ -737,13 +733,13 @@ class Dispatch {
     return height > this.getRowHeightInt() ? height : this.getRowHeightInt()
   }
 
-  setYSlot(order_id, ySlot, startIndex, endIndex) {
+  setYSlot(assigned_order_id, ySlot, startIndex, endIndex) {
     if (this.debug) {
-      console.log(`setYSlot(order_id=${order_id}, ySlot=${ySlot}, startIndex=${startIndex}, endIndex=${endIndex})`)
+      console.log(`setYSlot(assigned_order_id=${assigned_order_id}, ySlot=${ySlot}, startIndex=${startIndex}, endIndex=${endIndex})`)
     }
 
     for(let i=startIndex; i<=endIndex; i++) {
-      this.daysInView[i].orders[ySlot] = order_id
+      this.daysInView[i].orders[ySlot] = assigned_order_id
     }
   }
 
@@ -886,7 +882,9 @@ class Dispatch {
     this.hotspots.forEach(spot => {
       if (this.inStroke(spot.obj,mouseX, mouseY)) {
         this.canvas.style.cursor = "pointer"
-        this.showInfo(`${spot.order.order_info}\nStatus: ${this.getStatus(spot.order)}`, mouseX, mouseY)
+        this.showInfo(
+          `${spot.order.order_info}\nOrder status: ${spot.order.order_status}\nAssigned order status: ${spot.order.assignedorder_status ?? ''}\n`, mouseX, mouseY
+        )
         hit = true
         return
       }

@@ -11,7 +11,8 @@ class Statuscode extends BaseModel {
     'after_end_order': false,
     'description': '',
     'new_status_template': '',
-    'color_for_assignedorders': false
+    'color_for_assignedorders': false,
+    'can_be_reassigned_after_end': false
   }
 
   url = '/order/statuscode/'

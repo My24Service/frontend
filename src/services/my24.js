@@ -81,7 +81,7 @@ class My24 extends BaseModel {
   getStatuscodeForOrder(statuscodes, order) {
     const statuscode = this.getStatuscode(statuscodes, order.order_status)
     if (!statuscode) {
-      console.log(`no statuscode found for "${order.order_status}"`)
+      // console.log(`no statuscode found for "${order.order_status}"`)
       return
     }
 
