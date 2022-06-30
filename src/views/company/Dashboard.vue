@@ -145,7 +145,6 @@
 import BarChart from "@/components/BarChart.vue"
 import PieChart from "@/components/PieChart.vue"
 import dashboardModel from '@/models/company/Dashboard.js'
-import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 let d = new Date()
 
