@@ -143,6 +143,19 @@
           </b-table>
         </b-col>
       </b-row>
+      <b-row v-if="order.reported_codes_extra_data.length">
+        <b-col cols="12">
+          <h4>{{ $trans('Reported extra text') }}</h4>
+          <b-table
+            borderless
+            small
+            id="extra-data-table"
+            :fields="extraDataFields"
+            :items="order.reported_codes_extra_data"
+            responsive="sm"
+          ></b-table>
+        </b-col>
+      </b-row>
       <footer class="modal-footer">
         <b-button
           v-if="!past && !isCustomer"
@@ -183,6 +196,10 @@ export default {
       workorderDocumentFields: [
         { key: 'name', label: this.$trans('Name') },
         { key: 'url', label: this.$trans('URL') },
+      ],
+      extraDataFields: [
+        { key: 'statuscode', label: this.$trans('Status') },
+        { key: 'extra_data', label: this.$trans('Text') },
       ]
     }
   },
