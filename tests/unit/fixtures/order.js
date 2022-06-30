@@ -76,6 +76,7 @@ export default {
             }
         ],
         "assigned_orders": [],
+        "reported_codes_extra_data": [],
         "workorder_pdf_url": "",
         "total_price_purchase": "0.00",
         "total_price_selling": "0.00",
