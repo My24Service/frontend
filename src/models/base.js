@@ -113,11 +113,9 @@ class BaseModel {
 
     if (this.listArgs.length) {
       for (const arg of this.listArgs) {
-        console.log({arg})
         listArgs.push(arg)
       }
     }
-    console.log(listArgs)
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
 

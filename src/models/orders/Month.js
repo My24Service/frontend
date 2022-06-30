@@ -8,8 +8,10 @@ class Month extends BaseModel {
   url = '/order/order/month_list/'
 
   getMonthData(statuscodes) {
-    return this.list().then((monthData) => {
-      let results = [], weekObjs = {}
+    return this.list().then((results) => {
+      const monthData = results.week_data
+      const statusesData = results.statuses_data
+      let weekObjs = {}
 
       // add status color to orders
       for (let i = 0; i < monthData.length; i++) {
@@ -30,8 +32,9 @@ class Month extends BaseModel {
       }
 
       return {
-        results: monthData,
-        weeks
+        monthData,
+        weeks,
+        statusesData
       }
     })
   }

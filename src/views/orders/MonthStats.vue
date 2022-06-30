@@ -39,6 +39,27 @@
       :options="options"
     />
 
+    <div class="app-grid">
+      <b-row v-for="(charts, week) in this.weekChartData" :key="week" class="chart-section">
+        <b-col cols="6">
+          <bar-chart
+            :id="`bar-chart-order-types-${week}`"
+            v-if="!isLoading"
+            :chart-data="charts.bar"
+            :options="options"
+          />
+        </b-col>
+        <b-col cols="6">
+          <pie-chart
+            :id="`pie-chart-order-types-${week}`"
+            v-if="!isLoading"
+            :chart-data="charts.pie"
+            :options="pieOptions"
+          />
+        </b-col>
+      </b-row>
+    </div>
+
     <b-table
       small
       id="month-table"
@@ -68,6 +89,7 @@ import moment from 'moment'
 import monthModel from '@/models/orders/Month.js'
 
 import BarChart from "@/components/BarChart.vue"
+import PieChart from "@/components/PieChart.vue"
 import OrderStatusColorSpan from '@/components/OrderStatusColorSpan.vue'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 
@@ -82,6 +104,25 @@ export default {
         responsive: true,
         maintainAspectRatio: false,
       },
+      pieOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          datalabels: {
+            formatter: (value, ctx) => {
+              let datasets = ctx.chart.data.datasets;
+              if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
+                let sum = datasets[0].data.reduce((a, b) => a + b, 0);
+                let percentage = Math.round((value / sum) * 100) + '%';
+                return percentage;
+              } else {
+                return percentage;
+              }
+            },
+            color: '#fff',
+          }
+        }
+      },
       customerFields: [],
       loaded: false,
       orderType: 'all',
@@ -90,11 +131,16 @@ export default {
       year: null,
       monthTxt: null,
       statuscodes: null,
-      weeks: []
+      weekChartData: {},
+      barChartdataOrderStatuses: {},
+      pieChartdataOrderStatuses: {},
+      weeks: [],
+      orderStatusColors: {}
     }
   },
   components: {
     BarChart,
+    PieChart,
     OrderStatusColorSpan,
     OrderTypesSelect,
   },
@@ -179,14 +225,23 @@ export default {
 
       return total
     },
+    getOrderStatusolor(orderStatus) {
+      if (!(orderStatus in this.orderStatusColors)) {
+        this.orderStatusColors[orderStatus] = `#${Math.floor(Math.random()*16777215).toString(16)}`
+      }
+
+      return this.orderStatusColors[orderStatus]
+    },
     async loadData() {
       this.isLoading = true
       monthModel.setListArgs(`order_type=${this.orderType}&year=${this.year}&month=${this.month}`)
+      this.weekChartData = {}
 
       try {
         const data = await monthModel.getMonthData(this.statuscodes)
         this.weeks = data.weeks
-        const monthResults = data.results
+        const monthResults = data.monthData
+        const statusesData = data.statusesData
 
         this.setWeekTotals(monthResults)
         this.customerData = monthResults
@@ -221,16 +276,48 @@ export default {
         }
 
         this.chartdata = {
-            labels,
-            datasets: [{
-              label: `Total orders for order type: ${this.orderType}`,
-              data: monthData,
-              backgroundColor: '#f87979',
-            }]
+          labels,
+          datasets: [{
+            label: `Total orders for order type: ${this.orderType}`,
+            data: monthData,
+            backgroundColor: '#f87979',
+          }]
+        }
+
+        // for each week, gather order statuses and create stats data
+        for (const [week, statuscodes_data] of Object.entries(statusesData)) {
+          let pieGraphDataOrderStatuses = [], barGraphDataOrderStatuses = [],
+            labelsOrderStatuses = [], colors = [];
+
+          for (const [statuscode, _data] of Object.entries(statuscodes_data.statuscodes)) {
+            labelsOrderStatuses.push(statuscode)
+            pieGraphDataOrderStatuses.push(_data.perc)
+            barGraphDataOrderStatuses.push(_data.count)
+            colors.push(this.getOrderStatusolor(statuscode))
           }
 
-          this.loaded = true
-          this.isLoading = false
+          this.weekChartData[week] = {
+            pie: {
+              labels: labelsOrderStatuses,
+              datasets: [{
+                label: `Order statuses in week ${week}`,
+                data: pieGraphDataOrderStatuses,
+                backgroundColor: colors,
+              }]
+            },
+            bar: {
+              labels: labelsOrderStatuses,
+              datasets: [{
+                label: `Order statuses in week ${week}`,
+                data: barGraphDataOrderStatuses,
+                backgroundColor: '#f87979',
+              }]
+            }
+          }
+        }
+
+        this.loaded = true
+        this.isLoading = false
        } catch(error) {
         console.log(error)
       }
@@ -249,7 +336,13 @@ export default {
 
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
-    this.loadData()
+    await this.loadData()
   }
 }
 </script>
+<style scoped>
+.chart-section {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+</style>
