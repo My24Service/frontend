@@ -17,12 +17,19 @@ class Month extends BaseModel {
       for (let i = 0; i < monthData.length; i++) {
         for (const [week, data] of Object.entries(monthData[i].weeks)) {
           for (let j = 0; j < data.length; j++) {
-            data[j].color = my24.status2color(statuscodes, data[j].status)
+            monthData[i].weeks[week][j].color = my24.status2color(statuscodes, data[j].status)
           }
 
           if (!(week in weekObjs)) {
             weekObjs[week] = 1
           }
+        }
+      }
+
+      // add status color to statuses
+      for (const [week, data] of Object.entries(statusesData)) {
+        for (const [statuscode, _data] of Object.entries(data['statuscodes'])) {
+          statusesData[week]['statuscodes'][statuscode]['color'] = my24.status2color(statuscodes, statuscode)
         }
       }
 
