@@ -39,6 +39,27 @@
       :options="options"
     />
 
+    <div class="app-grid">
+      <b-row v-for="(charts, month) in this.monthChartData" :key="month" class="chart-section">
+        <b-col cols="6">
+          <bar-chart
+            :id="`bar-chart-order-types-${month}`"
+            v-if="!isLoading"
+            :chart-data="charts.bar"
+            :options="options"
+          />
+        </b-col>
+        <b-col cols="6">
+          <pie-chart
+            :id="`pie-chart-order-types-${month}`"
+            v-if="!isLoading"
+            :chart-data="charts.pie"
+            :options="pieOptions"
+          />
+        </b-col>
+      </b-row>
+    </div>
+
     <b-table
       small
       id="year-table"
@@ -68,6 +89,7 @@ import moment from 'moment'
 import yearModel from '@/models/orders/Year.js'
 
 import BarChart from "@/components/BarChart.vue"
+import PieChart from "@/components/PieChart.vue"
 import OrderStatusColorSpan from '@/components/OrderStatusColorSpan.vue'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 
@@ -84,16 +106,34 @@ export default {
         responsive: true,
         maintainAspectRatio: false,
       },
+      pieOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          datalabels: {
+            formatter: (value, ctx) => {
+              let datasets = ctx.chart.data.datasets;
+              if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
+                let sum = datasets[0].data.reduce((a, b) => a + b, 0);
+                return Math.round((value / sum) * 100) + '%';
+              }
+            },
+            color: '#fff',
+          }
+        }
+      },
       customerFields: [],
       loaded: false,
       orderType: 'all',
       year: d.getYear() + 1900,
       statuscodes: null,
-      months: []
+      months: [],
+      monthChartData: {}
     }
   },
   components: {
     BarChart,
+    PieChart,
     OrderStatusColorSpan,
     OrderTypesSelect,
   },
@@ -154,9 +194,11 @@ export default {
 
       try {
         yearModel.setListArgs(`order_type=${this.orderType}&year=${this.year}`)
-        const results = await yearModel.getYearData(this.statuscodes)
-        this.setMonthTotals(results)
-        this.customerData = results
+        const { statusesData, resultYearData } = await yearModel.getYearData(this.statuscodes)
+
+        this.setMonthTotals(resultYearData)
+        this.customerData = resultYearData
+
         this.customerFields = [{
           key: 'name',
           label: this.$trans('Customer'),
@@ -196,6 +238,37 @@ export default {
             data: monthData,
             backgroundColor: '#f87979',
           }]
+        }
+
+        // for each month, gather order statuses and create stats data
+        for (const [month, statuscodes_data] of Object.entries(statusesData)) {
+          let pieGraphDataOrderStatuses = [], barGraphDataOrderStatuses = [],
+            labelsOrderStatuses = [], colors = [];
+
+          for (const [statuscode, _data] of Object.entries(statuscodes_data.statuscodes)) {
+            labelsOrderStatuses.push(statuscode)
+            pieGraphDataOrderStatuses.push(_data.perc)
+            barGraphDataOrderStatuses.push(_data.count)
+            colors.push(_data.color)
+          }
+
+          this.monthChartData[month] = {
+            pie: {
+              labels: labelsOrderStatuses,
+              datasets: [{
+                data: pieGraphDataOrderStatuses,
+                backgroundColor: colors,
+              }]
+            },
+            bar: {
+              labels: labelsOrderStatuses,
+              datasets: [{
+                label: `Order statuses in month ${month} (Total: ${statusesData[month]['total']})`,
+                data: barGraphDataOrderStatuses,
+                backgroundColor: '#f87979',
+              }]
+            }
+          }
         }
 
         this.loaded = true

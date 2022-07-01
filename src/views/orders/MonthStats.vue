@@ -135,7 +135,6 @@ export default {
       barChartdataOrderStatuses: {},
       pieChartdataOrderStatuses: {},
       weeks: [],
-      orderStatusColors: {}
     }
   },
   components: {
@@ -225,13 +224,6 @@ export default {
 
       return total
     },
-    getOrderStatusolor(orderStatus) {
-      if (!(orderStatus in this.orderStatusColors)) {
-        this.orderStatusColors[orderStatus] = `#${Math.floor(Math.random()*16777215).toString(16)}`
-      }
-
-      return this.orderStatusColors[orderStatus]
-    },
     async loadData() {
       this.isLoading = true
       monthModel.setListArgs(`order_type=${this.orderType}&year=${this.year}&month=${this.month}`)
@@ -293,14 +285,13 @@ export default {
             labelsOrderStatuses.push(statuscode)
             pieGraphDataOrderStatuses.push(_data.perc)
             barGraphDataOrderStatuses.push(_data.count)
-            colors.push(this.getOrderStatusolor(statuscode))
+            colors.push(_data.color)
           }
 
           this.weekChartData[week] = {
             pie: {
               labels: labelsOrderStatuses,
               datasets: [{
-                label: `Order statuses in week ${week}`,
                 data: pieGraphDataOrderStatuses,
                 backgroundColor: colors,
               }]
@@ -308,7 +299,7 @@ export default {
             bar: {
               labels: labelsOrderStatuses,
               datasets: [{
-                label: `Order statuses in week ${week}`,
+                label: `Order statuses in week ${week} (Total: ${statusesData[week]['total']})`,
                 data: barGraphDataOrderStatuses,
                 backgroundColor: '#f87979',
               }]
