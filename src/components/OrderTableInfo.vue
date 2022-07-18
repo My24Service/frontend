@@ -28,6 +28,9 @@
           {{ $trans('Users set available') }}: {{ order.user_order_available_set_count }}<br/>
           {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
         </p>
+        <p v-if="memberType === 'maintenance'">
+          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
+        </p>
       </b-col>
     </b-row>
     <b-row v-if="order.orderlines.length || order.infolines.length || order.maintenance_product_lines.length" >
