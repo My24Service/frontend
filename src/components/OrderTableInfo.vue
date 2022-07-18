@@ -60,6 +60,9 @@
           {{ $trans('Users set available') }}: {{ order.user_order_available_set_count }}<br/>
           {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
         </p>
+        <p v-if="memberType === 'maintenance'">
+          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
+        </p>
       </b-col>
       <b-col>
         <b-table v-if="order.orderlines.length" dark borderless small :fields="orderLineFields" :items="order.orderlines" responsive="sm"></b-table>
