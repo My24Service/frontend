@@ -60,6 +60,27 @@
       </b-row>
     </div>
 
+    <div class="app-grid">
+      <b-row v-for="(charts, week) in this.weekChartDataAssignedOrders" :key="week" class="chart-section">
+        <b-col cols="6">
+          <bar-chart
+            :id="`bar-chart-assigned-orders-${week}`"
+            v-if="!isLoading"
+            :chart-data="charts.bar"
+            :options="options"
+          />
+        </b-col>
+        <b-col cols="6">
+          <pie-chart
+            :id="`pie-chart-assigned-orders-${week}`"
+            v-if="!isLoading"
+            :chart-data="charts.pie"
+            :options="pieOptions"
+          />
+        </b-col>
+      </b-row>
+    </div>
+
     <b-table
       small
       id="month-table"
@@ -92,6 +113,7 @@ import BarChart from "@/components/BarChart.vue"
 import PieChart from "@/components/PieChart.vue"
 import OrderStatusColorSpan from '@/components/OrderStatusColorSpan.vue'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
+import ChartJsPluginDataLabels from 'chartjs-plugin-datalabels'
 
 export default {
   data() {
@@ -101,6 +123,16 @@ export default {
       weekTotals: null,
       chartdata: [],
       options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            },
+            gridLines: {
+              display: false
+            }
+          }],
+        },
         responsive: true,
         maintainAspectRatio: false,
       },
@@ -112,11 +144,7 @@ export default {
             formatter: (value, ctx) => {
               let datasets = ctx.chart.data.datasets;
               if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
-                let sum = datasets[0].data.reduce((a, b) => a + b, 0);
-                let percentage = Math.round((value / sum) * 100) + '%';
-                return percentage;
-              } else {
-                return percentage;
+                return `${value}%`
               }
             },
             color: '#fff',
@@ -132,9 +160,9 @@ export default {
       monthTxt: null,
       statuscodes: null,
       weekChartData: {},
-      barChartdataOrderStatuses: {},
-      pieChartdataOrderStatuses: {},
+      weekChartDataAssignedOrders: {},
       weeks: [],
+      assignedColors: {}
     }
   },
   components: {
@@ -142,6 +170,7 @@ export default {
     PieChart,
     OrderStatusColorSpan,
     OrderTypesSelect,
+    ChartJsPluginDataLabels,
   },
   watch: {
     orderType: function(val) {
@@ -224,6 +253,14 @@ export default {
 
       return total
     },
+    getRandomColor(numAssigned) {
+      let found = false
+      if (!(numAssigned in this.assignedColors)) {
+        this.assignedColors[numAssigned] = `#${Math.floor(Math.random()*16777215).toString(16)}`
+      }
+
+      return this.assignedColors[numAssigned]
+    },
     async loadData() {
       this.isLoading = true
       monthModel.setListArgs(`order_type=${this.orderType}&year=${this.year}&month=${this.month}`)
@@ -234,6 +271,7 @@ export default {
         this.weeks = data.weeks
         const monthResults = data.monthData
         const statusesData = data.statusesData
+        const assignedOrdersData = data.assignedOrdersData
 
         this.setWeekTotals(monthResults)
         this.customerData = monthResults
@@ -301,7 +339,43 @@ export default {
               datasets: [{
                 label: `Order statuses in week ${week} (Total: ${statusesData[week]['total']})`,
                 data: barGraphDataOrderStatuses,
-                backgroundColor: '#f87979',
+                backgroundColor: colors,
+              }]
+            }
+          }
+        }
+
+        // for each week, gather assigned orders and create stats data
+        for (const [week, _assignedOrdersData] of Object.entries(assignedOrdersData)) {
+          let pieGraphDataAssignedOrders = [], barGraphDataAssignedOrders = [],
+            labelsAssignedOrders = [], colors = [];
+
+          for (const [numAssigned, _data] of Object.entries(_assignedOrdersData.data)) {
+            const color = this.getRandomColor(numAssigned)
+            labelsAssignedOrders.push(`${numAssigned} x`)
+            pieGraphDataAssignedOrders.push(_data.perc)
+            barGraphDataAssignedOrders.push(_data.count)
+            colors.push(color)
+          }
+
+          if (!barGraphDataAssignedOrders.length) {
+            continue
+          }
+
+          this.weekChartDataAssignedOrders[week] = {
+            pie: {
+              labels: labelsAssignedOrders,
+              datasets: [{
+                data: pieGraphDataAssignedOrders,
+                backgroundColor: colors,
+              }]
+            },
+            bar: {
+              labels: labelsAssignedOrders,
+              datasets: [{
+                label: `# assigned orders in week ${week} (Total: ${assignedOrdersData[week]['total']})`,
+                data: barGraphDataAssignedOrders,
+                backgroundColor: colors,
               }]
             }
           }
@@ -310,7 +384,7 @@ export default {
         this.loaded = true
         this.isLoading = false
        } catch(error) {
-        console.log(error)
+        console.log('error fetching month data', error)
       }
     }
   },

@@ -61,6 +61,21 @@ export default {
           "opdracht klaar": {"count": 1, "perc": 0.08333333333333333}
         }, "total": 12
       }
+    },
+    "assigned_orders_data": {
+      "27": {
+        "total": 16,
+        "data": {
+          "1": {"count": 10, "perc": 62.0},
+          "2": {"count": 3, "perc": 19.0},
+          "0": {"count": 3, "perc": 19.0}
+        }
+      },
+      "26": {"total": 4, "data": {"1": {"count": 4, "perc": 100.0}}},
+      "29": {"total": 1, "data": {"1": {"count": 1, "perc": 100.0}}},
+      "28": {
+        "total": 0, "data": {}
+      }
     }
   }
 }

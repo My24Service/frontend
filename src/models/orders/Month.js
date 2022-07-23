@@ -11,6 +11,8 @@ class Month extends BaseModel {
     return this.list().then((results) => {
       const monthData = results.week_data
       const statusesData = results.statuses_data
+      const assignedOrdersData = results.assigned_orders_data
+
       let weekObjs = {}
 
       // add status color to orders
@@ -41,7 +43,8 @@ class Month extends BaseModel {
       return {
         monthData,
         weeks,
-        statusesData
+        statusesData,
+        assignedOrdersData
       }
     })
   }

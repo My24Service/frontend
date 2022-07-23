@@ -92,6 +92,7 @@ import BarChart from "@/components/BarChart.vue"
 import PieChart from "@/components/PieChart.vue"
 import OrderStatusColorSpan from '@/components/OrderStatusColorSpan.vue'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
+import ChartJsPluginDataLabels from 'chartjs-plugin-datalabels'
 
 let d = new Date();
 
@@ -112,11 +113,7 @@ export default {
         plugins: {
           datalabels: {
             formatter: (value, ctx) => {
-              let datasets = ctx.chart.data.datasets;
-              if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
-                let sum = datasets[0].data.reduce((a, b) => a + b, 0);
-                return Math.round((value / sum) * 100) + '%';
-              }
+              return `${value}%`
             },
             color: '#fff',
           }
@@ -136,6 +133,7 @@ export default {
     PieChart,
     OrderStatusColorSpan,
     OrderTypesSelect,
+    ChartJsPluginDataLabels,
   },
   watch: {
     orderType: function(val) {
@@ -243,10 +241,11 @@ export default {
         // for each month, gather order statuses and create stats data
         for (const [month, statuscodes_data] of Object.entries(statusesData)) {
           let pieGraphDataOrderStatuses = [], barGraphDataOrderStatuses = [],
-            labelsOrderStatuses = [], colors = [];
+            labelsOrderStatusesPie = [], labelsOrderStatusesBar = [], colors = [];
 
           for (const [statuscode, _data] of Object.entries(statuscodes_data.statuscodes)) {
-            labelsOrderStatuses.push(statuscode)
+            labelsOrderStatusesPie.push(statuscode)
+            labelsOrderStatusesBar.push(statuscode)
             pieGraphDataOrderStatuses.push(_data.perc)
             barGraphDataOrderStatuses.push(_data.count)
             colors.push(_data.color)
@@ -254,14 +253,14 @@ export default {
 
           this.monthChartData[month] = {
             pie: {
-              labels: labelsOrderStatuses,
+              labels: labelsOrderStatusesPie,
               datasets: [{
                 data: pieGraphDataOrderStatuses,
                 backgroundColor: colors,
               }]
             },
             bar: {
-              labels: labelsOrderStatuses,
+              labels: labelsOrderStatusesBar,
               datasets: [{
                 label: `Order statuses in month ${month} (Total: ${statusesData[month]['total']})`,
                 data: barGraphDataOrderStatuses,
