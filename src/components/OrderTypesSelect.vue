@@ -28,7 +28,7 @@ export default {
   mounted() {
     this.$store.dispatch('getOrderTypes')
       .then((order_types) => {
-        this.orderTypes = this.includeAll ? [this.$trans('all'), ...order_types] : order_types
+        this.orderTypes = this.includeAll ? ['all', ...order_types] : order_types
         this.orderType = this.orderTypeIn !== null ? this.orderTypeIn : this.orderTypes[0]
       })
   }
