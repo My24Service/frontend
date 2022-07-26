@@ -254,7 +254,6 @@ export default {
       return total
     },
     getRandomColor(numAssigned) {
-      let found = false
       if (!(numAssigned in this.assignedColors)) {
         this.assignedColors[numAssigned] = `#${Math.floor(Math.random()*16777215).toString(16)}`
       }
@@ -263,10 +262,11 @@ export default {
     },
     async loadData() {
       this.isLoading = true
-      monthModel.setListArgs(`order_type=${this.orderType}&year=${this.year}&month=${this.month}`)
       this.weekChartData = {}
+      this.weekChartDataAssignedOrders = {}
 
       try {
+        monthModel.setListArgs(`order_type=${this.orderType}&year=${this.year}&month=${this.month}`)
         const data = await monthModel.getMonthData(this.statuscodes)
         this.weeks = data.weeks
         const monthResults = data.monthData

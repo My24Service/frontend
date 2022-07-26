@@ -189,6 +189,7 @@ export default {
     },
     async loadData() {
       this.isLoading = true
+      this.monthChartData = {}
 
       try {
         yearModel.setListArgs(`order_type=${this.orderType}&year=${this.year}`)
