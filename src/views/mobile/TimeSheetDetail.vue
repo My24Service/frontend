@@ -9,7 +9,7 @@
           </b-link>
         </b-col>
         <b-col cols="8">
-          {{ $trans('Totals in week') }} {{ week }}/{{ today.format('Y') }} {{ $trans('for') }} {{ fullName }}
+          {{ $trans('Totals in') }} {{ week }}/{{ today.format('Y') }} {{ $trans('for') }} {{ fullName }}
         </b-col>
         <b-col cols="2">
           <div class="float-right">
@@ -193,7 +193,7 @@ export default {
 
           let field
           switch(fields[i]) {
-            case 'work_total':
+            case 'total_work':
               field = this.$trans('Work total')
               break
 
@@ -216,6 +216,16 @@ export default {
             case 'distance_fixed_rate_amount_total':
               field = this.$trans('Total trips')
               break
+
+            case 'total_extra_work':
+              field = this.$trans('Total extra work')
+              break
+
+            case 'total_actual_work':
+              field = this.$trans('Total actual work')
+              break
+            default:
+              console.log(`help: ${fields[i]}`)
           }
 
           let row = {
