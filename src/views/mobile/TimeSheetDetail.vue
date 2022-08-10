@@ -224,6 +224,7 @@ export default {
             case 'total_actual_work':
               field = this.$trans('Total actual work')
               break
+
             default:
               console.log(`help: ${fields[i]}`)
           }
