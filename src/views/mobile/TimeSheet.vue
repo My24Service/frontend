@@ -8,10 +8,10 @@
       </b-col>
       <b-col cols="8">
         <p v-if="this.memberType === 'maintenance'">
-          {{ $trans('Total work hours / Total travel / Total distance') }}
+          {{ $trans('Total work hours / Total travel / Total distance') }} - {{ week }}/{{ today.format('Y') }}
         </p>
         <p v-if="this.memberType === 'temps'">
-          {{ $trans('Total hours / Total trips') }}
+          {{ $trans('Total hours / Total trips') }} - {{ week }}/{{ today.format('Y') }}
         </p>
       </b-col>
       <b-col cols="2">
@@ -110,6 +110,7 @@ export default {
     },
     setDate() {
       this.startDate = this.today.format('YYYY-MM-DD')
+      this.week = this.today.format('[week] W')
     },
     nextWeek() {
       this.today.add(7, 'days')
