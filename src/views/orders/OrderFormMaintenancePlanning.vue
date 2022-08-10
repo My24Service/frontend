@@ -37,7 +37,7 @@
             <b-form-group
               label-size="sm"
               label-class="p-sm-0"
-              v-bind:label="$trans('Start date')"
+              :label="$trans('Start date')"
               label-for="start_date"
             >
               <b-form-datepicker
@@ -45,7 +45,7 @@
                 size="sm"
                 class="p-sm-0"
                 v-model="order.start_date"
-                v-bind:placeholder="$trans('Choose a date')"
+                :placeholder="$trans('Choose a date')"
                 value="order.start_date"
                 locale="nl"
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null"
@@ -61,14 +61,14 @@
             <b-form-group
               label-size="sm"
               label-class="p-sm-0"
-              v-bind:label="$trans('Start time')"
+              :label="$trans('Start time')"
               label-for="start_time"
             >
               <b-form-timepicker
                 id="start_time"
                 size="sm"
                 v-model="order.start_time"
-                placeholder="Choose a time"
+                :placeholder="$trans('Choose a time')"
                 :hour12=false
               ></b-form-timepicker>
             </b-form-group>
@@ -85,7 +85,7 @@
                 size="sm"
                 v-model="order.end_date"
                 class="mb-2"
-                v-bind:placeholder="$trans('Choose a date')"
+                :placeholder="$trans('Choose a date')"
                 locale="nl"
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
@@ -99,7 +99,7 @@
           <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('End time')"
+              :label="$trans('End time')"
               label-class="p-sm-0"
               label-for="end_time"
             >
@@ -108,7 +108,7 @@
                 size="sm"
                 v-model="order.end_time"
                 class="mb-2"
-                v-bind:placeholder="$trans('Choose a time')"
+                :placeholder="$trans('Choose a time')"
                 :hour12=false
               ></b-form-timepicker>
             </b-form-group>

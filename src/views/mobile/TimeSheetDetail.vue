@@ -9,7 +9,7 @@
           </b-link>
         </b-col>
         <b-col cols="8">
-          {{ $trans('Totals in the week starting') }} {{ startDate }} {{ $trans('for') }} {{ fullName }}
+          {{ $trans('Totals in week') }} {{ week }}/{{ today.format('Y') }} {{ $trans('for') }} {{ fullName }}
         </b-col>
         <b-col cols="2">
           <div class="float-right">
@@ -117,6 +117,7 @@ export default {
     },
     setDate() {
       this.startDate = this.today.format('YYYY-MM-DD')
+      this.week = this.today.format('[week] W')
     },
     nextWeek() {
       this.today.add(7, 'days')
