@@ -38,21 +38,21 @@ jobs:
       - run:
           name: Create build
           command: yarn ci:build
+
       - run:
-           name: set environment var TARGET_DIR
-           command: |
-             export DATE=$(date +"%Y-%m-%d_%H%M")
-             echo 'export TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
-             source $BASH_ENV
+          name: set environment var TARGET_DIR
+          command: |
+            echo 'export TARGET_DIR="my24-frontend-$(date +"%Y-%m-%d_%H%M")-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
+            source $BASH_ENV
       - run:
-           name: Create build archive
-           command: |
-             mkdir /tmp/$TARGET_DIR
-             cp -r dist /tmp/$TARGET_DIR
-             echo $(cat src/version.js | sed -r "s/^.*'([^']+)'$/\1/") > /tmp/$TARGET_DIR/VERSION
-             cd /tmp
-             tar -zcf $TGZ_NAME $TARGET_DIR
-             echo "$TARGET_DIR" > $RELEASE_NAME
+          name: Create build archive
+          command: |
+            mkdir /tmp/$TARGET_DIR
+            cp -r dist /tmp/$TARGET_DIR
+            echo $(cat src/version.js | sed -r "s/^.*'([^']+)'$/\1/") > /tmp/$TARGET_DIR/VERSION
+            cd /tmp
+            tar -zcf $TGZ_NAME $TARGET_DIR
+            echo "$TARGET_DIR" > $RELEASE_NAME
       - run:
            name: Clone build-upload repo
            command: git clone https://github.com/My24Service/build-upload.git
@@ -95,8 +95,7 @@ jobs:
       - run:
           name: set environment var TARGET_DIR
           command: |
-            export DATE=$(date +"%Y-%m-%d_%H%M")
-            echo 'export TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
+            echo 'export TARGET_DIR="my24-frontend-$(date +"%Y-%m-%d_%H%M")-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
             source $BASH_ENV
       - run:
            name: Create build archive
