@@ -41,14 +41,12 @@ jobs:
       - run:
            name: set environment var TARGET_DIR
            command: |
-             DATE=$(date +"%Y-%m-%d_%H%M")
+             export DATE=$(date +"%Y-%m-%d_%H%M")
              echo 'export TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
              source $BASH_ENV
       - run:
            name: Create build archive
            command: |
-             DATE=$(date +"%Y-%m-%d_%H%M")
-             TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"
              mkdir /tmp/$TARGET_DIR
              cp -r dist /tmp/$TARGET_DIR
              echo $(cat src/version.js | sed -r "s/^.*'([^']+)'$/\1/") > /tmp/$TARGET_DIR/VERSION
@@ -95,10 +93,14 @@ jobs:
           name: Create build
           command: yarn ci:build
       - run:
+          name: set environment var TARGET_DIR
+          command: |
+            export DATE=$(date +"%Y-%m-%d_%H%M")
+            echo 'export TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
            name: Create build archive
            command: |
-             DATE=$(date +"%Y-%m-%d_%H%M")
-             TARGET_DIR="my24-frontend-${DATE}-${CIRCLE_BUILD_NUM}"
              mkdir /tmp/$TARGET_DIR
              cp -r dist /tmp/$TARGET_DIR
              echo $(cat src/version.js | sed -r "s/^.*'([^']+)'$/\1/") > /tmp/$TARGET_DIR/VERSION
