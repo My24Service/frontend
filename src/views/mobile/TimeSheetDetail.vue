@@ -9,7 +9,9 @@
           </b-link>
         </b-col>
         <b-col cols="8">
-          {{ $trans('Totals in') }} {{ week }}/{{ today.format('Y') }} {{ $trans('for') }} {{ fullName }}
+          {{ $trans('Totals in') }}
+          {{ week }}/{{ today.format('Y') }}
+          {{ $trans('for') }} {{ fullName }}
         </b-col>
         <b-col cols="2">
           <div class="float-right">
