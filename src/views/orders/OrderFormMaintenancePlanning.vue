@@ -951,8 +951,8 @@ export default {
     addEngineer(value) {
       console.log(value)
     },
-    customerLabel({ name, city}) {
-      return `${name} - ${city}`
+    customerLabel({ name, address, city}) {
+      return `${name} - ${address} - ${city}`
     },
     selectCustomer(option) {
       this.fillCustomer(option)
