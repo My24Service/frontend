@@ -51,22 +51,4 @@ describe('YearStats.vue', () => {
     const el = wrapper.findComponent(YearStats)
     expect(el.exists()).to.be.true
   })
-
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(yearResponse);
-
-    const wrapper = mount(YearStats, {
-      localVue,
-      store,
-      mocks: {
-        $trans: (f) => f,
-        $moment: moment,
-      },
-    })
-
-    await flushPromises()
-
-    const trs = wrapper.findAll('#year-table > tbody > tr')
-    expect(trs.length).to.equal(2)
-  })
 })
