@@ -169,7 +169,6 @@
             v-bind:method="function() { showChangeStatusModal(data.item.id) }"
           />
           <IconLinkDocuments
-            v-if="!dispatch"
             router_name="order-documents"
             v-bind:router_params="{orderPk: data.item.id}"
             v-bind:title="$trans('Documents')"

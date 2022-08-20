@@ -59,27 +59,6 @@
         </b-col>
       </b-row>
     </div>
-
-    <b-table
-      small
-      id="year-table"
-      :busy='isLoading'
-      :fields="customerFields"
-      :items="customerData"
-      responsive="md"
-      class="data-table"
-    >
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template v-for="month in months" v-slot:[`cell(mon${month})`]="{ item }">
-        <OrderStatusColorSpan :data="item.months[month]" :key="month" />
-      </template>
-      <template #cell(totals)="data">{{ getCustomerTotal(data.item.name )}}</template>
-    </b-table>
   </div>
 </template>
 
@@ -198,14 +177,6 @@ export default {
         this.setMonthTotals(resultYearData)
         this.customerData = resultYearData
 
-        this.customerFields = [{
-          key: 'name',
-          label: this.$trans('Customer'),
-          thAttr: {width: '20%'}
-        }]
-
-        const monthWidth = Math.ceil((100-20-5)/12)
-
         // fill graph data and set labels/fields
         let monthData = [], labels = []
         this.months = []
@@ -214,21 +185,9 @@ export default {
           this.months.push(monthText)
           const date = this.$moment(`2021-${monthText}-1`, 'D-MM-YYYY')
           const monthTextLong = date.format('MMM')
-          const label = `${monthTextLong} (${this.getMonthTotal(monthText)})`
           labels.push(monthTextLong)
           monthData.push(this.monthTotals[monthText])
-          this.customerFields.push({
-            key: `mon${monthText}`,
-            label,
-            thAttr: {width: `${monthWidth}%`}
-          })
         }
-
-        this.customerFields.push({
-          key: 'totals',
-          label: this.$trans('Totals'),
-          thAttr: {width: '5%'}
-        })
 
         this.chartdata = {
           labels,

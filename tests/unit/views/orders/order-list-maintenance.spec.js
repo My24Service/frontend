@@ -157,25 +157,4 @@ describe('OrderListMaintenance.vue', () => {
     const html = wrapper.html()
     expect(html).to.contain('title="Documents"')
   })
-
-  it('dispatch: does not contain title="Documents"', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
-
-    const wrapper = mount(OrderListMaintenance, {
-      localVue,
-      store,
-      router,
-      mocks: {
-        $trans: (f) => f
-      },
-      propsData: {
-        dispatch: true
-      }
-    })
-
-    await flushPromises()
-
-    const html = wrapper.html()
-    expect(html).not.to.contain('title="Documents"')
-  })
 })

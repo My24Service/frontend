@@ -66,7 +66,7 @@
         <span v-if="data.item.contact && data.item.contact.trim() !== ''">
             <b>{{ $trans('Contact') }}</b>: {{ data.item.contact }}<br/>
         </span>
-        <span v-if="data.item.order_email">
+        <span v-if="data.item.email">
           {{ $trans('Email') }}: <b-link class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.email }}</b-link><br/>
         </span>
         <span v-if="data.item.mobile && data.item.mobile.trim() !== ''">
