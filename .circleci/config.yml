@@ -76,8 +76,11 @@ jobs:
               sudo apt update
               sudo apt install gh
              
+              mkdir /tmp/release
+              cp $TGZ_NAME /tmp/release/frontend-release-$(cat /tmp/$TARGET_DIR/VERSION)
+             
               export GH_HOST=git@github.com:My24Service/frontend.git
-              gh release create ${VERSION} /tmp/release --generate-notes -R git@github.com:My24Service/frontend.git
+              gh release create $(cat /tmp/$TARGET_DIR/VERSION) /tmp/release --generate-notes -R git@github.com:My24Service/frontend.git
 #
 #              wget https://go.dev/dl/go1.19.linux-386.tar.gz
 #              tar -C $HOME -xzf go1.19.linux-386.tar.gz
