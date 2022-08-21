@@ -71,8 +71,8 @@ jobs:
            name: Create github release
            command: |
               wget https://go.dev/dl/go1.19.linux-386.tar.gz
-              tar -xzf go1.19.linux-386.tar.gz
-              ./go/bin/go get -u github.com/tcnksm/ghr
+              tar -C $HOME -xzf go1.19.linux-386.tar.gz
+              $HOME/go/bin/go get -u github.com/tcnksm/ghr
               VERSION=$(cat /tmp/$TARGET_DIR/VERSION)
               mkdir /tmp/release
               cp $TGZ_NAME /tmp/release/frontend-release-${VERSION}
