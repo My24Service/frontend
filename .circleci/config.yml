@@ -31,7 +31,7 @@ jobs:
     steps:
       - checkout
       - run: sudo apt-get update
-      - run: sudo apt install virtualenv golang-go
+      - run: sudo apt install virtualenv
       - run:
           name: Install packages
           command: yarn
@@ -70,8 +70,9 @@ jobs:
       - run:
            name: Create github release
            command: |
-              source $BASH_ENV
-              go get github.com/tcnksm/ghr
+              wget https://go.dev/dl/go1.19.linux-386.tar.gz
+              tar -C /usr/local -xzf go1.19.linux-386.tar.gz
+              /usr/local/go/bin/go get -u github.com/tcnksm/ghr
               VERSION=$(cat /tmp/$TARGET_DIR/VERSION)
               mkdir /tmp/release
               cp $TGZ_NAME /tmp/release/frontend-release-${VERSION}
@@ -114,6 +115,7 @@ jobs:
       - run:
            name: Upload to linode
            command: |
+              source $BASH_ENV
               cd build-upload
               virtualenv --python=python3 venv
               . venv/bin/activate
