@@ -77,7 +77,6 @@ jobs:
               sudo apt install gh
              
               export GH_HOST=git@github.com:My24Service/frontend.git
-              gh auth login
               gh release create ${VERSION} /tmp/release --generate-notes -R git@github.com:My24Service/frontend.git
 #
 #              wget https://go.dev/dl/go1.19.linux-386.tar.gz
