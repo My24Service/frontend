@@ -1,98 +1,558 @@
 export default {
   data: {
-    year_data:
-      [
-        {
-          "name": "Aboma (10029)",
-          "months": {
-            "10": [
+    "year_data":
+      {
+        "months":
+          {
+            "01":
               {
-                "order_id": 1170,
-                "status": "aangemaakt door AnonymousUser"
+                "count":
+                  94, "perc":
+                  "12.32"
               }
-            ]
-          }
-        },
-        {
-          "name": "Ambulance Oost (10002)",
-          "months": {
-            "10": [
+            ,
+            "03":
               {
-                "order_id": 1132,
-                "status": "aangemaakt door AnonymousUser"
-              },
-              {
-                "order_id": 1131,
-                "status": "aangemaakt door AnonymousUser"
+                "count":
+                  101, "perc":
+                  "14.05"
               }
-            ]
+            ,
+            "08":
+              {
+                "count":
+                  81, "perc":
+                  "10.64"
+              }
+            ,
+            "07":
+              {
+                "count":
+                  161, "perc":
+                  "21.13"
+              }
+            ,
+            "06":
+              {
+                "count":
+                  86, "perc":
+                  "11.48"
+              }
+            ,
+            "05":
+              {
+                "count":
+                  80, "perc":
+                  "10.61"
+              }
+            ,
+            "04":
+              {
+                "count":
+                  76, "perc":
+                  "10.20"
+              }
+            ,
+            "02":
+              {
+                "count":
+                  76, "perc":
+                  "9.95"
+              }
+            ,
+            "09":
+              {
+                "count":
+                  9, "perc":
+                  "1.37"
+              }
           }
-        }
-      ],
-    statuses_data: {
-      "1": {
-        "statuscodes": {
-          "Opdracht gefactureerd": {"count": 45, "perc": 47.87},
-          "opdracht klaar": {"count": 34, "perc": 36.17},
-          "gewijzigd door": {"count": 2, "perc": 2.13},
-          "unknown": {"count": 4, "perc": 4.26},
-          "workorders signed": {"count": 7, "perc": 7.45},
-          "opname offerte": {"count": 1, "perc": 1.06},
-          "Ziek": {"count": 1, "perc": 1.06}
-        }, "total": 94
-      },
-      "2": {
-        "statuscodes": {
-          "opdracht klaar": {"count": 21, "perc": 27.63},
-          "workorders signed": {"count": 23, "perc": 30.26},
-          "unknown": {"count": 2, "perc": 2.63},
-          "Opdracht gefactureerd": {"count": 25, "perc": 32.89},
-          "gewijzigd door": {"count": 2, "perc": 2.63},
-          "aangemaakt": {"count": 1, "perc": 1.32},
-          "opname offerte": {"count": 2, "perc": 2.63}
-        }, "total": 76
-      },
-      "3": {
-        "statuscodes": {
-          "workorders signed": {"count": 52, "perc": 51.49},
-          "Opdracht gefactureerd": {"count": 13, "perc": 12.87},
-          "opdracht klaar": {"count": 25, "perc": 24.75},
-          "unknown": {"count": 8, "perc": 7.92},
-          "gewijzigd door": {"count": 2, "perc": 1.98},
-          "begin opdracht": {"count": 1, "perc": 0.99}
-        }, "total": 101
-      },
-      "4": {
-        "statuscodes": {
-          "workorders signed": {"count": 34, "perc": 44.74},
-          "opdracht klaar": {"count": 31, "perc": 40.79},
-          "Opdracht gefactureerd": {"count": 6, "perc": 7.89},
-          "Opdracht toegewezen": {"count": 3, "perc": 3.95},
-          "unknown": {"count": 2, "perc": 2.63}
-        }, "total": 76
-      },
-      "5": {
-        "statuscodes": {
-          "workorders signed": {"count": 33, "perc": 41.25},
-          "opdracht klaar": {"count": 20, "perc": 25.0},
-          "Opdracht gefactureerd": {"count": 9, "perc": 11.25},
-          "unknown": {"count": 8, "perc": 10.0},
-          "gewijzigd door": {"count": 4, "perc": 5.0},
-          "Opdracht toegewezen": {"count": 6, "perc": 7.5}
-        }, "total": 80
-      },
-      "6": {
-        "statuscodes": {
-          "Opdracht toegewezen": {"count": 7, "perc": 21.88},
-          "workorders signed": {"count": 12, "perc": 37.5},
-          "unknown": {"count": 3, "perc": 9.38},
-          "opdracht klaar": {"count": 6, "perc": 18.75},
-          "gewijzigd door": {"count": 1, "perc": 3.12},
-          "aangemaakt": {"count": 2, "perc": 6.25},
-          "begin opdracht": {"count": 1, "perc": 3.12}
-        }, "total": 32
-      },
-      "7": {"statuscodes": {"unknown": {"count": 1, "perc": 100.0}}, "total": 1}
-    }
+        ,
+        "total":
+          764
+      }
+    ,
+    "statuses_data":
+      {
+        "01":
+          {
+            "statuscodes":
+              {
+                "Opdracht gefactureerd":
+                  {
+                    "count":
+                      48, "perc":
+                      "51.61"
+                  }
+                ,
+                "opdracht klaar":
+                  {
+                    "count":
+                      32, "perc":
+                      "34.04"
+                  }
+                ,
+                "gewijzigd door":
+                  {
+                    "count":
+                      2, "perc":
+                      "2.47"
+                  }
+                ,
+                "opdracht gecopieerd":
+                  {
+                    "count":
+                      2, "perc":
+                      "2.30"
+                  }
+                ,
+                "opname offerte":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "workorders signed":
+                  {
+                    "count":
+                      5, "perc":
+                      "7.25"
+                  }
+                ,
+                "Transport / Logistiek / onderdelen ophalen":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "planning":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "toegewezen aan":
+                  {
+                    "count":
+                      2, "perc":
+                      "2.67"
+                  }
+              }
+            ,
+            "total":
+              94
+          }
+        ,
+        "02":
+          {
+            "statuscodes":
+              {
+                "opdracht klaar":
+                  {
+                    "count":
+                      18, "perc":
+                      "24.66"
+                  }
+                ,
+                "workorders signed":
+                  {
+                    "count":
+                      22, "perc":
+                      "28.95"
+                  }
+                ,
+                "Opdracht gefactureerd":
+                  {
+                    "count":
+                      29, "perc":
+                      "38.67"
+                  }
+                ,
+                "planning":
+                  {
+                    "count":
+                      2, "perc":
+                      "3.03"
+                  }
+                ,
+                "gewijzigd door":
+                  {
+                    "count":
+                      2, "perc":
+                      "3.64"
+                  }
+                ,
+                "aangemaakt":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "opname offerte":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "coulance / garantie":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+              }
+            ,
+            "total":
+              76
+          }
+        ,
+        "03":
+          {
+            "statuscodes":
+              {
+                "workorders signed":
+                  {
+                    "count":
+                      52, "perc":
+                      "53.06"
+                  }
+                ,
+                "opdracht klaar":
+                  {
+                    "count":
+                      25, "perc":
+                      "24.75"
+                  }
+                ,
+                "Opdracht gefactureerd":
+                  {
+                    "count":
+                      13, "perc":
+                      "15.12"
+                  }
+                ,
+                "opdracht gecopieerd":
+                  {
+                    "count":
+                      5, "perc":
+                      "6.17"
+                  }
+                ,
+                "gewijzigd door":
+                  {
+                    "count":
+                      2, "perc":
+                      "2.17"
+                  }
+                ,
+                "planning":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "begin opdracht":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "toegewezen aan":
+                  {
+                    "count":
+                      2, "perc":
+                      "2.08"
+                  }
+              }
+            ,
+            "total":
+              101
+          }
+        ,
+        "04":
+          {
+            "statuscodes":
+              {
+                "workorders signed":
+                  {
+                    "count":
+                      34, "perc":
+                      "45.95"
+                  }
+                ,
+                "opdracht klaar":
+                  {
+                    "count":
+                      31, "perc":
+                      "40.79"
+                  }
+                ,
+                "Opdracht gefactureerd":
+                  {
+                    "count":
+                      6, "perc":
+                      "11.54"
+                  }
+                ,
+                "Opdracht toegewezen":
+                  {
+                    "count":
+                      3, "perc":
+                      "4.29"
+                  }
+                ,
+                "planning":
+                  {
+                    "count":
+                      2, "perc":
+                      "3.77"
+                  }
+              }
+            ,
+            "total":
+              76
+          }
+        ,
+        "05":
+          {
+            "statuscodes":
+              {
+                "workorders signed":
+                  {
+                    "count":
+                      33, "perc":
+                      "41.25"
+                  }
+                ,
+                "opdracht klaar":
+                  {
+                    "count":
+                      20, "perc":
+                      "25.32"
+                  }
+                ,
+                "Opdracht gefactureerd":
+                  {
+                    "count":
+                      9, "perc":
+                      "12.50"
+                  }
+                ,
+                "unknown":
+                  {
+                    "count":
+                      7, "perc":
+                      "28.00"
+                  }
+                ,
+                "gewijzigd door":
+                  {
+                    "count":
+                      4, "perc":
+                      "6.15"
+                  }
+                ,
+                "Opdracht toegewezen":
+                  {
+                    "count":
+                      6, "perc":
+                      "8.57"
+                  }
+                ,
+                "planning":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+              }
+            ,
+            "total":
+              80
+          }
+        ,
+        "06":
+          {
+            "statuscodes":
+              {
+                "workorders signed":
+                  {
+                    "count":
+                      53, "perc":
+                      "63.86"
+                  }
+                ,
+                "Opdracht toegewezen":
+                  {
+                    "count":
+                      3, "perc":
+                      "3.80"
+                  }
+                ,
+                "opdracht klaar":
+                  {
+                    "count":
+                      25, "perc":
+                      "29.07"
+                  }
+                ,
+                "opdracht gecopieerd":
+                  {
+                    "count":
+                      2, "perc":
+                      "4.76"
+                  }
+                ,
+                "planning":
+                  {
+                    "count":
+                      2, "perc":
+                      "4.44"
+                  }
+                ,
+                "toegewezen aan":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+              }
+            ,
+            "total":
+              86
+          }
+        ,
+        "07":
+          {
+            "statuscodes":
+              {
+                "workorders signed":
+                  {
+                    "count":
+                      121, "perc":
+                      "76.58"
+                  }
+                ,
+                "opdracht klaar":
+                  {
+                    "count":
+                      29, "perc":
+                      "18.01"
+                  }
+                ,
+                "gewijzigd door":
+                  {
+                    "count":
+                      3, "perc":
+                      "2.04"
+                  }
+                ,
+                "aangemaakt":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "planning":
+                  {
+                    "count":
+                      4, "perc":
+                      "2.78"
+                  }
+                ,
+                "Opdracht toegewezen":
+                  {
+                    "count":
+                      3, "perc":
+                      "1.99"
+                  }
+              }
+            ,
+            "total":
+              161
+          }
+        ,
+        "08":
+          {
+            "statuscodes":
+              {
+                "opdracht klaar":
+                  {
+                    "count":
+                      12, "perc":
+                      "15.38"
+                  }
+                ,
+                "Opdracht toegewezen":
+                  {
+                    "count":
+                      21, "perc":
+                      "25.93"
+                  }
+                ,
+                "planning":
+                  {
+                    "count":
+                      3, "perc":
+                      "5.77"
+                  }
+                ,
+                "workorders signed":
+                  {
+                    "count":
+                      42, "perc":
+                      "59.15"
+                  }
+                ,
+                "gewijzigd door":
+                  {
+                    "count":
+                      3, "perc":
+                      "4.00"
+                  }
+              }
+            ,
+            "total":
+              81
+          }
+        ,
+        "09":
+          {
+            "statuscodes":
+              {
+                "Opdracht toegewezen":
+                  {
+                    "count":
+                      7, "perc":
+                      "77.78"
+                  }
+                ,
+                "opdracht gecopieerd":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+                ,
+                "gewijzigd door":
+                  {
+                    "count":
+                      1, "perc":
+                      "0.00"
+                  }
+              }
+            ,
+            "total":
+              9
+          }
+      }
   }
 }

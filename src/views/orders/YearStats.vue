@@ -33,11 +33,25 @@
       </b-col>
     </b-row>
 
-    <bar-chart
-      v-if="loaded && !isLoading"
-      :chart-data="chartdata"
-      :options="options"
-    />
+    <div class="app-grid">
+      <b-row>
+        <b-col cols="6">
+          <bar-chart
+            v-if="loaded && !isLoading"
+            :chart-data="chartdataYearBar"
+            :options="options"
+          />
+        </b-col>
+        <b-col cols="6">
+          <pie-chart
+            id="pie-chart-year"
+            v-if="!isLoading"
+            :chart-data="chartdataYearPie"
+            :options="pieOptions"
+          />
+        </b-col>
+      </b-row>
+    </div>
 
     <div class="app-grid">
       <b-row v-for="(charts, month) in this.monthChartData" :key="month" class="chart-section">
@@ -81,7 +95,8 @@ export default {
       isLoading: false,
       customerData: null,
       monthTotals: null,
-      chartdata: [],
+      chartdataYearBar: [],
+      chartdataYearPie: [],
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -103,8 +118,8 @@ export default {
       orderType: 'all',
       year: d.getYear() + 1900,
       statuscodes: null,
-      months: [],
-      monthChartData: {}
+      monthChartData: {},
+      monthColors: {}
     }
   },
   components: {
@@ -121,6 +136,13 @@ export default {
     }
   },
   methods: {
+    getRandomColor(month) {
+      if (!(month in this.monthColors)) {
+        this.monthColors[month] = `#${Math.floor(Math.random()*16777215).toString(16)}`
+      }
+
+      return this.monthColors[month]
+    },
     denormalizeOrderType() {
       return this.orderType().replace('_', ' ')
     },
@@ -135,66 +157,61 @@ export default {
       this.year = this.year - 1
       this.loadData()
     },
-    setMonthTotals(yearData) {
-      let monthTotals = {}, customerTotals = {}
-
-      for (let i=0; i<yearData.length; i++) {
-        const name = yearData[i].name
-
-        for (let month=0; month<12; month++) {
-          const monthText = `${month + 1}`
-
-          if (!(monthText in monthTotals)) {
-            monthTotals[monthText] = 0
-          }
-
-          if (!(name in customerTotals)) {
-            customerTotals[name] = 0
-          }
-
-          monthTotals[monthText] += month in yearData[i].months && typeof yearData[i].months[month] !== 'undefined' ? yearData[i].months[month].length : 0
-          customerTotals[name] += month in yearData[i].months && typeof yearData[i].months[month] !== 'undefined' ? yearData[i].months[month].length : 0
-        }
-      }
-
-      this.monthTotals = monthTotals
-      this.customerTotals = customerTotals
-    },
-    getMonthTotal: function (month) {
-      return month in this.monthTotals ? this.monthTotals[month] : 0
-    },
-    getCustomerTotal: function (name) {
-      return name in this.customerTotals ? this.customerTotals[name] : 0
-    },
     async loadData() {
       this.isLoading = true
       this.monthChartData = {}
 
       try {
         yearModel.setListArgs(`order_type=${this.orderType}&year=${this.year}`)
-        const { statusesData, resultYearData } = await yearModel.getYearData(this.statuscodes)
+        const { statusesData, yearData } = await yearModel.getYearData(this.statuscodes)
 
-        this.setMonthTotals(resultYearData)
-        this.customerData = resultYearData
-
-        // fill graph data and set labels/fields
-        let monthData = [], labels = []
-        this.months = []
+        // fill bar graph data and set labels/fields
+        let monthData = [], labels = [], colors = []
         for (let i=0; i<12; i++) {
-          const monthText = `${i + 1}`
-          this.months.push(monthText)
+          const monthText =  i < 10 ? `0${i + 1}` : `${i}`
           const date = this.$moment(`2021-${monthText}-1`, 'D-MM-YYYY')
           const monthTextLong = date.format('MMM')
           labels.push(monthTextLong)
-          monthData.push(this.monthTotals[monthText])
+          colors.push(this.getRandomColor(monthText))
+          if (monthText in yearData.months) {
+            monthData.push(yearData.months[monthText].count)
+          } else {
+            monthData.push(0)
+          }
         }
 
-        this.chartdata = {
+        this.chartdataYearBar = {
+          labels,
+          datasets: [{
+            label: `Total orders for order type: ${this.orderType} (Total: ${yearData['total']})`,
+            data: monthData,
+            backgroundColor: colors,
+          }]
+        }
+
+        // fill pie graph data and set labels/fields
+        monthData = []
+        labels = []
+        colors = []
+        for (let i=0; i<12; i++) {
+          const monthText =  i < 10 ? `0${i + 1}` : `${i}`
+          const date = this.$moment(`2021-${monthText}-1`, 'D-MM-YYYY')
+          const monthTextLong = date.format('MMM')
+          labels.push(monthTextLong)
+          colors.push(this.getRandomColor(monthText))
+          if (monthText in yearData.months) {
+            monthData.push(yearData.months[monthText].perc)
+          } else {
+            monthData.push("0.00")
+          }
+        }
+
+        this.chartdataYearPie = {
           labels,
           datasets: [{
             label: `Total orders for order type: ${this.orderType}`,
             data: monthData,
-            backgroundColor: '#f87979',
+            backgroundColor: colors,
           }]
         }
 
