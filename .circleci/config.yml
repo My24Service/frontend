@@ -72,9 +72,10 @@ jobs:
            command: |
               wget https://go.dev/dl/go1.19.linux-386.tar.gz
               tar -C $HOME -xzf go1.19.linux-386.tar.gz
+              export PATH=$PATH:$HOME/go/bin/go
               echo "ls -Fal $HOME/go/bin/go"
               ls -Fal $HOME/go/bin/go
-              $HOME/go/bin/go get -u github.com/tcnksm/ghr
+              go get -u github.com/tcnksm/ghr
               VERSION=$(cat /tmp/$TARGET_DIR/VERSION)
               mkdir /tmp/release
               cp $TGZ_NAME /tmp/release/frontend-release-${VERSION}
