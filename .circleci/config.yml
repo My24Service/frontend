@@ -72,7 +72,7 @@ jobs:
            command: |
               wget https://go.dev/dl/go1.19.linux-386.tar.gz
               tar -C $HOME -xzf go1.19.linux-386.tar.gz
-              export PATH=$PATH:$HOME/go/bin/go
+              export PATH=$PATH:$HOME/go/bin
               echo "ls -Fal $HOME/go/bin/go"
               ls -Fal $HOME/go/bin/go
               go get -u github.com/tcnksm/ghr
