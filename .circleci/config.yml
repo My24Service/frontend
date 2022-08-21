@@ -72,6 +72,7 @@ jobs:
            command: |
               wget https://go.dev/dl/go1.19.linux-386.tar.gz
               tar -C $HOME -xzf go1.19.linux-386.tar.gz
+              ls -l $HOME
               $HOME/go/bin/go get -u github.com/tcnksm/ghr
               VERSION=$(cat /tmp/$TARGET_DIR/VERSION)
               mkdir /tmp/release
