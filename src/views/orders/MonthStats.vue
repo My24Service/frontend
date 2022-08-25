@@ -33,11 +33,25 @@
       </b-col>
     </b-row>
 
-    <bar-chart
-      v-if="loaded && !isLoading"
-      :chart-data="chartdata"
-      :options="options"
-    />
+    <div class="app-grid">
+      <b-row>
+        <b-col cols="6">
+          <bar-chart
+            v-if="loaded && !isLoading"
+            :chart-data="chartdataMonthBar"
+            :options="options"
+          />
+        </b-col>
+        <b-col cols="6">
+          <pie-chart
+            id="pie-chart-year"
+            v-if="!isLoading"
+            :chart-data="chartdataMonthPie"
+            :options="pieOptions"
+          />
+        </b-col>
+      </b-row>
+    </div>
 
     <div class="app-grid">
       <b-row v-for="(charts, week) in this.weekChartData" :key="week" class="chart-section">
@@ -81,26 +95,6 @@
       </b-row>
     </div>
 
-    <b-table
-      small
-      id="month-table"
-      :busy='isLoading'
-      :fields="customerFields"
-      :items="customerData"
-      responsive="md"
-      class="data-table"
-    >
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template v-for="week in weeks" v-slot:[`cell(week${week})`]="{ item }">
-        <OrderStatusColorSpan :data="item.weeks[week]" :key="week" />
-      </template>
-      <template #cell(totals)="data">{{ getCustomerTotal(data.item.name )}}</template>
-    </b-table>
   </div>
 </template>
 
@@ -121,7 +115,6 @@ export default {
       isLoading: false,
       customerData: null,
       weekTotals: null,
-      chartdata: [],
       options: {
         scales: {
           yAxes: [{
@@ -151,7 +144,6 @@ export default {
           }
         }
       },
-      customerFields: [],
       loaded: false,
       orderType: 'all',
       today: null,
@@ -161,8 +153,9 @@ export default {
       statuscodes: null,
       weekChartData: {},
       weekChartDataAssignedOrders: {},
-      weeks: [],
-      assignedColors: {}
+      assignedColors: {},
+      chartdataMonthPie: {},
+      chartdataMonthBar: {}
     }
   },
   components: {
@@ -200,59 +193,6 @@ export default {
 
       this.loadData()
     },
-    setWeekTotals(monthData) {
-      let weekTotals = {}, customerTotals = {}
-
-      for (let i=0; i<monthData.length; i++) {
-        const name = monthData[i].name
-
-        for (let j=0; j<this.weeks.length; j++) {
-          const weekText = `${this.weeks[j]}`
-
-          if (!(weekText in weekTotals)) {
-            weekTotals[weekText] = 0
-          }
-
-          if (!(name in customerTotals)) {
-            customerTotals[name] = 0
-          }
-
-          weekTotals[weekText] += weekText in monthData[i].weeks && typeof monthData[i].weeks[weekText] !== 'undefined' ? monthData[i].weeks[weekText].length : 0
-          customerTotals[name] += weekText in monthData[i].weeks && typeof monthData[i].weeks[weekText] !== 'undefined' ? monthData[i].weeks[weekText].length : 0
-        }
-      }
-
-      this.weekTotals = weekTotals
-      this.customerTotals = customerTotals
-    },
-    getWeekTotal: function (week) {
-      return week in this.weekTotals ? this.weekTotals[week] : 0
-    },
-    getCustomerTotal: function (name) {
-      return name in this.customerTotals ? this.customerTotals[name] : 0
-    },
-    getWeeks(weeksObject) {
-      let weeks = []
-      for(const [week, _] of Object.entries(weeksObject)) {
-        weeks.push(week)
-      }
-
-      return weeks
-    },
-    getTotalForDay(data, day) {
-      let total = 0
-      for (let i=0; i<data.length; i++) {
-        for (const[_, orders] of Object.entries(data[i].weeks)) {
-          for (let j=0; j<orders.length; j++) {
-            if (orders[j].day === day) {
-              total++
-            }
-          }
-        }
-      }
-
-      return total
-    },
     getRandomColor(numAssigned) {
       if (!(numAssigned in this.assignedColors)) {
         this.assignedColors[numAssigned] = `#${Math.floor(Math.random()*16777215).toString(16)}`
@@ -267,50 +207,39 @@ export default {
 
       try {
         monthModel.setListArgs(`order_type=${this.orderType}&year=${this.year}&month=${this.month}`)
-        const data = await monthModel.getMonthData(this.statuscodes)
-        this.weeks = data.weeks
-        const monthResults = data.monthData
-        const statusesData = data.statusesData
-        const assignedOrdersData = data.assignedOrdersData
+        const {monthData, statusesData, assignedOrdersData } = await monthModel.getMonthData(this.statuscodes)
+        const weeks = Object.keys(monthData.weeks)
 
-        this.setWeekTotals(monthResults)
-        this.customerData = monthResults
-        this.customerFields = [{
-          key: 'name',
-          label: this.$trans('Customer'),
-          thAttr: {width: '30%'}
-        }]
-
-        const weekWidth = Math.ceil((100-30-5)/this.weeks.length)
-
-        for (let i = 0; i<this.weeks.length; i++) {
-          const label = `${this.$trans('week')} ${this.weeks[i]} (${this.getWeekTotal(this.weeks[i])})`
-
-          this.customerFields.push({
-            key: `week${this.weeks[i]}`,
-            label,
-            thAttr: {width: `${weekWidth}%`}
-          })
+        // fill bar graph data and set labels/fields
+        let monthDataBar = [], monthDataPie = [], labels = [], colors = []
+        for (const week of weeks) {
+          const weekText =  `${this.$trans("week")} ${week}`
+          labels.push(weekText)
+          colors.push(this.getRandomColor(weekText))
+          if (week in monthData.weeks) {
+            monthDataBar.push(monthData.weeks[week].count)
+            monthDataPie.push(monthData.weeks[week].perc)
+          } else {
+            monthDataBar.push(0)
+            monthDataPie.push("0.00")
+          }
         }
 
-        this.customerFields.push({
-          key: 'totals',
-          label: this.$trans('Totals'),
-          thAttr: {width: '5%'}
-        })
-
-        let monthData = [], labels = []
-        for (let day=1; day<=this.today.daysInMonth(); day++) {
-          monthData.push(this.getTotalForDay(monthResults, day))
-          labels.push(day)
+        this.chartdataMonthBar = {
+          labels,
+          datasets: [{
+            label: `Total orders for order type: ${this.orderType} (Total: ${monthData['total']})`,
+            data: monthDataBar,
+            backgroundColor: colors,
+          }]
         }
 
-        this.chartdata = {
+        this.chartdataMonthPie = {
           labels,
           datasets: [{
             label: `Total orders for order type: ${this.orderType}`,
-            data: monthData,
-            backgroundColor: '#f87979',
+            data: monthDataPie,
+            backgroundColor: colors,
           }]
         }
 

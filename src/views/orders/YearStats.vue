@@ -95,8 +95,8 @@ export default {
       isLoading: false,
       customerData: null,
       monthTotals: null,
-      chartdataYearBar: [],
-      chartdataYearPie: [],
+      chartdataYearBar: {},
+      chartdataYearPie: {},
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -166,7 +166,7 @@ export default {
         const { statusesData, yearData } = await yearModel.getYearData(this.statuscodes)
 
         // fill bar graph data and set labels/fields
-        let monthData = [], labels = [], colors = []
+        let monthDataBar = [], monthDataPie = [], labels = [], colors = []
         for (let i=0; i<12; i++) {
           const monthText =  i < 10 ? `0${i + 1}` : `${i}`
           const date = this.$moment(`2021-${monthText}-1`, 'D-MM-YYYY')
@@ -174,9 +174,11 @@ export default {
           labels.push(monthTextLong)
           colors.push(this.getRandomColor(monthText))
           if (monthText in yearData.months) {
-            monthData.push(yearData.months[monthText].count)
+            monthDataBar.push(yearData.months[monthText].count)
+            monthDataPie.push(yearData.months[monthText].perc)
           } else {
-            monthData.push(0)
+            monthDataBar.push(0)
+            monthDataPie.push("0.00")
           }
         }
 
@@ -184,33 +186,16 @@ export default {
           labels,
           datasets: [{
             label: `Total orders for order type: ${this.orderType} (Total: ${yearData['total']})`,
-            data: monthData,
+            data: monthDataBar,
             backgroundColor: colors,
           }]
-        }
-
-        // fill pie graph data and set labels/fields
-        monthData = []
-        labels = []
-        colors = []
-        for (let i=0; i<12; i++) {
-          const monthText =  i < 10 ? `0${i + 1}` : `${i}`
-          const date = this.$moment(`2021-${monthText}-1`, 'D-MM-YYYY')
-          const monthTextLong = date.format('MMM')
-          labels.push(monthTextLong)
-          colors.push(this.getRandomColor(monthText))
-          if (monthText in yearData.months) {
-            monthData.push(yearData.months[monthText].perc)
-          } else {
-            monthData.push("0.00")
-          }
         }
 
         this.chartdataYearPie = {
           labels,
           datasets: [{
             label: `Total orders for order type: ${this.orderType}`,
-            data: monthData,
+            data: monthDataPie,
             backgroundColor: colors,
           }]
         }

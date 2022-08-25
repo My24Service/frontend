@@ -51,22 +51,4 @@ describe('MonthStats.vue', () => {
     const el = wrapper.findComponent(MonthStats)
     expect(el.exists()).to.be.true
   })
-
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(monthResponse);
-
-    const wrapper = mount(MonthStats, {
-      localVue,
-      store,
-      mocks: {
-        $trans: (f) => f,
-        $moment: moment,
-      },
-    })
-
-    await flushPromises()
-
-    const trs = wrapper.findAll('#month-table > tbody > tr')
-    expect(trs.length).to.equal(2)
-  })
 })
