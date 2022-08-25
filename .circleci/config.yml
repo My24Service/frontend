@@ -77,21 +77,10 @@ jobs:
               sudo apt install gh
              
               mkdir /tmp/release
-              cp $TGZ_NAME /tmp/release/frontend-release-$(cat /tmp/$TARGET_DIR/VERSION)
+              cp $TGZ_NAME /tmp/release/frontend-release-$(cat /tmp/$TARGET_DIR/VERSION).tgz
              
               export GH_HOST=git@github.com:My24Service/frontend.git
               gh release create $(cat /tmp/$TARGET_DIR/VERSION) /tmp/release/frontend-release-$(cat /tmp/$TARGET_DIR/VERSION) --generate-notes -R git@github.com:My24Service/frontend.git
-#
-#              wget https://go.dev/dl/go1.19.linux-386.tar.gz
-#              tar -C $HOME -xzf go1.19.linux-386.tar.gz
-#              export PATH=$PATH:$HOME/go/bin
-#              echo "ls -Fal $HOME/go/bin/go"
-#              ls -Fal $HOME/go/bin/go
-#              go get -u github.com/tcnksm/ghr
-#              VERSION=$(cat /tmp/$TARGET_DIR/VERSION)
-#              mkdir /tmp/release
-#              cp $TGZ_NAME /tmp/release/frontend-release-${VERSION}
-#              $HOME/go/bin/ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/release
   build-upload-develop:
     working_directory: ~/circleci-frontend
     docker:
