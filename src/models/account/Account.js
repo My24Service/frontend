@@ -47,6 +47,10 @@ class Account extends BaseModel {
     return this.axios.post('/rest-auth/logout/', {}, headers)
   }
 
+  async getUserDetails() {
+    return this.axios.get('/company/user-info-me/').then(response => response.data)
+  }
+
   async sendResetPasswordLink(email) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)

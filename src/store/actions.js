@@ -1,5 +1,3 @@
-import axios from '@/services/api'
-
 import my24 from '@/services/my24'
 import { isEmpty } from '@/utils'
 
@@ -9,16 +7,18 @@ import {
   SET_LANGUAGE,
   SET_SET_LANGUAGE_URL,
   SET_USER_INFO,
-  SET_TOKEN,
   SET_MEMBER_CONTRACT,
-  DATA_LOADED,
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
   SET_UNACCEPTED_COUNT,
   SET_MAINTENANCE_PRODUCTS,
+  SET_STREAM_INFO,
 } from './mutation-types'
 
 export const actions = {
+  setStreamInfo({commit}, streamInfo) {
+    commit(SET_STREAM_INFO, streamInfo)
+  },
   setUnacceptedCount({commit}, count) {
     commit(SET_UNACCEPTED_COUNT, count)
   },
