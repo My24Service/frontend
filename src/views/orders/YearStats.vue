@@ -169,13 +169,13 @@ export default {
         let monthDataBar = [], monthDataPie = [], labels = [], colors = []
         for (let i=0; i<12; i++) {
           const monthText =  i < 10 ? `0${i + 1}` : `${i}`
-          const date = this.$moment(`2021-${monthText}-1`, 'D-MM-YYYY')
+          const date = this.$moment(`${this.year}-${monthText}-1`, 'D-MM-YYYY')
           const monthTextLong = date.format('MMM')
           labels.push(monthTextLong)
           colors.push(this.getRandomColor(monthText))
-          if (monthText in yearData.months) {
-            monthDataBar.push(yearData.months[monthText].count)
-            monthDataPie.push(yearData.months[monthText].perc)
+          if (monthText in yearData.items) {
+            monthDataBar.push(yearData.items[monthText].count)
+            monthDataPie.push(yearData.items[monthText].perc)
           } else {
             monthDataBar.push(0)
             monthDataPie.push("0.00")

@@ -2,7 +2,7 @@ export default {
   data: {
     "month_data": {
       "total": 81,
-      "weeks": {
+      "items": {
         "32": {"count": 23, "perc": "29.11"},
         "33": {"count": 19, "perc": "23.46"},
         "31": {"count": 33, "perc": "84.62"},

@@ -2,7 +2,7 @@ export default {
   data: {
     "year_data":
       {
-        "months":
+        "items":
           {
             "01":
               {
