@@ -248,7 +248,7 @@ export default {
           let pieGraphDataOrderStatuses = [], barGraphDataOrderStatuses = [],
             labelsOrderStatuses = [], colors = [];
 
-          for (const [statuscode, _data] of Object.entries(statuscodes_data.statuscodes)) {
+          for (const [statuscode, _data] of Object.entries(statuscodes_data.items)) {
             labelsOrderStatuses.push(statuscode)
             pieGraphDataOrderStatuses.push(_data.perc)
             barGraphDataOrderStatuses.push(_data.count)
@@ -279,7 +279,7 @@ export default {
           let pieGraphDataAssignedOrders = [], barGraphDataAssignedOrders = [],
             labelsAssignedOrders = [], colors = [];
 
-          for (const [numAssigned, _data] of Object.entries(_assignedOrdersData.data)) {
+          for (const [numAssigned, _data] of Object.entries(_assignedOrdersData.items)) {
             const color = this.getRandomColor(numAssigned)
             labelsAssignedOrders.push(`${numAssigned} x`)
             pieGraphDataAssignedOrders.push(_data.perc)

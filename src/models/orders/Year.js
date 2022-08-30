@@ -14,8 +14,8 @@ class Year extends BaseModel {
 
     // add status color to statuses
     for (const [month, data] of Object.entries(statusesData)) {
-      for (const [statuscode, _data] of Object.entries(data['statuscodes'])) {
-        statusesData[month]['statuscodes'][statuscode]['color'] = my24.status2color(statuscodes, statuscode)
+      for (const [statuscode, _data] of Object.entries(data['items'])) {
+        statusesData[month]['items'][statuscode]['color'] = my24.status2color(statuscodes, statuscode)
       }
     }
 

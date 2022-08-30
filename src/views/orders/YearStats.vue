@@ -205,7 +205,7 @@ export default {
           let pieGraphDataOrderStatuses = [], barGraphDataOrderStatuses = [],
             labelsOrderStatusesPie = [], labelsOrderStatusesBar = [], colors = [];
 
-          for (const [statuscode, _data] of Object.entries(statuscodes_data.statuscodes)) {
+          for (const [statuscode, _data] of Object.entries(statuscodes_data.items)) {
             labelsOrderStatusesPie.push(statuscode)
             labelsOrderStatusesBar.push(statuscode)
             pieGraphDataOrderStatuses.push(_data.perc)
