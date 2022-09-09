@@ -15,12 +15,12 @@ const vm = new Vue({
       return localStorage.getItem('accessToken')
     },
     authenticate ({ accessToken }) {
-      localStorage.setItem('accessToken', accessToken)
+      sessionStorage.setItem('accessToken', accessToken)
       this.authState = true
     },
     logout (refresh = true) {
       if (refresh) window.location.reload(false)
-      localStorage.removeItem('accessToken')
+      sessionStorage.removeItem('accessToken')
       this.authState = false
     },
     isAuthenticated () {

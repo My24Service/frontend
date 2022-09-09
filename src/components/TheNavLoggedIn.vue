@@ -1,6 +1,7 @@
 <template>
   <div>
     <Notification v-if="isLoggedIn && !isCustomer" />
+    <TokenRefresh />
     <b-modal
       id="password-change-modal"
       ref="password-change-modal"
@@ -111,6 +112,7 @@ import Version from "@/components/Version.vue"
 import NavItems from "@/components/NavItems.vue"
 import NavBrand from "@/components/NavBrand.vue"
 import Notification from '@/components/Notification'
+import TokenRefresh from '@/components/TokenRefresh'
 
 export default {
   setup() {
@@ -124,6 +126,7 @@ export default {
     Password,
     Version,
     Notification,
+    TokenRefresh,
   },
   validations() {
     return {
@@ -192,9 +195,6 @@ export default {
     },
     async doLogout() {
       // do logout
-      const userPk = this.$store.getters.getUserPk
-      const memberPk = this.$store.getters.getMemberPk
-
       let loader = this.$loading.show()
 
       try {
