@@ -11,6 +11,8 @@ class SalesUser extends BaseModel {
     'password2': '',
     'password': '',
     'sales_user': {
+      'uses_time_registration': false,
+      'contract_hours_week': 0.0
     }
   }
 

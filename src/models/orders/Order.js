@@ -47,7 +47,7 @@ class Order extends BaseModel {
     'workorder_pdf_url': '',
     'workorder_pdf_url_partner': '',
 
-    'reported_codes_extra_data': []
+    'reported_codes_extra_data': [],
   }
 
   url = '/order/order/'

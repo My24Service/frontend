@@ -11,6 +11,8 @@ class PlanningUser extends BaseModel {
     'password2': '',
     'password': '',
     'planning_user': {
+      'uses_time_registration': false,
+      'contract_hours_week': 0.0
     }
   }
 

@@ -127,6 +127,36 @@
           </b-col>
         </b-row>
 
+        <b-row>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Contract hours per week')"
+              label-for="sales_user_contract_hours_week"
+            >
+              <b-form-input
+                id="sales_user_contract_hours_week"
+                size="sm"
+                v-model="salesuser.sales_user.contract_hours_week"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Uses time registration?')"
+              label-for="sales_user_uses_time_registration"
+            >
+              <b-form-checkbox
+                id="sales_user_uses_time_registration"
+                size="sm"
+                v-model="salesuser.sales_user.uses_time_registration"
+              >
+              </b-form-checkbox>
+            </b-form-group>
+          </b-col>
+        </b-row>
+
         <div class="mx-auto">
           <footer class="modal-footer">
             <b-button @click="cancelForm" type="button" variant="secondary">

@@ -25,7 +25,8 @@ class Engineer extends BaseModel {
       'inspection_date_tools': '',
       'cost_price_tools': 0,
       'remarks': '',
-      'contract_hours_week': 38.0
+      'contract_hours_week': 38.0,
+      // 'uses_time_registration': false
     }
   }
 
