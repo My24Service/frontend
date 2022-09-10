@@ -12,7 +12,7 @@ const vm = new Vue({
   },
   methods: {
     getAccessToken () {
-      return localStorage.getItem('accessToken')
+      return sessionStorage.getItem('accessToken')
     },
     authenticate ({ accessToken }) {
       sessionStorage.setItem('accessToken', accessToken)

@@ -9,11 +9,6 @@ export default (client, auth) => {
 
     const token = auth.getAccessToken()
     if (token) {
-      // request.headers = {
-      //   ...request.headers || {},
-      //   Authorization: `Token ${token}`
-      // }
-
       request.headers = {
         ...request.headers || {},
         Authorization: `Bearer ${token}`
@@ -21,5 +16,12 @@ export default (client, auth) => {
     }
 
     return request
-  }, error => Promise.reject(error))
+  }, error => {
+    console.log('in interceptors', error)
+    if (error.response.status === 401) {
+      console.log('doing logout without reload')
+      auth.logout(false)
+    }
+    Promise.reject(error)
+  })
 }
