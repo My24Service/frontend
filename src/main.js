@@ -174,7 +174,7 @@ store.dispatch('getInitialData')
       console.log('data', error.response.data);
       console.log('status', error.response.status);
       if (error.response.status === 401) {
-        auth.logout()
+        auth.logout(false)
       }
     }
   })

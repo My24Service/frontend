@@ -19,7 +19,7 @@ const vm = new Vue({
       this.authState = true
     },
     logout (refresh = true) {
-      if (refresh) window.location.reload(false)
+      if (refresh) window.location.reload()
       sessionStorage.removeItem('accessToken')
       this.authState = false
     },
