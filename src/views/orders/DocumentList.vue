@@ -2,6 +2,15 @@
   <div class="app-grid">
     <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
 
+    <b-pagination
+      v-if="this.model.count > 20"
+      class="pt-4"
+      v-model="currentPage"
+      :total-rows="this.model.count"
+      :per-page="this.model.perPage"
+      aria-controls="order-table"
+    ></b-pagination>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -94,10 +103,17 @@ export default {
       default: null
     },
   },
+  watch: {
+    currentPage: function(val) {
+      documentModel.currentPage = val
+      this.loadData()
+    }
+  },
   data() {
     return {
-      currentPage: null,
+      model: documentModel,
       searchQuery: null,
+      currentPage: 1,
       breadcrumb: [
         {
           text: this.$trans('Orders'),

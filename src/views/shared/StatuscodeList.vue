@@ -1,6 +1,15 @@
 <template>
   <div class="app-grid">
 
+    <b-pagination
+      v-if="this.statuscodeModel.count > 20"
+      class="pt-4"
+      v-model="currentPage"
+      :total-rows="this.statuscodeModel.count"
+      :per-page="this.statuscodeModel.perPage"
+      aria-controls="order-table"
+    ></b-pagination>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -140,6 +149,12 @@ export default {
     ButtonLinkAdd,
     SearchModal,
   },
+  watch: {
+    currentPage: function(val) {
+      this.statuscodeModel.currentPage = val
+      this.loadData()
+    }
+  },
   data() {
     return {
       // type based variables
@@ -151,6 +166,7 @@ export default {
       statuscodeModel: null,
 
       searchQuery: null,
+      currentPage: 1,
       statuscodePk: null,
       isLoading: false,
       statuscodes: [],

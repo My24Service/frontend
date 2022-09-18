@@ -46,6 +46,10 @@
         <p>
           {{ $trans('Order type') }}: <b>{{ order.order_type }}</b><br/>
           {{ $trans('Order reference') }}: <b>{{ order.order_reference }}</b>
+          <span v-if="order.remarks">
+            <br/>
+            {{ $trans('Remarks') }}: <b>{{ order.remarks }}</b>
+          </span>
         </p>
 
         <span v-if="order.order_contact">{{ $trans('Contact') }}: {{ order.order_contact }}<br/></span>
