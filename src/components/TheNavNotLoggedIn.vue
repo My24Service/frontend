@@ -126,6 +126,8 @@ export default {
         this.$auth.authenticate({ accessToken: loginResult.token })
 
         await this.$store.dispatch('getInitialData')
+        const userDetails = await accountModel.getUserDetails()
+        await this.$store.dispatch('setStreamInfo', userDetails.stream)
 
         loader.hide()
 

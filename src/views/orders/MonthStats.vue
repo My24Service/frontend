@@ -208,7 +208,7 @@ export default {
       try {
         monthModel.setListArgs(`order_type=${this.orderType}&year=${this.year}&month=${this.month}`)
         const {monthData, statusesData, assignedOrdersData } = await monthModel.getMonthData(this.statuscodes)
-        const weeks = Object.keys(monthData.weeks)
+        const weeks = Object.keys(monthData.items)
 
         // fill bar graph data and set labels/fields
         let monthDataBar = [], monthDataPie = [], labels = [], colors = []
@@ -216,9 +216,9 @@ export default {
           const weekText =  `${this.$trans("week")} ${week}`
           labels.push(weekText)
           colors.push(this.getRandomColor(weekText))
-          if (week in monthData.weeks) {
-            monthDataBar.push(monthData.weeks[week].count)
-            monthDataPie.push(monthData.weeks[week].perc)
+          if (week in monthData.items) {
+            monthDataBar.push(monthData.items[week].count)
+            monthDataPie.push(monthData.items[week].perc)
           } else {
             monthDataBar.push(0)
             monthDataPie.push("0.00")
@@ -248,7 +248,7 @@ export default {
           let pieGraphDataOrderStatuses = [], barGraphDataOrderStatuses = [],
             labelsOrderStatuses = [], colors = [];
 
-          for (const [statuscode, _data] of Object.entries(statuscodes_data.statuscodes)) {
+          for (const [statuscode, _data] of Object.entries(statuscodes_data.items)) {
             labelsOrderStatuses.push(statuscode)
             pieGraphDataOrderStatuses.push(_data.perc)
             barGraphDataOrderStatuses.push(_data.count)
@@ -279,7 +279,7 @@ export default {
           let pieGraphDataAssignedOrders = [], barGraphDataAssignedOrders = [],
             labelsAssignedOrders = [], colors = [];
 
-          for (const [numAssigned, _data] of Object.entries(_assignedOrdersData.data)) {
+          for (const [numAssigned, _data] of Object.entries(_assignedOrdersData.items)) {
             const color = this.getRandomColor(numAssigned)
             labelsAssignedOrders.push(`${numAssigned} x`)
             pieGraphDataAssignedOrders.push(_data.perc)

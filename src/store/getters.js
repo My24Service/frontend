@@ -1,6 +1,9 @@
 import { isEmpty } from '@/utils'
 
 export const getters = {
+  getStreamInfo: state => {
+    return state.streamInfo
+  },
   isLoggedIn: state => {
     return !isEmpty(state.userInfo)
   },

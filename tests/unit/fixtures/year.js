@@ -2,7 +2,7 @@ export default {
   data: {
     "year_data":
       {
-        "months":
+        "items":
           {
             "01":
               {
@@ -76,7 +76,7 @@ export default {
       {
         "01":
           {
-            "statuscodes":
+            "items":
               {
                 "Opdracht gefactureerd":
                   {
@@ -148,7 +148,7 @@ export default {
         ,
         "02":
           {
-            "statuscodes":
+            "items":
               {
                 "opdracht klaar":
                   {
@@ -213,7 +213,7 @@ export default {
         ,
         "03":
           {
-            "statuscodes":
+            "items":
               {
                 "workorders signed":
                   {
@@ -278,7 +278,7 @@ export default {
         ,
         "04":
           {
-            "statuscodes":
+            "items":
               {
                 "workorders signed":
                   {
@@ -322,7 +322,7 @@ export default {
         ,
         "05":
           {
-            "statuscodes":
+            "items":
               {
                 "workorders signed":
                   {
@@ -380,7 +380,7 @@ export default {
         ,
         "06":
           {
-            "statuscodes":
+            "items":
               {
                 "workorders signed":
                   {
@@ -431,7 +431,7 @@ export default {
         ,
         "07":
           {
-            "statuscodes":
+            "items":
               {
                 "workorders signed":
                   {
@@ -482,7 +482,7 @@ export default {
         ,
         "08":
           {
-            "statuscodes":
+            "items":
               {
                 "opdracht klaar":
                   {
@@ -526,7 +526,7 @@ export default {
         ,
         "09":
           {
-            "statuscodes":
+            "items":
               {
                 "Opdracht toegewezen":
                   {

@@ -219,7 +219,7 @@
           <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Contract hours  per week')"
+              v-bind:label="$trans('Contract hours per week')"
               label-for="engineer_contract_hours_week"
             >
               <b-form-input

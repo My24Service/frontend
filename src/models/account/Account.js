@@ -18,7 +18,7 @@ class Account extends BaseModel {
   async login(username, password) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
-    const url = '/jwt-token-kid/'
+    const url = '/jwt-token/'
 
     const postData = {
       username: username,
@@ -28,14 +28,12 @@ class Account extends BaseModel {
     return this.axios.post(url, postData, headers).then((response) => response.data)
   }
 
-  async loginOld(username, password) {
-    const token = await this.getCsrfToken()
-    const headers = this.getHeaders(token)
-    const url = '/rest-auth/login/'
+  async refreshToken(token) {
+    const headers = this.getHeaders()
+    const url = '/jwt-token/refresh/'
 
     const postData = {
-      username: username,
-      password: password,
+      token,
     }
 
     return this.axios.post(url, postData, headers).then((response) => response.data)
@@ -45,6 +43,10 @@ class Account extends BaseModel {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     return this.axios.post('/rest-auth/logout/', {}, headers)
+  }
+
+  async getUserDetails() {
+    return this.axios.get('/company/user-info-me/').then(response => response.data)
   }
 
   async sendResetPasswordLink(email) {

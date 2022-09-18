@@ -21,7 +21,8 @@ class OrderNotAccepted extends BaseModel {
   }
 
   getCount() {
-    return new this.axios.get('/order/order/all_for_customer_not_accepted_count/').then(response => response.data)
+    return new this.axios.get('/order/order/all_for_customer_not_accepted_count/')
+      .then(response => response.data)
   }
 }
 

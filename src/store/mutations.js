@@ -8,14 +8,17 @@ import {
   SET_USER_INFO,
   SET_TOKEN,
   SET_MEMBER_CONTRACT,
-  DATA_LOADED,
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
   SET_UNACCEPTED_COUNT,
   SET_MAINTENANCE_PRODUCTS,
+  SET_STREAM_INFO,
 } from './mutation-types'
 
 export const mutations = {
+  [SET_STREAM_INFO](state, streamInfo) {
+    state.streamInfo = streamInfo
+  },
   [SET_UNACCEPTED_COUNT](state, count) {
     state.unacceptedCount = count
   },

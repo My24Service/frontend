@@ -296,7 +296,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="6" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Contacts')"
@@ -309,7 +309,20 @@
               ></b-form-textarea>
             </b-form-group>
           </b-col>
-          <b-col cols="6" role="group">
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Remarks')"
+              label-for="remarks"
+            >
+              <b-form-textarea
+                id="remarks"
+                v-model="order.remarks"
+                rows="3"
+              ></b-form-textarea>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Customer remarks')"

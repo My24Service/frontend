@@ -30,7 +30,9 @@ class StudentUser extends BaseModel {
       'drivers_licence': 'N',
       'drivers_licence_type': '',
       'box_truck': 'N',
-      'bsn': ''
+      'bsn': '',
+      'uses_time_registration': false,
+      'contract_hours_week': 0.0
     }
   }
 
