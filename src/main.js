@@ -13,8 +13,6 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import Loading from 'vue-loading-overlay'
-import axios from '@/services/api'
-import VueAxios from 'vue-axios'
 import { ColorPicker, ColorPanel } from "one-colorpicker"
 
 import VueCompositionAPI from '@vue/composition-api'
@@ -157,7 +155,6 @@ Vue.prototype.$trans = (text) => {
 Vue.use(Vuex)
 Vue.use(VueRouter)
 Vue.use(Loading)
-Vue.use(VueAxios, axios)
 Vue.use(ColorPanel)
 Vue.use(ColorPicker)
 

@@ -37,6 +37,7 @@ class Order extends BaseModel {
     'end_time': null,
     'order_date': '',
     'customer_remarks': '',
+    'remarks': '',
     'required_users': 1,
     'statusses': [],
     'orderlines': [],
