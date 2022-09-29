@@ -20,56 +20,54 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this partner relation?') }}</p>
     </b-modal>
 
-    <b-pagination
-      v-if="this.partnerModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.partnerModel.count"
-      :per-page="this.partnerModel.perPage"
-      aria-controls="partner-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Partner')"
+      />
 
-    <b-table
-      id="partner-table"
-      small
-      :busy='isLoading'
-      :fields="partnerFields"
-      :items="partners"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
-
+      <b-table
+        id="partner-table"
+        small
+        :busy='isLoading'
+        :fields="partnerFields"
+        :items="partners"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -80,6 +78,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'PartnerList',
@@ -89,13 +88,13 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
       pk: null,
-      currentPage: 1,
       searchQuery: null,
-      partnerModel,
+      model: partnerModel,
       isLoading: false,
       partners: [],
       partnerFields: [
@@ -108,21 +107,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.partnerModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = partnerModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      partnerModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -135,7 +128,7 @@ export default {
     },
     async doDelete() {
       try {
-        await partnerModel.delete(this.pk)
+        await this.model.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('partner has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -148,7 +141,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await partnerModel.list()
+        const data = await this.model.list()
         this.partners = data.results
         this.isLoading = false
       } catch(error) {

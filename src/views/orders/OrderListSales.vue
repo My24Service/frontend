@@ -13,55 +13,54 @@
       @remove-filter="removeStatusFilter"
     />
 
-    <b-pagination
-      v-if="this.orderSalesModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.orderSalesModel.count"
-      :per-page="this.orderSalesModel.perPage"
-      aria-controls="order-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Order')"
+      />
 
-    <b-table
-      id="order-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="orders"
-      responsive="md"
-      class="data-table"
-      v-bind:tbody-tr-attr="rowStyle"
-    >
-      <template #head(id)="">
-        <span class="text-info">{{ $trans('Order') }}</span>
-      </template>
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(id)="data">
-        <OrderTableInfo
-          v-bind:order="data.item"
-        />
-      </template>
-    </b-table>
+      <b-table
+        id="order-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="orders"
+        responsive="md"
+        class="data-table"
+        v-bind:tbody-tr-attr="rowStyle"
+      >
+        <template #head(id)="">
+          <span class="text-info">{{ $trans('Order') }}</span>
+        </template>
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(id)="data">
+          <OrderTableInfo
+            v-bind:order="data.item"
+          />
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -73,6 +72,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import OrderFilters from "@/components/OrderFilters";
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
@@ -81,12 +81,12 @@ export default {
     ButtonLinkSearch,
     SearchModal,
     OrderFilters,
+    Pagination,
   },
   data() {
     return {
-      currentPage: 1,
       searchQuery: null,
-      orderSalesModel,
+      model: orderSalesModel,
       statuscodes: [],
       isLoading: false,
       orders: [],
@@ -104,33 +104,27 @@ export default {
       ]
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.orderSalesModel.currentPage = val
-      this.loadData()
-    }
-  },
   async created() {
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
-    this.currentPage = this.orderSalesModel.currentPage
-    this.loadData()
+    this.model.currentPage = this.$route.query.page || 1
+    await this.loadData()
   },
   methods: {
     // filters
     setStatusFilter(statuscode) {
-      orderSalesModel.addListArg(`last_status=${statuscode}`)
+      this.model.addListArg(`last_status=${statuscode}`)
       this.loadData()
     },
     removeStatusFilter(statuscode) {
       console.log('removing', { statuscode })
-      orderSalesModel.removeListArg(`last_status=${statuscode}`)
+      this.model.removeListArg(`last_status=${statuscode}`)
       this.loadData()
     },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderSalesModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -151,11 +145,11 @@ export default {
       this.isLoading = true
 
       try {
-        const data = await orderSalesModel.list()
+        const data = await this.model.list()
         this.orders = data.results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching past orders', error)
+        console.log('error fetching sales orders', error)
         this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       }

@@ -20,65 +20,62 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this sales user?') }}</p>
     </b-modal>
 
-    <b-pagination
-      v-if="this.salesUserModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.salesUserModel.count"
-      :per-page="this.salesUserModel.perPage"
-      aria-controls="salesuser-table"
-    ></b-pagination>
-
-    <b-table
-      id="salesuser-table"
-      small
-      :busy='isLoading'
-      :fields="salesuserFields"
-      :items="salesusers"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="salesuser-add"
-                v-bind:title="$trans('New sales user')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            router_name="salesuser-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
-
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Sales user')"
+      />
+      <b-table
+        id="salesuser-table"
+        small
+        :busy='isLoading'
+        :fields="salesuserFields"
+        :items="salesusers"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="salesuser-add"
+                  v-bind:title="$trans('New sales user')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="salesuser-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -91,6 +88,7 @@ import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'UserSalesList',
@@ -102,13 +100,13 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
       pk: null,
-      currentPage: 1,
       searchQuery: null,
-      salesUserModel,
+      model: salesUserModel,
       isLoading: false,
       salesusers: [],
       salesuserFields: [
@@ -121,21 +119,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.salesUserModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.salesUserModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      salesUserModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -148,9 +140,9 @@ export default {
     },
     async doDelete() {
       try {
-        await salesUserModel.delete(this.pk)
+        await this.model.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Sales user has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting sales user', error)
         this.errorToast(this.$trans('Error deleting sales user'))
@@ -161,7 +153,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await salesUserModel.list()
+        const data = await this.model.list()
         this.salesusers = data.results
         this.isLoading = false
       } catch(error) {

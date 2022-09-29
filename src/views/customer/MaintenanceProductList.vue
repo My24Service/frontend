@@ -28,81 +28,79 @@
       </b-button>
     </div>
 
-    <b-pagination
-      v-if="this.maintenanceProductModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.maintenanceProductModel.count"
-      :per-page="this.maintenanceProductModel.perPage"
-      aria-controls="maintenance-product-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Product}')"
+      />
 
-    <b-table
-      id="maintenance-product-table"
-      small
-      :busy='isLoading'
-      :fields="maintenanceProductFields"
-      :items="maintenanceProducts"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="maintenance-product-add"
-                :router_params="{contractPk: contract.id}"
-                v-bind:title="$trans('New maintenance-product')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(checkbox)="data">
-        <b-form-checkbox
-          v-model="selectedMaintenanceProducts"
-          :value="data.item.id"
-        >
-        </b-form-checkbox>
-      </template>
-      <template #cell(totals)="data">
-        {{ data.item.created_orders }} / {{ data.item.num_products }}
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            router_name="maintenance-product-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
+      <b-table
+        id="maintenance-product-table"
+        small
+        :busy='isLoading'
+        :fields="maintenanceProductFields"
+        :items="maintenanceProducts"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="maintenance-product-add"
+                  :router_params="{contractPk: contract.id}"
+                  v-bind:title="$trans('New maintenance-product')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(checkbox)="data">
+          <b-form-checkbox
+            v-model="selectedMaintenanceProducts"
+            :value="data.item.id"
+          >
+          </b-form-checkbox>
+        </template>
+        <template #cell(totals)="data">
+          {{ data.item.created_orders }} / {{ data.item.num_products }}
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="maintenance-product-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
 <script>
 import maintenanceProductModel from '@/models/customer/MaintenanceProduct.js'
-import customerModel from '@/models/customer/Customer.js'
 import maintenanceContractModel from '@/models/customer/MaintenanceContract.js'
 
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
@@ -111,6 +109,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'MaintenanceProductList',
@@ -121,6 +120,7 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
+    Pagination,
   },
   props: {
     contractPk  : {
@@ -131,9 +131,8 @@ export default {
   data() {
     return {
       contract: null,
-      currentPage: 1,
       searchQuery: null,
-      maintenanceProductModel,
+      model: maintenanceProductModel,
       isLoading: false,
       selectedMaintenanceProducts: [],
       maintenanceProducts: [],
@@ -158,19 +157,13 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.maintenanceProductModel.currentPage = val
-      this.loadData()
-    }
-  },
   async created() {
     this.isLoading = true
-    this.currentPage = this.maintenanceProductModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
 
     const data = await this.$store.dispatch('getMaintenanceProducts')
     if (data) {
-      const { maintenanceProducts, customer } = data
+      const { maintenanceProducts } = data
       this.selectedMaintenanceProducts = maintenanceProducts
     }
 
@@ -181,7 +174,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      maintenanceProductModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -208,9 +201,9 @@ export default {
     },
     async doDelete() {
       try {
-        await maintenanceProductModel.delete(this.pk)
+        await this.model.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance product has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting maintenance product', error)
         this.errorToast(this.$trans('Error deleting maintenance product'))
@@ -220,9 +213,8 @@ export default {
     async loadData() {
       try {
         this.contract = await maintenanceContractModel.detail(this.contractPk)
-        maintenanceProductModel.setListArgs(`contract=${this.contractPk}`)
-
-        const data = await maintenanceProductModel.list()
+        this.model.setListArgs(`contract=${this.contractPk}`)
+        const data = await this.model.list()
         this.maintenanceProducts = data.results
       } catch(error) {
         console.log('error fetching maintenance products', error)

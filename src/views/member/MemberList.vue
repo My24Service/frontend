@@ -7,68 +7,67 @@
       @do-search="handleSearchOk"
     />
 
-    <b-pagination
-      v-if="this.memberModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.memberModel.count"
-      :per-page="this.memberModel.perPage"
-      aria-controls="member-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Member')"
+      />
 
-    <b-table
-      id="member-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="members"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="member-add"
-                v-bind:title="$trans('New member')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(member_logo)="data">
-        <img :src="data.item.companylogo" width="100" alt=""/>
-      </template>
-      <template #cell(member_info)="data">
-        {{ data.item.name }}<br/>
-        {{ data.item.country_code }}-{{ data.item.postal }} {{ data.item.city }}<br/>
-        {{ data.item.email }}<br/>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            router_name="member-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-        </div>
-      </template>
-    </b-table>
+      <b-table
+        id="member-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="members"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="member-add"
+                  v-bind:title="$trans('New member')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(member_logo)="data">
+          <img :src="data.item.companylogo" width="100" alt=""/>
+        </template>
+        <template #cell(member_info)="data">
+          {{ data.item.name }}<br/>
+          {{ data.item.country_code }}-{{ data.item.postal }} {{ data.item.city }}<br/>
+          {{ data.item.email }}<br/>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="member-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -79,6 +78,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
@@ -87,12 +87,12 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
-      currentPage: 1,
       searchQuery: null,
-      memberModel,
+      model: memberModel,
       memberPk: null,
       isLoading: false,
       members: [],
@@ -106,21 +106,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.memberModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.memberModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      memberModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -131,7 +125,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await memberModel.list()
+        const data = await this.model.list()
         this.members = data.results
         this.isLoading = false
       } catch(error) {

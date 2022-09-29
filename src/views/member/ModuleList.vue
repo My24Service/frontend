@@ -16,64 +16,63 @@
       @do-search="handleSearchOk"
     />
 
-    <b-pagination
-      v-if="this.moduleModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.moduleModel.count"
-      :per-page="this.moduleModel.perPage"
-      aria-controls="module-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Module')"
+      />
 
-    <b-table
-      id="module-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="modules"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="module-add"
-                v-bind:title="$trans('New module')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            router_name="module-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
+      <b-table
+        id="module-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="modules"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="module-add"
+                  v-bind:title="$trans('New module')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="module-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -85,6 +84,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
@@ -94,12 +94,12 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
-      currentPage: 1,
       searchQuery: null,
-      moduleModel,
+      model: moduleModel,
       modulePk: null,
       isLoading: false,
       modules: [],
@@ -111,21 +111,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.moduleModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = moduleModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      moduleModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -138,7 +132,7 @@ export default {
     },
     async doDelete() {
       try {
-        await moduleModel.delete(this.modulePk)
+        await this.model.delete(this.modulePk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Module has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -151,7 +145,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await moduleModel.list()
+        const data = await this.model.list()
         this.modules = data.results
         this.isLoading = false
       } catch(error) {

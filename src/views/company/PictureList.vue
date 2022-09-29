@@ -16,67 +16,66 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this picture?') }}</p>
     </b-modal>
 
-    <b-pagination
-      v-if="this.pictureModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.pictureModel.count"
-      :per-page="this.pictureModel.perPage"
-      aria-controls="picture-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Picture')"
+      />
 
-    <b-table
-      id="picture-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="pictures"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="company-picture-add"
-                v-bind:title="$trans('New picture')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(picture)="data">
-        <img :src="data.item.picture || '/static/core/img/noimg.png'" height="100" alt=""/>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            router_name="company-picture-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
+      <b-table
+        id="picture-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="pictures"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="company-picture-add"
+                  v-bind:title="$trans('New picture')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(picture)="data">
+          <img :src="data.item.picture || '/static/core/img/noimg.png'" height="100" alt=""/>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="company-picture-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -88,6 +87,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
@@ -97,12 +97,12 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
-      currentPage: 1,
       searchQuery: null,
-      pictureModel,
+      model: pictureModel,
       picturePk: null,
       isLoading: false,
       pictures: [],
@@ -114,21 +114,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.pictureModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage =this.pictureModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      pictureModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -141,7 +135,7 @@ export default {
     },
     async doDelete() {
       try {
-        await pictureModel.delete(this.picturePk)
+        await this.model.delete(this.picturePk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Picture has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -154,7 +148,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await pictureModel.list()
+        const data = await this.model.list()
         this.pictures = data.results
         this.isLoading = false
       } catch(error) {

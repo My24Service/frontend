@@ -38,77 +38,75 @@
       <PillsCompanyPartners />
     </div>
 
-    <b-pagination
-      v-if="this.partnerRequestsReceivedModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.partnerRequestsReceivedModel.count"
-      :per-page="this.partnerRequestsReceivedModel.perPage"
-      aria-controls="partnerRequestsReceived-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Request')"
+      />
 
-    <b-table
-      id="partnerRequestsReceived-table"
-      small
-      :busy='isLoading'
-      :fields="partnerRequestsReceivedFields"
-      :items="partnerRequests"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkDelete
-            v-if="data.item.status !== 'requested'"
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-          <b-button
-            v-if="data.item.status === 'requested'"
-            @click="function() { showAcceptRequestModal(data.item.id) }"
-            type="button"
-            size="sm"
-            variant="secondary"
-          >
-            {{ $trans('Accept') }}
-          </b-button>
-          &nbsp;
-          <b-button
-            v-if="data.item.status === 'requested'"
-            @click="function() { showRejectRequestModal(data.item.id) }"
-            type="button"
-            size="sm"
-            variant="warning"
-          >
-            {{ $trans('Reject') }}
-          </b-button>
+      <b-table
+        id="partnerRequestsReceived-table"
+        small
+        :busy='isLoading'
+        :fields="partnerRequestsReceivedFields"
+        :items="partnerRequests"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkDelete
+              v-if="data.item.status !== 'requested'"
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+            <b-button
+              v-if="data.item.status === 'requested'"
+              @click="function() { showAcceptRequestModal(data.item.id) }"
+              type="button"
+              size="sm"
+              variant="secondary"
+            >
+              {{ $trans('Accept') }}
+            </b-button>
+            &nbsp;
+            <b-button
+              v-if="data.item.status === 'requested'"
+              @click="function() { showRejectRequestModal(data.item.id) }"
+              type="button"
+              size="sm"
+              variant="warning"
+            >
+              {{ $trans('Reject') }}
+            </b-button>
 
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-    </b-table>
-
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -119,6 +117,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'PartnerRequestsReceivedList',
@@ -128,13 +127,13 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
       pk: null,
-      currentPage: 1,
       searchQuery: null,
-      partnerRequestsReceivedModel,
+      model: partnerRequestsReceivedModel,
       isLoading: false,
       partnerRequests: [],
       partnerRequestsReceivedFields: [
@@ -148,21 +147,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.partnerRequestsReceivedModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.partnerRequestsReceivedModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      partnerRequestsReceivedModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -175,9 +168,9 @@ export default {
     },
     async acceptRequest() {
       try {
-        await partnerRequestsReceivedModel.accept(this.pk)
+        await this.model.accept(this.pk)
         this.infoToast(this.$trans('Accepted'), this.$trans('Partner request has been accepted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error accepting partner request', error)
         this.errorToast(this.$trans('Error accepting partner request'))
@@ -189,9 +182,9 @@ export default {
     },
     async rejectRequest() {
       try {
-        await partnerRequestsReceivedModel.reject(this.pk)
+        await this.model.reject(this.pk)
         this.infoToast(this.$trans('Rejected'), this.$trans('Partner request has been rejected'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error rejecting partner request', error)
         this.errorToast(this.$trans('Error rejecting partner request'))
@@ -204,9 +197,9 @@ export default {
     },
     async doDelete() {
       try {
-        await partnerRequestsReceivedModel.delete(this.pk)
+        await this.model.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting partner request', error)
         this.errorToast(this.$trans('Error deleting partner request'))
@@ -217,7 +210,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await partnerRequestsReceivedModel.list()
+        const data = await this.model.list()
         this.partnerRequests = data.results
         this.isLoading = false
       } catch(error) {

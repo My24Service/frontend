@@ -44,82 +44,80 @@
       @remove-filter="removeStatusFilter"
     />
 
-    <b-pagination
-      v-if="this.orderNotAcceptedModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.orderNotAcceptedModel.count"
-      :per-page="this.orderNotAcceptedModel.perPage"
-      aria-controls="order-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Order')"
+      />
 
-    <b-table
-      id="order-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="orders"
-      responsive="md"
-      class="data-table"
-      v-bind:tbody-tr-attr="rowStyle"
-    >
-      <template #head(id)="">
-        <span class="text-info">{{ $trans('Order') }}</span>
-      </template>
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="order-add"
-                v-bind:title="$trans('New order')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-              <ButtonLinkSort
-                v-bind:method="function() { showSortModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(id)="data">
-        <OrderTableInfo
-          v-bind:order="data.item"
-        />
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            v-if="data.item.last_accepted_status == 'not_yet_accepted'"
-            router_name="order-edit"
-            v-bind:router_params="{pk: data.item.id, unaccepted: true}"
-            v-bind:title="$trans('Edit')"
+      <b-table
+        id="order-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="orders"
+        responsive="md"
+        class="data-table"
+        v-bind:tbody-tr-attr="rowStyle"
+      >
+        <template #head(id)="">
+          <span class="text-info">{{ $trans('Order') }}</span>
+        </template>
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="order-add"
+                  v-bind:title="$trans('New order')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+                <ButtonLinkSort
+                  v-bind:method="function() { showSortModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(id)="data">
+          <OrderTableInfo
+            v-bind:order="data.item"
           />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              v-if="data.item.last_accepted_status == 'not_yet_accepted'"
+              router_name="order-edit"
+              v-bind:router_params="{pk: data.item.id, unaccepted: true}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
 <script>
 import orderNotAcceptedModel from '@/models/orders/OrderNotAccepted.js'
-import orderModel from '@/models/orders/Order.js'
 import my24 from '@/services/my24.js'
 import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
@@ -130,6 +128,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import OrderFilters from "@/components/OrderFilters"
+import Pagination from "@/components/Pagination.vue"
 import { componentMixin } from '@/utils'
 
 export default {
@@ -144,6 +143,7 @@ export default {
     IconLinkEdit,
     SearchModal,
     OrderFilters,
+    Pagination,
   },
   props: {
     dispatch: {
@@ -158,10 +158,9 @@ export default {
   data() {
     return {
       sortMode: 'default',
-      currentPage: 1,
       sort: null,
       searchQuery: null,
-      orderNotAcceptedModel,
+      model: orderNotAcceptedModel,
       statuscodes: [],
       orderPk: null,
       isLoading: false,
@@ -180,39 +179,33 @@ export default {
       ]
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.orderNotAcceptedModel.currentPage = val
-      this.loadData()
-    }
-  },
   async created() {
     // set queryMode
-    orderNotAcceptedModel.queryMode = this.queryMode
+    this.model.queryMode = this.queryMode
 
     // reset searchQuery
     this.searchQuery = null
 
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
-    this.currentPage = this.orderNotAcceptedModel.currentPage
-    this.loadData()
+    this.model.currentPage = this.$route.query.page || 1
+    await this.loadData()
   },
   methods: {
     // filters
     setStatusFilter(statuscode) {
-      orderModel.addListArg(`last_status=${statuscode}`)
+      this.model.addListArg(`last_status=${statuscode}`)
       this.loadData()
     },
     removeStatusFilter(statuscode) {
       console.log('removing', { statuscode })
-      orderModel.removeListArg(`last_status=${statuscode}`)
+      this.model.removeListArg(`last_status=${statuscode}`)
       this.loadData()
     },
     // delete
     async doDelete() {
       try {
-        await orderModel.delete(this.orderPk)
+        await this.model.delete(this.orderPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
         this.loadData()
       } catch(error) {
@@ -229,13 +222,13 @@ export default {
       this.$refs['sort-modal'].show()
     },
     doSort() {
-      orderNotAcceptedModel.setSort(this.sortMode)
+      this.model.setSort(this.sortMode)
       this.loadData()
     },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderNotAcceptedModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -256,7 +249,7 @@ export default {
       this.isLoading = true
 
       try {
-        const data = await orderNotAcceptedModel.list()
+        const data = await this.model.list()
         this.orders = data.results
         this.isLoading = false
       } catch(error) {

@@ -2,15 +2,6 @@
   <div class="app-grid">
     <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
 
-    <b-pagination
-      v-if="this.model.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.model.count"
-      :per-page="this.model.perPage"
-      aria-controls="order-table"
-    ></b-pagination>
-
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -26,55 +17,62 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this document?') }}</p>
     </b-modal>
 
-    <b-table
-      small
-      id="document-table"
-      :busy='isLoading'
-      :fields="fields"
-      :items="documents"
-      responsive="md"
-      class="data-table"
-    >
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #head(icons)="data">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="order-document-add"
-                v-bind:router_params="{orderPk: data.field.value}"
-                v-bind:title="$trans('New statuscode')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            router_name="order-document-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Document')"
+      />
+      <b-table
+        small
+        id="document-table"
+        :busy='isLoading'
+        :fields="fields"
+        :items="documents"
+        responsive="md"
+        class="data-table"
+      >
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #head(icons)="data">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="order-document-add"
+                  v-bind:router_params="{orderPk: data.field.value}"
+                  v-bind:title="$trans('New statuscode')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="order-document-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -86,6 +84,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'DocumentList',
@@ -96,6 +95,7 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
+    Pagination,
   },
   props: {
     orderPk: {
@@ -103,17 +103,10 @@ export default {
       default: null
     },
   },
-  watch: {
-    currentPage: function(val) {
-      documentModel.currentPage = val
-      this.loadData()
-    }
-  },
   data() {
     return {
       model: documentModel,
       searchQuery: null,
-      currentPage: 1,
       breadcrumb: [
         {
           text: this.$trans('Orders'),
@@ -137,7 +130,7 @@ export default {
   },
   created () {
     documentModel.setListArgs(`order=${this.orderPk}`)
-    this.currentPage = documentModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {

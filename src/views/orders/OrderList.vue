@@ -4,11 +4,13 @@
       v-if="memberType === 'maintenance'"
       :dispatch="dispatch"
       :query-mode="queryMode"
+      :key="$route.fullPath"
     />
     <OrderListTemps
       v-if="memberType === 'temps'"
       :dispatch="dispatch"
       :query-mode="queryMode"
+      :key="$route.fullPath"
     />
   </div>
 </template>
@@ -26,7 +28,7 @@ export default {
     queryMode: {
       type: [String],
       default: 'all'
-    }
+    },
   },
   data() {
     return {
