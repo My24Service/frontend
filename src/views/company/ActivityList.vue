@@ -7,48 +7,46 @@
       @do-search="handleSearchOk"
     />
 
-    <b-pagination
-      v-if="this.activityModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.activityModel.count"
-      :per-page="this.activityModel.perPage"
-      aria-controls="activity-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Activity')"
+      />
 
-    <b-table
-      id="activity-table"
-      small
-      :busy='isLoading'
-      :fields="activityFields"
-      :items="activity"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-    </b-table>
-
+      <b-table
+        id="activity-table"
+        small
+        :busy='isLoading'
+        :fields="activityFields"
+        :items="activity"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -57,6 +55,7 @@ import activityModel from '@/models/company/Activity.js'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'ActivityList',
@@ -64,13 +63,13 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
       pk: null,
-      currentPage: 1,
       searchQuery: null,
-      activityModel,
+      model: activityModel,
       isLoading: false,
       activity: [],
       activityFields: [
@@ -80,21 +79,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.activityModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.activityModel.currentPage
+    this.model.currentPage = this.$route?.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      activityModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -105,7 +98,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await activityModel.list()
+        const data = await this.model.list()
         this.activity = data.results
         this.isLoading = false
       } catch(error) {

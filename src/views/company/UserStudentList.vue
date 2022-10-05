@@ -20,83 +20,81 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this student user?') }}</p>
     </b-modal>
 
-    <b-pagination
-      v-if="this.studentUserModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.studentUserModel.count"
-      :per-page="this.studentUserModel.perPage"
-      aria-controls="studentuser-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Student user')"
+      />
 
-    <b-table
-      id="studentuser-table"
-      small
-      :busy='isLoading'
-      :fields="studentuserFields"
-      :items="studentusers"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="studentuser-add"
-                v-bind:title="$trans('New student user')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-              <ButtonLinkDownload
-                v-bind:method="function() { downloadList() }"
-                v-bind:title="$trans('Download')"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(active)="data">
-        <b-link
-          v-if="!data.item.is_active"
-          @click="function() { setActive(data.item.id, data.item.email) }"
-        >
-          <b-icon-check-square></b-icon-check-square>
-        </b-link>
-        <b-link
-          v-if="data.item.is_active"
-          @click="function() { setInActive(data.item.id, data.item.email) }"
-        >
-          <b-icon-check-square-fill></b-icon-check-square-fill>
-        </b-link>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            router_name="studentuser-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
-
+      <b-table
+        id="studentuser-table"
+        small
+        :busy='isLoading'
+        :fields="studentuserFields"
+        :items="studentusers"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="studentuser-add"
+                  v-bind:title="$trans('New student user')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+                <ButtonLinkDownload
+                  v-bind:method="function() { downloadList() }"
+                  v-bind:title="$trans('Download')"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(active)="data">
+          <b-link
+            v-if="!data.item.is_active"
+            @click="function() { setActive(data.item.id, data.item.email) }"
+          >
+            <b-icon-check-square></b-icon-check-square>
+          </b-link>
+          <b-link
+            v-if="data.item.is_active"
+            @click="function() { setInActive(data.item.id, data.item.email) }"
+          >
+            <b-icon-check-square-fill></b-icon-check-square-fill>
+          </b-link>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="studentuser-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -111,6 +109,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'UserstudentuserList',
@@ -123,13 +122,13 @@ export default {
     ButtonLinkSearch,
     ButtonLinkDownload,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
       pk: null,
-      currentPage: 1,
       searchQuery: null,
-      studentUserModel,
+      model: studentUserModel,
       isLoading: false,
       studentusers: [],
       studentuserFields: [
@@ -144,14 +143,8 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.studentUserModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.studentUserModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
@@ -164,7 +157,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      studentUserModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -173,7 +166,7 @@ export default {
     // active/inactive
     async setActive(pk, email) {
       try {
-        await studentUserModel.setActive(pk, email)
+        await this.model.setActive(pk, email)
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user active', error)
@@ -182,7 +175,7 @@ export default {
     },
     async setInActive(pk, email) {
       try {
-        await studentUserModel.setInActive(pk, email)
+        await this.model.setInActive(pk, email)
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user inactive', error)
@@ -196,7 +189,7 @@ export default {
     },
     async doDelete() {
       try {
-        await studentUserModel.delete(this.pk)
+        await this.model.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -209,12 +202,12 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await studentUserModel.list()
+        const data = await this.model.list()
         this.studentusers = data.results
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentusers', error)
-        this.errorToast(this.$trans('Error loading studentusers'))
+        this.errorToast(this.$trans('Error loading student users'))
         this.isLoading = false
       }
     }

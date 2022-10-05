@@ -20,60 +20,58 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this partner request?') }}</p>
     </b-modal>
 
-    <b-pagination
-      v-if="this.partnerRequestsSentModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.partnerRequestsSentModel.count"
-      :per-page="this.partnerRequestsSentModel.perPage"
-      aria-controls="partnerRequestsSent-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Request')"
+      />
 
-    <b-table
-      id="partnerRequestsSent-table"
-      small
-      :busy='isLoading'
-      :fields="partnerRequestsSentFields"
-      :items="partnerRequests"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="partner-request-add"
-                v-bind:title="$trans('New partner request')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-    </b-table>
-
+      <b-table
+        id="partnerRequestsSent-table"
+        small
+        :busy='isLoading'
+        :fields="partnerRequestsSentFields"
+        :items="partnerRequests"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="partner-request-add"
+                  v-bind:title="$trans('New partner request')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -85,6 +83,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'PartnerRequestsSentList',
@@ -95,13 +94,13 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
       pk: null,
-      currentPage: 1,
       searchQuery: null,
-      partnerRequestsSentModel,
+      model: partnerRequestsSentModel,
       isLoading: false,
       partnerRequests: [],
       partnerRequestsSentFields: [
@@ -115,21 +114,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.partnerRequestsSentModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.partnerRequestsSentModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      partnerRequestsSentModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -142,7 +135,7 @@ export default {
     },
     async doDelete() {
       try {
-        partnerRequestsSentModel.delete(this.pk)
+        this.model.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -155,7 +148,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await partnerRequestsSentModel.list()
+        const data = await this.model.list()
         this.partnerRequests = data.results
         this.isLoading = false
       } catch(error) {

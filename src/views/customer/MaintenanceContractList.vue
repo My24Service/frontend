@@ -16,67 +16,66 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance contract?') }}</p>
     </b-modal>
 
-    <b-pagination
-      v-if="this.maintenanceContractModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.maintenanceContractModel.count"
-      :per-page="this.maintenanceContractModel.perPage"
-      aria-controls="maintenance-contract-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Contract')"
+      />
 
-    <b-table
-      id="maintenance-contract-table"
-      small
-      :busy='isLoading'
-      :fields="maintenanceContractFields"
-      :items="maintenanceContracts"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="maintenance-contract-add"
-                v-bind:title="$trans('New maintenance contract')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(customer_view.name)="data">
-        <router-link :to="{name: 'maintenance-products', params: {contractPk: data.item.id}}">{{ data.item.customer_view.name }}</router-link>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkEdit
-            router_name="maintenance-contract-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
+      <b-table
+        id="maintenance-contract-table"
+        small
+        :busy='isLoading'
+        :fields="maintenanceContractFields"
+        :items="maintenanceContracts"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="maintenance-contract-add"
+                  v-bind:title="$trans('New maintenance contract')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(customer_view_name)="data">
+          <router-link :to="{name: 'maintenance-products', params: {contractPk: data.item.id}}">{{ data.item.customer_view.name }}</router-link>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="maintenance-contract-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -89,6 +88,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: 'MaintenanceContractList',
@@ -99,6 +99,7 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
+    Pagination,
   },
   props: {
     customer_pk: {
@@ -109,34 +110,27 @@ export default {
   data() {
     return {
       customer: null,
-      currentPage: 1,
       searchQuery: null,
-      maintenanceContractModel,
+      model: maintenanceContractModel,
       isLoading: false,
       maintenanceContracts: [],
       maintenanceContractFields: [
-        {key: 'customer_view.name', label: this.$trans('Customer'), sortable: true},
+        {key: 'customer_view_name', label: this.$trans('Customer'), sortable: true},
         {key: 'contract_value', label: this.$trans('Contract value'), sortable: true},
         {key: 'remarks', label: this.$trans('Remarks'), sortable: true},
         {key: 'icons'}
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.maintenanceContractModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.maintenanceContractModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      maintenanceContractModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -149,7 +143,7 @@ export default {
     },
     async doDelete() {
       try {
-        await maintenanceContractModel.delete(this.pk)
+        await this.model.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -162,7 +156,7 @@ export default {
       this.isLoading = true
 
       try {
-        const data = await maintenanceContractModel.list()
+        const data = await this.model.list()
         this.maintenanceContracts = data.results
         this.isLoading = false
       } catch(error) {

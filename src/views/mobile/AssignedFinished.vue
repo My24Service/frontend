@@ -25,56 +25,53 @@
       </b-col>
     </b-row>
 
-    <b-pagination
-      v-if="this.assignedFinishedModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.assignedFinishedModel.count"
-      :per-page="this.assignedFinishedModel.perPage"
-      aria-controls="assigned-finished-table"
-    ></b-pagination>
-
-    <b-table
-      id="assigned-finished-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="assignedOrders"
-      responsive="md"
-      class="data-table"
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(order)="data">
-        <router-link class="px-1" :to="{name: 'order-view', params: {pk: data.item.order.id}}">
-          {{ data.item.order.order_name }}<br/>
-          {{ data.item.order.order_city }}
-        </router-link>
-      </template>
-      <template #cell(engineer)="data">
-        {{ data.item.engineer.user.first_name }} {{ data.item.engineer.user.last_name }}
-      </template>
-    </b-table>
-
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Order')"
+      />
+      <b-table
+        id="assigned-finished-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="assignedOrders"
+        responsive="md"
+        class="data-table"
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(order)="data">
+          <router-link class="px-1" :to="{name: 'order-view', params: {pk: data.item.order.id}}">
+            {{ data.item.order.order_name }}<br/>
+            {{ data.item.order.order_city }}
+          </router-link>
+        </template>
+        <template #cell(engineer)="data">
+          {{ data.item.engineer.user.first_name }} {{ data.item.engineer.user.last_name }}
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -82,10 +79,10 @@
 import moment from 'moment'
 
 import assignedFinishedModel from '@/models/mobile/AssignedFinished.js'
-
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   name: "AssignedFinished",
@@ -93,6 +90,7 @@ export default {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
@@ -102,7 +100,7 @@ export default {
       monthText: null,
       currentPage: 1,
       searchQuery: null,
-      assignedFinishedModel,
+      model: assignedFinishedModel,
       isLoading: true,
       assignedOrders: [],
       fields: [
@@ -137,15 +135,14 @@ export default {
 
     // reset searchQuery
     this.searchQuery = null
-
-    this.currentPage = this.assignedFinishedModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      assignedFinishedModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -165,7 +162,7 @@ export default {
       args.push(`month=${this.month}`)
       args.push(`year=${this.year}`)
 
-      assignedFinishedModel.setListArgs(args.join('&'))
+      this.model.setListArgs(args.join('&'))
 
       this.loadData()
     },
@@ -177,7 +174,7 @@ export default {
       args.push(`month=${this.month}`)
       args.push(`year=${this.year}`)
 
-      assignedFinishedModel.setListArgs(args.join('&'))
+      this.model.setListArgs(args.join('&'))
 
       this.loadData()
     },
@@ -185,7 +182,7 @@ export default {
       this.isLoading = true
 
       try {
-        const data = await assignedFinishedModel.list()
+        const data = await this.model.list()
         this.assignedOrders = data.results
         this.isLoading = false
       } catch(error) {

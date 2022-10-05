@@ -7,50 +7,49 @@
       @do-search="handleSearchOk"
     />
 
-    <b-pagination
-      v-if="this.mutationModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.mutationModel.count"
-      :per-page="this.mutationModel.perPage"
-      aria-controls="stock-location-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Mutation')"
+      />
 
-    <b-table
-      id="stock-location-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="mutations"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(summary)="data">
-        <span v-html="data.item.summary"></span>
-      </template>
-    </b-table>
+      <b-table
+        id="stock-location-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="mutations"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(summary)="data">
+          <span v-html="data.item.summary"></span>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -59,18 +58,19 @@ import mutationModel from '@/models/inventory/Mutation.js'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
-      currentPage: 1,
       searchQuery: null,
-      mutationModel,
+      model: mutationModel,
       isLoading: false,
       mutations: [],
       fields: [
@@ -81,21 +81,15 @@ export default {
       ],
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.mutationModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.mutationModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      mutationModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -106,7 +100,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await mutationModel.list()
+        const data = await this.model.list()
         this.mutations = data.results
         this.isLoading = false
       } catch(error) {

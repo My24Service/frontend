@@ -43,77 +43,75 @@
       </form>
     </b-modal>
 
-    <b-pagination
-      v-if="this.purchaseOrderModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.purchaseOrderModel.count"
-      :per-page="this.purchaseOrderModel.perPage"
-      aria-controls="purchaseorder-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Purchase order')"
+      />
 
-    <b-table
-      id="purchaseorder-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="purchaseOrders"
-      responsive="md"
-      class="data-table"
-      sort-icon-left
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                router_name="purchaseorder-add"
-                v-bind:title="$trans('New purchase order')"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(purchase_order_id)="data">
-        <router-link :to="{name: 'purchaseorder-view', params: {pk: data.item.id}}">{{ data.item.purchase_order_id }}</router-link>
-      </template>
-      <template #cell(totals)="data">
-        {{ data.item.total_entries }} / {{ data.item.total_materials }}
-        <b-progress :value="(data.item.total_entries/data.item.total_materials)*100" class="mb-3"></b-progress>
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkPlus
-            type="tr"
-            v-bind:title="$trans('Change status')"
-            v-bind:method="function() { showChangeStatusModal(data.item.id) }"
-          />
-          <IconLinkEdit
-            router_name="purchaseorder-edit"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
-
+      <b-table
+        id="purchaseorder-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="purchaseOrders"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="purchaseorder-add"
+                  v-bind:title="$trans('New purchase order')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(purchase_order_id)="data">
+          <router-link :to="{name: 'purchaseorder-view', params: {pk: data.item.id}}">{{ data.item.purchase_order_id }}</router-link>
+        </template>
+        <template #cell(totals)="data">
+          {{ data.item.total_entries }} / {{ data.item.total_materials }}
+          <b-progress :value="(data.item.total_entries/data.item.total_materials)*100" class="mb-3"></b-progress>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkPlus
+              type="tr"
+              v-bind:title="$trans('Change status')"
+              v-bind:method="function() { showChangeStatusModal(data.item.id) }"
+            />
+            <IconLinkEdit
+              router_name="purchaseorder-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -127,6 +125,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
@@ -137,12 +136,12 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
+    Pagination,
   },
   data() {
     return {
-      currentPage: 1,
       searchQuery: null,
-      purchaseOrderModel,
+      model: purchaseOrderModel,
       purchaseOrderPk: null,
       isLoading: false,
       purchaseOrders: [],
@@ -150,7 +149,7 @@ export default {
         {key: 'purchase_order_id', label: this.$trans('Order ID'), sortable: true, thAttr: {width: '10%'}},
         {key: 'order_name', label: this.$trans('Supplier'), sortable: true, thAttr: {width: '15%'}},
         {key: 'order_reference', label: this.$trans('Reference'), sortable: true, thAttr: {width: '15%'}},
-        {key: 'expected_entry_date', label: this.$trans('Expected extry date'), sortable: true,thAttr: {width: '15%'}},
+        {key: 'expected_entry_date', label: this.$trans('Expected entry date'), sortable: true,thAttr: {width: '15%'}},
         {key: 'created', label: this.$trans('Created'), sortable: true,thAttr: {width: '15%'}},
         {key: 'totals', label: this.$trans('# entries / # materials'),thAttr: {width: '15%'}},
         {key: 'icons', thAttr: {width: '15%'}}
@@ -161,21 +160,15 @@ export default {
       },
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.purchaseOrderModel.currentPage = val
-      this.loadData()
-    }
-  },
   created() {
-    this.currentPage = this.purchaseOrderModel.currentPage
+    this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      purchaseOrderModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -189,9 +182,9 @@ export default {
       }
 
       try {
-        await purchaseOrderStatusModel.insert(status)
+        await this.model.insert(status)
         this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
         this.errorToast(this.$trans('Error creating status'))
@@ -208,9 +201,9 @@ export default {
     },
     async doDelete() {
       try {
-        await purchaseOrderModel.delete(this.purchaseOrderPk)
+        await this.model.delete(this.purchaseOrderPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Purchase order has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting purchase order', error)
         this.errorToast(this.$trans('Error deleting purchase order'))
@@ -221,7 +214,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await purchaseOrderModel.list()
+        const data = await this.model.list()
         this.purchaseOrders = data.results
         this.isLoading = false
       } catch(error) {

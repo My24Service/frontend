@@ -55,68 +55,67 @@
       @remove-filter="removeStatusFilter"
     />
 
-    <b-pagination
-      v-if="this.orderPastModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.orderPastModel.count"
-      :per-page="this.orderPastModel.perPage"
-      aria-controls="order-table"
-    ></b-pagination>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Order')"
+      />
 
-    <b-table
-      id="order-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="orders"
-      responsive="md"
-      class="data-table"
-      v-bind:tbody-tr-attr="rowStyle"
-    >
-      <template #head(id)="">
-        <span class="text-info">{{ $trans('Order') }}</span>
-      </template>
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-              <ButtonLinkSort
-                v-bind:method="function() { showSortModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(id)="data">
-        <OrderTableInfo
-          v-bind:order="data.item"
-        />
-      </template>
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkPlus
-            v-if="!isCustomer"
-            type="tr"
-            v-bind:title="$trans('Change status')"
-            v-bind:method="function() { showChangeStatusModal(data.item.id) }"
+      <b-table
+        id="order-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="orders"
+        responsive="md"
+        class="data-table"
+        v-bind:tbody-tr-attr="rowStyle"
+      >
+        <template #head(id)="">
+          <span class="text-info">{{ $trans('Order') }}</span>
+        </template>
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+                <ButtonLinkSort
+                  v-bind:method="function() { showSortModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(id)="data">
+          <OrderTableInfo
+            v-bind:order="data.item"
           />
-        </div>
-      </template>
-    </b-table>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkPlus
+              v-if="!isCustomer"
+              type="tr"
+              v-bind:title="$trans('Change status')"
+              v-bind:method="function() { showChangeStatusModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -131,6 +130,7 @@ import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
 import IconLinkPlus from '@/components/IconLinkPlus.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import OrderFilters from "@/components/OrderFilters"
+import Pagination from "@/components/Pagination.vue"
 import { componentMixin } from '@/utils'
 
 export default {
@@ -143,12 +143,12 @@ export default {
     IconLinkPlus,
     SearchModal,
     OrderFilters,
+    Pagination,
   },
   data() {
     return {
-      currentPage: 1,
       searchQuery: null,
-      orderPastModel,
+      model: orderPastModel,
       statuscodes: [],
       isLoading: false,
       orders: [],
@@ -170,34 +170,27 @@ export default {
       },
     }
   },
-  watch: {
-    currentPage: function(val) {
-      this.orderPastModel.currentPage = val
-      this.loadData()
-    }
-  },
   async created() {
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
-    this.currentPage = this.orderPastModel.currentPage
-    this.currentPage = 1
+    this.model.currentPage = this.$route.query.page || 1
     await this.loadData()
   },
   methods: {
     // filters
     setStatusFilter(statuscode) {
-      orderPastModel.addListArg(`last_status=${statuscode}`)
+      this.model.addListArg(`last_status=${statuscode}`)
       this.loadData()
     },
     removeStatusFilter(statuscode) {
       console.log('removing', { statuscode })
-      orderPastModel.removeListArg(`last_status=${statuscode}`)
+      this.model.removeListArg(`last_status=${statuscode}`)
       this.loadData()
     },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderPastModel.setSearchQuery(val)
+      this.model.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -238,7 +231,7 @@ export default {
       this.isLoading = true
 
       try {
-        const data = await orderPastModel.list()
+        const data = await this.model.list()
         this.orders = data.results
         this.isLoading = false
       } catch(error) {

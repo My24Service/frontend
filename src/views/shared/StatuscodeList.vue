@@ -1,15 +1,6 @@
 <template>
   <div class="app-grid">
 
-    <b-pagination
-      v-if="this.statuscodeModel.count > 20"
-      class="pt-4"
-      v-model="currentPage"
-      :total-rows="this.statuscodeModel.count"
-      :per-page="this.statuscodeModel.perPage"
-      aria-controls="order-table"
-    ></b-pagination>
-
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -25,100 +16,107 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this statuscode?') }}</p>
     </b-modal>
 
-    <b-table
-      small
-      id="statuscode-table"
-      :busy='isLoading'
-      :fields="fields"
-      :items="statuscodes"
-      responsive="md"
-      class="data-table"
-    >
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkAdd
-                :router_name="`${linkAdd}`"
-                v-bind:title="`${titleAdd}`"
-              />
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #cell(color)="data">
-        <span v-bind:style="{ backgroundColor: data.item.color }">
-          <img width="12" src="/static/core/img/pixel.png" />
-        </span>
-        <div class="color_text">{{data.item.color }}</div>
-      </template>
-      <template #cell(text_color)="data">
-        <span v-bind:style="{ width: '10px', backgroundColor: data.item.text_color }">
-          <img width="10" src="/static/core/img/pixel.png" />
-        </span>
-        <div class="color_text">{{data.item.text_color }}</div>
-      </template>
-      <template #cell(type)="data">
-        <div v-if="data.item.start_order">
-          <span class="statuscode_type">{{ $trans('Start order') }}</span>
-        </div>
-        <div v-if="data.item.end_order">
-          <span class="statuscode_type">{{ $trans('End order') }}</span>
-        </div>
-        <div v-if="data.item.after_end_order">
-          <span class="statuscode_type">{{ $trans('After end order') }}</span>
-        </div>
-      </template>
-      <template #cell(actions)="data">
-        <b-table
-          small
-          :fields="action_fields"
-          :items="data.item.actions"
-          responsive="md"
-          borderless
-          thead-class="d-none"
-        >
-          <template #cell(id)="data">
-            <router-link :to="{name: linkEditAction, params: {pk: data.item.id }}">
-              {{ data.item.name }} ({{ data.item.type }})
-            </router-link>
-          </template>
-        </b-table>
-      </template>
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.statuscodeModel"
+        :model_name="$trans('Statuscode')"
+      />
+      <b-table
+        small
+        id="statuscode-table"
+        :busy='isLoading'
+        :fields="fields"
+        :items="statuscodes"
+        responsive="md"
+        class="data-table"
+      >
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  :router_name="`${linkAdd}`"
+                  v-bind:title="`${titleAdd}`"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #cell(color)="data">
+          <span v-bind:style="{ backgroundColor: data.item.color }">
+            <img width="12" src="/static/core/img/pixel.png" />
+          </span>
+          <div class="color_text">{{data.item.color }}</div>
+        </template>
+        <template #cell(text_color)="data">
+          <span v-bind:style="{ width: '10px', backgroundColor: data.item.text_color }">
+            <img width="10" src="/static/core/img/pixel.png" />
+          </span>
+          <div class="color_text">{{data.item.text_color }}</div>
+        </template>
+        <template #cell(type)="data">
+          <div v-if="data.item.start_order">
+            <span class="statuscode_type">{{ $trans('Start order') }}</span>
+          </div>
+          <div v-if="data.item.end_order">
+            <span class="statuscode_type">{{ $trans('End order') }}</span>
+          </div>
+          <div v-if="data.item.after_end_order">
+            <span class="statuscode_type">{{ $trans('After end order') }}</span>
+          </div>
+        </template>
+        <template #cell(actions)="data">
+          <b-table
+            small
+            :fields="action_fields"
+            :items="data.item.actions"
+            responsive="md"
+            borderless
+            thead-class="d-none"
+          >
+            <template #cell(id)="data">
+              <router-link :to="{name: linkEditAction, params: {pk: data.item.id }}">
+                {{ data.item.name }} ({{ data.item.type }})
+              </router-link>
+            </template>
+          </b-table>
+        </template>
 
-      <template #cell(icons)="data">
-        <div class="h2 float-right">
-          <IconLinkPlus
-            type="tr"
-            v-bind:title="$trans('Add action')"
-            v-bind:router_name="`${linkAddAction}`"
-            v-bind:router_params="{statuscode_pk: data.item.id}"
-          />
-          <IconLinkEdit
-            v-bind:router_name="`${linkEdit}`"
-            v-bind:router_params="{pk: data.item.id}"
-            v-bind:title="$trans('Edit')"
-          />
-          <IconLinkDelete
-            v-bind:title="$trans('Delete')"
-            v-bind:method="function() { showDeleteModal(data.item.id) }"
-          />
-        </div>
-      </template>
-    </b-table>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkPlus
+              type="tr"
+              v-bind:title="$trans('Add action')"
+              v-bind:router_name="`${linkAddAction}`"
+              v-bind:router_params="{statuscode_pk: data.item.id}"
+            />
+            <IconLinkEdit
+              v-bind:router_name="`${linkEdit}`"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -132,6 +130,7 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   props: {
@@ -148,12 +147,7 @@ export default {
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
-  },
-  watch: {
-    currentPage: function(val) {
-      this.statuscodeModel.currentPage = val
-      this.loadData()
-    }
+    Pagination,
   },
   data() {
     return {
@@ -166,7 +160,6 @@ export default {
       statuscodeModel: null,
 
       searchQuery: null,
-      currentPage: 1,
       statuscodePk: null,
       isLoading: false,
       statuscodes: [],
@@ -217,7 +210,7 @@ export default {
         throw `unknown list_type: ${this.list_type}`
     }
 
-    this.currentPage = this.statuscodeModel.currentPage
+    this.statuscodeModel.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
