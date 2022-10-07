@@ -365,7 +365,10 @@ export default {
       this.isLoading = true
 
       await this.doFetchUnacceptedCountAndUpdateStore()
-      this.selectedOrders = await this.$store.dispatch('getAssignOrders')
+      const getAssignOrders = await this.$store.dispatch('getAssignOrders')
+      if (getAssignOrders) {
+        this.selectedOrders = getAssignOrders
+      }
 
       try {
         const data = await this.model.list()
