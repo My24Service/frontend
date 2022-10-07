@@ -421,8 +421,8 @@ export default {
           this.showOverlay = false
           this.dispatch.drawDispatch()
         } catch (error) {
-          console.log('error unassigning', error)
-          this.errorToast(this.$trans('Error unassigning order'))
+          console.log('error un-assigning', error)
+          this.errorToast(this.$trans('Error un-assigning order'))
           this.showOverlay = false
         }
       })

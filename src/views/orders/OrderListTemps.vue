@@ -285,9 +285,11 @@ export default {
       }
 
       this.selectedOrders.push(order)
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
     async changeStatus() {
       const status = {
@@ -298,7 +300,7 @@ export default {
       try {
         await statusModel.insert(status)
         this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
         this.errorToast(this.$trans('Error creating status'))
@@ -326,7 +328,7 @@ export default {
       try {
         await this.model.delete(this.orderPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
         this.errorToast(this.$trans('Error deleting order'))
@@ -338,6 +340,7 @@ export default {
       try {
         const data = await this.model.list()
         this.orders = data.results
+        this.selectedOrders = await this.$store.dispatch('getAssignOrders')
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
