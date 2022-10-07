@@ -312,9 +312,11 @@ export default {
       }
 
       this.selectedOrders.push(order)
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
     async changeStatus() {
       const status = {
@@ -363,6 +365,7 @@ export default {
       this.isLoading = true
 
       await this.doFetchUnacceptedCountAndUpdateStore()
+      this.selectedOrders = await this.$store.dispatch('getAssignOrders')
 
       try {
         const data = await this.model.list()

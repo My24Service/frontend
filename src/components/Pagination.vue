@@ -5,7 +5,7 @@
     </span>
     <span class="pagination-section">
       <b-pagination
-        v-if="this.model.count > 20"
+        v-if="this.model.count > this.model.perPage"
         class="pt-4"
         v-model="currentPage"
         :total-rows="this.model.count"
@@ -36,7 +36,7 @@ export default {
     currentPage: function(val) {
       const query = {
         ...this.$route.query,
-        page: val
+        page: val,
       }
       this.$router.push({ query }).catch(e => {})
     }
