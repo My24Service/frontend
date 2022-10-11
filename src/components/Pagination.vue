@@ -61,6 +61,9 @@ export default {
 </script>
 
 <style scoped>
+.my24-pagination {
+  padding-top: 8px;
+}
 .count-section {
 }
 .pagination-section {
