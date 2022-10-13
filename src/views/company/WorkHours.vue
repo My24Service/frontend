@@ -36,7 +36,7 @@
         </div>
       </template>
       <template #cell(full_name)="data">
-        <router-link class="px-1" :to="{name: 'company-workhours-detail', params: {user_id: data.item.user_id}}">
+        <router-link class="px-1" :to="{name: 'company-workhours-detail', params: {submodel_id: data.item.submodel_id, user_id: data.item.user_id}}">
           {{ data.item.full_name }}
         </router-link>
       </template>
@@ -69,7 +69,7 @@ export default {
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
-    this.today = this.$moment().weekday(monday)
+    this.today = this.$route.query.start_date ? this.$moment(this.$route.query.start_date) : this.$moment().weekday(monday)
 
     this.setDate()
     this.setArgs()
@@ -90,17 +90,20 @@ export default {
     },
     nextWeek() {
       this.today.add(7, 'days')
-      this.setDate()
-      this.setArgs()
-
-      this.loadData()
+      const query = {
+        ...this.$route.query,
+        start_date: this.today.format('YYYY-MM-DD'),
+      }
+      this.$router.push({ query }).catch(e => {})
     },
     backWeek() {
       this.today.subtract(7, 'days')
-      this.setDate()
-      this.setArgs()
 
-      this.loadData()
+      const query = {
+        ...this.$route.query,
+        start_date: this.today.format('YYYY-MM-DD'),
+      }
+      this.$router.push({ query }).catch(e => {})
     },
     async loadData() {
       this.isLoading = true
@@ -138,7 +141,11 @@ export default {
         let results = []
 
         for(let i=0; i<data.result.length; i++) {
-          let obj = {'full_name': data.result[i].full_name}
+          let obj = {
+            'full_name': data.result[i].full_name,
+            'user_id': data.result[i].user_id,
+            'submodel_id': data.result[i].submodel_id || 0,
+          }
 
           for(let j=0; j<data.result[i].totals.length; j++) {
             obj[`day${j}`] = data.result[i].totals[j].total

@@ -23,10 +23,27 @@
       </b-row>
 
       <b-table
-        id="workhours-detail-table"
+        id="workhours-orders-detail-table"
         small
         :busy='isLoading'
         :fields="fields"
+        :items="assignedOrders"
+        responsive="md"
+        class="data-table"
+      >
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+      </b-table>
+
+      <b-table
+        id="workhours-detail-table"
+        small
+        :busy='isLoading'
+        :fields="workHoursFields"
         :items="workHours"
         responsive="md"
         class="data-table"
@@ -47,6 +64,7 @@
 import moment from 'moment/min/moment-with-locales'
 
 import workHoursDetailModel from '@/models/company/WorkHoursDetail.js'
+import timeSheetDetailModel from '@/models/mobile/TimeSheetDetail.js'
 
 export default {
   name: "WorkHoursDetail",
@@ -55,7 +73,7 @@ export default {
       breadcrumb: [
         {
           text: this.$trans('Work hours'),
-          to: {name: 'company-workhours'}
+          to: {name: 'company-workhours', params: {start_date: this.startDate }}
         },
         {
           text: this.$trans('Work hours detail'),
@@ -67,13 +85,24 @@ export default {
       memberType: 'maintenance',
       fullName: null,
       model: workHoursDetailModel,
+      timeSheetDetailModel,
       isLoading: false,
       workHours: [],
+      assignedOrders: [],
       fields: [],
+      workHoursFields: [
+        {label: this.$trans('Project'), key: 'project_name', sortable: true},
+        {label: this.$trans('Date'), key: 'start_date', sortable: true},
+        {label: this.$trans('Duration'), key: 'duration', sortable: true},
+      ]
     }
   },
   props: {
     user_id: {
+      type: [String, Number],
+      default: null
+    },
+    submodel_id: {
       type: [String, Number],
       default: null
     },
@@ -83,22 +112,31 @@ export default {
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
-    this.today = this.$moment().weekday(monday)
+    this.today = this.$route.query.start_date ? this.$moment(this.$route.query.start_date) : this.$moment().weekday(monday)
 
     this.setDate()
     this.setArgs()
 
     this.memberType = await this.$store.dispatch('getMemberType')
-    this.loadData()
+    await this.loadData()
   },
   methods: {
     setArgs() {
-      const args = [
-        `user_id=${this.user_id}`,
+      let args = [
+        `user=${this.user_id}`,
         `start_date=${this.startDate}`
       ]
 
       this.model.setListArgs(args.join('&'))
+
+      if (parseInt(this.submodel_id) !== 0) {
+        args = [
+          `submodel_id=${this.submodel_id}`,
+          `start_date=${this.startDate}`
+        ]
+
+        this.timeSheetDetailModel.setListArgs(args.join('&'))
+      }
     },
     setDate() {
       this.startDate = this.today.format('YYYY-MM-DD')
@@ -106,23 +144,38 @@ export default {
     },
     nextWeek() {
       this.today.add(7, 'days')
-      this.setDate()
-      this.setArgs()
-
-      this.loadData()
+      const query = {
+        ...this.$route.query,
+        start_date: this.today.format('YYYY-MM-DD'),
+      }
+      this.$router.push({ query }).catch(e => {})
     },
     backWeek() {
       this.today.subtract(7, 'days')
-      this.setDate()
-      this.setArgs()
-
-      this.loadData()
+      const query = {
+        ...this.$route.query,
+        start_date: this.today.format('YYYY-MM-DD'),
+      }
+      this.$router.push({ query }).catch(e => {})
     },
     async loadData() {
       this.isLoading = true
 
+      const response = await this.model.list()
+      this.workHours = response.results
+      if (this.workHours.length) {
+        this.fullName = this.workHours[0].full_name
+      }
+
+      if (parseInt(this.submodel_id) !== 0) {
+        await this.loadAssignedOrders();
+      }
+
+      this.isLoading = false
+    },
+    async loadAssignedOrders() {
       try {
-        const data = await this.model.list()
+        const data = await this.timeSheetDetailModel.list()
         this.fullName = data.full_name
         let header_columns = [{label: this.$trans('Field'), key: 'field'}]
 
@@ -229,11 +282,9 @@ export default {
         }
 
         this.assignedOrders = results
-        this.isLoading = false
       } catch(error) {
         console.log('error fetching work hours details', error)
         this.errorToast(this.$trans('Error fetching work hours details'))
-        this.isLoading = false
       }
     }
   }
