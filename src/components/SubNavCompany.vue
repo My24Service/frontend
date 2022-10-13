@@ -43,6 +43,12 @@
         :to="{ name: 'company-pictures' }">
         {{ $trans('Pictures') }}
       </b-nav-item>
+<!--      <b-nav-item-->
+<!--        :active="isActive('workhours')"-->
+<!--        v-if="hasWorkhours"-->
+<!--        :to="{ name: 'company-workhours' }">-->
+<!--        {{ $trans('Work hours') }}-->
+<!--      </b-nav-item>-->
     </b-nav>
   </div>
 </template>
@@ -90,6 +96,9 @@ export default {
     hasPictures() {
       return true
     },
+    hasWorkhours() {
+      return true
+    }
   },
 }
 </script>

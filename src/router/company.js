@@ -27,6 +27,9 @@ import ActivityList from '@/views/company/ActivityList.vue'
 import PictureList from '@/views/company/PictureList.vue'
 import PictureForm from '@/views/company/PictureForm.vue'
 
+import WorkHours from '@/views/company/WorkHours.vue'
+import WorkHoursDetail from '@/views/company/WorkHoursDetail.vue'
+
 
 export default [
 {
@@ -359,6 +362,30 @@ export default [
       props: {
         'app-content': {},
         'app-subnav': {}
+      },
+    },
+    {
+      name: 'company-workhours',
+      path: '/company/workhours',
+      components: {
+        'app-content': WorkHours,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'company-workhours-detail',
+      path: '/company/workhours/:user_id',
+      components: {
+        'app-content': WorkHoursDetail,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
       },
     },
   ]
