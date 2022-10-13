@@ -1,4 +1,4 @@
-function errorHandler(error) {
+function errorHandler(error, auth) {
   if (error.response.status === 401) {
     console.log('doing logout without reload, but redirect to home')
     auth.logout(false, true)
@@ -29,6 +29,6 @@ export default (client, auth) => {
 
   client.interceptors.response.use(
 response => response,
-error => errorHandler(error)
+error => errorHandler(error, auth)
   )
 }

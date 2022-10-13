@@ -22,7 +22,7 @@ const vm = new Vue({
       if (refresh) window.location.reload()
       sessionStorage.removeItem('accessToken')
       this.authState = false
-      if (to_home) document.location.href = '/'
+      if (to_home) document.location.href = `${document.location.origin}/#/`
     },
     isAuthenticated () {
       return this.authState

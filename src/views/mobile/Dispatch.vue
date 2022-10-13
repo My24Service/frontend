@@ -114,7 +114,7 @@
         {{ selectedOrder.order_address }}<br/>
         {{ selectedOrder.order_postal }} {{ selectedOrder.order_city }}<br/>
         {{ $trans('Order date') }}: {{ selectedOrder.order_date }}<br/>
-        <span v-if="assignedOrder.assignedorder_date != ''">
+        <span v-if="assignedOrder && assignedOrder.assignedorder_date != ''">
             {{ $trans('User date') }}: {{ assignedOrder.assignedorder_date }}<br/>
         </span>
         <span v-if="selectedOrder.order_reference != ''">
@@ -130,14 +130,15 @@
           <b-col cols="1" class="mx-1">
             <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
           </b-col>
-          <b-col cols="4" class="mx-1">
+          <b-col cols="4" class="mx-1" v-if="assignedOrder">
             <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
           </b-col>
+          <b-col cols="4" class="mx-1" v-if="!assignedOrder">&nbsp;</b-col>
           <b-col cols="2" class="mx-1">
             <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
           </b-col>
           <b-col cols="2" class="mx-1">
-            <b-button size="sm" @click="cancel()">{{ $trans('Cancel') }}</b-button>
+            <b-button size="sm" @click="cancel()">{{ $trans('Close') }}</b-button>
           </b-col>
         </b-row>
 
@@ -371,13 +372,17 @@ export default {
         this.showOverlay = true
         this.selectedOrder = await orderModel.detail(order_pk)
 
-        this.assignedOrder = await assignedOrderModel.getDetailChangeDate(assignedorder_pk)
+        if (assignedorder_pk) {
+          this.assignedOrder = await assignedOrderModel.getDetailChangeDate(assignedorder_pk)
 
-        this.assignedOrder.alt_start_date = this.$moment(this.assignedOrder.alt_start_date, 'DD/MM/YYYY').toDate()
-        this.assignedOrder.alt_end_date = this.$moment(this.assignedOrder.alt_end_date, 'DD/MM/YYYY').toDate()
+          this.assignedOrder.alt_start_date = this.$moment(this.assignedOrder.alt_start_date, 'DD/MM/YYYY').toDate()
+          this.assignedOrder.alt_end_date = this.$moment(this.assignedOrder.alt_end_date, 'DD/MM/YYYY').toDate()
 
-        this.minDate = this.assignedOrder.order_start_date
-        this.maxDate = this.assignedOrder.order_end_date
+          this.minDate = this.assignedOrder.order_start_date
+          this.maxDate = this.assignedOrder.order_end_date
+        } else {
+          this.assignedOrder = null
+        }
         this.showOverlay = false
         this.$refs['dispatch-order-actions-modal'].show();
       } catch (error) {
@@ -431,6 +436,7 @@ export default {
       this.selectedUsers = [];
       this.selectedOrders = [];
       this.assignMode = false;
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1);

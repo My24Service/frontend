@@ -936,7 +936,6 @@ class Dispatch {
         user_id: position.user_id,
         full_name: position.full_name
       })
-      return
     }
   }
 
