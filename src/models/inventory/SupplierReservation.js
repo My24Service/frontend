@@ -1,14 +1,15 @@
 import BaseModel from '@/models/base'
+import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial.js'
 
 
 class SupplierReservation extends BaseModel {
   fields = {
+    'id': null,
     'supplier': null,
     'supplier_view': {},
-    'material': null,
-    'material_view': {},
+    'materials': [],
+    'material': supplierReservationMaterialModel.getFields(),
     'amount': 0,
-    'remarks': ''
   }
 
   url = '/inventory/supplier-reservation/'

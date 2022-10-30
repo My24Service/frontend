@@ -137,7 +137,7 @@ export default {
       try {
         await this.model.delete(this.entryPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Entry has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting entry', error)
         this.errorToast(this.$trans('Error deleting entry'))
@@ -145,10 +145,10 @@ export default {
     },
     // rest
     async loadData() {
-      this.isLoading = true;
+      this.isLoading = true
 
       try {
-        const data = this.model.list()
+        const data = await this.model.list()
         this.entries = data.results
         this.isLoading = false
       } catch(error) {
