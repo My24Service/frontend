@@ -85,12 +85,6 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkPlus
-              type="tr"
-              v-bind:title="$trans('Create purchase order')"
-              router_name="purchaseorder-add-from-reservation"
-              :router_params="{reservation_pk: data.item.id}"
-            />
             <IconLinkEdit
               router_name="supplier-reservation-edit"
               v-bind:router_params="{pk: data.item.id}"

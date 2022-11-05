@@ -80,11 +80,11 @@
                 v-model="purchaseOrder.order_name"
                 id="purchaseorder_name"
                 size="sm"
-                :state="isSubmitClicked ? !v$.purchaseOrder.order_name.$error : null"
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.purchaseOrder.order_name.$error : null">
-                {{ $trans('Please enter a supplier') }}
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null">
+                {{ chooseErrorText }}
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
@@ -99,7 +99,12 @@
                 id="purchaseorder_address"
                 size="sm"
                 v-model="purchaseOrder.order_address"
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="2" role="group">
@@ -113,7 +118,12 @@
                 id="purchaseorder_postal"
                 size="sm"
                 v-model="purchaseOrder.order_postal"
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="3" role="group">
@@ -127,7 +137,12 @@
                 id="purchaseorder_city"
                 size="sm"
                 v-model="purchaseOrder.order_city"
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="1" role="group">
@@ -141,7 +156,12 @@
                 id="purchaseorder_city"
                 size="sm"
                 v-model="purchaseOrder.order_country_code"
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.purchaseOrder.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
         </b-row>
@@ -317,8 +337,12 @@
                   readonly
                   id="purchaseorder-material-name"
                   size="sm"
-                  v-model="material.material_name"
+                  v-model="material.material_view.name"
                 ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="!v$.material.material.$error">
+                  {{ $trans('Please select a product') }}
+                </b-form-invalid-feedback>
               </b-form-group>
             </b-col>
             <b-col cols="4" role="group">
@@ -328,10 +352,15 @@
                 label-for="purchaseorder-material-amount"
               >
                 <b-form-input
+                  ref="amount"
                   id="purchaseorder-material-amount"
                   size="sm"
                   v-model="material.amount"
                 ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="!v$.material.amount.$error">
+                  {{ $trans('Please enter an amount') }}
+                </b-form-invalid-feedback>
               </b-form-group>
             </b-col>
             <b-col cols="4" role="group">
@@ -349,10 +378,34 @@
             </b-col>
           </b-row>
           <footer class="modal-footer">
-            <b-button v-if="isEditMaterial" @click="doEditMaterial" class="btn btn-primary" size="sm" type="button" variant="warning">
+            <b-button
+              @click="cancelEditMaterial"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="secondary"
+            >
+              {{ $trans('Cancel') }}
+            </b-button>
+            &nbsp;
+            <b-button
+              v-if="isEditMaterial"
+              @click="doEditMaterial"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="warning">
               {{ $trans('Edit product') }}
             </b-button>
-            <b-button v-if="!isEditMaterial" @click="addMaterial" class="btn btn-primary" size="sm" type="button" variant="primary">
+            <b-button
+              v-if="!isEditMaterial"
+              @click="addMaterial"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="primary"
+              :disabled="!isMaterialValid"
+            >
               {{ $trans('Add product') }}
             </b-button>
           </footer>
@@ -385,6 +438,8 @@ import supplierModel from '@/models/inventory/Supplier.js'
 import materialModel from '@/models/inventory/Material.js'
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 
+const greaterThanZero = (value) => parseInt(value) > 0
+
 export default {
   setup() {
     return { v$: useVuelidate() }
@@ -404,6 +459,7 @@ export default {
   },
   data() {
     return {
+      chooseErrorText: this.$trans('Please select a supplier or reservation'),
       isLoading: false,
       buttonDisabled: false,
       submitClicked: false,
@@ -433,22 +489,22 @@ export default {
   validations() {
     return {
       purchaseOrder: {
-        order_name: {
-          required,
-        },
-        order_address: {
-          required,
-        },
-        order_postal: {
-          required,
-        },
-        order_city: {
+        supplier: {
           required,
         },
         expected_entry_date: {
           required,
         },
       },
+      material: {
+        material: {
+          required
+        },
+        amount: {
+          required,
+          greaterThanZero
+        },
+      }
     }
   },
   computed: {
@@ -457,6 +513,11 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
+    },
+    isMaterialValid() {
+      this.v$.material.material.$touch()
+      this.v$.material.amount.$touch()
+      return !this.v$.material.amount.$invalid && !this.v$.material.material.$invalid;
     }
   },
   async created() {
@@ -494,6 +555,10 @@ export default {
     emptyMaterial() {
       this.material = purchaseOrderMaterialModel.getFields()
     },
+    cancelEditMaterial() {
+      this.isEditMaterial = false
+      this.emptyMaterial()
+    },
     doEditMaterial() {
       this.purchaseOrder.materials.splice(this.editIndex, 1, this.material)
       this.editIndex = null
@@ -511,8 +576,10 @@ export default {
     selectMaterial(option) {
       this.material.material = option.id
       this.material.material_view.name = option.name
-      this.material.amount = 0
-      this.material.remarks = ''
+      if (!this.isEditMaterial) {
+        this.material.amount = 0
+        this.material.remarks = ''
+      }
       this.v$.material.material.$touch()
       this.v$.material.amount.$touch()
       this.$refs.amount.focus()
@@ -528,7 +595,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.materials = await materialModel.search(query, this.purchaseOrder.supplier)
+        this.materialsSearch = await materialModel.search(query, this.purchaseOrder.supplier)
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching materials', error)
@@ -603,9 +670,8 @@ export default {
 
     async submitForm() {
       this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
+      this.v$.purchaseOrder.supplier.$touch()
+      if (this.v$.purchaseOrder.supplier.$invalid) {
         return
       }
 
@@ -626,12 +692,6 @@ export default {
           this.infoToast(this.$trans('Created'), this.$trans('Purchase order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
-
-          if (this.isCreateFromReservation) {
-            this.$router.push({name: 'supplier-reservation-list'})
-
-            return
-          }
 
           this.$router.go(-1)
         } catch(error) {
@@ -682,7 +742,8 @@ export default {
 
       try {
         this.purchaseOrder = await purchaseOrderModel.detail(this.pk)
-        expected_entry_date = this.$moment(this.purchaseOrder.expected_entry_date, 'YYYY-MM-DD')
+        console.log(this.purchaseOrder.expected_entry_date)
+        expected_entry_date = this.$moment(this.purchaseOrder.expected_entry_date, 'DD/MM/YYYY')
         this.purchaseOrder.expected_entry_date = expected_entry_date.toDate()
         this.isLoading = false
 

@@ -32,10 +32,6 @@
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
-                {{ $trans('Please select a supplier') }}
-              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
         </b-row>
@@ -51,7 +47,7 @@
                 id="supplier-reservation-supplier-name"
                 readonly
                 size="sm"
-                :state="!v$.supplierReservation.supplier.$error"
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
                 :state="!v$.supplierReservation.supplier.$error">
@@ -70,7 +66,12 @@
                 id="supplier-reservation-supplier-address"
                 readonly
                 size="sm"
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="3" role="group">
@@ -84,7 +85,12 @@
                 id="supplier-reservation-supplier-city"
                 size="sm"
                 readonly
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="3" role="group">
@@ -98,7 +104,12 @@
                 id="supplier-reservation-supplier-email"
                 size="sm"
                 readonly
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
         </b-row>
@@ -212,6 +223,16 @@
           </b-row>
           <footer class="modal-footer">
             <b-button
+              @click="cancelEditMaterial"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="secondary"
+            >
+              {{ $trans('Cancel') }}
+            </b-button>
+            &nbsp;
+            <b-button
               v-if="isEditMaterial"
               @click="doEditMaterial"
               class="btn btn-primary"
@@ -276,6 +297,7 @@ export default {
   },
   data() {
     return {
+      chooseErrorText: this.$trans('Please select a supplier'),
       isLoading: true,
       buttonDisabled: false,
       submitClicked: false,
@@ -361,6 +383,10 @@ export default {
     emptyMaterial() {
       this.material = supplierReservationMaterialModel.getFields()
     },
+    cancelEditMaterial() {
+      this.isEditMaterial = false
+      this.emptyMaterial()
+    },
     doEditMaterial() {
       this.supplierReservation.materials.splice(this.editIndex, 1, this.material)
       this.editIndex = null
@@ -378,8 +404,10 @@ export default {
     selectMaterial(option) {
       this.material.material = option.id
       this.material.material_view.name = option.name
-      this.material.amount = 0
-      this.material.remarks = ''
+      if (!this.isEditMaterial) {
+        this.material.amount = 0
+        this.material.remarks = ''
+      }
       this.v$.material.material.$touch()
       this.v$.material.amount.$touch()
       this.$refs.amount.focus()

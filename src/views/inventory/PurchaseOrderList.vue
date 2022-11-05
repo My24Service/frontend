@@ -91,7 +91,11 @@
           </p>
           {{ data.item.order_name }}<br/>
           {{ data.item.order_address }}<br/>
-          {{ data.item.order_country_code }}-{{ data.item.order_postal }} {{ data.item.order_city }}<br/>
+          {{ data.item.order_country_code }}-{{ data.item.order_postal }} {{ data.item.order_city }}
+
+          <p>
+            <b>{{ $trans('Last status') }}:</b> {{ data.item.last_status_full }}
+          </p>
 
           <span v-if="data.item.supplier_reservation">
             {{ $trans('Reservation')}}: <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.supplier_reservation}}">{{ data.item.supplier_reservation }}</router-link>
