@@ -1,7 +1,7 @@
 function errorHandler(error, auth) {
   if (error.response.status === 401) {
-    console.log('doing logout without reload, but redirect to home')
-    auth.logout(false, true)
+    console.log('doing logout with reload and redirect to home')
+    auth.logout(false, true, true)
   } else {
     console.log(error)
   }

@@ -10,7 +10,7 @@ export default {
   data() {
     return {
       intervalIdToken: null,
-      expireRefreshThresholdSec: 60*60*24*2 // 2 days
+      expireRefreshThresholdSec: 60*60*24*13
     }
   },
   methods: {
@@ -27,19 +27,22 @@ export default {
       const token = this.$auth.getAccessToken()
       const tokenVars = this.parseJwt(token)
       const expireInSeconds = tokenVars.refresh_exp - Math.round(Date.now()/1000)
+      const expireInHours = Math.round(expireInSeconds/(60*60))
+      const expireInDays = Math.round(expireInHours/24)
 
+      console.debug(`${expireInSeconds} <= ${this.expireRefreshThresholdSec}`)
       if (expireInSeconds <= this.expireRefreshThresholdSec) {
-        console.debug(`refreshing token`)
+        console.log(`refreshing token`)
 
         try {
           const result = await accountModel.refreshToken(token)
           this.$auth.authenticate({ accessToken: result.token })
-          console.debug('token refreshed')
+          console.log('token refreshed')
         } catch (e) {
           console.error('error refreshing token', e)
         }
       } else {
-        console.debug(`not refreshing token (threshold: ${this.expireRefreshThresholdSec}, expire in seconds: ${expireInSeconds}`)
+        console.debug(`not refreshing token (threshold: ${this.expireRefreshThresholdSec}, expire in seconds: ${expireInSeconds} - ${expireInHours} hour, ${expireInDays} days)`)
       }
     },
   },

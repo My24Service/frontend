@@ -51,7 +51,12 @@
                 id="supplier-reservation-supplier-name"
                 readonly
                 size="sm"
+                :state="!v$.supplierReservation.supplier.$error"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="!v$.supplierReservation.supplier.$error">
+                {{ $trans('Please select a supplier') }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="3" role="group">
@@ -162,7 +167,7 @@
                 <b-form-input
                   id="reservation-material-name"
                   size="sm"
-                  v-model="material.material_name"
+                  v-model="material.material_view.name"
                   readonly
                   :state="!v$.material.material.$error"
                 ></b-form-input>
@@ -287,11 +292,13 @@ export default {
       isEditMaterial: false,
 
       materialFields: [
-        { key: 'material_name', label: this.$trans('Name') },
+        { key: 'material_view.name', label: this.$trans('Name') },
         { key: 'amount', label: this.$trans('Amount') },
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
+
+      deletedMaterials: []
     }
   },
   validations() {
@@ -342,6 +349,7 @@ export default {
   methods: {
     // materials
     deleteMaterial(index) {
+      this.deletedMaterials.push(this.supplierReservation.materials[index])
       this.supplierReservation.materials.splice(index, 1)
     },
     editMaterial(item, index) {
@@ -369,7 +377,7 @@ export default {
     },
     selectMaterial(option) {
       this.material.material = option.id
-      this.material.material_name = option.name
+      this.material.material_view.name = option.name
       this.material.amount = 0
       this.material.remarks = ''
       this.v$.material.material.$touch()
@@ -424,9 +432,8 @@ export default {
 
     async submitForm() {
       this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
+      this.v$.supplierReservation.supplier.$touch()
+      if (this.v$.supplierReservation.supplier.$invalid) {
         return
       }
 
@@ -458,6 +465,25 @@ export default {
       try {
         await supplierReservationModel.update(this.pk, this.supplierReservation)
         this.infoToast(this.$trans('Updated'), this.$trans('Reservation has been updated'))
+
+        for (let material of this.supplierReservation.materials) {
+          material.reservation = this.pk
+          if (material.id) {
+            await supplierReservationMaterialModel.update(material.id, material)
+            this.infoToast(this.$trans('Product updated'), this.$trans('Reservation product has been updated'))
+          } else {
+            await supplierReservationMaterialModel.insert(material)
+            this.infoToast(this.$trans('Product created'), this.$trans('Reservation product has been created'))
+          }
+        }
+
+        for (const material of this.deletedMaterials) {
+          if (material.id) {
+            await supplierReservationMaterialModel.delete(material.id)
+            this.infoToast(this.$trans('Product removed'), this.$trans('Reservation product has been removed'))
+          }
+        }
+
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)

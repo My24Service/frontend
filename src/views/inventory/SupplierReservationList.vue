@@ -1,4 +1,4 @@
-<template>
+<template xmlns="http://www.w3.org/1999/html">
   <div class="mt-4">
 
     <SearchModal
@@ -59,11 +59,27 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #cell(supplier)="data">
-          {{ data.item.supplier_view.name }}, {{ data.item.supplier_view.city }}
-        </template>
-        <template #cell(material)="data">
-          {{ data.item.material_view.name }}
+        <template #cell(id)="data">
+          <b-row>
+            <b-col cols="3">
+              {{ data.item.supplier_view.name }}, {{ data.item.supplier_view.city }}<br/>
+              {{ $trans('Created') }}: {{ data.item.created }}
+            </b-col>
+            <b-col cols="9">
+              <b-table
+                id="supplier-reservation-materials-table"
+                dark borderless small
+                sort-by="supplier"
+                :busy='isLoading'
+                :fields="material_fields"
+                :items="data.item.materials"
+                responsive="sm"
+                class="data-table"
+                sort-icon-left
+              >
+              </b-table>
+            </b-col>
+          </b-row>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -119,12 +135,13 @@ export default {
       isLoading: false,
       reservations: [],
       fields: [
-        {key: 'supplier', label: this.$trans('Supplier'), sortable: true},
-        {key: 'material', label: this.$trans('Material'), sortable: true},
-        {key: 'remarks', label: this.$trans('Remarks'), sortable: true},
-        {key: 'amount', label: this.$trans('Amount'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'icons'}
+        {thAttr: {width: '85%'}, key: 'id', label: this.$trans('Reservation')},
+        {thAttr: {width: '15%'}, key: 'icons'}
+      ],
+      material_fields: [
+        {key: 'material_view.name', label: this.$trans('Material')},
+        {key: 'remarks', label: this.$trans('Remarks')},
+        {key: 'amount', label: this.$trans('Amount')},
       ],
     }
   },

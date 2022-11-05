@@ -19,10 +19,10 @@ const vm = new Vue({
       this.authState = true
     },
     logout (refresh = true, to_home = true) {
-      if (refresh) window.location.reload()
       sessionStorage.removeItem('accessToken')
       this.authState = false
       if (to_home) document.location.href = `${document.location.origin}/#/`
+      if (refresh) window.location.reload()
     },
     isAuthenticated () {
       return this.authState
