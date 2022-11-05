@@ -141,7 +141,7 @@ export default {
         {thAttr: {width: '15%'}, key: 'icons'}
       ],
       material_fields: [
-        {key: 'material_view.name', label: this.$trans('Material')},
+        {key: 'material_view.name', label: this.$trans('Product')},
         {key: 'remarks', label: this.$trans('Remarks')},
         {key: 'amount', label: this.$trans('Amount')},
       ],

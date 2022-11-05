@@ -69,7 +69,7 @@
       </b-row>
       <b-row v-if="purchaseOrder.materials.length">
         <b-col cols="12">
-          <h4>{{ $trans('Materials') }}</h4>
+          <h4>{{ $trans('Products') }}</h4>
           <b-table
             dark
             borderless
@@ -135,7 +135,7 @@ export default {
         { key: 'remarks', label: this.$trans('Remarks') }
       ],
       entryFields: [
-        { key: 'material_view.name', label: this.$trans('Material') },
+        { key: 'material_view.name', label: this.$trans('Product') },
         { key: 'amount', label: this.$trans('Amount') },
         { key: 'entry_date', label: this.$trans('Date') },
       ]

@@ -253,7 +253,7 @@
         </b-row>
 
         <div class="purchaseorder-materials">
-          <h4>{{ $trans('Materials') }}</h4>
+          <h4>{{ $trans('Products') }}</h4>
           <b-row>
             <b-col cols="12">
               <b-table
@@ -279,7 +279,7 @@
             <b-col cols="12" role="group">
               <b-form-group
                 label-size="sm"
-                v-bind:label="$trans('Search material')"
+                v-bind:label="$trans('Search product')"
               >
                 <multiselect
                   id="purchaseorder-material-name"
@@ -350,10 +350,10 @@
           </b-row>
           <footer class="modal-footer">
             <b-button v-if="isEditMaterial" @click="doEditMaterial" class="btn btn-primary" size="sm" type="button" variant="warning">
-              {{ $trans('Edit material') }}
+              {{ $trans('Edit product') }}
             </b-button>
             <b-button v-if="!isEditMaterial" @click="addMaterial" class="btn btn-primary" size="sm" type="button" variant="primary">
-              {{ $trans('Add material') }}
+              {{ $trans('Add product') }}
             </b-button>
           </footer>
         </div>
@@ -532,7 +532,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching materials', error)
-        this.errorToast(this.$trans('Error fetching materials'))
+        this.errorToast(this.$trans('Error fetching products'))
         this.isLoading = false
       }
     },

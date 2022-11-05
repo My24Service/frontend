@@ -57,7 +57,7 @@
       </b-row>
       <b-row>
         <b-col cols="12">
-          <h4>{{ $trans('Materials') }}</h4>
+          <h4>{{ $trans('Products') }}</h4>
           <b-table dark borderless small :fields="materialFields" :items="materials" responsive="sm"></b-table>
           </b-col>
       </b-row>
@@ -104,8 +104,8 @@ export default {
         this.materials = await materialModel.getForSupplier(this.pk)
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching supplier/materials', error)
-        this.errorToast(this.$trans('Error fetching supplier/materials'))
+        console.log('error fetching supplier/products', error)
+        this.errorToast(this.$trans('Error fetching supplier/products'))
         this.isLoading = false
       }
     }

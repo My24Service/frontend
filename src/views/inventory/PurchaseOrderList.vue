@@ -158,7 +158,7 @@ export default {
         {key: 'purchase_order_id', label: this.$trans('Order'), sortable: true, thAttr: {width: '40%'}},
         {key: 'expected_entry_date', label: this.$trans('Expected entry date'), sortable: true,thAttr: {width: '15%'}},
         {key: 'created', label: this.$trans('Created'), sortable: true,thAttr: {width: '15%'}},
-        {key: 'totals', label: this.$trans('# entries / # materials'),thAttr: {width: '15%'}},
+        {key: 'totals', label: this.$trans('# entries / # products'),thAttr: {width: '15%'}},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
       status: {

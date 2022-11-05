@@ -106,7 +106,7 @@ export default {
       fields: [
         {key: 'order_id', label: this.$trans('Order ID'), sortable: true},
         {key: 'supplier', label: this.$trans('Supplier'), sortable: true},
-        {key: 'material_name', label: this.$trans('Material'), sortable: true},
+        {key: 'material_name', label: this.$trans('Product'), sortable: true},
         {key: 'amount', label: this.$trans('Amount')},
         {key: 'entry_date', label: this.$trans('Entry date')},
         {key: 'stock_location_name', label: this.$trans('Moved to location')},

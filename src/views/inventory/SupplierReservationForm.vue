@@ -104,7 +104,7 @@
         </b-row>
 
         <div class="reservation-materials">
-          <h4>{{ $trans('Materials') }}</h4>
+          <h4>{{ $trans('Products') }}</h4>
           <b-row>
             <b-col cols="12">
               <b-table
@@ -424,8 +424,8 @@ export default {
         this.materialsSearch = data.results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching materials', error)
-        this.errorToast(this.$trans('Error fetching materials'))
+        console.log('error fetching products', error)
+        this.errorToast(this.$trans('Error fetching products'))
         this.isLoading = false
       }
     },
