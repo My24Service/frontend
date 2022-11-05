@@ -86,10 +86,19 @@
           </div>
         </template>
         <template #cell(purchase_order_id)="data">
-          <router-link :to="{name: 'purchaseorder-view', params: {pk: data.item.id}}">{{ data.item.purchase_order_id }}</router-link>
+          <p>
+            <router-link :to="{name: 'purchaseorder-view', params: {pk: data.item.id}}">{{ data.item.purchase_order_id }}</router-link>
+          </p>
+          {{ data.item.order_name }}<br/>
+          {{ data.item.order_address }}<br/>
+          {{ data.item.order_country_code }}-{{ data.item.order_postal }} {{ data.item.order_city }}<br/>
+
+          <span v-if="data.item.supplier_reservation">
+            {{ $trans('Reservation: ')}}: <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.supplier_reservation}}">{{ data.item.supplier_reservation }}</router-link>
+          </span>
         </template>
         <template #cell(totals)="data">
-          {{ data.item.total_entries }} / {{ data.item.total_materials }}
+          {{ data.item.total_entries || 0 }} / {{ data.item.total_materials }}
           <b-progress :value="(data.item.total_entries/data.item.total_materials)*100" class="mb-3"></b-progress>
         </template>
         <template #cell(icons)="data">
@@ -146,9 +155,7 @@ export default {
       isLoading: false,
       purchaseOrders: [],
       fields: [
-        {key: 'purchase_order_id', label: this.$trans('Order ID'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'order_name', label: this.$trans('Supplier'), sortable: true, thAttr: {width: '15%'}},
-        {key: 'order_reference', label: this.$trans('Reference'), sortable: true, thAttr: {width: '15%'}},
+        {key: 'purchase_order_id', label: this.$trans('Order'), sortable: true, thAttr: {width: '40%'}},
         {key: 'expected_entry_date', label: this.$trans('Expected entry date'), sortable: true,thAttr: {width: '15%'}},
         {key: 'created', label: this.$trans('Created'), sortable: true,thAttr: {width: '15%'}},
         {key: 'totals', label: this.$trans('# entries / # materials'),thAttr: {width: '15%'}},

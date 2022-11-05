@@ -14,6 +14,9 @@ class SupplierReservation extends BaseModel {
 
   url = '/inventory/supplier-reservation/'
 
+  search(query) {
+    return this.axios.get(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
+  }
 }
 
 let supplierReservationModel = new SupplierReservation()

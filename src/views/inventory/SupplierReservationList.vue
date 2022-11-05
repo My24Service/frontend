@@ -62,7 +62,9 @@
         <template #cell(id)="data">
           <b-row>
             <b-col cols="3">
-              {{ data.item.supplier_view.name }}, {{ data.item.supplier_view.city }}<br/>
+              <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.id}}">
+                {{ data.item.supplier_view.name }}, {{ data.item.supplier_view.city }}
+              </router-link><br/>
               {{ $trans('Created') }}: {{ data.item.created }}
             </b-col>
             <b-col cols="9">
