@@ -128,7 +128,7 @@
           <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Setings group')"
+              v-bind:label="$trans('Settings group')"
               label-for="customeruser_settings_group"
             >
               <b-form-input

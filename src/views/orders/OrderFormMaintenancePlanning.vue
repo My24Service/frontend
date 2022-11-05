@@ -744,7 +744,7 @@ export default {
         { key: 'product', label: this.$trans('Product') },
         { key: 'location', label: this.$trans('Location') },
         { key: 'amount', label: this.$trans('Amount') },
-        { key: 'done_needed', label: this.$trans('Needed / ceated') },
+        { key: 'done_needed', label: this.$trans('Needed / created') },
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],

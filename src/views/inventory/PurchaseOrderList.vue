@@ -94,7 +94,7 @@
           {{ data.item.order_country_code }}-{{ data.item.order_postal }} {{ data.item.order_city }}<br/>
 
           <span v-if="data.item.supplier_reservation">
-            {{ $trans('Reservation: ')}}: <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.supplier_reservation}}">{{ data.item.supplier_reservation }}</router-link>
+            {{ $trans('Reservation')}}: <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.supplier_reservation}}">{{ data.item.supplier_reservation }}</router-link>
           </span>
         </template>
         <template #cell(totals)="data">
