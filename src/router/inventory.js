@@ -19,6 +19,7 @@ import StockLocationView from '@/views/inventory/StockLocationView.vue'
 import StockLocationForm from '@/views/inventory/StockLocationForm.vue'
 
 import MutationList from '@/views/inventory/MutationList.vue'
+import MutationForm from '@/views/inventory/MutationForm.vue'
 
 import PurchaseOrderEntryList from '@/views/inventory/PurchaseOrderEntryList.vue'
 import PurchaseOrderEntryView from '@/views/inventory/PurchaseOrderEntryView.vue'
@@ -304,6 +305,18 @@ export default [
         props: {
           'app-content': {},
           'app-subnav': {}
+        },
+      },
+      {
+        name: 'mutation-add',
+        path: '/inventory/mutations/form',
+        components: {
+          'app-content': MutationForm,
+          'app-subnav': SubNavInventory
+        },
+        props: {
+          'app-content': {},
+          'app-subnav': true
         },
       },
       // purchase order entries

@@ -10,7 +10,7 @@ export default {
   data() {
     return {
       intervalIdToken: null,
-      expireRefreshThresholdSec: 60*60*24*13
+      expireRefreshThresholdSec: 60*60*24*12
     }
   },
   methods: {
@@ -28,11 +28,12 @@ export default {
       const tokenVars = this.parseJwt(token)
       const expireInSeconds = tokenVars.refresh_exp - Math.round(Date.now()/1000)
       const expireInHours = Math.round(expireInSeconds/(60*60))
-      const expireInDays = Math.round(expireInHours/24)
+      const expireInDays = expireInHours/24
+      const thresholdDays = this.expireRefreshThresholdSec/(60*60*24)
+      const debugStr = `threshold: ${this.expireRefreshThresholdSec}, expire in seconds: ${expireInSeconds} - ${expireInHours} hour, ${expireInDays} days, threshold days: ${thresholdDays}`
 
-      console.debug(`${expireInSeconds} <= ${this.expireRefreshThresholdSec}`)
       if (expireInSeconds <= this.expireRefreshThresholdSec) {
-        console.log(`refreshing token`)
+        console.log(`refreshing token (${debugStr})`)
 
         try {
           const result = await accountModel.refreshToken(token)
@@ -42,13 +43,13 @@ export default {
           console.error('error refreshing token', e)
         }
       } else {
-        console.debug(`not refreshing token (threshold: ${this.expireRefreshThresholdSec}, expire in seconds: ${expireInSeconds} - ${expireInHours} hour, ${expireInDays} days)`)
+        console.log(`not refreshing token (${debugStr})`)
       }
     },
   },
   mounted() {
     console.log('setting interval')
-    this.intervalIdToken = setInterval(this.checkToken, 1000*10)
+    this.intervalIdToken = setInterval(this.checkToken, 1000*60*60)
   },
   beforeDestroy() {
     console.log('clearing interval')
