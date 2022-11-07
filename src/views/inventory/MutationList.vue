@@ -28,6 +28,10 @@
           <div class="float-right">
             <b-button-toolbar>
               <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  router_name="mutation-add"
+                  v-bind:title="$trans('Add')"
+                />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
@@ -57,6 +61,7 @@
 import mutationModel from '@/models/inventory/Mutation.js'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 
@@ -66,6 +71,7 @@ export default {
     ButtonLinkSearch,
     SearchModal,
     Pagination,
+    ButtonLinkAdd,
   },
   data() {
     return {
@@ -78,6 +84,7 @@ export default {
         {key: 'summary', label: this.$trans('Mutation'), sortable: true},
         {key: 'amount', label: this.$trans('Amount'), sortable: true},
         {key: 'modified', label: this.$trans('Date'), sortable: true},
+        {key: 'icons'}
       ],
     }
   },
