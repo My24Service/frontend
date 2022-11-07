@@ -42,7 +42,7 @@
               label-size="sm"
               v-bind:label="$trans('New status template')"
               label-for="statuscode_new_status_template"
-              :description="$trans('For order statusses that are not set by the application.')"
+              :description="$trans('For order statuses that are not set by the application.')"
             >
               <b-form-input
                 id="statuscode_new_status_template"

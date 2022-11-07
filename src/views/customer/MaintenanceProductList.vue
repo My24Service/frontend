@@ -32,7 +32,7 @@
       <Pagination
         v-if="!isLoading"
         :model="this.model"
-        :model_name="$trans('Product}')"
+        :model_name="$trans('Product')"
       />
 
       <b-table

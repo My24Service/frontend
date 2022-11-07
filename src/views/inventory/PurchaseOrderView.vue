@@ -62,27 +62,42 @@
       <b-row class="my-2">
         <b-col cols="2"><strong>{{ $trans('Status') }}</strong></b-col>
         <b-col cols="10">
-          <div v-for="status in purchaseOrder.statusses" :key="status.id">
+          <div v-for="status in purchaseOrder.statuses" :key="status.id">
             {{ status.created }} {{ status.status }}<br/>
           </div>
         </b-col>
       </b-row>
-      <b-row v-if="purchaseOrder.purchase_order_materials.length">
+      <b-row v-if="purchaseOrder.materials.length">
         <b-col cols="12">
-          <h4>{{ $trans('Materials') }}</h4>
+          <h4>{{ $trans('Products') }}</h4>
           <b-table
             dark
             borderless
             small
             id="purchaseorder-materials-table"
             :fields="materialFields"
-            sort-by="material_name"
-            :items="purchaseOrder.purchase_order_materials"
+            sort-by="material_view.name"
+            :items="purchaseOrder.materials"
             responsive="sm"
           ></b-table>
           </b-col>
       </b-row>
-      <b-row v-if="purchaseOrder.entries.length > 0">
+      <b-row v-if="purchaseOrder.reservation_materials.length">
+        <b-col cols="12">
+          <h4>{{ $trans('Reserved products') }}</h4>
+          <b-table
+            dark
+            borderless
+            small
+            id="purchaseorder-reservation_materials-table"
+            :fields="materialFields"
+            sort-by="material_view.name"
+            :items="purchaseOrder.reservation_materials"
+            responsive="sm"
+          ></b-table>
+        </b-col>
+      </b-row>
+      <b-row>
         <b-col cols="12">
           <h4>{{ $trans('Entries') }}</h4>
           <b-table
@@ -90,7 +105,7 @@
             borderless
             small
             id="purchaseorder-entries-table"
-            sort-by="purchase_order_material_view.material_name"
+            sort-by="purchase_order_material_view.name"
             :fields="entryFields"
             :items="purchaseOrder.entries"
             responsive="sm"
@@ -115,12 +130,12 @@ export default {
       buttonDisabled: false,
       purchaseOrder: purchaseOrderModel.getFields(),
       materialFields: [
-        { key: 'material_name', label: this.$trans('Name') },
+        { key: 'material_view.name', label: this.$trans('Name') },
         { key: 'amount', label: this.$trans('Amount') },
         { key: 'remarks', label: this.$trans('Remarks') }
       ],
       entryFields: [
-        { key: 'material_name', label: this.$trans('Material') },
+        { key: 'material_view.name', label: this.$trans('Product') },
         { key: 'amount', label: this.$trans('Amount') },
         { key: 'entry_date', label: this.$trans('Date') },
       ]

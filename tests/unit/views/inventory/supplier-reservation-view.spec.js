@@ -5,15 +5,15 @@ import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
 import localVue from '../../index'
-import PurchaseOrderView from '@/views/inventory/PurchaseOrderView.vue'
-import purchaseOrderResponse from '../../fixtures/purchaseorder'
+import SupplierReservationView from '@/views/inventory/SupplierReservationView.vue'
+import supplierReservationViewResponse from '../../fixtures/supplier-reservation.js'
 
 jest.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
-    case '/inventory/purchaseorder/1/':
-      return Promise.resolve(purchaseOrderResponse)
+    case '/inventory/supplier-reservation/1/':
+      return Promise.resolve(supplierReservationViewResponse)
     default:
       return Promise.reject(new Error(`${url} not found`))
   }
@@ -24,9 +24,9 @@ const routes = [
 
 const router = new VueRouter({routes})
 
-describe('PurchaseOrderView.vue', () => {
-  it('has PurchaseOrderView component', async () => {
-    const wrapper = shallowMount(PurchaseOrderView, {
+describe('SupplierReservationView.vue', () => {
+  it('has SupplierReservationView component', async () => {
+    const wrapper = shallowMount(SupplierReservationView, {
       localVue,
       router,
       mocks: {
@@ -39,12 +39,12 @@ describe('PurchaseOrderView.vue', () => {
 
     await flushPromises()
 
-    const el = wrapper.findComponent(PurchaseOrderView)
+    const el = wrapper.findComponent(SupplierReservationView)
     expect(el.exists()).to.be.true
   })
 
   it('has 3 material rows', async () => {
-    const wrapper = mount(PurchaseOrderView, {
+    const wrapper = mount(SupplierReservationView, {
       localVue,
       router,
       mocks: {
@@ -57,30 +57,12 @@ describe('PurchaseOrderView.vue', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('#purchaseorder-materials-table tbody tr')
+    const trs = wrapper.findAll('#reservation-materials-table tbody tr')
     expect(trs.length).to.equal(3)
   })
 
-  it('has 1 entry row', async () => {
-    const wrapper = mount(PurchaseOrderView, {
-      localVue,
-      router,
-      mocks: {
-        $trans: (f) => f
-      },
-      propsData: {
-        pk: 1
-      }
-    })
-
-    await flushPromises()
-
-    const trs = wrapper.findAll('#purchaseorder-entries-table tbody tr')
-    expect(trs.length).to.equal(1)
-  })
-
   it('contains "Limoen Likeur"', async () => {
-    const wrapper = mount(PurchaseOrderView, {
+    const wrapper = mount(SupplierReservationView, {
       localVue,
       router,
       mocks: {

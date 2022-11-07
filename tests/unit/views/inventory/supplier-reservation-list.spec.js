@@ -63,7 +63,7 @@ describe('SupplierReservationList.vue', () => {
     expect(trs.length).to.equal(2)
   })
 
-  it('contains "tien port" and "test reservation"', async () => {
+  it('contains "My company" and "My company 2"', async () => {
     axios.get.mockResolvedValueOnce(supplierReservationListResponse);
 
     const wrapper = mount(SupplierReservationList, {
@@ -77,7 +77,7 @@ describe('SupplierReservationList.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('tien port')
-    expect(html).to.contain('test reservation')
+    expect(html).to.contain('My company')
+    expect(html).to.contain('My company 2')
   })
 })

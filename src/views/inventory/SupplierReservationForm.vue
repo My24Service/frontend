@@ -32,10 +32,6 @@
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
-                {{ $trans('Please select a supplier') }}
-              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
         </b-row>
@@ -51,7 +47,12 @@
                 id="supplier-reservation-supplier-name"
                 readonly
                 size="sm"
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="!v$.supplierReservation.supplier.$error">
+                {{ $trans('Please select a supplier') }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="3" role="group">
@@ -65,7 +66,12 @@
                 id="supplier-reservation-supplier-address"
                 readonly
                 size="sm"
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="3" role="group">
@@ -79,7 +85,12 @@
                 id="supplier-reservation-supplier-city"
                 size="sm"
                 readonly
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="3" role="group">
@@ -93,106 +104,156 @@
                 id="supplier-reservation-supplier-email"
                 size="sm"
                 readonly
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                {{ chooseErrorText }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
         </b-row>
 
-        <b-row>
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Material')"
-              label-for="supplier-reservation-material-search"
-            >
-              <multiselect
-                id="supplier-reservation-material-search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="materials"
-                :multiple="false"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                :hide-selected="true"
-                @select="selectMaterial"
-                :custom-label="materialLabel"
+        <div class="reservation-materials">
+          <h4>{{ $trans('Products') }}</h4>
+          <b-row>
+            <b-col cols="12">
+              <b-table
+                v-if="supplierReservation.materials.length > 0"
+                small
+                :fields="materialFields"
+                :items="supplierReservation.materials" responsive="md"
               >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.supplierReservation.material.$error : null">
-                {{ $trans('Please select a material') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Name')"
-              label-for="supplier-reservation-material-name"
+                <template #cell(icons)="data">
+                  <div class="float-right">
+                    <b-link class="h5 mx-2" @click="editMaterial(data.item, data.index)">
+                      <b-icon-pencil></b-icon-pencil>
+                    </b-link>
+                    <b-link class="h5 mx-2" @click.prevent="deleteMaterial(data.index)">
+                      <b-icon-trash></b-icon-trash>
+                    </b-link>
+                  </div>
+                </template>
+              </b-table>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Search product')"
+              >
+                <multiselect
+                  id="reservation-material-name"
+                  track-by="id"
+                  label="name"
+                  :placeholder="$trans('Type to search')"
+                  open-direction="bottom"
+                  :options="materialsSearch"
+                  :multiple="false"
+                  :loading="isLoading"
+                  :internal-search="false"
+                  :clear-on-select="true"
+                  :close-on-select="true"
+                  :options-limit="30"
+                  :limit="10"
+                  :max-height="600"
+                  :show-no-results="false"
+                  :hide-selected="true"
+                  @search-change="getMaterials"
+                  @select="selectMaterial"
+                >
+                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                </multiselect>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Name')"
+                label-for="reservation-material-name"
+              >
+                <b-form-input
+                  id="reservation-material-name"
+                  size="sm"
+                  v-model="material.material_view.name"
+                  readonly
+                  :state="!v$.material.material.$error"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="!v$.material.material.$error">
+                  {{ $trans('Please select a product') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Amount')"
+                label-for="reservation-material-amount"
+              >
+                <b-form-input
+                  id="reservation-material-amount"
+                  size="sm"
+                  v-model="material.amount"
+                  :state="!v$.material.amount.$error"
+                  ref="amount"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="!v$.material.amount.$error">
+                  {{ $trans('Please enter an amount') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Remarks')"
+                label-for="reservation-material-remarks"
+              >
+                <b-form-textarea
+                  id="reservation-material-remarks"
+                  v-model="material.remarks"
+                  rows="1"
+                ></b-form-textarea>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <footer class="modal-footer">
+            <b-button
+              @click="cancelEditMaterial"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="secondary"
             >
-              <b-form-input
-                v-model="selectedMaterial.name"
-                id="supplier-reservation-material-name"
-                readonly
-                size="sm"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Unit')"
-              label-for="supplier-reservation-material-unit"
+              {{ $trans('Cancel') }}
+            </b-button>
+            &nbsp;
+            <b-button
+              v-if="isEditMaterial"
+              @click="doEditMaterial"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="warning">
+              {{ $trans('Edit product') }}
+            </b-button>
+            <b-button
+              v-if="!isEditMaterial"
+              @click="addMaterial"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="primary"
+              :disabled="!isMaterialValid"
             >
-              <b-form-input
-                v-model="selectedMaterial.unit"
-                id="supplier-reservation-material-unit"
-                size="sm"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Amount')"
-              label-for="supplier-reservation-amount"
-            >
-              <b-form-input
-                v-model="supplierReservation.amount"
-                id="supplier-reservation-amount"
-                size="sm"
-                :state="isSubmitClicked ? !v$.supplierReservation.amount.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.supplierReservation.amount.$error : null">
-                {{ $trans('Please enter an amount') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Remarks')"
-              label-for="supplier-reservation-remarks"
-            >
-              <b-form-textarea
-                id="supplier-reservation-remarks"
-                v-model="supplierReservation.remarks"
-                rows="2"
-              ></b-form-textarea>
-            </b-form-group>
-          </b-col>
-        </b-row>
+              {{ $trans('Add product') }}
+            </b-button>
+          </footer>
+        </div>
 
         <div class="mx-auto">
           <footer class="modal-footer">
@@ -215,6 +276,7 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
+import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial.js'
 import supplierModel from '@/models/inventory/Supplier.js'
 import materialModel from '@/models/inventory/Material.js'
 
@@ -235,17 +297,30 @@ export default {
   },
   data() {
     return {
-      isLoading: false,
+      chooseErrorText: this.$trans('Please select a supplier'),
+      isLoading: true,
       buttonDisabled: false,
       submitClicked: false,
+      model: supplierReservationModel,
       supplierReservation: supplierReservationModel.getFields(),
+      material: supplierReservationMaterialModel.getFields(),
       errorMessage: null,
 
       suppliers: [],
-      materials: [],
+      materialsSearch: [],
 
       selectedSupplier: {},
-      selectedMaterial: {},
+
+      isEditMaterial: false,
+
+      materialFields: [
+        { key: 'material_view.name', label: this.$trans('Name') },
+        { key: 'amount', label: this.$trans('Amount') },
+        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'icons', label: '' }
+      ],
+
+      deletedMaterials: []
     }
   },
   validations() {
@@ -254,14 +329,16 @@ export default {
         supplier: {
           required,
         },
+      },
+      material: {
         material: {
-          required,
+          required
         },
         amount: {
           required,
           greaterThanZero
         },
-      },
+      }
     }
   },
   computed: {
@@ -270,18 +347,75 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
+    },
+    isMaterialValid() {
+      this.v$.material.material.$touch()
+      this.v$.material.amount.$touch()
+      return !this.v$.material.amount.$invalid && !this.v$.material.material.$invalid;
     }
   },
-  created() {
-    this.getSuppliers('')
+  async created() {
+    this.isLoading = true
+
+    await this.getSuppliers('')
 
     if (!this.isCreate) {
-      this.loadData()
+      await this.loadData()
     } else {
-      this.supplierReservation = supplierReservationModel.getFields()
+      this.supplierReservation = this.model.getFields()
     }
+    this.emptyMaterial()
+
+    this.isLoading = false
   },
   methods: {
+    // materials
+    deleteMaterial(index) {
+      this.deletedMaterials.push(this.supplierReservation.materials[index])
+      this.supplierReservation.materials.splice(index, 1)
+    },
+    editMaterial(item, index) {
+      this.editIndex = index
+      this.isEditMaterial = true
+
+      this.material = item
+    },
+    emptyMaterial() {
+      this.material = supplierReservationMaterialModel.getFields()
+    },
+    cancelEditMaterial() {
+      this.isEditMaterial = false
+      this.emptyMaterial()
+    },
+    doEditMaterial() {
+      this.supplierReservation.materials.splice(this.editIndex, 1, this.material)
+      this.editIndex = null
+      this.isEditMaterial = false
+      this.emptyMaterial()
+    },
+    addMaterial() {
+      if (!this.isMaterialValid) {
+        return
+      }
+      this.supplierReservation.materials.push(this.material)
+      this.emptyMaterial()
+      this.v$.$reset()
+    },
+    selectMaterial(option) {
+      this.material.material = option.id
+      this.material.material_view.name = option.name
+      if (!this.isEditMaterial) {
+        this.material.amount = 0
+        this.material.remarks = ''
+      }
+      this.v$.material.material.$touch()
+      this.v$.material.amount.$touch()
+      this.$refs.amount.focus()
+    },
+    materialLabel(material) {
+      return `${material.name}`
+    },
+
     selectSupplier(option) {
       this.supplierReservation.supplier = option.id
       this.selectedSupplier = option
@@ -315,36 +449,20 @@ export default {
         materialModel.setListArgs(`supplier_relation=${this.selectedSupplier.id}`)
         materialModel.setSearchQuery(query)
         const data = await materialModel.list()
-        this.materials = data.results
+        this.materialsSearch = data.results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching materials', error)
-        this.errorToast(this.$trans('Error fetching materials'))
+        console.log('error fetching products', error)
+        this.errorToast(this.$trans('Error fetching products'))
         this.isLoading = false
       }
-    },
-    selectMaterial(option) {
-      this.supplierReservation.material = option.id
-      this.selectedMaterial = option
-    },
-    materialLabel(material) {
-      return `${material.name}`
     },
 
     async submitForm() {
       this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
+      this.v$.supplierReservation.supplier.$touch()
+      if (this.v$.supplierReservation.supplier.$invalid) {
         return
-      }
-
-      // remove null fields
-      const null_fields = []
-      for (let i=0; i<null_fields.length; i++) {
-        if (this.supplierReservation[null_fields[i]] === null) {
-          delete this.supplierReservation[null_fields[i]]
-        }
       }
 
       this.buttonDisabled = true
@@ -352,7 +470,12 @@ export default {
 
       if (this.isCreate) {
         try {
-          await supplierReservationModel.insert(this.supplierReservation)
+          const reservation = await this.model.insert(this.supplierReservation)
+          for (let material of this.supplierReservation.materials) {
+            material.reservation = reservation.id
+            await supplierReservationMaterialModel.insert(material)
+          }
+
           this.infoToast(this.$trans('Created'), this.$trans('Reservation has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -370,6 +493,25 @@ export default {
       try {
         await supplierReservationModel.update(this.pk, this.supplierReservation)
         this.infoToast(this.$trans('Updated'), this.$trans('Reservation has been updated'))
+
+        for (let material of this.supplierReservation.materials) {
+          material.reservation = this.pk
+          if (material.id) {
+            await supplierReservationMaterialModel.update(material.id, material)
+            this.infoToast(this.$trans('Product updated'), this.$trans('Reservation product has been updated'))
+          } else {
+            await supplierReservationMaterialModel.insert(material)
+            this.infoToast(this.$trans('Product created'), this.$trans('Reservation product has been created'))
+          }
+        }
+
+        for (const material of this.deletedMaterials) {
+          if (material.id) {
+            await supplierReservationMaterialModel.delete(material.id)
+            this.infoToast(this.$trans('Product removed'), this.$trans('Reservation product has been removed'))
+          }
+        }
+
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
@@ -381,19 +523,14 @@ export default {
       }
     },
     async loadData() {
-      this.isLoading = true
-
       try {
         this.supplierReservation = await supplierReservationModel.detail(this.pk)
         this.selectedSupplier = this.supplierReservation.supplier_view
-        this.selectedMaterial = this.supplierReservation.material_view
-        this.isLoading = false
 
-        this.getMaterials('')
+        await this.getMaterials('')
       } catch(error) {
           console.log('error fetching reservation', error)
           this.errorToast(this.$trans('Error fetching reservation'))
-          this.isLoading = false
       }
     },
     cancelForm() {

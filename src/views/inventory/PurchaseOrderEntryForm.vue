@@ -112,7 +112,7 @@
           <b-col cols="12" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Material')"
+              v-bind:label="$trans('Product')"
               label-for="purchaseorder-entry-material-search"
             >
               <multiselect
@@ -137,7 +137,7 @@
               </multiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
-                {{ $trans('Please select a material') }}
+                {{ $trans('Please select a product') }}
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
@@ -349,8 +349,8 @@ export default {
         this.purchaseOrderMaterials = data.purchase_order_materials
         this.isLoading = false
       } catch(error) {
-        console.log('Error fetching purchase order materials', error)
-        this.errorToast(this.$trans('Error fetching purchase order materials'))
+        console.log('Error fetching purchase order products', error)
+        this.errorToast(this.$trans('Error fetching purchase order products'))
         this.isLoading = false
       }
     },
@@ -432,8 +432,8 @@ export default {
 
       try {
         this.purchaseorderEntry = await purchaseorderEntryModel.detail(this.pk)
-        this.selectedPurchaseOrder = purchaseorderEntry.purchase_order_material_view.purchase_order_view
-        this.selectedPurchaseOrderMaterial = purchaseorderEntry.purchase_order_material_view
+        this.selectedPurchaseOrder = this.purchaseorderEntry.purchase_order_material_view.purchase_order_view
+        this.selectedPurchaseOrderMaterial = this.purchaseorderEntry.purchase_order_material_view
         this.isLoading = false
       } catch(error) {
         console.log('error fetching entry', error)

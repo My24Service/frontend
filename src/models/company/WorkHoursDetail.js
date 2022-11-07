@@ -1,10 +1,10 @@
 import BaseModel from '@/models/base';
 
 
-class TimeSheetDetail extends BaseModel {
-  url = '/mobile/assignedorder/list_timesheet_user/'
+class WorkHoursDetail extends BaseModel {
+  url = '/company/user-workhours/'
 }
 
-let timeSheetDetailModel = new TimeSheetDetail();
+let workHoursDetailModel = new WorkHoursDetail();
 
-export default timeSheetDetailModel;
+export default workHoursDetailModel;

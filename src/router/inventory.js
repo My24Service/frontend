@@ -26,6 +26,7 @@ import PurchaseOrderEntryForm from '@/views/inventory/PurchaseOrderEntryForm.vue
 
 import SupplierReservationList from '@/views/inventory/SupplierReservationList.vue'
 import SupplierReservationForm from '@/views/inventory/SupplierReservationForm.vue'
+import SupplierReservationView from '@/views/inventory/SupplierReservationView.vue'
 
 import Stats from '@/views/inventory/Stats.vue'
 
@@ -204,6 +205,18 @@ export default [
         },
         props: {
           'app-content': {},
+          'app-subnav': {}
+        },
+      },
+      {
+        name: 'supplier-reservation-view',
+        path: '/inventory/supplier-reservations/view/:pk',
+        components: {
+          'app-content': SupplierReservationView,
+          'app-subnav': SubNavInventory
+        },
+        props: {
+          'app-content': route => ({...route.params}),
           'app-subnav': {}
         },
       },

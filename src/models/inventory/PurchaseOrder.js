@@ -37,10 +37,10 @@ class PurchaseOrder extends BaseModel {
     'supplier_remarks': '',
     'description': '',
 
-    'statusses': [],
-    'purchase_order_materials': [],
-    'purchase_order_materials_detail_view': [],
-    'entries': []
+    'statuses': [],
+    'materials': [],
+    'entries': [],
+    'reservation_materials': []
   }
 
   url = '/inventory/purchaseorder/'

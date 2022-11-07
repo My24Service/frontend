@@ -178,7 +178,7 @@
             <table class="table table-bordered">
                 <thead>
                     <th>{{ $trans('Material') }}</th>
-                    <th>{{ $trans('Identfier') }}</th>
+                    <th>{{ $trans('Identifier') }}</th>
                     <th>{{ $trans('Amount') }}</th>
                 </thead>
                 <tbody>
