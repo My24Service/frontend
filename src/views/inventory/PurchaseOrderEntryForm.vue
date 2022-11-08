@@ -192,6 +192,7 @@
               label-for="purchaseorder-entry-amount"
             >
               <b-form-input
+                ref="amount"
                 v-model="purchaseorderEntry.amount"
                 id="purchaseorder-entry-amount"
                 size="sm"
@@ -346,7 +347,7 @@ export default {
       this.isLoading = true
       try {
         const data = await purchaseOrderModel.detail(option.id)
-        this.purchaseOrderMaterials = data.purchase_order_materials
+        this.purchaseOrderMaterials = data.materials
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching purchase order products', error)
@@ -374,15 +375,15 @@ export default {
     selectPurchaseOrderMaterial(option) {
       this.purchaseorderEntry.purchase_order_material = option.id
       this.selectedPurchaseOrderMaterial = option
+      this.$refs.amount.focus()
     },
     purchaseOrderMaterialLabel(purchaseOrderMaterial) {
-      return `${purchaseOrderMaterial.material_name} (ordered: ${purchaseOrderMaterial.amount}, entries: ${purchaseOrderMaterial.num_entries})`
+      return `${purchaseOrderMaterial.material_view.name} (ordered: ${purchaseOrderMaterial.amount}, entries: ${purchaseOrderMaterial.num_entries})`
     },
     async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
         return
       }
 

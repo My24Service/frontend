@@ -28,6 +28,7 @@
                 @search-change="getMaterials"
                 @select="selectMaterial"
                 :custom-label="materialLabel"
+                ref="searchMaterial"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
@@ -151,6 +152,7 @@
               label-for="move-material-amount"
             >
               <b-form-input
+                ref="amount"
                 v-model="amount"
                 id="move-material-amount"
                 size="sm"
@@ -167,6 +169,9 @@
           <footer class="modal-footer">
             <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
+            </b-button>
+            <b-button @click="submitFormBulk" :disabled="buttonDisabled" type="button" variant="success">
+              {{ $trans('Bulk') }}
             </b-button>
           </footer>
         </div>
@@ -209,6 +214,7 @@ export default {
       selectedToLocation: {},
       selectedToLocationPk: null,
       amount: null,
+      isBulk: false
     }
   },
   validations: {
@@ -239,7 +245,11 @@ export default {
     selectMaterial(option) {
       this.selectedMaterial = option
       this.selectedMaterialPk = option.material_id
-      this.getFromLocations()
+      if (!this.isBulk) {
+        this.getFromLocations()
+      } else {
+        this.$refs.amount.focus()
+      }
     },
     async getMaterials(query) {
       this.isLoading = true
@@ -295,10 +305,15 @@ export default {
       }
     },
     async submitForm() {
+      await this._submitForm(false)
+    },
+    async submitFormBulk() {
+      await this._submitForm(true)
+    },
+    async _submitForm(isBulk) {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
         return
       }
 
@@ -307,13 +322,25 @@ export default {
 
       try {
         await materialModel.move(this.selectedMaterialPk,
-                                 this.selectedFromLocationPk,
-                                 this.selectedToLocationPk,
-                                 this.amount)
-          this.infoToast(this.$trans('Moved'), this.$trans('Material moved'))
-          this.buttonDisabled = false
-          this.isLoading = false
+          this.selectedFromLocationPk,
+          this.selectedToLocationPk,
+          this.amount)
+        this.infoToast(this.$trans('Moved'), this.$trans('Material moved'))
+        this.buttonDisabled = false
+        this.isLoading = false
+
+        if (isBulk) {
+          this.amount = 0
+          this.selectedMaterial = {
+            material_name: ''
+          }
+          this.selectedMaterialPk = null
+          this.isBulk = true
+          this.v$.$reset()
+          this.$refs.searchMaterial.$el.focus()
+        } else {
           this.$router.push({name: 'mutation-list'})
+        }
       } catch(error) {
         console.log('error moving', error)
         this.errorToast(this.$trans('Error moving material'))
