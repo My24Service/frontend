@@ -10,7 +10,10 @@ export default {
   data() {
     return {
       intervalIdToken: null,
-      expireRefreshThresholdSec: 60*60*24*12
+      intervalMinutes: 60,
+      // 'SLIDING_TOKEN_LIFETIME': timedelta(days=2),
+      // 'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=14),
+      expireRefreshThresholdSec: 60*60*30
     }
   },
   methods: {
@@ -26,17 +29,16 @@ export default {
     async checkToken() {
       const token = this.$auth.getAccessToken()
       const tokenVars = this.parseJwt(token)
-      const expireInSeconds = tokenVars.refresh_exp - Math.round(Date.now()/1000)
+      const expireInSeconds = tokenVars.exp - Math.round(Date.now()/1000)
       const expireInHours = Math.round(expireInSeconds/(60*60))
-      const expireInDays = expireInHours/24
-      const thresholdDays = this.expireRefreshThresholdSec/(60*60*24)
-      const debugStr = `threshold: ${this.expireRefreshThresholdSec}, expire in seconds: ${expireInSeconds} - ${expireInHours} hour, ${expireInDays} days, threshold days: ${thresholdDays}`
+      const debugStr = `threshold: ${this.expireRefreshThresholdSec/(60*60)} hrs, expire in seconds: ${expireInSeconds}, ${expireInHours} hrs`
 
       if (expireInSeconds <= this.expireRefreshThresholdSec) {
         console.log(`refreshing token (${debugStr})`)
 
         try {
           const result = await accountModel.refreshToken(token)
+          console.log('token refresh result', result)
           this.$auth.authenticate({ accessToken: result.token })
           console.log('token refreshed')
         } catch (e) {
@@ -49,7 +51,7 @@ export default {
   },
   mounted() {
     console.log('setting interval')
-    this.intervalIdToken = setInterval(this.checkToken, 1000*60*60)
+    this.intervalIdToken = setInterval(this.checkToken, 1000*60*this.intervalMinutes)
   },
   beforeDestroy() {
     console.log('clearing interval')
