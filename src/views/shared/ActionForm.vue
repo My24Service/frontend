@@ -122,6 +122,40 @@
             </b-row>
           </b-col>
           <b-col cols="6">
+            <div v-if="action.type === 'status'">
+              <b-row>
+                <b-col cols="12" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Override status?')"
+                    label-for="action_status_override"
+                    :description="$trans('Set a different status in the original order.')"
+                  >
+                    <b-form-checkbox
+                      id="action_status_override"
+                      v-model="action.override_status"
+                    >
+                    </b-form-checkbox>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="12" role="group">
+                  <b-form-group
+                    v-if="action.type === 'status' && action.override_status"
+                    label-size="sm"
+                    v-bind:label="$trans('Status')"
+                    label-for="action_status_override_template"
+                  >
+                    <b-form-input
+                      id="action_status_override_template"
+                      size="sm"
+                      v-model="action.template"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+            </div>
             <div v-if="action.type === 'copy'">
               <b-row>
                 <b-col cols="12" role="group">
@@ -324,6 +358,7 @@ export default {
 
       isLoading: false,
       partners: [],
+
       condition_field: '',
       condition_operator: '',
       condition_value: '',
@@ -333,9 +368,9 @@ export default {
         {key: 'value', label: this.$trans('Value')},
         {key: 'icons'}
       ],
+
       submitClicked: false,
       action: actionOrderModel.getFields(),
-      errorMessage: null,
       operators: ['=', '!=', '<', '<=', '>', '>=', 'REGEXP', 'NOTREGEXP', 'CONTAINS'],
       querymodes: [
         {value: 'and', text: this.$trans('must match all of the conditions')},
@@ -355,7 +390,7 @@ export default {
         {value: 'email', text: this.$trans('send email')},
         {value: 'send_sms', text: this.$trans('send sms')},
         {value: 'send_fcm', text: this.$trans('send FCM')},
-      ]
+      ],
     }
   },
   computed: {
