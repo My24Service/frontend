@@ -34,27 +34,25 @@ export default {
       const debugStr = `threshold: ${this.expireRefreshThresholdSec/(60*60)} hrs, expire in seconds: ${expireInSeconds}, ${expireInHours} hrs`
 
       if (expireInSeconds <= this.expireRefreshThresholdSec) {
-        console.log(`refreshing token (${debugStr})`)
+        console.debug(`refreshing token (${debugStr})`)
 
         try {
           const result = await accountModel.refreshToken(token)
-          console.log('token refresh result', result)
+          console.debug('token refresh result', result)
           this.$auth.authenticate({ accessToken: result.token })
-          console.log('token refreshed')
+          console.debug('token refreshed')
         } catch (e) {
           console.error('error refreshing token', e)
         }
       } else {
-        console.log(`not refreshing token (${debugStr})`)
+        console.debug(`not refreshing token (${debugStr})`)
       }
     },
   },
   mounted() {
-    console.log('setting interval')
     this.intervalIdToken = setInterval(this.checkToken, 1000*60*this.intervalMinutes)
   },
   beforeDestroy() {
-    console.log('clearing interval')
     clearInterval(this.intervalIdToken)
   }
 }

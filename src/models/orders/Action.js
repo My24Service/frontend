@@ -15,6 +15,7 @@ class Action extends BaseModel {
     'json_conditions': [],
     'querymode': 'or',
     'statuscode': '',
+    'override_status': false
   }
 
   url = '/order/action/'
