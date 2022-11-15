@@ -5,7 +5,7 @@
         <h2 v-if="isCreate">{{ $trans('New stock location') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit stock location') }}</h2>
         <b-row>
-          <b-col cols="8" role="group">
+          <b-col cols="6" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Name')"
@@ -34,6 +34,18 @@
                 size="sm"
                 v-model="stockLocation.identifier"
               ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Show in stats?')"
+              label-for="stock-location-show_in_stats"
+            >
+              <b-form-checkbox
+                v-model="stockLocation.show_in_stats"
+              >
+              </b-form-checkbox>
             </b-form-group>
           </b-col>
         </b-row>

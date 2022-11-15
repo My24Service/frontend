@@ -61,6 +61,11 @@
         <template #cell(name)="data">
           <router-link :to="{name: 'stock-location-view', params: {pk: data.item.id}}">{{ data.item.name }}</router-link>
         </template>
+        <template #cell(show_in_stats)="data">
+          <span v-if="data.item.show_in_stats">
+            <b-icon-check-square-fill></b-icon-check-square-fill>
+          </span>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
@@ -110,6 +115,7 @@ export default {
         {key: 'name', label: this.$trans('Name'), sortable: true},
         {key: 'identifier', label: this.$trans('Identifier'), sortable: true},
         {key: 'inventory', label: this.$trans('Inventory'), sortable: true},
+        {key: 'show_in_stats', label: this.$trans('In stats?'), sortable: true},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons'}
