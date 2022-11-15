@@ -50,6 +50,10 @@ class Material extends BaseModel {
   getForSupplier(supplier) {
     return this.axios.get(`${this.url}?supplier_relation=${supplier}`).then((response) => response.data.results)
   }
+
+  getStatsTable(year) {
+    return this.axios.get(`${this.url}stats_table/?year=${year}`).then((response) => response.data)
+  }
 }
 
 let materialModel = new Material()

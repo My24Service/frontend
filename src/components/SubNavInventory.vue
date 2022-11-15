@@ -55,6 +55,12 @@
         :to="{ name: 'inventory-stats' }">
         {{ $trans('Statistics') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('stats-table')"
+        v-if="hasStats"
+        :to="{ name: 'inventory-stats-table' }">
+        {{ $trans('Statistics table') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
