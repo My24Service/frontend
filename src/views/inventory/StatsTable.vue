@@ -73,7 +73,7 @@ export default {
         {thAttr: {width: '10%'}, key: 'turnover', label: this.$trans('Turnover'), sortable: true},
         {thAttr: {width: '10%'}, key: 'profit', label: this.$trans('Profit'), sortable: true},
         {thAttr: {width: '10%'}, key: 'margin_product', label: this.$trans('Margin product'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'current_stock', label: this.$trans('Stock'), sortable: false},
+        {thAttr: {width: '10%'}, key: 'current_stock', label: this.$trans('Stock'), sortable: true},
         {thAttr: {width: '10%'}, key: 'sum_inventory', label: this.$trans('Locations'), sortable: false},
       ],
       tableData: [],
@@ -111,7 +111,6 @@ export default {
         const data = await this.model.getStatsTable(this.year)
         this.tableData = data.results
         this.inventoryHeaders = data.inventory_keys
-        console.log(this.inventoryItems)
         this.isLoading = false
       } catch(error) {
         console.log(error)
