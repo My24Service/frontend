@@ -66,6 +66,9 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(full_name)="data">
+          <b-link :to="{name: 'studentuser-detail', params: {pk: data.item.id}}">{{ data.item.full_name }}</b-link>
+        </template>
         <template #cell(active)="data">
           <b-link
             v-if="!data.item.is_active"

@@ -327,8 +327,8 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '@/models/helpers.js'
-import studentUserModel from '@/models/company/UserStudent.js'
+import { usernameExists } from '../../models/helpers.js'
+import studentUserModel from '../../models/company/UserStudent.js'
 
 
 export default {
