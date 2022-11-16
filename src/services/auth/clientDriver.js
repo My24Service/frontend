@@ -5,7 +5,7 @@ function errorHandler(error, auth) {
   } else {
     console.log(error)
   }
-  Promise.reject(error)
+  return Promise.reject(error)
 }
 
 export default (client, auth) => {

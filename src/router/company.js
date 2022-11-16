@@ -1,34 +1,39 @@
-import TheAppLayout from '@/components/TheAppLayout.vue'
-import SubNavCompany from '@/components/SubNavCompany.vue'
+import TheAppLayout from '../components/TheAppLayout.vue'
+import SubNavCompany from '../components/SubNavCompany.vue'
 
-import Dashboard from '@/views/company/Dashboard.vue'
-import Info from '@/views/company/Info.vue'
-import Settings from '@/views/company/Settings.vue'
+import Dashboard from '../views/company/Dashboard.vue'
+import Info from '../views/company/Info.vue'
+import Settings from '../views/company/Settings.vue'
 
-import UserEngineerList from '@/views/company/UserEngineerList.vue'
-import UserEngineerForm from '@/views/company/UserEngineerForm.vue'
-import UserEngineerDetail from '@/views/company/UserEngineerDetail.vue'
-import UserSalesList from '@/views/company/UserSalesList.vue'
-import UserSalesForm from '@/views/company/UserSalesForm.vue'
-import UserCustomerList from '@/views/company/UserCustomerList.vue'
-import UserCustomerForm from '@/views/company/UserCustomerForm.vue'
-import UserPlanningList from '@/views/company/UserPlanningList.vue'
-import UserPlanningForm from '@/views/company/UserPlanningForm.vue'
-import UserStudentList from '@/views/company/UserStudentList.vue'
-import UserStudentForm from '@/views/company/UserStudentForm.vue'
+import UserEngineerList from '../views/company/UserEngineerList.vue'
+import UserEngineerForm from '../views/company/UserEngineerForm.vue'
+import UserEngineerDetail from '../views/company/UserEngineerDetail.vue'
 
-import PartnerList from '@/views/company/PartnerList.vue'
-import PartnerRequestsSentList from '@/views/company/PartnerRequestsSentList.vue'
-import PartnerRequestsSentForm from '@/views/company/PartnerRequestsSentForm.vue'
-import PartnerRequestsReceivedList from '@/views/company/PartnerRequestsReceivedList.vue'
+import UserSalesList from '../views/company/UserSalesList.vue'
+import UserSalesForm from '../views/company/UserSalesForm.vue'
 
-import ActivityList from '@/views/company/ActivityList.vue'
+import UserCustomerList from '../views/company/UserCustomerList.vue'
+import UserCustomerForm from '../views/company/UserCustomerForm.vue'
 
-import PictureList from '@/views/company/PictureList.vue'
-import PictureForm from '@/views/company/PictureForm.vue'
+import UserPlanningList from '../views/company/UserPlanningList.vue'
+import UserPlanningForm from '../views/company/UserPlanningForm.vue'
 
-import WorkHours from '@/views/company/WorkHours.vue'
-import WorkHoursDetail from '@/views/company/WorkHoursDetail.vue'
+import UserStudentList from '../views/company/UserStudentList.vue'
+import UserStudentForm from '../views/company/UserStudentForm.vue'
+import UserStudentDetail from "../views/company/UserStudentDetail"
+
+import PartnerList from '../views/company/PartnerList.vue'
+import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
+import PartnerRequestsSentForm from '../views/company/PartnerRequestsSentForm.vue'
+import PartnerRequestsReceivedList from '../views/company/PartnerRequestsReceivedList.vue'
+
+import ActivityList from '../views/company/ActivityList.vue'
+
+import PictureList from '../views/company/PictureList.vue'
+import PictureForm from '../views/company/PictureForm.vue'
+
+import WorkHours from '../views/company/WorkHours.vue'
+import WorkHoursDetail from '../views/company/WorkHoursDetail.vue'
 
 
 export default [
@@ -250,6 +255,18 @@ export default [
       },
       components: {
         'app-content': UserStudentForm,
+        'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'studentuser-detail',
+      path: '/company/users/studentusers/view/:pk',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': UserStudentDetail,
         'app-subnav': SubNavCompany
       },
     },
