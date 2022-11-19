@@ -101,18 +101,18 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs } from '@vuelidate/validators'
 import Password from 'vue-password-strength-meter'
 
-import accountModel from '@/models/account/Account.js'
-import { componentMixin } from '@/utils.js'
-import userSocket from '@/services/websocket/UserSocket.js'
-import memberSocket from '@/services/websocket/MemberSocket.js'
-import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
+import accountModel from '../models/account/Account.js'
+import { componentMixin } from '../utils.js'
+import userSocket from '../services/websocket/UserSocket.js'
+import memberSocket from '../services/websocket/MemberSocket.js'
+import memberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
 
-import TheLanguageChooser from "@/components/TheLanguageChooser.vue"
-import Version from "@/components/Version.vue"
-import NavItems from "@/components/NavItems.vue"
-import NavBrand from "@/components/NavBrand.vue"
-import Notification from '@/components/Notification'
-import TokenRefresh from '@/components/TokenRefresh'
+import TheLanguageChooser from "../components/TheLanguageChooser.vue"
+import Version from "../components/Version.vue"
+import NavItems from "../components/NavItems.vue"
+import NavBrand from "../components/NavBrand.vue"
+import Notification from '../components/Notification'
+import TokenRefresh from '../components/TokenRefresh'
 
 export default {
   setup() {
@@ -182,7 +182,7 @@ export default {
       this.isLoading = true
 
       try {
-        await accountModel.changePassword(this.old_password, this.new_password1, this.new_password2)
+        await accountModel.changePassword(this.old_password, this.new_password1)
         this.infoToast(this.$trans('Password changed'), this.$trans('Your password is changed'))
         this.$refs['password-change-modal'].hide()
       } catch(error) {
@@ -198,7 +198,6 @@ export default {
       let loader = this.$loading.show()
 
       try {
-        await accountModel.logout()
         this.$auth.logout(false)
         await this.$store.dispatch('getInitialData')
 

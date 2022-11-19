@@ -4,7 +4,7 @@ module.exports = {
   },
   filenameHashing: false,
   productionSourceMap: false,
-  publicPath: '/frontend/',
+  publicPath: '/',
   outputDir: './dist',
   chainWebpack: config => {
     config.optimization

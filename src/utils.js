@@ -1,4 +1,4 @@
-import my24 from '@/services/my24'
+import my24 from './services/my24'
 import orderNotAcceptedModel from './models/orders/OrderNotAccepted.js'
 
 
