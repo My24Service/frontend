@@ -57,6 +57,14 @@ class StudentUser extends BaseModel {
 
     return this.update(pk, data)
   }
+
+  async register(studentUser) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+
+    return this.axios.post('/accounts/register/', studentUser, headers).then((response) => response.data)
+  }
+
 }
 
 let studentUserModel = new StudentUser()

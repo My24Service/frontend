@@ -1,5 +1,5 @@
 <template>
-  <div class="container app-form">
+  <div class="container register">
     <ResetPassword />
   </div>
 </template>
@@ -19,6 +19,8 @@ export default {
   }
 }
 </script>
-
 <style scoped>
+.register {
+  padding-top: 68px;
+}
 </style>

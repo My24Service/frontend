@@ -771,7 +771,7 @@ export default {
         this.errorToast(this.$trans('Error updating studentuser'))
         this.isLoading = false
       }
-      z    },
+    },
     async loadData() {
       this.isLoading = true
 
