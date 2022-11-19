@@ -1,8 +1,8 @@
-import TheAppLayout from '@/components/TheAppLayout.vue'
+import TheAppLayout from '../components/TheAppLayout.vue'
 
-import TheNoAccessLayout from '@/views/account/NoAccess.vue'
-import ResetPassword from '@/views/account/ResetPassword.vue'
-import ResetPasswordConfirm from '@/views/account/ResetPasswordConfirm.vue'
+import TheNoAccessLayout from '../views/account/NoAccess.vue'
+import ResetPassword from '../views/account/ResetPassword.vue'
+import ResetPasswordConfirm from '../views/account/ResetPasswordConfirm.vue'
 
 
 export default [{
@@ -13,6 +13,7 @@ export default [{
   },
   children: [
       {
+        meta: { needsAuth: false },
         name: 'reset-password',
         path: '/reset-password',
         components: {
@@ -20,6 +21,7 @@ export default [{
         },
       },
       {
+        meta: { needsAuth: false },
         name: 'reset-password-confirm',
         path: '/reset-password-confirm',
         components: {
@@ -27,6 +29,7 @@ export default [{
         },
       },
       {
+        meta: { needsAuth: false },
         name: 'no-access',
         path: '/no-access',
         component: TheNoAccessLayout
