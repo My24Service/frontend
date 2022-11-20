@@ -20,13 +20,22 @@ class Member extends BaseModel {
     'data': '',
     'contract': '',
     'is_deleted': false,
-    'member_type': ''
+    'member_type': '',
+    'is_public': true
   }
 
   url = '/member/member/'
 
   getMe() {
     return this.axios.get(`${this.url}me/`).then((response) => response.data)
+  }
+
+  async getDeleted() {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.url}deleted/`
+
+    return this.axios.get(url, headers).then((response) => response.data)
   }
 
   async updateMe(obj) {

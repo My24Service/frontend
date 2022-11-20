@@ -252,9 +252,9 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import memberModel from '@/models/member/Member.js'
-
-import PillsCompanyCompany from "@/components/PillsCompanyCompany.vue"
+import memberModel from '../../models/member/Member.js'
+import PillsCompanyCompany from "../../components/PillsCompanyCompany.vue"
+import {NO_IMAGE_URL} from "../../utils"
 
 export default {
   setup() {
@@ -271,10 +271,10 @@ export default {
       countries: [],
       member: memberModel.getFields(),
       errorMessage: null,
-      current_image: '/static/core/img/noimg.png',
-      upload_preview: '/static/core/img/noimg.png',
-      current_image_workorder: '/static/core/img/noimg.png',
-      upload_preview_workorder: '/static/core/img/noimg.png',
+      current_image: NO_IMAGE_URL,
+      upload_preview: NO_IMAGE_URL,
+      current_image_workorder: NO_IMAGE_URL,
+      upload_preview_workorder: NO_IMAGE_URL,
       fileChanged: false,
       fileWorkorderChanged: false,
     }
@@ -366,8 +366,8 @@ export default {
 
       try {
         this.member = await memberModel.getMe()
-        this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
-        this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : '/static/core/img/noimg.png'
+        this.current_image = this.member.companylogo ? this.member.companylogo : NO_IMAGE_URL
+        this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : NO_IMAGE_URL
         this.isLoading = false
       } catch(error) {
         console.log('error fetching member/me', error)

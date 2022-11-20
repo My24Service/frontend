@@ -40,7 +40,7 @@ import UserStudentRegisterResetPassword from "../views/company/UserStudentRegist
 
 export default [
 {
-  path: '/customers',
+  path: '/company',
   component: TheAppLayout,
   children: [
       {

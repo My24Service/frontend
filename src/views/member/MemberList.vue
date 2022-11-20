@@ -11,7 +11,7 @@
       <Pagination
         v-if="!isLoading"
         :model="this.model"
-        :model_name="$trans('Member')"
+        :model_name="deleted ? $trans('Deleted member') : $trans('Member')"
       />
 
       <b-table
@@ -53,7 +53,8 @@
           <img :src="data.item.companylogo" width="100" alt=""/>
         </template>
         <template #cell(member_info)="data">
-          {{ data.item.name }}<br/>
+          {{ $trans('Companycode') }}: {{ data.item.companycode }} <span v-if="!data.item.is_public">({{ $trans('private') }})</span> <br/>
+          {{ $trans('Name') }}: {{ data.item.name }}<br/>
           {{ data.item.country_code }}-{{ data.item.postal }} {{ data.item.city }}<br/>
           {{ data.item.email }}<br/>
         </template>
@@ -72,13 +73,13 @@
 </template>
 
 <script>
-import memberModel from '@/models/member/Member.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
+import memberModel from '../../models/member/Member.js'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import Pagination from "../../components/Pagination.vue"
 
 export default {
   components: {
@@ -88,6 +89,12 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
+  },
+  props: {
+    deleted: {
+      type: [String, Boolean],
+      default: false
+    },
   },
   data() {
     return {
@@ -125,7 +132,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.model.list()
+        const data = this.deleted ? await this.model.getDeleted() : await this.model.list()
         this.members = data.results
         this.isLoading = false
       } catch(error) {

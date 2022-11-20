@@ -141,7 +141,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="4" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Tel.')"
@@ -159,7 +159,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Email')"
@@ -177,7 +177,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Website (http://...)')"
@@ -193,6 +193,19 @@
                 :state="isSubmitClicked ? !v$.member.www.$error : null">
                 {{ $trans('Please enter a website') }}
               </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="3" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Public?')"
+              label-for="member_is_pub;ic"
+            >
+              <b-form-checkbox
+                id="member_is_public"
+                v-model="member.is_public"
+              >
+              </b-form-checkbox>
             </b-form-group>
           </b-col>
         </b-row>
@@ -325,8 +338,9 @@ import { useVuelidate } from '@vuelidate/core'
 import { url, email, required } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import memberModel from '@/models/member/Member.js'
-import contractModel from '@/models/member/Contract.js'
+import memberModel from '../../models/member/Member.js'
+import contractModel from '../../models/member/Contract.js'
+import {NO_IMAGE_URL} from "../../utils";
 
 export default {
   setup() {
@@ -356,10 +370,10 @@ export default {
         {value: false, text: this.$trans('Not deleted')},
       ],
       suppliers: [],
-      current_image: '/static/core/img/noimg.png',
-      upload_preview: '/static/core/img/noimg.png',
-      current_image_workorder: '/static/core/img/noimg.png',
-      upload_preview_workorder: '/static/core/img/noimg.png',
+      current_image: NO_IMAGE_URL,
+      upload_preview: NO_IMAGE_URL,
+      current_image_workorder: NO_IMAGE_URL,
+      upload_preview_workorder: NO_IMAGE_URL,
       fileChanged: false,
       fileWorkorderChanged: false,
     }
@@ -569,8 +583,8 @@ export default {
 
       try {
         this.member = await memberModel.detail(this.pk)
-        this.current_image = this.member.companylogo ? this.member.companylogo : '/static/core/img/noimg.png'
-        this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : '/static/core/img/noimg.png'
+        this.current_image = this.member.companylogo ? this.member.companylogo : NO_IMAGE_URL
+        this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : NO_IMAGE_URL
         this.orgCompanycode = this.member.companycode
         this.isLoading = false
       } catch(error) {

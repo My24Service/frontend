@@ -59,7 +59,7 @@
           </div>
         </template>
         <template #cell(picture)="data">
-          <img :src="data.item.picture || '/static/core/img/noimg.png'" height="100" alt=""/>
+          <img :src="data.item.picture || NO_IMAGE_URL" height="100" alt=""/>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -88,6 +88,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {NO_IMAGE_URL} from "../../utils"
 
 export default {
   components: {
@@ -112,6 +113,7 @@ export default {
         {key: 'created', label: this.$trans('Created'), sortable: true, thAttr: {width: '10%'}},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
+      NO_IMAGE_URL
     }
   },
   created() {

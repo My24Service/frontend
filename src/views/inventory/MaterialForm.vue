@@ -258,10 +258,11 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-
 import Multiselect from 'vue-multiselect'
-import materialModel from '@/models/inventory/Material.js'
-import supplierModel from '@/models/inventory/Supplier.js'
+
+import materialModel from '../../models/inventory/Material.js'
+import supplierModel from '../../models/inventory/Supplier.js'
+import {NO_IMAGE_URL} from "../../utils"
 
 export default {
   setup() {
@@ -285,8 +286,8 @@ export default {
       material: materialModel.getFields(),
       errorMessage: null,
       suppliers: [],
-      current_image: '/static/core/img/noimg.png',
-      upload_preview: '/static/core/img/noimg.png',
+      current_image: NO_IMAGE_URL,
+      upload_preview: NO_IMAGE_URL,
       fileChanged: false
     }
   },
@@ -400,7 +401,7 @@ export default {
 
       try {
         this.material = await materialModel.detail(this.pk)
-        this.current_image = this.material.image ? this.material.image : '/static/core/img/noimg.png'
+        this.current_image = this.material.image ? this.material.image : NO_IMAGE_URL
         this.isLoading = false
       } catch(error) {
         console.log('error fetching material', error)
