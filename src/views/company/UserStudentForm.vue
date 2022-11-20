@@ -669,10 +669,7 @@ export default {
   async created() {
     this.countries = await this.$store.dispatch('getCountries')
 
-    if (this.isRegister) {
-      console.log('REGISTERUUUH')
-    } else {
-
+    if (!this.isRegister) {
       if (!this.isCreate) {
         await this.loadData()
       } else {
