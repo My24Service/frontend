@@ -37,15 +37,15 @@ router.beforeEach((to, from, next) => {
     if (isAllowed) {
       const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
 
-      console.log('path allowed, checking authenticated', to.path, needsAuth, auth.isAuthenticated())
+      console.debug('path allowed, checking authenticated', to.path, needsAuth, auth.isAuthenticated())
       if (needsAuth && !auth.isAuthenticated()) {
-          console.log('not isAuthenticated and auth needed', to.path)
+          console.debug('not isAuthenticated and auth needed', to.path)
           next(`/no-access?next=${to.path}`)
       } else {
         next()
       }
     } else {
-      console.log('not allowed', to.path)
+      console.debug('not allowed', to.path)
       next(`/no-access?next=${to.path}`)
     }
   });
