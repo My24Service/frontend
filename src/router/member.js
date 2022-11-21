@@ -1,22 +1,24 @@
-import TheAppLayout from '@/components/TheAppLayout.vue'
-import SubNavMembers from '@/components/SubNavMembers.vue'
+import TheAppLayout from '../components/TheAppLayout.vue'
+import SubNavMembers from '../components/SubNavMembers.vue'
 
-import MemberList from '@/views/member/MemberList.vue'
-import MemberForm from '@/views/member/MemberForm.vue'
-import ContractList from '@/views/member/ContractList.vue'
-import ContractForm from '@/views/member/ContractForm.vue'
-import ModuleList from '@/views/member/ModuleList.vue'
-import ModuleForm from '@/views/member/ModuleForm.vue'
-import ModulePartList from '@/views/member/ModulePartList.vue'
-import ModulePartForm from '@/views/member/ModulePartForm.vue'
+import MemberList from '../views/member/MemberList.vue'
+import MemberForm from '../views/member/MemberForm.vue'
+import ContractList from '../views/member/ContractList.vue'
+import ContractForm from '../views/member/ContractForm.vue'
+import ModuleList from '../views/member/ModuleList.vue'
+import ModuleForm from '../views/member/ModuleForm.vue'
+import ModulePartList from '../views/member/ModulePartList.vue'
+import ModulePartForm from '../views/member/ModulePartForm.vue'
+import {AUTH_LEVELS} from "../constants";
 
 
 export default [
 {
-  path: '/members',
+  path: '/member',
   component: TheAppLayout,
   children: [
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'member-list',
         path: '/members/members',
         components: {
@@ -28,7 +30,21 @@ export default [
           'app-subnav': {}
         },
       },
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
+      name: 'member-deleted-list',
+      path: '/members/deleted-members',
+      components: {
+        'app-content': MemberList,
+        'app-subnav': SubNavMembers
+      },
+      props: {
+        'app-content': route => ({...route.params, deleted: true}),
+        'app-subnav': {}
+      },
+    },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'member-edit',
         path: '/members/members/form/:pk',
         props: {
@@ -41,6 +57,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'member-add',
         path: '/members/members/form',
         components: {
@@ -54,6 +71,7 @@ export default [
       },
       // contracts
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'contract-list',
         path: '/members/contracts',
         components: {
@@ -66,6 +84,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'contract-edit',
         path: '/members/contracts/form/:pk',
         props: {
@@ -78,6 +97,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'contract-add',
         path: '/members/contracts/form',
         components: {
@@ -91,6 +111,7 @@ export default [
       },
       // modules
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'module-list',
         path: '/members/modules',
         components: {
@@ -103,6 +124,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'module-edit',
         path: '/members/modules/form/:pk',
         props: {
@@ -115,6 +137,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'module-add',
         path: '/members/modules/form',
         components: {
@@ -128,6 +151,7 @@ export default [
       },
       // module parts
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'module-part-list',
         path: '/members/module-parts',
         components: {
@@ -140,6 +164,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'module-part-edit',
         path: '/members/module-parts/form/:pk',
         props: {
@@ -152,6 +177,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
         name: 'module-part-add',
         path: '/members/module-parts/form',
         components: {

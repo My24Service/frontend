@@ -21,6 +21,7 @@ import UserPlanningForm from '../views/company/UserPlanningForm.vue'
 import UserStudentList from '../views/company/UserStudentList.vue'
 import UserStudentForm from '../views/company/UserStudentForm.vue'
 import UserStudentDetail from "../views/company/UserStudentDetail"
+import UserStudentRegisterVerify from "../views/company/UserStudentRegisterVerify"
 
 import PartnerList from '../views/company/PartnerList.vue'
 import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
@@ -34,11 +35,12 @@ import PictureForm from '../views/company/PictureForm.vue'
 
 import WorkHours from '../views/company/WorkHours.vue'
 import WorkHoursDetail from '../views/company/WorkHoursDetail.vue'
+import UserStudentRegisterResetPassword from "../views/company/UserStudentRegisterResetPassword";
 
 
 export default [
 {
-  path: '/customers',
+  path: '/company',
   component: TheAppLayout,
   children: [
       {
@@ -234,11 +236,24 @@ export default [
         'app-subnav': {}
       },
     },
+    // students
     {
       name: 'users-studentusers',
       path: '/company/users/studentusers',
       components: {
         'app-content': UserStudentList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'studentuser-add',
+      path: '/company/users/studentusers/form',
+      components: {
+        'app-content': UserStudentForm,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -270,16 +285,38 @@ export default [
         'app-subnav': SubNavCompany
       },
     },
+    // registration
     {
-      name: 'studentuser-add',
-      path: '/company/users/studentusers/form',
+      meta: { needsAuth: false },
+      name: 'studentuser-register',
+      path: '/company/users/studentusers/register',
       components: {
         'app-content': UserStudentForm,
-        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({mode: 'register', ...route.params}),
+      },
+    },
+    {
+      meta: { needsAuth: false },
+      name: 'studentuser-verify',
+      path: '/company/users/studentusers/register/verify',
+      components: {
+        'app-content': UserStudentRegisterVerify,
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+      },
+    },
+    {
+      meta: { needsAuth: false },
+      name: 'studentuser-reset-password',
+      path: '/company/users/studentusers/register/reset-password',
+      components: {
+        'app-content': UserStudentRegisterResetPassword,
+      },
+      props: {
+        'app-content': {},
       },
     },
     // partners

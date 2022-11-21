@@ -5,7 +5,7 @@ base.href = BASE_URL
 document.head.appendChild(base)
 
 const script = document.createElement("script")
-script.src = `${BASE_URL}/jsi18n/`
+script.src = `${BASE_URL}/api/jsi18n/`
 script.async = false
 document.head.appendChild(script)
 

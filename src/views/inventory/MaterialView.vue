@@ -63,7 +63,7 @@
       <b-row>
         <b-col cols="12" class="text-center">
           <h4>{{ $trans('Image') }}</h4>
-          <img :src="material.image || '/static/core/img/noimg.png'"  alt=""/>
+          <img :src="material.image || NO_IMAGE_URL"  alt=""/>
         </b-col>
       </b-row>
       <b-row>
@@ -82,8 +82,9 @@
 </template>
 
 <script>
-import materialModel from '@/models/inventory/Material.js'
-import inventoryModel from '@/models/inventory/Inventory.js'
+import materialModel from '../../models/inventory/Material.js'
+import inventoryModel from '../../models/inventory/Inventory.js'
+import {NO_IMAGE_URL} from "../../utils";
 
 export default {
   data() {
@@ -94,7 +95,8 @@ export default {
       inventoryFields: [
         { key: 'location_name', label: this.$trans('Location') },
         { key: 'total_amount', label: this.$trans('Total amount') },
-      ]
+      ],
+      NO_IMAGE_URL
     }
   },
   props: {

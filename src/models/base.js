@@ -134,7 +134,7 @@ class BaseModel {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return this.axios.put(`${this.url}${pk}/`, this.preUpdate(obj), headers).then((response) => response.data)
+    return this.axios.patch(`${this.url}${pk}/`, this.preUpdate(obj), headers).then((response) => response.data)
   }
 
   async delete(pk) {

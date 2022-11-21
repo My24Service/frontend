@@ -1,36 +1,133 @@
-import my24 from '@/services/my24'
+import my24 from './services/my24'
 import orderNotAcceptedModel from './models/orders/OrderNotAccepted.js'
+import {
+  AUTH_LEVELS
+} from "./constants";
 
+const NO_IMAGE_URL = `${document.location.origin}/assets/no-img.png`
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
 }
 
+function getIsStaff(store) {
+  return store.state.userInfo.hasOwnProperty('is_staff') && store.state.userInfo.is_staff
+}
+
+function getIsSuperuser(store) {
+  return store.state.userInfo.hasOwnProperty('is_superuser') && store.state.userInfo.is_superuser
+}
+
+function getIsPlanning(store) {
+  return store.state.userInfo.hasOwnProperty('planning_user') && store.state.userInfo.planning_user
+}
+
+function getIsCustomer(store) {
+  return store.state.userInfo.hasOwnProperty('customer_user') && store.state.userInfo.customer_user
+}
+
+function getIsEngineer(store) {
+  return store.state.userInfo.hasOwnProperty('engineer') && store.state.userInfo.engineer
+}
+
+function getIsSales(store) {
+  return store.state.userInfo.hasOwnProperty('sales_user') && store.state.userInfo.sales_user
+}
+
+function getIsStudent(store) {
+  return store.state.userInfo.hasOwnProperty('student_user') && store.state.userInfo.student_user
+}
+
+function getIsLoggedIn(store) {
+  return store.getters.isLoggedIn
+}
+
+function getUserAuthLevel(store) {
+  if (getIsStudent(store)) {
+    return AUTH_LEVELS.STUDENT
+  }
+
+  if (getIsSales(store)) {
+    return AUTH_LEVELS.SALES
+  }
+
+  if (getIsEngineer(store)) {
+    return AUTH_LEVELS.ENGINEER
+  }
+
+  if (getIsCustomer(store)) {
+    return AUTH_LEVELS.CUSTOMER
+  }
+
+  if (getIsPlanning(store)) {
+    return AUTH_LEVELS.PLANNING
+  }
+
+  if (getIsSuperuser(store)) {
+    return AUTH_LEVELS.SUPERUSER
+  }
+
+  if (getIsStaff(store)) {
+    return AUTH_LEVELS.STAFF
+  }
+}
+
+function hasAccessRouteAuthLevel(authLevelNeeded, store) {
+  const authLevelUser = getUserAuthLevel(store)
+  const isSuperUserOrStaff = authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+
+  if (authLevelNeeded === AUTH_LEVELS.STAFF) {
+    return authLevelUser === isSuperUserOrStaff
+  }
+
+  if (authLevelNeeded === AUTH_LEVELS.SUPERUSER) {
+    return authLevelUser === AUTH_LEVELS.SUPERUSER
+  }
+
+  if (authLevelNeeded === AUTH_LEVELS.PLANNING) {
+    return authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+  }
+
+  if (authLevelNeeded === AUTH_LEVELS.SALES) {
+    return authLevelUser === AUTH_LEVELS.SALES || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+  }
+
+  if (authLevelNeeded === AUTH_LEVELS.STUDENT) {
+    return authLevelUser === AUTH_LEVELS.STUDENT || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+  }
+
+  if (authLevelNeeded === AUTH_LEVELS.ENGINEER) {
+    return authLevelUser === AUTH_LEVELS.ENGINEER || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+  }
+
+  return false
+}
+
 let componentMixin = {
   computed: {
     isStaff() {
-      return this.$store.state.userInfo.is_staff
+      return getIsStaff(this.$store)
     },
     isSuperuser() {
-      return this.$store.state.userInfo.is_superuser
+      return getIsSuperuser(this.$store)
     },
     isPlanning() {
-      return this.$store.state.userInfo.planning_user
+      return getIsPlanning(this.$store)
     },
     isCustomer() {
-      return this.$store.state.userInfo.customer_user
+      return getIsCustomer(this.$store)
     },
     isEngineer() {
-      this.$store.state.userInfo.engineer
+      return getIsEngineer(this.$store)
     },
     isSales() {
-      this.$store.state.userInfo.sales_user
+      return getIsSales(this.$store)
     },
     isStudent() {
-      this.$store.state.userInfo.student_user
+      return getIsStudent(this.$store)
     },
     isLoggedIn() {
-      return this.$store.getters.isLoggedIn
+      return getIsLoggedIn(this.$store)
     },
     username() {
       return this.$store.getters.getUserName
@@ -53,4 +150,18 @@ let componentMixin = {
   }
 }
 
-export { isEmpty, componentMixin }
+export {
+  isEmpty,
+  getIsStaff,
+  getIsSuperuser,
+  getIsPlanning,
+  getIsEngineer,
+  getIsSales,
+  getIsStudent,
+  getIsCustomer,
+  getIsLoggedIn,
+  hasAccessRouteAuthLevel,
+  getUserAuthLevel,
+  NO_IMAGE_URL,
+  componentMixin
+}

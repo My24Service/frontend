@@ -68,7 +68,8 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import pictureModel from '@/models/company/Picture.js'
+import pictureModel from '../../models/company/Picture.js'
+import {NO_IMAGE_URL} from "../../utils"
 
 export default {
   setup() {
@@ -87,8 +88,8 @@ export default {
       submitClicked: false,
       picture: pictureModel.getFields(),
       errorMessage: null,
-      current_image: '/static/core/img/noimg.png',
-      upload_preview: '/static/core/img/noimg.png',
+      current_image: NO_IMAGE_URL,
+      upload_preview: NO_IMAGE_URL,
       fileChanged: false
     }
   },
@@ -176,7 +177,7 @@ export default {
 
       try {
         this.picture = await pictureModel.detail(this.pk)
-        this.current_image = this.picture.picture ? this.picture.picture : '/static/core/img/noimg.png'
+        this.current_image = this.picture.picture ? this.picture.picture : NO_IMAGE_URL
         this.isLoading = false
       } catch(error) {
         console.log('error fetching picture', error)
