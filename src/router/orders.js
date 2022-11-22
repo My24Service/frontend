@@ -29,6 +29,7 @@ export default [
   path: '/orders',
   children: [
       {
+        meta: { needsAuth: false },
         name: 'workorder-view',
         path: '/orders/orders/workorder/:uuid',
         components: {
