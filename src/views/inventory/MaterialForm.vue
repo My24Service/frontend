@@ -262,7 +262,7 @@ import Multiselect from 'vue-multiselect'
 
 import materialModel from '../../models/inventory/Material.js'
 import supplierModel from '../../models/inventory/Supplier.js'
-import {NO_IMAGE_URL} from "../../utils"
+import {NO_IMAGE_URL} from "../../constants"
 
 export default {
   setup() {

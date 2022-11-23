@@ -84,7 +84,7 @@
 <script>
 import materialModel from '../../models/inventory/Material.js'
 import inventoryModel from '../../models/inventory/Inventory.js'
-import {NO_IMAGE_URL} from "../../utils";
+import {NO_IMAGE_URL} from "../../constants";
 
 export default {
   data() {

@@ -4,8 +4,6 @@ import {
   AUTH_LEVELS
 } from "./constants";
 
-const NO_IMAGE_URL = `${document.location.origin}/assets/no-img.png`
-
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
 }
@@ -162,6 +160,5 @@ export {
   getIsLoggedIn,
   hasAccessRouteAuthLevel,
   getUserAuthLevel,
-  NO_IMAGE_URL,
   componentMixin
 }

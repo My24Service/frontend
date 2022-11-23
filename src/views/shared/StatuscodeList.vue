@@ -58,13 +58,13 @@
         </template>
         <template #cell(color)="data">
           <span v-bind:style="{ backgroundColor: data.item.color }">
-            <img width="12" src="/static/core/img/pixel.png" />
+            <img width="12" :src="PIXEL_URL" />
           </span>
           <div class="color_text">{{data.item.color }}</div>
         </template>
         <template #cell(text_color)="data">
           <span v-bind:style="{ width: '10px', backgroundColor: data.item.text_color }">
-            <img width="10" src="/static/core/img/pixel.png" />
+            <img width="10" :src="PIXEL_URL" />
           </span>
           <div class="color_text">{{data.item.text_color }}</div>
         </template>
@@ -121,16 +121,17 @@
 </template>
 
 <script>
-import statuscodeOrderModel from '@/models/orders/Statuscode.js'
-import statuscodeTripModel from '@/models/mobile/TripStatuscode.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
+import statuscodeOrderModel from '../../models/orders/Statuscode.js'
+import statuscodeTripModel from '../../models/mobile/TripStatuscode.js'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import IconLinkPlus from '../../components/IconLinkPlus.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import Pagination from "../../components/Pagination.vue"
+import {PIXEL_URL} from "../../constants";
 
 export default {
   props: {
@@ -184,7 +185,8 @@ export default {
         {key: 'description', label: this.$trans('Description'), thAttr: {width: '20%'}},
         {key: 'actions', label: this.$trans('Actions'), thAttr: {width: '20%'}},
         {key: 'icons', thAttr: {width: '15%'}},
-      ]
+      ],
+      PIXEL_URL
     }
   },
   created() {

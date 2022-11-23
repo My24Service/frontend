@@ -254,7 +254,7 @@ import { required } from '@vuelidate/validators'
 
 import memberModel from '../../models/member/Member.js'
 import PillsCompanyCompany from "../../components/PillsCompanyCompany.vue"
-import {NO_IMAGE_URL} from "../../utils"
+import {NO_IMAGE_URL} from "../../constants"
 
 export default {
   setup() {
