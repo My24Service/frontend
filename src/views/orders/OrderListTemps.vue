@@ -340,7 +340,7 @@ export default {
       try {
         const data = await this.model.list()
         this.orders = data.results
-        this.selectedOrders = await this.$store.dispatch('getAssignOrders')
+        this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
