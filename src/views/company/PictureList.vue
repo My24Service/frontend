@@ -88,7 +88,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
-import {NO_IMAGE_URL} from "../../utils"
+import {NO_IMAGE_URL} from "../../constants"
 
 export default {
   components: {

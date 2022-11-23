@@ -340,7 +340,7 @@ import { helpers } from '@vuelidate/validators'
 
 import memberModel from '../../models/member/Member.js'
 import contractModel from '../../models/member/Contract.js'
-import {NO_IMAGE_URL} from "../../utils";
+import {NO_IMAGE_URL} from "../../constants";
 
 export default {
   setup() {

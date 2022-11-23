@@ -69,7 +69,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import pictureModel from '../../models/company/Picture.js'
-import {NO_IMAGE_URL} from "../../utils"
+import {NO_IMAGE_URL} from "../../constants"
 
 export default {
   setup() {
