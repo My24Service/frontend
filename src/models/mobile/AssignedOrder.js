@@ -35,7 +35,7 @@ class AssignedOrder extends BaseModel {
       data.alt_end_date = moment(data.alt_end_date).format('YYYY-MM-DD')
     }
 
-    return this.axios.put(`${this.url}${pk}/detail_change_date/`, data, headers).then((response) => response.data)
+    return this.axios.patch(`${this.url}${pk}/detail_change_date/`, data, headers).then((response) => response.data)
   }
 }
 
