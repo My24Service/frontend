@@ -630,10 +630,10 @@ export default {
 
       if (this.isCreate) {
         try {
-          await tripModel.insert(this.trip)
-            this.infoToast(this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
-            this.isLoading = false
-            this.buttonDisabled = false
+          const trip = await tripModel.insert(this.trip)
+          this.infoToast(this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
+          this.isLoading = false
+          this.buttonDisabled = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating trip', error)
