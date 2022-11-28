@@ -222,7 +222,7 @@
                 </b-form-invalid-feedback>
                 <b-form-invalid-feedback
                   v-if="studentuser.username !== ''"
-                  :state="isSubmitClicked ? v$.studentuser.username.isUnique.$invalid : null">
+                  :state="isSubmitClicked ? !v$.studentuser.username.isUnique.$invalid : null">
                   {{ $trans('Username is already in use') }}
                 </b-form-invalid-feedback>
               </b-form-group>
@@ -280,7 +280,7 @@
                   :state="isSubmitClicked ? !v$.studentuser.password2.$error : null"
                 ></b-form-input>
                 <b-form-invalid-feedback
-                  :state="isSubmitClicked ? v$.studentuser.password2.sameAs.$invalid : null">
+                  :state="isSubmitClicked ? !v$.studentuser.password2.sameAs.$invalid : null">
                   {{ $trans('Passwords do not match') }}
                 </b-form-invalid-feedback>
               </b-form-group>
@@ -615,8 +615,8 @@ export default {
           sameAs: sameAs(this.studentuser.password1)
         }
       } else {
-        const isUniqueEdit = (value) => {
-          if (this.orgUsername === this.customeruser.username || value === '' || value.length < 3) {
+        function isUniqueEdit(value) {
+          if (this.orgUsername === this.studentuser.username || value === '' || value.length < 3) {
             return true
           }
 
