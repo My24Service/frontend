@@ -57,6 +57,9 @@
           {{ $trans('Name') }}: {{ data.item.name }}<br/>
           {{ data.item.country_code }}-{{ data.item.postal }} {{ data.item.city }}<br/>
           {{ data.item.email }}<br/>
+          <p v-if="data.item.has_api_users">
+            <strong>{{ $trans('Has API users') }}</strong>
+          </p>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">

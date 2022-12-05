@@ -195,15 +195,28 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="1" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Public?')"
-              label-for="member_is_pub;ic"
+              label-for="member_is_public"
             >
               <b-form-checkbox
                 id="member_is_public"
                 v-model="member.is_public"
+              >
+              </b-form-checkbox>
+            </b-form-group>
+          </b-col>
+          <b-col cols="1" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('API users?')"
+              label-for="member_has_api_users"
+            >
+              <b-form-checkbox
+                id="member_is_has_api_users"
+                v-model="member.has_api_users"
               >
               </b-form-checkbox>
             </b-form-group>

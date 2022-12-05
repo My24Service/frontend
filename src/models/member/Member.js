@@ -21,7 +21,8 @@ class Member extends BaseModel {
     'contract': '',
     'is_deleted': false,
     'member_type': '',
-    'is_public': true
+    'is_public': true,
+    'has_api_users': false
   }
 
   url = '/member/member/'
@@ -42,7 +43,7 @@ class Member extends BaseModel {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return this.axios.put(`${this.url}me/`, obj, headers).then((response) => response.data)
+    return this.axios.patch(`${this.url}me/`, obj, headers).then((response) => response.data)
   }
 
   getSettings() {
