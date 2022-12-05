@@ -122,7 +122,7 @@
                 open-direction="bottom"
                 :options="purchaseOrderMaterials"
                 :multiple="false"
-                :internal-search="false"
+                :internal-search="true"
                 :clear-on-select="true"
                 :close-on-select="true"
                 :options-limit="30"
@@ -372,6 +372,9 @@ export default {
     purchaseOrderLabel (purchaseOrder) {
       return `${purchaseOrder.purchase_order_id} - ${purchaseOrder.order_name}, ${purchaseOrder.order_city} (materials: ${purchaseOrder.num_materials})`
     },
+
+    // materials
+
     selectPurchaseOrderMaterial(option) {
       this.purchaseorderEntry.purchase_order_material = option.id
       this.selectedPurchaseOrderMaterial = option
@@ -380,6 +383,8 @@ export default {
     purchaseOrderMaterialLabel(purchaseOrderMaterial) {
       return `${purchaseOrderMaterial.material_view.name} (ordered: ${purchaseOrderMaterial.amount}, entries: ${purchaseOrderMaterial.num_entries})`
     },
+
+    // rest
     async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
