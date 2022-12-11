@@ -1,5 +1,11 @@
 <template>
   <div class="app-grid">
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
     <b-row align-v="center">
       <b-col cols="1">
         <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
@@ -27,6 +33,17 @@
       responsive="md"
       class="data-table"
     >
+      <template #head(icons)="">
+        <div class="float-right">
+          <b-button-toolbar>
+            <b-button-group class="mr-1">
+              <ButtonLinkSearch
+                v-bind:method="function() { showSearchModal() }"
+              />
+            </b-button-group>
+          </b-button-toolbar>
+        </div>
+      </template>
       <template #table-busy>
         <div class="text-center text-danger my-2">
           <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
@@ -34,7 +51,7 @@
         </div>
       </template>
       <template #cell(num_sales)="data">
-        {{ data.item.num_sales }} ({{ data.item.sales_perc }}%)
+        {{ data.item.num_sales }}
       </template>
       <template #cell(turnover)="data">
         {{ data.item.turnover.toFixed(2) }} EUR
@@ -56,11 +73,17 @@
 
 <script>
 import materialModel from '../../models/inventory/Material.js'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import SearchModal from '@/components/SearchModal.vue'
 
 let d = new Date();
 
 export default {
   name: "StatsTable",
+  components: {
+    ButtonLinkSearch,
+    SearchModal,
+  },
   data() {
     return {
       model: materialModel,
@@ -75,6 +98,7 @@ export default {
         {thAttr: {width: '10%'}, key: 'margin_product', label: this.$trans('Margin product'), sortable: true},
         {thAttr: {width: '10%'}, key: 'current_stock', label: this.$trans('Stock'), sortable: true},
         {thAttr: {width: '10%'}, key: 'sum_inventory', label: this.$trans('Locations'), sortable: false},
+        {key: 'icons'},
       ],
       tableData: [],
       loaded: false,
@@ -82,14 +106,19 @@ export default {
       cachedData: {},
     }
   },
-  components: {
-  },
-  watch: {
-  },
   created() {
     this.loadData()
   },
   methods: {
+    // search
+    handleSearchOk(val) {
+      this.$refs['search-modal'].hide()
+      this.model.setSearchQuery(val)
+      this.loadData()
+    },
+    showSearchModal() {
+      this.$refs['search-modal'].show()
+    },
     nextYear() {
       this.year = this.year + 1
       this.loadData()

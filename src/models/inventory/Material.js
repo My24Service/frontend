@@ -52,7 +52,14 @@ class Material extends BaseModel {
   }
 
   getStatsTable(year) {
-    return this.axios.get(`${this.url}stats_table/?year=${year}`).then((response) => response.data)
+    let listArgs = [`year=${year}`]
+
+    if (this.searchQuery) {
+      listArgs.push(`q=${this.searchQuery}`)
+    }
+
+    return this.axios.get(`${this.url}stats_table/?${listArgs.join('&')}`)
+      .then((response) => response.data)
   }
 }
 
