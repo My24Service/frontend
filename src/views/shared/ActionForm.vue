@@ -110,8 +110,6 @@
                   ></b-form-input>
                 </b-form-group>
               </b-col>
-            </b-row>
-            <b-row>
               <b-col cols="12">
                 <footer class="modal-footer">
                   <b-button @click="addCondition" class="btn btn-primary" size="sm" type="button" variant="warning">
@@ -120,6 +118,15 @@
                 </footer>
               </b-col>
             </b-row>
+            <b-col cols="12" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Condition handling')"
+                label-for="action_type"
+              >
+                <b-form-select v-model="action.querymode" :options="querymodes" size="sm"></b-form-select>
+              </b-form-group>
+            </b-col>
           </b-col>
           <b-col cols="6">
             <div v-if="action.type === 'status'">
