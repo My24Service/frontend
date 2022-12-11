@@ -6,13 +6,16 @@ class PurchaseOrderEntry extends BaseModel {
   fields = {
     'purchase_order': null,
     'purchase_order_material': null,
+    'material_name': null,
     'purchase_order_material_view': {
-      'purchase_order_view': {}
+      'name': "",
+      'unit': "",
+      "amount": 0
     },
     'amount': 0,
-    'entry_amount': 0,
     'entry_date': moment().toDate(),
-    'stock_location': null
+    'stock_location': null,
+    'stock_location_name': null
   }
 
   url = '/inventory/purchaseorder-entry/'
