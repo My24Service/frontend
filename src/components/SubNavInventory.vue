@@ -57,7 +57,7 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('stats-table')"
-        v-if="hasStats || true"
+        v-if="hasStats"
         :to="{ name: 'inventory-stats-table' }">
         {{ $trans('Statistics table') }}
       </b-nav-item>

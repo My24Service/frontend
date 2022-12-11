@@ -60,11 +60,11 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="purchaseorder-entry-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
+<!--            <IconLinkEdit-->
+<!--              router_name="purchaseorder-entry-edit"-->
+<!--              v-bind:router_params="{pk: data.item.id}"-->
+<!--              v-bind:title="$trans('Edit')"-->
+<!--            />-->
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
