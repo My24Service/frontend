@@ -857,7 +857,7 @@ export default {
         this.isLoading = false
       }
     } else {
-      this.loadOrder()
+      await this.loadOrder()
     }
   },
   methods: {
