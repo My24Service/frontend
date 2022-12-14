@@ -28,11 +28,17 @@
         :to="{ name: 'users-planningusers' }">
         {{ $trans('Planning') }}
       </b-nav-item>
+      <b-nav-item
+        v-if="hasApiUsers"
+        :active="isActive('apiusers')"
+        :to="{ name: 'users-apiusers' }">
+        {{ $trans('API') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
 <script>
-import { componentMixin } from '@/utils.js'
+import { componentMixin } from '../utils.js'
 
 export default {
   mixins: [componentMixin],
@@ -40,14 +46,17 @@ export default {
     return {
       isLoaded: false,
       memberType: null,
+      hasApiUsers: false
     }
   },
-  created() {
+  async created() {
+    // check api users
+    this.hasApiUsers = await this.$store.getters.getMemberHasApiUsers
+
     // get member type
-    this.$store.dispatch('getMemberType').then((memberType) => {
-      this.memberType = memberType
-      this.isLoaded = true
-    })
+    this.memberType = await this.$store.dispatch('getMemberType')
+
+    this.isLoaded = true
   },
   methods: {
     isActive(item) {

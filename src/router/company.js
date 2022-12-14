@@ -23,6 +23,9 @@ import UserStudentForm from '../views/company/UserStudentForm.vue'
 import UserStudentDetail from "../views/company/UserStudentDetail"
 import UserStudentRegisterVerify from "../views/company/UserStudentRegisterVerify"
 
+import UserApiList from '../views/company/UserApiList.vue'
+import UserApiForm from '../views/company/UserApiForm.vue'
+
 import PartnerList from '../views/company/PartnerList.vue'
 import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
 import PartnerRequestsSentForm from '../views/company/PartnerRequestsSentForm.vue'
@@ -234,6 +237,43 @@ export default [
       props: {
         'app-content': {},
         'app-subnav': {}
+      },
+    },
+    // API
+    {
+      name: 'users-apiusers',
+      path: '/company/users/apiusers',
+      components: {
+        'app-content': UserApiList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'apiuser-add',
+      path: '/company/users/apiusers/form',
+      components: {
+        'app-content': UserApiForm,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'apiuser-edit',
+      path: '/company/users/apiusers/form/:pk',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': UserApiForm,
+        'app-subnav': SubNavCompany
       },
     },
     // students
