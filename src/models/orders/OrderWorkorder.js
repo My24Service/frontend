@@ -2,6 +2,7 @@ import BaseModel from '@/models/base'
 
 
 class OrderWorkorder extends BaseModel {
+  useRust = true
   fields = {
 
   }

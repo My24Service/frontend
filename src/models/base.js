@@ -1,7 +1,9 @@
-import client from '@/services/api'
+import client, {rustClient} from '@/services/api'
 
 class BaseModel {
   axios = client
+  axiosRust = rustClient
+  useRust = false
   component = null
   fields = {}
   url = ''
@@ -14,6 +16,14 @@ class BaseModel {
   count = 0
   numPages = 0
   perPage = 20
+
+  getClient() {
+    if (this.useRust) {
+      return this.axiosRust
+    } else {
+      return this.axios
+    }
+  }
 
   getFields() {
     return this.postCopyFields(JSON.parse(JSON.stringify(this.fields)))
@@ -94,7 +104,7 @@ class BaseModel {
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
 
-    const response = await this.axios.get(url)
+    const response = await this.getClient().get(url)
 
     if ('count' in response.data) {
       this.count = response.data.count

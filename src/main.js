@@ -139,8 +139,9 @@ Vue.mixin(toastMix)
 
 // auth
 import auth from '@/services/auth'
-import client from '@/services/api'
+import client, {rustClient} from '@/services/api'
 auth.setInterceptors(client)
+auth.setInterceptors(rustClient)
 
 Vue.config.productionTip = false
 

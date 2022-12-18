@@ -15,6 +15,7 @@ if (tomorrow.day() === 6) {
 
 
 class Order extends BaseModel {
+  useRust = true
   fields = {
     'customer_id': '',
     'order_name': '',
