@@ -84,6 +84,7 @@ export default {
         if (data.material === this.pk) {
           this.material = await materialModel.detail(this.pk)
           this.events = await materialEventModel.getForMaterial(this.pk)
+          this.stats = await materialEventTypeModel.getStatsForMaterial(this.pk)
         }
         this.newData = true
       }
