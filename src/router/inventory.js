@@ -179,7 +179,7 @@ export default [
       },
       {
         name: 'material-event-type-edit',
-        path: '/inventory/material-event-type/form/:pk',
+        path: '/inventory/material-event-types/form/:pk',
         components: {
           'app-content': MaterialEventTypeForm,
           'app-subnav': SubNavInventory
@@ -191,7 +191,7 @@ export default [
       },
       {
         name: 'material-event-type-add',
-        path: '/inventory/material-event-type/form',
+        path: '/inventory/material-event-types/form',
         components: {
           'app-content': MaterialEventTypeForm,
           'app-subnav': SubNavInventory
