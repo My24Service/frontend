@@ -245,12 +245,12 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import Dispatch from '@/services/dispatch.js'
-import orderModel from '@/models/orders/Order.js'
-import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
-import assign from '@/models/mobile/Assign.js'
-import SearchModal from '@/components/SearchModal.vue'
-import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
+import Dispatch from '../../services/dispatch.js'
+import orderModel from '../../models/orders/Order.js'
+import assignedOrderModel from '../../models/mobile/AssignedOrder.js'
+import assign from '../../models/mobile/Assign.js'
+import SearchModal from '../../components/SearchModal.vue'
+import memberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from '../../constants';
 
 export default {
@@ -487,7 +487,7 @@ export default {
     }
   },
   async mounted() {
-    await memberNewDataSocket.init('dispatch')
+    await memberNewDataSocket.init(NEW_DATA_EVENTS.DISPATCH)
     memberNewDataSocket.setOnmessageHandler(this.onNewData)
     memberNewDataSocket.getSocket()
 
@@ -517,7 +517,7 @@ export default {
     this.setHandlers()
   },
   beforeDestroy() {
-    memberNewDataSocket.removeOnmessageHandler('dispatch')
+    memberNewDataSocket.removeOnmessageHandler(NEW_DATA_EVENTS.DISPATCH)
   }
 }
 </script>

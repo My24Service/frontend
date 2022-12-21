@@ -23,7 +23,8 @@ class Material extends BaseModel {
     'price_selling_ex': '0.00',
     'price_selling_alt_ex': '0.00',
 
-    'image': null
+    'image': null,
+    'latest_event': false
   }
 
   url = '/inventory/material/'

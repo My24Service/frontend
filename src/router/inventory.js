@@ -6,9 +6,13 @@ import PurchaseOrderForm from '../views/inventory/PurchaseOrderForm.vue'
 import PurchaseOrderView from '../views/inventory/PurchaseOrderView.vue'
 
 import MaterialList from '../views/inventory/MaterialList.vue'
+import MaterialWithEventsView from '../views/inventory/MaterialWithEventsView.vue'
 import MaterialView from '../views/inventory/MaterialView.vue'
 import MaterialForm from '../views/inventory/MaterialForm.vue'
 import MaterialMoveForm from '../views/inventory/MaterialMoveForm.vue'
+
+import MaterialEventTypeList from '../views/inventory/MaterialEventTypeList.vue'
+import MaterialEventTypeForm from '../views/inventory/MaterialEventTypeForm.vue'
 
 import SupplierList from '../views/inventory/SupplierList.vue'
 import SupplierForm from '../views/inventory/SupplierForm.vue'
@@ -125,6 +129,18 @@ export default [
         },
       },
       {
+        name: 'material-events-view',
+        path: '/inventory/materials/view-events/:pk',
+        components: {
+          'app-content': MaterialWithEventsView,
+          'app-subnav': SubNavInventory
+        },
+        props: {
+          'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+      },
+      {
         name: 'material-edit',
         path: '/inventory/materials/form/:pk',
         components: {
@@ -141,6 +157,43 @@ export default [
         path: '/inventory/materials/form',
         components: {
           'app-content': MaterialForm,
+          'app-subnav': SubNavInventory
+        },
+        props: {
+          'app-content': {},
+          'app-subnav': true
+        },
+      },
+      // material event types
+      {
+        name: 'material-event-type-list',
+        path: '/inventory/material-event-types',
+        components: {
+          'app-content': MaterialEventTypeList,
+          'app-subnav': SubNavInventory
+        },
+        props: {
+          'app-content': {},
+          'app-subnav': {}
+        },
+      },
+      {
+        name: 'material-event-type-edit',
+        path: '/inventory/material-event-type/form/:pk',
+        components: {
+          'app-content': MaterialEventTypeForm,
+          'app-subnav': SubNavInventory
+        },
+        props: {
+          'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+      },
+      {
+        name: 'material-event-type-add',
+        path: '/inventory/material-event-type/form',
+        components: {
+          'app-content': MaterialEventTypeForm,
           'app-subnav': SubNavInventory
         },
         props: {

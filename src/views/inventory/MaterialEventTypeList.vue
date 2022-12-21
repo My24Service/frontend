@@ -10,27 +10,27 @@
     />
 
     <b-modal
-      id="delete-material-modal"
-      ref="delete-material-modal"
+      id="delete-event-type-modal"
+      ref="delete-event-type-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this material?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to delete this event type?') }}</p>
     </b-modal>
 
     <div class="overflow-auto">
       <Pagination
         v-if="!isLoading"
         :model="this.model"
-        :model_name="$trans('Material')"
+        :model_name="$trans('Event type')"
       />
 
       <b-table
-        id="material-table"
+        id="event-type-table"
         small
         :busy='isLoading'
         :fields="fields"
-        :items="materials"
+        :items="eventTypes"
         responsive="md"
         class="data-table"
         sort-icon-left
@@ -40,8 +40,8 @@
             <b-button-toolbar>
               <b-button-group class="mr-1">
                 <ButtonLinkAdd
-                  router_name="material-add"
-                  v-bind:title="$trans('New material')"
+                  router_name="material-event-type-add"
+                  v-bind:title="$trans('New event type')"
                 />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
@@ -60,16 +60,10 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #cell(show_name)="data">
-          <router-link :to="{name: 'material-events', params: {pk: data.item.id}}">
-            {{ data.item.show_name }}</router-link>
-          <router-link :to="{name: 'material-events-view', params: {pk: data.item.id}}">
-            (events)</router-link>
-        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              router_name="material-edit"
+              router_name="material-event-type-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -85,7 +79,7 @@
 </template>
 
 <script>
-import materialModel from '../../models/inventory/Material.js'
+import materialEventTypeModel from '../../models/inventory/MaterialEventType.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -109,19 +103,16 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: materialModel,
-      materialPk: null,
+      model: materialEventTypeModel,
+      materialEventTypeModelPk: null,
       isLoading: false,
-      materials: [],
+      eventTypes: [],
       fields: [
-        {key: 'show_name', label: this.$trans('Name'), sortable: true, thAttr: {width: '25%'}},
-        {key: 'identifier', label: this.$trans('Identifier'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'location', label: this.$trans('Location'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'price_purchase', label: this.$trans('Purchase price'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'price_selling', label: this.$trans('Selling price'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'supplier_name', label: this.$trans('Supplier'), sortable: true, thAttr: {width: '15%'}},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'icons', thAttr: {width: '10%'}}
+        {key: 'event_type', label: this.$trans('Event type'), sortable: true},
+        {key: 'measure_last_event_type', label: this.$trans('Measure last event type'), sortable: true},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'icons'}
       ],
     }
   },
@@ -141,17 +132,17 @@ export default {
     },
     // delete
     showDeleteModal(id) {
-      this.materialPk = id
-      this.$refs['delete-material-modal'].show()
+      this.materialEventTypeModelPk = id
+      this.$refs['delete-event-type-modal'].show()
     },
     async doDelete() {
       try {
-        await this.model.delete(this.materialPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
-        this.loadData()
+        await this.model.delete(this.materialEventTypeModelPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Event type has been deleted'))
+        await this.loadData()
       } catch(error) {
-        console.log('error deleting material', error)
-        this.errorToast(this.$trans('Error deleting material'))
+        console.log('Error deleting event type', error)
+        this.errorToast(this.$trans('Error deleting event type'))
       }
     },
     // rest
@@ -160,11 +151,11 @@ export default {
 
       try {
         const data = await this.model.list()
-        this.materials = data.results
+        this.eventTypes = data.results
         this.isLoading = false
-      } catch(error) {
-        console.log('error fetching materials', error)
-        this.errorToast(this.$trans('Error loading materials'))
+      } catch(error){
+        console.log('error fetching event types', error)
+        this.errorToast(this.$trans('Error loading event types'))
         this.isLoading = false
       }
     }
