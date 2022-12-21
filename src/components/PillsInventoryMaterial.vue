@@ -30,7 +30,6 @@ export default {
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')
-      console.log(parts, parts[3], item)
       return parts[2] === item
     }
   },
