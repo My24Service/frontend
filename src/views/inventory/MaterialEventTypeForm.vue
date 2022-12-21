@@ -110,6 +110,10 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
+      if (!this.materialEventType.measure_last_event_type || this.materialEventType.measure_last_event_type === '') {
+        delete this.materialEventType.measure_last_event_type
+      }
+
       if (this.isCreate) {
         try {
           await materialEventTypeModel.insert(this.materialEventType)
