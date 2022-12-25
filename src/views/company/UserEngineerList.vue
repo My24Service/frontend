@@ -5,6 +5,8 @@
       <PillsCompanyUsers />
     </div>
 
+    <PillsEngineer />
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -88,17 +90,18 @@
 </template>
 
 <script>
-import my24 from '@/services/my24.js'
-import PillsCompanyUsers from '@/components/PillsCompanyUsers.vue'
-import engineerModel from '@/models/company/UserEngineer.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
+import my24 from '../../services/my24.js'
+import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
+import engineerModel from '../../models/company/UserEngineer.js'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import Pagination from "../../components/Pagination.vue"
+import PillsEngineer from "./PillsEngineer";
 
 export default {
   name: 'UserEngineerList',
@@ -112,6 +115,7 @@ export default {
     ButtonLinkDownload,
     SearchModal,
     Pagination,
+    PillsEngineer,
   },
   data() {
     return {
@@ -128,7 +132,7 @@ export default {
         {key: 'last_login', label: this.$trans('Last login'), sortable: true},
         {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
         {key: 'icons'}
-      ],
+      ]
     }
   },
   created() {

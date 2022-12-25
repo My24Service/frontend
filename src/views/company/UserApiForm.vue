@@ -168,6 +168,7 @@ export default {
         } catch(error) {
           this.errorToast(this.$trans('Error creating API user'))
           this.isLoading = false
+          this.buttonDisabled = false
         }
 
         return
@@ -182,6 +183,7 @@ export default {
       } catch(error) {
         this.errorToast(this.$trans('Error updating API user'))
         this.isLoading = false
+        this.buttonDisabled = false
       }
     },
     async loadData() {

@@ -5,7 +5,7 @@
         <h2 v-if="isCreate">{{ $trans('New event type') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit event type') }}</h2>
         <b-row>
-          <b-col cols="6" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Event type')"
@@ -36,6 +36,21 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
+          <b-col size="4">
+            <b-form-group
+              v-bind:label="$trans('Status?')"
+              label-for="event-type-statuscode"
+            >
+              <b-form-select
+                id="event-type-statuscode"
+                v-model="materialEventType.statuscode"
+                :options="statuscodes"
+                size="sm"
+                value-field="id"
+                text-field="statuscode"
+              ></b-form-select>
+            </b-form-group>
+          </b-col>
         </b-row>
         <div class="mx-auto">
           <footer class="modal-footer">
@@ -56,7 +71,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import materialEventTypeModel from '../../models/inventory/MaterialEventType.js'
+import materialEventTypeModel from '../../models/company/EngineerEventType.js'
 
 export default {
   setup() {
@@ -74,6 +89,7 @@ export default {
       buttonDisabled: false,
       submitClicked: false,
       materialEventType: materialEventTypeModel.getFields(),
+      statuscodes: [],
     }
   },
   validations: {
@@ -91,9 +107,11 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
+    const statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.statuscodes = [{id: null, statuscode: ''}, ...statuscodes]
     if (!this.isCreate) {
-      this.loadData()
+      await this.loadData()
     } else {
       this.materialEventType = materialEventTypeModel.getFields()
     }

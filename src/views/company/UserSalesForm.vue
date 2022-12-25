@@ -306,6 +306,7 @@ export default {
           console.log('Error creating sales user', error)
           this.errorToast(this.$trans('Error creating sales user'))
           this.isLoading = false
+          this.buttonDisabled = false
         }
 
         return
@@ -329,6 +330,7 @@ export default {
         console.log('Error updating sales user', error)
         this.errorToast(this.$trans('Error updating sales user'))
         this.isLoading = false
+        this.buttonDisabled = false
       }
     },
     async loadData() {

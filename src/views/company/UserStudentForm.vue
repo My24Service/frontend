@@ -709,6 +709,7 @@ export default {
         } catch(error) {
           console.log('Error creating studentuser', error)
           this.errorToast(this.$trans('Error registering'))
+          this.buttonDisabled = false
         }
 
         return
@@ -742,6 +743,7 @@ export default {
           console.log('Error creating studentuser', error)
           this.errorToast(this.$trans('Error creating studentuser'))
           this.isLoading = false
+          this.buttonDisabled = false
         }
 
         return
@@ -767,6 +769,7 @@ export default {
         console.log('Error updating studentuser', error)
         this.errorToast(this.$trans('Error updating studentuser'))
         this.isLoading = false
+        this.buttonDisabled = false
       }
     },
     async loadData() {

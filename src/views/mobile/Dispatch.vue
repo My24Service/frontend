@@ -250,8 +250,10 @@ import orderModel from '../../models/orders/Order.js'
 import assignedOrderModel from '../../models/mobile/AssignedOrder.js'
 import assign from '../../models/mobile/Assign.js'
 import SearchModal from '../../components/SearchModal.vue'
-import memberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
+import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from '../../constants';
+
+const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
   name: 'DispatchComponent',

@@ -39,6 +39,9 @@ import PictureForm from '../views/company/PictureForm.vue'
 import WorkHours from '../views/company/WorkHours.vue'
 import WorkHoursDetail from '../views/company/WorkHoursDetail.vue'
 import UserStudentRegisterResetPassword from "../views/company/UserStudentRegisterResetPassword";
+import SubNavInventory from "../components/SubNavInventory";
+import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
+import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
 
 
 export default [
@@ -97,7 +100,7 @@ export default [
     },
     {
       name: 'engineer-detail',
-      path: '/company/users/engineers/:pk',
+      path: '/company/users/engineers/detail/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -129,6 +132,43 @@ export default [
       props: {
         'app-content': {},
         'app-subnav': {}
+      },
+    },
+    // engineer event types
+    {
+      name: 'engineer-event-type-list',
+      path: '/company/users/engineers/event-types',
+      components: {
+        'app-content': EngineerEventTypeList,
+        'app-subnav': SubNavInventory
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'engineer-event-type-edit',
+      path: '/company/users/engineers/event-types/form/:pk',
+      components: {
+        'app-content': EngineerEventTypeForm,
+        'app-subnav': SubNavInventory
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'engineer-event-type-add',
+      path: '/company/users/engineers/event-types/form',
+      components: {
+        'app-content': EngineerEventTypeForm,
+        'app-subnav': SubNavInventory
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': true
       },
     },
     {
@@ -482,5 +522,6 @@ export default [
         'app-subnav': true
       },
     },
+
   ]
 }]

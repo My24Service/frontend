@@ -136,7 +136,7 @@ export default {
         if (document.location.hash.indexOf('?') !== -1) {
           const nextPart = document.location.hash.split('?')[1]
           const nextPath = decodeURIComponent(nextPart.split('=')[1])
-          this.$router.push({path: nextPath})
+          await this.$router.push({path: nextPath})
         }
       } catch (error) {
         console.log(error)
