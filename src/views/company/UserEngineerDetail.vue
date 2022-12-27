@@ -259,16 +259,16 @@
             >
               {{ $trans('Trigger door open') }}
             </b-button>
-            <b-button @click="doorClose" class="btn btn-info" type="button" variant="primary"
-                      :disabled="engineer.engineer.last_event && engineer.engineer.last_event.event_type === 'door close'"
+            <b-button @click="doorClosed" class="btn btn-info" type="button" variant="primary"
+                      :disabled="engineer.engineer.last_event && engineer.engineer.last_event.event_type === 'door closed'"
             >
-              {{ $trans('Trigger door close') }}
+              {{ $trans('Trigger door closed') }}
             </b-button>
           </footer>
         </div>
       </div>
     </div>
-    
+
     <footer class="modal-footer">
       <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
         {{ $trans('Back') }}
@@ -445,9 +445,9 @@ export default {
       const event_dts = this.event_time && this.event_date ? `${this.event_date} ${this.event_time}` : null
       await engineerEventModel.sendDoorOpen(this.engineer.engineer.id, event_dts)
     },
-    async doorClose() {
+    async doorClosed() {
       const event_dts = this.event_time && this.event_date ? `${this.event_date} ${this.event_time}` : null
-      await engineerEventModel.sendDoorClose(this.engineer.engineer.id, event_dts)
+      await engineerEventModel.sendDoorClosed(this.engineer.engineer.id, event_dts)
     },
     async nextYear() {
       this.year = this.year + 1
