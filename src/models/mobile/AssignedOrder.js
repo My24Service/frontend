@@ -1,5 +1,6 @@
 import moment from 'moment'
 import BaseModel from '@/models/base';
+import {use} from "chai";
 
 
 class AssignedOrder extends BaseModel {
@@ -36,6 +37,10 @@ class AssignedOrder extends BaseModel {
     }
 
     return this.axios.patch(`${this.url}${pk}/detail_change_date/`, data, headers).then((response) => response.data)
+  }
+
+  async listDevice(user_pk) {
+    return this.axios.get(`${this.url}list_device/?user_pk=${user_pk}`).then((response) => response.data)
   }
 }
 

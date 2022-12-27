@@ -379,6 +379,7 @@ export default {
         } catch(error) {
           this.errorToast(this.$trans('Error creating customer user'))
           this.isLoading = false
+          this.buttonDisabled = false
         }
 
         return

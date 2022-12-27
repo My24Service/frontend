@@ -10,7 +10,7 @@ class MemberNewDataSocket extends BaseSocket {
   onmessageHandlers = {}
 
   async init(type) {
-    this.type = this
+    this.type = type
     this.room = await this._getRoom('/get-member-new-data-room/')
     if (this.debug) {
       console.log(`${this.name}: received room: ${this.room}`)
@@ -41,4 +41,4 @@ class MemberNewDataSocket extends BaseSocket {
   }
 }
 
-export default new MemberNewDataSocket()
+export default MemberNewDataSocket

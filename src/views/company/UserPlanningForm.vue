@@ -309,6 +309,7 @@ export default {
         } catch(error) {
           this.errorToast(this.$trans('Error creating planning user'))
           this.isLoading = false
+          this.buttonDisabled = false
         }
 
         return
@@ -331,6 +332,7 @@ export default {
       } catch(error) {
         this.errorToast(this.$trans('Error updating planning user'))
         this.isLoading = false
+        this.buttonDisabled = false
       }
     },
     async loadData() {

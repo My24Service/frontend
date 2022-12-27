@@ -105,7 +105,8 @@ import accountModel from '../models/account/Account.js'
 import { componentMixin } from '../utils.js'
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
-import memberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
+import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
+import {NEW_DATA_EVENTS} from "../constants";
 
 import TheLanguageChooser from "../components/TheLanguageChooser.vue"
 import Version from "../components/Version.vue"
@@ -113,6 +114,8 @@ import NavItems from "../components/NavItems.vue"
 import NavBrand from "../components/NavBrand.vue"
 import Notification from '../components/Notification'
 import TokenRefresh from '../components/TokenRefresh'
+
+const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
   setup() {
@@ -211,14 +214,14 @@ export default {
         memberSocket.removeOnmessageHandler()
         memberSocket.removeSocket()
 
-        await memberNewDataSocket.init('unaccepted_orders')
+        await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
         memberNewDataSocket.removeOnmessageHandler()
         memberNewDataSocket.removeSocket()
 
         this.infoToast(this.$trans('Logged out'), this.$trans('You are now logged out'))
 
         if(this.$router.currentRoute.path !== '/') {
-          this.$router.push({path: '/'})
+          await this.$router.push({path: '/'})
         }
       } catch (error) {
         console.log(error)

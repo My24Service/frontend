@@ -2,11 +2,13 @@
   <div/>
 </template>
 <script>
-import { componentMixin } from '@/utils.js'
-import userSocket from '@/services/websocket/UserSocket.js'
-import memberSocket from '@/services/websocket/MemberSocket.js'
-import memberNewDataSocket from '@/services/websocket/MemberNewDataSocket.js'
-import { NEW_DATA_EVENTS } from '@/constants'
+import { componentMixin } from '../utils.js'
+import userSocket from '../services/websocket/UserSocket.js'
+import memberSocket from '../services/websocket/MemberSocket.js'
+import { NEW_DATA_EVENTS } from '../constants'
+import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
+
+const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
   mixins: [componentMixin],
@@ -64,12 +66,12 @@ export default {
     memberSocket.setOnmessageHandler(this.handleMessageMember)
     memberSocket.getSocket()
 
-    await memberNewDataSocket.init('unaccepted_orders')
+    await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
     memberNewDataSocket.setOnmessageHandler(this.onNewData)
     memberNewDataSocket.getSocket()
 
     // unaccepted orders polling
-    this.setupPolling()
+    await this.setupPolling()
   },
   beforeDestroy() {
     if (this.intervalId) {

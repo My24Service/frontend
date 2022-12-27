@@ -61,10 +61,8 @@
           </div>
         </template>
         <template #cell(show_name)="data">
-          <router-link :to="{name: 'material-events', params: {pk: data.item.id}}">
+          <router-link :to="{name: 'material-view', params: {pk: data.item.id}}">
             {{ data.item.show_name }}</router-link>
-          <router-link :to="{name: 'material-events-view', params: {pk: data.item.id}}">
-            (events)</router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -93,7 +91,6 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import PillsInventoryMaterial from "../../components/PillsInventoryMaterial.vue"
 
 export default {
   components: {
@@ -104,7 +101,6 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
-    PillsInventoryMaterial,
   },
   data() {
     return {

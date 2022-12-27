@@ -437,6 +437,7 @@ export default {
           console.log('Error creating engineer', error)
           this.errorToast(this.$trans('Error creating engineer'))
           this.isLoading = false
+          this.buttonDisabled = false
         }
 
         return
@@ -459,6 +460,7 @@ export default {
         console.log('Error updating engineer', error)
         this.errorToast(this.$trans('Error updating engineer'))
         this.isLoading = false
+        this.buttonDisabled = false
       }
     },
     async loadData() {
