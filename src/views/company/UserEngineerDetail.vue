@@ -4,26 +4,38 @@
     <div class="subnav-pills">
       <b-nav pills>
         <b-nav-item
-          v-for="item in viewMethods"
-          :active="item.value === activeViewMethod"
+          v-for="item in dateQueryMode"
+          :active="item.value === activeDateQueryMode"
           :key="item.value"
-          @click="activeViewMethod = item.value"
+          @click="activeDateQueryMode = item.value"
           >
           {{ item.label }}
         </b-nav-item>
       </b-nav>
     </div>
 
-    <!-- week -->
-    <div class="app-detail" v-if="!isLoading && activeViewMethod === 'week'">
-      <b-row align-v="center">
+    <div class="subnav-pills">
+      <b-nav pills>
+        <b-nav-item
+          v-for="item in dataModes"
+          :active="item.value === activeDataMode"
+          :key="item.value"
+          @click="activeDataMode = item.value"
+        >
+          {{ item.label }}
+        </b-nav-item>
+      </b-nav>
+    </div>
+
+    <div class="app-detail" v-if="!isLoading">
+      <b-row align-v="center" v-if="activeDateQueryMode === 'week'">
         <b-col cols="2">
           <b-link @click.prevent="backWeek" v-bind:title="$trans('Week back')">
             <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
           </b-link>
         </b-col>
         <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Week totals for') }} {{ fullName }} {{ $trans('starting from') }} {{ startDate.format('DD/MM/YYYY') }}</h4>
+          <h4>{{ $trans('Week totals for') }} {{ fullName }}, {{ $trans('starting from') }} {{ startDate.format('DD/MM/YYYY') }}</h4>
         </b-col>
         <b-col cols="2">
           <div class="float-right">
@@ -34,40 +46,32 @@
         </b-col>
       </b-row>
 
-      <b-table
-        small
-        id="weeks-table"
-        :fields="weekHeaders"
-        :items="weekData"
-        responsive="md"
-        class="data-table"
-      />
-
-      <b-row align-v="center">
-        <b-col cols="12">
-          <pie-chart
-            id="pie-chart-week"
-            v-if="!isLoading && pieChartdataWeek"
-            :chart-data="pieChartdataWeek"
-            :options="optionsWeek"
-          />
-          <p class="no-data" v-if="!pieChartdataWeek">
-            {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
-          </p>
+      <b-row align-v="center" v-if="activeDateQueryMode === 'month'">
+        <b-col cols="2">
+          <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+          </b-link>
+        </b-col>
+        <b-col cols="8" class="text-center">
+          <h4>{{ $trans('Month totals for') }} {{ fullName }}, {{ $trans('month') }} {{ month }}</h4>
+        </b-col>
+        <b-col cols="2">
+          <div class="float-right">
+            <b-link @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            </b-link>
+          </div>
         </b-col>
       </b-row>
-    </div>
 
-    <!-- quarters -->
-    <div class="app-detail" v-if="!isLoading && activeViewMethod === 'quarter'">
-      <b-row align-v="center">
+      <b-row align-v="center" v-if="activeDateQueryMode === 'quarter'">
         <b-col cols="2">
           <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
             <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
           </b-link>
         </b-col>
         <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Quarter totals for') }} {{ fullName }} {{ $trans('in') }} {{ year }}</h4>
+          <h4>{{ $trans('Quarter totals for') }} {{ fullName }}, {{ $trans('Year') }} {{ year }}</h4>
         </b-col>
         <b-col cols="2">
           <div class="float-right">
@@ -78,55 +82,90 @@
         </b-col>
       </b-row>
 
-      <b-table
-        small
-        id="quarter-table"
-        :fields="quarterHeaders"
-        :items="quarterData"
-        responsive="md"
-        class="data-table"
-      />
+      <b-row align-v="center" v-if="activeDateQueryMode === 'year'">
+        <b-col cols="2">
+          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
+            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+          </b-link>
+        </b-col>
+        <b-col cols="8" class="text-center">
+          <h4>{{ $trans('Year totals for') }} {{ fullName }}, {{ $trans('Year') }} {{ year }}</h4>
+        </b-col>
+        <b-col cols="2">
+          <div class="float-right">
+            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            </b-link>
+          </div>
+        </b-col>
+      </b-row>
 
-      <b-row align-v="center">
-        <b-col cols="6">
-          <pie-chart
-            id="pie-chart-quarter1"
-            v-if="!isLoading && pieChartdataQuarters[0]"
-            :chart-data="pieChartdataQuarters[0]"
-            :options="options[0]"
-          />
-          <p class="no-data" v-if="!pieChartdataQuarters[0]">{{ $trans('No graph data for quarter 1') }}</p>
-        </b-col>
-        <b-col cols="6">
-          <pie-chart
-            id="pie-chart-quarter2"
-            v-if="!isLoading && pieChartdataQuarters[1]"
-            :chart-data="pieChartdataQuarters[1]"
-            :options="options[1]"
-          />
-          <p class="no-data" v-if="!pieChartdataQuarters[1]">{{ $trans('No graph data for quarter 2') }}</p>
-        </b-col>
-      </b-row>
-      <b-row align-v="center">
-        <b-col cols="6">
-          <pie-chart
-            id="pie-chart-quarter3"
-            v-if="!isLoading && pieChartdataQuarters[2]"
-            :chart-data="pieChartdataQuarters[2]"
-            :options="options[2]"
-          />
-          <p class="no-data" v-if="!pieChartdataQuarters[2]">{{ $trans('No graph data for quarter 3') }}</p>
-        </b-col>
-        <b-col cols="6">
-          <pie-chart
-            id="pie-chart-quarter4"
-            v-if="!isLoading && pieChartdataQuarters[3]"
-            :chart-data="pieChartdataQuarters[3]"
-            :options="options[3]"
-          />
-          <p class="no-data" v-if="!pieChartdataQuarters[3]">{{ $trans('No graph data for quarter 4') }}</p>
-        </b-col>
-      </b-row>
+      <!-- work hours -->
+      <div class="work-hours">
+        <h3>{{ $trans('Work hours')}}</h3>
+        <b-table
+          small
+          id="data-table"
+          :fields="headers"
+          :items="workHoursData"
+          responsive="md"
+          class="data-table"
+        />
+
+        <b-row>
+          <b-col cols="6">
+            <bar-chart
+              id="bar-chart-data"
+              v-if="!isLoading && barChartdataWorkhours"
+              :chart-data="barChartdataWorkhours"
+              :options="options"
+            />
+            <p class="no-data" v-if="!barChartdataWorkhours">
+              {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
+            </p>
+          </b-col>
+          <b-col cols="6">
+            <pie-chart
+              id="pie-chart-data"
+              v-if="!isLoading && pieChartdataWorkhours"
+              :chart-data="pieChartdataWorkhours"
+              :options="optionsPie"
+            />
+            <p class="no-data" v-if="!pieChartdataWorkhours">
+              {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
+            </p>
+          </b-col>
+        </b-row>
+
+        <b-row>
+          <b-col cols="12">
+            <bar-chart
+              id="bar-chart-period"
+              v-if="!isLoading && barChartdataWorkhoursPeriod"
+              :chart-data="barChartdataWorkhoursPeriod"
+              :options="options"
+            />
+            <p class="no-data" v-if="!barChartdataWorkhoursPeriod">
+              {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
+            </p>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="12">
+            <pie-chart
+              id="pie-chart-period"
+              v-if="!isLoading && pieChartdataWorkhoursPeriod"
+              :chart-data="pieChartdataWorkhoursPeriod"
+              :options="optionsPie"
+            />
+            <p class="no-data" v-if="!pieChartdataWorkhoursPeriod">
+              {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
+            </p>
+          </b-col>
+        </b-row>
+
+      </div>
+
     </div>
 
     <div class="app-detail">
@@ -231,7 +270,9 @@
 
 <script>
 import moment from 'moment'
+import ChartJsPluginDataLabels from 'chartjs-plugin-datalabels'
 
+import BarChart from "../../components/BarChart.vue"
 import PieChart from "../../components/PieChart.vue"
 import engineerModel from '../../models/company/UserEngineer.js'
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
@@ -241,38 +282,95 @@ import engineerEventTypeModel from "../../models/company/EngineerEventType";
 import assignedOrderModel from "../../models/mobile/AssignedOrder";
 
 let d = new Date();
-const monday = window.locale === 'en' ? 1 : 0
+const sunday = window.locale === 'en' ? 1 : 0
 const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
   components: {
     PieChart,
+    BarChart,
+    ChartJsPluginDataLabels,
   },
   data() {
     return {
-      activeViewMethod: 'quarter',
-      viewMethods: [
-      {
-        label: 'Per quarter',
-        value: 'quarter'
+      activeDateQueryMode: 'week',
+      dateQueryMode: [
+        {
+          label: 'Per week',
+          value: 'week'
+        },
+        {
+          label: 'Per month',
+          value: 'month'
+        },
+        {
+          label: 'Per quarter',
+          value: 'quarter'
+        },
+        {
+          label: 'Per year',
+          value: 'year'
+        },
+      ],
+      activeDataMode: 'customer',
+      dataModes: [
+        {
+          label: 'Customers',
+          tableHeader: 'Customer',
+          value: 'customer'
+        },
+        {
+          label: 'Order types',
+          tableHeader: 'Order type',
+          value: 'order_type'
+        },
+      ],
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true
+            },
+            gridLines: {
+              display: false
+            }
+          }],
+        },
+        responsive: true,
+        maintainAspectRatio: false,
       },
-      {
-        label: 'Per week',
-        value: 'week'
-      }],
-      options: [],
-      optionsWeek: null,
-      startDate: moment().weekday(monday),
+      optionsPie: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          datalabels: {
+            formatter: (value, ctx) => {
+              let datasets = ctx.chart.data.datasets;
+              if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
+                return `${Math.round(value*100)}%`
+              }
+            },
+            color: '#fff',
+          },
+        },
+      },
+      pieChartdataWorkhours: null,
+      barChartdataWorkhours: null,
+      pieChartdataWorkhoursPeriod: null,
+      barChartdataWorkhoursPeriod: null,
+      colors: {},
+
+      startDate: moment().weekday(sunday),
       year: d.getYear() + 1900,
+      month: d.getMonth() + 1,
       isLoading: false,
       fullName: null,
       quarterHeaders: [],
       quarterData: [],
       pieChartdataQuarters: [],
-      weekHeaders: [],
-      weekData: [],
-      pieChartdataWeek: null,
-      orderTypeColors: {},
+      headers: [],
+      workHoursData: [],
+
       types: [
       {
         label: 'Work total',
@@ -297,11 +395,17 @@ export default {
         {key: 'order.last_status_full', label: this.$trans('Status'), sortable: true, thAttr: {width: '25%'}},
       ],
       event_date: null,
-      event_time: null
+      event_time: null,
+      days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     }
   },
   watch: {
-    activeViewMethod: {
+    activeDateQueryMode: {
+      handler() {
+        this.render()
+      }
+    },
+    activeDataMode: {
       handler() {
         this.render()
       }
@@ -316,7 +420,13 @@ export default {
   computed: {
     getStatusClass() {
       return this.engineer.engineer.last_event.event_type === 'door open' ? 'open' : 'closed'
-    }
+    },
+    getActiveDataMode() {
+      return this.dataModes.find(item => item.value === this.activeDataMode)
+    },
+    getActiveDateQueryMode() {
+      return this.dateQueryMode.find(item => item.value === this.activeDateQueryMode)
+    },
   },
   methods: {
     async doorOpen() {
@@ -328,12 +438,335 @@ export default {
       await engineerEventModel.sendDoorClose(this.engineer.engineer.id, event_dts)
     },
     async render() {
-      if (this.activeViewMethod === 'week') {
-        await this.renderWeek()
+      if (this.activeDateQueryMode === 'week') {
+        const response = await engineerModel.stats_v2_week(this.pk, this.startDate.format('YYYY-MM-DD'), this.activeDataMode)
+        this.fullName = response.engineer
+        const totals = response.totals
+        this.headers = this.getWeekHeaders()
+        let keys = {}, day_totals = {}
+
+        for (const row of response.result) {
+          let tmpDate = this.startDate.clone()
+          if (!(row[this.activeDataMode] in keys)) {
+            keys[row[this.activeDataMode]] = {
+              label: `${row[this.activeDataMode]}`,
+              days: {},
+              total: 0
+            }
+          }
+
+          for (let i=0; i<this.days.length; i++) {
+            let tmp = tmpDate
+            if (parseInt(tmp.format('DD')) === row.day) {
+              keys[row[this.activeDataMode]].total += row.sum_work_total
+              // keys[row[this.activeDataMode]].days[`day${i}`] = `${row.sum_work_total} (avg. ${row.avg_work_total})`
+              keys[row[this.activeDataMode]].days[`day${i}`] = row.sum_work_total
+            }
+            tmp = tmpDate.add(1, "days")
+          }
+        }
+
+        this.workHoursData = []
+        let pieGraphData = [], labels = [], colors = []
+        let barGraphData = []
+        for (const [_, data] of Object.entries(keys)) {
+          let tableRow = {}
+          tableRow[this.activeDataMode] = data.label
+          for (let i=0; i<this.days.length; i++) {
+            tableRow[`day${i}`] = `day${i}` in data.days ? data.days[`day${i}`] : '-'
+            if (!(`day${i}` in day_totals)) {
+              day_totals[`day${i}`] = 0
+            }
+            day_totals[`day${i}`] += `day${i}` in data.days ? data.days[`day${i}`] : 0
+          }
+          this.workHoursData.push(tableRow)
+
+          labels.push(data.label)
+          pieGraphData.push(data.total/totals.sum_work_total_all)
+          barGraphData.push(data.total)
+          colors.push(this.getColor(data.label))
+        }
+
+        let pieMonthGraphData = [], barMonthGraphData = [], labelsMonth = [], colorsMonth = []
+        for (let i=0; i<this.days.length; i++) {
+          const val = `day${i}` in day_totals ? day_totals[`day${i}`] : 0
+          labelsMonth.push(this.days[i])
+          pieMonthGraphData.push(val/totals.sum_work_total_all)
+          barMonthGraphData.push(val)
+          colorsMonth.push(this.getColor(`day${i}`))
+        }
+
+        this.renderWorkhoursGraphs(
+          barGraphData,
+          pieGraphData,
+          colors,
+          labels,
+          labelsMonth,
+          pieMonthGraphData,
+          barMonthGraphData,
+          colorsMonth,
+          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${totals.sum_work_total_all})`,
+          `Total work hours per ${this.activeDateQueryMode} (Total: ${totals.sum_work_total_all})`
+        )
       }
 
-      if (this.activeViewMethod === 'quarter') {
-        await this.renderQuarter()
+      if (this.activeDateQueryMode === 'month') {
+        const response = await engineerModel.stats_v2_month(this.pk, this.month, this.year, this.activeDataMode)
+        this.fullName = response.engineer
+        const totals = response.totals
+        this.headers = this.getMonthHeaders()
+        let keys = {}, day_totals = {}
+
+        for (const row of response.result) {
+          const tmpDate = moment(`${this.year}-${this.month}-01`)
+          if (!(row[this.activeDataMode] in keys)) {
+            keys[row[this.activeDataMode]] = {
+              label: `${row[this.activeDataMode]}`,
+              days: {},
+              total: 0
+            }
+          }
+
+          let tmp = tmpDate.clone()
+          for (let i=1; i<=tmpDate.daysInMonth(); i++) {
+            if (parseInt(tmp.format('DD')) === row.day) {
+              keys[row[this.activeDataMode]].total += row.sum_work_total
+              keys[row[this.activeDataMode]].days[`day${i}`] = row.sum_work_total
+              if (!(`day${i}` in day_totals)) {
+                day_totals[`day${i}`] = 0
+              }
+              day_totals[`day${i}`] += row.sum_work_total
+            }
+            tmp = tmp.add(1, "days")
+          }
+        }
+
+        this.workHoursData = []
+        let pieGraphData = []
+        let labels = [], colors = []
+        let barGraphData = []
+        const tmpDate = moment(`${this.year}-${this.month}-01`)
+        for (const [_, data] of Object.entries(keys)) {
+          let tableRow = {}
+          tableRow[this.activeDataMode] = data.label
+          for (let i=1; i<=tmpDate.daysInMonth(); i++) {
+            tableRow[`day${i}`] = `day${i}` in data.days ? data.days[`day${i}`] : '-'
+          }
+          this.workHoursData.push(tableRow)
+
+          labels.push(data.label)
+          pieGraphData.push(data.total/totals.sum_work_total_all)
+          barGraphData.push(data.total)
+          colors.push(this.getColor(data.label))
+        }
+
+        let pieMonthGraphData = [], barMonthGraphData = [], labelsMonth = [], colorsMonth = []
+        for (let i=1; i<=tmpDate.daysInMonth(); i++) {
+          const val = `day${i}` in day_totals ? day_totals[`day${i}`] : 0
+          labelsMonth.push(i)
+          pieMonthGraphData.push(val/totals.sum_work_total_all)
+          barMonthGraphData.push(val)
+          colorsMonth.push(this.getColor(`day${i}`))
+        }
+
+        this.renderWorkhoursGraphs(
+          barGraphData,
+          pieGraphData,
+          colors,
+          labels,
+          labelsMonth,
+          pieMonthGraphData,
+          barMonthGraphData,
+          colorsMonth,
+          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${totals.sum_work_total_all})`,
+          `Total work hours per ${this.activeDateQueryMode} (Total: ${totals.sum_work_total_all})`
+        )
+      }
+
+      if (this.activeDateQueryMode === 'quarter') {
+        const response = await engineerModel.stats_v2_quarter(this.pk, this.year, this.activeDataMode)
+        this.fullName = response.engineer
+        const totals = response.totals
+        this.headers = this.getQuarterHeaders()
+        let keys = {}, quarter_totals = {}
+
+        for (const row of response.result) {
+          if (!(row[this.activeDataMode] in keys)) {
+            keys[row[this.activeDataMode]] = {
+              label: `${row[this.activeDataMode]}`,
+              quarters: {},
+              total: 0
+            }
+          }
+
+          for (let i=1; i<=4; i++) {
+            if (i === row.quarter) {
+              keys[row[this.activeDataMode]].total += row.sum_work_total
+              keys[row[this.activeDataMode]].quarters[`quarter${i}`] = row.sum_work_total
+              if (!(`quarter${i}` in quarter_totals)) {
+                quarter_totals[`quarter${i}`] = 0
+              }
+              quarter_totals[`quarter${i}`] += row.sum_work_total
+            }
+          }
+        }
+
+        this.workHoursData = []
+        let pieGraphData = []
+        let labels = [], colors = []
+        let barGraphData = []
+        for (const [_, data] of Object.entries(keys)) {
+          let tableRow = {}
+          tableRow[this.activeDataMode] = data.label
+          for (let i=1; i<=4; i++) {
+            tableRow[`quarter${i}`] = `quarter${i}` in data.quarters ? data.quarters[`quarter${i}`] : '-'
+          }
+          this.workHoursData.push(tableRow)
+
+          labels.push(data.label)
+          pieGraphData.push(data.total/totals.sum_work_total_all)
+          barGraphData.push(data.total)
+          colors.push(this.getColor(data.label))
+        }
+
+        let pieMonthGraphData = [], barMonthGraphData = [], labelsMonth = [], colorsMonth = []
+        for (let i=1; i<=4; i++) {
+          const val = `quarter${i}` in quarter_totals ? quarter_totals[`quarter${i}`] : 0
+          labelsMonth.push(i)
+          pieMonthGraphData.push(val/totals.sum_work_total_all)
+          barMonthGraphData.push(val)
+          colorsMonth.push(this.getColor(`quarter${i}`))
+        }
+
+        this.renderWorkhoursGraphs(
+          barGraphData,
+          pieGraphData,
+          colors,
+          labels,
+          labelsMonth,
+          pieMonthGraphData,
+          barMonthGraphData,
+          colorsMonth,
+          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${totals.sum_work_total_all})`,
+          `Total work hours per ${this.activeDateQueryMode} (Total: ${totals.sum_work_total_all})`
+        )
+      }
+
+      if (this.activeDateQueryMode === 'year') {
+        const response = await engineerModel.stats_v2_year(this.pk, this.year, this.activeDataMode)
+        this.fullName = response.engineer
+        const totals = response.totals
+        this.headers = this.getYearHeaders()
+        let keys = {}, month_totals = {}
+
+        for (const row of response.result) {
+          if (!(row[this.activeDataMode] in keys)) {
+            keys[row[this.activeDataMode]] = {
+              label: `${row[this.activeDataMode]}`,
+              months: {},
+              total: 0
+            }
+          }
+
+          for (let i=1; i<=12; i++) {
+            if (i === row.month) {
+              keys[row[this.activeDataMode]].total += row.sum_work_total
+              keys[row[this.activeDataMode]].months[`month${i}`] = row.sum_work_total
+              if (!(`month${i}` in month_totals)) {
+                month_totals[`month${i}`] = 0
+              }
+              month_totals[`month${i}`] += row.sum_work_total
+            }
+          }
+        }
+
+        this.workHoursData = []
+        let pieGraphData = []
+        let labels = [], colors = []
+        let barGraphData = []
+        for (const [_, data] of Object.entries(keys)) {
+          let tableRow = {}
+          tableRow[this.activeDataMode] = data.label
+          for (let i=1; i<=12; i++) {
+            tableRow[`month${i}`] = `month${i}` in data.months ? data.months[`month${i}`] : '-'
+          }
+          this.workHoursData.push(tableRow)
+
+          labels.push(data.label)
+          pieGraphData.push(data.total/totals.sum_work_total_all)
+          barGraphData.push(data.total)
+          colors.push(this.getColor(data.label))
+        }
+
+        let pieMonthGraphData = [], barMonthGraphData = [], labelsMonth = [], colorsMonth = []
+        for (let i=1; i<=12; i++) {
+          const val = `month${i}` in month_totals ? month_totals[`month${i}`] : 0
+          labelsMonth.push(i)
+          pieMonthGraphData.push(val/totals.sum_work_total_all)
+          barMonthGraphData.push(val)
+          colorsMonth.push(this.getColor(`month${i}`))
+        }
+
+        this.renderWorkhoursGraphs(
+          barGraphData,
+          pieGraphData,
+          colors,
+          labels,
+          labelsMonth,
+          pieMonthGraphData,
+          barMonthGraphData,
+          colorsMonth,
+          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${totals.sum_work_total_all})`,
+          `Total work hours per ${this.activeDateQueryMode} (Total: ${totals.sum_work_total_all})`
+        )
+      }
+    },
+    renderWorkhoursGraphs(
+      barGraphData,
+      pieGraphData,
+      colors,
+      labels,
+      labelsMonth,
+      pieMonthGraphData,
+      barMonthGraphData,
+      colorsMonth,
+      barLabel,
+      barLabelMonth) {
+      this.pieChartdataWorkhours = {
+        labels: labels,
+        datasets: [{
+          data: pieGraphData,
+          backgroundColor: colors,
+        }]
+      }
+
+      // bar graph data mode
+      this.barChartdataWorkhours = {
+        labels,
+        datasets: [{
+          label: barLabel,
+          data: barGraphData,
+          backgroundColor: colors,
+        }]
+      }
+
+      // pie graph period
+      this.pieChartdataWorkhoursPeriod = {
+        labels: labelsMonth,
+        datasets: [{
+          data: pieMonthGraphData,
+          backgroundColor: colorsMonth,
+        }]
+      }
+
+      // bar graph period
+      this.barChartdataWorkhoursPeriod = {
+        labels: labelsMonth,
+        datasets: [{
+          label: barLabelMonth,
+          data: barMonthGraphData,
+          backgroundColor: colorsMonth,
+        }]
       }
     },
     async nextYear() {
@@ -355,163 +788,86 @@ export default {
     goBack() {
       this.$router.push({name: 'users-engineers'})
     },
-    getOrderTypeColor(orderType) {
-      if (!(orderType in this.orderTypeColors)) {
-        this.orderTypeColors[orderType] = `#${Math.floor(Math.random()*16777215).toString(16)}`
+    getColor(item) {
+      if (!(item in this.colors)) {
+        this.colors[item] = `#${Math.floor(Math.random()*16777215).toString(16)}`
       }
 
-      return this.orderTypeColors[orderType]
+      return this.colors[item]
     },
-    setQuarterChartdata(totals) {
-      for (let i=0; i<totals.length; i++) {
-        let pieGraphDataOrderTypes = [], labelsOrderTypes = [], colors = []
-
-        for (const [orderType, data] of Object.entries(totals[i].work_hours_status_perc)) {
-          if (!data) {
-            continue
-          }
-
-          labelsOrderTypes.push(`${orderType} (${totals[i].work_hours_status[orderType]})`)
-          pieGraphDataOrderTypes.push(data)
-          colors.push(this.getOrderTypeColor(orderType))
+    getWeekHeaders() {
+      let tmpDate = this.startDate.clone()
+      let headers = [
+        {
+          key: this.getActiveDataMode.value,
+          label: this.getActiveDataMode.tableHeader
         }
+      ]
 
-        if (pieGraphDataOrderTypes.length) {
-          this.options[i] = {
-            responsive: true,
-            maintainAspectRatio: false,
-            title: {
-              display: true,
-              text: `Workhours per order type for quarter ${i+1}`
-            }
-          }
-
-          this.pieChartdataQuarters[i] = {
-            labels: labelsOrderTypes,
-            datasets: [{
-              data: pieGraphDataOrderTypes,
-              backgroundColor: colors,
-            }]
-          }
-        } else {
-          this.options[i] = null
-          this.pieChartdataQuarters[i] = null
-        }
+      for (let i=0; i<this.days.length; i++) {
+        let tmp = tmpDate
+        headers.push({
+          key: `day${i}`,
+          label: `${this.days[i]} ${tmp.format('DD/MM')}`
+        })
+        tmp = tmpDate.add(1, "days")
       }
+
+      return headers
     },
-    setWeekChartdata(data) {
-      let pieGraphDataOrderTypes = [], labelsOrderTypes = [], colors = [], dataFound = false
-
-      this.optionsWeek = {
-        responsive: true,
-        maintainAspectRatio: false,
-        title: {
-          display: true,
-          text: `Workhours per order type for week starting ${this.startDate.format('DD/MM/YYYY')}`
+    getMonthHeaders() {
+      const tmpDate = moment(`${this.year}-${this.month}-01`)
+      let headers = [
+        {
+          key: this.getActiveDataMode.value,
+          label: this.getActiveDataMode.tableHeader
         }
+      ]
+
+      let tmp = tmpDate.clone()
+      for (let i=1; i<=tmpDate.daysInMonth(); i++) {
+        headers.push({
+          key: `day${i}`,
+          label: `${tmp.format('DD')}`
+        })
+        tmp = tmp.add(1, "days")
       }
 
-      for (const [orderType, _data] of Object.entries(data.work_hours_status_perc)) {
-        if (!_data) {
-          continue
-        }
-
-        labelsOrderTypes.push(`${orderType} (${data.work_hours_status[orderType]})`)
-        pieGraphDataOrderTypes.push(_data)
-        colors.push(this.getOrderTypeColor(orderType))
-      }
-
-      if (pieGraphDataOrderTypes.length) {
-        this.pieChartdataWeek = {
-          labels: labelsOrderTypes,
-          datasets: [{
-            data: pieGraphDataOrderTypes,
-            backgroundColor: colors,
-          }]
-        }
-      } else {
-        this.pieChartdataWeek = null
-      }
+      return headers
     },
-    setQuarterHeaders(totals) {
-      this.quarterHeaders = [{
-        key: 'type',
-        label: this.$trans('Type')
-      }]
+    getQuarterHeaders() {
+      let headers = [
+        {
+          key: this.getActiveDataMode.value,
+          label: this.getActiveDataMode.tableHeader
+        }
+      ]
 
-      for (let i=0; i<totals.length; i++) {
-        this.quarterHeaders.push({
-          key: `quarter${totals[i].quarter}`,
-          label: totals[i].month
+      for (let i=1; i<=4; i++) {
+        headers.push({
+          key: `quarter${i}`,
+          label: i
         })
       }
-    },
-    setWeekHeaders(totals) {
-      this.weekHeaders = [{
-        key: 'type',
-        label: this.$trans('Type')
-      }]
 
-      for (let i=0; i<totals.length; i++) {
-        this.weekHeaders.push({
-          key: `day${totals[i].day}`,
-          label: totals[i].weekday
+      return headers
+    },
+    getYearHeaders() {
+      let headers = [
+        {
+          key: this.getActiveDataMode.value,
+          label: this.getActiveDataMode.tableHeader
+        }
+      ]
+
+      for (let i=1; i<=12; i++) {
+        headers.push({
+          key: `month${i}`,
+          label: `${i}`
         })
       }
-    },
-    setQuarterData(totals) {
-      this.quarterData = []
 
-      for (let i=0; i<this.types.length; i++) {
-        let row = {
-          type: this.types[i].label
-        }
-
-        for (let j=0; j<totals.length; j++) {
-          const key = `quarter${totals[j].quarter}`
-          let val = {}
-          row[key] = totals[j].totals[this.types[i].key] ? totals[j].totals[this.types[i].key] : 0
-        }
-
-        this.quarterData.push(row)
-      }
-    },
-    setWeekData(totals) {
-      this.weekData = []
-
-      for (let i=0; i<this.types.length; i++) {
-        let row = {
-          type: this.types[i].label
-        }
-
-        for (let j=0; j<totals.length; j++) {
-          const key = `day${totals[j].day}`
-          let val = {}
-          row[key] = totals[j].totals[this.types[i].key] ? totals[j].totals[this.types[i].key] : 0
-        }
-
-        this.weekData.push(row)
-      }
-    },
-    async renderQuarter() {
-      this.isLoading = true
-      const data = await engineerModel.stats_quarter(this.pk, this.year)
-      this.fullName = data.engineer
-
-      this.setQuarterHeaders(data.totals)
-      this.setQuarterData(data.totals)
-      this.setQuarterChartdata(data.totals)
-      this.isLoading = false
-    },
-    async renderWeek() {
-      this.isLoading = true
-      const data = await engineerModel.stats_week(this.pk, this.startDate.format('YYYY-MM-DD'))
-      this.fullName = data.engineer
-
-      this.setWeekHeaders(data.totals)
-      this.setWeekData(data.totals)
-      this.setWeekChartdata(data)
-      this.isLoading = false
+      return headers
     },
     async loadData() {
       try {
