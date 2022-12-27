@@ -30,12 +30,12 @@ class EngineerEvent extends BaseModel {
 
   }
 
-  async sendDoorClose(engineer_id, event_dts) {
+  async sendDoorClosed(engineer_id, event_dts) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     let body = {
       'engineer': engineer_id,
-      'event_type': 'door close',
+      'event_type': 'door closed',
     }
 
     if (event_dts) {
