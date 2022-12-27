@@ -1,31 +1,38 @@
 <template>
 
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="subnav-pills">
-      <b-nav pills>
-        <b-nav-item
-          v-for="item in dateQueryMode"
-          :active="item.value === activeDateQueryMode"
-          :key="item.value"
-          @click="activeDateQueryMode = item.value"
-          >
-          {{ item.label }}
-        </b-nav-item>
-      </b-nav>
-    </div>
-
-    <div class="subnav-pills">
-      <b-nav pills>
-        <b-nav-item
-          v-for="item in dataModes"
-          :active="item.value === activeDataMode"
-          :key="item.value"
-          @click="activeDataMode = item.value"
-        >
-          {{ item.label }}
-        </b-nav-item>
-      </b-nav>
-    </div>
+    <b-row align-v="center">
+      <b-col cols="8">
+        <div class="subnav-pills">
+          <b-nav pills>
+            <b-nav-item
+              v-for="item in dateQueryMode"
+              :active="item.value === activeDateQueryMode"
+              :key="item.value"
+              @click="activeDateQueryMode = item.value"
+              >
+              {{ item.label }}
+            </b-nav-item>
+          </b-nav>
+        </div>
+      </b-col>
+      <b-col cols="4">
+        <div class="float-right">
+          <div class="subnav-pills">
+            <b-nav pills>
+              <b-nav-item
+                v-for="item in dataModes"
+                :active="item.value === activeDataMode"
+                :key="item.value"
+                @click="activeDataMode = item.value"
+              >
+                {{ item.label }}
+              </b-nav-item>
+            </b-nav>
+          </div>
+        </div>
+      </b-col>
+    </b-row>
 
     <div class="app-detail" v-if="!isLoading">
       <b-row align-v="center" v-if="activeDateQueryMode === 'week'">
@@ -53,7 +60,7 @@
           </b-link>
         </b-col>
         <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Month totals for') }} {{ fullName }}, {{ $trans('month') }} {{ month }}</h4>
+          <h4>{{ $trans('Month totals for') }} {{ fullName }}, {{ monthTxt }} {{ year }}</h4>
         </b-col>
         <b-col cols="2">
           <div class="float-right">
@@ -71,7 +78,7 @@
           </b-link>
         </b-col>
         <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Quarter totals for') }} {{ fullName }}, {{ $trans('Year') }} {{ year }}</h4>
+          <h4>{{ $trans('Quarter totals for') }} {{ fullName }}, {{ year }}</h4>
         </b-col>
         <b-col cols="2">
           <div class="float-right">
@@ -89,7 +96,7 @@
           </b-link>
         </b-col>
         <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Year totals for') }} {{ fullName }}, {{ $trans('Year') }} {{ year }}</h4>
+          <h4>{{ $trans('Year totals for') }} {{ fullName }}, {{ year }}</h4>
         </b-col>
         <b-col cols="2">
           <div class="float-right">
@@ -361,8 +368,10 @@ export default {
       colors: {},
 
       startDate: moment().weekday(sunday),
+      today: null,
       year: d.getYear() + 1900,
       month: d.getMonth() + 1,
+      monthTxt: null,
       isLoading: false,
       fullName: null,
       quarterHeaders: [],
@@ -771,19 +780,37 @@ export default {
     },
     async nextYear() {
       this.year = this.year + 1
-      await this.loadData()
+      await this.render()
     },
     async backYear() {
       this.year = this.year - 1
-      await this.loadData()
+      await this.render()
     },
     async nextWeek() {
       this.startDate.add(7, 'days');
-      await this.loadData();
+      await this.render()
     },
     async backWeek() {
       this.startDate.subtract(7, 'days');
-      await this.loadData();
+      await this.render()
+    },
+    async backMonth() {
+      this.today.subtract(1, 'month')
+
+      this.month = this.today.month() + 1
+      this.monthTxt = this.today.format('MMMM')
+      this.year = this.today.year()
+
+      await this.render()
+    },
+    async nextMonth() {
+      this.today.add(1, 'month')
+
+      this.month = this.today.month() + 1
+      this.monthTxt = this.today.format('MMMM')
+      this.year = this.today.year()
+
+      await this.render()
     },
     goBack() {
       this.$router.push({name: 'users-engineers'})
@@ -891,6 +918,10 @@ export default {
     },
   },
   async created() {
+    this.today = moment()
+    this.month = this.today.month() + 1
+    this.monthTxt = this.today.format('MMMM')
+    this.year = this.today.year()
     await this.loadData()
   },
 
