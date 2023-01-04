@@ -116,7 +116,12 @@
                 v-model="member.tel"
                 id="member_tel"
                 size="sm"
+                :state="isSubmitClicked ? !v$.member.tel.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.member.tel.$error : null">
+                {{ $trans('Please enter a number') }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="4" role="group">
@@ -129,7 +134,12 @@
                 id="member_www"
                 size="sm"
                 v-model="member.www"
+                :state="isSubmitClicked ? !v$.member.www.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.member.www.$error : null">
+                {{ $trans('Please enter a website') }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="4" role="group">
@@ -142,7 +152,12 @@
                 id="member_email"
                 size="sm"
                 v-model="member.email"
+                :state="isSubmitClicked ? !v$.member.email.$error : null"
               ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.member.email.$error : null">
+                {{ $trans('Please enter a valid email') }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
         </b-row>
@@ -157,7 +172,12 @@
                 id="member_contacts"
                 v-model="member.contacts"
                 rows="5"
+                :state="isSubmitClicked ? !v$.member.contacts.$error : null"
               ></b-form-textarea>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.member.contacts.$error : null">
+                {{ $trans('Please enter some contacts') }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="4" role="group">
@@ -170,7 +190,12 @@
                 id="member_activities"
                 v-model="member.activities"
                 rows="5"
+                :state="isSubmitClicked ? !v$.member.activities.$error : null"
               ></b-form-textarea>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.member.activities.$error : null">
+                {{ $trans('Please enter some activities') }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
           <b-col cols="4" role="group">
@@ -183,7 +208,12 @@
                 id="member_info"
                 v-model="member.info"
                 rows="5"
+                :state="isSubmitClicked ? !v$.member.info.$error : null"
               ></b-form-textarea>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.member.info.$error : null">
+                {{ $trans('Please enter some info') }}
+              </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
         </b-row>
@@ -250,7 +280,7 @@
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+import {email, required, url} from '@vuelidate/validators'
 
 import memberModel from '../../models/member/Member.js'
 import PillsCompanyCompany from "../../components/PillsCompanyCompany.vue"
@@ -291,6 +321,26 @@ export default {
         required,
       },
       city: {
+        required,
+      },
+      tel: {
+        required,
+      },
+      email: {
+        required,
+        email
+      },
+      www: {
+        required,
+        url
+      },
+      contacts: {
+        required,
+      },
+      activities: {
+        required,
+      },
+      info: {
         required,
       },
     },
