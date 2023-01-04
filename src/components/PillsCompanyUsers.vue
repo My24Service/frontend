@@ -46,7 +46,7 @@ export default {
     return {
       isLoaded: false,
       memberType: null,
-      hasApiUsers: false
+      hasApiUsers: false,
     }
   },
   async created() {
