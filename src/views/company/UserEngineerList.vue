@@ -5,7 +5,7 @@
       <PillsCompanyUsers />
     </div>
 
-    <PillsEngineer />
+    <PillsEngineer v-if="companycode === 'grm'" />
 
     <SearchModal
       id="search-modal"
@@ -119,6 +119,7 @@ export default {
   },
   data() {
     return {
+      companycode: null,
       pk: null,
       searchQuery: null,
       model: engineerModel,
@@ -172,6 +173,9 @@ export default {
     },
     // rest
     async loadData() {
+      // get companycode
+      this.companycode = await this.$store.getters.getMemberCompanycode
+
       this.isLoading = true;
 
       try {

@@ -175,7 +175,7 @@
 
     </div>
 
-    <div v-if="this.companycode === 'demo'">
+    <div v-if="this.companycode === 'grm'">
       <div class="app-detail">
         <h3>{{ $trans("Pending orders") }}</h3>
         <b-table
