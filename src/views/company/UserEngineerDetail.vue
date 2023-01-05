@@ -192,7 +192,7 @@
 
       <div class="app-detail events well" v-if="engineer">
         <div v-if="engineer && engineer.engineer.last_event">
-          <h3>{{ engineer.full_name }} - {{ $trans('This day') }}</h3>
+          <h3>{{ engineer.full_name }}</h3>
           <div>
             <p>{{ $trans('Status') }}:
               <span :class="getStatusClass">
@@ -202,12 +202,16 @@
                 </span>
               </span>
             </p>
+            <div v-if="engineer.engineer.last_event.event_type === 'door open' && this.doorOpenCounter">
+              <h3>{{ $trans("Time open") }}: {{ this.doorOpenCounter }}</h3>
+            </div>
             <div v-if="engineer.engineer.last_event.measure_last_event_type">
               <p>{{ $trans('Seconds since') }} {{ engineer.engineer.last_event.measure_last_event_type }}: {{ engineer.engineer.last_event.secs_since_last_measure_event_type }}</p>
             </div>
+            <hr/>
             <div>
               <div v-for="eventType in stats">
-                <p><strong>{{ eventType.event_type }}</strong></p>
+                <p>{{ $trans("Event type") }}: <strong>{{ eventType.event_type }}</strong></p>
                 <p># events: {{ eventType.num_events }}</p>
                 <p v-if="eventType.sum_duration">Total duration: {{ eventType.sum_duration }}</p>
                 <p v-if="eventType.avg_duration">Avg. duration: {{ eventType.avg_duration }}</p>
@@ -215,6 +219,7 @@
             </div>
           </div>
         </div>
+        <hr/>
         <div>
           <b-row>
             <b-col cols="6" role="group">
@@ -408,7 +413,9 @@ export default {
       ],
       event_date: null,
       event_time: null,
-      days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      intervalCounter: null,
+      doorOpenCounter: null
     }
   },
   watch: {
@@ -567,6 +574,31 @@ export default {
 
       return headers
     },
+    updateCounter() {
+      const now = moment(new Date())
+      const event_dts = moment(this.engineer.engineer.last_event.event_dts)
+      const duration = moment.duration(now.diff(event_dts))
+      let hours = duration.hours()
+      if (hours < 10) {
+        hours = `0${hours}`
+      }
+      let minutes = duration.minutes()
+      if (minutes< 10) {
+        minutes = `0${minutes}`
+      }
+      let seconds = duration.seconds()
+      if (seconds < 10) {
+        seconds = `0${seconds}`
+      }
+      this.doorOpenCounter = `${hours}:${minutes}:${seconds}`
+    },
+    clearCounter() {
+      this.doorOpenCounter = null
+      clearInterval(this.intervalCounter)
+    },
+    startCounter() {
+      this.intervalCounter = setInterval(this.updateCounter, 1000)
+    },
     async loadData() {
       try {
         this.engineer = await engineerModel.detail(this.pk)
@@ -575,6 +607,11 @@ export default {
         const assignedordersResult = await assignedOrderModel.listDevice(this.pk)
         this.assignedorders = assignedordersResult.assignedorders
         await this.render()
+        if (this.engineer.engineer.last_event.event_type === 'door open') {
+          this.startCounter()
+        } else {
+          this.clearCounter()
+        }
       } catch(error) {
         console.log('error fetching engineer details', error)
         this.errorToast(this.$trans('Error fetching engineer details'))
@@ -922,7 +959,6 @@ export default {
   },
   async created() {
     this.companycode = this.$store.getters.getMemberCompanycode
-    console.log(this.companycode)
     this.today = moment()
     this.month = this.today.month() + 1
     this.monthTxt = this.today.format('MMMM')
@@ -937,7 +973,8 @@ export default {
   },
   beforeDestroy() {
     memberNewDataSocket.removeOnmessageHandler(NEW_DATA_EVENTS.ENGINEER_EVENT)
-  }
+    this.clearCounter()
+  },
 }
 </script>
 

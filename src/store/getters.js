@@ -37,6 +37,7 @@ export const getters = {
     return state.memberInfo.name
   },
   getMemberCompanycode(state) {
+    // return 'grm'
     return state.memberInfo.companycode
   },
   getCurrentLanguage(state) {
