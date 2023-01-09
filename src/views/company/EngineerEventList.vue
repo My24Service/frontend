@@ -48,6 +48,14 @@
         <template #cell(secs_since_last_measure_event_type)="data">
           {{ displayDurationFromSeconds(data.item.secs_since_last_measure_event_type) }}
         </template>
+        <template #cell(assigned_order)="data">
+          <span v-if="data.item.assigned_order">
+            {{ data.item.assigned_order.order_name }}, {{ data.item.assigned_order.order_city }}
+          </span>
+          <span v-if="!data.item.assigned_order">
+            {{ $trans("No order") }}
+          </span>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkDelete
