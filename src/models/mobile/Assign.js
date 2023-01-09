@@ -8,7 +8,7 @@ class Assign extends BaseModel {
     const url = notify_user ? `/mobile/assign-user/${user_id}/?notify_user=1` : `/mobile/assign-user/${user_id}/`
     const data = {order_ids: order_ids.join(',')}
 
-    return this.axios.post(url, data, headers)
+    return this.axios.post(url, data, headers).then((response) => response.data)
   }
 
   async unAssign(user_id, order_pk) {
@@ -17,7 +17,7 @@ class Assign extends BaseModel {
     const url = `/mobile/unassign-user/${user_id}/`
     const data = { order_pk }
 
-    return this.axios.post(url, data, headers)
+    return this.axios.post(url, data, headers).then((response) => response.data)
   }
 }
 

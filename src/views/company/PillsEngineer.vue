@@ -39,10 +39,15 @@ export default {
         value: 'engineers'
       },
       {
-        label: 'Event types',
-        url_name: 'engineer-event-type-list',
-        value: 'event-types'
-      }
+        label: 'Events',
+        url_name: 'engineer-event-list',
+        value: 'events'
+      },
+        {
+          label: 'Event types',
+          url_name: 'engineer-event-type-list',
+          value: 'event-types'
+        },
     ]
     }
   },

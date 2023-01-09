@@ -42,6 +42,7 @@ import UserStudentRegisterResetPassword from "../views/company/UserStudentRegist
 import SubNavInventory from "../components/SubNavInventory";
 import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
+import EngineerEventList from "../views/company/EngineerEventList";
 
 
 export default [
@@ -134,6 +135,20 @@ export default [
         'app-subnav': {}
       },
     },
+    // engineer events
+    {
+      name: 'engineer-event-list',
+      path: '/company/users/engineers/events',
+      components: {
+        'app-content': EngineerEventList,
+        'app-subnav': SubNavInventory
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+
     // engineer event types
     {
       name: 'engineer-event-type-list',

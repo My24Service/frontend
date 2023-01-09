@@ -202,19 +202,101 @@
                 </span>
               </span>
             </p>
-            <div v-if="engineer.engineer.last_event.event_type === 'door open' && this.doorOpenCounter">
+            <div v-if="currentState === DOOR_OPEN && this.doorOpenCounter">
               <h3>{{ $trans("Time open") }}: {{ this.doorOpenCounter }}</h3>
             </div>
+            <div v-if="!engineer.engineer.last_event.assigned_order">
+              <h4>{{ $trans("No order found, create one")}}</h4>
+              <div class="container app-form">
+                <b-form>
+                  <b-row>
+                    <b-col cols="8" role="group">
+                      <b-form-group
+                        label-size="sm"
+                        label-class="p-sm-0"
+                        v-bind:label="$trans('Search existing address')"
+                        label-for="order-customer-search"
+                      >
+                        <multiselect
+                          id="order-customer-search"
+                          track-by="id"
+                          :placeholder="$trans('Type to search')"
+                          open-direction="bottom"
+                          :options="customers"
+                          :multiple="false"
+                          :loading="isLoading"
+                          :internal-search="false"
+                          :options-limit="30"
+                          :limit="10"
+                          :max-height="600"
+                          :hide-selected="true"
+                          @search-change="getCustomersDebounced"
+                          @select="selectCustomer"
+                          :custom-label="customerLabel"
+                        >
+                          <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+                        </multiselect>
+                      </b-form-group>
+                    </b-col>
+                    <b-col cols="4" role="group">
+                      <b-form-group
+                        label-size="sm"
+                        label-class="p-sm-0"
+                        v-bind:label="$trans('Licence plate')"
+                        label-for="order_reference"
+                      >
+                        <b-form-input
+                          id="order_reference"
+                          size="sm"
+                          class="p-sm-0"
+                          v-model="order.order_reference"
+                        ></b-form-input>
+                      </b-form-group>
+                    </b-col>
+                  </b-row>
+                </b-form>
+                <b-row>
+                  <b-col cols="12" role="group">
+                    <h5 v-if="order.order_name || order.order_reference">{{ order.order_name}} - {{ order.order_reference }}</h5>
+                  </b-col>
+                </b-row>
+              </div>
+              <div class="mx-auto">
+                <footer class="modal-footer">
+                  <b-button
+                    @click="cancelForm"
+                    class="btn btn-secondary"
+                    type="button"
+                    variant="secondary"
+                  >
+                    {{ $trans('Cancel') }}
+                  </b-button>
+                  <b-button
+                    @click="submitForm"
+                    :disabled="buttonDisabled"
+                    class="btn btn-primary"
+                    type="button"
+                    variant="primary"
+                  >
+                    {{ $trans('Submit') }}
+                  </b-button>
+                </footer>
+              </div>
+            </div>
             <div v-if="engineer.engineer.last_event.measure_last_event_type">
-              <p>{{ $trans('Seconds since') }} {{ engineer.engineer.last_event.measure_last_event_type }}: {{ engineer.engineer.last_event.secs_since_last_measure_event_type }}</p>
+              <p>{{ $trans('Time') }} {{ engineer.engineer.last_event.measure_last_event_type }}:
+                {{ displayDurationFromSeconds(engineer.engineer.last_event.secs_since_last_measure_event_type) }}
+              </p>
             </div>
             <hr/>
             <div>
               <div v-for="eventType in stats">
                 <p>{{ $trans("Event type") }}: <strong>{{ eventType.event_type }}</strong></p>
                 <p># events: {{ eventType.num_events }}</p>
-                <p v-if="eventType.sum_duration">Total duration: {{ eventType.sum_duration }}</p>
-                <p v-if="eventType.avg_duration">Avg. duration: {{ eventType.avg_duration }}</p>
+                <p v-if="eventType.sum_duration">
+                  Total duration: {{ displayDurationFromSeconds(eventType.sum_duration) }}</p>
+                <p v-if="eventType.avg_duration">
+                  Avg. duration: {{ displayDurationFromSeconds(eventType.avg_duration) }}</p>
               </div>
             </div>
           </div>
@@ -260,12 +342,12 @@
           </b-row>
           <footer class="modal-footer">
             <b-button @click="doorOpen" class="btn btn-info" type="button" variant="primary"
-                      :disabled="engineer.engineer.last_event && engineer.engineer.last_event.event_type === 'door open'"
+                      :disabled="currentState === DOOR_OPEN"
             >
               {{ $trans('Trigger door open') }}
             </b-button>
             <b-button @click="doorClosed" class="btn btn-info" type="button" variant="primary"
-                      :disabled="engineer.engineer.last_event && engineer.engineer.last_event.event_type === 'door closed'"
+                      :disabled="currentState === DOOR_CLOSED"
             >
               {{ $trans('Trigger door closed') }}
             </b-button>
@@ -285,28 +367,42 @@
 <script>
 import moment from 'moment'
 import ChartJsPluginDataLabels from 'chartjs-plugin-datalabels'
+import Multiselect from 'vue-multiselect'
+import AwesomeDebouncePromise from "awesome-debounce-promise";
 
 import BarChart from "../../components/BarChart.vue"
 import PieChart from "../../components/PieChart.vue"
+import orderModel from '../../models/orders/Order.js'
+import customerModel from '../../models/customer/Customer.js'
 import engineerModel from '../../models/company/UserEngineer.js'
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
-import {NEW_DATA_EVENTS} from "../../constants";
+import {DOOR_OPEN, DOOR_CLOSED, NEW_DATA_EVENTS} from "../../constants";
 import engineerEventModel from "../../models/company/EngineerEvent";
 import engineerEventTypeModel from "../../models/company/EngineerEventType";
 import assignedOrderModel from "../../models/mobile/AssignedOrder";
+import {componentMixin} from "../../utils";
+import Assign from "../../models/mobile/Assign";
 
 let d = new Date();
 const sunday = window.locale === 'en' ? 1 : 0
 const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
+  mixins: [componentMixin],
   components: {
     PieChart,
     BarChart,
     ChartJsPluginDataLabels,
+    Multiselect,
   },
   data() {
     return {
+      moment,
+      DOOR_OPEN,
+      DOOR_CLOSED,
+      order: orderModel.getFields(),
+      customers: [],
+      customerSearch: '',
       activeDateQueryMode: 'week',
       dateQueryMode: [
         {
@@ -437,8 +533,17 @@ export default {
     },
   },
   computed: {
+    buttonDisabled() {
+      return this.order.order_name === null
+    },
+    currentState() {
+      if (!this.engineer.engineer.last_event) {
+        return
+      }
+      return this.engineer.engineer.last_event.event_type === 'door open' ? DOOR_OPEN : DOOR_CLOSED
+    },
     getStatusClass() {
-      return this.engineer.engineer.last_event.event_type === 'door open' ? 'open' : 'closed'
+      return this.currentState === DOOR_OPEN ? 'open' : 'closed'
     },
     getActiveDataMode() {
       return this.dataModes.find(item => item.value === this.activeDataMode)
@@ -574,23 +679,72 @@ export default {
 
       return headers
     },
+    async submitForm() {
+      this.isLoading = true
+      try {
+        this.order.start_date = moment().toDate()
+        this.order.end_date = moment().toDate()
+        const newOrder = await orderModel.insert(this.order)
+
+        // assign order
+        const assigned_result = await Assign.assignToUser(this.engineer.id, [newOrder.order_id], true)
+        const assigned_order_id = assigned_result.assigned_data[newOrder.order_id]
+
+        // update event which should trigger a reload
+        await engineerEventModel.sendUpdate(this.engineer.engineer.last_event.id, assigned_order_id)
+
+        // reset order
+        this.order = orderModel.getFields()
+
+        this.isLoading = false
+        this.infoToast(this.$trans('Assigned'), this.$trans('Order created and assigned'))
+      } catch(error) {
+        console.log('Error assigning order', error)
+        this.errorToast(this.$trans('Error assigning order'))
+        this.isLoading = false
+      }
+    },
+    cancelForm() {
+      this.order = {}
+    },
+    customerLabel({ name, address, city}) {
+      return `${name} - ${address} - ${city}`
+    },
+    selectCustomer(option) {
+      this.fillCustomer(option)
+    },
+    fillCustomer(customer) {
+      this.order.customer_relation = customer.id
+      this.order.customer_id = customer.customer_id
+      this.order.order_name = customer.name
+      this.order.order_address = customer.address
+      this.order.order_city = customer.city
+      this.order.order_postal = customer.postal
+      this.order.order_country_code = customer.country_code
+      this.order.order_tel = customer.tel
+      this.order.order_mobile = customer.mobile
+      this.order.order_email = customer.email
+      this.order.order_contact = customer.contact
+      this.order.customer_remarks = customer.remarks
+    },
+    async getCustomers(query) {
+      if (query === '') return
+      this.isLoading = true
+
+      try {
+        this.customers = await customerModel.search(query)
+        this.isLoading = false
+      } catch(error) {
+        console.log('Error fetching customers', error)
+        this.errorToast(this.$trans('Error fetching customers'))
+        this.isLoading = false
+      }
+    },
     updateCounter() {
       const now = moment(new Date())
       const event_dts = moment(this.engineer.engineer.last_event.event_dts)
       const duration = moment.duration(now.diff(event_dts))
-      let hours = duration.hours()
-      if (hours < 10) {
-        hours = `0${hours}`
-      }
-      let minutes = duration.minutes()
-      if (minutes< 10) {
-        minutes = `0${minutes}`
-      }
-      let seconds = duration.seconds()
-      if (seconds < 10) {
-        seconds = `0${seconds}`
-      }
-      this.doorOpenCounter = `${hours}:${minutes}:${seconds}`
+      this.doorOpenCounter = this.displayDuration(duration)
     },
     clearCounter() {
       this.doorOpenCounter = null
@@ -607,7 +761,7 @@ export default {
         const assignedordersResult = await assignedOrderModel.listDevice(this.pk)
         this.assignedorders = assignedordersResult.assignedorders
         await this.render()
-        if (this.engineer.engineer.last_event.event_type === 'door open') {
+        if (this.currentState === DOOR_OPEN) {
           this.startCounter()
         } else {
           this.clearCounter()
@@ -958,6 +1112,7 @@ export default {
     },
   },
   async created() {
+    this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.companycode = this.$store.getters.getMemberCompanycode
     this.today = moment()
     this.month = this.today.month() + 1
@@ -977,7 +1132,7 @@ export default {
   },
 }
 </script>
-
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>
   p.no-data {
     text-align: center;
@@ -993,6 +1148,6 @@ export default {
   color: floralwhite;
 }
 .events {
-  width: 400px;
+  width: 600px;
 }
 </style>

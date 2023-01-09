@@ -45,6 +45,17 @@ class EngineerEvent extends BaseModel {
     return this.axios.post(this.url, body, headers).then((response) => response.data)
 
   }
+
+  async sendUpdate(event_id, assigned_order_id) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    let body = {
+      'assigned_order': assigned_order_id,
+    }
+
+    const url = `/company/engineerevent-update/${event_id}/`
+    return this.axios.patch(url, body, headers).then((response) => response.data)
+  }
 }
 
 let engineerEventModel = new EngineerEvent()
