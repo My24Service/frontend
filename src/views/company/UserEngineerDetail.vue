@@ -1,6 +1,123 @@
 <template>
 
   <b-overlay :show="isLoading" rounded="sm">
+
+    <footer class="modal-footer">
+      <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
+        {{ $trans('Back') }}
+      </b-button>
+    </footer>
+
+    <div v-if="this.companycode === 'grm'">
+      <EngineerEventOrderForm
+        v-if="engineer"
+        id="attach-order-modal"
+        ref="attach-order-modal"
+        @assigned="assignedOk"
+      />
+
+      <div class="app-detail events well" v-if="engineer">
+        <div v-if="engineer && engineer.engineer.last_event">
+          <h3>{{ engineer.full_name }}</h3>
+          <div>
+            <p>{{ $trans('Status') }}:
+              <span :class="getStatusClass">
+                {{ engineer.engineer.last_event.event_type }}
+                <span v-if="engineer.engineer.last_event.assigned_order">
+                  ({{ engineer.engineer.last_event.assigned_order.order_name }})
+                </span>
+              </span>
+            </p>
+            <div v-if="currentState === DOOR_OPEN && this.doorOpenCounter">
+              <h3>{{ $trans("Time open") }}: {{ this.doorOpenCounter }}</h3>
+            </div>
+            <div v-if="!engineer.engineer.last_event.assigned_order">
+              <b-button @click="function() { showOrderModal() }"
+                        class="btn btn-info" type="button" variant="primary"
+              >
+                {{ $trans("No order found, attach one")}}
+              </b-button>
+            </div>
+            <div v-if="engineer.engineer.last_event.measure_last_event_type">
+              <p>{{ $trans('Time') }} {{ engineer.engineer.last_event.measure_last_event_type }}:
+                {{ displayDurationFromSeconds(engineer.engineer.last_event.secs_since_last_measure_event_type) }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <hr/>
+        <div class="app-detail">
+          <h3>{{ $trans("Order history") }}</h3>
+          <b-table
+            id="assignedorders-table"
+            small
+            :busy='isLoading'
+            :fields="assignedordersFields"
+            :items="assignedorders"
+            responsive="md"
+            class="data-table"
+            sort-icon-left
+          ></b-table>
+        </div>
+
+        <hr/>
+        <div>
+          <h4>{{ $trans("Trigger event manually") }}</h4>
+          <b-row>
+            <b-col cols="6" role="group">
+              <b-form-group
+                label-size="sm"
+                label-class="p-sm-0"
+                v-bind:label="$trans('Event date')"
+                label-for="event_date"
+              >
+                <b-form-datepicker
+                  id="event_date"
+                  size="sm"
+                  class="p-sm-0"
+                  v-model="event_date"
+                  v-bind:placeholder="$trans('Choose a date')"
+                  value="event_date"
+                  locale="nl"
+                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                ></b-form-datepicker>
+              </b-form-group>
+            </b-col>
+            <b-col cols="6" role="group">
+              <b-form-group
+                label-size="sm"
+                label-class="p-sm-0"
+                :label="$trans('Event time')"
+                label-for="event_time"
+              >
+                <b-form-timepicker
+                  id="event_time"
+                  size="sm"
+                  v-model="event_time"
+                  :placeholder="$trans('Choose a time')"
+                  :hour12=false
+                ></b-form-timepicker>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <footer class="modal-footer">
+            <b-button @click="doorOpen" class="btn btn-info" type="button" variant="primary"
+                      :disabled="currentState === DOOR_OPEN"
+            >
+              {{ $trans('Trigger door open') }}
+            </b-button>
+            <b-button @click="doorClosed" class="btn btn-info" type="button" variant="primary"
+                      :disabled="currentState === DOOR_CLOSED"
+            >
+              {{ $trans('Trigger door closed') }}
+            </b-button>
+          </footer>
+        </div>
+      </div>
+    </div>
+
+    <h2>{{ $trans("Stats") }}</h2>
     <b-row align-v="center">
       <b-col cols="8">
         <div class="subnav-pills">
@@ -175,187 +292,6 @@
 
     </div>
 
-    <div v-if="this.companycode === 'grm'">
-      <div class="app-detail">
-        <h3>{{ $trans("Pending orders") }}</h3>
-        <b-table
-          id="assignedorders-table"
-          small
-          :busy='isLoading'
-          :fields="assignedordersFields"
-          :items="assignedorders"
-          responsive="md"
-          class="data-table"
-          sort-icon-left
-        ></b-table>
-      </div>
-
-      <div class="app-detail events well" v-if="engineer">
-        <div v-if="engineer && engineer.engineer.last_event">
-          <h3>{{ engineer.full_name }}</h3>
-          <div>
-            <p>{{ $trans('Status') }}:
-              <span :class="getStatusClass">
-                {{ engineer.engineer.last_event.event_type }}
-                <span v-if="engineer.engineer.last_event.assigned_order">
-                  ({{ engineer.engineer.last_event.assigned_order.order_name }})
-                </span>
-              </span>
-            </p>
-            <div v-if="currentState === DOOR_OPEN && this.doorOpenCounter">
-              <h3>{{ $trans("Time open") }}: {{ this.doorOpenCounter }}</h3>
-            </div>
-            <div v-if="!engineer.engineer.last_event.assigned_order">
-              <h4>{{ $trans("No order found, create one")}}</h4>
-              <div class="container app-form">
-                <b-form>
-                  <b-row>
-                    <b-col cols="8" role="group">
-                      <b-form-group
-                        label-size="sm"
-                        label-class="p-sm-0"
-                        v-bind:label="$trans('Search existing address')"
-                        label-for="order-customer-search"
-                      >
-                        <multiselect
-                          id="order-customer-search"
-                          track-by="id"
-                          :placeholder="$trans('Type to search')"
-                          open-direction="bottom"
-                          :options="customers"
-                          :multiple="false"
-                          :loading="isLoading"
-                          :internal-search="false"
-                          :options-limit="30"
-                          :limit="10"
-                          :max-height="600"
-                          :hide-selected="true"
-                          @search-change="getCustomersDebounced"
-                          @select="selectCustomer"
-                          :custom-label="customerLabel"
-                        >
-                          <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-                        </multiselect>
-                      </b-form-group>
-                    </b-col>
-                    <b-col cols="4" role="group">
-                      <b-form-group
-                        label-size="sm"
-                        label-class="p-sm-0"
-                        v-bind:label="$trans('Licence plate')"
-                        label-for="order_reference"
-                      >
-                        <b-form-input
-                          id="order_reference"
-                          size="sm"
-                          class="p-sm-0"
-                          v-model="order.order_reference"
-                        ></b-form-input>
-                      </b-form-group>
-                    </b-col>
-                  </b-row>
-                </b-form>
-                <b-row>
-                  <b-col cols="12" role="group">
-                    <h5 v-if="order.order_name || order.order_reference">{{ order.order_name}} - {{ order.order_reference }}</h5>
-                  </b-col>
-                </b-row>
-              </div>
-              <div class="mx-auto">
-                <footer class="modal-footer">
-                  <b-button
-                    @click="cancelForm"
-                    class="btn btn-secondary"
-                    type="button"
-                    variant="secondary"
-                  >
-                    {{ $trans('Cancel') }}
-                  </b-button>
-                  <b-button
-                    @click="submitForm"
-                    :disabled="buttonDisabled"
-                    class="btn btn-primary"
-                    type="button"
-                    variant="primary"
-                  >
-                    {{ $trans('Submit') }}
-                  </b-button>
-                </footer>
-              </div>
-            </div>
-            <div v-if="engineer.engineer.last_event.measure_last_event_type">
-              <p>{{ $trans('Time') }} {{ engineer.engineer.last_event.measure_last_event_type }}:
-                {{ displayDurationFromSeconds(engineer.engineer.last_event.secs_since_last_measure_event_type) }}
-              </p>
-            </div>
-            <hr/>
-            <div>
-              <div v-for="eventType in stats">
-                <p>{{ $trans("Event type") }}: <strong>{{ eventType.event_type }}</strong></p>
-                <p># events: {{ eventType.num_events }}</p>
-                <p v-if="eventType.sum_duration">
-                  Total duration: {{ displayDurationFromSeconds(eventType.sum_duration) }}</p>
-                <p v-if="eventType.avg_duration">
-                  Avg. duration: {{ displayDurationFromSeconds(eventType.avg_duration) }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <hr/>
-        <div>
-          <b-row>
-            <b-col cols="6" role="group">
-              <b-form-group
-                label-size="sm"
-                label-class="p-sm-0"
-                v-bind:label="$trans('Event date')"
-                label-for="event_date"
-              >
-                <b-form-datepicker
-                  id="event_date"
-                  size="sm"
-                  class="p-sm-0"
-                  v-model="event_date"
-                  v-bind:placeholder="$trans('Choose a date')"
-                  value="event_date"
-                  locale="nl"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                ></b-form-datepicker>
-              </b-form-group>
-            </b-col>
-            <b-col cols="6" role="group">
-              <b-form-group
-                label-size="sm"
-                label-class="p-sm-0"
-                :label="$trans('Event time')"
-                label-for="event_time"
-              >
-                <b-form-timepicker
-                  id="event_time"
-                  size="sm"
-                  v-model="event_time"
-                  :placeholder="$trans('Choose a time')"
-                  :hour12=false
-                ></b-form-timepicker>
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <footer class="modal-footer">
-            <b-button @click="doorOpen" class="btn btn-info" type="button" variant="primary"
-                      :disabled="currentState === DOOR_OPEN"
-            >
-              {{ $trans('Trigger door open') }}
-            </b-button>
-            <b-button @click="doorClosed" class="btn btn-info" type="button" variant="primary"
-                      :disabled="currentState === DOOR_CLOSED"
-            >
-              {{ $trans('Trigger door closed') }}
-            </b-button>
-          </footer>
-        </div>
-      </div>
-    </div>
-
     <footer class="modal-footer">
       <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
         {{ $trans('Back') }}
@@ -372,16 +308,13 @@ import AwesomeDebouncePromise from "awesome-debounce-promise";
 
 import BarChart from "../../components/BarChart.vue"
 import PieChart from "../../components/PieChart.vue"
-import orderModel from '../../models/orders/Order.js'
-import customerModel from '../../models/customer/Customer.js'
 import engineerModel from '../../models/company/UserEngineer.js'
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import {DOOR_OPEN, DOOR_CLOSED, NEW_DATA_EVENTS} from "../../constants";
 import engineerEventModel from "../../models/company/EngineerEvent";
-import engineerEventTypeModel from "../../models/company/EngineerEventType";
 import assignedOrderModel from "../../models/mobile/AssignedOrder";
 import {componentMixin} from "../../utils";
-import Assign from "../../models/mobile/Assign";
+import EngineerEventOrderForm from "./EngineerEventOrderForm";
 
 let d = new Date();
 const sunday = window.locale === 'en' ? 1 : 0
@@ -394,15 +327,13 @@ export default {
     BarChart,
     ChartJsPluginDataLabels,
     Multiselect,
+    EngineerEventOrderForm,
   },
   data() {
     return {
       moment,
       DOOR_OPEN,
       DOOR_CLOSED,
-      order: orderModel.getFields(),
-      customers: [],
-      customerSearch: '',
       activeDateQueryMode: 'week',
       dateQueryMode: [
         {
@@ -497,9 +428,7 @@ export default {
         label: 'Distance total',
         key: 'distance_total'
       }],
-      stats: [],
       engineer: null,
-      events: [],
       assignedorders: [],
       assignedordersFields: [
         {key: 'order.order_name', label: this.$trans('Name'), sortable: true, thAttr: {width: '25%'}},
@@ -553,6 +482,12 @@ export default {
     },
   },
   methods: {
+    showOrderModal() {
+      this.$refs['attach-order-modal'].show(this.engineer.engineer.last_event.id, this.engineer.id)
+    },
+    assignedOk() {
+      this.infoToast(this.$trans('Assigned'), this.$trans('Order created and assigned'))
+    },
     async doorOpen() {
       const event_dts = this.event_time && this.event_date ? `${this.event_date} ${this.event_time}` : null
       await engineerEventModel.sendDoorOpen(this.engineer.engineer.id, event_dts)
@@ -679,67 +614,6 @@ export default {
 
       return headers
     },
-    async submitForm() {
-      this.isLoading = true
-      try {
-        this.order.start_date = moment().toDate()
-        this.order.end_date = moment().toDate()
-        const newOrder = await orderModel.insert(this.order)
-
-        // assign order
-        const assigned_result = await Assign.assignToUser(this.engineer.id, [newOrder.order_id], true)
-        const assigned_order_id = assigned_result.assigned_data[newOrder.order_id]
-
-        // update event which should trigger a reload
-        await engineerEventModel.sendUpdate(this.engineer.engineer.last_event.id, assigned_order_id)
-
-        // reset order
-        this.order = orderModel.getFields()
-
-        this.isLoading = false
-        this.infoToast(this.$trans('Assigned'), this.$trans('Order created and assigned'))
-      } catch(error) {
-        console.log('Error assigning order', error)
-        this.errorToast(this.$trans('Error assigning order'))
-        this.isLoading = false
-      }
-    },
-    cancelForm() {
-      this.order = {}
-    },
-    customerLabel({ name, address, city}) {
-      return `${name} - ${address} - ${city}`
-    },
-    selectCustomer(option) {
-      this.fillCustomer(option)
-    },
-    fillCustomer(customer) {
-      this.order.customer_relation = customer.id
-      this.order.customer_id = customer.customer_id
-      this.order.order_name = customer.name
-      this.order.order_address = customer.address
-      this.order.order_city = customer.city
-      this.order.order_postal = customer.postal
-      this.order.order_country_code = customer.country_code
-      this.order.order_tel = customer.tel
-      this.order.order_mobile = customer.mobile
-      this.order.order_email = customer.email
-      this.order.order_contact = customer.contact
-      this.order.customer_remarks = customer.remarks
-    },
-    async getCustomers(query) {
-      if (query === '') return
-      this.isLoading = true
-
-      try {
-        this.customers = await customerModel.search(query)
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
-        this.isLoading = false
-      }
-    },
     updateCounter() {
       const now = moment(new Date())
       const event_dts = moment(this.engineer.engineer.last_event.event_dts)
@@ -756,8 +630,6 @@ export default {
     async loadData() {
       try {
         this.engineer = await engineerModel.detail(this.pk)
-        this.events = await engineerEventModel.getForEngineer(this.engineer.engineer.id)
-        this.stats = await engineerEventTypeModel.getStatsForEngineer(this.engineer.engineer.id)
         const assignedordersResult = await assignedOrderModel.listDevice(this.pk)
         this.assignedorders = assignedordersResult.assignedorders
         await this.render()
