@@ -16,6 +16,12 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this event?') }}</p>
     </b-modal>
 
+    <EngineerEventOrderForm
+      id="attach-order-modal"
+      ref="attach-order-modal"
+      @assigned="assignedOk"
+    />
+
     <div class="overflow-auto">
       <Pagination
         v-if="!isLoading"
@@ -46,14 +52,23 @@
           </div>
         </template>
         <template #cell(secs_since_last_measure_event_type)="data">
-          {{ displayDurationFromSeconds(data.item.secs_since_last_measure_event_type) }}
+          <span v-if="data.item.secs_since_last_measure_event_type">
+            {{ displayDurationFromSeconds(data.item.secs_since_last_measure_event_type) }}
+          </span>
+        </template>
+        <template #cell(event_dts)="data">
+          {{ moment(data.item.event_dts).format('YYYY-MM-DD hh:mm:s') }}
         </template>
         <template #cell(assigned_order)="data">
           <span v-if="data.item.assigned_order">
             {{ data.item.assigned_order.order_name }}, {{ data.item.assigned_order.order_city }}
           </span>
-          <span v-if="!data.item.assigned_order">
-            {{ $trans("No order") }}
+          <span v-if="!data.item.assigned_order && data.item.last_measure_event">
+              <b-button @click="function() { showOrderModal(data.item.id, data.item.user_id) }"
+                        class="btn btn-info" type="button" variant="primary"
+              >
+            {{ $trans("No order, create one") }}
+              </b-button>
           </span>
         </template>
         <template #cell(icons)="data">
@@ -70,6 +85,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 import engineerEventModel from '../../models/company/EngineerEvent.js'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -77,6 +93,11 @@ import Pagination from "../../components/Pagination.vue"
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import PillsEngineer from "./PillsEngineer";
 import {componentMixin} from "../../utils";
+import EngineerEventOrderForm from "./EngineerEventOrderForm";
+import {NEW_DATA_EVENTS} from "../../constants";
+import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
+
+const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
   mixins: [componentMixin],
@@ -86,9 +107,11 @@ export default {
     Pagination,
     PillsCompanyUsers,
     PillsEngineer,
+    EngineerEventOrderForm
   },
   data() {
     return {
+      moment,
       companycode: null,
       searchQuery: null,
       model: engineerEventModel,
@@ -112,6 +135,14 @@ export default {
     this.loadData()
   },
   methods: {
+    // create order
+    showOrderModal(event_id, engineer_user_id) {
+      this.$refs['attach-order-modal'].show(event_id, engineer_user_id)
+    },
+    assignedOk() {
+      this.infoToast(this.$trans('Assigned'), this.$trans('Order created and assigned'))
+    },
+
     // delete
     showDeleteModal(id) {
       this.engineerEventTypeModelPk = id
@@ -143,7 +174,20 @@ export default {
         this.errorToast(this.$trans('Error loading events'))
         this.isLoading = false
       }
-    }
-  }
+    },
+    async onNewData(data) {
+      if (data.type === NEW_DATA_EVENTS.ENGINEER_EVENT) {
+        await this.loadData()
+      }
+    },
+  },
+  async mounted() {
+    await memberNewDataSocket.init(NEW_DATA_EVENTS.ENGINEER_EVENT)
+    memberNewDataSocket.setOnmessageHandler(this.onNewData)
+    memberNewDataSocket.getSocket()
+  },
+  beforeDestroy() {
+    memberNewDataSocket.removeOnmessageHandler(NEW_DATA_EVENTS.ENGINEER_EVENT)
+  },
 }
 </script>
