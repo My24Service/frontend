@@ -758,7 +758,7 @@ export default {
       errorMessage: null,
       customers: [],
       customerSearch: '',
-      selectedCustomer: null,
+      getCustomersDebounced: null,
       engineers: [],
       selectedEngineers: [],
       files: [],

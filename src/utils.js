@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 import my24 from './services/my24'
 import orderNotAcceptedModel from './models/orders/OrderNotAccepted.js'
 import {
@@ -132,6 +134,25 @@ let componentMixin = {
     },
   },
   methods: {
+    displayDurationFromSeconds(seconds) {
+      return this.displayDuration(moment.duration(seconds*1000))
+    },
+    displayDuration(duration) {
+      let hours = duration.hours()
+      if (hours < 10) {
+        hours = `0${hours}`
+      }
+      let minutes = duration.minutes()
+      if (minutes< 10) {
+        minutes = `0${minutes}`
+      }
+      let seconds = duration.seconds()
+      if (seconds < 10) {
+        seconds = `0${seconds}`
+      }
+      return `${hours}:${minutes}:${seconds}`
+
+    },
     async doFetchUnacceptedCountAndUpdateStore() {
       const countResult = await orderNotAcceptedModel.getCount()
       await this.$store.dispatch('setUnacceptedCount', countResult.count)

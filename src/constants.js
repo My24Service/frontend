@@ -17,3 +17,6 @@ export const AUTH_LEVELS = {
 
 export const NO_IMAGE_URL = `${document.location.origin}/assets/no-img.png`
 export const PIXEL_URL = `${document.location.origin}/assets/pixel.png`
+
+export const DOOR_OPEN = 'door open'
+export const DOOR_CLOSED = 'door closed'
