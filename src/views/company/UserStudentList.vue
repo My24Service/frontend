@@ -102,17 +102,17 @@
 </template>
 
 <script>
-import my24 from '@/services/my24.js'
-import PillsCompanyUsers from '@/components/PillsCompanyUsers.vue'
-import studentUserModel from '@/models/company/UserStudent.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
+import my24 from '../../services/my24.js'
+import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
+import studentUserModel from '../../models/company/UserStudent.js'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import Pagination from "../../components/Pagination.vue"
 
 export default {
   name: 'UserstudentuserList',

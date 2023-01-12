@@ -61,6 +61,16 @@ class Material extends BaseModel {
     return this.axios.get(`${this.url}stats_table/?${listArgs.join('&')}`)
       .then((response) => response.data)
   }
+
+  getStatsTableUrl(year) {
+    let listArgs = [`year=${year}`]
+
+    if (this.searchQuery) {
+      listArgs.push(`q=${this.searchQuery}`)
+    }
+
+    return `/inventory/stats_table_export/?${listArgs.join('&')}`
+  }
 }
 
 let materialModel = new Material()

@@ -40,6 +40,10 @@
               <ButtonLinkSearch
                 v-bind:method="function() { showSearchModal() }"
               />
+              <ButtonLinkDownload
+                v-bind:method="function() { downloadList() }"
+                v-bind:title="$trans('Download')"
+              />
             </b-button-group>
           </b-button-toolbar>
         </div>
@@ -73,8 +77,10 @@
 
 <script>
 import materialModel from '../../models/inventory/Material.js'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import SearchModal from '@/components/SearchModal.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
+import my24 from "../../services/my24";
 
 let d = new Date();
 
@@ -82,11 +88,13 @@ export default {
   name: "StatsTable",
   components: {
     ButtonLinkSearch,
+    ButtonLinkDownload,
     SearchModal,
   },
   data() {
     return {
       model: materialModel,
+      inventoryHeaders: null,
       isLoading: false,
       tableFields: [
         {thAttr: {width: '20%'}, key: 'supplier.name', label: this.$trans('Supplier'), sortable: true},
@@ -110,6 +118,11 @@ export default {
     this.loadData()
   },
   methods: {
+    // download
+    downloadList() {
+      const url = this.model.getStatsTableUrl(this.year)
+      my24.downloadItem(url, 'stats_table.xlsx')
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
