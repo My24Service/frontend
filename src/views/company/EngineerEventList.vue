@@ -57,7 +57,7 @@
           </span>
         </template>
         <template #cell(event_dts)="data">
-          {{ moment(data.item.event_dts).format('YYYY-MM-DD hh:mm:s') }}
+          {{ moment(data.item.event_dts).format('YYYY-MM-DD HH:mm:ss') }}
         </template>
         <template #cell(assigned_order)="data">
           <span v-if="data.item.assigned_order">
