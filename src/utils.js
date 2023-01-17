@@ -92,6 +92,10 @@ function hasAccessRouteAuthLevel(authLevelNeeded, store) {
     return authLevelUser === AUTH_LEVELS.SALES || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
   }
 
+  if (authLevelNeeded === AUTH_LEVELS.CUSTOMER) {
+    return authLevelUser === AUTH_LEVELS.CUSTOMER || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+  }
+
   if (authLevelNeeded === AUTH_LEVELS.STUDENT) {
     return authLevelUser === AUTH_LEVELS.STUDENT || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
   }
