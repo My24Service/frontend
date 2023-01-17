@@ -615,7 +615,7 @@ export default {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
+        console.log('invalid?', this.v$.$invalid, this.v$.$errors)
         return
       }
 
@@ -635,10 +635,11 @@ export default {
 
         let newOrder
         try {
-          const newOrder = await orderModel.insert(this.order)
+          await orderModel.insert(this.order)
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
+          this.$router.go(-1)
         } catch(error) {
           console.log('Error creating order', error)
           this.errorToast(this.$trans('Error creating order'))
