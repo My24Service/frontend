@@ -20,6 +20,7 @@ import DocumentForm from '../views/orders/DocumentForm.vue'
 
 import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
+import {AUTH_LEVELS} from "../constants";
 
 
 export default [
@@ -47,6 +48,7 @@ export default [
   children: [
     // orders
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-list',
       path: '/orders/orders',
       components: {
@@ -55,6 +57,7 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-edit',
       path: '/orders/orders/form/:pk(\\d+)',
       props: {
@@ -67,6 +70,7 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-add',
       path: '/orders/orders/form',
       components: {
@@ -91,6 +95,7 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-view',
       path: '/orders/orders/view/:pk',
       props: {
@@ -103,6 +108,7 @@ export default [
       },
     },
 	  {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
 	  	name: 'past-order-list',
 			path: '/orders/past-orders',
 			components: {
@@ -119,6 +125,7 @@ export default [
       }
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'orders-not-accepted',
       path: '/orders/orders-not-accepted',
       components: {
@@ -136,6 +143,7 @@ export default [
     },
     // documents
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-documents',
       path: '/orders/orders/documents/:orderPk',
       components: {
@@ -148,6 +156,7 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-document-add',
       path: '/orders/orders/documents/form/:orderPk',
       components: {
@@ -160,6 +169,7 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-document-edit',
       path: '/orders/orders/documents/edit/:pk',
       components: {
@@ -235,6 +245,7 @@ export default [
     },
     // stats
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-year-stats',
       path: '/orders/year-stats',
       components: {
@@ -247,6 +258,7 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
       name: 'order-month-stats',
       path: '/orders/month-stats',
       components: {
