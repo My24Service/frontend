@@ -379,6 +379,17 @@ export default {
         },
         responsive: true,
         maintainAspectRatio: false,
+        plugins: {
+          datalabels: {
+            formatter: (value, ctx) => {
+              let datasets = ctx.chart.data.datasets;
+              if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
+                return this.displayDurationFromSeconds(value)
+              }
+            },
+            color: '#fff',
+          },
+        },
       },
       optionsPie: {
         responsive: true,
@@ -718,8 +729,8 @@ export default {
           pieMonthGraphData,
           barMonthGraphData,
           colorsMonth,
-          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${totals.sum_work_total_all})`,
-          `Total work hours per ${this.activeDateQueryMode} (Total: ${totals.sum_work_total_all})`
+          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${this.displayDurationFromSeconds(totals.sum_work_total_all)})`,
+          `Total work hours per ${this.activeDateQueryMode} (Total: ${this.displayDurationFromSeconds(totals.sum_work_total_all)})`
         )
       }
 
@@ -791,8 +802,8 @@ export default {
           pieMonthGraphData,
           barMonthGraphData,
           colorsMonth,
-          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${totals.sum_work_total_all})`,
-          `Total work hours per ${this.activeDateQueryMode} (Total: ${totals.sum_work_total_all})`
+          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${this.displayDurationFromSeconds(totals.sum_work_total_all)})`,
+          `Total work hours per ${this.activeDateQueryMode} (Total: ${this.displayDurationFromSeconds(totals.sum_work_total_all)})`
         )
       }
 
@@ -860,8 +871,8 @@ export default {
           pieMonthGraphData,
           barMonthGraphData,
           colorsMonth,
-          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${totals.sum_work_total_all})`,
-          `Total work hours per ${this.activeDateQueryMode} (Total: ${totals.sum_work_total_all})`
+          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${this.displayDurationFromSeconds(totals.sum_work_total_all)})`,
+          `Total work hours per ${this.activeDateQueryMode} (Total: ${this.displayDurationFromSeconds(totals.sum_work_total_all)})`
         )
       }
 
@@ -929,8 +940,8 @@ export default {
           pieMonthGraphData,
           barMonthGraphData,
           colorsMonth,
-          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${totals.sum_work_total_all})`,
-          `Total work hours per ${this.activeDateQueryMode} (Total: ${totals.sum_work_total_all})`
+          `Total work hours per ${this.getActiveDataMode.tableHeader.toLowerCase()} (Total: ${this.displayDurationFromSeconds(totals.sum_work_total_all)})`,
+          `Total work hours per ${this.activeDateQueryMode} (Total: ${this.displayDurationFromSeconds(totals.sum_work_total_all)})`
         )
       }
     },
