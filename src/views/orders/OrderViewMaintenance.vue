@@ -166,7 +166,19 @@
           type="button"
           variant="secondary"
         >
-          {{ $trans('Recreate workorder PDF') }}</b-button>
+          {{ $trans('Recreate workorder PDF') }}
+        </b-button>
+        <b-button
+          v-if="!past && !isCustomer"
+          id="recreateWorkorderPdfButtonGotenberg"
+          @click="recreateWorkorderPdfGotenberg"
+          :disabled="buttonDisabled"
+          class="btn btn-danger"
+          type="button"
+          variant="secondary"
+        >
+          {{ $trans('Recreate workorder PDF (new)') }}
+        </b-button>
         <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
           {{ $trans('Back') }}</b-button>
       </footer>
@@ -227,7 +239,24 @@ export default {
         this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
         this.isLoading = false
         this.buttonDisabled = false
-        this.loadOrder()
+        await this.loadOrder()
+      } catch(err) {
+        console.log('Error recreating workorder', err)
+        this.errorToast(this.$trans('Error recreating workorder'))
+        this.buttonDisabled = false
+        this.isLoading = false
+      }
+    },
+    async recreateWorkorderPdfGotenberg() {
+      this.isLoading = true
+      this.buttonDisabled = true
+
+      try {
+        await orderModel.recreateWorkorderPdfGotenberg(this.pk)
+        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
+        this.isLoading = false
+        this.buttonDisabled = false
+        await this.loadOrder()
       } catch(err) {
         console.log('Error recreating workorder', err)
         this.errorToast(this.$trans('Error recreating workorder'))
