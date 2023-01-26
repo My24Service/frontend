@@ -64,6 +64,10 @@ class Order extends BaseModel {
     return this.axios.post(`${this.url}${pk}/recreate_pdf/`)
   }
 
+  recreateWorkorderPdfGotenberg(pk) {
+    return this.axios.post(`${this.url}${pk}/recreate_pdf/?gotenberg=1`)
+  }
+
   preInsert(order) {
     // check date types
     if (typeof order.start_date === 'object') {

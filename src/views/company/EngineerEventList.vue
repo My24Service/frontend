@@ -47,6 +47,10 @@
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
                 />
+                <ButtonLinkDownload
+                  v-bind:method="function() { downloadList() }"
+                  v-bind:title="$trans('Download events')"
+                />
               </b-button-group>
             </b-button-toolbar>
           </div>
@@ -96,6 +100,8 @@ import {componentMixin} from "../../utils";
 import EngineerEventOrderForm from "./EngineerEventOrderForm";
 import {NEW_DATA_EVENTS} from "../../constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
+import my24 from "../../services/my24";
+import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
@@ -107,7 +113,8 @@ export default {
     Pagination,
     PillsCompanyUsers,
     PillsEngineer,
-    EngineerEventOrderForm
+    EngineerEventOrderForm,
+    ButtonLinkDownload,
   },
   data() {
     return {
@@ -135,6 +142,14 @@ export default {
     this.loadData()
   },
   methods: {
+    // download
+    downloadList() {
+      if (confirm(this.$trans('Are you sure you want to export all events?'))) {
+        const url = "/company/events-export-xls/"
+
+        my24.downloadItem(url, 'events.xlsx')
+      }
+    },
     // create order
     showOrderModal(event_id, engineer_user_id) {
       this.$refs['attach-order-modal'].show(event_id, engineer_user_id)
