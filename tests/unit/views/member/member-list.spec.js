@@ -3,6 +3,7 @@ import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
+import Vuex from "vuex";
 
 import localVue from '../../index'
 import MemberList from '@/views/member/MemberList.vue'
@@ -25,12 +26,37 @@ const router = new VueRouter({routes})
 
 
 describe('MemberList.vue', () => {
+  let store
+  let actions
+  let getters
+
+  beforeEach(() => {
+    getters = {
+    }
+
+    actions = {
+    }
+
+    store = new Vuex.Store({
+      actions,
+      getters,
+      state: {
+        userInfo: {
+          pk: 1,
+          is_staff: true,
+          customer_user: null
+        }
+      }
+    })
+  })
+
   it('exists', async () => {
     axios.get.mockResolvedValueOnce(memberResponse);
 
     const wrapper = shallowMount(MemberList, {
       localVue,
       router,
+      store,
       mocks: {
         $trans: (f) => f
       },
@@ -48,6 +74,7 @@ describe('MemberList.vue', () => {
     const wrapper = mount(MemberList, {
       localVue,
       router,
+      store,
       mocks: {
         $trans: (f) => f
       },
@@ -65,6 +92,7 @@ describe('MemberList.vue', () => {
     const wrapper = mount(MemberList, {
       localVue,
       router,
+      store,
       mocks: {
         $trans: (f) => f
       },

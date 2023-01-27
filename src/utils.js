@@ -74,10 +74,9 @@ function getUserAuthLevel(store) {
 
 function hasAccessRouteAuthLevel(authLevelNeeded, store) {
   const authLevelUser = getUserAuthLevel(store)
-  const isSuperUserOrStaff = authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
 
   if (authLevelNeeded === AUTH_LEVELS.STAFF) {
-    return authLevelUser === isSuperUserOrStaff
+    return authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
   }
 
   if (authLevelNeeded === AUTH_LEVELS.SUPERUSER) {
@@ -85,23 +84,23 @@ function hasAccessRouteAuthLevel(authLevelNeeded, store) {
   }
 
   if (authLevelNeeded === AUTH_LEVELS.PLANNING) {
-    return authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+    return authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
   }
 
   if (authLevelNeeded === AUTH_LEVELS.SALES) {
-    return authLevelUser === AUTH_LEVELS.SALES || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+    return authLevelUser === AUTH_LEVELS.SALES || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
   }
 
   if (authLevelNeeded === AUTH_LEVELS.CUSTOMER) {
-    return authLevelUser === AUTH_LEVELS.CUSTOMER || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+    return authLevelUser === AUTH_LEVELS.CUSTOMER || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
   }
 
   if (authLevelNeeded === AUTH_LEVELS.STUDENT) {
-    return authLevelUser === AUTH_LEVELS.STUDENT || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+    return authLevelUser === AUTH_LEVELS.STUDENT || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
   }
 
   if (authLevelNeeded === AUTH_LEVELS.ENGINEER) {
-    return authLevelUser === AUTH_LEVELS.ENGINEER || authLevelUser === AUTH_LEVELS.PLANNING || isSuperUserOrStaff
+    return authLevelUser === AUTH_LEVELS.ENGINEER || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
   }
 
   return false

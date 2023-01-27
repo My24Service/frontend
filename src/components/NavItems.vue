@@ -55,13 +55,17 @@
       <div v-if="hasMembers" class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
-      <b-nav-item :active="isActive('members')" v-if="hasMembers" to="/members/members">{{ $trans('Members') }}</b-nav-item>
+      <b-nav-item
+        :active="isActive('members')"
+        v-if="hasMembers"
+        to="/members/members">{{ $trans('Members') }}
+      </b-nav-item>
     </b-navbar-nav>
   </span>
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
+import { componentMixin } from '../utils.js'
 
 export default {
   mixins: [componentMixin],
@@ -95,7 +99,7 @@ export default {
       return this.hasAccessToModule('company')
     },
     hasMembers() {
-      return this.isStaff && this.isSuperuser
+      return this.isStaff || this.isSuperuser
     },
     unacceptedCount() {
       return this.$store.state.unacceptedCount

@@ -29,6 +29,7 @@
             <b-button-toolbar>
               <b-button-group class="mr-1">
                 <ButtonLinkAdd
+                  v-if="isSuperuser"
                   router_name="member-add"
                   v-bind:title="$trans('New member')"
                 />
@@ -83,8 +84,10 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import { componentMixin } from '../../utils.js'
 
 export default {
+  mixins: [componentMixin],
   components: {
     IconLinkEdit,
     ButtonLinkRefresh,

@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
+import { componentMixin } from '../utils.js'
 
 export default {
   mixins: [componentMixin],
@@ -48,19 +48,19 @@ export default {
   },
   computed: {
     hasMembers() {
-      return this.hasAccessToModule('members', 'members')
+      return this.isSuperuser || this.isStaff
     },
     hasDeletedMembers() {
-      return this.hasAccessToModule('members', 'deleted-members')
+      return this.isSuperuser || this.isStaff
     },
     hasContracts() {
-      return this.hasAccessToModule('members', 'contracts')
+      return this.isSuperuser || this.isStaff
     },
     hasModules() {
-      return this.hasAccessToModule('members', 'modules')
+      return this.isSuperuser
     },
     hasModuleParts() {
-      return this.hasAccessToModule('members', 'module-parts')
+      return this.isSuperuser
     },
   },
 }
