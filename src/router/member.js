@@ -18,7 +18,7 @@ export default [
   component: TheAppLayout,
   children: [
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
+        meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
         name: 'member-list',
         path: '/members/members',
         components: {
@@ -31,7 +31,7 @@ export default [
         },
       },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
       name: 'member-deleted-list',
       path: '/members/deleted-members',
       components: {
@@ -44,7 +44,7 @@ export default [
       },
     },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
+        meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
         name: 'member-edit',
         path: '/members/members/form/:pk',
         props: {
@@ -71,7 +71,7 @@ export default [
       },
       // contracts
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
+        meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
         name: 'contract-list',
         path: '/members/contracts',
         components: {
@@ -84,7 +84,7 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
+        meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
         name: 'contract-edit',
         path: '/members/contracts/form/:pk',
         props: {
@@ -97,7 +97,7 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
+        meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
         name: 'contract-add',
         path: '/members/contracts/form',
         components: {
