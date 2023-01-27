@@ -287,7 +287,6 @@ export default {
 
       if (this.v$.$invalid) {
         console.log('invalid?', this.v$.$invalid)
-        this.submitClicked = false
         this.buttonDisabled = false
         return
       }
