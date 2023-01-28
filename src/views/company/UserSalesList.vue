@@ -41,6 +41,7 @@
             <b-button-toolbar>
               <b-button-group class="mr-1">
                 <ButtonLinkAdd
+                  v-if="isStaff || isSuperuser"
                   router_name="salesuser-add"
                   v-bind:title="$trans('New sales user')"
                 />
@@ -80,17 +81,19 @@
 </template>
 
 <script>
-import PillsCompanyUsers from '@/components/PillsCompanyUsers.vue'
-import salesUserModel from '@/models/company/UserSales.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
+import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
+import salesUserModel from '../../models/company/UserSales.js'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import Pagination from "../../components/Pagination.vue"
+import { componentMixin } from '../../utils.js'
 
 export default {
+  mixins: [componentMixin],
   name: 'UserSalesList',
   components: {
     PillsCompanyUsers,

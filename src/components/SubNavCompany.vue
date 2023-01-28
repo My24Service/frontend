@@ -16,13 +16,13 @@
       <b-nav-item
         v-if="memberType === 'maintenance'"
         :active="isActive('users')"
-        :to="{ name: 'users-engineers' }">
+        :to="getToRouteMaintenanceUsers">
         {{ $trans('Users') }}
       </b-nav-item>
       <b-nav-item
         v-if="memberType === 'temps'"
         :active="isActive('users')"
-        :to="{ name: 'users-studentusers' }">
+        :to="getToRouteTempsUsers">
         {{ $trans('Users') }}
       </b-nav-item>
       <b-nav-item
@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
+import { componentMixin } from '../utils.js'
 
 export default {
   mixins: [componentMixin],
@@ -67,7 +67,7 @@ export default {
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')
-      return parts[2] === item
+      return parts[2] === item || parts[2].indexOf(item) !== -1
     }
   },
   created() {
@@ -78,6 +78,28 @@ export default {
     })
   },
   computed: {
+    getToRouteMaintenanceUsers() {
+      if (this.hasAccessToModule('company', 'engineer-users')) {
+        return { name: 'users-engineers' }
+      }
+
+      if (this.hasAccessToModule('company', 'sales-users')) {
+        return { name: 'users-salesusers' }
+      }
+
+      if (this.hasAccessToModule('company', 'customer-users')) {
+        return { name: 'users-customerusers' }
+      }
+
+      return { name: 'users-planningusers' }
+    },
+    getToRouteTempsUsers() {
+      if (this.hasAccessToModule('company', 'student-users')) {
+        return { name: 'users-studentusers' }
+      }
+
+      return { name: 'users-planningusers' }
+    },
     hasDashBoard() {
       return this.hasAccessToModule('company', 'dashboard')
     },
@@ -97,7 +119,7 @@ export default {
       return true
     },
     hasWorkhours() {
-      return true
+      return this.hasAccessToModule('company', 'workhours')
     }
   },
 }

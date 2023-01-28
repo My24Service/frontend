@@ -110,31 +110,42 @@ class My24 extends BaseModel {
 
   hasAccessToModule(config) {
     // console.log(config)
-    // staff and superuser can see all
-    if (config.isStaff || config.isSuperuser) {
-      return true
-    }
 
     // just pages like / and /no-access
     if (config.lenParts === 1) {
       return true;
     }
 
-    if (!(config.module in config.contract)) {
+    if (!config.isStaff && !config.isSuperuser && config.module !== 'members' && !(config.module in config.contract)) {
+      console.debug('not allowed: module not in contract')
       return false;
     }
 
     if (!config.part) {
+      console.debug('allowed: no part')
       return true;
     }
 
-    const allowed = ['form', 'view', 'info', 'users'];
-
-    if (allowed.indexOf(config.part) !== -1) {
+    const parts_always_allowed = [
+      'form', 'view', 'info', 'company', 'activity', 'pictures', 'planning-users'
+    ]
+    if (parts_always_allowed.indexOf(config.part) !== -1) {
+      console.debug(`allowed: part "${config.part}" in always allowed (${parts_always_allowed.join('/')})`)
       return true;
     }
 
-    return config.contract[config.module].indexOf(config.part) !== -1;
+    if (config.isStaff || config.isSuperuser) {
+      const allowed_staff = ['members', 'contracts', 'deleted-members', 'modules', 'module-parts']
+
+      if (allowed_staff.indexOf(config.part) !== -1) {
+        console.debug('allowed because member or staff and member', config.part)
+        return true;
+      }
+    }
+
+    const contract_result = config.contract[config.module].indexOf(config.part) !== -1;
+    console.debug(`end of hasAccessToModule, config.part=${config.part}, contract_result=${contract_result}`)
+    return contract_result
   }
 
   getModelsFromString(member_contract) {

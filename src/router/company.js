@@ -43,6 +43,7 @@ import SubNavInventory from "../components/SubNavInventory";
 import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
 import EngineerEventList from "../views/company/EngineerEventList";
+import {AUTH_LEVELS} from "../constants";
 
 
 export default [
@@ -89,7 +90,7 @@ export default [
     // users
     {
       name: 'users-engineers',
-      path: '/company/users/engineers',
+      path: '/company/engineer-users',
       components: {
         'app-content': UserEngineerList,
         'app-subnav': SubNavCompany
@@ -101,7 +102,7 @@ export default [
     },
     {
       name: 'engineer-detail',
-      path: '/company/users/engineers/detail/:pk',
+      path: '/company/engineer-users/detail/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -113,7 +114,7 @@ export default [
     },
     {
       name: 'engineer-edit',
-      path: '/company/users/engineers/form/:pk',
+      path: '/company/engineer-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -125,7 +126,7 @@ export default [
     },
     {
       name: 'engineer-add',
-      path: '/company/users/engineers/form',
+      path: '/company/engineer-users/form',
       components: {
         'app-content': UserEngineerForm,
         'app-subnav': SubNavCompany
@@ -138,7 +139,7 @@ export default [
     // engineer events
     {
       name: 'engineer-event-list',
-      path: '/company/users/engineers/events',
+      path: '/company/engineer-users/events',
       components: {
         'app-content': EngineerEventList,
         'app-subnav': SubNavInventory
@@ -152,7 +153,7 @@ export default [
     // engineer event types
     {
       name: 'engineer-event-type-list',
-      path: '/company/users/engineers/event-types',
+      path: '/company/engineer-users/event-types',
       components: {
         'app-content': EngineerEventTypeList,
         'app-subnav': SubNavInventory
@@ -164,7 +165,7 @@ export default [
     },
     {
       name: 'engineer-event-type-edit',
-      path: '/company/users/engineers/event-types/form/:pk',
+      path: '/company/engineer-users/event-types/form/:pk',
       components: {
         'app-content': EngineerEventTypeForm,
         'app-subnav': SubNavInventory
@@ -176,7 +177,7 @@ export default [
     },
     {
       name: 'engineer-event-type-add',
-      path: '/company/users/engineers/event-types/form',
+      path: '/company/engineer-users/event-types/form',
       components: {
         'app-content': EngineerEventTypeForm,
         'app-subnav': SubNavInventory
@@ -188,7 +189,7 @@ export default [
     },
     {
       name: 'users-salesusers',
-      path: '/company/users/salesusers',
+      path: '/company/sales-users',
       components: {
         'app-content': UserSalesList,
         'app-subnav': SubNavCompany
@@ -200,7 +201,7 @@ export default [
     },
     {
       name: 'salesuser-edit',
-      path: '/company/users/salesusers/form/:pk',
+      path: '/company/sales-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -211,8 +212,9 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
       name: 'salesuser-add',
-      path: '/company/users/salesusers/form',
+      path: '/company/sales-users/form',
       components: {
         'app-content': UserSalesForm,
         'app-subnav': SubNavCompany
@@ -224,7 +226,7 @@ export default [
     },
     {
       name: 'users-customerusers',
-      path: '/company/users/customerusers',
+      path: '/company/customer-users',
       components: {
         'app-content': UserCustomerList,
         'app-subnav': SubNavCompany
@@ -236,7 +238,7 @@ export default [
     },
     {
       name: 'customeruser-edit',
-      path: '/company/users/customerusers/form/:pk',
+      path: '/company/customer-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -247,8 +249,9 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
       name: 'customeruser-add',
-      path: '/company/users/customerusers/form',
+      path: '/company/customer-users/form',
       components: {
         'app-content': UserCustomerForm,
         'app-subnav': SubNavCompany
@@ -258,9 +261,10 @@ export default [
         'app-subnav': {}
       },
     },
+    // planning users
     {
       name: 'users-planningusers',
-      path: '/company/users/planningusers',
+      path: '/company/planning-users',
       components: {
         'app-content': UserPlanningList,
         'app-subnav': SubNavCompany
@@ -272,7 +276,7 @@ export default [
     },
     {
       name: 'planninguser-edit',
-      path: '/company/users/planningusers/form/:pk',
+      path: '/company/planning-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -284,7 +288,7 @@ export default [
     },
     {
       name: 'planninguser-add',
-      path: '/company/users/planningusers/form',
+      path: '/company/planning-users/form',
       components: {
         'app-content': UserPlanningForm,
         'app-subnav': SubNavCompany
@@ -297,7 +301,7 @@ export default [
     // API
     {
       name: 'users-apiusers',
-      path: '/company/users/apiusers',
+      path: '/company/api-users',
       components: {
         'app-content': UserApiList,
         'app-subnav': SubNavCompany
@@ -309,7 +313,7 @@ export default [
     },
     {
       name: 'apiuser-add',
-      path: '/company/users/apiusers/form',
+      path: '/company/api-users/form',
       components: {
         'app-content': UserApiForm,
         'app-subnav': SubNavCompany
@@ -321,7 +325,7 @@ export default [
     },
     {
       name: 'apiuser-edit',
-      path: '/company/users/apiusers/form/:pk',
+      path: '/company/api-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -334,7 +338,7 @@ export default [
     // students
     {
       name: 'users-studentusers',
-      path: '/company/users/studentusers',
+      path: '/company/student-users',
       components: {
         'app-content': UserStudentList,
         'app-subnav': SubNavCompany
@@ -346,7 +350,7 @@ export default [
     },
     {
       name: 'studentuser-add',
-      path: '/company/users/studentusers/form',
+      path: '/company/student-users/form',
       components: {
         'app-content': UserStudentForm,
         'app-subnav': SubNavCompany
@@ -358,7 +362,7 @@ export default [
     },
     {
       name: 'studentuser-edit',
-      path: '/company/users/studentusers/form/:pk',
+      path: '/company/student-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -370,7 +374,7 @@ export default [
     },
     {
       name: 'studentuser-detail',
-      path: '/company/users/studentusers/view/:pk',
+      path: '/company/student-users/view/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -384,7 +388,7 @@ export default [
     {
       meta: { needsAuth: false },
       name: 'studentuser-register',
-      path: '/company/users/studentusers/register',
+      path: '/company/student-users/register',
       components: {
         'app-content': UserStudentForm,
       },
@@ -395,7 +399,7 @@ export default [
     {
       meta: { needsAuth: false },
       name: 'studentuser-verify',
-      path: '/company/users/studentusers/register/verify',
+      path: '/company/student-users/register/verify',
       components: {
         'app-content': UserStudentRegisterVerify,
       },
@@ -406,7 +410,7 @@ export default [
     {
       meta: { needsAuth: false },
       name: 'studentuser-reset-password',
-      path: '/company/users/studentusers/register/reset-password',
+      path: '/company/student-users/register/reset-password',
       components: {
         'app-content': UserStudentRegisterResetPassword,
       },
