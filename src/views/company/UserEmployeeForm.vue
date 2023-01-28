@@ -2,29 +2,29 @@
   <b-overlay :show="isLoading" rounded="sm">
     <div class="container app-form">
       <b-form>
-        <h2 v-if="isCreate">{{ $trans('New sales user') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit sales user') }}</h2>
+        <h2 v-if="isCreate">{{ $trans('New employee') }}</h2>
+        <h2 v-if="!isCreate">{{ $trans('Edit employee') }}</h2>
         <b-row>
           <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Username')"
-              label-for="salesuser_username"
+              label-for="employee_username"
             >
               <b-form-input
-                id="salesuser_username"
+                id="employee_username"
                 size="sm"
-                v-model="salesuser.username"
-                :state="isSubmitClicked ? !v$.salesuser.username.$error : null"
+                v-model="employee.username"
+                :state="isSubmitClicked ? !v$.employee.username.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                v-if="salesuser.username === ''"
-                :state="isSubmitClicked ? v$.salesuser.username.required : null">
+                v-if="employee.username === ''"
+                :state="isSubmitClicked ? v$.employee.username.required : null">
                 {{ $trans('Username is required') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
-                v-if="salesuser.username !== '' && salesuser.username !== orgUsername"
-                :state="isSubmitClicked ? !v$.salesuser.username.isUnique.$invalid : null">
+                v-if="employee.username !== '' && employee.username !== orgUsername"
+                :state="isSubmitClicked ? !v$.employee.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -33,18 +33,18 @@
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Password')"
-              label-for="salesuser_password"
+              label-for="employee_password"
             >
               <b-form-input
-                id="salesuser_password"
+                id="employee_password"
                 size="sm"
                 type="password"
-                v-model="salesuser.password1"
-                @blur="v$.salesuser.password1.$touch()"
-                :state="isSubmitClicked && v$.salesuser.password1 ? !v$.salesuser.password1.$error : null"
+                v-model="employee.password1"
+                @blur="v$.employee.password1.$touch()"
+                :state="isSubmitClicked && v$.employee.password1 ? !v$.employee.password1.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked && v$.salesuser.password1 ? !v$.salesuser.password1.$error : null">
+                :state="isSubmitClicked && v$.employee.password1 ? !v$.employee.password1.$error : null">
                 {{ $trans('Please enter a password') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -53,19 +53,19 @@
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Password again')"
-              label-for="salesuser_password_again"
+              label-for="employee_password_again"
             >
               <b-form-input
-                id="salesuser_password_again"
+                id="employee_password_again"
                 size="sm"
                 type="password"
-                v-model="salesuser.password2"
-                @blur="v$.salesuser.password2.$touch()"
-                :state="isSubmitClicked ? !v$.salesuser.password2.$error : null"
+                v-model="employee.password2"
+                @blur="v$.employee.password2.$touch()"
+                :state="isSubmitClicked ? !v$.employee.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                v-if="salesuser.password2 !== '' && salesuser.password2"
-                :state="isSubmitClicked ? !v$.salesuser.password2.sameAs.$invalid : null">
+                v-if="employee.password2 !== '' && employee.password2"
+                :state="isSubmitClicked ? !v$.employee.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -76,16 +76,16 @@
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('First name')"
-              label-for="salesuser_first_name"
+              label-for="employee_first_name"
             >
               <b-form-input
-                id="salesuser_first_name"
+                id="employee_first_name"
                 size="sm"
-                v-model="salesuser.first_name"
-                :state="isSubmitClicked ? !v$.salesuser.first_name.$error : null"
+                v-model="employee.first_name"
+                :state="isSubmitClicked ? !v$.employee.first_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.salesuser.first_name.$error : null">
+                :state="isSubmitClicked ? !v$.employee.first_name.$error : null">
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -94,16 +94,16 @@
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Last name')"
-              label-for="salesuser_last_name"
+              label-for="employee_last_name"
             >
               <b-form-input
-                id="salesuser_last_name"
+                id="employee_last_name"
                 size="sm"
-                v-model="salesuser.last_name"
-                :state="isSubmitClicked ? !v$.salesuser.last_name.$error : null"
+                v-model="employee.last_name"
+                :state="isSubmitClicked ? !v$.employee.last_name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.salesuser.last_name.$error : null">
+                :state="isSubmitClicked ? !v$.employee.last_name.$error : null">
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -112,16 +112,16 @@
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Email')"
-              label-for="salesuser_email"
+              label-for="employee_email"
             >
               <b-form-input
-                id="salesuser_email"
+                id="employee_email"
                 size="sm"
-                v-model="salesuser.email"
-                :state="isSubmitClicked ? !v$.salesuser.email.$error : null"
+                v-model="employee.email"
+                :state="isSubmitClicked ? !v$.employee.email.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.salesuser.email.$error : null">
+                :state="isSubmitClicked ? !v$.employee.email.$error : null">
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -133,12 +133,12 @@
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Contract hours per week')"
-              label-for="sales_user_contract_hours_week"
+              label-for="employee_contract_hours_week"
             >
               <b-form-input
-                id="sales_user_contract_hours_week"
+                id="employee_contract_hours_week"
                 size="sm"
-                v-model="salesuser.sales_user.contract_hours_week"
+                v-model="employee.employee_user.contract_hours_week"
               ></b-form-input>
             </b-form-group>
           </b-col>
@@ -146,12 +146,12 @@
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Uses time registration?')"
-              label-for="sales_user_uses_time_registration"
+              label-for="employee_uses_time_registration"
             >
               <b-form-checkbox
-                id="sales_user_uses_time_registration"
+                id="employee_uses_time_registration"
                 size="sm"
-                v-model="salesuser.sales_user.uses_time_registration"
+                v-model="employee.employee_user.uses_time_registration"
               >
               </b-form-checkbox>
             </b-form-group>
@@ -176,8 +176,8 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '@/models/helpers.js'
-import salesUserModel from '@/models/company/UserSales.js'
+import { usernameExists } from '../../models/helpers.js'
+import employeeModel from '../../models/company/UserEmployee.js'
 
 export default {
   setup() {
@@ -191,7 +191,7 @@ export default {
   },
   validations() {
     let validations = {
-      salesuser: {
+      employee: {
         first_name: {
           required
         },
@@ -214,18 +214,18 @@ export default {
         return usernameExists(value)
       }
 
-      validations.salesuser.username = {
+      validations.employee.username = {
         required,
         isUnique: helpers.withAsync(isUniqueCreate)
       }
 
-      validations.salesuser.password1 = {
+      validations.employee.password1 = {
         required
       }
 
-      validations.salesuser.password2 = {
+      validations.employee.password2 = {
         required,
-        sameAs: sameAs(this.salesuser.password1)
+        sameAs: sameAs(this.employee.password1)
       }
     } else {
       const isUniqueEdit = (value) => {
@@ -236,16 +236,16 @@ export default {
         return helpers.withAsync(usernameExists(value))
       }
 
-      validations.salesuser.username = {
+      validations.employee.username = {
         required,
         isUnique: isUniqueEdit
       }
 
-      validations.salesuser.password1 = {
+      validations.employee.password1 = {
       }
 
-      validations.salesuser.password2 = {
-        sameAs: sameAs(this.salesuser.password1)
+      validations.employee.password2 = {
+        sameAs: sameAs(this.employee.password1)
       }
     }
 
@@ -256,7 +256,7 @@ export default {
       isLoading: false,
       submitClicked: false,
       buttonDisabled: false,
-      salesuser: salesUserModel.getFields(),
+      employee: employeeModel.getFields(),
       orgUsername: null,
     }
   },
@@ -272,7 +272,7 @@ export default {
     if (!this.isCreate) {
       await this.loadData()
     } else {
-      this.salesuser = salesUserModel.getFields()
+      this.employee = employeeModel.getFields()
     }
     this.isLoading = false
   },
@@ -297,15 +297,15 @@ export default {
       this.isLoading = true
 
       if (this.isCreate) {
-        this.salesuser.password = this.salesuser.password1
+        this.employee.password = this.employee.password1
         try {
-          await salesUserModel.insert(this.salesuser)
-          this.infoToast(this.$trans('Created'), this.$trans('sales user has been created'))
+          await employeeModel.insert(this.employee)
+          this.infoToast(this.$trans('Created'), this.$trans('employee has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
-          console.log('Error creating sales user', error)
-          this.errorToast(this.$trans('Error creating sales user'))
+          console.log('Error creating employee', error)
+          this.errorToast(this.$trans('Error creating employee'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -314,22 +314,22 @@ export default {
       }
 
       try {
-        delete this.salesuser.date_joined
-        delete this.salesuser.last_login
+        delete this.employee.date_joined
+        delete this.employee.last_login
 
-        if (this.salesuser.password1) {
-          this.salesuser.password = this.salesuser.password1
+        if (this.employee.password1) {
+          this.employee.password = this.employee.password1
         } else {
-          delete this.salesuser.password
+          delete this.employee.password
         }
 
-        await salesUserModel.update(this.pk, this.salesuser)
-        this.infoToast(this.$trans('Updated'), this.$trans('sales user has been updated'))
+        await employeeModel.update(this.pk, this.employee)
+        this.infoToast(this.$trans('Updated'), this.$trans('employee has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
-        console.log('Error updating sales user', error)
-        this.errorToast(this.$trans('Error updating sales user'))
+        console.log('Error updating employee', error)
+        this.errorToast(this.$trans('Error updating employee'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -338,12 +338,12 @@ export default {
       this.isLoading = true
 
       try {
-        this.salesuser = await salesUserModel.detail(this.pk)
-        this.orgUsername = this.salesuser.username
+        this.employee = await employeeModel.detail(this.pk)
+        this.orgUsername = this.employee.username
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching salesuser', error)
-        this.errorToast(this.$trans('Error loading sales user'))
+        console.log('error fetching employee', error)
+        this.errorToast(this.$trans('Error loading employee'))
         this.isLoading = false
       }
     },

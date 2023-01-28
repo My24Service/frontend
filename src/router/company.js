@@ -38,12 +38,19 @@ import PictureForm from '../views/company/PictureForm.vue'
 
 import WorkHours from '../views/company/WorkHours.vue'
 import WorkHoursDetail from '../views/company/WorkHoursDetail.vue'
+
 import UserStudentRegisterResetPassword from "../views/company/UserStudentRegisterResetPassword";
+
 import SubNavInventory from "../components/SubNavInventory";
+
 import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
 import EngineerEventList from "../views/company/EngineerEventList";
+
 import {AUTH_LEVELS} from "../constants";
+
+import UserEmployeeList from "../views/company/UserEmployeeList";
+import UserEmployeeForm from "../views/company/UserEmployeeForm";
 
 
 export default [
@@ -187,6 +194,7 @@ export default [
         'app-subnav': true
       },
     },
+    // sales users
     {
       name: 'users-salesusers',
       path: '/company/sales-users',
@@ -224,6 +232,7 @@ export default [
         'app-subnav': {}
       },
     },
+    // customer users
     {
       name: 'users-customerusers',
       path: '/company/customer-users',
@@ -333,6 +342,43 @@ export default [
       components: {
         'app-content': UserApiForm,
         'app-subnav': SubNavCompany
+      },
+    },
+    // employee users
+    {
+      name: 'users-employees',
+      path: '/company/employees',
+      components: {
+        'app-content': UserEmployeeList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'employee-edit',
+      path: '/company/employees/form/:pk',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': UserEmployeeForm,
+        'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'employee-add',
+      path: '/company/employees/form',
+      components: {
+        'app-content': UserEmployeeForm,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
       },
     },
     // students

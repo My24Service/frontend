@@ -31,6 +31,11 @@
         {{ $trans('Planning') }}
       </b-nav-item>
       <b-nav-item
+        :active="isActive('employees')"
+        :to="{ name: 'users-employees' }">
+        {{ $trans('Employees') }}
+      </b-nav-item>
+      <b-nav-item
         v-if="hasApiUsers"
         :active="isActive('api-users')"
         :to="{ name: 'users-apiusers' }">

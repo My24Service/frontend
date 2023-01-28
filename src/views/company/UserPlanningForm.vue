@@ -19,11 +19,11 @@
               ></b-form-input>
               <b-form-invalid-feedback
                 v-if="planninguser.username === ''"
-                :state="isSubmitClicked ? v$.planninguser.username.required : null">
+                :state="isSubmitClicked ? !v$.planninguser.username.required : null">
                 {{ $trans('Username is required') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
-                v-if="planninguser.username !== ''"
+                v-if="planninguser.username !== '' && planninguser.username !== orgUsername"
                 :state="isSubmitClicked ? !v$.planninguser.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
@@ -64,6 +64,7 @@
                 :state="isSubmitClicked ? !v$.planninguser.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
+                v-if="planninguser.password2 !== '' && planninguser.password2"
                 :state="isSubmitClicked ? !v$.planninguser.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>

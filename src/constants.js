@@ -11,6 +11,7 @@ export const AUTH_LEVELS = {
   ENGINEER: 'engineer',
   CUSTOMER: 'customer_user',
   PLANNING: 'planning_user',
+  EMPLOYEE: 'employee_user',
   SUPERUSER: 'is_superuser',
   STAFF: 'is_staff',
 }
