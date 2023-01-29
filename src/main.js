@@ -140,6 +140,7 @@ Vue.mixin(toastMix)
 // auth
 import auth from '@/services/auth'
 import client from '@/services/api'
+import accountModel from "./models/account/Account";
 auth.setInterceptors(client)
 
 Vue.config.productionTip = false
@@ -169,8 +170,24 @@ store.dispatch('getInitialData')
   .catch((error) => {
     if (error.response) {
       if (error.response.status === 401) {
-        console.log('401 in main, logout and reload')
-        auth.logout(true)
+        console.log('401 in main')
+        // try to refresh token
+        try {
+          const token = auth.getAccessToken()
+          accountModel.refreshToken(token).then((result) => {
+            console.debug('token refresh result', result)
+            auth.authenticate({ accessToken: result.token })
+            console.debug('token refreshed, reload window')
+            window.location.reload()
+          })
+        } catch (e) {
+          console.error('error refreshing token', e)
+          console.log('logout and reload')
+          auth.logout(true)
+        }
+
+        // console.log('401 in main, logout and reload')
+        // auth.logout(true)
       }
     }
   })
