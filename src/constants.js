@@ -2,7 +2,8 @@ export const NEW_DATA_EVENTS = {
   REFRESH_INITIAL: 'refresh_initial',
   UNACCEPTED_ORDER: 'unaccepted_order_event',
   DISPATCH: 'dispatch',
-  ENGINEER_EVENT: 'engineer-event'
+  ENGINEER_EVENT: 'engineer-event',
+  CONTRACT: 'contract'
 }
 
 export const AUTH_LEVELS = {
