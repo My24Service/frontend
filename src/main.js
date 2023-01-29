@@ -168,10 +168,9 @@ store.dispatch('getInitialData')
   })
   .catch((error) => {
     if (error.response) {
-      console.log('data', error.response.data);
-      console.log('status', error.response.status);
       if (error.response.status === 401) {
-        auth.logout(false)
+        console.log('401 in main, logout and reload')
+        auth.logout(true)
       }
     }
   })
