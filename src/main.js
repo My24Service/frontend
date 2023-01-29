@@ -174,12 +174,17 @@ store.dispatch('getInitialData')
         // try to refresh token
         try {
           const token = auth.getAccessToken()
-          accountModel.refreshToken(token).then((result) => {
-            console.debug('token refresh result', result)
-            auth.authenticate({ accessToken: result.token })
-            console.debug('token refreshed, reload window')
-            window.location.reload()
-          })
+          if (token) {
+            accountModel.refreshToken(token).then((result) => {
+              console.debug('token refresh result', result)
+              auth.authenticate({ accessToken: result.token })
+              console.debug('token refreshed, reload window')
+              window.location.reload()
+            })
+          } else {
+            console.log('no token, logout and reload')
+            auth.logout(true)
+          }
         } catch (e) {
           console.error('error refreshing token', e)
           console.log('logout and reload')
