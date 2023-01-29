@@ -347,7 +347,7 @@ export default [
     // employee users
     {
       name: 'users-employees',
-      path: '/company/employees',
+      path: '/company/employee-users',
       components: {
         'app-content': UserEmployeeList,
         'app-subnav': SubNavCompany
@@ -359,7 +359,7 @@ export default [
     },
     {
       name: 'employee-edit',
-      path: '/company/employees/form/:pk',
+      path: '/company/employee-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -371,7 +371,7 @@ export default [
     },
     {
       name: 'employee-add',
-      path: '/company/employees/form',
+      path: '/company/employee-users/form',
       components: {
         'app-content': UserEmployeeForm,
         'app-subnav': SubNavCompany
