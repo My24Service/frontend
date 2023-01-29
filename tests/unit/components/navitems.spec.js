@@ -72,7 +72,7 @@ describe('Navitems.vue no staff & no superuser', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('has 0 items', async () => {
+  it('has 2 items', async () => {
     const wrapper = shallowMount(NavItems, {
       localVue,
       router,
@@ -85,7 +85,7 @@ describe('Navitems.vue no staff & no superuser', () => {
     await flushPromises()
 
     const navbar = wrapper.findComponent({ ref: 'nav-items' })
-    expect(navbar.element.children.length).to.eq(0)
+    expect(navbar.element.children.length).to.eq(2)
   })
 })
 
@@ -139,7 +139,7 @@ describe('Navitems.vue no customer', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('has 1 items', async () => {
+  it('has 2 items', async () => {
     const wrapper = shallowMount(NavItems, {
       localVue,
       router,
@@ -152,7 +152,7 @@ describe('Navitems.vue no customer', () => {
     await flushPromises()
 
     const navbar = wrapper.findComponent({ ref: 'nav-items' })
-    expect(navbar.element.children.length).to.eq(1)
+    expect(navbar.element.children.length).to.eq(2)
   })
 
   it('contains Orders', async () => {
@@ -237,7 +237,7 @@ describe('Navitems.vue staff & superuser', () => {
     })
   })
 
-  it('has 11 items', async () => {
+  it('has 8 items', async () => {
     const wrapper = shallowMount(NavItems, {
       localVue,
       router,
@@ -250,7 +250,7 @@ describe('Navitems.vue staff & superuser', () => {
     await flushPromises()
 
     const navbar = wrapper.findComponent({ ref: 'nav-items' })
-    expect(navbar.element.children.length).to.eq(11)
+    expect(navbar.element.children.length).to.eq(8)
   })
 
   it('does contain members', async () => {

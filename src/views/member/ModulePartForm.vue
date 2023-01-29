@@ -5,7 +5,7 @@
         <h2 v-if="isCreate">{{ $trans('New module part') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit module part') }}</h2>
         <b-row>
-          <b-col cols="8" role="group">
+          <b-col cols="6" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Name')"
@@ -24,13 +24,27 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Module')"
               label-for="module-part_module"
             >
               <b-form-select v-model="modulePart.module" :options="modules" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+          <b-col cols="3" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Always selected?')"
+              label-for="module-part_is_always_selected"
+            >
+              <b-form-checkbox
+                id="module-part_is_always_selected"
+                size="sm"
+                v-model="modulePart.is_always_selected"
+              >
+              </b-form-checkbox>
             </b-form-group>
           </b-col>
         </b-row>

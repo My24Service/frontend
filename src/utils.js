@@ -38,6 +38,10 @@ function getIsStudent(store) {
   return store.state.userInfo.hasOwnProperty('student_user') && store.state.userInfo.student_user
 }
 
+function getIsEmployee(store) {
+  return store.state.userInfo.hasOwnProperty('employee_user') && store.state.userInfo.employee_user
+}
+
 function getIsLoggedIn(store) {
   return store.getters.isLoggedIn
 }
@@ -128,6 +132,9 @@ let componentMixin = {
     },
     isStudent() {
       return getIsStudent(this.$store)
+    },
+    isEmployee() {
+      return getIsEmployee(this.$store)
     },
     isLoggedIn() {
       return getIsLoggedIn(this.$store)

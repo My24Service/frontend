@@ -29,7 +29,13 @@
           <b-col cols="12" role="group">
             <ul v-for="module in moduleData" :key="module.id">
               <li>
-                {{ module.name }}
+                <b-form-checkbox
+                  :id="`module${module.id}`"
+                  :value="`${module.id}`"
+                  v-model="selected_modules"
+                >
+                  {{ module.name }}
+                </b-form-checkbox>
                 (<b-link @click="selectAll(module.id)">{{ $trans('all') }}</b-link> /
                 <b-link @click="selectNone(module.id)">{{ $trans('none') }}</b-link>)
               </li>
@@ -41,6 +47,8 @@
                     <b-form-checkbox
                       :id="`el${part.id}`"
                       :value="part.id"
+                      @change="checkClicked"
+                      :disabled="always_selected[module.id] && always_selected[module.id].indexOf(part.id) !== -1"
                     >
                       {{ part.name }}
                     </b-form-checkbox>
@@ -90,6 +98,8 @@ export default {
       submitClicked: false,
       moduleData: {},
       selected: {},
+      selected_modules: [],
+      always_selected: {},
       contract: contractModel.getFields(),
     }
   },
@@ -111,22 +121,31 @@ export default {
   async created() {
     this.isLoading = true
 
-    const data = await contractModel.getModuleData()
+    const module_data = await contractModel.getModuleData()
 
     let moduleData = {}, selected = {}
-    for (var i=0; i<data.length; i++) {
-      const module_id = data[i].id+''
+    for (let i=0; i<module_data.length; i++) {
+      const module_id = module_data[i].id+''
       let parts = []
-      for (let j=0; j<data[i].parts.length; j++) {
-        data[i].parts[j].id += ''
-        parts.push(data[i].parts[j])
+      let always_selected = []
+      for (let j=0; j<module_data[i].parts.length; j++) {
+        module_data[i].parts[j].id += ''
+        parts.push(module_data[i].parts[j])
+        if (module_data[i].parts[j].is_always_selected) {
+          always_selected.push(module_data[i].parts[j].id)
+        }
       }
+
       moduleData[module_id] = {
         id: module_id,
-        name: data[i].name,
+        name: module_data[i].name,
         parts
       }
+
       selected[module_id] = []
+      if (always_selected.length) {
+        this.always_selected[module_id] = always_selected
+      }
     }
     this.selected = selected
     this.moduleData = moduleData
@@ -137,18 +156,24 @@ export default {
       this.loaded = true
     } else {
       this.contract = contractModel.getFields()
+      this.checkAlwaysSelected()
       this.isLoading = false
       this.loaded = true
     }
   },
   methods: {
+    checkClicked() {
+      this.checkModuleCheckboxes()
+    },
     selectNone(module_id) {
       this.selected[module_id] = []
+      this.checkModuleCheckboxes()
     },
     selectAll(module_id) {
       this.selected[module_id] = this.moduleData[module_id].parts.map(
         item => item.id
       )
+      this.checkModuleCheckboxes()
     },
     getPartsLengthForModuleId(module_id) {
       for (let i=0; i<this.moduleData.length; i++) {
@@ -224,10 +249,8 @@ export default {
       }
 
       return paths.join('|')
-
     },
     fillSelected(module_paths_pks) {
-      let selected = {}
       const moduleElements = module_paths_pks.split('|')
       for (let i=0; i<moduleElements.length; i++) {
         const moduleElement = moduleElements[i].split(':')
@@ -237,6 +260,37 @@ export default {
           parts.push(p[j] + '')
         }
         this.selected[module_id+''] = parts
+
+        if (parts.length) {
+          this.selected_modules.push(module_id)
+        }
+      }
+
+      this.checkAlwaysSelected()
+      this.checkModuleCheckboxes()
+    },
+    checkAlwaysSelected() {
+      // make sure the always selected ones are also checked
+      for (const [module_id, always_selected_parts] of Object.entries(this.always_selected)) {
+        for (let k=0; k<always_selected_parts.length; k++) {
+          if (!(module_id+'' in this.selected)) {
+            this.selected[module_id+''] = []
+          }
+          if (this.selected_modules.indexOf(module_id+'') === -1) {
+            this.selected_modules.push(module_id)
+          }
+          if (this.selected[module_id+''].indexOf(always_selected_parts[k]+'') === -1) {
+            this.selected[module_id+''].push(always_selected_parts[k]+'')
+          }
+        }
+      }
+    },
+    checkModuleCheckboxes() {
+      this.selected_modules = []
+      for (const [module_id, parts] of Object.entries(this.selected)) {
+        if (parts.length) {
+          this.selected_modules.push(module_id)
+        }
       }
     },
     cancelForm() {

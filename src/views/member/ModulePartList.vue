@@ -58,6 +58,9 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(is_always_selected)="data">
+          <b-icon-check-square v-if="data.item.is_always_selected"></b-icon-check-square>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
@@ -104,8 +107,9 @@ export default {
       isLoading: false,
       moduleParts: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), thAttr: {width: '50%'}, sortable: true},
+        {key: 'name', label: this.$trans('Name'), thAttr: {width: '30%'}, sortable: true},
         {key: 'module_name', label: this.$trans('Module'), thAttr: {width: '20%'}, sortable: true},
+        {key: 'is_always_selected', label: this.$trans('Always selected?'), thAttr: {width: '20%'}, sortable: true},
         {key: 'created', label: this.$trans('Created'), thAttr: {width: '10%'}, sortable: true},
         {key: 'modified', label: this.$trans('Modified'), thAttr: {width: '10%'}, sortable: true},
         {key: 'icons', thAttr: {width: '10%'}}

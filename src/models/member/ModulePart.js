@@ -1,11 +1,12 @@
-import BaseModel from '@/models/base'
+import BaseModel from '../../models/base'
 
 
 class ModulePart extends BaseModel {
   fields = {
     'name': '',
     'module': 0,
-    'module_name': ''
+    'module_name': '',
+    'is_always_selected': false
   }
 
   url = '/member/module-part/'

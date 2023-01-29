@@ -113,16 +113,23 @@ class My24 extends BaseModel {
 
     // just pages like / and /no-access
     if (config.lenParts === 1) {
+      console.debug(`allowed: only one route part (${config.part}`)
       return true;
     }
 
-    if (!config.isStaff && !config.isSuperuser && config.module !== 'members' && !(config.module in config.contract)) {
-      console.debug('not allowed: module not in contract')
+    // members exception
+    if ((config.isStaff || config.isSuperuser) && config.module === 'members') {
+      console.debug(`allowed: member exception (module=${config.module})`)
+      return true;
+    }
+
+    if (!(config.module in config.contract)) {
+      console.debug(`not allowed: module not in contract (module=${config.module})`)
       return false;
     }
 
     if (!config.part) {
-      console.debug('allowed: no part')
+      console.debug(`allowed: no part (module=${config.module})`)
       return true;
     }
 
