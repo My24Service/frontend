@@ -8,7 +8,7 @@
       </b-col>
       <b-col cols="8">
         <p v-if="this.memberType === 'maintenance'">
-          {{ $trans('Total work hours / Total travel / Total distance') }} - {{ week }}/{{ today.format('Y') }}
+          {{ hoursTitle }} - {{ week }}/{{ today.format('Y') }}
         </p>
         <p v-if="this.memberType === 'temps'">
           {{ $trans('Total hours / Total trips') }} - {{ week }}/{{ today.format('Y') }}
@@ -41,7 +41,7 @@
         </div>
       </template>
       <template #cell(full_name)="data">
-        <router-link class="px-1" :to="{name: 'mobile-timesheet-detail', params: {submodel_id: data.item.submodel_id}}">
+        <router-link class="px-1" :to="{name: 'mobile-timesheet-detail', params: {user_id: data.item.user_id}, query: {date: startDate}}">
           {{ data.item.full_name }}
         </router-link>
       </template>
@@ -65,8 +65,10 @@
 import moment from 'moment/min/moment-with-locales'
 
 import timeSheetModel from '@/models/mobile/TimeSheet.js'
+import {componentMixin} from "../../utils";
 
 export default {
+  mixins: [componentMixin],
   name: "TimeSheet",
   data() {
     return {
@@ -84,7 +86,9 @@ export default {
         {label: this.$trans('Amount'), key: 'amount', sortable: true},
       ],
       sortBy: "total",
-      sortDesc: true
+      sortDesc: true,
+      day_field_types: null,
+      day_fields: null
     }
   },
   async created() {
@@ -92,13 +96,24 @@ export default {
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
-    this.today = this.$moment().weekday(monday)
+    this.today = this.$route.query.date ? this.$moment(this.$route.query.date) : this.$moment().weekday(monday)
 
     this.setDate()
     this.setArgs()
 
     this.memberType = await this.$store.dispatch('getMemberType')
-    this.loadData()
+    await this.loadData()
+  },
+  computed: {
+    hoursTitle() {
+      let result = []
+      if (this.day_fields) {
+        for(let i=0; i<this.day_fields.length; i++) {
+          result.push(this.$trans(this.day_fields[i]))
+        }
+      }
+      return result.join(' / ')
+    }
   },
   methods: {
     setArgs() {
@@ -114,32 +129,65 @@ export default {
     },
     nextWeek() {
       this.today.add(7, 'days')
-      this.setDate()
-      this.setArgs()
-
-      this.loadData()
+      const query = {
+        ...this.$route.query,
+        date: this.today.format('YYYY-MM-DD'),
+      }
+      this.$router.push({ query }).catch(e => {})
+      //
+      // this.setDate()
+      // this.setArgs()
+      //
+      // this.loadData()
     },
     backWeek() {
       this.today.subtract(7, 'days')
-      this.setDate()
-      this.setArgs()
+      const query = {
+        ...this.$route.query,
+        date: this.today.format('YYYY-MM-DD'),
+      }
+      this.$router.push({ query }).catch(e => {})
+      // this.setDate()
+      // this.setArgs()
+      //
+      // this.loadData()
+    },
+    formatDays(day_data) {
+      let result = []
+      let hasData = false
+      for(let i=0; i<day_data.length; i++) {
+        if (day_data[i]) {
+          if (this.day_field_types[i] === 'duration') {
+            hasData = true
+            result.push(this.displayDurationFromSeconds(day_data[i], true))
+          } else {
+            hasData = true
+            result.push(day_data[i])
+          }
+        } else {
+          result.push('-')
+        }
+      }
 
-      this.loadData()
+      return hasData ? result.join(' / ') : ''
     },
     async loadData() {
       this.isLoading = true
 
       try {
         const data = await timeSheetModel.list()
+        this.day_fields = data.day_fields
+        this.day_field_types = data.day_field_types
+        // set materials
+        this.materials = data.materials
+
         let header_columns = []
 
-        if(data.submodel === 'engineer') {
-          header_columns.push({
-            key: 'full_name',
-            label: this.$trans('Engineer'),
-            sortable: true
-          })
-        }
+        header_columns.push({
+          key: 'full_name',
+          label: this.$trans('User'),
+          sortable: true
+        })
 
         if(data.submodel === 'student_user') {
           header_columns.push({
@@ -149,18 +197,13 @@ export default {
           })
         }
 
-        // set materials
-        this.materials = data.materials
-
-        // get all weekdays from the first user
-        if (data.activity.length) {
-          for(let i=0; i<data.activity[0].totals.length; i++) {
-            header_columns.push({
-              key: `day${i}`,
-              label: data.activity[0].totals[i].weekday,
-              sortable: true
-            })
-          }
+        // add days
+        for(let i=0; i<data.date_list.length; i++) {
+          header_columns.push({
+            key: `day${i}`,
+            label: this.$moment(data.date_list[i]).format('ddd DD'),
+            sortable: true
+          })
         }
 
         header_columns.push({
@@ -174,35 +217,26 @@ export default {
         // create array for table
         let results = []
 
-        for(let i=0; i<data.activity.length; i++) {
-          let row = [], obj = {'full_name': data.activity[i].full_name, 'submodel_id': data.activity[i].submodel_id}
-
-          if (this.memberType === 'temps') {
-            for(let j=0; j<data.activity[i].totals.length; j++) {
-              obj[`day${j}`] = data.activity[i].totals[j].totals.total_time + ' / ' +
-                data.activity[i].totals[j].totals.total_distance_fixed_rate_amount
-            }
-
-            // add week totals
-            obj['total'] = data.activity[i].week_totals.total_time + ' / ' +
-              data.activity[i].week_totals.total_distance_fixed_rate_amount
-
-            results.push(obj)
-
-          } else {
-            for(let j=0; j<data.activity[i].totals.length; j++) {
-              obj[`day${j}`] = data.activity[i].totals[j].totals.total_work + ' / ' +
-                data.activity[i].totals[j].totals.total_travel + ' / ' +
-                data.activity[i].totals[j].totals.total_distance
-            }
-
-            // add week totals
-            obj['total'] = data.activity[i].week_totals.total_work + ' / ' +
-              data.activity[i].week_totals.total_travel + ' / ' +
-              data.activity[i].week_totals.total_distance
-
-            results.push(obj)
+        for(let i=0; i<data.result.length; i++) {
+          let obj = {
+            'full_name': data.result[i].full_name,
+            'user_id': data.result[i].user_id,
+            'submodel_id': data.result[i].submodel_id || 0,
           }
+
+          for(let j=0; j<data.result[i].day_totals.length; j++) {
+            obj[`day${j}`] = this.formatDays(data.result[i].day_totals[j])
+          }
+
+          // add week totals
+          const week_totals = this.formatDays(data.result[i].week_totals)
+          if (week_totals) {
+            obj['total'] = week_totals
+          } else {
+            obj['total'] = ''
+          }
+
+          results.push(obj)
         }
 
         this.assignedOrders = results
