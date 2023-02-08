@@ -144,24 +144,35 @@ let componentMixin = {
     },
   },
   methods: {
-    displayDurationFromSeconds(seconds) {
-      return this.displayDuration(moment.duration(seconds*1000))
+    displayDurationFromSeconds(seconds, exclude_seconds) {
+      return this.displayDuration(moment.duration(seconds*1000), exclude_seconds)
     },
-    displayDuration(duration) {
+    displayDuration(duration, exclude_seconds) {
+      let days = duration.days()
+      if (days) {
+        days = `${days}d`
+      }
+
       let hours = duration.hours()
       if (hours < 10) {
         hours = `0${hours}`
       }
+
       let minutes = duration.minutes()
       if (minutes< 10) {
         minutes = `0${minutes}`
       }
-      let seconds = duration.seconds()
-      if (seconds < 10) {
-        seconds = `0${seconds}`
-      }
-      return `${hours}:${minutes}:${seconds}`
 
+      if (!exclude_seconds) {
+        let seconds = duration.seconds()
+        if (seconds < 10) {
+          seconds = `0${seconds}`
+        }
+
+        return days ? `${days} ${hours}:${minutes}:${seconds}` : `${hours}:${minutes}:${seconds}`
+      }
+
+      return days ? `${days} ${hours}:${minutes}` : `${hours}:${minutes}`
     },
     async doFetchUnacceptedCountAndUpdateStore() {
       const countResult = await orderNotAcceptedModel.getCount()

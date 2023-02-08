@@ -7,7 +7,7 @@
         </b-link>
       </b-col>
       <b-col cols="8">
-        {{ $trans('Total work hours') }} - {{ week }}/{{ today.format('Y') }}
+        {{ hoursTitle }} - {{ week }}/{{ today.format('Y') }}
       </b-col>
       <b-col cols="2">
         <div class="float-right">
@@ -49,8 +49,10 @@
 import moment from 'moment/min/moment-with-locales'
 
 import workHoursModel from "../../models/company/WorkHours";
+import {componentMixin} from "../../utils";
 
 export default {
+  mixins: [componentMixin],
   name: "WorkHours",
   data() {
     return {
@@ -61,7 +63,21 @@ export default {
       workHours: [],
       fields: [],
       sortBy: "full_name",
-      sortDesc: false
+      sortDesc: false,
+      day_field_types: null,
+      day_fields: null
+    }
+  },
+  computed: {
+    hoursTitle() {
+      let result = []
+      if (this.day_fields) {
+        console.log(this.day_fields)
+        for(let i=0; i<this.day_fields.length; i++) {
+          result.push(this.$trans(this.day_fields[i]))
+        }
+      }
+      return result.join(' / ')
     }
   },
   async created() {
@@ -105,11 +121,27 @@ export default {
       }
       this.$router.push({ query }).catch(e => {})
     },
+    formatDays(day_data) {
+      let result = []
+      for(let i=0; i<day_data.length; i++) {
+        if (day_data[i]) {
+          if (this.day_field_types[i] === 'duration') {
+            result.push(this.displayDurationFromSeconds(day_data[i], true))
+          } else {
+            result.push(day_data[i])
+          }
+        }
+      }
+
+      return result.length ? result.join(' / ') : ''
+    },
     async loadData() {
       this.isLoading = true
 
       try {
         const data = await this.model.list()
+        this.day_fields = data.day_fields
+        this.day_field_types = data.day_field_types
         let header_columns = []
 
         header_columns.push({
@@ -118,15 +150,13 @@ export default {
           sortable: true
         })
 
-        // get all weekdays from the first user
-        if (data.result.length) {
-          for(let i=0; i<data.result[0].totals.length; i++) {
-            header_columns.push({
-              key: `day${i}`,
-              label: data.result[0].totals[i].weekday,
-              sortable: true
-            })
-          }
+        // add days
+        for(let i=0; i<data.date_list.length; i++) {
+          header_columns.push({
+            key: `day${i}`,
+            label: this.$moment(data.date_list[i]).format('ddd DD'),
+            sortable: true
+          })
         }
 
         header_columns.push({
@@ -147,12 +177,17 @@ export default {
             'submodel_id': data.result[i].submodel_id || 0,
           }
 
-          for(let j=0; j<data.result[i].totals.length; j++) {
-            obj[`day${j}`] = data.result[i].totals[j].total
+          for(let j=0; j<data.result[i].day_totals.length; j++) {
+            obj[`day${j}`] = this.formatDays(data.result[i].day_totals[j])
           }
 
           // add week totals
-          obj['total'] = `${data.result[i].total_duration} (${data.result[i].perc})`
+          const week_totals = this.formatDays(data.result[i].week_totals)
+          if (week_totals) {
+            obj['total'] = `${week_totals} (${data.result[i].perc})`
+          } else {
+            obj['total'] = ''
+          }
 
           results.push(obj)
         }
