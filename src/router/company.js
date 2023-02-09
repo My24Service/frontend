@@ -577,7 +577,7 @@ export default [
     },
     {
       name: 'company-workhours-detail',
-      path: '/company/workhours/:user_id/:submodel_id',
+      path: '/company/workhours/:user_id',
       components: {
         'app-content': WorkHoursDetail,
         'app-subnav': SubNavCompany

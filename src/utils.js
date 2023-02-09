@@ -144,6 +144,18 @@ let componentMixin = {
     },
   },
   methods: {
+    translateHoursField(field) {
+      const allFields = {
+        'work_total': this.$trans("Work total"),
+        'travel_total': this.$trans('Travel to total'),
+        'distance_total': this.$trans('Distance total'),
+        'extra_work': this.$trans('Total extra work'),
+        'actual_work': this.$trans('Total actual work'),
+        'distance_fixed_rate_amount': this.$trans('Total trips')
+      }
+
+      return allFields[field]
+    },
     displayDurationFromSeconds(seconds, exclude_seconds) {
       return this.displayDuration(moment.duration(seconds*1000), exclude_seconds)
     },
