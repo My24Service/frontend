@@ -14,10 +14,8 @@ class CustomerUser extends BaseModel {
     'customer_user': {
       'customer': null,
       'settings_group': '',
-      // 'uses_time_registration': false
     },
     'customer_details': {},
-    'uses_time_registration': false
   }
 
   url = '/company/customeruser/'

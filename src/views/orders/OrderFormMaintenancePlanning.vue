@@ -660,19 +660,18 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import eachSeries from 'async/eachSeries'
 import Multiselect from 'vue-multiselect'
 
-import orderNotAcceptedModel from '@/models/orders/OrderNotAccepted.js'
-import orderModel from '@/models/orders/Order.js'
-import customerModel from '@/models/customer/Customer.js'
-import engineerModel from '@/models/company/UserEngineer.js'
-import documentModel from '@/models/orders/Document.js'
-import maintenanceProductModel from '@/models/customer/MaintenanceProduct.js'
-import Assign from '@/models/mobile/Assign.js'
+import orderNotAcceptedModel from '../../models/orders/OrderNotAccepted.js'
+import orderModel from '../../models/orders/Order.js'
+import customerModel from '../../models/customer/Customer.js'
+import engineerModel from '../../models/company/UserEngineer.js'
+import documentModel from '../../models/orders/Document.js'
+import maintenanceProductModel from '../../models/customer/MaintenanceProduct.js'
+import Assign from '../../models/mobile/Assign.js'
 
-import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
-import Collapse from '@/components/Collapse.vue'
+import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
+import Collapse from '../../components/Collapse.vue'
 
 export default {
   setup() {
@@ -987,7 +986,7 @@ export default {
     async editAndAccept() {
       this.buttonDisabled = true
       this.acceptOrder = true
-      this.submitForm()
+      await this.submitForm()
     },
     async reject() {
       await orderNotAcceptedModel.setRejected(this.pk)
