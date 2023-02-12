@@ -31,7 +31,7 @@
         {{ $trans('Planning') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('employees')"
+        :active="isActive('employee-users')"
         :to="{ name: 'users-employees' }">
         {{ $trans('Employees') }}
       </b-nav-item>
