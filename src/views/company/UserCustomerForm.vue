@@ -23,7 +23,7 @@
                 {{ $trans('Username is required') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
-                v-if="customeruser.username !== ''"
+                v-if="customeruser.username !== '' && customeruser.username !== orgUsername"
                 :state="isSubmitClicked ? !v$.customeruser.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
@@ -64,6 +64,7 @@
                 :state="isSubmitClicked ? !v$.customeruser.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
+                v-if="customeruser.password2 !== '' && customeruser.password2"
                 :state="isSubmitClicked ? !v$.customeruser.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
@@ -307,6 +308,7 @@ export default {
       errorMessage: null,
       customers: [],
       customer_info: '',
+      orgUsername: null
     }
   },
   computed: {

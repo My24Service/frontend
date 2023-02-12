@@ -6,8 +6,9 @@ import VueRouter from 'vue-router'
 import Vuex from "vuex"
 
 import localVue from '../../index'
-import UserEngineerList from '@/views/company/UserEngineerList.vue'
+import UserEngineerList from '../../../../src/views/company/UserEngineerList.vue'
 import userEngineerResponse from '../../fixtures/user-engineers'
+import my24 from "../../../../src/services/my24";
 
 jest.mock('axios')
 
@@ -26,6 +27,12 @@ const routes = [
   }
 ]
 
+const resultCertainModules = {
+  'userInfo': {
+    "member_contract": "company:activity,company|mobile:assigned-finished,dispatch,orders|orders:orders,orders-not-accepted"
+  }
+}
+
 const router = new VueRouter({routes})
 
 
@@ -40,6 +47,14 @@ describe('UserEngineerList.vue', () => {
 
     store = new Vuex.Store({
       actions,
+      state: {
+        memberContract: my24.getModelsFromString(resultCertainModules.userInfo.member_contract),
+        userInfo: {
+          pk: 1,
+          is_staff: true,
+          customer_user: null,
+        }
+      }
     })
   })
 

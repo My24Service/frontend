@@ -43,6 +43,7 @@ export default {
         await this.doFetchUnacceptedCountAndUpdateStore()
       }, 1000)
 
+      console.debug('setting up polling: doFetchUnacceptedCountAndUpdateStore')
       this.intervalId = setInterval(async () => {
         await this.doFetchUnacceptedCountAndUpdateStore()
       }, 5*60*1000)
@@ -75,7 +76,10 @@ export default {
   },
   beforeDestroy() {
     if (this.intervalId) {
+      console.debug('clearing polling: doFetchUnacceptedCountAndUpdateStore')
       clearInterval(this.intervalId)
+    } else {
+      console.debug('not clearing polling, no interval: doFetchUnacceptedCountAndUpdateStore')
     }
   },
 }

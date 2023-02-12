@@ -100,7 +100,7 @@ export default [
       },
       {
         name: 'mobile-timesheet-detail',
-        path: '/mobile/timesheet/:submodel_id',
+        path: '/mobile/timesheet/:user_id',
         components: {
           'app-content': TimeSheetDetail,
           'app-subnav': SubNavMobile

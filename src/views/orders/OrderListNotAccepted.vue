@@ -100,7 +100,7 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              v-if="data.item.last_accepted_status == 'not_yet_accepted'"
+              v-if="!data.item.customer_order_accepted"
               router_name="order-edit"
               v-bind:router_params="{pk: data.item.id, unaccepted: true}"
               v-bind:title="$trans('Edit')"

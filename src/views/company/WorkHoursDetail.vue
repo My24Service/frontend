@@ -1,44 +1,13 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
+    <UserHoursDataDetail
+      ref="user-hours-detail-data"
+      main_grid_router_name="company-workhours"
+      :breadcrumb_main_grid_title="$trans('Work hours')"
+      :breadcrumb_grid_title="$trans('User work hours')"
+      />
+
     <div class="app-detail">
-      <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-      <b-row>
-        <b-col cols="2">
-          <b-link class="px-1" @click.prevent="backWeek" v-bind:title="$trans('Week back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
-        </b-col>
-        <b-col cols="8">
-          {{ $trans('Totals in') }}
-          {{ week }}/{{ today.format('Y') }}
-          {{ $trans('for') }} {{ fullName }}
-        </b-col>
-        <b-col cols="2">
-          <div class="float-right">
-            <b-link class="px-1" @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
-          </div>
-        </b-col>
-      </b-row>
-
-      <b-table
-        id="workhours-orders-detail-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="assignedOrders"
-        responsive="md"
-        class="data-table"
-      >
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-      </b-table>
-
       <b-table
         id="workhours-detail-table"
         small
@@ -63,46 +32,37 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import workHoursDetailModel from '@/models/company/WorkHoursDetail.js'
-import timeSheetDetailModel from '@/models/mobile/TimeSheetDetail.js'
+import workHoursDetailModel from '../../models/company/WorkHoursDetail.js'
+import workHoursModel from '../../models/company/WorkHours.js'
+import UserHoursDataDetail from "../../components/UserHoursDataDetail";
 
 export default {
   name: "WorkHoursDetail",
+  components: {
+    UserHoursDataDetail
+  },
   data() {
     return {
-      breadcrumb: [
-        {
-          text: this.$trans('Work hours'),
-          to: {name: 'company-workhours', params: {start_date: this.startDate }}
-        },
-        {
-          text: this.$trans('Work hours detail'),
-          active: true
-        },
-      ],
       today: moment(),
       startDate: null,
-      memberType: 'maintenance',
-      fullName: null,
       model: workHoursDetailModel,
-      timeSheetDetailModel,
+      workHoursModel,
       isLoading: false,
       workHours: [],
-      assignedOrders: [],
-      fields: [],
       workHoursFields: [
         {label: this.$trans('Project'), key: 'project_name', sortable: true},
         {label: this.$trans('Date'), key: 'start_date', sortable: true},
-        {label: this.$trans('Duration'), key: 'duration', sortable: true},
+        {label: this.$trans('Work start'), key: 'work_start', sortable: true},
+        {label: this.$trans('Work end'), key: 'work_end', sortable: true},
+        {label: this.$trans('Travel to'), key: 'travel_to', sortable: true},
+        {label: this.$trans('Travel back'), key: 'travel_back', sortable: true},
+        {label: this.$trans('Distance to'), key: 'distance_to', sortable: true},
+        {label: this.$trans('Distance back'), key: 'distance_back', sortable: true},
       ]
     }
   },
   props: {
     user_id: {
-      type: [String, Number],
-      default: null
-    },
-    submodel_id: {
       type: [String, Number],
       default: null
     },
@@ -112,12 +72,11 @@ export default {
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
-    this.today = this.$route.query.start_date ? this.$moment(this.$route.query.start_date) : this.$moment().weekday(monday)
+    this.today = this.$route.query.date ? this.$moment(this.$route.query.date) : this.$moment().weekday(monday)
+    this.startDate = this.today.format('YYYY-MM-DD')
 
-    this.setDate()
     this.setArgs()
 
-    this.memberType = await this.$store.dispatch('getMemberType')
     await this.loadData()
   },
   methods: {
@@ -129,164 +88,26 @@ export default {
 
       this.model.setListArgs(args.join('&'))
 
-      if (parseInt(this.submodel_id) !== 0) {
+      if (parseInt(this.user_id) !== 0) {
         args = [
-          `submodel_id=${this.submodel_id}`,
+          `user_id=${this.user_id}`,
           `start_date=${this.startDate}`
         ]
 
-        this.timeSheetDetailModel.setListArgs(args.join('&'))
+        this.workHoursModel.setListArgs(args.join('&'))
       }
-    },
-    setDate() {
-      this.startDate = this.today.format('YYYY-MM-DD')
-      this.week = this.today.format('[week] W')
-    },
-    nextWeek() {
-      this.today.add(7, 'days')
-      const query = {
-        ...this.$route.query,
-        start_date: this.today.format('YYYY-MM-DD'),
-      }
-      this.$router.push({ query }).catch(e => {})
-    },
-    backWeek() {
-      this.today.subtract(7, 'days')
-      const query = {
-        ...this.$route.query,
-        start_date: this.today.format('YYYY-MM-DD'),
-      }
-      this.$router.push({ query }).catch(e => {})
     },
     async loadData() {
       this.isLoading = true
 
       const response = await this.model.list()
       this.workHours = response.results
-      if (this.workHours.length) {
-        this.fullName = this.workHours[0].full_name
-      }
 
-      if (parseInt(this.submodel_id) !== 0) {
-        await this.loadAssignedOrders();
-      }
+      const data = await this.workHoursModel.list()
+      this.$refs['user-hours-detail-data'].processData(data)
 
       this.isLoading = false
     },
-    async loadAssignedOrders() {
-      try {
-        const data = await this.timeSheetDetailModel.list()
-        this.fullName = data.full_name
-        let header_columns = [{label: this.$trans('Field'), key: 'field'}]
-
-        // set materials
-        this.materials = data.materials
-
-        // get all weekdays from the first user
-        for(let i=0; i<data.totals.length; i++) {
-          header_columns.push({
-            key: `day${i}`,
-            label: data.totals[i].weekday,
-            sortable: true
-          })
-        }
-
-        header_columns.push({
-          key: 'total',
-          label: this.$trans('Total'),
-          sortable: true
-        })
-
-        this.fields = header_columns
-
-        // create array for table
-        let results = []
-
-        // get fields
-        let fields = []
-        for (const [key, value] of Object.entries(data.totals[0].totals)) {
-          if (this.memberType === 'maintenance') {
-            if (key === 'distance_fixed_rate_amount_total') {
-              continue
-            }
-          } else {
-            if (key === 'distance_to_total' || key === 'distance_back_total') {
-              continue
-            }
-          }
-
-          fields.push(key)
-        }
-
-        for(let i=0; i<fields.length; i++) {
-          if (this.memberType === 'maintenance') {
-            if (fields[i] === 'distance_fixed_rate_amount_total') {
-              continue
-            }
-          } else {
-            if (fields[i] === 'distance_to_total' || fields[i] === 'distance_back_total') {
-              continue
-            }
-          }
-
-          let field
-          switch(fields[i]) {
-            case 'total_work':
-              field = this.$trans('Work total')
-              break
-
-            case 'travel_to_total':
-              field = this.$trans('Travel to total')
-              break
-
-            case 'travel_back_total':
-              field = this.$trans('Travel back total')
-              break
-
-            case 'distance_to_total':
-              field = this.$trans('Distance to total')
-              break
-
-            case 'distance_back_total':
-              field = this.$trans('Distance back total')
-              break
-
-            case 'distance_fixed_rate_amount_total':
-              field = this.$trans('Total trips')
-              break
-
-            case 'total_extra_work':
-              field = this.$trans('Total extra work')
-              break
-
-            case 'total_actual_work':
-              field = this.$trans('Total actual work')
-              break
-
-            default:
-              console.log(`help: ${fields[i]}`)
-          }
-
-          let row = {
-            field: field
-          }
-
-          for(let j=0; j<data.totals.length; j++) {
-            row[`day${j}`] = data.totals[j].totals[fields[i]]
-          }
-
-          // add week totals
-          row['total'] = data['week_totals'][fields[i]]
-
-          results.push(row)
-        }
-
-        this.assignedOrders = results
-      } catch(error) {
-        console.log('error fetching work hours details', error)
-        this.errorToast(this.$trans('Error fetching work hours details'))
-      }
-    }
   }
 }
 </script>

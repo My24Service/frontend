@@ -3,42 +3,42 @@
     <b-navbar-nav ref="nav-items">
       <b-nav-item
         :active="isActive('orders')"
-        v-if="isStaff || isSuperuser || (hasOrders && (isPlanning || isCustomer))"
+        v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer)"
         to="/orders/orders">{{ $trans('Orders') }}
         <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
       </b-nav-item>
       <div
-        v-if="isStaff || isSuperuser || (hasCustomers && isPlanning)"
+        v-if="(hasCustomers && isPlanning) || hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer)"
         class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
       <b-nav-item
         :active="isActive('customers')"
-        v-if="isStaff || isSuperuser || (hasCustomers && isPlanning)"
+        v-if="hasCustomers && (isPlanning || isStaff || isSuperuser)"
         to="/customers/customers">{{ $trans('Customers') }}
       </b-nav-item>
       <div
-        v-if="isStaff || isSuperuser || (hasInventory && isPlanning)"
+        v-if="hasInventory && (isPlanning || isStaff || isSuperuser)"
         class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
       <b-nav-item
         :active="isActive('inventory')"
-        v-if="isStaff || isSuperuser || (hasInventory && isPlanning)"
+        v-if="hasInventory && (isPlanning || isStaff || isSuperuser)"
         to="/inventory/purchaseorders">{{ $trans('Inventory') }}
       </b-nav-item>
       <div
-        v-if="isStaff || isSuperuser || (hasMobile && isPlanning)"
+        v-if="hasMobile && (isPlanning || isStaff || isSuperuser)"
         class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
       <b-nav-item
         :active="isActive('mobile')"
-        v-if="isStaff || isSuperuser || (hasMobile && isPlanning)"
+        v-if="hasMobile && (isPlanning || isStaff || isSuperuser)"
         to="/mobile/dispatch">{{ $trans('Mobile') }}
       </b-nav-item>
       <div
-        v-if="isStaff || isSuperuser || (hasCompany && isPlanning)"
+        v-if="!isCustomer"
         class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
@@ -49,7 +49,7 @@
  -->
       <b-nav-item
         :active="isActive('company')"
-        v-if="isStaff || isSuperuser || (hasCompany && isPlanning)"
+        v-if="!isCustomer"
         to="/company/dashboard">{{ $trans('Company') }}
       </b-nav-item>
       <div v-if="hasMembers" class="main-nav-divider">

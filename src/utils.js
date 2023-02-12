@@ -38,6 +38,10 @@ function getIsStudent(store) {
   return store.state.userInfo.hasOwnProperty('student_user') && store.state.userInfo.student_user
 }
 
+function getIsEmployee(store) {
+  return store.state.userInfo.hasOwnProperty('employee_user') && store.state.userInfo.employee_user
+}
+
 function getIsLoggedIn(store) {
   return store.getters.isLoggedIn
 }
@@ -129,6 +133,9 @@ let componentMixin = {
     isStudent() {
       return getIsStudent(this.$store)
     },
+    isEmployee() {
+      return getIsEmployee(this.$store)
+    },
     isLoggedIn() {
       return getIsLoggedIn(this.$store)
     },
@@ -137,24 +144,47 @@ let componentMixin = {
     },
   },
   methods: {
-    displayDurationFromSeconds(seconds) {
-      return this.displayDuration(moment.duration(seconds*1000))
+    translateHoursField(field) {
+      const allFields = {
+        'work_total': this.$trans("Work total"),
+        'travel_total': this.$trans('Travel to total'),
+        'distance_total': this.$trans('Distance total'),
+        'extra_work': this.$trans('Total extra work'),
+        'actual_work': this.$trans('Total actual work'),
+        'distance_fixed_rate_amount': this.$trans('Total trips')
+      }
+
+      return allFields[field]
     },
-    displayDuration(duration) {
+    displayDurationFromSeconds(seconds, exclude_seconds) {
+      return this.displayDuration(moment.duration(seconds*1000), exclude_seconds)
+    },
+    displayDuration(duration, exclude_seconds) {
+      let days = duration.days()
+      if (days) {
+        days = `${days}d`
+      }
+
       let hours = duration.hours()
       if (hours < 10) {
         hours = `0${hours}`
       }
+
       let minutes = duration.minutes()
       if (minutes< 10) {
         minutes = `0${minutes}`
       }
-      let seconds = duration.seconds()
-      if (seconds < 10) {
-        seconds = `0${seconds}`
-      }
-      return `${hours}:${minutes}:${seconds}`
 
+      if (!exclude_seconds) {
+        let seconds = duration.seconds()
+        if (seconds < 10) {
+          seconds = `0${seconds}`
+        }
+
+        return days ? `${days} ${hours}:${minutes}:${seconds}` : `${hours}:${minutes}:${seconds}`
+      }
+
+      return days ? `${days} ${hours}:${minutes}` : `${hours}:${minutes}`
     },
     async doFetchUnacceptedCountAndUpdateStore() {
       const countResult = await orderNotAcceptedModel.getCount()

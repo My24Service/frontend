@@ -1,14 +1,9 @@
 <template>
-  <div class="mt-4">
+  <div class="app-grid">
 
-    <b-modal
-      id="delete-module-part-modal"
-      ref="delete-module-part-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this module part?') }}</p>
-    </b-modal>
+    <div class="subnav-pills">
+      <PillsCompanyUsers />
+    </div>
 
     <SearchModal
       id="search-modal"
@@ -16,19 +11,27 @@
       @do-search="handleSearchOk"
     />
 
+    <b-modal
+      id="delete-employee-modal"
+      ref="delete-employee-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this employee?') }}</p>
+    </b-modal>
+
     <div class="overflow-auto">
       <Pagination
         v-if="!isLoading"
         :model="this.model"
-        :model_name="$trans('Module part')"
+        :model_name="$trans('Employee')"
       />
-
       <b-table
-        id="module-part-table"
+        id="employee-table"
         small
         :busy='isLoading'
-        :fields="fields"
-        :items="moduleParts"
+        :fields="employeeFields"
+        :items="employees"
         responsive="md"
         class="data-table"
         sort-icon-left
@@ -38,8 +41,8 @@
             <b-button-toolbar>
               <b-button-group class="mr-1">
                 <ButtonLinkAdd
-                  router_name="module-part-add"
-                  v-bind:title="$trans('New module part')"
+                  router_name="employee-add"
+                  v-bind:title="$trans('New employee')"
                 />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
@@ -58,13 +61,10 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #cell(is_always_selected)="data">
-          <b-icon-check-square v-if="data.item.is_always_selected"></b-icon-check-square>
-        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              router_name="module-part-edit"
+              router_name="employee-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -80,39 +80,44 @@
 </template>
 
 <script>
-import modulePartModel from '@/models/member/ModulePart.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
+import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
+import employeeModel from '../../models/company/UserEmployee.js'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import Pagination from "../../components/Pagination.vue"
+import { componentMixin } from '../../utils.js'
 
 export default {
+  mixins: [componentMixin],
+  name: 'UserEmployeeList',
   components: {
+    PillsCompanyUsers,
     IconLinkEdit,
     IconLinkDelete,
+    ButtonLinkAdd,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
   data() {
     return {
+      pk: null,
       searchQuery: null,
-      model: modulePartModel,
-      modulePartPk: null,
+      model: employeeModel,
       isLoading: false,
-      moduleParts: [],
-      fields: [
-        {key: 'name', label: this.$trans('Name'), thAttr: {width: '30%'}, sortable: true},
-        {key: 'module_name', label: this.$trans('Module'), thAttr: {width: '20%'}, sortable: true},
-        {key: 'is_always_selected', label: this.$trans('Always selected?'), thAttr: {width: '20%'}, sortable: true},
-        {key: 'created', label: this.$trans('Created'), thAttr: {width: '10%'}, sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), thAttr: {width: '10%'}, sortable: true},
-        {key: 'icons', thAttr: {width: '10%'}}
+      employees: [],
+      employeeFields: [
+        {key: 'full_name', label: this.$trans('Name'), sortable: true},
+        {key: 'username', label: this.$trans('Username'), sortable: true},
+        {key: 'email', label: this.$trans('Email'), sortable: true},
+        {key: 'last_login', label: this.$trans('Last login'), sortable: true},
+        {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
+        {key: 'icons'}
       ],
     }
   },
@@ -132,30 +137,30 @@ export default {
     },
     // delete
     showDeleteModal(id) {
-      this.modulePartPk = id
-      this.$refs['delete-module-part-modal'].show()
+      this.pk = id
+      this.$refs['delete-employee-modal'].show()
     },
     async doDelete() {
       try {
-        await this.model.delete(this.modulePartPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Module part has been deleted'))
-        this.loadData()
+        await this.model.delete(this.pk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Employee has been deleted'))
+        await this.loadData()
       } catch(error) {
-        console.log('Error deleting module part', error)
-        this.errorToast(this.$trans('Error deleting module part'))
+        console.log('Error deleting employee', error)
+        this.errorToast(this.$trans('Error deleting employee'))
       }
     },
     // rest
     async loadData() {
       this.isLoading = true;
-
+``
       try {
         const data = await this.model.list()
-        this.moduleParts = data.results
+        this.employees = data.results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching module parts', error)
-        this.errorToast(this.$trans('Error loading module parts'))
+        console.log('error fetching employees', error)
+        this.errorToast(this.$trans('Error loading employees'))
         this.isLoading = false
       }
     }

@@ -221,7 +221,7 @@
                   {{ $trans('Username is required') }}
                 </b-form-invalid-feedback>
                 <b-form-invalid-feedback
-                  v-if="studentuser.username !== ''"
+                  v-if="studentuser.username !== '' && studentuser.username !== orgUsername"
                   :state="isSubmitClicked ? !v$.studentuser.username.isUnique.$invalid : null">
                   {{ $trans('Username is already in use') }}
                 </b-form-invalid-feedback>
@@ -653,6 +653,7 @@ export default {
         {value: 'F', text: this.$trans('Female')},
         {value: 'O', text: this.$trans('Other')},
       ],
+      orgUsername: null
     }
   },
   computed: {

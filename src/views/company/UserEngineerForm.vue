@@ -23,7 +23,7 @@
                 {{ $trans('Username is required') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
-                v-if="engineer.username !== ''"
+                v-if="engineer.username !== '' && engineer.username !== orgUsername"
                 :state="isSubmitClicked ? v$.engineer.username.isUnique.$invalid : null">
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
@@ -64,6 +64,11 @@
                 :state="isSubmitClicked ? !v$.engineer.password2.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
+                :state="isSubmitClicked && v$.engineer.password2 ? !v$.engineer.password2.$error : null">
+                {{ $trans('Please enter a password') }}
+              </b-form-invalid-feedback>
+              <b-form-invalid-feedback
+                v-if="engineer.password2 !== '' && engineer.password2"
                 :state="isSubmitClicked ? v$.engineer.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
@@ -372,6 +377,7 @@ export default {
       buttonDisabled: false,
       engineer: engineerModel.getFields(),
       errorMessage: null,
+      orgUsername: null
     }
   },
   computed: {

@@ -6,8 +6,8 @@ import VueRouter from 'vue-router'
 import Vuex from "vuex"
 
 import localVue from '../../index'
-import UserCustomerList from '@/views/company/UserCustomerList.vue'
-import userCustomerResponse from '../../fixtures/user-customers'
+import UserEmployeeList from '../../../../src/views/company/UserEmployeeList.vue'
+import usersEmployeeResponse from '../../fixtures/users-employee'
 import my24 from "../../../../src/services/my24";
 
 jest.mock('axios')
@@ -15,11 +15,11 @@ jest.mock('axios')
 const routes = [
 {
   path: '/hello/world',
-  name: 'customeruser-add'
+  name: 'employeeuser-add'
 },
 {
   path: '/hello/world',
-  name: 'customeruser-edit'
+  name: 'employeeuser-edit'
 },
 ]
 
@@ -32,7 +32,7 @@ const resultCertainModules = {
 const router = new VueRouter({routes})
 
 
-describe('UserCustomerList.vue', () => {
+describe('UserEmployeeList.vue', () => {
   let store
   let actions
 
@@ -55,9 +55,9 @@ describe('UserCustomerList.vue', () => {
   })
 
   it('exists', async () => {
-    axios.get.mockResolvedValueOnce(userCustomerResponse);
+    axios.get.mockResolvedValueOnce(usersEmployeeResponse);
 
-    const wrapper = shallowMount(UserCustomerList, {
+    const wrapper = shallowMount(UserEmployeeList, {
       localVue,
       router,
       store,
@@ -68,14 +68,14 @@ describe('UserCustomerList.vue', () => {
 
     await flushPromises()
 
-    const el = wrapper.findComponent(UserCustomerList)
+    const el = wrapper.findComponent(UserEmployeeList)
     expect(el.exists()).to.be.true
   })
 
   it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(userCustomerResponse);
+    axios.get.mockResolvedValueOnce(usersEmployeeResponse);
 
-    const wrapper = mount(UserCustomerList, {
+    const wrapper = mount(UserEmployeeList, {
       localVue,
       store,
       router,
@@ -86,14 +86,14 @@ describe('UserCustomerList.vue', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('#customeruser-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    const trs = wrapper.findAll('#employee-table > tbody > tr')
+    expect(trs.length).to.equal(1)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(userCustomerResponse);
+  it('contains "Hoi""', async () => {
+    axios.get.mockResolvedValueOnce(usersEmployeeResponse);
 
-    const wrapper = mount(UserCustomerList, {
+    const wrapper = mount(UserEmployeeList, {
       localVue,
       store,
       router,
@@ -105,7 +105,6 @@ describe('UserCustomerList.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('Test')
-    expect(html).to.contain('Test 2')
+    expect(html).to.contain('Hoi')
   })
 })

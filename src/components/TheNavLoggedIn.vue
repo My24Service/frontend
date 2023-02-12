@@ -218,6 +218,10 @@ export default {
         memberNewDataSocket.removeOnmessageHandler()
         memberNewDataSocket.removeSocket()
 
+        await memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
+        memberNewDataSocket.removeOnmessageHandler()
+        memberNewDataSocket.removeSocket()
+
         this.infoToast(this.$trans('Logged out'), this.$trans('You are now logged out'))
 
         if(this.$router.currentRoute.path !== '/') {
@@ -229,7 +233,15 @@ export default {
         this.errorToast(this.$trans('Error logging you out'))
       }
     },
+    onContractChange() {
+      this.$store.dispatch('getInitialData')
+    },
   },
+  async created() {
+    await memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
+    memberNewDataSocket.setOnmessageHandler(this.onContractChange)
+    memberNewDataSocket.getSocket()
+  }
 }
 </script>
 <style scoped>

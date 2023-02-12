@@ -2,35 +2,42 @@
   <div>
     <b-nav pills>
       <b-nav-item
-        v-if="memberType === 'maintenance'"
-        :active="isActive('engineers')"
+        v-if="hasEngineers()"
+        :active="isActive('engineer-users')"
         :to="{ name: 'users-engineers' }">
         {{ $trans('Engineers') }}
       </b-nav-item>
       <b-nav-item
-        v-if="memberType === 'temps'"
-        :active="isActive('studentusers')"
+        v-if="hasStudents()"
+        :active="isActive('student-users')"
         :to="{ name: 'users-studentusers' }">
         {{ $trans('Students') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('salesusers')"
+        v-if="hasSales()"
+        :active="isActive('sales-users')"
         :to="{ name: 'users-salesusers' }">
         {{ $trans('Sales') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('customerusers')"
+        v-if="hasCustomers()"
+        :active="isActive('customer-users')"
         :to="{ name: 'users-customerusers' }">
         {{ $trans('Customers') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('planningusers')"
+        :active="isActive('planning-users')"
         :to="{ name: 'users-planningusers' }">
         {{ $trans('Planning') }}
       </b-nav-item>
       <b-nav-item
+        :active="isActive('employees')"
+        :to="{ name: 'users-employees' }">
+        {{ $trans('Employees') }}
+      </b-nav-item>
+      <b-nav-item
         v-if="hasApiUsers"
-        :active="isActive('apiusers')"
+        :active="isActive('api-users')"
         :to="{ name: 'users-apiusers' }">
         {{ $trans('API') }}
       </b-nav-item>
@@ -59,9 +66,21 @@ export default {
     this.isLoaded = true
   },
   methods: {
+    hasEngineers() {
+      return this.memberType === 'maintenance' && this.hasAccessToModule('company', 'engineer-users')
+    },
+    hasStudents() {
+      return this.memberType === 'temps' && this.hasAccessToModule('company', 'student-users')
+    },
+    hasSales() {
+      return this.hasAccessToModule('company', 'sales-users')
+    },
+    hasCustomers() {
+      return this.hasAccessToModule('company', 'customer-users')
+    },
     isActive(item) {
       const parts = this.$route.path.split('/')
-      return parts[3] === item
+      return parts[2] === item
     }
   },
 }

@@ -1,9 +1,9 @@
-import BaseModel from '@/models/base'
+import BaseModel from '../../models/base'
 
 
 class Module extends BaseModel {
   fields = {
-    'name': ''
+    'name': '',
   }
 
   url = '/member/module/'

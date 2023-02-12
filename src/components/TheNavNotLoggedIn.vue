@@ -65,11 +65,10 @@
 </template>
 
 <script>
-import accountModel from '@/models/account/Account.js'
-import authService from '@/services/auth'
-import TheLanguageChooser from "@/components/TheLanguageChooser.vue"
-import NavBrand from "@/components/NavBrand.vue"
-import Version from "@/components/Version.vue"
+import accountModel from '../models/account/Account.js'
+import TheLanguageChooser from "../components/TheLanguageChooser.vue"
+import NavBrand from "../components/NavBrand.vue"
+import Version from "../components/Version.vue"
 
 export default {
   components: {
