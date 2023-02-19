@@ -1,5 +1,5 @@
 import moment from 'moment'
-import BaseModel from '@/models/base'
+import BaseModel from '../base'
 
 let tomorrow = moment().add(1, 'days')
 

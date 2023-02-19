@@ -46,7 +46,7 @@ export default {
       const currentPage = parseInt(this.currentPage)
       if (this.model.count > this.model.perPage) {
         const start = ((currentPage - 1) * this.model.perPage) + 1;
-        const end = start + this.model.perPage < this.model.count ? start + this.model.perPage -1 : this.model.count
+        const end = start + this.model.perPage <= this.model.count ? start + this.model.perPage -1 : this.model.count
 
         return `${ this.model_name } ${ start } - ${ end }, ${ this.$trans('total') } ${ this.model.count }`
       } else {
