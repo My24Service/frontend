@@ -145,9 +145,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 
-import inventoryModel from '@/models/inventory/Inventory.js'
-import materialModel from '@/models/inventory/Material.js'
-import stockLocationModel from '@/models/inventory/StockLocation.js'
+import inventoryModel from '../../models/inventory/Inventory.js'
 import mutationModel from "../../models/inventory/Mutation";
 
 const greaterThanZero = (value) => parseInt(value) > 0
@@ -272,7 +270,7 @@ export default {
         this.infoToast(this.$trans('Created'), this.$trans('Mutation created'))
         this.buttonDisabled = false
         this.isLoading = false
-        this.$router.push({name: 'mutation-list'})
+        await this.$router.push({name: 'mutation-list'})
       } catch(error) {
         console.log('error creating mutation', error)
         this.errorToast(this.$trans('Error creating mutation'))
