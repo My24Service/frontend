@@ -42,6 +42,10 @@ function getIsEmployee(store) {
   return store.state.userInfo.hasOwnProperty('employee_user') && store.state.userInfo.employee_user
 }
 
+function getIsBranchEmployee(store) {
+  return store.state.userInfo.hasOwnProperty('employee_user') && store.state.userInfo.employee_user && store.state.userInfo.employee_user.branch
+}
+
 function getIsLoggedIn(store) {
   return store.getters.isLoggedIn
 }
@@ -136,11 +140,17 @@ let componentMixin = {
     isEmployee() {
       return getIsEmployee(this.$store)
     },
+    isBranchEmployee() {
+      return getIsBranchEmployee(this.$store)
+    },
     isLoggedIn() {
       return getIsLoggedIn(this.$store)
     },
     username() {
       return this.$store.getters.getUserName
+    },
+    hasBranches() {
+      return this.$store.getters.getMemberHasBranches
     },
   },
   methods: {

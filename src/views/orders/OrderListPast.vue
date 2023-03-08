@@ -8,7 +8,7 @@
     />
 
     <b-modal
-      v-if="!isCustomer"
+      v-if="!isCustomer && !isBranchEmployee"
       id="change-status-modal"
       ref="change-status-modal"
       v-bind:title="$trans('Add status')"
@@ -107,7 +107,7 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkPlus
-              v-if="!isCustomer"
+              v-if="!isCustomer && !isBranchEmployee"
               type="tr"
               v-bind:title="$trans('Change status')"
               v-bind:method="function() { showChangeStatusModal(data.item.id) }"
