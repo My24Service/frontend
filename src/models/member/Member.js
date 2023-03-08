@@ -22,7 +22,8 @@ class Member extends BaseModel {
     'is_deleted': false,
     'member_type': '',
     'is_public': true,
-    'has_api_users': false
+    'has_api_users': false,
+    'has_branches': false
   }
 
   url = '/member/member/'

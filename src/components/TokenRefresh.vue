@@ -10,10 +10,10 @@ export default {
   data() {
     return {
       intervalIdToken: null,
-      intervalMinutes: 60,
+      intervalMinutes: 15,
       // 'SLIDING_TOKEN_LIFETIME': timedelta(days=2),
       // 'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=14),
-      expireRefreshThresholdSec: 60*60*30
+      expireRefreshThresholdSec: 60*60*12
     }
   },
   methods: {
@@ -50,6 +50,7 @@ export default {
     },
   },
   mounted() {
+    this.checkToken()
     this.intervalIdToken = setInterval(this.checkToken, 1000*60*this.intervalMinutes)
   },
   beforeDestroy() {

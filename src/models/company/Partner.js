@@ -1,4 +1,4 @@
-import BaseModel from '@/models/base'
+import BaseModel from '../base'
 
 
 class Partner extends BaseModel {
@@ -10,6 +10,29 @@ class Partner extends BaseModel {
   }
 
   url = '/company/partner/'
+
+  getBranches(partnerPk) {
+    const url = `${this.getListUrl()}${partnerPk}/branches/`
+    return this.axios.get(url).then((response) => response.data)
+  }
+
+  createBranchFromCustomer(customerPk, partnerPk) {
+    const data = {
+      customer_id: customerPk
+    }
+
+    const url = `${this.url}${partnerPk}/branch_create_from_customer/`
+    return this.axios.post(url, data).then((response) => response.data)
+  }
+
+  copy_customer_orders(customerPk, partnerPk) {
+    const data = {
+      customer_id: customerPk
+    }
+
+    const url = `${this.url}${partnerPk}/copy_customer_orders/`
+    return this.axios.post(url, data).then((response) => response.data)
+  }
 
 }
 

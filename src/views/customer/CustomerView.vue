@@ -123,12 +123,12 @@
 </template>
 
 <script>
-import orderPastModel from '@/models/orders/OrderPast.js'
-import customerModel from '@/models/customer/Customer.js'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import OrderTableInfo from '@/components/OrderTableInfo.vue'
-import SearchModal from '@/components/SearchModal.vue'
+import orderPastModel from '../../models/orders/OrderPast.js'
+import customerModel from '../../models/customer/Customer.js'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import SearchModal from '../../components/SearchModal.vue'
 
 export default {
   components: {

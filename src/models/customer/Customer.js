@@ -1,4 +1,4 @@
-import BaseModel from '@/models/base'
+import BaseModel from '../base'
 
 
 class Customer extends BaseModel {
@@ -26,7 +26,12 @@ class Customer extends BaseModel {
 
     'standard_hours_hour': 0,
     'standard_hours_minute': '00',
-    'documents': []
+    'documents': [],
+    'branch_partner': null,
+    'branch_id': null,
+    'branch_view': null,
+    'use_branch_address': true,
+    'num_orders': 0
   }
 
   url = '/customer/customer/'

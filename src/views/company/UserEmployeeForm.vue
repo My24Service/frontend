@@ -143,20 +143,27 @@
             </b-form-group>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Uses time registration?')"
-              label-for="employee_uses_time_registration"
-            >
-              <b-form-checkbox
-                id="employee_uses_time_registration"
-                size="sm"
-                v-model="employee.employee_user.uses_time_registration"
-              >
-              </b-form-checkbox>
-            </b-form-group>
           </b-col>
         </b-row>
+
+        <div v-if="hasBranches">
+          <b-row>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Branch')"
+                label-for="employee_branch"
+              >
+                <b-form-select
+                  id="employee_branch"
+                  v-model="employee.employee_user.branch"
+                  :options="branches"
+                  size="sm"
+                ></b-form-select>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </div>
 
         <div class="mx-auto">
           <footer class="modal-footer">
@@ -178,10 +185,13 @@ import { helpers } from '@vuelidate/validators'
 
 import { usernameExists } from '../../models/helpers.js'
 import employeeModel from '../../models/company/UserEmployee.js'
+import branchModel from '../../models/company/Branch.js'
 
 export default {
   setup() {
     return { v$: useVuelidate() }
+  },
+  components: {
   },
   props: {
     pk: {
@@ -258,6 +268,8 @@ export default {
       buttonDisabled: false,
       employee: employeeModel.getFields(),
       orgUsername: null,
+      branches: [],
+      branch_info: '',
     }
   },
   computed: {
@@ -266,9 +278,28 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
-    }
+    },
+    hasBranches() {
+      return this.$store.getters.getMemberHasBranches
+    },
   },
   async created() {
+    const response = await branchModel.list()
+
+    this.branches = [{
+      value: null,
+      text: '-'
+    }]
+
+    for(let i=0;i<response.results.length; i++) {
+      const txt = `${response.results[i].name} - ${response.results[i].city}`
+
+      this.branches.push({
+        value: response.results[i].id,
+        text: txt,
+      })
+    }
+
     if (!this.isCreate) {
       await this.loadData()
     } else {

@@ -32,6 +32,7 @@
         responsive="md"
         class="data-table"
         sort-icon-left
+        :tbody-tr-class="rowClass"
       >
         <template #head(icons)="">
           <div class="float-right">
@@ -59,25 +60,55 @@
           </div>
         </template>
         <template #cell(id)="data">
-          <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">{{ data.item.name }}</router-link><br/>
-          <b>{{ $trans('Customer ID') }}</b>: {{ data.item.customer_id }}<br/>
-          <span v-if="data.item.contact && data.item.contact.trim() !== ''">
-              <b>{{ $trans('Contact') }}</b>: {{ data.item.contact }}<br/>
-          </span>
-          <span v-if="data.item.email">
-            {{ $trans('Email') }}: <b-link class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.email }}</b-link><br/>
-          </span>
-          <span v-if="data.item.mobile && data.item.mobile.trim() !== ''">
-              <b>{{ $trans('Mobile') }}</b>: {{ data.item.mobile }}<br/>
-          </span>
+          <div v-if="data.item.branch_view">
+            <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
+              {{ data.item.branch_view.name }}, {{ data.item.branch_view.city }}, {{ data.item.branch_view.country_code }}
+              (<span class="branch">{{ $trans("Branch") }}</span>)
+            </router-link><br/>
+            {{ $trans('Customer ID') }}: {{ data.item.customer_id }}<br/>
+            {{ data.item.branch_view.address }}<br/>
+            {{ data.item.branch_view.country_code }}-{{ data.item.branch_view.postal }}<br/>
+            <span v-if="data.item.branch_view.contact && data.item.branch_view.contact.trim() !== ''">
+                <b>{{ $trans('Contact') }}</b>: {{ data.item.branch_view.contact }}<br/>
+            </span>
+            <span v-if="data.item.branch_view.email">
+              {{ $trans('Email') }}: <b-link class="px-1" v-bind:href="`mailto:${data.item.branch_view.email}`">{{ data.item.branch_view.email }}</b-link><br/>
+            </span>
+            <span v-if="data.item.branch_view.tel && data.item.branch_view.tel.trim() !== ''">
+                <b>{{ $trans('Tel') }}</b>: {{ data.item.branch_view.tel }}<br/>
+            </span>
+            <span v-if="data.item.branch_view.mobile && data.item.branch_view.mobile.trim() !== ''">
+                <b>{{ $trans('Mobile') }}</b>: {{ data.item.branch_view.mobile }}<br/>
+            </span>
+          </div>
+          <div v-if="!data.item.branch_view">
+            <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
+              {{ data.item.name }}, {{ data.item.city }}, {{ data.item.country_code }}
+            </router-link><br/>
+            {{ $trans('Customer ID') }}: {{ data.item.customer_id }}<br/>
+            {{ data.item.address }}<br/>
+            {{ data.item.country_code }}-{{ data.item.postal }}<br/>
+            <span v-if="data.item.contact && data.item.contact.trim() !== ''">
+                <b>{{ $trans('Contact') }}</b>: {{ data.item.contact }}<br/>
+            </span>
+              <span v-if="data.item.email">
+              {{ $trans('Email') }}: <b-link class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.email }}</b-link><br/>
+              </span>
+              <span v-if="data.item.tel && data.item.tel.trim() !== ''">
+                  <b>{{ $trans('Tel') }}</b>: {{ data.item.tel }}<br/>
+              </span>
+              <span v-if="data.item.mobile && data.item.mobile.trim() !== ''">
+                <b>{{ $trans('Mobile') }}</b>: {{ data.item.mobile }}<br/>
+              </span>
+          </div>
           <span v-if="data.item.remarks && data.item.remarks.trim() != ''">
-              <b>{{ $trans('Remarks') }}</b>: {{ data.item.remarks }}<br/>
+            <b>{{ $trans('Remarks') }}</b>: {{ data.item.remarks }}<br/>
           </span>
           <span v-if="data.item.maintenance_contract && data.item.maintenance_contract.trim() != ''">
-              <b>{{ $trans('Maintenance contract') }}</b>: {{ data.item.maintenance_contract }}<br/>
+            <b>{{ $trans('Maintenance contract') }}</b>: {{ data.item.maintenance_contract }}<br/>
           </span>
           <span v-if="data.item.standard_hours_txt !== '0:00'">
-              <b>{{ $trans('Standard hours') }}</b>: {{ data.item.standard_hours_txt }}<br/>
+            <b>{{ $trans('Standard hours') }}</b>: {{ data.item.standard_hours_txt }}<br/>
           </span>
           <b-row>
             <b-col cols="12" v-if="data.item.documents.length > 0">
@@ -144,11 +175,8 @@ export default {
       isLoading: false,
       customers: [],
       customerFields: [
-        {key: 'id', label: this.$trans('Company'), sortable: true, thAttr: {width: '25%'}},
-        {key: 'tel', label: this.$trans('Tel.'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'address', label: this.$trans('Address'), sortable: true, thAttr: {width: '20%'}},
-        {key: 'country_code', label: this.$trans('Postal'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'city', label: this.$trans('City'), sortable: true, thAttr: {width: '20%'}},
+        {key: 'id', label: this.$trans('Company'), sortable: true, thAttr: {width: '75%'}},
+        {key: 'num_orders', label: this.$trans('# orders'), sortable: true, thAttr: {width: '10%'}},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
     }
@@ -183,6 +211,11 @@ export default {
       }
     },
     // rest
+    rowClass(item, type) {
+      if (item && type === 'row') {
+        return item.branch_view ? 'branch' : ''
+      }
+    },
     async loadData() {
       this.isLoading = true;
 
@@ -199,3 +232,8 @@ export default {
   }
 }
 </script>
+<style>
+tr.branch {
+  background-color: #f6cdd1;
+}
+</style>

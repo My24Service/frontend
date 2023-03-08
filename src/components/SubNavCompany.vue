@@ -49,6 +49,12 @@
         :to="{ name: 'company-workhours' }">
         {{ $trans('Work hours') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('branches')"
+        v-if="hasBranches"
+        :to="{ name: 'company-branches' }">
+        {{ $trans('Branches') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
@@ -99,6 +105,9 @@ export default {
       }
 
       return { name: 'users-planningusers' }
+    },
+    hasBranches() {
+      return this.$store.getters.getMemberHasBranches
     },
     hasDashBoard() {
       return this.hasAccessToModule('company', 'dashboard')
