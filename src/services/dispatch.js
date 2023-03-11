@@ -69,7 +69,7 @@ class Dispatch {
 
   debug = false
   debugNumUsers = 300
-  debugSubstr = 'heerink'
+  debugSubstr = 'teus'
 
   statuscodes = null
 
@@ -178,9 +178,9 @@ class Dispatch {
   }
 
 
-  loadToday() {
+  async loadToday() {
     this.startDate = this.component.$moment().weekday(this.monday)
-    this.drawDispatch()
+    await this.drawDispatch()
   }
 
   fetchData() {
@@ -222,7 +222,7 @@ class Dispatch {
     this.reOffset()
     this.createUserRows(data)
 
-    if (timesDone == 0) {
+    if (timesDone === 0) {
       this.lastYPlus = this.lastY + 30
       this._draw(data, ++timesDone)
     }
@@ -247,16 +247,16 @@ class Dispatch {
     this.dateToIndex = []
 
     for (let date=this.startDate.clone(), i=0; i<this.numDays; i++) {
-    	const dateFormated = date.format('YYYY-MM-DD')
+    	const dateFormatted = date.format('YYYY-MM-DD')
     	const dateHeader = i === 0 ? date.format('ddd DD/MM, [week] W') : date.format('ddd DD/MM') // display week in first column
 
       this.daysInView.push({
-      	dateFormated,
+      	dateFormatted: dateFormatted,
       	dateHeader,
         orders: []
       })
 
-      this.dateToIndex[dateFormated] = i
+      this.dateToIndex[dateFormatted] = i
 
       date.add(1, 'days')
 	    this.endDate = date
@@ -306,7 +306,7 @@ class Dispatch {
       }
 
       if (this.debug) {
-        console.log(`creating row for ${data[i].full_name}, lastY=${this.lastY}`)
+        console.log(`creating row for ${data[i].full_name}, lastY=${this.lastY}`, data[i])
       }
       this.createUserRow(data[i], i)
 
@@ -317,7 +317,7 @@ class Dispatch {
 
     if (this.debug) {
       for(let i=0; i<this.daysInView.length; i++) {
-        console.log(`days in view: ${this.daysInView[i].dateFormated}`, this.daysInView[i].orders)
+        console.log(`days in view: ${this.daysInView[i].dateFormatted}`, this.daysInView[i].orders)
       }
     }
   }
@@ -328,7 +328,7 @@ class Dispatch {
 
     // draw partners with a grey background
     if (data.is_partner && this.partnerYPositions.length) {
-      const positions = this.partnerYPositions.find(position => position.user_id == data.user_id)
+      const positions = this.partnerYPositions.find(position => position.user_id === data.user_id)
       if (positions) {
         this.ctx.fillStyle = "#e5e5e5"
         this.ctx.fillRect(1, positions.start, this.width-1, positions.end)
@@ -343,13 +343,21 @@ class Dispatch {
     // prio 2 = start inside, end outside window
     // prio 3 = start/end inside window
     // prio 4 = same day
+    // prio 5 = start/end outside window
     let rowOrderLinesPrio1 = []
     let rowOrderLinesPrio2 = []
     let rowOrderLinesPrio3 = []
     let rowOrderLinesPrio4 = []
+    let rowOrderLinesPrio5 = []
+
+    const startDateView = this.component.$moment(this.startDate.format('YYYY/MM/DD'))
+    const endDateView = this.component.$moment(this.endDate.format('YYYY/MM/DD')).subtract(1, 'days')
 
     for (const [date, orders] of Object.entries(data.assignedorders.start)) {
       for(let i=0; i<orders.length; i++) {
+        if (this.debug) {
+          console.log('--------------------------------------------------------------')
+        }
         // fill searchable info
         rowInfo.push(orders[i].order_pk)
         rowInfo.push(orders[i].assignedorder_status)
@@ -361,8 +369,18 @@ class Dispatch {
           console.log(`order ${orders[i].order_id}, start: ${date}, end: ${endOrder.date}`)
         }
 
+        const startDateOrder = this.component.$moment(this.component.$moment(date).format("YYYY/MM/DD"))
+        const endDateOrder = this.component.$moment(endOrder.date)
+        if (this.debug) {
+          console.log(`start date order=${startDateOrder.format("YYYY/MM/DD h:mm:ss")}, start date view=${startDateView.format("YYYY/MM/DD h:mm:ss")} || end date order=${endDateOrder.format("YYYY/MM/DD h:mm:ss")}, end date view=${endDateView.format("YYYY/MM/DD h:mm:ss")}`)
+        }
+
         // start outside window, end within
-        if (!(date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
+        if (startDateOrder.isBefore(startDateView) && endDateOrder.isSameOrBefore(endDateView)) {
+        // if (!(date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
+          if (this.debug) {
+            console.log(`adding rowOrderLinesPrio1 (start outside, end within window)`)
+          }
           rowOrderLinesPrio1.push({
             order: orders[i],
             startIndex: 0,
@@ -373,7 +391,11 @@ class Dispatch {
         }
 
         // start inside window, end outside
-        else if ((date in this.dateToIndex) && !(endOrder.date in this.dateToIndex)) {
+        // else if ((date in this.dateToIndex) && !(endOrder.date in this.dateToIndex)) {
+        else if (startDateOrder.isSameOrAfter(startDateView) && endDateOrder.isAfter(endDateView)) {
+          if (this.debug) {
+            console.debug('adding rowOrderLinesPrio2 (start inside, end outside window)')
+          }
           rowOrderLinesPrio2.push({
             order: orders[i],
             startIndex: this.dateToIndex[date],
@@ -384,9 +406,13 @@ class Dispatch {
         }
 
         // start & end inside window
-        else if ((date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
+        else if (startDateOrder.isSameOrAfter(startDateView) && endDateOrder.isSameOrBefore(endDateView)) {
+        // else if ((date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
           // not same day
           if (date !== endOrder.date) {
+            if (this.debug) {
+              console.debug('adding rowOrderLinesPrio3 (start/end inside window)')
+            }
             rowOrderLinesPrio3.push({
               order: orders[i],
               startIndex: this.dateToIndex[date],
@@ -395,6 +421,9 @@ class Dispatch {
               endPosX: this.getEndXPos(this.dateToIndex[endOrder.date]),
             })
           } else {
+            if (this.debug) {
+              console.debug('adding rowOrderLinesPrio4 (same day)')
+            }
             rowOrderLinesPrio4.push({
               order: orders[i],
               startIndex: this.dateToIndex[date],
@@ -403,7 +432,32 @@ class Dispatch {
               endPosX: this.getEndXPosSameDay(this.dateToIndex[date]),
             })
           }
-
+            // start & end outside window
+        } else if (startDateOrder.isBefore(startDateView) && endDateOrder.isAfter(endDateView)) {
+          if (this.debug) {
+            console.debug('adding rowOrderLinesPrio5 (start/end outside window)')
+          }
+          rowOrderLinesPrio5.push({
+            order: orders[i],
+            startIndex: 0,
+            endIndex: this.numSlots-2,
+            startPosX: this.getSlotsStartX(),
+            endPosX: this.getSlotsEndX(),
+          })
+        } else  {
+          if (this.debug) {
+            console.debug('dont know what to do with this dates')
+          }
+            // console.log('adding rowOrderLinesPrio4 (same day)')
+            // rowOrderLinesPrio4.push({
+            //   order: orders[i],
+            //   startIndex: this.dateToIndex[date],
+            //   endIndex: this.dateToIndex[date],
+            //   startPosX: this.getStartXPosSameDay(this.dateToIndex[date]),
+            //   endPosX: this.getEndXPosSameDay(this.dateToIndex[date]),
+            // })
+        // } else {
+        //   console.error('HELP unknown mode')
         }
       } // for orders.length
     } // for data.assignedorders.start
@@ -460,6 +514,22 @@ class Dispatch {
     rowOrderLinesPrio4.forEach(lineData => {
       if (this.debug) {
         console.log('drawOrderLine: start & end inside window, same day')
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
+      }
+
+      // find an empty slot
+      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex)
+
+      // set y slots in all slots
+      this.setYSlot(lineData.order.assignedorder_pk, ySlot, lineData.startIndex, lineData.endIndex)
+
+      // draw the line
+      this._drawOrderLine(lineData, ySlot, data.user_id)
+    })
+
+    rowOrderLinesPrio5.forEach(lineData => {
+      if (this.debug) {
+        console.log('drawOrderLine: start & end outside window, same day')
         console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
       }
 

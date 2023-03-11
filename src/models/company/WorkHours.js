@@ -1,4 +1,4 @@
-import BaseModel from '@/models/base';
+import BaseModel from '../base';
 
 
 class WorkHours extends BaseModel {

@@ -50,6 +50,12 @@
         {{ $trans('Work hours') }}
       </b-nav-item>
       <b-nav-item
+        :active="isActive('time-registration')"
+        v-if="hasTimeRegistration"
+        :to="{ name: 'company-time-registration' }">
+        {{ $trans('Time registration') }}
+      </b-nav-item>
+      <b-nav-item
         :active="isActive('branches')"
         v-if="hasBranches"
         :to="{ name: 'company-branches' }">
@@ -111,6 +117,9 @@ export default {
     },
     hasDashBoard() {
       return this.hasAccessToModule('company', 'dashboard')
+    },
+    hasTimeRegistration() {
+      return this.hasAccessToModule('company', 'time-registration')
     },
     hasCompany() {
       return true

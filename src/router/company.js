@@ -55,6 +55,9 @@ import UserEmployeeForm from "../views/company/UserEmployeeForm";
 import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
 
+import TimeRegistration from '../views/company/TimeRegistration.vue'
+import TimeRegistrationDetail from '../views/company/TimeRegistrationDetail.vue'
+
 
 export default [
 {
@@ -584,6 +587,31 @@ export default [
       path: '/company/workhours/:user_id',
       components: {
         'app-content': WorkHoursDetail,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    // time registration
+    {
+      name: 'company-time-registration',
+      path: '/company/time-registration',
+      components: {
+        'app-content': TimeRegistration,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'company-time-registration-detail',
+      path: '/company/time-registration/:user_id',
+      components: {
+        'app-content': TimeRegistrationDetail,
         'app-subnav': SubNavCompany
       },
       props: {
