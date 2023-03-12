@@ -56,7 +56,6 @@ import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
 
 import TimeRegistration from '../views/company/TimeRegistration.vue'
-import TimeRegistrationDetail from '../views/company/TimeRegistrationDetail.vue'
 
 
 export default [
@@ -611,7 +610,7 @@ export default [
       name: 'company-time-registration-detail',
       path: '/company/time-registration/:user_id',
       components: {
-        'app-content': TimeRegistrationDetail,
+        'app-content': TimeRegistration,
         'app-subnav': SubNavCompany
       },
       props: {

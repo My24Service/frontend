@@ -2,7 +2,7 @@
   <div class="app-grid">
     <TimeRegistrationData
       ref="user-time-registration"
-      detail_route_name="company-time-registration-detail"
+      :user_id="user_id"
     />
   </div>
 </template>
@@ -15,6 +15,12 @@ import TimeRegistrationData from "../../components/TimeRegistrationData.vue";
 
 export default {
   name: "TimeRegistration",
+  props: {
+    user_id: {
+      type: [String, Number],
+      default: null
+    },
+  },
   data() {
     return {
       today: null,
@@ -45,6 +51,10 @@ export default {
         let args = [
           `mode=${this.mode}`
         ]
+
+        if (this.user_id) {
+          args.push(`user=${this.user_id}`)
+        }
 
         if (this.mode === 'week') {
           args.push(`start_date=${this.today.format('YYYY-MM-DD')}`)
