@@ -768,8 +768,6 @@ export default {
         { item: 'orders', name: this.$trans('Orders') },
         { item: 'dispatch', name: this.$trans('Dispatch') },
       ],
-      isDocumentsOpen: false,
-      isAssignOpen: false,
       maintenanceProducts: []
     }
   },

@@ -14,7 +14,7 @@
       </div>
       <b-nav-item
         :active="isActive('customers')"
-        v-if="hasCustomers && (isPlanning || isStaff || isSuperuser)"
+        v-if="(hasCustomers && isPlanning) || hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer)"
         to="/customers/customers">{{ $trans('Customers') }}
       </b-nav-item>
       <div

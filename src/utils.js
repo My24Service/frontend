@@ -42,6 +42,10 @@ function getIsEmployee(store) {
   return store.state.userInfo.hasOwnProperty('employee_user') && store.state.userInfo.employee_user
 }
 
+function getIsBranchEmployee(store) {
+  return store.state.userInfo.hasOwnProperty('employee_user') && store.state.userInfo.employee_user && store.state.userInfo.employee_user.branch
+}
+
 function getIsLoggedIn(store) {
   return store.getters.isLoggedIn
 }
@@ -136,11 +140,17 @@ let componentMixin = {
     isEmployee() {
       return getIsEmployee(this.$store)
     },
+    isBranchEmployee() {
+      return getIsBranchEmployee(this.$store)
+    },
     isLoggedIn() {
       return getIsLoggedIn(this.$store)
     },
     username() {
       return this.$store.getters.getUserName
+    },
+    hasBranches() {
+      return this.$store.getters.getMemberHasBranches
     },
   },
   methods: {
@@ -160,31 +170,10 @@ let componentMixin = {
       return this.displayDuration(moment.duration(seconds*1000), exclude_seconds)
     },
     displayDuration(duration, exclude_seconds) {
-      let days = duration.days()
-      if (days) {
-        days = `${days}d`
-      }
-
-      let hours = duration.hours()
-      if (hours < 10) {
-        hours = `0${hours}`
-      }
-
-      let minutes = duration.minutes()
-      if (minutes< 10) {
-        minutes = `0${minutes}`
-      }
-
-      if (!exclude_seconds) {
-        let seconds = duration.seconds()
-        if (seconds < 10) {
-          seconds = `0${seconds}`
-        }
-
-        return days ? `${days} ${hours}:${minutes}:${seconds}` : `${hours}:${minutes}:${seconds}`
-      }
-
-      return days ? `${days} ${hours}:${minutes}` : `${hours}:${minutes}`
+      const totalMilliseconds = duration.as('milliseconds')
+      const hours = moment.duration(totalMilliseconds).asHours().toFixed()
+      const format = exclude_seconds ? 'mm' : 'mm:ss'
+      return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
     },
     async doFetchUnacceptedCountAndUpdateStore() {
       const countResult = await orderNotAcceptedModel.getCount()

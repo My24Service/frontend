@@ -26,7 +26,8 @@ class Engineer extends BaseModel {
       'cost_price_tools': 0,
       'remarks': '',
       'contract_hours_week': 38.0,
-      'latest_event': false
+      'latest_event': false,
+      'prefered_location': null
       // 'uses_time_registration': false
     }
   }

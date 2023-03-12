@@ -130,7 +130,7 @@ export default {
     },
     selectMember(option) {
       this.partnerRequest.to_member = option.id
-      this.member_info = `${option.companycode}, ${option.name}, ${option.city}`
+      this.member_info = `${option.name}, ${option.city}`
     },
 
     async submitForm() {

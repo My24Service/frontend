@@ -19,6 +19,9 @@ export const getters = {
   getMemberHasApiUsers: state => {
     return state.memberInfo.has_api_users
   },
+  getMemberHasBranches: state => {
+    return state.memberInfo.has_branches
+  },
   getUserName: state => {
     if (state.userInfo.is_superuser) {
       return 'superuser'

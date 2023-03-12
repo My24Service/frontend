@@ -30,7 +30,7 @@
     />
 
     <b-modal
-      v-if="!isCustomer"
+      v-if="!isCustomer && !isBranchEmployee"
       id="delete-order-modal"
       ref="delete-order-modal"
       v-bind:title="$trans('Delete?')"
@@ -40,7 +40,7 @@
     </b-modal>
 
     <b-modal
-      v-if="!isCustomer"
+      v-if="!isCustomer && !isBranchEmployee"
       id="change-status-modal"
       ref="change-status-modal"
       v-bind:title="$trans('Add status')"
@@ -87,7 +87,7 @@
       @remove-filter="removeStatusFilter"
     />
 
-    <b-row v-if="!isCustomer && dispatch && selectedOrders.length > 0">
+    <b-row v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
       <b-col cols="12">
         <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
         <span v-for="(order, index) in selectedOrders" :key="order.id">
@@ -161,7 +161,7 @@
               v-bind:title="$trans('Edit')"
             />
             <IconLinkPlus
-              v-if="!isCustomer"
+              v-if="!isCustomer && !isBranchEmployee"
               type="tr"
               v-bind:title="$trans('Change status')"
               v-bind:method="function() { showChangeStatusModal(data.item.id) }"
@@ -172,12 +172,12 @@
               v-bind:title="$trans('Documents')"
             />
             <IconLinkAssign
-              v-if="!isCustomer && dispatch"
+              v-if="!isCustomer && !isBranchEmployee && dispatch"
               v-bind:title="$trans('Assign')"
               v-bind:method="function() { selectOrder(data.item) }"
             />
             <IconLinkDelete
-              v-if="!isCustomer"
+              v-if="!isCustomer && !isBranchEmployee"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />

@@ -6,6 +6,7 @@ import flushPromises from 'flush-promises'
 import localVue from '../../index'
 import UserEmployeeForm from '../../../../src/views/company/UserEmployeeForm.vue'
 import userEmployeeResponse from '../../fixtures/user-employee'
+import Vuex from "vuex";
 
 jest.mock('axios')
 
@@ -20,9 +21,23 @@ axios.get.mockImplementation((url) => {
 
 
 describe('UserEmployeeForm.vue', () => {
+  let store
+  let getters
+
+  beforeEach(() => {
+    getters = {
+      getMemberHasBranches: () => true
+    }
+
+    store = new Vuex.Store({
+      getters,
+    })
+  })
+
   it('exists', async () => {
     const wrapper = shallowMount(UserEmployeeForm, {
       localVue,
+      store,
       mocks: {
         $trans: (f) => f,
       },
@@ -37,6 +52,7 @@ describe('UserEmployeeForm.vue', () => {
   it('insert, contains "New employee"', async () => {
     const wrapper = mount(UserEmployeeForm, {
       localVue,
+      store,
       mocks: {
         $trans: (f) => f,
       },
@@ -51,6 +67,7 @@ describe('UserEmployeeForm.vue', () => {
   it('edit, contains "Edit employee"', async () => {
     const wrapper = mount(UserEmployeeForm, {
       localVue,
+      store,
       mocks: {
         $trans: (f) => f,
       },

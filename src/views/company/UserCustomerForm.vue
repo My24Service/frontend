@@ -219,9 +219,9 @@ import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 
-import { usernameExists } from '@/models/helpers.js'
-import customerUserModel from '@/models/company/UserCustomer.js'
-import customerModel from '@/models/customer/Customer.js'
+import { usernameExists } from '../../models/helpers.js'
+import customerUserModel from '../../models/company/UserCustomer.js'
+import customerModel from '../../models/customer/Customer.js'
 
 export default {
   setup() {
@@ -386,7 +386,6 @@ export default {
 
         return
       }
-
 
       try {
         delete this.customeruser.date_joined

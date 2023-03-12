@@ -26,8 +26,13 @@ describe('Navitems.vue no staff & no superuser', () => {
   let state
   let store
   let actions
+  let getters
 
   beforeEach(() => {
+    getters = {
+      getMemberHasBranches: () => false
+    }
+
     actions = {
       getIsStaff: () => {
         return new Promise((resolve) => {
@@ -52,7 +57,8 @@ describe('Navitems.vue no staff & no superuser', () => {
 
     store = new Vuex.Store({
       state,
-      actions
+      actions,
+      getters
     })
   })
 
@@ -93,8 +99,13 @@ describe('Navitems.vue no customer', () => {
   let state
   let store
   let actions
+  let getters
 
   beforeEach(() => {
+    getters = {
+      getMemberHasBranches: () => false
+    }
+
     actions = {
       getIsStaff: () => {
         return new Promise((resolve) => {
@@ -119,7 +130,8 @@ describe('Navitems.vue no customer', () => {
 
     store = new Vuex.Store({
       state,
-      actions
+      actions,
+      getters
     })
   })
 
@@ -152,7 +164,7 @@ describe('Navitems.vue no customer', () => {
     await flushPromises()
 
     const navbar = wrapper.findComponent({ ref: 'nav-items' })
-    expect(navbar.element.children.length).to.eq(2)
+    expect(navbar.element.children.length).to.eq(3)
   })
 
   it('contains Orders', async () => {
@@ -208,8 +220,13 @@ describe('Navitems.vue staff & superuser', () => {
   let state
   let store
   let actions
+  let getters
 
   beforeEach(() => {
+    getters = {
+      getMemberHasBranches: () => false
+    }
+
     actions = {
       getIsStaff: () => {
         return new Promise((resolve) => {
@@ -233,7 +250,8 @@ describe('Navitems.vue staff & superuser', () => {
 
     store = new Vuex.Store({
       state,
-      actions
+      actions,
+      getters
     })
   })
 
@@ -250,7 +268,7 @@ describe('Navitems.vue staff & superuser', () => {
     await flushPromises()
 
     const navbar = wrapper.findComponent({ ref: 'nav-items' })
-    expect(navbar.element.children.length).to.eq(8)
+    expect(navbar.element.children.length).to.eq(9)
   })
 
   it('does contain members', async () => {

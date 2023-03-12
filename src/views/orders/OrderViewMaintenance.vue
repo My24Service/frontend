@@ -85,7 +85,7 @@
           ></b-table>
           </b-col>
       </b-row>
-      <b-row v-if="!isCustomer && order.infolines.length > 0">
+      <b-row v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
         <b-col cols="12">
           <h4>{{ $trans('Infolines') }}</h4>
           <b-table dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"></b-table>
@@ -158,7 +158,7 @@
       </b-row>
       <footer class="modal-footer">
         <b-button
-          v-if="!past && !isCustomer"
+          v-if="!past && !isCustomer && !isBranchEmployee"
           id="recreateWorkorderPdfButton"
           @click="recreateWorkorderPdf"
           :disabled="buttonDisabled"
@@ -169,7 +169,7 @@
           {{ $trans('Recreate workorder PDF') }}
         </b-button>
         <b-button
-          v-if="!past && !isCustomer"
+          v-if="!past && !isCustomer && !isBranchEmployee"
           id="recreateWorkorderPdfButtonGotenberg"
           @click="recreateWorkorderPdfGotenberg"
           :disabled="buttonDisabled"

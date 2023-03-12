@@ -113,7 +113,7 @@ class My24 extends BaseModel {
 
     // just pages like / and /no-access
     if (config.lenParts === 1) {
-      console.debug(`allowed: only one route part (${config.part}`)
+      console.debug(`allowed: only one route part (${config.part})`)
       return true;
     }
 

@@ -12,7 +12,8 @@ class EmployeeUser extends BaseModel {
     'password': '',
     'employee_user': {
       'uses_time_registration': true,
-      'contract_hours_week': 0.0
+      'contract_hours_week': 0.0,
+      'branch': null
     }
   }
 

@@ -52,6 +52,11 @@ import {AUTH_LEVELS} from "../constants";
 import UserEmployeeList from "../views/company/UserEmployeeList";
 import UserEmployeeForm from "../views/company/UserEmployeeForm";
 
+import BranchList from "../views/company/BranchList";
+import BranchForm from "../views/company/BranchForm";
+
+import TimeRegistration from '../views/company/TimeRegistration.vue'
+
 
 export default [
 {
@@ -563,6 +568,7 @@ export default [
         'app-subnav': {}
       },
     },
+    // workhours
     {
       name: 'company-workhours',
       path: '/company/workhours',
@@ -585,6 +591,68 @@ export default [
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': true
+      },
+    },
+    // time registration
+    {
+      name: 'company-time-registration',
+      path: '/company/time-registration',
+      components: {
+        'app-content': TimeRegistration,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'company-time-registration-detail',
+      path: '/company/time-registration/:user_id',
+      components: {
+        'app-content': TimeRegistration,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    // branches
+    {
+      name: 'company-branches',
+      path: '/company/branches',
+      components: {
+        'app-content': BranchList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'company-branch-edit',
+      path: '/company/branches/form/:pk',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': BranchForm,
+        'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'company-branch-add',
+      path: '/company/branches/form',
+      components: {
+        'app-content': BranchForm,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
       },
     },
 

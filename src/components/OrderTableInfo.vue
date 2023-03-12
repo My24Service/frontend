@@ -71,7 +71,10 @@
       <b-col>
         <b-table v-if="order.orderlines.length" dark borderless small :fields="orderLineFields" :items="order.orderlines" responsive="sm"></b-table>
         <b-table v-if="order.maintenance_product_lines.length" dark borderless small :fields="maintenanceProductLineFields" :items="order.maintenance_product_lines" responsive="sm"></b-table>
-        <b-table v-if="!isCustomer && order.infolines.length" dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"></b-table>
+        <b-table
+          v-if="!isCustomer && !hasBranches && order.infolines.length"
+          dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"
+        ></b-table>
       </b-col>
     </b-row>
     <b-row v-if="order.workorder_pdf_url || order.workorder_pdf_url_partner">
@@ -124,7 +127,7 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
+import { componentMixin } from '../utils.js'
 
 export default {
   mixins: [componentMixin],

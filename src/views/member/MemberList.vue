@@ -61,6 +61,9 @@
           <p v-if="data.item.has_api_users">
             <strong>{{ $trans('Has API users') }}</strong>
           </p>
+          <p v-if="data.item.has_branches">
+            <strong>{{ $trans('Has branches') }}</strong>
+          </p>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">

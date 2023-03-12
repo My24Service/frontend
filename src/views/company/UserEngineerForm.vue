@@ -190,7 +190,8 @@
               v-bind:label="$trans('Country')"
               label-for="engineer_country_code"
             >
-              <b-form-select v-model="engineer.engineer.country_code" :options="countries" size="sm"></b-form-select>
+              <b-form-select v-model="engineer.engineer.country_code"
+                             :options="countries" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
         </b-row>
@@ -274,6 +275,55 @@
             </b-form-group>
           </b-col>
         </b-row>
+        <b-row>
+          <b-col cols="3" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Prefered location')"
+              label-for="engineer_prefered_location"
+            >
+              <b-form-select
+                id="engineer_prefered_location"
+                v-model="engineer.engineer.prefered_location"
+                :options="locations"
+                size="sm"
+                value-field="id"
+                text-field="name"
+              ></b-form-select>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.engineer.engineer.prefered_location.$error : null">
+                {{ $trans('Please select a prefered location') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="6" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Or create new location')"
+              label-for="engineer_prefered_location_new"
+            >
+              <div>
+                <b-form-input
+                  style="width: 140px !important; float:left !important;"
+                  id="engineer_prefered_location_new"
+                  size="sm"
+                  v-model="newLocationName"
+                ></b-form-input>
+                <span style="float:left !important;">&nbsp;</span>
+                <b-button
+                  style="width: 60px !important;"
+                  @click="createLocation"
+                  :disabled="buttonCreateLocationDisabled"
+                  type="button"
+                  size="sm"
+                  variant="primary">
+                  {{ $trans('Create') }}</b-button>
+              </div>
+            </b-form-group>
+
+          </b-col>
+
+        </b-row>
 
         <div class="mx-auto">
           <footer class="modal-footer">
@@ -293,8 +343,9 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '@/models/helpers.js'
-import engineerModel from '@/models/company/UserEngineer.js'
+import { usernameExists } from '../../models/helpers.js'
+import engineerModel from '../../models/company/UserEngineer.js'
+import stockLocationModel from '../../models/inventory/StockLocation.js'
 
 export default {
   setup() {
@@ -321,6 +372,11 @@ export default {
         email: {
           required,
           email
+        },
+        engineer: {
+          prefered_location: {
+            required,
+          }
         }
       }
     }
@@ -377,7 +433,9 @@ export default {
       buttonDisabled: false,
       engineer: engineerModel.getFields(),
       errorMessage: null,
-      orgUsername: null
+      orgUsername: null,
+      locations: [],
+      newLocationName: null
     }
   },
   computed: {
@@ -386,6 +444,9 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
+    },
+    buttonCreateLocationDisabled() {
+      return this.newLocationName === null || this.newLocationName === ''
     }
   },
   async created() {
@@ -399,6 +460,34 @@ export default {
     this.isLoading = false
   },
   methods: {
+    async getLocations() {
+      this.isLoading = true
+      try {
+        const response = await stockLocationModel.list()
+        this.locations = response.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching locations', error)
+        this.errorToast(this.$trans('Error fetching locations'))
+        this.isLoading = false
+      }
+    },
+    async createLocation() {
+      this.isLoading = true
+      try {
+        let stockLocation = stockLocationModel.getFields()
+        stockLocation.name = this.newLocationName
+        const newLocation = await stockLocationModel.insert(stockLocation)
+        await this.getLocations()
+        this.engineer.engineer.prefered_location = newLocation.id
+        this.newLocationName = ""
+        this.isLoading = false
+      } catch(error) {
+        console.log('error creating new location', error)
+        this.errorToast(this.$trans('Error creating new location'))
+        this.isLoading = false
+      }
+    },
     preSubmitForm() {
       this.buttonDisabled = true
       this.submitClicked = true
@@ -475,6 +564,7 @@ export default {
       try {
         this.engineer = await engineerModel.detail(this.pk)
         this.orgUsername = this.engineer.username
+        await this.getLocations()
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineer', error)
