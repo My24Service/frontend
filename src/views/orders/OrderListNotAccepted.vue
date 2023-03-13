@@ -117,18 +117,19 @@
 </template>
 
 <script>
-import orderNotAcceptedModel from '@/models/orders/OrderNotAccepted.js'
-import my24 from '@/services/my24.js'
-import OrderTableInfo from '@/components/OrderTableInfo.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import OrderFilters from "@/components/OrderFilters"
-import Pagination from "@/components/Pagination.vue"
+import orderNotAcceptedModel from '../../models/orders/OrderNotAccepted.js'
+import orderModel from '../../models/orders/Order.js'
+import my24 from '../../services/my24.js'
+import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import OrderFilters from "../../components/OrderFilters"
+import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '@/utils'
 
 export default {
@@ -205,9 +206,9 @@ export default {
     // delete
     async doDelete() {
       try {
-        await this.model.delete(this.orderPk)
+        await orderModel.delete(this.orderPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
         this.errorToast(this.$trans('Error deleting order'))
