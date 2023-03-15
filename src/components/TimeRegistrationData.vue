@@ -377,7 +377,7 @@ export default {
 
       else if (this.activeDateQueryMode === 'month') {
         // if (['Su', 'Sa'].indexOf(this.$moment(dateIn).format("dd")) === -1) {
-          label = this.$moment(dateIn).format('DD')
+          label = this.$moment(dateIn).format('[week] W')
         // } else {
         //   label = 'w'
         // }

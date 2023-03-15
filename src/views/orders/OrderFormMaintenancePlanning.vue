@@ -5,7 +5,7 @@
         <h2 v-if="isCreate">{{ $trans('New order') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit order') }}</h2>
         <b-row>
-          <b-col cols="4" role="group">
+          <b-col cols="4" role="group" v-if="!hasBranches">
             <b-form-group
               label-size="sm"
               label-class="p-sm-0"
@@ -28,6 +28,34 @@
                 @search-change="getCustomersDebounced"
                 @select="selectCustomer"
                 :custom-label="customerLabel"
+              >
+                <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+              </multiselect>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group" v-if="hasBranches">
+            <b-form-group
+              label-size="sm"
+              label-class="p-sm-0"
+              v-bind:label="$trans('Search branches')"
+              label-for="order-branch-search"
+            >
+              <multiselect
+                id="order-branch-search"
+                track-by="id"
+                :placeholder="$trans('Type to search')"
+                open-direction="bottom"
+                :options="branches"
+                :multiple="false"
+                :loading="isLoading"
+                :internal-search="false"
+                :options-limit="30"
+                :limit="10"
+                :max-height="600"
+                :hide-selected="true"
+                @search-change="getBranchesDebounced"
+                @select="selectBranch"
+                :custom-label="branchLabel"
               >
                 <span slot="noResult">{{ $trans('Nothing found.') }}</span>
               </multiselect>
@@ -115,10 +143,10 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="4" role="group">
+          <b-col :cols="!hasBranches ? 4 : 6" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Customer')"
+              :label="!hasBranches ? $trans('Customer') : $trans('Branch')"
               label-for="order_name"
             >
               <b-form-input
@@ -129,11 +157,11 @@
               ></b-form-input>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_name.$error : null">
-                {{ $trans('Please enter the customer') }}
+                {{ hasBranches ? $trans('Please enter the customer') : $trans('Please enter the branch') }}
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="2" role="group">
+          <b-col cols="2" role="group" v-if="!hasBranches">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Customer ID')"
@@ -412,7 +440,7 @@
           </Collapse>
         </div>
 
-        <div class="info-lines section">
+        <div class="info-lines section" v-if="!hasBranches">
           <Collapse
             :title="$trans('Info lines')"
           >
@@ -467,7 +495,7 @@
           </Collapse>
         </div>
 
-        <div class="maintenance_product_lines section">
+        <div class="maintenance_product_lines section" v-if="!hasBranches">
           <Collapse
             ref="maintenance-product-lines"
             :title="$trans('Maintenance product lines')"
@@ -556,7 +584,7 @@
           </Collapse>
         </div>
 
-        <div class="assign-engineer section" v-if="isCreate">
+        <div class="assign-engineer section" v-if="isCreate && !hasBranches">
           <Collapse
             :title="$trans('Directly assign')"
           >
@@ -588,7 +616,7 @@
           </Collapse>
         </div>
 
-        <div class="order-done" v-if="isCreate">
+        <div class="order-done" v-if="isCreate && !hasBranches">
           <h4>{{ $trans('Next page after create') }}</h4>
           <b-row>
             <b-col cols="12">
@@ -610,7 +638,7 @@
         </div>
 
         <div class="mx-auto">
-          <footer class="modal-footer" v-if="!unaccepted">
+          <footer class="modal-footer" v-if="!unaccepted || hasBranches">
             <b-button
               @click="cancelForm"
               class="btn btn-secondary"
@@ -629,7 +657,7 @@
               {{ $trans('Submit') }}
             </b-button>
           </footer>
-          <footer class="modal-footer" v-if="!isCreate && (unaccepted || !order.customer_order_accepted)">
+          <footer class="modal-footer" v-if="!isCreate && !hasBranches && (unaccepted || !order.customer_order_accepted)">
             <b-button
               @click="reject"
               class="btn btn-danger"
@@ -672,8 +700,11 @@ import Assign from '../../models/mobile/Assign.js'
 
 import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
 import Collapse from '../../components/Collapse.vue'
+import {componentMixin} from "../../utils";
+import branchModel from "../../models/company/Branch";
 
 export default {
+  mixins: [componentMixin],
   setup() {
     return { v$: useVuelidate() }
   },
@@ -758,6 +789,9 @@ export default {
       customers: [],
       customerSearch: '',
       getCustomersDebounced: null,
+      branches: [],
+      branchSearch: '',
+      getBranchesDebounced: null,
       engineers: [],
       selectedEngineers: [],
       files: [],
@@ -772,11 +806,36 @@ export default {
     }
   },
   validations() {
+    if (!this.hasBranches) {
+      return {
+        order: {
+          customer_id: {
+            required,
+          },
+          order_name: {
+            required,
+          },
+          order_address: {
+            required,
+          },
+          order_postal: {
+            required,
+          },
+          order_city: {
+            required,
+          },
+          start_date: {
+            required,
+          },
+          end_date: {
+            required,
+          },
+        },
+      }
+    }
+
     return {
       order: {
-        customer_id: {
-          required,
-        },
         order_name: {
           required,
         },
@@ -821,6 +880,7 @@ export default {
     this.$moment.locale(lang)
 
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
+    this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
     this.countries = await this.$store.dispatch('getCountries')
     const { results } = await engineerModel.list()
     this.engineers = results
@@ -961,6 +1021,7 @@ export default {
     addEngineer(value) {
       console.log(value)
     },
+
     customerLabel({ name, address, city}) {
       return `${name} - ${address} - ${city}`
     },
@@ -981,6 +1042,27 @@ export default {
       this.order.order_contact = customer.contact
       this.order.customer_remarks = customer.remarks
     },
+
+    branchLabel({ name, address, city}) {
+      return `${name} - ${address} - ${city}`
+    },
+    selectBranch(option) {
+      this.fillBranch(option)
+    },
+    fillBranch(branch) {
+      this.order.branch = branch.id
+      this.order.order_name = branch.name
+      this.order.order_address = branch.address
+      this.order.order_city = branch.city
+      this.order.order_postal = branch.postal
+      this.order.order_country_code = branch.country_code
+      this.order.order_tel = branch.tel
+      this.order.order_mobile = branch.mobile
+      this.order.order_email = branch.email
+      this.order.order_contact = branch.contact
+      this.order.customer_remarks = branch.remarks
+    },
+
     async editAndAccept() {
       this.buttonDisabled = true
       this.acceptOrder = true
@@ -1059,12 +1141,12 @@ export default {
         }
 
         // clear maintenance products
-        this.$store.dispatch('setMaintenanceProducts', null)
+        await this.$store.dispatch('setMaintenanceProducts', null)
 
-        if (this.nextField === 'orders') {
+        if (this.nextField === 'orders' || this.hasBranches) {
           this.$router.go(-1)
         } else if (this.nextField === 'dispatch') {
-          this.$router.push({name: 'mobile-dispatch'})
+          await this.$router.push({name: 'mobile-dispatch'})
         }
 
         return
@@ -1106,6 +1188,19 @@ export default {
       } catch(error) {
         console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
+        this.isLoading = false
+      }
+    },
+    async getBranches(query) {
+      if (query === '') return
+      this.isLoading = true
+
+      try {
+        this.branches = await branchModel.search(query)
+        this.isLoading = false
+      } catch(error) {
+        console.log('Error fetching branches', error)
+        this.errorToast(this.$trans('Error fetching branches'))
         this.isLoading = false
       }
     },
