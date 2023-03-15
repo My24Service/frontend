@@ -274,7 +274,7 @@ export default {
         }
       }
 
-      return result.length ? result.join('\n') : ''
+      return result.length ? result.join(' | ') : ''
     },
     addUserDataToResults(userData, results) {
       const keys = Object.keys(userData)
