@@ -29,7 +29,8 @@
         </b-link>
       </b-col>
       <b-col cols="8" class="text-center">
-        <h4>{{ hoursTitle }} - {{ today.format('YYYY') }}</h4>
+        <h4 align="center" v-if="!isDetail">{{ hoursTitle }} - {{ today.format('YYYY') }}</h4>
+        <h4 align="center" v-if="isDetail">{{ $trans('Year totals') }} - {{ today.format('YYYY') }}</h4>
       </b-col>
       <b-col cols="2">
         <div class="float-right">
@@ -47,7 +48,8 @@
         </b-link>
       </b-col>
       <b-col cols="8" class="text-center">
-        <h4>{{ hoursTitle }} - {{ today.format('MMM YYYY') }}</h4>
+        <h4 align="center" v-if="!isDetail">{{ hoursTitle }} - {{ today.format('MMM YYYY') }}</h4>
+        <h4 align="center" v-if="isDetail">{{ $trans('Month totals') }} - {{ today.format('MMM YYYY') }}</h4>
       </b-col>
       <b-col cols="2">
         <div class="float-right">
@@ -65,7 +67,8 @@
         </b-link>
       </b-col>
       <b-col cols="8">
-        <h4>{{ hoursTitle }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
+        <h4 align="center" v-if="!isDetail">{{ hoursTitle }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
+        <h4 align="center" v-if="isDetail">{{ $trans('Week totals') }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
       </b-col>
       <b-col cols="2">
         <div class="float-right">
