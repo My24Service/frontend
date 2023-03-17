@@ -584,7 +584,7 @@
           </Collapse>
         </div>
 
-        <div class="assign-engineer section" v-if="isCreate && !hasBranches">
+        <div class="assign-engineer section" v-if="!hasBranches && (isCreate || (!isCreate && (unaccepted || !order.customer_order_accepted)))">
           <Collapse
             :title="$trans('Directly assign')"
           >
@@ -1169,6 +1169,24 @@ export default {
       if (this.acceptOrder) {
         try {
           await orderNotAcceptedModel.setAccepted(this.pk)
+
+          // assign engineers
+          try {
+            for (const engineer of this.selectedEngineers) {
+              await Assign.assignToUser(engineer.id, [this.order.order_id], true)
+            }
+
+            if (this.selectedEngineers.length) {
+              this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
+            }
+          } catch (error) {
+            console.log('error assigning to users', error)
+            this.errorToast(this.$trans('Error assigning to users'))
+            this.isLoading = false
+            this.buttonDisabled = false
+            return
+          }
+
           this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
         } catch(error) {
           console.log('Error accepting order', error)

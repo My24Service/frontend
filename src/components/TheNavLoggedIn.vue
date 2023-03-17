@@ -115,8 +115,6 @@ import NavBrand from "../components/NavBrand.vue"
 import Notification from '../components/Notification'
 import TokenRefresh from '../components/TokenRefresh'
 
-const memberNewDataSocket = new MemberNewDataSocket()
-
 export default {
   setup() {
     return { v$: useVuelidate() }
@@ -152,6 +150,7 @@ export default {
   },
   data() {
     return {
+      memberNewDataSocket: new MemberNewDataSocket(),
       old_password: null,
       new_password1: null,
       new_password2: null,
@@ -214,13 +213,13 @@ export default {
         memberSocket.removeOnmessageHandler()
         memberSocket.removeSocket()
 
-        await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
-        memberNewDataSocket.removeOnmessageHandler()
-        memberNewDataSocket.removeSocket()
+        await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+        this.memberNewDataSocket.removeOnmessageHandler()
+        this.memberNewDataSocket.removeSocket()
 
-        await memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
-        memberNewDataSocket.removeOnmessageHandler()
-        memberNewDataSocket.removeSocket()
+        await this.memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
+        this.memberNewDataSocket.removeOnmessageHandler()
+        this.memberNewDataSocket.removeSocket()
 
         this.infoToast(this.$trans('Logged out'), this.$trans('You are now logged out'))
 
@@ -233,14 +232,25 @@ export default {
         this.errorToast(this.$trans('Error logging you out'))
       }
     },
-    onContractChange() {
-      this.$store.dispatch('getInitialData')
+    onContractChange(data) {
+      if (data.type === NEW_DATA_EVENTS.CONTRACT) {
+        this.$store.dispatch('getInitialData')
+      }
     },
   },
   async created() {
-    await memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
-    memberNewDataSocket.setOnmessageHandler(this.onContractChange)
-    memberNewDataSocket.getSocket()
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
+    this.memberNewDataSocket.setOnmessageHandler(this.onContractChange)
+    this.memberNewDataSocket.getSocket()
+  },
+  async beforeDestroy() {
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.removeOnmessageHandler()
+    this.memberNewDataSocket.removeSocket()
+
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
+    this.memberNewDataSocket.removeOnmessageHandler()
+    this.memberNewDataSocket.removeSocket()
   }
 }
 </script>

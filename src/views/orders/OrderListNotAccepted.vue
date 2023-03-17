@@ -130,7 +130,9 @@ import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderFilters from "../../components/OrderFilters"
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '@/utils'
+import { componentMixin } from '../../utils'
+import {NEW_DATA_EVENTS} from "../../constants";
+import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 
 export default {
   mixins: [componentMixin],
@@ -158,6 +160,7 @@ export default {
   },
   data() {
     return {
+      memberNewDataSocket: new MemberNewDataSocket(),
       sortMode: 'default',
       sort: null,
       searchQuery: null,
@@ -258,7 +261,22 @@ export default {
         this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       }
+    },
+    onNewData(data) {
+      if (data.type === NEW_DATA_EVENTS.UNACCEPTED_ORDER) {
+        this.loadData()
+      }
     }
+  },
+  async mounted() {
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.setOnmessageHandler(this.onNewData)
+    this.memberNewDataSocket.getSocket()
+  },
+  async beforeDestroy() {
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.removeOnmessageHandler()
+    this.memberNewDataSocket.removeSocket()
   }
 }
 </script>
