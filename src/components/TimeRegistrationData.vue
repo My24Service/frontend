@@ -98,6 +98,42 @@
           {{ data.item.full_name }}
         </router-link>
       </template>
+      <template v-slot:[`cell(${dataField})`]="data" v-for="(dataField, index) in dataFields">
+        <!-- Some complicated rendering logic here -->
+<!--        {{ date_list_moment[index] }} {{ index }}-->
+        <router-link
+          v-if="activeDateQueryMode === 'month'"
+          class="px-1"
+          :to="{
+            name: 'company-time-registration-detail',
+            params: {user_id: data.item.user_id},
+            query: {date: date_list_moment[index].format('YYYY-MM-DD'), mode: 'week'}
+          }">
+          {{ data.item[dataField] }}
+        </router-link>
+
+        <router-link
+          v-if="activeDateQueryMode === 'year'"
+          class="px-1"
+          :to="{
+            name: 'company-time-registration-detail',
+            params: {user_id: data.item.user_id},
+            query: {date: date_list_moment[index].format('YYYY-MM-DD'), mode: 'month'}
+          }">
+          {{ data.item[dataField] }}
+        </router-link>
+
+        <router-link
+          v-if="activeDateQueryMode === 'week'"
+          class="px-1"
+          :to="{
+            name: 'company-time-registration-detail',
+            params: {user_id: data.item.user_id},
+            query: {date: date_list_moment[index].format('YYYY-MM-DD'), mode: 'week'}
+          }">
+          {{ data.item[dataField] }}
+        </router-link>
+      </template>
     </b-table>
 
     <b-table
@@ -110,6 +146,33 @@
       v-if="isDetail"
     >
     </b-table>
+
+    <div v-if="isDetail">
+      <h4 align="center">{{ $trans("Workhours") }}</h4>
+      <b-table
+        small
+        id="workhours-table"
+        :fields="workHoursFields"
+        :items="workHours"
+        responsive="md"
+        class="data-table"
+      >
+      </b-table>
+
+      <div v-if="activity.length > 0">
+        <h4 align="center">{{ $trans("Activity") }}</h4>
+        <b-table
+          small
+          id="activity-table"
+          :fields="activityFields"
+          :items="activity"
+          responsive="md"
+          class="data-table"
+        >
+        </b-table>
+
+      </div>
+    </div>
 
   </div>
 </template>
@@ -145,13 +208,43 @@ export default {
       today: null,
       data: [],
       fields: [],
+      dataFields: [],
       sortBy: "full_name",
       sortDesc: false,
       annotate_fields: [],
       field_types: [],
       date_list: [],
+      date_list_moment: [],
       activeDateQueryMode: 'week',
       fullName: null,
+      // excludeDays: ['Su', 'Sa'],
+      excludeDays: [],
+      workHours: [],
+      workHoursFields: [
+        {label: this.$trans('Project'), key: 'project_name'},
+        {label: this.$trans('Date'), key: 'start_date'},
+        {label: this.$trans('Work start'), key: 'work_start'},
+        {label: this.$trans('Work end'), key: 'work_end'},
+        {label: this.$trans('Travel to'), key: 'travel_to'},
+        {label: this.$trans('Travel back'), key: 'travel_back'},
+        {label: this.$trans('Distance to'), key: 'distance_to'},
+        {label: this.$trans('Distance back'), key: 'distance_back'},
+      ],
+      activity: [],
+      activityFields: [
+        {label: this.$trans('Order'), key: 'order'},
+        {label: this.$trans('Date'), key: 'activity_date'},
+        {label: this.$trans('Work start'), key: 'work_start'},
+        {label: this.$trans('Work end'), key: 'work_end'},
+        {label: this.$trans('Travel to'), key: 'travel_to'},
+        {label: this.$trans('Travel back'), key: 'travel_back'},
+        {label: this.$trans('Distance to'), key: 'distance_to'},
+        {label: this.$trans('Distance back'), key: 'distance_back'},
+        {label: this.$trans('Distance to'), key: 'distance_to'},
+        {label: this.$trans('Extra work'), key: 'extra_work'},
+        {label: this.$trans('Extra work description'), key: 'extra_work_description'},
+        {label: this.$trans('Actual work'), key: 'actual_work'},
+      ],
       dateQueryMode: [
         {
           label: 'Per week',
@@ -341,7 +434,7 @@ export default {
           const date = this.$moment(result[i].bucket)
           if (date.format('YYYY-MM-DD') === this.date_list[j]) {
             let interval_data = []
-            if (['Su', 'Sa'].indexOf(date.format("dd")) === -1) {
+            if (this.excludeDays.indexOf(date.format("dd")) === -1) {
               for (let k=0; k<this.annotate_fields.length; k++) {
                 interval_data.push(result[i][this.annotate_fields[k]])
                 if (this.field_types[k] === 'duration') {
@@ -400,6 +493,9 @@ export default {
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
       })
+      this.date_list_moment = data.date_list.map((dateIn) => {
+        return this.$moment(dateIn)
+      })
       let header_columns = []
 
       header_columns.push({
@@ -409,6 +505,7 @@ export default {
       })
 
       // add intervals
+      this.dataFields = []
       for(let i=0; i<data.date_list.length; i++) {
         const label = this._getHeaderLabel(data.date_list[i])
 
@@ -417,6 +514,7 @@ export default {
           label,
           sortable: true
         })
+        this.dataFields.push(`field${i}`)
       }
 
       header_columns.push({
@@ -457,6 +555,8 @@ export default {
       this.fullName = data.full_name
       this.annotate_fields = data.annotate_fields
       this.field_types = data.field_types
+      this.workHours = data.workhours_data
+      this.activity = data.activity_data
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
       })
