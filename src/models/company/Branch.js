@@ -15,6 +15,10 @@ class Branch extends BaseModel {
   }
 
   url = '/company/branch/'
+
+  search(query) {
+    return this.axios.get(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
+  }
 }
 
 let branchModel = new Branch()

@@ -117,19 +117,22 @@
 </template>
 
 <script>
-import orderNotAcceptedModel from '@/models/orders/OrderNotAccepted.js'
-import my24 from '@/services/my24.js'
-import OrderTableInfo from '@/components/OrderTableInfo.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import OrderFilters from "@/components/OrderFilters"
-import Pagination from "@/components/Pagination.vue"
-import { componentMixin } from '@/utils'
+import orderNotAcceptedModel from '../../models/orders/OrderNotAccepted.js'
+import orderModel from '../../models/orders/Order.js'
+import my24 from '../../services/my24.js'
+import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import OrderFilters from "../../components/OrderFilters"
+import Pagination from "../../components/Pagination.vue"
+import { componentMixin } from '../../utils'
+import {NEW_DATA_EVENTS} from "../../constants";
+import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 
 export default {
   mixins: [componentMixin],
@@ -157,6 +160,7 @@ export default {
   },
   data() {
     return {
+      memberNewDataSocket: new MemberNewDataSocket(),
       sortMode: 'default',
       sort: null,
       searchQuery: null,
@@ -205,9 +209,9 @@ export default {
     // delete
     async doDelete() {
       try {
-        await this.model.delete(this.orderPk)
+        await orderModel.delete(this.orderPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
         this.errorToast(this.$trans('Error deleting order'))
@@ -257,7 +261,22 @@ export default {
         this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       }
+    },
+    onNewData(data) {
+      if (data.type === NEW_DATA_EVENTS.UNACCEPTED_ORDER) {
+        this.loadData()
+      }
     }
+  },
+  async mounted() {
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.setOnmessageHandler(this.onNewData)
+    this.memberNewDataSocket.getSocket()
+  },
+  async beforeDestroy() {
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.removeOnmessageHandler()
+    this.memberNewDataSocket.removeSocket()
   }
 }
 </script>

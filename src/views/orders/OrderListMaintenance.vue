@@ -206,6 +206,8 @@ import SearchModal from '../../components/SearchModal.vue'
 import OrderFilters from "../../components/OrderFilters.vue"
 import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '../../utils'
+import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "../../constants";
+import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 
 export default {
   mixins: [componentMixin],
@@ -236,6 +238,7 @@ export default {
   },
   data() {
     return {
+      memberNewDataSocket: new MemberNewDataSocket(),
       sortMode: 'default',
       searchQuery: null,
       model: orderModel,
@@ -376,7 +379,24 @@ export default {
         this.errorToast(this.$trans('Error loading orders'))
         this.isLoading = false
       }
+    },
+    onNewData(data) {
+      if (data.type === NEW_DATA_EVENTS.UNACCEPTED_ORDER &&
+        (data.data_type === NEW_DATA_EVENTS_TYPES.NEW_DATA_ORDER_ACCEPTED ||
+        data.data_type === NEW_DATA_EVENTS_TYPES.NEW_DATA_ORDER_REJECTED)) {
+        this.loadData()
+      }
     }
+  },
+  async mounted() {
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.setOnmessageHandler(this.onNewData)
+    this.memberNewDataSocket.getSocket()
+  },
+  async beforeDestroy() {
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.removeOnmessageHandler()
+    this.memberNewDataSocket.removeSocket()
   }
 }
 </script>

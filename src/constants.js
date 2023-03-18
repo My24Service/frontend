@@ -6,6 +6,12 @@ export const NEW_DATA_EVENTS = {
   CONTRACT: 'contract'
 }
 
+export const NEW_DATA_EVENTS_TYPES = {
+  NEW_DATA_ORDER_COPIED: 'ORDER_COPIED',
+  NEW_DATA_ORDER_REJECTED: 'ORDER_REJECTED',
+  NEW_DATA_ORDER_ACCEPTED: 'ORDER_ACCEPTED',
+}
+
 export const AUTH_LEVELS = {
   STUDENT: 'student_user',
   SALES: 'sales_user',

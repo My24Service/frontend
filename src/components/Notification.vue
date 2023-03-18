@@ -8,12 +8,11 @@ import memberSocket from '../services/websocket/MemberSocket.js'
 import { NEW_DATA_EVENTS } from '../constants'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
 
-const memberNewDataSocket = new MemberNewDataSocket()
-
 export default {
   mixins: [componentMixin],
   data() {
     return {
+      memberNewDataSocket: new MemberNewDataSocket(),
       intervalId: null
     }
   },
@@ -67,14 +66,18 @@ export default {
     memberSocket.setOnmessageHandler(this.handleMessageMember)
     memberSocket.getSocket()
 
-    await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
-    memberNewDataSocket.setOnmessageHandler(this.onNewData)
-    memberNewDataSocket.getSocket()
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.setOnmessageHandler(this.onNewData)
+    this.memberNewDataSocket.getSocket()
 
     // unaccepted orders polling
     await this.setupPolling()
   },
-  beforeDestroy() {
+  async beforeDestroy() {
+    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+    this.memberNewDataSocket.removeOnmessageHandler()
+    this.memberNewDataSocket.removeSocket()
+
     if (this.intervalId) {
       console.debug('clearing polling: doFetchUnacceptedCountAndUpdateStore')
       clearInterval(this.intervalId)
