@@ -1,18 +1,23 @@
-import TheAppLayout from '@/components/TheAppLayout.vue'
-import SubNavCustomers from '@/components/SubNavCustomers.vue'
+import TheAppLayout from '../components/TheAppLayout.vue'
+import SubNavCustomers from '../components/SubNavCustomers.vue'
 
-import CustomerList from '@/views/customer/CustomerList.vue'
-import CustomerForm from '@/views/customer/CustomerForm.vue'
-import CustomerView from '@/views/customer/CustomerView.vue'
+import CustomerList from '../views/customer/CustomerList.vue'
+import CustomerForm from '../views/customer/CustomerForm.vue'
+import CustomerView from '../views/customer/CustomerView.vue'
 
-import DocumentList from '@/views/customer/DocumentList.vue'
-import DocumentForm from '@/views/customer/DocumentForm.vue'
+import DocumentList from '../views/customer/DocumentList.vue'
+import DocumentForm from '../views/customer/DocumentForm.vue'
 
-import MaintenanceContractList from '@/views/customer/MaintenanceContractList.vue'
-import MaintenanceContractForm from '@/views/customer/MaintenanceContractForm.vue'
-import MaintenanceProductList from '@/views/customer/MaintenanceProductList.vue'
-import MaintenanceProductForm from '@/views/customer/MaintenanceProductForm.vue'
-import Calendar from '@/views/customer/Calendar.vue'
+import MaintenanceContractList from '../views/customer/MaintenanceContractList.vue'
+import MaintenanceContractForm from '../views/customer/MaintenanceContractForm.vue'
+import MaintenanceProductList from '../views/customer/MaintenanceProductList.vue'
+import MaintenanceProductForm from '../views/customer/MaintenanceProductForm.vue'
+
+import MaintenanceEquipmentList from '../views/customer/MaintenanceEquipmentList.vue'
+import MaintenanceEquipmentForm from '../views/customer/MaintenanceEquipmentForm.vue'
+
+import Calendar from '../views/customer/Calendar.vue'
+import MaintenanceEquipment from "../models/customer/MaintenanceEquipment";
 
 export default [
 {
@@ -178,6 +183,44 @@ export default [
         'app-subnav': true
       },
     },
+    // maintenance equipment
+    {
+      name: 'maintenance-equipment',
+      path: '/customers/maintenance-equipment/:contractPk',
+      components: {
+        'app-content': MaintenanceEquipmentList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-equipment-add',
+      path: '/customers/maintenance-equipment/form',
+      components: {
+        'app-content': MaintenanceEquipmentForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'maintenance-equipment-edit',
+      path: '/customers/maintenance-equipment/form/:pk',
+      components: {
+        'app-content': MaintenanceEquipmentForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+
     // calendar
     {
       name: 'maintenance-products-calendar',

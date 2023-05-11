@@ -8,27 +8,30 @@
     />
 
     <b-modal
-      id="delete-maintenance-contract-modal"
-      ref="delete-maintenance-contract-modal"
+      id="delete-maintenance-equipment-modal"
+      ref="delete-maintenance-equipment-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance contract?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance equipment?') }}</p>
     </b-modal>
+
+    <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
+    <h2>{{ $trans('Maintenance equipment for ') }} {{ contract.customer_view.name }}</h2>
 
     <div class="overflow-auto">
       <Pagination
         v-if="!isLoading"
         :model="this.model"
-        :model_name="$trans('Contract')"
+        :model_name="$trans('equipment')"
       />
 
       <b-table
-        id="maintenance-contract-table"
+        id="maintenance-equipment-table"
         small
         :busy='isLoading'
-        :fields="maintenanceContractFields"
-        :items="maintenanceContracts"
+        :fields="maintenanceEquipmentFields"
+        :items="maintenanceEquipment"
         responsive="md"
         class="data-table"
         sort-icon-left
@@ -38,8 +41,9 @@
             <b-button-toolbar>
               <b-button-group class="mr-1">
                 <ButtonLinkAdd
-                  router_name="maintenance-contract-add"
-                  v-bind:title="$trans('New maintenance contract')"
+                  router_name="maintenance-equipment-add"
+                  :router_params="{contractPk: contract.id}"
+                  v-bind:title="$trans('New maintenance equipment')"
                 />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
@@ -58,11 +62,6 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-<!--        <template #cell(name)="data">-->
-<!--          <router-link :to="{name: 'maintenance-equipment', params: {contractPk: data.item.id}}">-->
-<!--            {{ data.item.name }}-->
-<!--          </router-link>-->
-<!--        </template>-->
         <template #cell(totals)="data">
           <table class="totals">
             <tr>
@@ -70,22 +69,15 @@
               <td>{{ data.item.created_orders}}</td>
             </tr>
             <tr>
-              <td><strong>{{ $trans('# contract equipment') }}</strong></td>
-              <td>{{ data.item.num_equipment}}</td>
-            </tr>
-            <tr>
               <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
               <td>{{ data.item.num_order_equipment}}</td>
             </tr>
           </table>
         </template>
-        <template #cell(customer_view_name)="data">
-          {{ data.item.customer_view.name }}
-        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              router_name="maintenance-contract-edit"
+              router_name="maintenance-equipment-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -101,7 +93,9 @@
 </template>
 
 <script>
+import maintenanceEquipmentModel from '../../models/customer/MaintenanceEquipment.js'
 import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
+
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -111,7 +105,7 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 
 export default {
-  name: 'MaintenanceContractList',
+  name: 'MaintenanceEquipmentList',
   components: {
     IconLinkDelete,
     IconLinkEdit,
@@ -122,31 +116,44 @@ export default {
     Pagination,
   },
   props: {
-    customer_pk: {
+    contractPk  : {
       type: [String, Number],
       default: null
     },
   },
   data() {
     return {
-      customer: null,
+      contract: null,
       searchQuery: null,
-      model: maintenanceContractModel,
+      model: maintenanceEquipmentModel,
       isLoading: false,
-      maintenanceContracts: [],
-      maintenanceContractFields: [
-        {key: 'name', label: this.$trans('Contract name'), sortable: true},
-        {key: 'customer_view_name', label: this.$trans('Customer'), sortable: true},
+      maintenanceEquipment: [],
+      maintenanceEquipmentFields: [
+        {key: 'equipment_name', label: this.$trans('Equipment'), sortable: true},
+        {key: 'amount', label: this.$trans('Amount'), sortable: true},
+        {key: 'times_per_year', label: this.$trans('Times/year'), sortable: true},
         {key: 'contract_value', label: this.$trans('Contract value'), sortable: true},
-        {key: 'remarks', label: this.$trans('Remarks'), sortable: true},
         {key: 'totals', label: this.$trans('Totals'), sortable: true},
         {key: 'icons'}
       ],
+      breadcrumb: [
+        {
+          text: this.$trans('Maintenance contracts'),
+          to: {name: 'maintenance-contracts'}
+        },
+        {
+          text: this.$trans('Maintenance equipment'),
+          active: true
+        },
+      ],
     }
   },
-  created() {
+  async created() {
+    this.isLoading = true
     this.model.currentPage = this.$route.query.page || 1
-    this.loadData()
+
+    await this.loadData()
+    this.isLoading = false
   },
   methods: {
     // search
@@ -161,37 +168,30 @@ export default {
     // delete
     showDeleteModal(id) {
       this.pk = id
-      this.$refs['delete-maintenance-contract-modal'].show()
+      this.$refs['delete-maintenance-equipment-modal'].show()
     },
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))
+        this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance equipment has been deleted'))
         await this.loadData()
       } catch(error) {
-        console.log('Error deleting maintenance contract', error)
-        this.errorToast(this.$trans('Error deleting maintenance contract'))
+        console.log('Error deleting maintenance equipment', error)
+        this.errorToast(this.$trans('Error deleting maintenance equipment'))
       }
     },
     // rest
     async loadData() {
-      this.isLoading = true
-
       try {
+        this.contract = await maintenanceContractModel.detail(this.contractPk)
+        this.model.setListArgs(`contract=${this.contractPk}`)
         const data = await this.model.list()
-        this.maintenanceContracts = data.results
-        this.isLoading = false
+        this.maintenanceEquipment = data.results
       } catch(error) {
-        console.log('error fetching maintenance contract', error)
-        this.errorToast(this.$trans('Error loading maintenance contracts'))
-        this.isLoading = false
+        console.log('error fetching maintenance equipment', error)
+        this.errorToast(this.$trans('Error loading maintenance equipment'))
       }
     }
   }
 }
 </script>
-<style scoped>
-table.totals tr:first-child td {
-  border-top: none;
-}
-</style>

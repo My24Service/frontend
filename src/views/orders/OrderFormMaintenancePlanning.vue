@@ -589,6 +589,12 @@
             :title="$trans('Directly assign')"
           >
             <b-row>
+              <b-col cols="12" role="group" v-if="recommendedUsers.length > 0">
+                <h4>{{ $trans('Recommended engineers') }}</h4>
+                <span v-for="(userData, index) in recommendedUsers">
+                  <strong>{{ index + 1 }}</strong> {{ userData.full_name }}
+                </span>
+              </b-col>
               <b-col cols="12" role="group">
                 <b-form-group
                   label-size="sm"
@@ -702,6 +708,7 @@ import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
 import Collapse from '../../components/Collapse.vue'
 import {componentMixin} from "../../utils";
 import branchModel from "../../models/company/Branch";
+import timeRegistrationModel from "../../models/company/TimeRegistration";
 
 export default {
   mixins: [componentMixin],
@@ -781,6 +788,10 @@ export default {
       documentFields: [
         { key: 'name', label: this.$trans('Name') },
         { key: 'icons', label: '' }
+      ],
+      recommendedUsers: [],
+      recommendedUsersFields: [
+        { key: 'full_name', label: this.$trans('Name') },
       ],
       submitClicked: false,
       countries: [],
@@ -1025,7 +1036,17 @@ export default {
     customerLabel({ name, address, city}) {
       return `${name} - ${address} - ${city}`
     },
-    selectCustomer(option) {
+    async selectCustomer(option) {
+      const topUsers = await timeRegistrationModel.getTopUsersForCustomerView(option.id)
+      let users = []
+      for (let i=0; i<topUsers.data.length; i++) {
+        const bla = users.find((user) => user.full_name === topUsers.data[i].full_name)
+        console.log(topUsers.data[i].full_name, bla)
+        if (!bla) {
+          users.push(topUsers.data[i])
+        }
+      }
+      this.recommendedUsers = users
       this.fillCustomer(option)
     },
     fillCustomer(customer) {

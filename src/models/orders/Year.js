@@ -24,6 +24,30 @@ class Year extends BaseModel {
       yearData
     }
   }
+
+  async getOrderTypesStats(customerPk) {
+    const url = `/order/order/order_types_stats/?customer=${customerPk}`
+
+    const response = await this.axios.get(url)
+    return response.data.order_types_stats
+
+  }
+
+  async getMonthsStats(customerPk) {
+    const url = `/order/order/order_counts_stats/?customer=${customerPk}`
+
+    const response = await this.axios.get(url)
+    return response.data.order_counts_stats
+
+  }
+
+  async getOrderTypesMonthsStats(customerPk) {
+    const url = `/order/order/order_types_month_stats/?customer=${customerPk}`
+
+    const response = await this.axios.get(url)
+    return response.data.order_types_month_stats
+
+  }
 }
 
 let yearModel = new Year()

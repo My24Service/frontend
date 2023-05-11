@@ -2,7 +2,9 @@
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-detail">
       <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-      <h3>{{ customer.name }}</h3>
+      <b-row align-h="center">
+        <h2>{{ customer.name }}</h2>
+      </b-row>
       <b-row>
         <b-col cols="6">
           <b-table-simple>
@@ -62,57 +64,166 @@
         </b-col>
       </b-row>
 
-      <SearchModal
-        id="search-modal"
-        ref="search-modal"
-        @do-search="handleSearchOk"
+      <CustomerStats
+        v-if="!isLoading"
+        ref="customer-stats"
       />
 
-      <b-pagination
-        v-if="this.orderPastModel.count > 20"
-        class="pt-4"
-        v-model="currentPage"
-        :total-rows="this.orderPastModel.count"
-        :per-page="this.orderPastModel.perPage"
-        aria-controls="customer-past-table"
-      ></b-pagination>
+      <div class="app-grid">
+        <b-row align-h="center">
+          <b-col cols="10">
+            <b-row align-h="center">
+              <h3>{{ $trans("Maintenance contracts") }}</h3>
+            </b-row>
+            <b-table
+              id="customer-maintenance-contracts-table"
+              small
+              :busy='isLoading'
+              :fields="maintenanceContractFields"
+              :items="maintenanceContracts"
+              responsive="md"
+              class="data-table"
+            >
+              <template #cell(contract)="data">
+                <b-row>
+                  <b-col cols="5">
+                    <table class="totals">
+                      <tr>
+                        <td><strong>{{ $trans('Name') }}:</strong></td>
+                        <td>{{ data.item.name }}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>{{ $trans('Contract value') }}:</strong></td>
+                        <td>EUR {{ data.item.contract_value }}</td>
+                      </tr>
+                    </table>
+                  </b-col>
+                  <b-col cols="4">
+                    <table class="totals">
+                      <tr>
+                        <td><strong>{{ $trans('Created orders') }}</strong></td>
+                        <td>{{ data.item.created_orders}}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
+                        <td>{{ data.item.num_order_equipment}}</td>
+                      </tr>
+                    </table>
+                  </b-col>
+                  <b-col cols="3">
+                    <div class="float-right">
+                      <span class="button-container">
+                        <b-button
+                          class="btn btn-outline-primary"
+                          :to="{name: 'order-add-maintenance'}"
+                          size="sm"
+                          type="button"
+                          variant="outline-primary"
+                        >
+                          {{ $trans('Create order') }}
+                        </b-button>
+                      </span>
 
-      <b-table
-        id="customer-past-table"
-        small
-        :busy='isLoading'
-        :fields="orderPastFields"
-        :items="orders"
-        responsive="md"
-        class="data-table"
-      >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(id)="data">
-          <OrderTableInfo
-            v-bind:order="data.item"
-          />
-        </template>
-      </b-table>
+                      <span class="button-container">
+                        <b-button
+                          :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}"
+                          class="btn btn-outline-secondary"
+                          size="sm"
+                          type="button"
+                          variant="outline-secondary"
+                        >
+                          {{ $trans('Edit') }}
+                        </b-button>
+                      </span>
+                    </div>
+                  </b-col>
+                </b-row>
+              </template>
+            </b-table>
+            <b-row align-h="end">
+              <span class="button-container">
+                <b-button
+                  class="btn btn-outline-secondary"
+                  :to="{name: 'maintenance-contract-add'}"
+                  size="sm"
+                  type="button"
+                  variant="outline-secondary"
+                >
+                  {{ $trans('New') }}
+                </b-button>
+              </span>
+              <span class="button-container">
+                <b-button
+                  class="btn btn-outline-secondary"
+                  :to="{name: 'maintenance-contracts'}"
+                  size="sm"
+                  type="button"
+                  variant="outline-secondary"
+                >
+                  {{ $trans('Manage >>') }}
+                </b-button>
+              </span>
+            </b-row>
+          </b-col>
+        </b-row>
+      </div>
+
+      <div>
+        <b-row align-h="center">
+          <h3>{{ $trans("Past orders") }}</h3>
+        </b-row>
+        <SearchModal
+          id="search-modal"
+          ref="search-modal"
+          @do-search="handleSearchOk"
+        />
+
+        <b-pagination
+          v-if="this.orderPastModel.count > 20"
+          class="pt-4"
+          v-model="currentPage"
+          :total-rows="this.orderPastModel.count"
+          :per-page="this.orderPastModel.perPage"
+          aria-controls="customer-past-table"
+        ></b-pagination>
+
+        <b-table
+          id="customer-past-table"
+          small
+          :busy='isLoading'
+          :fields="orderPastFields"
+          :items="orders"
+          responsive="md"
+          class="data-table"
+        >
+          <template #head(icons)="">
+            <div class="float-right">
+              <b-button-toolbar>
+                <b-button-group class="mr-1">
+                  <ButtonLinkRefresh
+                    v-bind:method="function() { loadData() }"
+                    v-bind:title="$trans('Refresh')"
+                  />
+                  <ButtonLinkSearch
+                    v-bind:method="function() { showSearchModal() }"
+                  />
+                </b-button-group>
+              </b-button-toolbar>
+            </div>
+          </template>
+          <template #table-busy>
+            <div class="text-center text-danger my-2">
+              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+              <strong>{{ $trans('Loading...') }}</strong>
+            </div>
+          </template>
+          <template #cell(id)="data">
+            <OrderTableInfo
+              v-bind:order="data.item"
+            />
+          </template>
+        </b-table>
+      </div>
 
       <footer class="modal-footer">
         <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
@@ -123,12 +234,15 @@
 </template>
 
 <script>
+import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
 import orderPastModel from '../../models/orders/OrderPast.js'
 import customerModel from '../../models/customer/Customer.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
+import yearModel from '../../models/orders/Year.js'
+import CustomerStats from "../../components/CustomerStats";
 
 export default {
   components: {
@@ -136,6 +250,7 @@ export default {
     ButtonLinkSearch,
     OrderTableInfo,
     SearchModal,
+    CustomerStats,
   },
   data() {
     return {
@@ -159,6 +274,10 @@ export default {
           text: this.$trans('Detail'),
           active: true
         },
+      ],
+      maintenanceContracts: [],
+      maintenanceContractFields: [
+        {key: 'contract', label: this.$trans('Contract')},
       ],
     }
   },
@@ -190,11 +309,21 @@ export default {
     },
     async loadData() {
       this.isLoading = true
-      orderPastModel.setListArgs(`customer_relation=${this.pk}`)
+
+      await this.loadHistory()
+      await this.loadMaintenanceContracts()
+
 
       try {
         this.customer = await customerModel.detail(this.pk)
-        await this.loadHistory()
+
+        const orderTypeStatsData = await yearModel.getOrderTypesStats(this.pk)
+        const monthsStatsData = await yearModel.getMonthsStats(this.pk)
+        const orderTypesMonthStatsData = await yearModel.getOrderTypesMonthsStats(this.pk)
+        console.log(orderTypesMonthStatsData)
+        this.$refs['customer-stats'].render(
+          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData)
+
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders or customer detail', error)
@@ -202,10 +331,21 @@ export default {
         this.isLoading = false
       }
     },
-    async loadHistory() {
-      this.isLoading = true
 
+    async loadMaintenanceContracts() {
       try {
+        const data = await maintenanceContractModel.list()
+        this.maintenanceContracts = data.results
+      } catch(error) {
+        console.log('error fetching maintenance contracts', error)
+        this.errorToast(this.$trans('Error fetching maintenance contracts'))
+        this.isLoading = false
+      }
+    },
+
+    async loadHistory() {
+      try {
+        orderPastModel.setListArgs(`customer_relation=${this.pk}`)
         const results = await orderPastModel.list()
         this.orders = results.results
         this.isLoading = false
@@ -218,9 +358,20 @@ export default {
   },
   created() {
     this.loadData()
+  },
+  async mounted () {
   }
 }
 </script>
 
 <style scoped>
+table.totals tr:first-child td {
+  border-top: none;
+}
+span.button-container {
+  padding: 8px;
+}
+span.spacer {
+  width: 10px;
+}
 </style>
