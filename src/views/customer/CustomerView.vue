@@ -64,9 +64,9 @@
         </b-col>
       </b-row>
 
-      <CustomerStats
+      <OrderStats
         v-if="!isLoading"
-        ref="customer-stats"
+        ref="order-stats"
       />
 
       <div class="app-grid">
@@ -241,8 +241,8 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import yearModel from '../../models/orders/Year.js'
-import CustomerStats from "../../components/CustomerStats";
+import orderModel from '../../models/orders/Order.js'
+import OrderStats from "../../components/OrderStats";
 
 export default {
   components: {
@@ -250,7 +250,7 @@ export default {
     ButtonLinkSearch,
     OrderTableInfo,
     SearchModal,
-    CustomerStats,
+    OrderStats,
   },
   data() {
     return {
@@ -317,12 +317,17 @@ export default {
       try {
         this.customer = await customerModel.detail(this.pk)
 
-        const orderTypeStatsData = await yearModel.getOrderTypesStats(this.pk)
-        const monthsStatsData = await yearModel.getMonthsStats(this.pk)
-        const orderTypesMonthStatsData = await yearModel.getOrderTypesMonthsStats(this.pk)
-        console.log(orderTypesMonthStatsData)
-        this.$refs['customer-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData)
+        const orderTypeStatsData = await orderModel.getOrderTypesStats(this.pk)
+        const monthsStatsData = await orderModel.getMonthsStats(this.pk)
+        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStats(this.pk)
+        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStats(this.pk)
+
+        // use this in customer dashboard
+        // const bla = await orderModel.getTopXCustomers()
+
+        this.$refs['order-stats'].render(
+          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
+        )
 
         this.isLoading = false
       } catch(error) {

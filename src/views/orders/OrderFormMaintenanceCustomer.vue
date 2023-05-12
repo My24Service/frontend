@@ -620,7 +620,7 @@ export default {
       }
 
       // remove null fields
-      const null_fields = ['start_time', 'end_time', 'maintenanceproduct_relation']
+      const null_fields = ['start_time', 'end_time']
       for (let i=0; i<null_fields.length; i++) {
         if (this.order[null_fields[i]] === null) {
           delete this.order[null_fields[i]]

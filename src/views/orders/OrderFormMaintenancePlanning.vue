@@ -495,59 +495,6 @@
           </Collapse>
         </div>
 
-        <div class="maintenance_product_lines section" v-if="!hasBranches">
-          <Collapse
-            ref="maintenance-product-lines"
-            :title="$trans('Maintenance product lines')"
-          >
-            <b-row>
-              <b-col cols="12">
-                <b-table v-if="order.maintenance_product_lines.length > 0" small :fields="maintenanceProductLineFields" :items="order.maintenance_product_lines" responsive="md">
-                  <template #cell()="data">
-                    {{ data.value }}
-                  </template>
-
-                  <template #cell(location)="data">
-                    <b-form-input
-                      style="width: 180px !important; float:left !important;"
-                      size="sm"
-                      v-model="order.maintenance_product_lines[data.index].location"
-                    ></b-form-input>
-                  </template>
-
-                  <template #cell(amount)="data">
-                    <b-form-input
-                      style="width: 60px !important; float:left !important;"
-                      size="sm"
-                      v-model="order.maintenance_product_lines[data.index].amount"
-                    ></b-form-input>
-                  </template>
-
-                  <template #cell(done_needed)="data">
-                    {{ data.item.done_needed }}
-                  </template>
-
-                  <template #cell(remarks)="data">
-                    <b-form-textarea
-                      v-model="order.maintenance_product_lines[data.index].remarks"
-                      rows="1"
-                    ></b-form-textarea>
-                  </template>
-
-                  <template #cell(icons)="data">
-                    <div class="float-right">
-                      <b-link class="h5 mx-2" @click.prevent="deleteMaintenanceProductLine(data.index)">
-                        <b-icon-trash></b-icon-trash>
-                      </b-link>
-                    </div>
-                  </template>
-                </b-table>
-              </b-col>
-            </b-row>
-            {{ order.maintenance_product_lines }}
-          </Collapse>
-        </div>
-
         <div class="order-documents section" v-if="isCreate">
           <Collapse
             :title="$trans('Documents')"
@@ -701,9 +648,9 @@ import orderModel from '../../models/orders/Order.js'
 import customerModel from '../../models/customer/Customer.js'
 import engineerModel from '../../models/company/UserEngineer.js'
 import documentModel from '../../models/orders/Document.js'
-import maintenanceProductModel from '../../models/customer/MaintenanceProduct.js'
+import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
+import maintenanceEquipmentModel from '../../models/customer/MaintenanceEquipment.js'
 import Assign from '../../models/mobile/Assign.js'
-
 import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
 import Collapse from '../../components/Collapse.vue'
 import {componentMixin} from "../../utils";
@@ -1102,7 +1049,7 @@ export default {
       }
 
       // remove null fields
-      const null_fields = ['start_time', 'end_time', 'maintenanceproduct_relation']
+      const null_fields = ['start_time', 'end_time']
       for (let i=0; i<null_fields.length; i++) {
         if (this.order[null_fields[i]] === null) {
           delete this.order[null_fields[i]]

@@ -1,7 +1,35 @@
 <template>
   <div class="app-grid">
     <b-row align-h="center">
-      <h3>{{ $trans("Total orders per month")}}</h3>
+      <h3>{{ $trans("Per order type per year")}}</h3>
+    </b-row>
+    <b-row>
+      <b-col cols="12">
+        <bar-chart
+          id="bar-chart-order-types-year"
+          v-if="!isLoading"
+          :chart-data="chartdataCountsYearOrdertypesBar"
+          :options="optionsStacked"
+        />
+      </b-col>
+    </b-row>
+
+    <b-row align-h="center">
+      <h3>{{ $trans("Per order type per month")}}</h3>
+    </b-row>
+    <b-row>
+      <b-col cols="12">
+        <bar-chart
+          id="bar-chart-order-types-month"
+          v-if="!isLoading"
+          :chart-data="chartdataCountsOrderTypesBar"
+          :options="optionsStacked"
+        />
+      </b-col>
+    </b-row>
+
+    <b-row align-h="center">
+      <h3>{{ $trans("Orders per month")}}</h3>
     </b-row>
     <b-row>
       <b-col cols="6">
@@ -18,20 +46,6 @@
           v-if="!isLoading"
           :chart-data="chartdataCountsPie"
           :options="pieOptions"
-        />
-      </b-col>
-    </b-row>
-
-    <b-row align-h="center">
-      <h3>{{ $trans("Total orders/order type per month")}}</h3>
-    </b-row>
-    <b-row>
-      <b-col cols="12">
-        <bar-chart
-          id="bar-chart-order-types-month"
-          v-if="!isLoading"
-          :chart-data="chartdataCountsOrderTypesBar"
-          :options="optionsStacked"
         />
       </b-col>
     </b-row>
@@ -76,7 +90,7 @@ export default {
     PieChart,
     ChartJsPluginDataLabels,
   },
-  name: "CustomerStats",
+  name: "OrderStats",
   data() {
     return {
       isLoading: false,
@@ -86,6 +100,7 @@ export default {
       chartdataCountsOrderTypesPie: {},
       chartdataCountsBar: {},
       chartdataCountsPie: {},
+      chartdataCountsYearOrdertypesBar: {},
       colors: {},
       colorsOrderTypes: {},
       options: {
@@ -142,10 +157,8 @@ export default {
 
       return this.colorsOrderTypes[txt]
     },
-    render(orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData) {
-
+    render(orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats) {
       let monthDataBar = [], monthDataPie = [], colors = [], labels = []
-      let monthDataStackedBar = []
       for (let i=1; i<13; i++) {
         const monthText =  `${i}`
         const date = this.$moment(`2022-${monthText}-1`, 'D-MM-YYYY')
@@ -230,6 +243,42 @@ export default {
       this.chartdataCountsOrderTypesBar = {
         labels,
         datasets
+      }
+
+      //chartdataCountsYearOrdertypesBar
+      let datasetsYear = [], labelsYear = []
+      for (let j=0; j<countsYearOrdertypeStats.order_types.length; j++) {
+        const order_type = countsYearOrdertypeStats.order_types[j]
+
+        let data = []
+        for (let i=countsYearOrdertypeStats.min_year; i<countsYearOrdertypeStats.max_year+1; i++) {
+          const yearText = `${i}`
+          // 2023
+          // 2020
+          // diff = 3
+          if (labelsYear.length <= countsYearOrdertypeStats.max_year - countsYearOrdertypeStats.min_year) {
+            labelsYear.push(yearText)
+          }
+          if (yearText in countsYearOrdertypeStats.order_counts) {
+            if (order_type in countsYearOrdertypeStats.order_counts[yearText]) {
+              data.push(countsYearOrdertypeStats.order_counts[yearText][order_type].count)
+            } else
+              data.push(0)
+          } else {
+            data.push(0)
+          }
+        }
+
+        datasetsYear.push({
+          label: order_type,
+          backgroundColor: this.getRandomColorOrderType(order_type),
+          data
+        })
+      }
+
+      this.chartdataCountsYearOrdertypesBar = {
+        labels: labelsYear,
+        datasets: datasetsYear
       }
     }
   },
