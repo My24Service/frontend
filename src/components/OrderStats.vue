@@ -115,7 +115,27 @@ export default {
         responsive: true,
         maintainAspectRatio: false,
       },
+      total: 0,
+      leftOutMonth: {},
+      leftOutYear: {},
+      leftOutOrderTypes: [],
       optionsStacked: {
+        tooltips: {
+          callbacks: {
+            afterTitle: () => {
+              this.total = 0
+            },
+            label: (tooltipItem, data) => {
+              const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
+              const key = data.datasets[tooltipItem.datasetIndex].label
+              this.total = data.datasets.reduce((a, dataset) => a + parseInt(dataset.data[tooltipItem.index]), 0)
+              return `${key} ${value}`
+            },
+            footer: (tooltipItems, data) => {
+              return `${this.$trans("Total") }: ${this.total}`
+            }
+          }
+        },
         plugins: {
           datalabels: {
             formatter: (value, ctx) => {
@@ -158,6 +178,116 @@ export default {
       return this.colorsOrderTypes[txt]
     },
     render(orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats) {
+      const threshold = .07
+
+      // first graph, year
+      let datasetsYear = [], labelsYear = []
+      this.leftOutYear = {
+        count: 0,
+        data: {}
+      }
+      for (let j=0; j<countsYearOrdertypeStats.order_types.length; j++) {
+        const order_type = countsYearOrdertypeStats.order_types[j]
+        let dataOk = true
+
+        let data = []
+        for (let i=countsYearOrdertypeStats.min_year; i<countsYearOrdertypeStats.max_year+1; i++) {
+          const yearText = `${i}`
+          if (labelsYear.length <= countsYearOrdertypeStats.max_year - countsYearOrdertypeStats.min_year) {
+            labelsYear.push(yearText)
+          }
+          if (yearText in countsYearOrdertypeStats.order_counts) {
+            if (order_type in countsYearOrdertypeStats.order_counts[yearText]) {
+              if (parseFloat(countsYearOrdertypeStats.order_counts[yearText][order_type].perc) < threshold) {
+                if (!(yearText in this.leftOutYear.data)) {
+                  this.leftOutYear.data[yearText] = []
+                }
+                this.leftOutYear.count++;
+                this.leftOutYear.data[yearText].push({
+                  order_type: order_type,
+                  data: countsYearOrdertypeStats.order_counts[yearText][order_type]})
+                dataOk = false
+                break
+              }
+
+              data.push(countsYearOrdertypeStats.order_counts[yearText][order_type].count)
+            } else
+              data.push(0)
+          } else {
+            data.push(0)
+          }
+        }
+
+        if (dataOk) {
+          datasetsYear.push({
+            label: order_type,
+            backgroundColor: this.getRandomColorOrderType(order_type),
+            data
+          })
+        }
+      }
+      console.log('left out year', this.leftOutYear)
+
+      this.chartdataCountsYearOrdertypesBar = {
+        labels: labelsYear,
+        datasets: datasetsYear
+      }
+
+      // second graph, month
+      let datasets = [], labelsMonth = []
+      this.leftOutMonth = {
+        count: 0,
+        data: {}
+      }
+      for (let j=0; j<orderTypesMonthStatsData.order_types.length; j++) {
+        const order_type = orderTypesMonthStatsData.order_types[j]
+        let dataOk = true
+
+        let data = []
+        for (let i=1; i<13; i++) {
+          const monthText = `${i}`
+          if (monthText in orderTypesMonthStatsData.order_counts) {
+            if (order_type in orderTypesMonthStatsData.order_counts[monthText]) {
+              if (parseFloat(orderTypesMonthStatsData.order_counts[monthText][order_type].perc) < threshold) {
+                if (!(monthText in this.leftOutMonth.data)) {
+                  this.leftOutMonth.data[monthText] = []
+                }
+                this.leftOutMonth.count++;
+                this.leftOutMonth.data[monthText].push({
+                  order_type: order_type,
+                  month: monthText,
+                  data: orderTypesMonthStatsData.order_counts[monthText][order_type]}
+                )
+                dataOk = false
+                break
+              }
+              if (labelsMonth.indexOf(order_type) === -1) {
+                labelsMonth.push(order_type)
+              }
+              data.push(orderTypesMonthStatsData.order_counts[monthText][order_type].count)
+            } else
+              data.push(0)
+          } else {
+            data.push(0)
+          }
+        }
+
+        if (dataOk) {
+          datasets.push({
+            label: order_type,
+            backgroundColor: this.getRandomColorOrderType(order_type),
+            data
+          })
+        }
+      }
+      console.log('left out month', this.leftOutMonth)
+
+      this.chartdataCountsOrderTypesBar = {
+        labels: labelsMonth,
+        datasets
+      }
+
+      // third graph, orders per month
       let monthDataBar = [], monthDataPie = [], colors = [], labels = []
       for (let i=1; i<13; i++) {
         const monthText =  `${i}`
@@ -172,12 +302,12 @@ export default {
           monthDataBar.push(0)
           monthDataPie.push("0.00")
         }
-      } // chartdataCountsOrderTypesBar
+      }
 
       this.chartdataCountsBar = {
         labels,
         datasets: [{
-          label: this.$trans('Total orders per month'),
+          // label: this.$trans('Total orders per month'),
           data: monthDataBar,
           backgroundColor: 'blue',
         }]
@@ -191,19 +321,37 @@ export default {
         }]
       }
 
-      let monthDataOrderTypesBar = [], monthDataOrderTypesPie = [], orderTypesLabels = [], orderTypesColors = []
-      for (const [orderType, _data] of Object.entries(orderTypeStatsData.order_types)) {
-        orderTypesLabels.push(orderType)
-        orderTypesColors.push(this.getRandomColorOrderType(orderType))
-        monthDataOrderTypesPie.push(_data.perc)
-        monthDataOrderTypesBar.push(_data.count)
+      // fourth graph, order types
+      let orderTypesDataBar = [], orderTypesDataPie = [], orderTypesLabels = [], orderTypesColors = []
+      this.leftOutOrderTypes = {
+        count: 0,
+        data: {}
       }
+      const thresholdOrderType = .15
+      for (const [orderType, _data] of Object.entries(orderTypeStatsData.order_types)) {
+        if (parseFloat(_data.perc) > thresholdOrderType) {
+          orderTypesLabels.push(orderType)
+          orderTypesColors.push(this.getRandomColorOrderType(orderType))
+          orderTypesDataPie.push(_data.perc)
+          orderTypesDataBar.push(_data.count)
+        } else {
+          if (!(orderType in this.leftOutOrderTypes.data)) {
+            this.leftOutOrderTypes.data[orderType] = []
+          }
+          this.leftOutOrderTypes.count++;
+          this.leftOutOrderTypes.data[orderType].push({
+            order_type: orderType,
+            data: _data
+          })
+        }
+      }
+      console.log('left out order types', this.leftOutOrderTypes)
 
       this.chartdataOrderTypesBar = {
         labels: orderTypesLabels,
         datasets: [{
-          label: this.$trans('Order types'),
-          data: monthDataOrderTypesBar,
+          // label: this.$trans('Order types'),
+          data: orderTypesDataBar,
           backgroundColor: orderTypesColors,
         }]
       }
@@ -211,75 +359,12 @@ export default {
       this.chartdataOrderTypesPie = {
         labels: orderTypesLabels,
         datasets: [{
-          data: monthDataOrderTypesPie,
+          data: orderTypesDataPie,
           backgroundColor: orderTypesColors,
         }]
       }
 
-      let datasets = []
-      for (let j=0; j<orderTypesMonthStatsData.order_types.length; j++) {
-        const order_type = orderTypesMonthStatsData.order_types[j]
 
-        let data = []
-        for (let i=1; i<13; i++) {
-          const monthText = `${i}`
-          if (monthText in orderTypesMonthStatsData.order_counts) {
-            if (order_type in orderTypesMonthStatsData.order_counts[monthText]) {
-              data.push(orderTypesMonthStatsData.order_counts[monthText][order_type].count)
-            } else
-              data.push(0)
-          } else {
-            data.push(0)
-          }
-        }
-
-        datasets.push({
-          label: order_type,
-          backgroundColor: this.getRandomColorOrderType(order_type),
-          data
-        })
-      }
-
-      this.chartdataCountsOrderTypesBar = {
-        labels,
-        datasets
-      }
-
-      //chartdataCountsYearOrdertypesBar
-      let datasetsYear = [], labelsYear = []
-      for (let j=0; j<countsYearOrdertypeStats.order_types.length; j++) {
-        const order_type = countsYearOrdertypeStats.order_types[j]
-
-        let data = []
-        for (let i=countsYearOrdertypeStats.min_year; i<countsYearOrdertypeStats.max_year+1; i++) {
-          const yearText = `${i}`
-          // 2023
-          // 2020
-          // diff = 3
-          if (labelsYear.length <= countsYearOrdertypeStats.max_year - countsYearOrdertypeStats.min_year) {
-            labelsYear.push(yearText)
-          }
-          if (yearText in countsYearOrdertypeStats.order_counts) {
-            if (order_type in countsYearOrdertypeStats.order_counts[yearText]) {
-              data.push(countsYearOrdertypeStats.order_counts[yearText][order_type].count)
-            } else
-              data.push(0)
-          } else {
-            data.push(0)
-          }
-        }
-
-        datasetsYear.push({
-          label: order_type,
-          backgroundColor: this.getRandomColorOrderType(order_type),
-          data
-        })
-      }
-
-      this.chartdataCountsYearOrdertypesBar = {
-        labels: labelsYear,
-        datasets: datasetsYear
-      }
     }
   },
   async mounted () {
