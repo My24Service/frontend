@@ -1,6 +1,17 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-grid">
+      <b-row align-h="center">
+        <h2>{{ $trans('Overall statistics')}}</h2>
+        <b-col cols="12">
+          <OrderStats
+            ref="order-stats"
+          />
+        </b-col>
+      </b-row>
+    </div>
+
+    <div class="app-grid">
       <b-row align-v="center">
         <b-col cols="1">
           <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
@@ -142,13 +153,20 @@
 </template>
 
 <script>
-import BarChart from "@/components/BarChart.vue"
-import PieChart from "@/components/PieChart.vue"
-import dashboardModel from '@/models/company/Dashboard.js'
+import BarChart from "../../components/BarChart.vue"
+import PieChart from "../../components/PieChart.vue"
+import OrderStats from "../../components/OrderStats.vue"
+import dashboardModel from '../../models/company/Dashboard.js'
+import orderModel from "../../models/orders/Order";
 
 let d = new Date()
 
 export default {
+  components: {
+    BarChart,
+    PieChart,
+    OrderStats,
+  },
   data() {
     return {
       chartdataCustomers: {},
@@ -197,10 +215,6 @@ export default {
       isLoading: false,
       year: d.getYear() + 1900,
     }
-  },
-  components: {
-    BarChart,
-    PieChart,
   },
   created() {
     this.loadData()
@@ -458,6 +472,15 @@ export default {
             backgroundColor: '#f87979',
           }]
         }
+
+        const orderTypeStatsData = await orderModel.getOrderTypesStats()
+        const monthsStatsData = await orderModel.getMonthsStats()
+        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStats()
+        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStats()
+
+        this.$refs['order-stats'].render(
+          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
+        )
 
         this.isLoading = false
       } catch(error) {

@@ -99,7 +99,7 @@
 </template>
 
 <script>
-import moment from 'moment'
+import moment from 'moment/min/moment-with-locales'
 
 import monthModel from '@/models/orders/Month.js'
 

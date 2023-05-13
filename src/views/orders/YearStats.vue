@@ -77,15 +77,14 @@
 </template>
 
 <script>
-import moment from 'moment'
-
-import yearModel from '@/models/orders/Year.js'
-
-import BarChart from "@/components/BarChart.vue"
-import PieChart from "@/components/PieChart.vue"
-import OrderStatusColorSpan from '@/components/OrderStatusColorSpan.vue'
-import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
+import moment from 'moment/min/moment-with-locales'
 import ChartJsPluginDataLabels from 'chartjs-plugin-datalabels'
+
+import yearModel from '../../models/orders/Year.js'
+import BarChart from "../../components/BarChart.vue"
+import PieChart from "../../components/PieChart.vue"
+import OrderStatusColorSpan from '../../components/OrderStatusColorSpan.vue'
+import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
 
 let d = new Date();
 

@@ -8,37 +8,37 @@
         <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
       </b-nav-item>
       <div
-        v-if="(hasCustomers && isPlanning) || hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer)"
+        v-if="showCustomers"
         class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
       <b-nav-item
         :active="isActive('customers')"
-        v-if="(hasCustomers && isPlanning) || hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer)"
+        v-if="showCustomers"
         to="/customers/customers">{{ $trans('Customers') }}
       </b-nav-item>
       <div
-        v-if="hasInventory && (isPlanning || isStaff || isSuperuser)"
+        v-if="showInventory"
         class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
       <b-nav-item
         :active="isActive('inventory')"
-        v-if="hasInventory && (isPlanning || isStaff || isSuperuser)"
+        v-if="showInventory"
         to="/inventory/purchaseorders">{{ $trans('Inventory') }}
       </b-nav-item>
       <div
-        v-if="hasMobile && (isPlanning || isStaff || isSuperuser)"
+        v-if="showMobile"
         class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
       <b-nav-item
         :active="isActive('mobile')"
-        v-if="hasMobile && (isPlanning || isStaff || isSuperuser)"
+        v-if="showMobile"
         to="/mobile/dispatch">{{ $trans('Mobile') }}
       </b-nav-item>
       <div
-        v-if="!isCustomer"
+        v-if="showCompany"
         class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
@@ -49,7 +49,7 @@
  -->
       <b-nav-item
         :active="isActive('company')"
-        v-if="!isCustomer"
+        v-if="showCompany"
         to="/company/dashboard">{{ $trans('Company') }}
       </b-nav-item>
       <div v-if="hasMembers" class="main-nav-divider">
@@ -57,7 +57,7 @@
       </div>
       <b-nav-item
         :active="isActive('members')"
-        v-if="hasMembers"
+        v-if="showMembers"
         to="/members/members">{{ $trans('Members') }}
       </b-nav-item>
     </b-navbar-nav>
@@ -80,6 +80,25 @@ export default {
     }
   },
   computed: {
+    showCustomers() {
+      return !this.hasBranches && (
+        (this.hasCustomers && this.isPlanning) ||
+        this.hasOrders && (this.isPlanning || this.isStaff || this.isSuperuser || this.isCustomer)
+      );
+    },
+    showInventory() {
+      return this.hasInventory && (this.isPlanning || this.isStaff || this.isSuperuser);
+    },
+    showMobile() {
+      return this.hasMobile && (this.isPlanning || this.isStaff || this.isSuperuser)
+    },
+    showCompany() {
+      return !this.isCustomer;
+    },
+    showMembers() {
+      return this.hasMembers;
+    },
+
     hasOrders() {
       return this.hasAccessToModule('orders')
     },
@@ -103,7 +122,10 @@ export default {
     },
     unacceptedCount() {
       return this.$store.state.unacceptedCount
-    }
+    },
+    hasBranches() {
+      return this.$store.getters.getMemberHasBranches
+    },
   },
   watch: {
     unacceptedCount (oldValue, newValue) {

@@ -39,11 +39,10 @@ class Order extends BaseModel {
     'customer_remarks': '',
     'remarks': '',
     'required_users': 1,
-    'statusses': [],
+    'statuses': [],
     'orderlines': [],
     'infolines': [],
     'workorder_documents': [],
-    'maintenance_product_lines': [],
 
     'workorder_pdf_url': '',
     'workorder_pdf_url_partner': '',
@@ -122,6 +121,39 @@ class Order extends BaseModel {
 
   getWorkorderData(uuid) {
     return this.axios.get(`/order/workorder-data/${uuid}/`).then(response => response.data)
+  }
+
+
+  async getOrderTypesStats(customerPk) {
+    const url = customerPk ? `${this.url}order_types_stats/?customer=${customerPk}` : `${this.url}order_types_stats/`
+
+    const response = await this.axios.get(url)
+    return response.data.order_types_stats
+  }
+
+  async getOrderTypesMonthsStats(customerPk) {
+    const url = customerPk ? `${this.url}order_types_month_stats/?customer=${customerPk}` : `${this.url}order_types_month_stats/`
+
+    const response = await this.axios.get(url)
+    return response.data.order_types_month_stats
+  }
+
+  async getMonthsStats(customerPk) {
+    const url = customerPk ? `${this.url}order_counts_stats/?customer=${customerPk}` : `${this.url}order_counts_stats/`
+
+    const response = await this.axios.get(url)
+    return response.data.order_counts_stats
+  }
+
+  async getCountsYearOrdertypeStats(customerPk) {
+    const url = customerPk ? `${this.url}counts_year_order_type_stats/?customer=${customerPk}` : `${this.url}counts_year_order_type_stats/`
+    const response = await this.axios.get(url)
+    return response.data.counts_year_order_type_stats
+  }
+
+  async getTopXCustomers() {
+    const response = await this.axios.get(`${this.url}get_top_x_customers/`)
+    return response.data.get_top_x_customers
   }
 }
 

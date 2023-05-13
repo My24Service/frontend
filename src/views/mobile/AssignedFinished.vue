@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import moment from 'moment'
+import moment from 'moment/min/moment-with-locales'
 
 import assignedFinishedModel from '@/models/mobile/AssignedFinished.js'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'

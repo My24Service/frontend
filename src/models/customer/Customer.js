@@ -3,6 +3,7 @@ import BaseModel from '../base'
 
 class Customer extends BaseModel {
   fields = {
+    'id': null,
     'name': '',
     'address': '',
     'postal': '',

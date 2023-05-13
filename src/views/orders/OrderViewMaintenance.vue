@@ -98,7 +98,7 @@
       <b-row class="my-2">
           <b-col cols="2"><strong>{{ $trans('Status') }}</strong></b-col>
           <b-col cols="9">
-            <div v-for="status in order.statusses" :key="status.id">
+            <div v-for="status in order.statuses" :key="status.id">
               {{ status.created }} {{ status.status }}<br/>
             </div>
           </b-col>
