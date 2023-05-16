@@ -193,8 +193,10 @@ export default {
         let data = []
         for (let i=countsYearOrdertypeStats.min_year; i<countsYearOrdertypeStats.max_year+1; i++) {
           const yearText = `${i}`
-          if (labelsYear.length <= countsYearOrdertypeStats.max_year - countsYearOrdertypeStats.min_year) {
+          if (labelsYear.indexOf(yearText) === -1) {
             labelsYear.push(yearText)
+          } else {
+
           }
           if (yearText in countsYearOrdertypeStats.order_counts) {
             if (order_type in countsYearOrdertypeStats.order_counts[yearText]) {
@@ -226,7 +228,7 @@ export default {
           })
         }
       }
-      console.log('left out year', this.leftOutYear)
+      // console.log('left out year', this.leftOutYear)
 
       this.chartdataCountsYearOrdertypesBar = {
         labels: labelsYear,
@@ -246,6 +248,8 @@ export default {
         let data = []
         for (let i=1; i<13; i++) {
           const monthText = `${i}`
+          const date = this.$moment(`2022-${monthText}-1`, 'D-MM-YYYY')
+          const monthTextLong = date.format('MMMM')
           if (monthText in orderTypesMonthStatsData.order_counts) {
             if (order_type in orderTypesMonthStatsData.order_counts[monthText]) {
               if (parseFloat(orderTypesMonthStatsData.order_counts[monthText][order_type].perc) < threshold) {
@@ -261,8 +265,8 @@ export default {
                 dataOk = false
                 break
               }
-              if (labelsMonth.indexOf(order_type) === -1) {
-                labelsMonth.push(order_type)
+              if (labelsMonth.indexOf(monthTextLong) === -1) {
+                labelsMonth.push(monthTextLong)
               }
               data.push(orderTypesMonthStatsData.order_counts[monthText][order_type].count)
             } else
@@ -280,7 +284,7 @@ export default {
           })
         }
       }
-      console.log('left out month', this.leftOutMonth)
+      // console.log('left out month', this.leftOutMonth)
 
       this.chartdataCountsOrderTypesBar = {
         labels: labelsMonth,
@@ -345,7 +349,7 @@ export default {
           })
         }
       }
-      console.log('left out order types', this.leftOutOrderTypes)
+      // console.log('left out order types', this.leftOutOrderTypes)
 
       this.chartdataOrderTypesBar = {
         labels: orderTypesLabels,
