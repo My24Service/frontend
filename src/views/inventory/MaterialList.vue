@@ -1,8 +1,6 @@
 <template>
   <div class="mt-4">
 
-    <PillsInventoryMaterial />
-
     <SearchModal
       id="search-modal"
       ref="search-modal"
