@@ -452,6 +452,8 @@ export default {
   async created() {
     this.countries = await this.$store.dispatch('getCountries')
 
+    await this.getLocations()
+
     if (!this.isCreate) {
       await this.loadData()
     } else {
@@ -564,7 +566,6 @@ export default {
       try {
         this.engineer = await engineerModel.detail(this.pk)
         this.orgUsername = this.engineer.username
-        await this.getLocations()
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineer', error)
