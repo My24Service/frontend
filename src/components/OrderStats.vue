@@ -193,8 +193,10 @@ export default {
         let data = []
         for (let i=countsYearOrdertypeStats.min_year; i<countsYearOrdertypeStats.max_year+1; i++) {
           const yearText = `${i}`
-          if (labelsYear.length <= countsYearOrdertypeStats.max_year - countsYearOrdertypeStats.min_year) {
+          if (labelsYear.indexOf(yearText) === -1) {
             labelsYear.push(yearText)
+          } else {
+
           }
           if (yearText in countsYearOrdertypeStats.order_counts) {
             if (order_type in countsYearOrdertypeStats.order_counts[yearText]) {
