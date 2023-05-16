@@ -4,7 +4,7 @@ import auth from '@/services/auth'
 
 let client = axios.create({
   baseURL: `${BASE_URL}/api`,
-  withCredentials: true
+  withCredentials: false
 })
 
 auth.setInterceptors(client)
