@@ -15,6 +15,11 @@ class Location extends BaseModel {
       .then((response) => response.data)
   }
 
+  searchBranch(query, branchPk) {
+    return this.axios.get(`${this.url}autocomplete/?q=${query}&branch=${branchPk}`)
+      .then((response) => response.data)
+  }
+
   quickAddCustomerPlanning(name, customerPk) {
     const data = {
       customer: customerPk,

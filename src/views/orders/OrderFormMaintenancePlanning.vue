@@ -470,7 +470,7 @@
                     :hide-selected="true"
                     @search-change="getEquipmentDebounced"
                     @select="selectEquipment"
-                    :disabled="!this.order.customer_relation"
+                    :disabled="!equipmentFormSearchOk"
                   >
                 <span slot="noResult">
                   <h5>{{ $trans('No equipment found') }}</h5>
@@ -556,7 +556,7 @@
                     :hide-selected="true"
                     @search-change="getLocationDebounced"
                     @select="selectLocation"
-                    :disabled="!this.order.customer_relation"
+                    :disabled="!equipmentFormSearchOk"
                   >
                 <span slot="noResult">
                   <h5>{{ $trans('No locations found') }}</h5>
@@ -1055,6 +1055,13 @@ export default {
     }
   },
   computed: {
+    equipmentFormSearchOk() {
+      if (!this.hasBranches) {
+        return this.order.customer_relation !== null
+      } else {
+        return this.order.branch !== null
+      }
+    },
     usesEquipment() {
       // return true
       return this.hasBranches || this.isEditEquipment
@@ -1109,12 +1116,19 @@ export default {
       this.$refs.multiselect_equipment.deactivate()
 
       try {
-        const response = this.isPlanning || this.isStaff || this.isSuperuser ?
-          await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
-          await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
+        if (!this.hasBranches) {
+          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+            await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
+            await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
 
-        this.equipment = response.id
-        this.product = response.name
+          this.equipment = response.id
+          this.product = response.name
+        } else {
+          const response = await equipmentModel.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
+
+          this.equipment = response.id
+          this.product = response.name
+        }
       }  catch(error) {
         console.log('Error adding equipment', error)
         this.errorToast(this.$trans('Error adding equipment'))
@@ -1122,7 +1136,12 @@ export default {
     },
     async getEquipment(query) {
       try {
-        this.equipmentSearch = await equipmentModel.searchCustomer(query, this.order.customer_relation)
+        if (this.hasBranches) {
+          this.equipmentSearch = await equipmentModel.searchBranch(query, this.order.branch)
+        } else {
+          this.equipmentSearch = await equipmentModel.searchCustomer(query, this.order.customer_relation)
+        }
+
       } catch(error) {
         console.log('Error searching equipment', error)
         this.errorToast(this.$trans('Error searching equipment'))
@@ -1148,12 +1167,19 @@ export default {
       this.$refs.multiselect_location.deactivate()
 
       try {
-        const response = this.isPlanning || this.isStaff || this.isSuperuser ?
-          await locationModel.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
-          await locationModel.quickAddCustomerNonPlanning(this.newLocationName)
+        if (!this.hasBranches) {
+          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+            await locationModel.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
+            await locationModel.quickAddCustomerNonPlanning(this.newLocationName)
 
-        this.equipment_location = response.id
-        this.location = response.name
+          this.equipment_location = response.id
+          this.location = response.name
+        } else {
+          const response = await locationModel.quickAddBranchPlanning(this.newLocationName, this.order.branch);
+
+          this.equipment_location = response.id
+          this.location = response.name
+        }
       }  catch(error) {
         console.log('Error adding location', error)
         this.errorToast(this.$trans('Error adding location'))
@@ -1161,7 +1187,11 @@ export default {
     },
     async getLocation(query) {
       try {
-        this.locationSearch = await locationModel.searchCustomer(query, this.order.customer_relation)
+        if (this.hasBranches) {
+          this.locationSearch = await locationModel.searchBranch(query, this.order.branch)
+        } else {
+          this.locationSearch = await locationModel.searchCustomer(query, this.order.customer_relation)
+        }
       } catch(error) {
         console.log('Error searching location', error)
         this.errorToast(this.$trans('Error searching location'))
