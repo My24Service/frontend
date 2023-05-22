@@ -10,14 +10,18 @@ import DocumentForm from '../views/customer/DocumentForm.vue'
 
 import MaintenanceContractList from '../views/customer/MaintenanceContractList.vue'
 import MaintenanceContractForm from '../views/customer/MaintenanceContractForm.vue'
-import MaintenanceProductList from '../views/customer/MaintenanceProductList.vue'
-import MaintenanceProductForm from '../views/customer/MaintenanceProductForm.vue'
 
 import MaintenanceEquipmentList from '../views/customer/MaintenanceEquipmentList.vue'
 import MaintenanceEquipmentForm from '../views/customer/MaintenanceEquipmentForm.vue'
 
+import EquipmentList from '../views/equipment/EquipmentList.vue'
+import EquipmentForm from '../views/equipment/EquipmentForm.vue'
+
+import LocationList from '../views/equipment/LocationList.vue'
+import LocationForm from '../views/equipment/LocationForm.vue'
+
 import Calendar from '../views/customer/Calendar.vue'
-import MaintenanceEquipment from "../models/customer/MaintenanceEquipment";
+import SubNavEquipment from "../components/SubNavEquipment";
 
 export default [
 {
@@ -146,43 +150,6 @@ export default [
         'app-subnav': true
       },
     },
-    // maintenance products
-    {
-      name: 'maintenance-products',
-      path: '/customers/maintenance-products/:contractPk',
-      components: {
-        'app-content': MaintenanceProductList,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'maintenance-product-add',
-      path: '/customers/maintenance-products/form',
-      components: {
-        'app-content': MaintenanceProductForm,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'maintenance-product-edit',
-      path: '/customers/maintenance-products/form/:pk',
-      components: {
-        'app-content': MaintenanceProductForm,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
     // maintenance equipment
     {
       name: 'maintenance-equipment',
@@ -231,6 +198,81 @@ export default [
       },
       props: {
         'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+
+    // equipment
+    {
+      name: 'customers-equipment-list',
+      path: '/customers/equipment',
+      components: {
+        'app-content': EquipmentList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'customers-equipment-edit',
+      path: '/customers/equipment/form/:pk',
+      components: {
+        'app-content': EquipmentForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'customers-equipment-add',
+      path: '/customers/equipment/form',
+      components: {
+        'app-content': EquipmentForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': true
+      },
+    },
+    // locations
+    {
+      name: 'customers-location-list',
+      path: '/customers/locations',
+      components: {
+        'app-content': LocationList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'customers-location-edit',
+      path: '/customers/locations/form/:pk',
+      components: {
+        'app-content': LocationForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'customers-location-add',
+      path: '/customers/locations/form',
+      components: {
+        'app-content': LocationForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': {},
         'app-subnav': true
       },
     },

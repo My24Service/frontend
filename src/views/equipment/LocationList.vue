@@ -1,0 +1,197 @@
+<template>
+  <div class="mt-4 app-grid">
+
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <b-modal
+      id="delete-location-modal"
+      ref="delete-location-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this location?') }}</p>
+    </b-modal>
+
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Location')"
+      />
+
+      <b-table
+        id="location-table"
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="locations"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  :router_name="newLink"
+                  v-bind:title="$trans('New location')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(customer)="data">
+          {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+        </template>
+        <template #cell(branch)="data">
+          {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              :router_name="editLink"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
+  </div>
+</template>
+
+<script>
+import locationModel from '../../models/equipment/location.js'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import Pagination from "../../components/Pagination.vue"
+import {componentMixin} from "../../utils";
+
+export default {
+  mixins: [componentMixin],
+  components: {
+    IconLinkEdit,
+    IconLinkDelete,
+    ButtonLinkRefresh,
+    ButtonLinkSearch,
+    ButtonLinkAdd,
+    SearchModal,
+    Pagination,
+  },
+  computed: {
+    editLink() {
+      if (this.hasBranches) {
+        return 'equipment-location-edit'
+      } else {
+        return 'customers-location-edit'
+      }
+    },
+    newLink() {
+      if (this.hasBranches) {
+        return 'equipment-location-add'
+      } else {
+        return 'customers-location-add'
+      }
+    },
+  },
+  data() {
+    return {
+      searchQuery: null,
+      model: locationModel,
+      locationPk: null,
+      isLoading: false,
+      locations: [],
+      fieldsCustomer: [
+        {key: 'customer', label: this.$trans('Customer')},
+        {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'icons'}
+      ],
+      fieldsBranch: [
+        {key: 'branch', label: this.$trans('Branch')},
+        {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'icons'}
+      ],
+      fields: [],
+    }
+  },
+  created() {
+    if (this.hasBranches) {
+      this.fields = this.fieldsBranch
+    } else {
+      this.fields = this.fieldsCustomer
+    }
+    this.model.currentPage = this.$route.query.page || 1
+    this.loadData()
+  },
+  methods: {
+    // search
+    handleSearchOk(val) {
+      this.$refs['search-modal'].hide()
+      this.model.setSearchQuery(val)
+      this.loadData()
+    },
+    showSearchModal() {
+      this.$refs['search-modal'].show()
+    },
+    // delete
+    showDeleteModal(id) {
+      this.locationPk = id
+      this.$refs['delete-location-modal'].show()
+    },
+    async doDelete() {
+      try {
+        await this.model.delete(this.locationPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Location has been deleted'))
+        await this.loadData()
+      } catch(error) {
+        console.log('Error deleting location', error)
+        this.errorToast(this.$trans('Error deleting location'))
+      }
+    },
+    // rest
+    async loadData() {
+      this.isLoading = true;
+
+      try {
+        const data = await this.model.list()
+        this.locations = data.results
+        this.isLoading = false
+      } catch(error){
+        console.log('error fetching locations', error)
+        this.errorToast(this.$trans('Error loading locations'))
+        this.isLoading = false
+      }
+    }
+  }
+}
+</script>

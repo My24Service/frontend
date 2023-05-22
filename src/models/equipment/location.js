@@ -5,7 +5,8 @@ class Location extends BaseModel {
     'customer': null,
     'branch': null,
     'name': null,
-    'identifier': null,
+    'created': null,
+    'modified': null,
   }
 
   url = '/equipment/location/'

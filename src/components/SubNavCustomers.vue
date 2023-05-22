@@ -13,6 +13,18 @@
         :to="{ name: 'maintenance-contracts' }">
         {{ $trans('Maintenance contracts') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('equipment')"
+        v-if="hasEquipment"
+        :to="{ name: 'customers-equipment-list' }">
+        {{ $trans('Equipment') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('locations')"
+        v-if="hasEquipmentLocations"
+        :to="{ name: 'customers-location-list' }">
+        {{ $trans('Locations') }}
+      </b-nav-item>
 <!--      <b-nav-item-->
 <!--        :active="isActive('calendar')"-->
 <!--        v-if="hasMaintenanceOrdersPerYear"-->
@@ -24,7 +36,7 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
+import { componentMixin } from '../utils.js'
 
 export default {
   mixins: [componentMixin],
@@ -35,6 +47,12 @@ export default {
     }
   },
   computed: {
+    hasEquipment() {
+      return this.hasAccessToModule('customers', 'equipment')
+    },
+    hasEquipmentLocations() {
+      return this.hasAccessToModule('customers', 'locations')
+    },
     hasCustomers() {
       return this.hasAccessToModule('customers', 'customers')
     },

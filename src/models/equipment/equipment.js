@@ -4,13 +4,17 @@ class Equipment extends BaseModel {
   fields = {
     'customer': null,
     'branch': null,
+
     'name': null,
+    'brand': null,
     'identifier': null,
     'description': null,
     'installation_date': null,
     'production_date': null,
     'serialnumber': null,
     'standard_hours': null,
+    'created': null,
+    'modified': null,
   }
 
   url = '/equipment/equipment/'

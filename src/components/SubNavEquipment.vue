@@ -1,0 +1,44 @@
+<template>
+  <div>
+    <b-nav tabs>
+      <b-nav-item
+        :active="isActive('equipment')"
+        v-if="hasEquipment"
+        :to="{ name: 'equipment-equipment-list' }">
+        {{ $trans('Equipment') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('locations')"
+        v-if="hasEquipmentLocations"
+        :to="{ name: 'equipment-location-list' }">
+        {{ $trans('Locations') }}
+      </b-nav-item>
+    </b-nav>
+  </div>
+</template>
+
+<script>
+import { componentMixin } from '../utils.js'
+
+export default {
+  name: 'SubNavEquipment',
+  mixins: [componentMixin],
+  methods: {
+    isActive(item) {
+      const parts = this.$route.path.split('/')
+      return parts[2] === item
+    }
+  },
+  computed: {
+    hasEquipment() {
+      return this.hasAccessToModule('equipment', 'equipment')
+    },
+    hasEquipmentLocations() {
+      return this.hasAccessToModule('equipment', 'locations')
+    },
+  },
+}
+</script>
+
+<style scoped>
+</style>
