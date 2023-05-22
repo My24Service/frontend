@@ -72,6 +72,9 @@ Vue.use(FormTextareaPlugin)
 import { FormTimepickerPlugin } from 'bootstrap-vue'
 Vue.use(FormTimepickerPlugin)
 
+import { InputGroupPlugin } from 'bootstrap-vue'
+Vue.use(InputGroupPlugin)
+
 import { LayoutPlugin } from 'bootstrap-vue'
 Vue.use(LayoutPlugin)
 

@@ -97,15 +97,15 @@ class Order extends BaseModel {
     let base = ''
     if (this.queryMode === 'dispatch') {
       base = '/order/order/dispatch_list_all/'
-    } else if (this.queryMode == 'inprogress') {
+    } else if (this.queryMode === 'inprogress') {
       base = '/order/order/dispatch_list_inprogress/'
-    } else if (this.queryMode == 'finished') {
+    } else if (this.queryMode === 'finished') {
       base = '/order/order/dispatch_list_finished/'
-    } else if (this.queryMode == 'unassigned') {
+    } else if (this.queryMode === 'unassigned') {
       base = '/order/order/dispatch_list_unassigned/'
-    } else if (this.queryMode == 'range') {
+    } else if (this.queryMode === 'range') {
       base = '/order/order/get_within_range/'
-    } else if (this.queryMode == 'all') {
+    } else if (this.queryMode === 'all') {
       base = '/order/order/'
     } else {
       console.log(`unknown queryMode: ${this.queryMode}`)
