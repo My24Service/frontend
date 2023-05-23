@@ -48,10 +48,10 @@ export default {
   },
   computed: {
     hasEquipment() {
-      return this.hasAccessToModule('customers', 'equipment')
+      return this.hasAccessToModule('customers', 'equipment') && !this.isCustomer
     },
     hasEquipmentLocations() {
-      return this.hasAccessToModule('customers', 'locations')
+      return this.hasAccessToModule('customers', 'locations') && !this.isCustomer
     },
     hasCustomers() {
       return this.hasAccessToModule('customers', 'customers')

@@ -168,6 +168,133 @@
         </b-row>
       </div>
 
+      <div class="app-grid">
+        <b-row align-h="center">
+          <b-col cols="6">
+            <b-row align-h="center">
+              <h3>{{ $trans("Equipment") }}</h3>
+            </b-row>
+            <b-table
+              id="customer-equipment-table"
+              small
+              :busy='isLoading'
+              :fields="equipmentFields"
+              :items="equipment"
+              responsive="md"
+              class="data-table"
+            >
+              <template #cell(customer)="data">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </template>
+              <template #cell(branch)="data">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </template>
+              <template #cell(icons)="data">
+                <div class="h2 float-right">
+                  <span class="button-container">
+                    <b-button
+                      :to="{name: 'customers-equipment-edit', params: {pk: data.item.id}}"
+                      class="btn btn-outline-secondary"
+                      size="sm"
+                      type="button"
+                      variant="outline-secondary"
+                    >
+                      {{ $trans('Edit') }}
+                    </b-button>
+                  </span>
+                </div>
+              </template>
+            </b-table>
+            <b-row align-h="end">
+              <span class="button-container">
+                <b-button
+                  class="btn btn-outline-secondary"
+                  :to="{name: 'customers-equipment-add'}"
+                  size="sm"
+                  type="button"
+                  variant="outline-secondary"
+                >
+                  {{ $trans('New') }}
+                </b-button>
+              </span>
+              <span class="button-container">
+                <b-button
+                  class="btn btn-outline-secondary"
+                  :to="{name: 'customers-equipment-list'}"
+                  size="sm"
+                  type="button"
+                  variant="outline-secondary"
+                >
+                  {{ $trans('Manage >>') }}
+                </b-button>
+              </span>
+            </b-row>
+          </b-col>
+          <b-col cols="6">
+            <b-row align-h="center">
+              <h3>{{ $trans("Locations") }}</h3>
+            </b-row>
+            <b-table
+              id="customer-location-table"
+              small
+              :busy='isLoading'
+              :fields="locationFields"
+              :items="locations"
+              responsive="md"
+              class="data-table"
+            >
+              <template #cell(customer)="data">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </template>
+              <template #cell(branch)="data">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </template>
+              <template #cell(icons)="data">
+                <div class="h2 float-right">
+                  <span class="button-container">
+                    <b-button
+                      :to="{name: 'customers-location-edit', params: {pk: data.item.id}}"
+                      class="btn btn-outline-secondary"
+                      size="sm"
+                      type="button"
+                      variant="outline-secondary"
+                    >
+                      {{ $trans('Edit') }}
+                    </b-button>
+                  </span>
+                </div>
+              </template>
+            </b-table>
+            <b-row align-h="end">
+              <span class="button-container">
+                <b-button
+                  class="btn btn-outline-secondary"
+                  :to="{name: 'customers-location-add'}"
+                  size="sm"
+                  type="button"
+                  variant="outline-secondary"
+                >
+                  {{ $trans('New') }}
+                </b-button>
+              </span>
+              <span class="button-container">
+                <b-button
+                  class="btn btn-outline-secondary"
+                  :to="{name: 'customers-location-list'}"
+                  size="sm"
+                  type="button"
+                  variant="outline-secondary"
+                >
+                  {{ $trans('Manage >>') }}
+                </b-button>
+              </span>
+            </b-row>
+          </b-col>
+        </b-row>
+      </div>
+
+      <div class="spacer"></div>
+
       <div>
         <b-row align-h="center">
           <h3>{{ $trans("Past orders") }}</h3>
@@ -243,8 +370,12 @@ import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import orderModel from '../../models/orders/Order.js'
 import OrderStats from "../../components/OrderStats";
+import {componentMixin} from "../../utils";
+import locationModel from "../../models/equipment/location";
+import equipmentModel from "../../models/equipment/equipment";
 
 export default {
+  mixins: [componentMixin],
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
@@ -279,6 +410,36 @@ export default {
       maintenanceContractFields: [
         {key: 'contract', label: this.$trans('Contract')},
       ],
+
+      locations: [],
+      locationFieldsCustomer: [
+        {key: 'name', label: this.$trans('Name')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'icons', label: ""}
+      ],
+      locationFieldsBranch: [
+        {key: 'name', label: this.$trans('Name')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'icons', label: ""}
+      ],
+      locationFields: [],
+
+      equipment: [],
+      equipmentFieldsCustomer: [
+        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'icons', label: ""}
+      ],
+      equipmentFieldsBranch: [
+        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'icons', label: ""}
+      ],
+      equipmentFields: [],
     }
   },
   props: {
@@ -313,7 +474,6 @@ export default {
       await this.loadHistory()
       await this.loadMaintenanceContracts()
 
-
       try {
         this.customer = await customerModel.detail(this.pk)
 
@@ -321,6 +481,14 @@ export default {
         const monthsStatsData = await orderModel.getMonthsStats(this.pk)
         const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStats(this.pk)
         const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStats(this.pk)
+
+        locationModel.setListArgs(`customer=${this.pk}`)
+        let data = await locationModel.list()
+        this.locations = data.results
+
+        equipmentModel.setListArgs(`customer=${this.pk}`)
+        data = await equipmentModel.list()
+        this.equipment = data.results
 
         // use this in customer dashboard
         // const bla = await orderModel.getTopXCustomers()
@@ -362,6 +530,13 @@ export default {
     }
   },
   created() {
+    if (this.hasBranches) {
+      this.locationFields = this.locationFieldsBranch
+      this.equipmentFields = this.equipmentFieldsBranch
+    } else {
+      this.locationFields = this.locationFieldsCustomer
+      this.equipmentFields = this.equipmentFieldsCustomer
+    }
     this.loadData()
   },
   async mounted () {
@@ -378,5 +553,8 @@ span.button-container {
 }
 span.spacer {
   width: 10px;
+}
+div.spacer {
+  margin: 10px;
 }
 </style>
