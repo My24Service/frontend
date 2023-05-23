@@ -128,27 +128,27 @@ class Order extends BaseModel {
     const url = customerPk ? `${this.url}order_types_stats/?customer=${customerPk}` : `${this.url}order_types_stats/`
 
     const response = await this.axios.get(url)
-    return response.data.order_types_stats
+    return response && 'data' in response ? response.data.order_types_stats : {}
   }
 
   async getOrderTypesMonthsStats(customerPk) {
     const url = customerPk ? `${this.url}order_types_month_stats/?customer=${customerPk}` : `${this.url}order_types_month_stats/`
 
     const response = await this.axios.get(url)
-    return response.data.order_types_month_stats
+    return response && 'data' in response ? response.data.order_types_month_stats : {}
   }
 
   async getMonthsStats(customerPk) {
     const url = customerPk ? `${this.url}order_counts_stats/?customer=${customerPk}` : `${this.url}order_counts_stats/`
 
     const response = await this.axios.get(url)
-    return response.data.order_counts_stats
+    return response && 'data' in response ? response.data.order_counts_stats : {}
   }
 
   async getCountsYearOrdertypeStats(customerPk) {
     const url = customerPk ? `${this.url}counts_year_order_type_stats/?customer=${customerPk}` : `${this.url}counts_year_order_type_stats/`
     const response = await this.axios.get(url)
-    return response.data.counts_year_order_type_stats
+    return response && 'data' in response ? response.data.counts_year_order_type_stats : {}
   }
 
   async getTopXCustomers() {

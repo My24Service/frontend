@@ -21,6 +21,8 @@ axios.get.mockImplementation((url) => {
       return Promise.resolve(supplierResponse)
     case '/inventory/material/autocomplete/?supplier=3&q=':
       return Promise.resolve(materialResponse)
+    case '/inventory/material/autocomplete/?supplier=23&q=':
+      return Promise.resolve(materialResponse)
     default:
       return Promise.reject(new Error(`${url} not found`))
   }

@@ -742,7 +742,6 @@ export default {
 
       try {
         this.purchaseOrder = await purchaseOrderModel.detail(this.pk)
-        console.log(this.purchaseOrder.expected_entry_date)
         expected_entry_date = this.$moment(this.purchaseOrder.expected_entry_date, 'DD/MM/YYYY')
         this.purchaseOrder.expected_entry_date = expected_entry_date.toDate()
         this.isLoading = false

@@ -350,8 +350,10 @@ class Dispatch {
     let rowOrderLinesPrio4 = []
     let rowOrderLinesPrio5 = []
 
-    const startDateView = this.component.$moment(this.startDate.format('YYYY/MM/DD'))
-    const endDateView = this.component.$moment(this.endDate.format('YYYY/MM/DD')).subtract(1, 'days')
+    const format = 'YYYY-MM-DD'
+
+    const startDateView = this.component.$moment(this.startDate.format(format))
+    const endDateView = this.component.$moment(this.endDate.format(format)).subtract(1, 'days')
 
     for (const [date, orders] of Object.entries(data.assignedorders.start)) {
       for(let i=0; i<orders.length; i++) {
@@ -369,7 +371,7 @@ class Dispatch {
           console.log(`order ${orders[i].order_id}, start: ${date}, end: ${endOrder.date}`)
         }
 
-        const startDateOrder = this.component.$moment(this.component.$moment(date).format("YYYY/MM/DD"))
+        const startDateOrder = this.component.$moment(this.component.$moment(date).format(format))
         const endDateOrder = this.component.$moment(endOrder.date)
         if (this.debug) {
           console.log(`start date order=${startDateOrder.format("YYYY/MM/DD h:mm:ss")}, start date view=${startDateView.format("YYYY/MM/DD h:mm:ss")} || end date order=${endDateOrder.format("YYYY/MM/DD h:mm:ss")}, end date view=${endDateView.format("YYYY/MM/DD h:mm:ss")}`)
@@ -734,10 +736,14 @@ class Dispatch {
     this.setText(order.order_id, startX + 4, textY, endX - startX, text_color)
 
     textY += this.getFontsize() + this.fontPaddingWide
-    this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
+    if (order.order_name) {
+      this.setText(`${order.order_name.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
+    }
 
     textY += this.getFontsize() + this.fontPaddingWide
-    this.setText(`${order.order_city.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
+    if (order.order_city) {
+      this.setText(`${order.order_city.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
+    }
 
     textY += this.getFontsize() + this.fontPaddingWide
     this.setText(order.order_type, startX + 4, textY, endX - startX, text_color)
@@ -814,6 +820,13 @@ class Dispatch {
   }
 
   findEmptyYSlot(startIndex, endIndex) {
+    if (!(startIndex in this.daysInView) || !(endIndex in this.daysInView)) {
+      if (this.debug) {
+        console.log(`startIndex=${startIndex}, or endIndex=${endIndex} not in daysInView`)
+      }
+      return
+    }
+
     const nextFreeStart = this.daysInView[startIndex].orders.length
     const nextFreeEnd = this.daysInView[endIndex].orders.length
 

@@ -42,7 +42,8 @@ describe('OrderListTemps.vue', () => {
   beforeEach(() => {
     actions = {
       getStatuscodes: () => [],
-      getMemberType: () => 'temps'
+      getMemberType: () => 'temps',
+      getAssignOrders: () => {}
     }
 
     store = new Vuex.Store({

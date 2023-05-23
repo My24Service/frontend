@@ -15,11 +15,11 @@ jest.mock('axios')
 const routes = [
 {
   path: '/hello/world',
-  name: 'employeeuser-add'
+  name: 'employee-add'
 },
 {
   path: '/hello/world',
-  name: 'employeeuser-edit'
+  name: 'employee-edit'
 },
 ]
 

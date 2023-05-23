@@ -17,6 +17,10 @@ const routes = [
   path: '/hello/world',
   name: 'studentuser-add'
 },
+  {
+    path: '/hello/world',
+    name: 'studentuser-detail'
+  },
 {
   path: '/hello/world',
   name: 'studentuser-edit'

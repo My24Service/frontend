@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { expect } from 'chai'
-import { shallowMount, mount } from '@vue/test-utils'
+import { shallowMount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
 import localVue from '../../index'

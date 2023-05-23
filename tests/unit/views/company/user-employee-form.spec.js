@@ -6,12 +6,15 @@ import flushPromises from 'flush-promises'
 import localVue from '../../index'
 import UserEmployeeForm from '../../../../src/views/company/UserEmployeeForm.vue'
 import userEmployeeResponse from '../../fixtures/user-employee'
+import branchesResponse from '../../fixtures/branches'
 import Vuex from "vuex";
 
 jest.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
+    case '/company/branch/?page=1':
+      return Promise.resolve(branchesResponse)
     case '/company/employeeuser/1/':
       return Promise.resolve(userEmployeeResponse)
     default:

@@ -54,7 +54,8 @@ describe('OrderList.vue temps', () => {
     actions = {
       getStatuscodes: () => [],
       getMemberType: () => 'temps',
-      setUnacceptedCount: () => null
+      setUnacceptedCount: () => null,
+      getAssignOrders: () => {}
     }
 
     store = new Vuex.Store({
@@ -101,7 +102,8 @@ describe('OrderList.vue maintenance', () => {
     actions = {
       getStatuscodes: () => [],
       getMemberType: () => 'maintenance',
-      setUnacceptedCount: () => null
+      setUnacceptedCount: () => null,
+      getAssignOrders: () => {},
     }
 
     store = new Vuex.Store({

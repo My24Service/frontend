@@ -78,7 +78,9 @@ export default {
       try {
         const data = await timeSheetModel.list()
         this.materials = data.materials
-        this.$refs['user-hours-detail-data'].processData(data)
+        if ('user-hours-detail-data' in this.$refs && typeof this.$refs['user-hours-detail-data'].processData === "function") {
+          this.$refs['user-hours-detail-data'].processData(data)
+        }
         this.isLoading = false
       } catch(error) {
         console.log('error fetching timesheet details', error)

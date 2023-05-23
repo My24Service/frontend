@@ -63,7 +63,7 @@ class My24 extends BaseModel {
 
   getStatuscode(statuscodes, status) {
     if (!status) {
-      console.log('getStatuscode: no status, return')
+      // console.log('getStatuscode: no status, return')
       return null
     }
 
@@ -109,27 +109,28 @@ class My24 extends BaseModel {
   }
 
   hasAccessToModule(config) {
+    const debug = false
     // console.log(config)
 
     // just pages like / and /no-access
     if (config.lenParts === 1) {
-      console.debug(`allowed: only one route part (${config.part})`)
+      if (debug) console.debug(`allowed: only one route part (${config.part})`)
       return true;
     }
 
     // members exception
     if ((config.isStaff || config.isSuperuser) && config.module === 'members') {
-      console.debug(`allowed: member exception (module=${config.module})`)
+      if (debug) console.debug(`allowed: member exception (module=${config.module})`)
       return true;
     }
 
     if (!(config.module in config.contract)) {
-      console.debug(`not allowed: module not in contract (module=${config.module})`)
+      if (debug) console.debug(`not allowed: module not in contract (module=${config.module})`)
       return false;
     }
 
     if (!config.part) {
-      console.debug(`allowed: no part (module=${config.module})`)
+      if (debug) console.debug(`allowed: no part (module=${config.module})`)
       return true;
     }
 
@@ -138,7 +139,7 @@ class My24 extends BaseModel {
       'planning-users', 'employee-users'
     ]
     if (parts_always_allowed.indexOf(config.part) !== -1) {
-      console.debug(`allowed: part "${config.part}" in always allowed (${parts_always_allowed.join('/')})`)
+      if (debug) console.debug(`allowed: part "${config.part}" in always allowed (${parts_always_allowed.join('/')})`)
       return true;
     }
 
@@ -146,13 +147,13 @@ class My24 extends BaseModel {
       const allowed_staff = ['members', 'contracts', 'deleted-members', 'modules', 'module-parts']
 
       if (allowed_staff.indexOf(config.part) !== -1) {
-        console.debug('allowed because member or staff and member', config.part)
+        if (debug) console.debug('allowed because member or staff and member', config.part)
         return true;
       }
     }
 
     const contract_result = config.contract[config.module].indexOf(config.part) !== -1;
-    console.debug(`end of hasAccessToModule, config.part=${config.part}, contract_result=${contract_result}`)
+    if (debug) console.debug(`end of hasAccessToModule, config.part=${config.part}, contract_result=${contract_result}`)
     return contract_result
   }
 
