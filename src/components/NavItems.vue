@@ -3,9 +3,21 @@
     <b-navbar-nav ref="nav-items">
       <b-nav-item
         :active="isActive('orders')"
-        v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer)"
+        v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
         to="/orders/orders">{{ $trans('Orders') }}
         <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
+      </b-nav-item>
+
+      <!-- dashboard for customer users -->
+      <div
+        v-if="showCustomerDashBoard"
+        class="main-nav-divider">
+        &nbsp;|&nbsp;
+      </div>
+      <b-nav-item
+        :active="isActive('customers')"
+        v-if="showCustomerDashBoard"
+        to="/customers/dashboard">{{ $trans('Dashboard') }}
       </b-nav-item>
 
       <!-- equipment -->
@@ -18,6 +30,18 @@
         :active="isActive('equipment')"
         v-if="showEquipment"
         to="/equipment/equipment">{{ $trans('Equipment') }}
+      </b-nav-item>
+
+      <!-- dashboard for branch employees -->
+      <div
+        v-if="showBranchEmployeeDashBoard"
+        class="main-nav-divider">
+        &nbsp;|&nbsp;
+      </div>
+      <b-nav-item
+        :active="isActive('company')"
+        v-if="showBranchEmployeeDashBoard"
+        to="/company/employee-dashboard">{{ $trans('Dashboard') }}
       </b-nav-item>
 
       <!-- customers -->
@@ -67,6 +91,7 @@
         &nbsp;|&nbsp;
       </div>
  -->
+
       <b-nav-item
         :active="isActive('company')"
         v-if="showCompany"
@@ -102,10 +127,16 @@ export default {
     }
   },
   computed: {
+    showCustomerDashBoard() {
+      return !this.hasBranches && this.isCustomer
+    },
+    showBranchEmployeeDashBoard() {
+      return this.hasBranches && this.isBranchEmployee
+    },
     showCustomers() {
       return !this.hasBranches && (
         (this.hasCustomers && this.isPlanning) ||
-        this.hasOrders && (this.isPlanning || this.isStaff || this.isSuperuser || this.isCustomer)
+        this.hasOrders && (this.isPlanning || this.isStaff || this.isSuperuser)
       );
     },
     showEquipment() {
@@ -118,7 +149,7 @@ export default {
       return this.hasMobile && (this.isPlanning || this.isStaff || this.isSuperuser)
     },
     showCompany() {
-      return !this.isCustomer;
+      return !this.isCustomer && !this.isEmployee;
     },
     showMembers() {
       return this.hasMembers;

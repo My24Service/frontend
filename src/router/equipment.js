@@ -6,6 +6,7 @@ import LocationForm from '../views/equipment/LocationForm.vue'
 
 import SubNavEquipment from "../components/SubNavEquipment";
 import TheAppLayout from "../components/TheAppLayout";
+import {AUTH_LEVELS} from "../constants";
 
 export default [
   {
@@ -14,6 +15,7 @@ export default [
     // equipment
     children: [
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'equipment-equipment-list',
         path: '/equipment/equipment',
         components: {
@@ -26,6 +28,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'equipment-equipment-edit',
         path: '/equipment/equipment/form/:pk',
         components: {
@@ -38,6 +41,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'equipment-equipment-add',
         path: '/equipment/equipment/form',
         components: {
@@ -51,6 +55,7 @@ export default [
       },
       // locations
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'equipment-location-list',
         path: '/equipment/locations',
         components: {
@@ -63,6 +68,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'equipment-location-edit',
         path: '/equipment/locations/form/:pk',
         components: {
@@ -75,6 +81,7 @@ export default [
         },
       },
       {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'equipment-location-add',
         path: '/equipment/locations/form',
         components: {

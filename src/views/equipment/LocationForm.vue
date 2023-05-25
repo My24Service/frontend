@@ -4,7 +4,7 @@
       <b-form>
         <h2 v-if="isCreate">{{ $trans('New location') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit location') }}</h2>
-        <b-row v-if="!hasBranches">
+        <b-row v-if="!hasBranches && !isCustomer">
           <b-col cols="12" role="group">
             <b-form-group
               label-size="sm"
@@ -42,7 +42,7 @@
             </b-form-group>
           </b-col>
         </b-row>
-        <b-row v-if="hasBranches">
+        <b-row v-if="hasBranches && !isEmployee">
           <b-col cols="12" role="group">
             <b-form-group
               label-size="sm"
@@ -225,6 +225,15 @@
             <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
             </b-button>
+            <b-button
+              @click="submitFormBulk"
+              :disabled="buttonDisabled"
+              type="button"
+              variant="success"
+              v-if="isCreate"
+            >
+              {{ $trans('Bulk') }}
+            </b-button>
           </footer>
         </div>
       </b-form>
@@ -274,7 +283,7 @@ export default {
     }
   },
   validations() {
-    if (!this.hasBranches) {
+    if (!this.hasBranches && !this.isCustomer) {
       return {
         location: {
           customer: {
@@ -287,17 +296,27 @@ export default {
       }
     }
 
+    if (this.hasBranches && !this.isEmployee) {
+      return {
+        location: {
+          branch: {
+            required
+          },
+          name: {
+            required,
+          },
+        }
+      }
+    }
+
+    // customer or employee
     return {
       location: {
-        branch: {
-          required
-        },
         name: {
           required,
         },
       }
     }
-
   },
   computed: {
     isCreate() {
@@ -354,6 +373,12 @@ export default {
     },
 
     async submitForm() {
+      await this._submitForm(false)
+    },
+    async submitFormBulk() {
+      await this._submitForm(true)
+    },
+    async _submitForm(isBulk) {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -370,7 +395,17 @@ export default {
           this.infoToast(this.$trans('Created'), this.$trans('Location has been created'))
           this.buttonDisabled = false
           this.isLoading = false
-          this.$router.go(-1)
+
+          if (isBulk) {
+            let empty = locationModel.getFields()
+            empty.branch = this.location.branch
+            empty.customer = this.location.customer
+            this.location = empty
+            this.v$.$reset()
+            this.$refs.name.$el.focus()
+          } else {
+            this.$router.go(-1)
+          }
         } catch(error) {
           console.log('Error creating location', error)
           this.errorToast(this.$trans('Error creating location'))
@@ -399,9 +434,10 @@ export default {
 
       try {
         this.location = await locationModel.detail(this.pk)
-        if (this.hasBranches) {
+        if (this.hasBranches && !this.isEmployee) {
           this.branch = await branchModel.detail(this.location.branch)
-        } else {
+        }
+        if (!this.hasBranches && !this.isCustomer) {
           this.customer = await customerModel.detail(this.location.customer)
         }
         this.isLoading = false

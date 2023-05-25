@@ -59,7 +59,9 @@
           </div>
         </template>
         <template #cell(id)="data">
-          <h4>{{ data.item.name }}</h4>
+          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
+            {{ data.item.name }}, {{ data.item.city }}, {{ data.item.country_code }}
+          </router-link><br/>
           <span v-if="data.item.contact && data.item.contact.trim() !== ''">
               <b>{{ $trans('Contact') }}</b>: {{ data.item.contact }}<br/>
           </span>

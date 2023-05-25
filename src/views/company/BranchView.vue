@@ -1,65 +1,53 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-detail">
-      <div class="customer-details" v-if="!isCustomer">
+      <div class="customer-details" v-if="!isBranchEmployee">
         <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
         <b-row align-h="center">
-          <h2>{{ customer.name }}</h2>
+          <h2>{{ branch.name }}</h2>
         </b-row>
         <b-row>
           <b-col cols="6">
             <b-table-simple>
               <b-tr>
                 <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
-                <b-td>{{ customer.name }}</b-td>
+                <b-td>{{ branch.name }}</b-td>
               </b-tr>
               <b-tr>
                 <b-td><strong>{{ $trans('Address') }}:</strong></b-td>
-                <b-td>{{ customer.address }}</b-td>
+                <b-td>{{ branch.address }}</b-td>
               </b-tr>
               <b-tr>
                 <b-td><strong>{{ $trans('Postal') }}:</strong></b-td>
-                <b-td>{{ customer.postal }}</b-td>
+                <b-td>{{ branch.postal }}</b-td>
               </b-tr>
               <b-tr>
                 <b-td><strong>{{ $trans('City') }}:</strong></b-td>
-                <b-td>{{ customer.city }}</b-td>
+                <b-td>{{ branch.city }}</b-td>
               </b-tr>
               <b-tr>
                 <b-td><strong>{{ $trans('Country') }}:</strong></b-td>
-                <b-td>{{ customer.country_code }}</b-td>
-              </b-tr>
-              <b-tr>
-                <b-td><strong>{{ $trans('Customer ID') }}:</strong></b-td>
-                <b-td>{{ customer.customer_id }}</b-td>
+                <b-td>{{ branch.country_code }}</b-td>
               </b-tr>
             </b-table-simple>
           </b-col>
           <b-col cols="6">
             <b-table-simple>
               <b-tr>
-                <b-td><strong>{{ $trans('Ext. identifier') }}:</strong></b-td>
-                <b-td>{{ customer.external_identifier }}</b-td>
-              </b-tr>
-              <b-tr>
                 <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
-                <b-td>{{ customer.email }}</b-td>
+                <b-td>{{ branch.email }}</b-td>
               </b-tr>
               <b-tr>
                 <b-td><strong>{{ $trans('Tel.') }}:</strong></b-td>
-                <b-td>{{ customer.tel }}</b-td>
+                <b-td>{{ branch.tel }}</b-td>
               </b-tr>
               <b-tr>
                 <b-td><strong>{{ $trans('Mobile') }}:</strong></b-td>
-                <b-td>{{ customer.mobile }}</b-td>
+                <b-td>{{ branch.mobile }}</b-td>
               </b-tr>
               <b-tr>
                 <b-td><strong>{{ $trans('Contact') }}:</strong></b-td>
-                <b-td>{{ customer.contact }}</b-td>
-              </b-tr>
-              <b-tr>
-                <b-td><strong>{{ $trans('Remarks') }}:</strong></b-td>
-                <b-td>{{ customer.remarks }}</b-td>
+                <b-td>{{ branch.contact }}</b-td>
               </b-tr>
             </b-table-simple>
           </b-col>
@@ -70,105 +58,6 @@
         v-if="!isLoading"
         ref="order-stats"
       />
-
-      <div class="app-grid" v-if="!isCustomer">
-        <b-row align-h="center">
-          <b-col cols="10">
-            <b-row align-h="center">
-              <h3>{{ $trans("Maintenance contracts") }}</h3>
-            </b-row>
-            <b-table
-              id="customer-maintenance-contracts-table"
-              small
-              :busy='isLoading'
-              :fields="maintenanceContractFields"
-              :items="maintenanceContracts"
-              responsive="md"
-              class="data-table"
-            >
-              <template #cell(contract)="data">
-                <b-row>
-                  <b-col cols="5">
-                    <table class="totals">
-                      <tr>
-                        <td><strong>{{ $trans('Name') }}:</strong></td>
-                        <td>{{ data.item.name }}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>{{ $trans('Contract value') }}:</strong></td>
-                        <td>EUR {{ data.item.contract_value }}</td>
-                      </tr>
-                    </table>
-                  </b-col>
-                  <b-col cols="4">
-                    <table class="totals">
-                      <tr>
-                        <td><strong>{{ $trans('Created orders') }}</strong></td>
-                        <td>{{ data.item.created_orders}}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
-                        <td>{{ data.item.num_order_equipment}}</td>
-                      </tr>
-                    </table>
-                  </b-col>
-                  <b-col cols="3">
-                    <div class="float-right">
-                      <span class="button-container">
-                        <b-button
-                          class="btn btn-outline-primary"
-                          :to="{name: 'order-add-maintenance'}"
-                          size="sm"
-                          type="button"
-                          variant="outline-primary"
-                        >
-                          {{ $trans('Create order') }}
-                        </b-button>
-                      </span>
-
-                      <span class="button-container">
-                        <b-button
-                          :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}"
-                          class="btn btn-outline-secondary"
-                          size="sm"
-                          type="button"
-                          variant="outline-secondary"
-                        >
-                          {{ $trans('Edit') }}
-                        </b-button>
-                      </span>
-                    </div>
-                  </b-col>
-                </b-row>
-              </template>
-            </b-table>
-            <b-row align-h="end">
-              <span class="button-container">
-                <b-button
-                  class="btn btn-outline-secondary"
-                  :to="{name: 'maintenance-contract-add'}"
-                  size="sm"
-                  type="button"
-                  variant="outline-secondary"
-                >
-                  {{ $trans('New') }}
-                </b-button>
-              </span>
-              <span class="button-container">
-                <b-button
-                  class="btn btn-outline-secondary"
-                  :to="{name: 'maintenance-contracts'}"
-                  size="sm"
-                  type="button"
-                  variant="outline-secondary"
-                >
-                  {{ $trans('Manage >>') }}
-                </b-button>
-              </span>
-            </b-row>
-          </b-col>
-        </b-row>
-      </div>
 
       <div class="app-grid">
         <b-row align-h="center">
@@ -185,17 +74,11 @@
               responsive="md"
               class="data-table"
             >
-              <template #cell(customer)="data">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </template>
-              <template #cell(branch)="data">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </template>
               <template #cell(icons)="data">
                 <div class="h2 float-right">
                   <span class="button-container">
                     <b-button
-                      :to="{name: 'customers-equipment-edit', params: {pk: data.item.id}}"
+                      :to="{name: 'equipment-equipment-edit', params: {pk: data.item.id}}"
                       class="btn btn-outline-secondary"
                       size="sm"
                       type="button"
@@ -211,7 +94,7 @@
               <span class="button-container">
                 <b-button
                   class="btn btn-outline-secondary"
-                  :to="{name: 'customers-equipment-add'}"
+                  :to="{name: 'equipment-equipment-add'}"
                   size="sm"
                   type="button"
                   variant="outline-secondary"
@@ -222,7 +105,7 @@
               <span class="button-container">
                 <b-button
                   class="btn btn-outline-secondary"
-                  :to="{name: 'customers-equipment-list'}"
+                  :to="{name: 'equipment-equipment-list'}"
                   size="sm"
                   type="button"
                   variant="outline-secondary"
@@ -237,7 +120,7 @@
               <h3>{{ $trans("Locations") }}</h3>
             </b-row>
             <b-table
-              id="customer-location-table"
+              id="branch-location-table"
               small
               :busy='isLoading'
               :fields="locationFields"
@@ -245,17 +128,11 @@
               responsive="md"
               class="data-table"
             >
-              <template #cell(customer)="data">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </template>
-              <template #cell(branch)="data">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </template>
               <template #cell(icons)="data">
                 <div class="h2 float-right">
                   <span class="button-container">
                     <b-button
-                      :to="{name: 'customers-location-edit', params: {pk: data.item.id}}"
+                      :to="{name: 'equipment-location-edit', params: {pk: data.item.id}}"
                       class="btn btn-outline-secondary"
                       size="sm"
                       type="button"
@@ -271,7 +148,7 @@
               <span class="button-container">
                 <b-button
                   class="btn btn-outline-secondary"
-                  :to="{name: 'customers-location-add'}"
+                  :to="{name: 'equipment-location-add'}"
                   size="sm"
                   type="button"
                   variant="outline-secondary"
@@ -282,7 +159,7 @@
               <span class="button-container">
                 <b-button
                   class="btn btn-outline-secondary"
-                  :to="{name: 'customers-location-list'}"
+                  :to="{name: 'equipment-location-list'}"
                   size="sm"
                   type="button"
                   variant="outline-secondary"
@@ -363,9 +240,8 @@
 </template>
 
 <script>
-import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
 import orderPastModel from '../../models/orders/OrderPast.js'
-import customerModel from '../../models/customer/Customer.js'
+import branchModel from '../../models/company/Branch.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -392,7 +268,7 @@ export default {
       isLoading: false,
       orderPastModel,
       buttonDisabled: false,
-      customer: customerModel.fields,
+      branch: branchModel.fields,
       orders: [],
       orderPastFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -400,48 +276,30 @@ export default {
       ],
       breadcrumb: [
         {
-          text: this.$trans('Customers'),
-          to: {name: 'customer-list'}
+          text: this.$trans('Branches'),
+          to: {name: 'company-branches'}
         },
         {
           text: this.$trans('Detail'),
           active: true
         },
       ],
-      maintenanceContracts: [],
-      maintenanceContractFields: [
-        {key: 'contract', label: this.$trans('Contract')},
-      ],
 
       locations: [],
-      locationFieldsCustomer: [
+      locationFields: [
         {key: 'name', label: this.$trans('Name')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons', label: ""}
       ],
-      locationFieldsBranch: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
-        {key: 'icons', label: ""}
-      ],
-      locationFields: [],
 
       equipment: [],
-      equipmentFieldsCustomer: [
+      equipmentFields: [
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'brand', label: this.$trans('Brand')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'icons', label: ""}
       ],
-      equipmentFieldsBranch: [
-        {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'icons', label: ""}
-      ],
-      equipmentFields: [],
     }
   },
   props: {
@@ -473,44 +331,37 @@ export default {
     async loadData() {
       this.isLoading = true
 
-      try {
-        if (!this.isCustomer) {
-          await this.loadHistory()
-          await this.loadMaintenanceContracts()
-          this.customer = await customerModel.detail(this.pk)
+      await this.loadHistory()
 
-          const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer(this.pk)
-          const monthsStatsData = await orderModel.getMonthsStatsCustomer(this.pk)
-          const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsCustomer(this.pk)
-          const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsCustomer(this.pk)
+      try {
+        if (!this.isBranchEmployee) {
+          this.branch = await branchModel.detail(this.pk)
+
+          const orderTypeStatsData = await orderModel.getOrderTypesStatsBranch(this.pk)
+          const monthsStatsData = await orderModel.getMonthsStatsBranch(this.pk)
+          const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsBranch(this.pk)
+          const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsBranch(this.pk)
+
+          locationModel.setListArgs(`branch=${this.pk}`)
+          let data = await locationModel.list()
+          this.locations = data.results
+
+          equipmentModel.setListArgs(`branch=${this.pk}`)
+          data = await equipmentModel.list()
+          this.equipment = data.results
 
           this.$refs['order-stats'].render(
             orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
           )
 
-          locationModel.setListArgs(`customer=${this.pk}`)
-          let data = await locationModel.list()
-          this.locations = data.results
-
-          equipmentModel.setListArgs(`customer=${this.pk}`)
-          data = await equipmentModel.list()
-          this.equipment = data.results
-
           this.isLoading = false
-
           return
         }
 
-        await this.loadHistoryCustomer()
-
-        const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer()
-        const monthsStatsData = await orderModel.getMonthsStatsCustomer()
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsCustomer()
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsCustomer()
-
-        this.$refs['order-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-        )
+        const orderTypeStatsData = await orderModel.getOrderTypesStatsBranch()
+        const monthsStatsData = await orderModel.getMonthsStatsBranch()
+        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsBranch()
+        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsBranch()
 
         let data = await locationModel.list()
         this.locations = data.results
@@ -518,43 +369,19 @@ export default {
         data = await equipmentModel.list()
         this.equipment = data.results
 
-        this.isLoading = false
-
-        // use this in customer dashboard
-        // const bla = await orderModel.getTopXCustomers()
+        this.$refs['order-stats'].render(
+          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
+        )
 
       } catch(error) {
-        console.log('error fetching orders or customer detail', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        console.log('error fetching branch detail data', error)
+        this.errorToast(this.$trans('Error fetching branch detail'))
         this.isLoading = false
       }
     },
 
-    async loadMaintenanceContracts() {
-      try {
-        const data = await maintenanceContractModel.list()
-        this.maintenanceContracts = data.results
-      } catch(error) {
-        console.log('error fetching maintenance contracts', error)
-        this.errorToast(this.$trans('Error fetching maintenance contracts'))
-        this.isLoading = false
-      }
-    },
-
-    async loadHistoryCustomer() {
-      try {
-        const results = await orderPastModel.list()
-        this.orders = results.results
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
-        this.isLoading = false
-      }
-    },
     async loadHistory() {
       try {
-        orderPastModel.setListArgs(`customer_relation=${this.pk}`)
         const results = await orderPastModel.list()
         this.orders = results.results
         this.isLoading = false
@@ -566,13 +393,6 @@ export default {
     }
   },
   created() {
-    if (this.hasBranches) {
-      this.locationFields = this.locationFieldsBranch
-      this.equipmentFields = this.equipmentFieldsBranch
-    } else {
-      this.locationFields = this.locationFieldsCustomer
-      this.equipmentFields = this.equipmentFieldsCustomer
-    }
     this.loadData()
   },
   async mounted () {
@@ -581,9 +401,6 @@ export default {
 </script>
 
 <style scoped>
-table.totals tr:first-child td {
-  border-top: none;
-}
 span.button-container {
   padding: 8px;
 }

@@ -56,6 +56,9 @@ import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
 
 import TimeRegistration from '../views/company/TimeRegistration.vue'
+import CustomerView from "../views/customer/CustomerView";
+import SubNavCustomers from "../components/SubNavCustomers";
+import BranchView from "../views/company/BranchView";
 
 
 export default [
@@ -63,18 +66,31 @@ export default [
   path: '/company',
   component: TheAppLayout,
   children: [
-      {
-        name: 'company-dashboard',
-        path: '/company/dashboard',
-        components: {
-          'app-content': Dashboard,
-          'app-subnav': SubNavCompany
-        },
-        props: {
-          'app-content': {},
-          'app-subnav': {}
-        },
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+      name: 'employee-dashboard',
+      path: '/company/employee-dashboard',
+      components: {
+        'app-content': BranchView,
+        // 'app-subnav': {}
       },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'company-dashboard',
+      path: '/company/dashboard',
+      components: {
+        'app-content': Dashboard,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
     {
       name: 'company-info',
       path: '/company/company/info',
@@ -652,6 +668,18 @@ export default [
       },
       props: {
         'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'company-branch-view',
+      path: '/company/branches/:pk',
+      components: {
+        'app-content': BranchView,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
         'app-subnav': {}
       },
     },

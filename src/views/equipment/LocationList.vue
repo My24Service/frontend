@@ -59,10 +59,14 @@
           </div>
         </template>
         <template #cell(customer)="data">
-          {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
+            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          </router-link><br/>
         </template>
         <template #cell(branch)="data">
-          {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
+            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          </router-link><br/>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -127,15 +131,27 @@ export default {
       locationPk: null,
       isLoading: false,
       locations: [],
-      fieldsCustomer: [
+      fieldsCustomerPlanning: [
         {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Name'), sortable: true},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
-      fieldsBranch: [
+      fieldsBranchPlanning: [
         {key: 'branch', label: this.$trans('Branch')},
+        {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'icons'}
+      ],
+      fieldsCustomerNonPlanning: [
+        {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'icons'}
+      ],
+      fieldsBranchNonPlanning: [
         {key: 'name', label: this.$trans('Name'), sortable: true},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
@@ -146,9 +162,17 @@ export default {
   },
   created() {
     if (this.hasBranches) {
-      this.fields = this.fieldsBranch
+      if (this.isEmployee) {
+        this.fields = this.fieldsBranchNonPlanning
+      } else {
+        this.fields = this.fieldsBranchPlanning
+      }
     } else {
-      this.fields = this.fieldsCustomer
+      if (this.isCustomer) {
+        this.fields = this.fieldsCustomerNonPlanning
+      } else {
+        this.fields = this.fieldsCustomerPlanning
+      }
     }
     this.model.currentPage = this.$route.query.page || 1
     this.loadData()

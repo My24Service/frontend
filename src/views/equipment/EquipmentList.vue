@@ -59,10 +59,14 @@
           </div>
         </template>
         <template #cell(customer)="data">
-          {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}">
+            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          </router-link><br/>
         </template>
         <template #cell(branch)="data">
-          {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
+            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          </router-link><br/>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -129,16 +133,34 @@ export default {
       isLoading: false,
       equipmentObjects: [],
       equipmentFields: [],
-      equipmentFieldsCustomer: [
+      equipmentFieldsCustomerPlanning: [
         {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'brand', label: this.$trans('Brand')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
       ],
-      equipmentFieldsBranch: [
+      equipmentFieldsBranchPlanning: [
         {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'brand', label: this.$trans('Brand')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'icons'}
+      ],
+      equipmentFieldsCustomerNonPlanning: [
+        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'icons'}
+      ],
+      equipmentFieldsBranchNonPlanning: [
+        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
       ],
     }
@@ -148,9 +170,17 @@ export default {
     this.model.currentPage = this.$route.query.page || 1
 
     if (this.hasBranches) {
-      this.equipmentFields = this.equipmentFieldsBranch
+      if (this.isEmployee) {
+        this.equipmentFields = this.equipmentFieldsBranchNonPlanning
+      } else {
+        this.equipmentFields = this.equipmentFieldsBranchPlanning
+      }
     } else {
-      this.equipmentFields = this.equipmentFieldsCustomer
+      if (this.isCustomer) {
+        this.equipmentFields = this.equipmentFieldsCustomerNonPlanning
+      } else {
+        this.equipmentFields = this.equipmentFieldsCustomerPlanning
+      }
     }
 
     await this.loadData()

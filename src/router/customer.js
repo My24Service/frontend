@@ -21,61 +21,74 @@ import LocationList from '../views/equipment/LocationList.vue'
 import LocationForm from '../views/equipment/LocationForm.vue'
 
 import Calendar from '../views/customer/Calendar.vue'
-import SubNavEquipment from "../components/SubNavEquipment";
+import {AUTH_LEVELS} from "../constants";
 
 export default [
 {
   path: '/customers',
   component: TheAppLayout,
   children: [
-      {
-        name: 'customer-list',
-        path: '/customers/customers',
-        components: {
-          'app-content': CustomerList,
-          'app-subnav': SubNavCustomers
-        },
-        props: {
-          'app-content': {},
-          'app-subnav': {}
-        },
+    {
+      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      name: 'customer-dashboard',
+      path: '/customers/dashboard',
+      components: {
+        'app-content': CustomerView,
+        // 'app-subnav': {}
       },
-      {
-        name: 'customer-edit',
-        path: '/customers/customers/form/:pk',
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
-        components: {
-          'app-content': CustomerForm,
-          'app-subnav': SubNavCustomers
-        },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
       },
-      {
-        name: 'customer-add',
-        path: '/customers/customers/form',
-        components: {
-          'app-content': CustomerForm,
-          'app-subnav': SubNavCustomers
-        },
-        props: {
-          'app-content': {},
-          'app-subnav': {}
-        },
+    },
+    {
+      name: 'customer-list',
+      path: '/customers/customers',
+      components: {
+        'app-content': CustomerList,
+        'app-subnav': SubNavCustomers
       },
-      {
-        name: 'customer-view',
-        path: '/customers/customers/:pk',
-        components: {
-          'app-content': CustomerView,
-          'app-subnav': SubNavCustomers
-        },
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
       },
+    },
+    {
+      name: 'customer-edit',
+      path: '/customers/customers/form/:pk',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': CustomerForm,
+        'app-subnav': SubNavCustomers
+      },
+    },
+    {
+      name: 'customer-add',
+      path: '/customers/customers/form',
+      components: {
+        'app-content': CustomerForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'customer-view',
+      path: '/customers/customers/:pk',
+      components: {
+        'app-content': CustomerView,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
     // documents
     {
       name: 'customer-documents',

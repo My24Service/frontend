@@ -935,12 +935,6 @@ export default {
 
       isEditOrderLine: false,
 
-      maintenance_product_line_product: '',
-      maintenance_product_line_location: '',
-      maintenance_product_line_remarks: '',
-      maintenance_product_line_amount: '',
-      isEditMaintenanceProductLine: false,
-
       info: '',
       isEditInfoLine: false,
 
@@ -952,14 +946,6 @@ export default {
       ],
       infoLineFields: [
         { key: 'info', label: this.$trans('Info') },
-        { key: 'icons', label: '' }
-      ],
-      maintenanceProductLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'amount', label: this.$trans('Amount') },
-        { key: 'done_needed', label: this.$trans('Needed / created') },
-        { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       documentFields: [

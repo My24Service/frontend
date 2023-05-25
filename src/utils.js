@@ -11,39 +11,48 @@ function isEmpty(obj) {
 }
 
 function getIsStaff(store) {
-  return store.state.userInfo.hasOwnProperty('is_staff') && store.state.userInfo.is_staff
+  return store.state.userInfo.submodel === 'staff' && store.state.userInfo.user.is_staff
+  // return store.state.userInfo.hasOwnProperty('is_staff') && store.state.userInfo.is_staff
 }
 
 function getIsSuperuser(store) {
-  return store.state.userInfo.hasOwnProperty('is_superuser') && store.state.userInfo.is_superuser
+  return store.state.userInfo.submodel === 'superuser' && store.state.userInfo.user.is_superuser
+  // return store.state.userInfo.hasOwnProperty('is_superuser') && store.state.userInfo.is_superuser
 }
 
 function getIsPlanning(store) {
-  return store.state.userInfo.hasOwnProperty('planning_user') && store.state.userInfo.planning_user
+  return store.state.userInfo.submodel === 'planning_user' && store.state.userInfo.user.planning_user
+  // return store.state.userInfo.hasOwnProperty('planning_user') && store.state.userInfo.planning_user
 }
 
 function getIsCustomer(store) {
-  return store.state.userInfo.hasOwnProperty('customer_user') && store.state.userInfo.customer_user
+  return store.state.userInfo.submodel === 'customer_user' && store.state.userInfo.user.customer_user
+  // return store.state.userInfo.hasOwnProperty('customer_user') && store.state.userInfo.customer_user
 }
 
 function getIsEngineer(store) {
-  return store.state.userInfo.hasOwnProperty('engineer') && store.state.userInfo.engineer
+  return store.state.userInfo.submodel === 'engineer' && store.state.userInfo.user.engineer
+  // return store.state.userInfo.hasOwnProperty('engineer') && store.state.userInfo.engineer
 }
 
 function getIsSales(store) {
-  return store.state.userInfo.hasOwnProperty('sales_user') && store.state.userInfo.sales_user
+  return store.state.userInfo.submodel === 'sales_user' && store.state.userInfo.user.sales_user
+  // return store.state.userInfo.hasOwnProperty('sales_user') && store.state.userInfo.sales_user
 }
 
 function getIsStudent(store) {
-  return store.state.userInfo.hasOwnProperty('student_user') && store.state.userInfo.student_user
+  return store.state.userInfo.submodel === 'student_user' && store.state.userInfo.user.student_user
+  // return store.state.userInfo.hasOwnProperty('student_user') && store.state.userInfo.student_user
 }
 
 function getIsEmployee(store) {
-  return store.state.userInfo.hasOwnProperty('employee_user') && store.state.userInfo.employee_user
+  return store.state.userInfo.submodel === 'employee_user' && store.state.userInfo.user.employee_user
+  // return store.state.userInfo.hasOwnProperty() && store.state.userInfo.employee_user
 }
 
 function getIsBranchEmployee(store) {
-  return store.state.userInfo.hasOwnProperty('employee_user') && store.state.userInfo.employee_user && store.state.userInfo.employee_user.branch
+  return store.state.userInfo.submodel === 'employee_user' && store.state.userInfo.user.employee_user && store.state.userInfo.user.employee_user.branch
+  // return store.state.userInfo.user.hasOwnProperty('employee_user') && store.state.userInfo.employee_user && store.state.userInfo.employee_user.branch
 }
 
 function getIsLoggedIn(store) {
@@ -71,6 +80,10 @@ function getUserAuthLevel(store) {
     return AUTH_LEVELS.PLANNING
   }
 
+  if (getIsEmployee(store)) {
+    return AUTH_LEVELS.EMPLOYEE
+  }
+
   if (getIsSuperuser(store)) {
     return AUTH_LEVELS.SUPERUSER
   }
@@ -83,32 +96,44 @@ function getUserAuthLevel(store) {
 function hasAccessRouteAuthLevel(authLevelNeeded, store) {
   const authLevelUser = getUserAuthLevel(store)
 
-  if (authLevelNeeded === AUTH_LEVELS.STAFF) {
-    return authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+  // TODO in the future use ONLY arrays?
+  // let needed = typeof authLevelNeeded === 'string' ? [ authLevelNeeded ] : authLevelNeeded
+  if (typeof authLevelNeeded === 'string') {
+    if (authLevelNeeded === AUTH_LEVELS.STAFF) {
+      return authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+    }
+
+    if (authLevelNeeded === AUTH_LEVELS.SUPERUSER) {
+      return authLevelUser === AUTH_LEVELS.SUPERUSER
+    }
+
+    if (authLevelNeeded === AUTH_LEVELS.PLANNING) {
+      return authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+    }
+
+    if (authLevelNeeded === AUTH_LEVELS.SALES) {
+      return authLevelUser === AUTH_LEVELS.SALES || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+    }
+
+    if (authLevelNeeded === AUTH_LEVELS.CUSTOMER) {
+      return authLevelUser === AUTH_LEVELS.CUSTOMER || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+    }
+
+    if (authLevelNeeded === AUTH_LEVELS.EMPLOYEE) {
+      return authLevelUser === AUTH_LEVELS.EMPLOYEE || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+    }
+
+    if (authLevelNeeded === AUTH_LEVELS.STUDENT) {
+      return authLevelUser === AUTH_LEVELS.STUDENT || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+    }
+
+    if (authLevelNeeded === AUTH_LEVELS.ENGINEER) {
+      return authLevelUser === AUTH_LEVELS.ENGINEER || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+    }
   }
 
-  if (authLevelNeeded === AUTH_LEVELS.SUPERUSER) {
-    return authLevelUser === AUTH_LEVELS.SUPERUSER
-  }
-
-  if (authLevelNeeded === AUTH_LEVELS.PLANNING) {
-    return authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-  }
-
-  if (authLevelNeeded === AUTH_LEVELS.SALES) {
-    return authLevelUser === AUTH_LEVELS.SALES || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-  }
-
-  if (authLevelNeeded === AUTH_LEVELS.CUSTOMER) {
-    return authLevelUser === AUTH_LEVELS.CUSTOMER || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-  }
-
-  if (authLevelNeeded === AUTH_LEVELS.STUDENT) {
-    return authLevelUser === AUTH_LEVELS.STUDENT || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
-  }
-
-  if (authLevelNeeded === AUTH_LEVELS.ENGINEER) {
-    return authLevelUser === AUTH_LEVELS.ENGINEER || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
+  if (typeof authLevelNeeded === 'object') {
+    return authLevelNeeded.indexOf(authLevelUser) !== -1 || authLevelUser === AUTH_LEVELS.PLANNING || authLevelUser === AUTH_LEVELS.STAFF || authLevelUser === AUTH_LEVELS.SUPERUSER
   }
 
   return false

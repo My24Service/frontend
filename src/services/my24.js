@@ -170,7 +170,7 @@ class My24 extends BaseModel {
   }
 
   isAllowed(userInfo) {
-    return !(!userInfo.planning_user && userInfo.is_staff === false && userInfo.is_superuser === false);
+    return !(!userInfo.user.planning_user && userInfo.user.is_staff === false && userInfo.user.is_superuser === false);
   }
 
 }

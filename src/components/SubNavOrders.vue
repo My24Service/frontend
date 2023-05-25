@@ -3,20 +3,20 @@
     <b-nav tabs>
       <b-nav-item
         :active="isActive('orders')"
-        v-if="isStaff || isSuperuser || (hasOrders && (isPlanning || isCustomer))"
+        v-if="isStaff || isSuperuser || (hasOrders && (isPlanning || isCustomer || isBranchEmployee))"
         :to="{ name: 'order-list' }">
         {{ $trans('Orders') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('orders-not-accepted')"
-        v-if="isStaff || isSuperuser || (hasNotAcceptedOrders && (isPlanning || isCustomer))"
+        v-if="isStaff || isSuperuser || (hasNotAcceptedOrders && (isPlanning || isCustomer || isBranchEmployee))"
         :to="{ name: 'orders-not-accepted' }">
         {{ $trans('Not accepted orders') }}
         <b-badge v-if="unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
       </b-nav-item>
       <b-nav-item
         :active="isActive('past-orders')"
-        v-if="isStaff || isSuperuser || (hasPastOrders && (isPlanning || isCustomer))"
+        v-if="isStaff || isSuperuser || (hasPastOrders && (isPlanning || isCustomer || isBranchEmployee))"
         :to="{ name: 'past-order-list' }">
         {{ $trans('Past orders') }}
       </b-nav-item>
@@ -40,13 +40,13 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('year-stats')"
-        v-if="isStaff || isSuperuser || (hasYearStats && (isPlanning || isSales || isCustomer))"
+        v-if="isStaff || isSuperuser || (hasYearStats && (isPlanning || isSales || isCustomer || isBranchEmployee))"
         :to="{ name: 'order-year-stats' }">
         {{ $trans('Year') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('month-stats')"
-        v-if="isStaff || isSuperuser || (hasMonthStats && (isPlanning || isSales || isCustomer))"
+        v-if="isStaff || isSuperuser || (hasMonthStats && (isPlanning || isSales || isCustomer || isBranchEmployee))"
         to="/orders/month-stats">
         {{ $trans('Month') }}
       </b-nav-item>
@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
+import { componentMixin } from '../utils.js'
 
 export default {
   mixins: [componentMixin],
@@ -71,7 +71,7 @@ export default {
   },
   computed: {
     hasOrders() {
-      return this.hasAccessToModule('orders', 'orders');
+      return this.hasAccessToModule('orders', 'orders')
     },
     hasNotAcceptedOrders() {
       return this.hasAccessToModule('orders', 'orders-not-accepted');

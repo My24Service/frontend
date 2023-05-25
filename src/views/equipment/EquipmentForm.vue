@@ -4,7 +4,7 @@
       <b-form>
         <h2 v-if="isCreate">{{ $trans('New equipment') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit equipment') }}</h2>
-        <b-row v-if="!hasBranches">
+        <b-row v-if="!hasBranches && !isCustomer">
           <b-col cols="12" role="group">
             <b-form-group
               label-size="sm"
@@ -42,7 +42,7 @@
             </b-form-group>
           </b-col>
         </b-row>
-        <b-row v-if="hasBranches">
+        <b-row v-if="hasBranches && !isEmployee">
           <b-col cols="12" role="group">
             <b-form-group
               label-size="sm"
@@ -327,6 +327,14 @@
               {{ $trans('Cancel') }}</b-button>
             <b-button @click="submitForm" type="button" variant="primary">
               {{ $trans('Submit') }}</b-button>
+            <b-button
+              @click="submitFormBulk"
+              type="button"
+              variant="success"
+              v-if="isCreate"
+            >
+              {{ $trans('Bulk') }}
+            </b-button>
           </footer>
         </div>
       </b-form>
@@ -344,6 +352,7 @@ import customerModel from '../../models/customer/Customer.js'
 import equipmentModel from '../../models/equipment/equipment.js'
 import branchModel from "../../models/company/Branch";
 import {componentMixin} from "../../utils";
+import locationModel from "../../models/equipment/location";
 
 export default {
   mixins: [componentMixin],
@@ -360,7 +369,7 @@ export default {
     },
   },
   validations() {
-    if (!this.hasBranches) {
+    if (!this.hasBranches && !this.isCustomer) {
       return {
         equipment: {
           customer: {
@@ -373,11 +382,22 @@ export default {
       }
     }
 
+    if (this.hasBranches && !this.isEmployee) {
+      return {
+        equipment: {
+          customer: {
+            required
+          },
+          name: {
+            required,
+          },
+        }
+      }
+    }
+
+    // customer or employee
     return {
       equipment: {
-        branch: {
-          required
-        },
         name: {
           required,
         },
@@ -457,6 +477,12 @@ export default {
     },
 
     async submitForm() {
+      await this._submitForm(false)
+    },
+    async submitFormBulk() {
+      await this._submitForm(true)
+    },
+    async _submitForm(isBulk) {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
@@ -471,7 +497,17 @@ export default {
           await equipmentModel.insert(this.equipment)
           this.infoToast(this.$trans('Created'), this.$trans('Equipment has been created'))
           this.isLoading = false
-          this.cancelForm()
+
+          if (isBulk) {
+            let empty = equipmentModel.getFields()
+            empty.branch = this.equipment.branch
+            empty.customer = this.equipment.customer
+            this.location = empty
+            this.v$.$reset()
+            this.$refs.name.$el.focus()
+          } else {
+            this.$router.go(-1)
+          }
         } catch(error) {
           console.log('Error creating equipment', error)
           this.errorToast(this.$trans('Error creating equipment'))
@@ -497,11 +533,13 @@ export default {
 
       try {
         this.equipment = await equipmentModel.detail(this.pk)
-        if (this.hasBranches) {
+        if (this.hasBranches && !this.isEmployee) {
           this.branch = await branchModel.detail(this.equipment.branch)
-        } else {
+        }
+        if (!this.hasBranches && !this.isCustomer) {
           this.customer = await customerModel.detail(this.equipment.customer)
         }
+
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)
