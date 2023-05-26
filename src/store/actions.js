@@ -61,14 +61,16 @@ export const actions = {
     parts.shift()
     const lenParts = parts.length
     const [mod, part] = parts
+    const isStaff = state.userInfo && state.userInfo.user ? state.userInfo.user.is_staff : false
+    const isSuperuser = state.userInfo && state.userInfo.user ? state.userInfo.user.is_superuser : false
 
     const result = my24.hasAccessToModule({
       contract: state.memberContract,
       module: mod,
       part,
       lenParts,
-      isStaff: state.userInfo.user.is_staff,
-      isSuperuser: state.userInfo.user.is_superuser
+      isStaff,
+      isSuperuser,
     })
 
     return new Promise((resolve) => {
