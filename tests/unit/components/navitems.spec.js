@@ -49,9 +49,10 @@ describe('Navitems.vue no staff & no superuser', () => {
     state = {
       memberContract: my24.getModelsFromString(resultCertainModules.userInfo.member_contract),
       userInfo: {
-        is_staff: false,
-        is_superuser: false,
-        customer_user: null
+        user: {
+          is_staff: false,
+          is_superuser: false,
+        }
       }
     }
 
@@ -95,7 +96,7 @@ describe('Navitems.vue no staff & no superuser', () => {
   })
 })
 
-describe('Navitems.vue no customer', () => {
+describe('Navitems.vue customer', () => {
   let state
   let store
   let actions
@@ -122,9 +123,14 @@ describe('Navitems.vue no customer', () => {
     state = {
       memberContract: my24.getModelsFromString(resultCertainModules.userInfo.member_contract),
       userInfo: {
-        is_staff: false,
-        is_superuser: false,
-        customer_user: 10
+        submodel: 'customer_user',
+        user: {
+          is_staff: false,
+          is_superuser: false,
+          customer_user: {
+            customer: 1
+          }
+        }
       }
     }
 
@@ -216,7 +222,133 @@ describe('Navitems.vue no customer', () => {
   })
 })
 
-describe('Navitems.vue staff & superuser', () => {
+describe('Navitems.vue branch employee', () => {
+  let state
+  let store
+  let actions
+  let getters
+
+  beforeEach(() => {
+    getters = {
+      getMemberHasBranches: () => true
+    }
+
+    actions = {
+      getIsStaff: () => {
+        return new Promise((resolve) => {
+          resolve(false)
+        })
+      },
+      getIsSuperuser: () => {
+        return new Promise((resolve) => {
+          resolve(false)
+        })
+      }
+    }
+
+    state = {
+      memberContract: my24.getModelsFromString(resultCertainModules.userInfo.member_contract),
+      userInfo: {
+        submodel: 'employee_user',
+        user: {
+          is_staff: false,
+          is_superuser: false,
+          employee_user: {
+            branch: 1
+          }
+        }
+      }
+    }
+
+    store = new Vuex.Store({
+      state,
+      actions,
+      getters
+    })
+  })
+
+  it('exists', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      store,
+      router,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.exists()).to.be.true
+  })
+
+  it('has 5 items', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      router,
+      store,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.element.children.length).to.eq(5)
+  })
+
+  it('contains Orders', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      router,
+      store,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.html()).to.contain('/orders')
+  })
+
+  it('does not contain Inventory', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      router,
+      store,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.html()).not.to.contain('/inventory')
+  })
+
+  it('does not contain members', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      router,
+      store,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.html()).not.to.contain('/members')
+  })
+})
+
+describe('Navitems.vue staff', () => {
   let state
   let store
   let actions
@@ -243,8 +375,86 @@ describe('Navitems.vue staff & superuser', () => {
     state = {
       memberContract: my24.getModelsFromString(resultCertainModules.userInfo.member_contract),
       userInfo: {
-        is_staff: true,
-        is_superuser: true
+        submodel: 'staff',
+        user: {
+          is_staff: true,
+          is_superuser: false
+        }
+      }
+    }
+
+    store = new Vuex.Store({
+      state,
+      actions,
+      getters
+    })
+  })
+
+  it('has 8 items', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      router,
+      store,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.element.children.length).to.eq(9)
+  })
+
+  it('does contain members', async () => {
+    const wrapper = shallowMount(NavItems, {
+      localVue,
+      router,
+      store,
+      mocks: {
+        $trans: () => {}
+      }
+    })
+
+    await flushPromises()
+
+    const navbar = wrapper.findComponent({ ref: 'nav-items' })
+    expect(navbar.html()).to.contain('/members')
+  })
+})
+
+describe('Navitems.vue superuser', () => {
+  let state
+  let store
+  let actions
+  let getters
+
+  beforeEach(() => {
+    getters = {
+      getMemberHasBranches: () => false
+    }
+
+    actions = {
+      getIsStaff: () => {
+        return new Promise((resolve) => {
+          resolve(true)
+        })
+      },
+      getIsSuperuser: () => {
+        return new Promise((resolve) => {
+          resolve(true)
+        })
+      }
+    }
+
+    state = {
+      memberContract: my24.getModelsFromString(resultCertainModules.userInfo.member_contract),
+      userInfo: {
+        submodel: 'superuser',
+        user: {
+          is_staff: true,
+          is_superuser: true
+        }
       }
     }
 
