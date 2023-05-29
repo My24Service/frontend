@@ -588,6 +588,7 @@ import AwesomeDebouncePromise from "awesome-debounce-promise";
 import equipmentModel from "../../models/equipment/equipment";
 import locationModel from "../../models/equipment/location";
 import Multiselect from "vue-multiselect";
+import orderlineModel from "../../models/orders/Orderline";
 
 export default {
   setup() {
@@ -659,6 +660,7 @@ export default {
 
       isEditEquipment: false,
 
+      deletedOrderlines: [],
     }
   },
   validations() {
@@ -826,6 +828,7 @@ export default {
     },
     // order lines
     deleteOrderLine(index) {
+      this.deletedOrderlines.push(this.order.orderlines[index])
       this.order.orderlines.splice(index, 1)
     },
     editOrderLine(item, index) {
@@ -896,9 +899,32 @@ export default {
       if (this.isCreate) {
         this.order.customer_order_accepted = false
 
-        let newOrder
         try {
-          await orderModel.insert(this.order)
+          const orderlines = this.order.orderlines
+          this.order.orderlines = []
+
+          const newOrder = await orderModel.insert(this.order)
+
+          // add orderlines
+          try {
+            for (const orderline of orderlines) {
+              orderline.order = newOrder.id
+              await orderlineModel.insert(orderline)
+            }
+          } catch(error) {
+            console.log('Error creating infolines', error)
+          }
+
+          // insert documents
+          try {
+            for (const document of this.documents) {
+              document.order = newOrder.id
+              await documentModel.insert(document)
+            }
+          } catch(error) {
+            console.log('Error creating documents', error)
+          }
+
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -911,21 +937,32 @@ export default {
           return
         }
 
-        // insert documents
-        try {
-          for (const document of this.documents) {
-            document.order = newOrder.id
-            await documentModel.insert(document)
-          }
-        } catch(error) {
-          console.log('Error creating documents', error)
-        }
-
         return
       }
 
       try {
+        const orderlines = this.order.orderlines
+        this.order.orderlines = []
         await orderModel.update(this.pk, this.order)
+
+        for (let orderline of orderlines) {
+          orderline.order = this.pk
+          if (orderline.id) {
+            await orderlineModel.update(orderline.id, orderline)
+            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+          } else {
+            await orderlineModel.insert(orderline)
+            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+          }
+        }
+
+        for (const orderline of this.deletedOrderlines) {
+          if (orderline.id) {
+            await orderlineModel.delete(orderline.id)
+            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+          }
+        }
+
         this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false

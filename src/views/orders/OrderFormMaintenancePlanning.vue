@@ -883,6 +883,8 @@ import branchModel from "../../models/company/Branch";
 import timeRegistrationModel from "../../models/company/TimeRegistration";
 import equipmentModel from "../../models/equipment/equipment";
 import locationModel from "../../models/equipment/location";
+import orderlineModel from "../../models/orders/Orderline";
+import infolineModel from "../../models/orders/Infoline";
 
 export default {
   mixins: [componentMixin],
@@ -986,6 +988,9 @@ export default {
       newLocationName: null,
 
       isEditEquipment: false,
+
+      deletedOrderlines: [],
+      deletedInfolines: [],
     }
   },
   validations() {
@@ -1219,6 +1224,7 @@ export default {
     },
     // order lines
     deleteOrderLine(index) {
+      this.deletedOrderlines.push(this.order.orderlines[index])
       this.order.orderlines.splice(index, 1)
     },
     editOrderLine(item, index) {
@@ -1269,6 +1275,7 @@ export default {
 
     // info lines
     deleteInfoLine(index) {
+      this.deletedInfolines.push(this.order.infolines[index])
       this.order.infolines.splice(index, 1)
     },
     editInfoLine(item, index) {
@@ -1294,11 +1301,6 @@ export default {
         info: this.info,
       })
       this.emptyInfoLine()
-    },
-
-    // maintenance product lines
-    deleteMaintenanceProductLine(index) {
-      this.order.maintenance_product_lines.splice(index, 1)
     },
 
     engineerLabel({ full_name }) {
@@ -1387,10 +1389,37 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
-      let newOrder
+      let newOrder;
       if (this.isCreate) {
         try {
+          const orderlines = this.order.orderlines
+          this.order.orderlines = []
+
+          const infolines = this.order.infolines
+          this.order.infolines = []
+
           newOrder = await orderModel.insert(this.order)
+
+          // add orderlines
+          try {
+            for (const orderline of orderlines) {
+              orderline.order = newOrder.id
+              await orderlineModel.insert(orderline)
+            }
+          } catch(error) {
+            console.log('Error creating infolines', error)
+          }
+
+          // add infolines
+          try {
+            for (const infoline of infolines) {
+              infoline.order = newOrder.id
+              await infolineModel.insert(infoline)
+            }
+          } catch(error) {
+            console.log('Error creating infolines', error)
+          }
+
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -1436,9 +1465,6 @@ export default {
           return
         }
 
-        // clear maintenance products
-        await this.$store.dispatch('setMaintenanceProducts', null)
-
         if (this.nextField === 'orders' || this.hasBranches) {
           this.$router.go(-1)
         } else if (this.nextField === 'dispatch') {
@@ -1450,7 +1476,53 @@ export default {
 
       try {
         delete this.order.customer_order_accepted
+        const orderlines = this.order.orderlines
+        this.order.orderlines = []
+
+        const infolines = this.order.infolines
+        this.order.infolines = []
+
         await orderModel.update(this.pk, this.order)
+
+        // orderlines create/update
+        for (let orderline of orderlines) {
+          orderline.order = this.pk
+          if (orderline.id) {
+            await orderlineModel.update(orderline.id, orderline)
+            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+          } else {
+            await orderlineModel.insert(orderline)
+            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+          }
+        }
+
+        // orderlines delete
+        for (const orderline of this.deletedOrderlines) {
+          if (orderline.id) {
+            await orderlineModel.delete(orderline.id)
+            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+          }
+        }
+
+        // infolines create/update
+        for (let infoline of infolines) {
+          infoline.order = this.pk
+          if (infoline.id) {
+            await infolineModel.update(infoline.id, infoline)
+            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+          } else {
+            await infolineModel.insert(infoline)
+            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+          }
+        }
+
+        for (const infoline of this.deletedInfolines) {
+          if (infoline.id) {
+            await infolineModel.delete(infoline.id)
+            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+          }
+        }
+
         this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false

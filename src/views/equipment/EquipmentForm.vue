@@ -385,7 +385,7 @@ export default {
     if (this.hasBranches && !this.isEmployee) {
       return {
         equipment: {
-          customer: {
+          branch: {
             required
           },
           name: {
