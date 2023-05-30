@@ -3,10 +3,48 @@
     <b-navbar-nav ref="nav-items">
       <b-nav-item
         :active="isActive('orders')"
-        v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer)"
+        v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
         to="/orders/orders">{{ $trans('Orders') }}
         <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
       </b-nav-item>
+
+      <!-- dashboard for customer users -->
+      <div
+        v-if="showCustomerDashBoard"
+        class="main-nav-divider">
+        &nbsp;|&nbsp;
+      </div>
+      <b-nav-item
+        :active="isActive('customers')"
+        v-if="showCustomerDashBoard"
+        to="/customers/dashboard">{{ $trans('Dashboard') }}
+      </b-nav-item>
+
+      <!-- equipment -->
+      <div
+        v-if="showEquipment"
+        class="main-nav-divider">
+        &nbsp;|&nbsp;
+      </div>
+      <b-nav-item
+        :active="isActive('equipment')"
+        v-if="showEquipment"
+        to="/equipment/equipment">{{ $trans('Equipment') }}
+      </b-nav-item>
+
+      <!-- dashboard for branch employees -->
+      <div
+        v-if="showBranchEmployeeDashBoard"
+        class="main-nav-divider">
+        &nbsp;|&nbsp;
+      </div>
+      <b-nav-item
+        :active="isActive('company')"
+        v-if="showBranchEmployeeDashBoard"
+        to="/company/employee-dashboard">{{ $trans('Dashboard') }}
+      </b-nav-item>
+
+      <!-- customers -->
       <div
         v-if="showCustomers"
         class="main-nav-divider">
@@ -17,6 +55,8 @@
         v-if="showCustomers"
         to="/customers/customers">{{ $trans('Customers') }}
       </b-nav-item>
+
+      <!-- inventory -->
       <div
         v-if="showInventory"
         class="main-nav-divider">
@@ -27,6 +67,8 @@
         v-if="showInventory"
         to="/inventory/purchaseorders">{{ $trans('Inventory') }}
       </b-nav-item>
+
+      <!-- mobile -->
       <div
         v-if="showMobile"
         class="main-nav-divider">
@@ -37,6 +79,8 @@
         v-if="showMobile"
         to="/mobile/dispatch">{{ $trans('Mobile') }}
       </b-nav-item>
+
+      <!-- company -->
       <div
         v-if="showCompany"
         class="main-nav-divider">
@@ -47,6 +91,7 @@
         &nbsp;|&nbsp;
       </div>
  -->
+
       <b-nav-item
         :active="isActive('company')"
         v-if="showCompany"
@@ -55,6 +100,8 @@
       <div v-if="hasMembers" class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
+
+      <!-- members -->
       <b-nav-item
         :active="isActive('members')"
         v-if="showMembers"
@@ -80,11 +127,20 @@ export default {
     }
   },
   computed: {
+    showCustomerDashBoard() {
+      return !this.hasBranches && this.isCustomer
+    },
+    showBranchEmployeeDashBoard() {
+      return this.hasBranches && this.isBranchEmployee
+    },
     showCustomers() {
       return !this.hasBranches && (
         (this.hasCustomers && this.isPlanning) ||
-        this.hasOrders && (this.isPlanning || this.isStaff || this.isSuperuser || this.isCustomer)
+        this.hasOrders && (this.isPlanning || this.isStaff || this.isSuperuser)
       );
+    },
+    showEquipment() {
+      return this.hasBranches;
     },
     showInventory() {
       return this.hasInventory && (this.isPlanning || this.isStaff || this.isSuperuser);
@@ -93,7 +149,7 @@ export default {
       return this.hasMobile && (this.isPlanning || this.isStaff || this.isSuperuser)
     },
     showCompany() {
-      return !this.isCustomer;
+      return !this.isCustomer && !this.isEmployee;
     },
     showMembers() {
       return this.hasMembers;

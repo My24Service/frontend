@@ -53,7 +53,8 @@ describe('OrderListMaintenance.vue', () => {
     actions = {
       getStatuscodes: () => [],
       getMemberType: () => 'maintenance',
-      setUnacceptedCount: () => 1
+      setUnacceptedCount: () => 1,
+      getAssignOrders: () => {}
     }
 
     store = new Vuex.Store({

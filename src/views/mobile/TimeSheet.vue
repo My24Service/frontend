@@ -66,7 +66,9 @@ export default {
 
       try {
         const data = await timeSheetModel.list()
-        this.$refs['user-hours-data'].processData(data)
+        if ('user-hours-data' in this.$refs && typeof this.$refs['user-hours-data'].processData === "function") {
+          this.$refs['user-hours-data'].processData(data)
+        }
         this.materials = data.materials
         this.isLoading = false
       } catch(error) {

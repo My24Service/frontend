@@ -8,10 +8,10 @@ export const getters = {
     return !isEmpty(state.userInfo)
   },
   getUserPk: state => {
-    return state.userInfo.pk
+    return state.userInfo.user.pk
   },
   getUserUUID: state => {
-    return state.userInfo.uuid
+    return state.userInfo.user.uuid
   },
   getMemberPk: state => {
     return state.memberInfo.id
@@ -27,11 +27,11 @@ export const getters = {
       return 'superuser'
     }
 
-    if (state.userInfo.first_name) {
-      return state.userInfo.first_name
+    if (state.userInfo.user.first_name) {
+      return state.userInfo.user.first_name
     }
 
-    return state.userInfo.username
+    return state.userInfo.user.username
   },
   getMemberLogo(state) {
     return state.memberInfo.companylogo

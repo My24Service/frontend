@@ -6,6 +6,7 @@ import store from '../store'
 import orders from './orders'
 import mobile from './mobile'
 import customer from './customer'
+import equipment from './equipment'
 import inventory from './inventory'
 import company from './company'
 import member from './member'
@@ -23,6 +24,7 @@ const routes = [
   ...orders,
   ...mobile,
   ...customer,
+  ...equipment,
   ...inventory,
   ...company,
   ...member,

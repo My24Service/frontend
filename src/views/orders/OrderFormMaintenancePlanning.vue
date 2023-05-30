@@ -1,5 +1,59 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
+    <b-modal
+      id="new-equipment-modal"
+      ref="new-equipment-modal"
+      v-bind:title="$trans('New equipment')"
+      @ok="submitCreateEquipment"
+      @cancel="cancelCreateEquipment"
+    >
+      <form ref="maintenance_equipment_new_equipment-form" @submit.stop.prevent="submitCreateEquipment">
+        <b-container fluid>
+          <b-row role="group">
+            <b-col size="12">
+              <b-form-group
+                v-bind:label="$trans('Equipment name')"
+                label-for="maintenance_equipment_new_equipment"
+              >
+                <b-form-input
+                  id="maintenance_equipment_new_equipment"
+                  size="sm"
+                  v-model="newEquipmentName"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
+    <b-modal
+      id="new-location-modal"
+      ref="new-location-modal"
+      v-bind:title="$trans('New location')"
+      @ok="submitCreateLocation"
+      @cancel="cancelCreateLocation"
+    >
+      <form ref="new_location-form" @submit.stop.prevent="submitCreateLocation">
+        <b-container fluid>
+          <b-row role="group">
+            <b-col size="12">
+              <b-form-group
+                v-bind:label="$trans('Location name')"
+                label-for="new_location"
+              >
+                <b-form-input
+                  id="new_location"
+                  size="sm"
+                  v-model="newLocationName"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
     <div class="container app-form">
       <b-form>
         <h2 v-if="isCreate">{{ $trans('New order') }}</h2>
@@ -389,7 +443,78 @@
               </b-col>
             </b-row>
             <b-row>
-              <b-col cols="4" role="group">
+              <!-- equipment -->
+              <b-col cols="4" role="group" v-if="usesEquipment">
+                <b-form-group
+                  label-size="sm"
+                  label-class="p-sm-2"
+                  v-bind:label="$trans('Search equipment')"
+                >
+                  <multiselect
+                    id="maintenance-contract-equipment-name"
+                    ref="multiselect_equipment"
+                    track-by="id"
+                    label="name"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="equipmentSearch"
+                    :multiple="false"
+                    :loading="isLoading"
+                    :internal-search="false"
+                    :clear-on-select="true"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="true"
+                    :hide-selected="true"
+                    @search-change="getEquipmentDebounced"
+                    @select="selectEquipment"
+                    :disabled="!equipmentFormSearchOk"
+                  >
+                <span slot="noResult">
+                  <h5>{{ $trans('No equipment found') }}</h5>
+                  <p>
+                    <b-button
+                      @click="showAddEquipmentModal"
+                      class="btn btn-primary"
+                      size="sm"
+                      type="button"
+                      variant="primary"
+                    >
+                      {{ $trans("Add new equipment") }}
+                    </b-button>
+                  </p>
+
+                </span>
+                  </multiselect>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group" v-if="usesEquipment">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Equipment')"
+                  label-for="order-orderline-product"
+                >
+                  <b-input-group class="sm">
+                    <b-form-input
+                      id="order-orderline-product"
+                      size="sm"
+                      readonly
+                      v-model="product"
+                    ></b-form-input>
+                    <b-input-group-append>
+                      <b-button variant="outline-success" v-if="equipment" size="sm">
+                        <b-icon-check></b-icon-check>
+                      </b-button>
+                    </b-input-group-append>
+                  </b-input-group>
+                </b-form-group>
+              </b-col>
+              <!-- end equipment -->
+
+              <!-- normal product -->
+              <b-col cols="4" role="group" v-if="!usesEquipment">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Equipment')"
@@ -402,7 +527,79 @@
                   ></b-form-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="4" role="group">
+              <!-- end normal product -->
+
+              <!-- equipment locations -->
+              <b-col cols="4" role="group" v-if="usesEquipment">
+                <b-form-group
+                  label-size="sm"
+                  label-class="p-sm-2"
+                  v-bind:label="$trans('Search location')"
+                >
+                  <multiselect
+                    id="location-name"
+                    ref="multiselect_location"
+                    track-by="id"
+                    label="name"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="locationSearch"
+                    :multiple="false"
+                    :loading="isLoading"
+                    :internal-search="false"
+                    :clear-on-select="true"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="true"
+                    :hide-selected="true"
+                    @search-change="getLocationDebounced"
+                    @select="selectLocation"
+                    :disabled="!equipmentFormSearchOk"
+                  >
+                <span slot="noResult">
+                  <h5>{{ $trans('No locations found') }}</h5>
+                  <p>
+                    <b-button
+                      @click="showAddLocationModal"
+                      class="btn btn-primary"
+                      size="sm"
+                      type="button"
+                      variant="primary"
+                    >
+                      {{ $trans("Add new location") }}
+                    </b-button>
+                  </p>
+                </span>
+                  </multiselect>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group" v-if="usesEquipment">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Location')"
+                  label-for="order-orderline-equipment-location"
+                >
+                  <b-input-group class="sm">
+                    <b-form-input
+                      id="order-orderline-equipment-location"
+                      size="sm"
+                      readonly
+                      v-model="location"
+                    ></b-form-input>
+                    <b-input-group-append>
+                      <b-button variant="outline-success" v-if="equipment_location" size="sm">
+                        <b-icon-check></b-icon-check>
+                      </b-button>
+                    </b-input-group-append>
+                  </b-input-group>
+                </b-form-group>
+              </b-col>
+              <!-- end equipment locations -->
+
+              <!-- normal location -->
+              <b-col cols="4" role="group" v-if="!usesEquipment">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Location')"
@@ -415,7 +612,22 @@
                   ></b-form-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="4" role="group">
+              <!-- end normal location -->
+
+              <b-col cols="4" role="group" v-if="!usesEquipment">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Remarks')"
+                  label-for="order-orderline-remarks"
+                >
+                  <b-form-textarea
+                    id="order-orderline-remarks"
+                    v-model="remarks"
+                    rows="1"
+                  ></b-form-textarea>
+                </b-form-group>
+              </b-col>
+              <b-col cols="12" role="group" v-if="usesEquipment">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
@@ -430,10 +642,25 @@
               </b-col>
             </b-row>
             <footer class="modal-footer">
-              <b-button v-if="isEditOrderLine" @click="doEditOrderLine" class="btn btn-primary" size="sm" type="button" variant="warning">
+              <b-button
+                v-if="isEditOrderLine"
+                @click="doEditOrderLine"
+                class="btn btn-primary"
+                size="sm" type="button"
+                variant="warning"
+                :disabled="!isOrderLineValid"
+              >
                 {{ $trans('Edit orderline') }}
               </b-button>
-              <b-button v-if="!isEditOrderLine" @click="addOrderLine" class="btn btn-primary" size="sm" type="button" variant="primary">
+              <b-button
+                v-if="!isEditOrderLine"
+                @click="addOrderLine"
+                class="btn btn-primary"
+                size="sm"
+                type="button"
+                variant="primary"
+                :disabled="!isOrderLineValid"
+              >
                 {{ $trans('Add orderline') }}
               </b-button>
             </footer>
@@ -648,14 +875,16 @@ import orderModel from '../../models/orders/Order.js'
 import customerModel from '../../models/customer/Customer.js'
 import engineerModel from '../../models/company/UserEngineer.js'
 import documentModel from '../../models/orders/Document.js'
-import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
-import maintenanceEquipmentModel from '../../models/customer/MaintenanceEquipment.js'
 import Assign from '../../models/mobile/Assign.js'
 import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
 import Collapse from '../../components/Collapse.vue'
 import {componentMixin} from "../../utils";
 import branchModel from "../../models/company/Branch";
 import timeRegistrationModel from "../../models/company/TimeRegistration";
+import equipmentModel from "../../models/equipment/equipment";
+import locationModel from "../../models/equipment/location";
+import orderlineModel from "../../models/orders/Orderline";
+import infolineModel from "../../models/orders/Infoline";
 
 export default {
   mixins: [componentMixin],
@@ -701,15 +930,12 @@ export default {
       acceptOrder: false,
 
       product: '',
+      equipment: null,
       location: '',
+      equipment_location: null,
       remarks: '',
-      isEditOrderLine: false,
 
-      maintenance_product_line_product: '',
-      maintenance_product_line_location: '',
-      maintenance_product_line_remarks: '',
-      maintenance_product_line_amount: '',
-      isEditMaintenanceProductLine: false,
+      isEditOrderLine: false,
 
       info: '',
       isEditInfoLine: false,
@@ -722,14 +948,6 @@ export default {
       ],
       infoLineFields: [
         { key: 'info', label: this.$trans('Info') },
-        { key: 'icons', label: '' }
-      ],
-      maintenanceProductLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'amount', label: this.$trans('Amount') },
-        { key: 'done_needed', label: this.$trans('Needed / created') },
-        { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       documentFields: [
@@ -760,7 +978,19 @@ export default {
         { item: 'orders', name: this.$trans('Orders') },
         { item: 'dispatch', name: this.$trans('Dispatch') },
       ],
-      maintenanceProducts: []
+
+      getEquipmentDebounced: null,
+      equipmentSearch: [],
+      newEquipmentName: null,
+
+      getLocationDebounced: null,
+      locationSearch: [],
+      newLocationName: null,
+
+      isEditEquipment: false,
+
+      deletedOrderlines: [],
+      deletedInfolines: [],
     }
   },
   validations() {
@@ -816,8 +1046,16 @@ export default {
     }
   },
   computed: {
-    maintenanceProductLinesIsOpened() {
-      return this.maintenance
+    equipmentFormSearchOk() {
+      if (!this.hasBranches) {
+        return this.order.customer_relation !== null
+      } else {
+        return this.order.branch !== null
+      }
+    },
+    usesEquipment() {
+      // return true
+      return this.hasBranches || this.isEditEquipment
     },
     startDate() {
       return this.order.start_date
@@ -830,7 +1068,11 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
+    },
+    isOrderLineValid() {
+      return this.location !== null && this.location !== "" && this.product !== null && this.product !== ""
     }
+
   },
   async created () {
     const lang = this.$store.getters.getCurrentLanguage
@@ -839,43 +1081,121 @@ export default {
 
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
+    this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
+    this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
     this.countries = await this.$store.dispatch('getCountries')
     const { results } = await engineerModel.list()
     this.engineers = results
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
-
-      if (this.maintenance) {
-        this.isLoading = true
-        const data = await this.$store.dispatch('getMaintenanceProducts')
-        if (data) {
-          const { maintenanceProducts, customer_id } = data
-
-          const customer = await customerModel.detail(customer_id)
-          this.fillCustomer(customer)
-
-          for (const product of maintenanceProducts) {
-            const maintenanceProduct = await maintenanceProductModel.detail(product)
-
-            this.order.maintenance_product_lines.push({
-              'maintenance_product': maintenanceProduct.id,
-              'product': maintenanceProduct.product_name,
-              'location': '',
-              'amount': 0,
-              'done_needed': `${maintenanceProduct.amount} / ${maintenanceProduct.num_products ?? 0}`
-            })
-          }
-
-          this.$refs['maintenance-product-lines'].isOpen = true
-        }
-        this.isLoading = false
-      }
     } else {
       await this.loadOrder()
     }
   },
   methods: {
+    // equipment
+    showAddEquipmentModal() {
+      this.$refs.multiselect_equipment.deactivate()
+      this.newEquipmentName =this.$refs.multiselect_equipment.$refs.search.value
+      this.$refs['new-equipment-modal'].show()
+    },
+    cancelCreateEquipment() {
+      this.$refs['new-equipment-modal'].hide()
+    },
+    async submitCreateEquipment() {
+      this.$refs.multiselect_equipment.deactivate()
+
+      try {
+        if (!this.hasBranches) {
+          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+            await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
+            await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
+
+          this.equipment = response.id
+          this.product = response.name
+        } else {
+          const response = await equipmentModel.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
+
+          this.equipment = response.id
+          this.product = response.name
+        }
+      }  catch(error) {
+        console.log('Error adding equipment', error)
+        this.errorToast(this.$trans('Error adding equipment'))
+      }
+    },
+    async getEquipment(query) {
+      try {
+        if (this.hasBranches) {
+          this.equipmentSearch = await equipmentModel.searchBranch(query, this.order.branch)
+        } else {
+          this.equipmentSearch = await equipmentModel.searchCustomer(query, this.order.customer_relation)
+        }
+
+      } catch(error) {
+        console.log('Error searching equipment', error)
+        this.errorToast(this.$trans('Error searching equipment'))
+      }
+    },
+    equipmentLabel({ name }) {
+      return name
+    },
+    selectEquipment(option) {
+      this.equipment = option.id
+      this.product = option.name
+    },
+    // equipment locations
+    showAddLocationModal() {
+      this.$refs.multiselect_location.deactivate()
+      this.newLocationName =this.$refs.multiselect_location.$refs.search.value
+      this.$refs['new-location-modal'].show()
+    },
+    cancelCreateLocation() {
+      this.$refs['new-location-modal'].hide()
+    },
+    async submitCreateLocation() {
+      this.$refs.multiselect_location.deactivate()
+
+      try {
+        if (!this.hasBranches) {
+          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+            await locationModel.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
+            await locationModel.quickAddCustomerNonPlanning(this.newLocationName)
+
+          this.equipment_location = response.id
+          this.location = response.name
+        } else {
+          const response = await locationModel.quickAddBranchPlanning(this.newLocationName, this.order.branch);
+
+          this.equipment_location = response.id
+          this.location = response.name
+        }
+      }  catch(error) {
+        console.log('Error adding location', error)
+        this.errorToast(this.$trans('Error adding location'))
+      }
+    },
+    async getLocation(query) {
+      try {
+        if (this.hasBranches) {
+          this.locationSearch = await locationModel.searchBranch(query, this.order.branch)
+        } else {
+          this.locationSearch = await locationModel.searchCustomer(query, this.order.customer_relation)
+        }
+      } catch(error) {
+        console.log('Error searching location', error)
+        this.errorToast(this.$trans('Error searching location'))
+      }
+    },
+    locationLabel({ name }) {
+      return name
+    },
+    selectLocation(option) {
+      this.equipment_location = option.id
+      this.location = option.name
+    },
+
     // documents
     filesSelected(files) {
       for (let i=0;i<files.length; i++) {
@@ -904,6 +1224,7 @@ export default {
     },
     // order lines
     deleteOrderLine(index) {
+      this.deletedOrderlines.push(this.order.orderlines[index])
       this.order.orderlines.splice(index, 1)
     },
     editOrderLine(item, index) {
@@ -913,34 +1234,48 @@ export default {
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
+
+      if (item.equipment && item.equipment_location) {
+        this.equipment_location = item.equipment_location
+        this.equipment = item.equipment
+        this.isEditEquipment = true
+      }
     },
     emptyOrderLine() {
       this.product = ''
       this.location = ''
       this.remarks = ''
+      this.equipment_location = null
+      this.equipment = null
     },
     doEditOrderLine() {
       const orderLine = {
         product: this.product,
         location: this.location,
-        remarks: this.remarks
+        remarks: this.remarks,
+        equipment_location: this.equipment_location,
+        equipment: this.equipment,
       }
       this.order.orderlines.splice(this.editIndex, 1, orderLine)
       this.editIndex = null
       this.isEditOrderLine = false
+      this.isEditEquipment = false
       this.emptyOrderLine()
     },
     addOrderLine() {
       this.order.orderlines.push({
         product: this.product,
         location: this.location,
-        remarks: this.remarks
+        remarks: this.remarks,
+        equipment_location: this.equipment_location,
+        equipment: this.equipment,
       })
       this.emptyOrderLine()
     },
 
     // info lines
     deleteInfoLine(index) {
+      this.deletedInfolines.push(this.order.infolines[index])
       this.order.infolines.splice(index, 1)
     },
     editInfoLine(item, index) {
@@ -968,11 +1303,6 @@ export default {
       this.emptyInfoLine()
     },
 
-    // maintenance product lines
-    deleteMaintenanceProductLine(index) {
-      this.order.maintenance_product_lines.splice(index, 1)
-    },
-
     engineerLabel({ full_name }) {
       return full_name
     },
@@ -984,16 +1314,16 @@ export default {
       return `${name} - ${address} - ${city}`
     },
     async selectCustomer(option) {
-      const topUsers = await timeRegistrationModel.getTopUsersForCustomerView(option.id)
-      let users = []
-      for (let i=0; i<topUsers.data.length; i++) {
-        const bla = users.find((user) => user.full_name === topUsers.data[i].full_name)
-        console.log(topUsers.data[i].full_name, bla)
-        if (!bla) {
-          users.push(topUsers.data[i])
-        }
-      }
-      this.recommendedUsers = users
+      // const topUsers = await timeRegistrationModel.getTopUsersForCustomerView(option.id)
+      // let users = []
+      // for (let i=0; i<topUsers.data.length; i++) {
+      //   const bla = users.find((user) => user.full_name === topUsers.data[i].full_name)
+      //   console.log(topUsers.data[i].full_name, bla)
+      //   if (!bla) {
+      //     users.push(topUsers.data[i])
+      //   }
+      // }
+      // this.recommendedUsers = users
       this.fillCustomer(option)
     },
     fillCustomer(customer) {
@@ -1059,10 +1389,37 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
-      let newOrder
+      let newOrder;
       if (this.isCreate) {
         try {
+          const orderlines = this.order.orderlines
+          this.order.orderlines = []
+
+          const infolines = this.order.infolines
+          this.order.infolines = []
+
           newOrder = await orderModel.insert(this.order)
+
+          // add orderlines
+          try {
+            for (const orderline of orderlines) {
+              orderline.order = newOrder.id
+              await orderlineModel.insert(orderline)
+            }
+          } catch(error) {
+            console.log('Error creating infolines', error)
+          }
+
+          // add infolines
+          try {
+            for (const infoline of infolines) {
+              infoline.order = newOrder.id
+              await infolineModel.insert(infoline)
+            }
+          } catch(error) {
+            console.log('Error creating infolines', error)
+          }
+
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -1108,9 +1465,6 @@ export default {
           return
         }
 
-        // clear maintenance products
-        await this.$store.dispatch('setMaintenanceProducts', null)
-
         if (this.nextField === 'orders' || this.hasBranches) {
           this.$router.go(-1)
         } else if (this.nextField === 'dispatch') {
@@ -1122,7 +1476,53 @@ export default {
 
       try {
         delete this.order.customer_order_accepted
+        const orderlines = this.order.orderlines
+        this.order.orderlines = []
+
+        const infolines = this.order.infolines
+        this.order.infolines = []
+
         await orderModel.update(this.pk, this.order)
+
+        // orderlines create/update
+        for (let orderline of orderlines) {
+          orderline.order = this.pk
+          if (orderline.id) {
+            await orderlineModel.update(orderline.id, orderline)
+            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+          } else {
+            await orderlineModel.insert(orderline)
+            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+          }
+        }
+
+        // orderlines delete
+        for (const orderline of this.deletedOrderlines) {
+          if (orderline.id) {
+            await orderlineModel.delete(orderline.id)
+            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+          }
+        }
+
+        // infolines create/update
+        for (let infoline of infolines) {
+          infoline.order = this.pk
+          if (infoline.id) {
+            await infolineModel.update(infoline.id, infoline)
+            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+          } else {
+            await infolineModel.insert(infoline)
+            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+          }
+        }
+
+        for (const infoline of this.deletedInfolines) {
+          if (infoline.id) {
+            await infolineModel.delete(infoline.id)
+            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+          }
+        }
+
         this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false

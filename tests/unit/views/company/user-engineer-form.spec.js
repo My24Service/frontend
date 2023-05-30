@@ -7,6 +7,7 @@ import Vuex from "vuex"
 import localVue from '../../index'
 import UserEngineerForm from '@/views/company/UserEngineerForm.vue'
 import userEngineerResponse from '../../fixtures/user-engineer'
+import locationsResponse from '../../fixtures/stocklocations'
 
 jest.mock('axios')
 
@@ -14,6 +15,8 @@ axios.get.mockImplementation((url) => {
   switch (url) {
     case '/company/engineer/1/':
       return Promise.resolve(userEngineerResponse)
+    case '/inventory/stock-location/?page=1':
+      return Promise.resolve(locationsResponse)
     default:
       return Promise.reject(new Error(`${url} not found`))
   }

@@ -15,6 +15,10 @@ const routes = [
   path: '/hello/world',
   name: 'supplier-reservation-edit'
 },
+  {
+    path: '/hello/world',
+    name: 'supplier-reservation-view'
+  },
 {
   path: '/hello/world',
   name: 'supplier-reservation-add'

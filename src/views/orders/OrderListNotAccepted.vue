@@ -202,7 +202,6 @@ export default {
       this.loadData()
     },
     removeStatusFilter(statuscode) {
-      console.log('removing', { statuscode })
       this.model.removeListArg(`last_status=${statuscode}`)
       this.loadData()
     },

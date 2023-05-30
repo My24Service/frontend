@@ -4,19 +4,33 @@ class Equipment extends BaseModel {
   fields = {
     'customer': null,
     'branch': null,
+
     'name': null,
+    'brand': null,
     'identifier': null,
     'description': null,
     'installation_date': null,
     'production_date': null,
     'serialnumber': null,
     'standard_hours': null,
+    'created': null,
+    'modified': null,
   }
 
   url = '/equipment/equipment/'
 
   searchCustomer(query, customerPk) {
     return this.axios.get(`${this.url}autocomplete/?q=${query}&customer=${customerPk}`)
+      .then((response) => response.data)
+  }
+
+  searchBranch(query, branchPk) {
+    return this.axios.get(`${this.url}autocomplete/?q=${query}&branch=${branchPk}`)
+      .then((response) => response.data)
+  }
+
+  searchBranchEmployee(query) {
+    return this.axios.get(`${this.url}autocomplete/?q=${query}`)
       .then((response) => response.data)
   }
 

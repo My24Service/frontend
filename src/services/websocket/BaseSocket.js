@@ -63,13 +63,16 @@ class BaseSocket {
       return room
     }
 
-    const result = await axios.get(url).then((response) => response.data)
-    if (this.debug) {
-      console.log(`${this.name}: got room from backend: ${result.room}`)
-    }
-    this._storeRoom(url, result.room)
+    const response = await axios.get(url)
+    if (response && typeof response.then === "function") {
+      const result = response.then((response) => response.data)
+      if (this.debug) {
+        console.log(`${this.name}: got room from backend: ${result.room}`)
+      }
+      this._storeRoom(url, result.room)
 
-    return result.room
+      return result.room
+    }
   }
 
   _getMemberRoom() {

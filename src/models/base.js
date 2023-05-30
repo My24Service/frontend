@@ -116,6 +116,8 @@ class BaseModel {
   }
 
   preInsert(obj) {
+    delete obj.created
+    delete obj.modified
     return obj
   }
 
@@ -127,6 +129,8 @@ class BaseModel {
   }
 
   preUpdate(obj) {
+    delete obj.created
+    delete obj.modified
     return obj
   }
 

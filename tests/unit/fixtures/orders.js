@@ -1,6 +1,6 @@
 export default {
     data: {
-        "next": "http://kms.my24service.com:8000/order/order/dispatch_list_all/?page=2",
+        "next": "http://bla.my24service.com:8000/order/order/dispatch_list_all/?page=2",
         "previous": null,
         "count": 39,
         "num_pages": 2,
@@ -82,14 +82,13 @@ export default {
                         "purchase_order_material": 510
                     },
                 ],
-                'maintenance_product_lines': [],
                 "required_assigned": "-",
                 "required_users": 1,
                 "user_order_available_set_count": 0,
                 "assigned_count": 0,
                 "customer_relation": 80,
                 "customer_rate_avg": null,
-                "workorder_url": "http://kms.my24service.com:8000/order/workorder-view/b354dc2a-2f76-40ce-b93b-d86a232832da/",
+                "workorder_url": "http://bla.my24service.com:8000/order/workorder-view/b354dc2a-2f76-40ce-b93b-d86a232832da/",
                 "infolines": [],
                 "workorder_documents": []
             },
@@ -163,14 +162,13 @@ export default {
                         "purchase_order_material": 434
                     },
                 ],
-                'maintenance_product_lines': [],
                 "required_assigned": "-",
                 "required_users": 1,
                 "user_order_available_set_count": 0,
                 "assigned_count": 0,
                 "customer_relation": 162,
                 "customer_rate_avg": null,
-                "workorder_url": "http://kms.my24service.com:8000/order/workorder-view/ee2977f6-87b9-4142-a256-4aaf035246a1/",
+                "workorder_url": "http://bla.my24service.com:8000/order/workorder-view/ee2977f6-87b9-4142-a256-4aaf035246a1/",
                 "infolines": [],
                 "workorder_documents": []
             }

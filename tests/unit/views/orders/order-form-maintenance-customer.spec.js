@@ -22,7 +22,7 @@ axios.get.mockImplementation((url) => {
   switch (url) {
     case '/customer/customer/1/':
       return Promise.resolve(customerResponse)
-    case '/company/user-info/1/':
+    case '/company/user-info-me/':
       return Promise.resolve({data: userResponse})
     case '/order/order/1/':
       return Promise.resolve(orderResponse)

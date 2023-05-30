@@ -1,13 +1,17 @@
 <template>
   <div>
     <OrderFormMaintenancePlanning
-      v-if="!isCustomer || isStaff || isSuperuser"
+      v-if="isPlanning || isStaff || isSuperuser"
       :pk="pk"
       :unaccepted="unaccepted"
       :maintenance="maintenance"
     />
     <OrderFormMaintenanceCustomer
-      v-if="isCustomer && !isStaff && !isSuperuser"
+      v-if="isCustomer && !hasBranches && !isBranchEmployee && !isStaff && !isSuperuser"
+      :pk="pk"
+    />
+    <OrderFormMaintenanceEmployee
+      v-if="isBranchEmployee && !isStaff && !isSuperuser"
       :pk="pk"
     />
   </div>
@@ -16,7 +20,8 @@
 <script>
 import OrderFormMaintenancePlanning from "./OrderFormMaintenancePlanning.vue"
 import OrderFormMaintenanceCustomer from "./OrderFormMaintenanceCustomer.vue"
-import { componentMixin } from '@/utils.js'
+import OrderFormMaintenanceEmployee from "./OrderFormMaintenanceEmployee.vue"
+import { componentMixin } from '../../utils.js'
 
 export default {
   name: "OrderFormMaintenance",
@@ -38,6 +43,7 @@ export default {
   components: {
     OrderFormMaintenancePlanning,
     OrderFormMaintenanceCustomer,
+    OrderFormMaintenanceEmployee
   },
 }
 </script>

@@ -97,15 +97,15 @@ class Order extends BaseModel {
     let base = ''
     if (this.queryMode === 'dispatch') {
       base = '/order/order/dispatch_list_all/'
-    } else if (this.queryMode == 'inprogress') {
+    } else if (this.queryMode === 'inprogress') {
       base = '/order/order/dispatch_list_inprogress/'
-    } else if (this.queryMode == 'finished') {
+    } else if (this.queryMode === 'finished') {
       base = '/order/order/dispatch_list_finished/'
-    } else if (this.queryMode == 'unassigned') {
+    } else if (this.queryMode === 'unassigned') {
       base = '/order/order/dispatch_list_unassigned/'
-    } else if (this.queryMode == 'range') {
+    } else if (this.queryMode === 'range') {
       base = '/order/order/get_within_range/'
-    } else if (this.queryMode == 'all') {
+    } else if (this.queryMode === 'all') {
       base = '/order/order/'
     } else {
       console.log(`unknown queryMode: ${this.queryMode}`)
@@ -124,31 +124,58 @@ class Order extends BaseModel {
   }
 
 
-  async getOrderTypesStats(customerPk) {
+  async getOrderTypesStatsCustomer(customerPk) {
     const url = customerPk ? `${this.url}order_types_stats/?customer=${customerPk}` : `${this.url}order_types_stats/`
 
     const response = await this.axios.get(url)
-    return response.data.order_types_stats
+    return response && 'data' in response ? response.data.order_types_stats : {}
   }
 
-  async getOrderTypesMonthsStats(customerPk) {
+  async getOrderTypesStatsBranch(branchPk) {
+    const url = branchPk ? `${this.url}order_types_stats/?branch=${branchPk}` : `${this.url}order_types_stats/`
+
+    const response = await this.axios.get(url)
+    return response && 'data' in response ? response.data.order_types_stats : {}
+  }
+
+  async getOrderTypesMonthsStatsCustomer(customerPk) {
     const url = customerPk ? `${this.url}order_types_month_stats/?customer=${customerPk}` : `${this.url}order_types_month_stats/`
 
     const response = await this.axios.get(url)
-    return response.data.order_types_month_stats
+    return response && 'data' in response ? response.data.order_types_month_stats : {}
   }
 
-  async getMonthsStats(customerPk) {
+  async getOrderTypesMonthsStatsBranch(branchPk) {
+    const url = branchPk ? `${this.url}order_types_month_stats/?branch=${branchPk}` : `${this.url}order_types_month_stats/`
+
+    const response = await this.axios.get(url)
+    return response && 'data' in response ? response.data.order_types_month_stats : {}
+  }
+
+  async getMonthsStatsCustomer(customerPk) {
     const url = customerPk ? `${this.url}order_counts_stats/?customer=${customerPk}` : `${this.url}order_counts_stats/`
 
     const response = await this.axios.get(url)
-    return response.data.order_counts_stats
+    return response && 'data' in response ? response.data.order_counts_stats : {}
   }
 
-  async getCountsYearOrdertypeStats(customerPk) {
+  async getMonthsStatsBranch(branchPk) {
+    const url = branchPk ? `${this.url}order_counts_stats/?branch=${branchPk}` : `${this.url}order_counts_stats/`
+
+    const response = await this.axios.get(url)
+    return response && 'data' in response ? response.data.order_counts_stats : {}
+  }
+
+  async getCountsYearOrdertypeStatsCustomer(customerPk) {
     const url = customerPk ? `${this.url}counts_year_order_type_stats/?customer=${customerPk}` : `${this.url}counts_year_order_type_stats/`
     const response = await this.axios.get(url)
-    return response.data.counts_year_order_type_stats
+    return response && 'data' in response ? response.data.counts_year_order_type_stats : {}
+  }
+
+  async getCountsYearOrdertypeStatsBranch(branchPk) {
+    const url = branchPk ? `${this.url}counts_year_order_type_stats/?branch=${branchPk}` : `${this.url}counts_year_order_type_stats/`
+    const response = await this.axios.get(url)
+    return response && 'data' in response ? response.data.counts_year_order_type_stats : {}
   }
 
   async getTopXCustomers() {

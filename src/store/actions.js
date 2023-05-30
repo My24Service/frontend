@@ -14,6 +14,7 @@ import {
   SET_MAINTENANCE_PRODUCTS,
   SET_STREAM_INFO,
 } from './mutation-types'
+import accountModel from "../models/account/Account";
 
 export const actions = {
   setStreamInfo({commit}, streamInfo) {
@@ -36,6 +37,7 @@ export const actions = {
       try {
         const languageVars = await my24.getLanguageVars()
         const initialData = await my24.getInitialData()
+
         const memberContract = !isEmpty(initialData.memberInfo) && initialData.memberInfo.contract ? my24.getModelsFromString(initialData.memberInfo.contract.member_contract) : {}
 
         document.title = initialData.memberInfo.name
@@ -59,14 +61,16 @@ export const actions = {
     parts.shift()
     const lenParts = parts.length
     const [mod, part] = parts
+    const isStaff = state.userInfo && state.userInfo.user ? state.userInfo.user.is_staff : false
+    const isSuperuser = state.userInfo && state.userInfo.user ? state.userInfo.user.is_superuser : false
 
     const result = my24.hasAccessToModule({
       contract: state.memberContract,
       module: mod,
       part,
       lenParts,
-      isStaff: state.userInfo.is_staff,
-      isSuperuser: state.userInfo.is_superuser
+      isStaff,
+      isSuperuser,
     })
 
     return new Promise((resolve) => {
@@ -120,12 +124,12 @@ export const actions = {
   },
   getIsStaff({ state }) {
     return new Promise((resolve) => {
-      resolve(state.userInfo.is_staff)
+      resolve(state.userInfo.user.is_staff)
     })
   },
   getIsSuperuser({ state }) {
     return new Promise((resolve) => {
-      resolve(state.userInfo.is_superuser)
+      resolve(state.userInfo.user.is_superuser)
     })
   },
   getMaintenanceProducts({ state }) {

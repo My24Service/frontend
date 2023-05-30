@@ -51,7 +51,7 @@
     </b-row>
 
     <b-row align-h="center">
-      <h3>{{ $trans("Orders types")}}</h3>
+      <h3>{{ $trans("Order types")}}</h3>
     </b-row>
     <b-row>
       <b-col cols="6">

@@ -5,7 +5,9 @@
         {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
           {{ order.order_id }}
         </router-link><br/>
-        {{ $trans('Customer ID') }}: {{ order.customer_id }}<br/>
+        <span v-if="!hasBranches">
+          {{ $trans('Customer ID') }}: {{ order.customer_id }}<br/>
+        </span>
         {{ order.order_name }}<br/>
         {{ order.order_address }}<br/>
         {{ order.order_country_code }}-{{ order.order_postal }} {{ order.order_city }}<br/>
@@ -38,7 +40,9 @@
         {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
           {{ order.order_id }}
         </router-link><br/>
-        {{ $trans('Customer ID') }}: {{ order.customer_id }}<br/>
+        <span v-if="!hasBranches">
+          {{ $trans('Customer ID') }}: {{ order.customer_id }}<br/>
+        </span>
         {{ order.order_name }}<br/>
         {{ order.order_address }}<br/>
         {{ order.order_country_code }}-{{ order.order_postal }} {{ order.order_city }}<br/>

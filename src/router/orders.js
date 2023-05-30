@@ -48,7 +48,7 @@ export default [
   children: [
     // orders
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-list',
       path: '/orders/orders',
       components: {
@@ -57,7 +57,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-edit',
       path: '/orders/orders/form/:pk(\\d+)',
       props: {
@@ -70,7 +70,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-add',
       path: '/orders/orders/form',
       components: {
@@ -95,7 +95,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-view',
       path: '/orders/orders/view/:pk',
       props: {
@@ -108,7 +108,7 @@ export default [
       },
     },
 	  {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
 	  	name: 'past-order-list',
 			path: '/orders/past-orders',
 			components: {
@@ -125,7 +125,7 @@ export default [
       }
     },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'orders-not-accepted',
       path: '/orders/orders-not-accepted',
       components: {
@@ -143,7 +143,7 @@ export default [
     },
     // documents
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-documents',
       path: '/orders/orders/documents/:orderPk',
       components: {
@@ -156,7 +156,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-document-add',
       path: '/orders/orders/documents/form/:orderPk',
       components: {
@@ -169,7 +169,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-document-edit',
       path: '/orders/orders/documents/edit/:pk',
       components: {
@@ -245,7 +245,7 @@ export default [
     },
     // stats
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-year-stats',
       path: '/orders/year-stats',
       components: {
@@ -258,7 +258,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.CUSTOMER },
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-month-stats',
       path: '/orders/month-stats',
       components: {

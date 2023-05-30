@@ -1,11 +1,65 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
+    <b-modal
+      id="new-equipment-modal"
+      ref="new-equipment-modal"
+      v-bind:title="$trans('New equipment')"
+      @ok="submitCreateEquipment"
+      @cancel="cancelCreateEquipment"
+    >
+      <form ref="maintenance_equipment_new_equipment-form" @submit.stop.prevent="submitCreateEquipment">
+        <b-container fluid>
+          <b-row role="group">
+            <b-col size="12">
+              <b-form-group
+                v-bind:label="$trans('Equipment name')"
+                label-for="maintenance_equipment_new_equipment"
+              >
+                <b-form-input
+                  id="maintenance_equipment_new_equipment"
+                  size="sm"
+                  v-model="newEquipmentName"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
+    <b-modal
+      id="new-location-modal"
+      ref="new-location-modal"
+      v-bind:title="$trans('New location')"
+      @ok="submitCreateLocation"
+      @cancel="cancelCreateLocation"
+    >
+      <form ref="new_location-form" @submit.stop.prevent="submitCreateLocation">
+        <b-container fluid>
+          <b-row role="group">
+            <b-col size="12">
+              <b-form-group
+                v-bind:label="$trans('Location name')"
+                label-for="new_location"
+              >
+                <b-form-input
+                  id="new_location"
+                  size="sm"
+                  v-model="newLocationName"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
     <div class="container app-form">
       <b-form>
         <h2 v-if="isCreate">{{ $trans('New order') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit order') }}</h2>
         <b-row>
-          <b-col cols="2" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               label-class="p-sm-0"
@@ -45,7 +99,7 @@
               ></b-form-timepicker>
             </b-form-group>
           </b-col>
-          <b-col cols="2" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               label-class="p-sm-0"
@@ -85,28 +139,27 @@
               ></b-form-timepicker>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Customer ID')"
               label-class="p-sm-0"
-              label-for="customer_id"
+              v-bind:label="$trans('Order type')"
+              label-for="order_type"
             >
-              <b-form-input
-                v-model="order.customer_id"
-                readonly
-                id="customer_id"
-                size="sm"
-                :state="isSubmitClicked ? !v$.order.customer_id.$error : null"
-              ></b-form-input>
+              <OrderTypesSelect
+                v-if="(!isCreate && !isLoading) || isCreate"
+                :orderTypeIn="order.order_type"
+                :order-type.sync="order.order_type"
+                :include-all="false"
+              />
             </b-form-group>
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="6" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Customer')"
+              v-bind:label="$trans('Branch')"
               label-for="order_name"
             >
               <b-form-input
@@ -117,11 +170,11 @@
               ></b-form-input>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_name.$error : null">
-                {{ $trans('Please enter the customer') }}
+                {{ $trans('Please enter the branch') }}
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Address')"
@@ -142,17 +195,6 @@
           <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Country')"
-              label-for="order_country_code"
-            >
-              <b-form-select v-model="order.order_country_code" :options="countries" size="sm"></b-form-select>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
               v-bind:label="$trans('Postal')"
               label-for="order_postal"
             >
@@ -168,7 +210,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('City')"
@@ -186,21 +228,18 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Order type')"
-              label-for="order_type"
+              v-bind:label="$trans('Country')"
+              label-for="order_country_code"
             >
-              <OrderTypesSelect
-                v-if="(!isCreate && !isLoading) || isCreate"
-                :orderTypeIn="order.order_type"
-                :order-type.sync="order.order_type"
-                :include-all="false"
-              />
+              <b-form-select v-model="order.order_country_code" :options="countries" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+        </b-row>
+        <b-row>
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Order number')"
@@ -213,9 +252,7 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="2" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Reference')"
@@ -228,7 +265,7 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Email')"
@@ -241,7 +278,7 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Mobile')"
@@ -254,7 +291,7 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Tel.')"
@@ -269,7 +306,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="4" role="group">
+          <b-col cols="6" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Contacts')"
@@ -282,7 +319,7 @@
               ></b-form-textarea>
             </b-form-group>
           </b-col>
-          <b-col cols="4" role="group">
+          <b-col cols="6" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Remarks')"
@@ -291,19 +328,6 @@
               <b-form-textarea
                 id="remarks"
                 v-model="order.remarks"
-                rows="3"
-              ></b-form-textarea>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Customer remarks')"
-              label-for="customer_remarks"
-            >
-              <b-form-textarea
-                id="customer_remarks"
-                v-model="order.customer_remarks"
                 rows="3"
               ></b-form-textarea>
             </b-form-group>
@@ -334,33 +358,143 @@
               </b-col>
             </b-row>
             <b-row>
+              <!-- equipment -->
               <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  label-class="p-sm-2"
+                  v-bind:label="$trans('Search equipment')"
+                >
+                  <multiselect
+                    id="maintenance-contract-equipment-name"
+                    ref="multiselect_equipment"
+                    track-by="id"
+                    label="name"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="equipmentSearch"
+                    :multiple="false"
+                    :loading="isLoading"
+                    :internal-search="false"
+                    :clear-on-select="true"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="true"
+                    :hide-selected="true"
+                    @search-change="getEquipmentDebounced"
+                    @select="selectEquipment"
+                  >
+                <span slot="noResult">
+                  <h5>{{ $trans('No equipment found') }}</h5>
+                  <p>
+                    <b-button
+                      @click="showAddEquipmentModal"
+                      class="btn btn-primary"
+                      size="sm"
+                      type="button"
+                      variant="primary"
+                    >
+                      {{ $trans("Add new equipment") }}
+                    </b-button>
+                  </p>
+
+                </span>
+                  </multiselect>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Equipment')"
                   label-for="order-orderline-product"
                 >
-                  <b-form-input
-                    id="order-orderline-product"
-                    size="sm"
-                    v-model="product"
-                  ></b-form-input>
+                  <b-input-group class="sm">
+                    <b-form-input
+                      id="order-orderline-product"
+                      size="sm"
+                      readonly
+                      v-model="product"
+                    ></b-form-input>
+                    <b-input-group-append>
+                      <b-button variant="outline-success" v-if="equipment" size="sm">
+                        <b-icon-check></b-icon-check>
+                      </b-button>
+                    </b-input-group-append>
+                  </b-input-group>
                 </b-form-group>
               </b-col>
+              <!-- end equipment -->
+
+              <!-- equipment locations -->
               <b-col cols="4" role="group">
                 <b-form-group
                   label-size="sm"
-                  v-bind:label="$trans('Location')"
-                  label-for="order-orderline-location"
+                  label-class="p-sm-2"
+                  v-bind:label="$trans('Search location')"
                 >
-                  <b-form-input
-                    id="order-orderline-location"
-                    size="sm"
-                    v-model="location"
-                  ></b-form-input>
+                  <multiselect
+                    id="location-name"
+                    ref="multiselect_location"
+                    track-by="id"
+                    label="name"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="locationSearch"
+                    :multiple="false"
+                    :loading="isLoading"
+                    :internal-search="false"
+                    :clear-on-select="true"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="true"
+                    :hide-selected="true"
+                    @search-change="getLocationDebounced"
+                    @select="selectLocation"
+                  >
+                <span slot="noResult">
+                  <h5>{{ $trans('No locations found') }}</h5>
+                  <p>
+                    <b-button
+                      @click="showAddLocationModal"
+                      class="btn btn-primary"
+                      size="sm"
+                      type="button"
+                      variant="primary"
+                    >
+                      {{ $trans("Add new location") }}
+                    </b-button>
+                  </p>
+                </span>
+                  </multiselect>
                 </b-form-group>
               </b-col>
-              <b-col cols="4" role="group">
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Location')"
+                  label-for="order-orderline-equipment-location"
+                >
+                  <b-input-group class="sm">
+                    <b-form-input
+                      id="order-orderline-equipment-location"
+                      size="sm"
+                      readonly
+                      v-model="location"
+                    ></b-form-input>
+                    <b-input-group-append>
+                      <b-button variant="outline-success" v-if="equipment_location" size="sm">
+                        <b-icon-check></b-icon-check>
+                      </b-button>
+                    </b-input-group-append>
+                  </b-input-group>
+                </b-form-group>
+              </b-col>
+              <!-- end equipment locations -->
+              <b-col cols="12" role="group">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
@@ -373,6 +507,7 @@
                   ></b-form-textarea>
                 </b-form-group>
               </b-col>
+
             </b-row>
             <footer class="modal-footer">
               <b-button v-if="isEditOrderLine" @click="doEditOrderLine" class="btn btn-primary" size="sm" type="button" variant="warning">
@@ -442,14 +577,17 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
 
-import orderModel from '@/models/orders/Order.js'
-import customerModel from '@/models/customer/Customer.js'
-import documentModel from '@/models/orders/Document.js'
-import accountModel from '@/models/account/Account.js'
+import orderModel from '../../models/orders/Order.js'
+import branchModel from '../../models/company/Branch.js'
+import documentModel from '../../models/orders/Document.js'
+import accountModel from '../../models/account/Account.js'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import Collapse from '@/components/Collapse.vue'
-import infolineModel from "../../models/orders/Infoline";
+import AwesomeDebouncePromise from "awesome-debounce-promise";
+import equipmentModel from "../../models/equipment/equipment";
+import locationModel from "../../models/equipment/location";
+import Multiselect from "vue-multiselect";
 import orderlineModel from "../../models/orders/Orderline";
 
 export default {
@@ -457,6 +595,7 @@ export default {
     return { v$: useVuelidate() }
   },
   components: {
+    Multiselect,
     OrderTypesSelect,
     Collapse
   },
@@ -484,9 +623,13 @@ export default {
       buttonDisabled: false,
       editIndex: null,
       isEditOrderLine: false,
+
       product: '',
+      equipment: null,
       location: '',
+      equipment_location: null,
       remarks: '',
+
       info: '',
       orderLineFields: [
         { key: 'product', label: this.$trans('Product') },
@@ -505,16 +648,24 @@ export default {
       files: [],
       documents: [],
       orderPk: null,
-      customer: null,
+      branch: null,
+
+      getEquipmentDebounced: null,
+      equipmentSearch: [],
+      newEquipmentName: null,
+
+      getLocationDebounced: null,
+      locationSearch: [],
+      newLocationName: null,
+
+      isEditEquipment: false,
+
       deletedOrderlines: [],
     }
   },
   validations() {
     return {
       order: {
-        customer_id: {
-          required,
-        },
         order_name: {
           required,
         },
@@ -551,6 +702,104 @@ export default {
     }
   },
   methods: {
+    // equipment
+    showAddEquipmentModal() {
+      this.$refs.multiselect_equipment.deactivate()
+      this.newEquipmentName =this.$refs.multiselect_equipment.$refs.search.value
+      this.$refs['new-equipment-modal'].show()
+    },
+    cancelCreateEquipment() {
+      this.$refs['new-equipment-modal'].hide()
+    },
+    async submitCreateEquipment() {
+      this.$refs.multiselect_equipment.deactivate()
+
+      try {
+        if (!this.hasBranches) {
+          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+            await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
+            await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
+
+          this.equipment = response.id
+          this.product = response.name
+        } else {
+          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+            await equipmentModel.quickAddBranchPlanning(this.newEquipmentName, this.order.branch) :
+            await equipmentModel.quickAddBranchNonPlanning(this.newEquipmentName)
+
+          this.equipment = response.id
+          this.product = response.name
+        }
+      }  catch(error) {
+        console.log('Error adding equipment', error)
+        this.errorToast(this.$trans('Error adding equipment'))
+      }
+    },
+    async getEquipment(query) {
+      try {
+        this.equipmentSearch = await equipmentModel.searchBranchEmployee(query)
+
+      } catch(error) {
+        console.log('Error searching equipment', error)
+        this.errorToast(this.$trans('Error searching equipment'))
+      }
+    },
+    equipmentLabel({ name }) {
+      return name
+    },
+    selectEquipment(option) {
+      this.equipment = option.id
+      this.product = option.name
+    },
+    // equipment locations
+    showAddLocationModal() {
+      this.$refs.multiselect_location.deactivate()
+      this.newLocationName =this.$refs.multiselect_location.$refs.search.value
+      this.$refs['new-location-modal'].show()
+    },
+    cancelCreateLocation() {
+      this.$refs['new-location-modal'].hide()
+    },
+    async submitCreateLocation() {
+      this.$refs.multiselect_location.deactivate()
+
+      try {
+        if (!this.hasBranches) {
+          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+            await locationModel.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
+            await locationModel.quickAddCustomerNonPlanning(this.newLocationName)
+
+          this.equipment_location = response.id
+          this.location = response.name
+        } else {
+          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+            await locationModel.quickAddBranchPlanning(this.newLocationName, this.order.branch) :
+            await locationModel.quickAddBranchNonPlanning(this.newLocationName)
+
+          this.equipment_location = response.id
+          this.location = response.name
+        }
+      }  catch(error) {
+        console.log('Error adding location', error)
+        this.errorToast(this.$trans('Error adding location'))
+      }
+    },
+    async getLocation(query) {
+      try {
+        this.locationSearch = await locationModel.searchBranchEmployee(query, this.order.branch)
+      } catch(error) {
+        console.log('Error searching location', error)
+        this.errorToast(this.$trans('Error searching location'))
+      }
+    },
+    locationLabel({ name }) {
+      return name
+    },
+    selectLocation(option) {
+      this.equipment_location = option.id
+      this.location = option.name
+    },
+
     // documents
     filesSelected(files) {
       for (let i=0;i<files.length; i++) {
@@ -589,28 +838,41 @@ export default {
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
+
+      if (item.equipment && item.equipment_location) {
+        this.equipment_location = item.equipment_location
+        this.equipment = item.equipment
+        this.isEditEquipment = true
+      }
     },
     emptyOrderLine() {
       this.product = ''
       this.location = ''
       this.remarks = ''
+      this.equipment_location = null
+      this.equipment = null
     },
     doEditOrderLine() {
       const orderLine = {
         product: this.product,
         location: this.location,
-        remarks: this.remarks
+        remarks: this.remarks,
+        equipment_location: this.equipment_location,
+        equipment: this.equipment,
       }
       this.order.orderlines.splice(this.editIndex, 1, orderLine)
       this.editIndex = null
       this.isEditOrderLine = false
+      this.isEditEquipment = false
       this.emptyOrderLine()
     },
     addOrderLine() {
       this.order.orderlines.push({
         product: this.product,
         location: this.location,
-        remarks: this.remarks
+        remarks: this.remarks,
+        equipment_location: this.equipment_location,
+        equipment: this.equipment,
       })
       this.emptyOrderLine()
     },
@@ -653,7 +915,7 @@ export default {
             console.log('Error creating infolines', error)
           }
 
-          // add documents
+          // insert documents
           try {
             for (const document of this.documents) {
               document.order = newOrder.id
@@ -681,7 +943,6 @@ export default {
       try {
         const orderlines = this.order.orderlines
         this.order.orderlines = []
-
         await orderModel.update(this.pk, this.order)
 
         for (let orderline of orderlines) {
@@ -727,30 +988,31 @@ export default {
   async created () {
     this.isLoading = true
 
+    this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
+    this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
+
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     try {
       this.countries = await this.$store.dispatch('getCountries')
-      const user = await accountModel.getUserDetails()
-      const customer = await customerModel.detail(user.user.customer_user.customer)
+      const branch = await branchModel.getMyBranch()
+      console.log(branch)
 
       if (this.isCreate) {
         this.order = orderModel.getFields()
-        this.order.customer_relation = customer.id
-        this.order.customer_id = customer.customer_id
-        this.order.order_name = customer.name
-        this.order.order_address = customer.address
-        this.order.order_postal = customer.postal
-        this.order.city = customer.city
-        this.order.order_country_code = customer.country_code
+        this.order.branch = branch.id
+        this.order.order_name = branch.name
+        this.order.order_address = branch.address
+        this.order.order_postal = branch.postal
+        this.order.city = branch.city
+        this.order.order_country_code = branch.country_code
       } else {
         this.order = await this.loadOrder()
         this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
         this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
-        this.order.customer_relation = customer.id
-        this.order.customer_id = customer.customer_id
+        this.order.branch = branch.id
       }
       this.isLoading = false
     } catch (error) {

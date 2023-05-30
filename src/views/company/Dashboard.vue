@@ -363,7 +363,6 @@ export default {
           }]
         }
 
-
         // assigned count: bar graph
         let graphDataAssignedCount = [], labelsAssignedCount = [];
         if (data.assigned_count.length > 1) {
@@ -385,7 +384,6 @@ export default {
             backgroundColor: '#f87979',
           }]
         }
-
 
         // top materials used: bar graph
         let graphDataTopMaterials = [], labelsTopMaterials = [];
@@ -473,14 +471,33 @@ export default {
           }]
         }
 
-        const orderTypeStatsData = await orderModel.getOrderTypesStats()
-        const monthsStatsData = await orderModel.getMonthsStats()
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStats()
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStats()
+        if (this.hasBranches) {
+          const orderTypeStatsData = await orderModel.getOrderTypesStatsBranch()
+          const monthsStatsData = await orderModel.getMonthsStatsBranch()
+          const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsBranch()
+          const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsBranch()
 
-        this.$refs['order-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-        )
+          if ('order-stats' in this.$refs && typeof this.$refs['order-stats'].render === "function") {
+            this.$refs['order-stats'].render(
+              orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
+            )
+          }
+
+          this.isLoading = false
+
+          return
+        }
+
+        const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer()
+        const monthsStatsData = await orderModel.getMonthsStatsCustomer()
+        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsCustomer()
+        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsCustomer()
+
+        if ('order-stats' in this.$refs && typeof this.$refs['order-stats'].render === "function") {
+          this.$refs['order-stats'].render(
+            orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
+          )
+        }
 
         this.isLoading = false
       } catch(error) {

@@ -1,7 +1,6 @@
 import axios from "axios"
 import { expect } from 'chai'
-import { shallowMount, mount } from '@vue/test-utils'
-import { render } from '@vue/server-test-utils'
+import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
@@ -9,8 +8,6 @@ import flushPromises from 'flush-promises'
 import localVue from '../../index'
 import OrderListNotAccepted from '@/views/orders/OrderListNotAccepted.vue'
 import ordersResponse from '../../fixtures/orders'
-
-jest.mock('axios')
 
 const routes = [
 {
@@ -33,6 +30,19 @@ const routes = [
 
 const router = new VueRouter({routes})
 
+jest.mock('axios')
+
+axios.get.mockImplementation((url) => {
+  switch (url) {
+    case '/order/order/all_for_customer_not_accepted/?page=1':
+      return Promise.resolve(ordersResponse)
+    case '/order/order/all_for_customer_not_accepted_count/':
+      return Promise.resolve({count: 1})
+    default:
+      console.error(`${url} not found`)
+      return Promise.reject(new Error(`${url} not found`))
+  }
+})
 
 describe('OrderListNotAccepted.vue', () => {
   let mock
@@ -42,7 +52,8 @@ describe('OrderListNotAccepted.vue', () => {
   beforeEach(() => {
     actions = {
       getStatuscodes: () => [],
-      getMemberType: () => 'maintenance'
+      getMemberType: () => 'maintenance',
+      getAssignOrders: () => {}
     }
 
     store = new Vuex.Store({
@@ -89,6 +100,7 @@ describe('OrderListNotAccepted.vue', () => {
 
     await flushPromises()
 
+    // console.log(wrapper.html())
     const trs = wrapper.findAll('#order-table > tbody > tr')
     expect(trs.length).to.equal(2)
   })

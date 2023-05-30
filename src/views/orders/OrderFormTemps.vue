@@ -424,6 +424,7 @@ import orderModel from '@/models/orders/Order.js'
 import customerModel from '@/models/customer/Customer.js'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
+import orderlineModel from "../../models/orders/Orderline";
 
 export default {
   setup() {
@@ -473,7 +474,8 @@ export default {
       errorMessage: null,
       customers: [],
       customerSearch: '',
-      selectedCustomer: null
+      selectedCustomer: null,
+      deletedOrderlines: [],
     }
   },
   validations() {
@@ -527,14 +529,15 @@ export default {
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
-      this.getCustomers('')
+      await this.getCustomers('')
     } else {
-      this.loadOrder()
+      await this.loadOrder()
     }
   },
   methods: {
     // order lines
     deleteOrderLine(index) {
+      this.deletedOrderlines.push(this.order.orderlines[index])
       this.order.orderlines.splice(index, 1)
     },
     editOrderLine(item, index) {
@@ -608,7 +611,21 @@ export default {
 
       if (this.isCreate) {
         try {
-          await orderModel.insert(this.order)
+          const orderlines = this.order.orderlines
+          this.order.orderlines = []
+
+          const newOrder = await orderModel.insert(this.order)
+
+          // add orderlines
+          try {
+            for (const orderline of orderlines) {
+              orderline.order = newOrder.id
+              await orderlineModel.insert(orderline)
+            }
+          } catch(error) {
+            console.log('Error creating infolines', error)
+          }
+
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -629,7 +646,31 @@ export default {
       }
 
       try {
+        const orderlines = this.order.orderlines
+        this.order.orderlines = []
+
         await orderModel.update(this.pk, this.order)
+
+        // orderlines create/update
+        for (let orderline of orderlines) {
+          orderline.order = this.pk
+          if (orderline.id) {
+            await orderlineModel.update(orderline.id, orderline)
+            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+          } else {
+            await orderlineModel.insert(orderline)
+            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+          }
+        }
+
+        // orderlines delete
+        for (const orderline of this.deletedOrderlines) {
+          if (orderline.id) {
+            await orderlineModel.delete(orderline.id)
+            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+          }
+        }
+
         this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
