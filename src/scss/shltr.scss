@@ -1,0 +1,24 @@
+// Define variable defaults
+
+// Primair, groen, #c4d82e
+// Secundair, antraciet, #293133
+// Tertiair, blauw, #14377d
+
+// color-primary: #000000;
+//color-secondary: #FFFFFF;
+//color-text: #000000;
+//color-accent: #30BFBF;
+//global-color-1cf88dd:
+
+$my24: #000000;
+$primary: #000000;
+$secondary: #30BFBF;
+
+$navbar-light-color: #30BFBF;
+$active-link: #30BFBF;
+$normal-link: #30BFBF;
+$font-size-base: 0.9rem;
+
+// Then import Bootstrap an BootstrapVue SCSS files (order is important)
+@import 'node_modules/bootstrap/scss/bootstrap.scss';
+@import 'node_modules/bootstrap-vue/src/index.scss';

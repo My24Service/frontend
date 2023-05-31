@@ -32,6 +32,10 @@ export default defineConfig({
             scopeName: "theme-saled",
             path: path.resolve("./src/scss/saled.scss"),
           },
+          {
+            scopeName: "theme-shltr",
+            path: path.resolve("./src/scss/shltr.scss"),
+          },
         ],
         // add scopeName to html tag className. default use multipleScopeVars[0].scopeName
         defaultScopeName: "",
