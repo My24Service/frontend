@@ -111,11 +111,11 @@
             </b-link>
           </b-col>
       </b-row>
-      <b-row class="my-2" v-if="order.workorder_pdf_url != ''">
+      <b-row class="my-2" v-if="order.workorder_pdf_url">
           <b-col cols="2"><strong>{{ $trans('Download PDF') }}</strong></b-col>
           <b-col cols="9">
             <b-link class="px-1" :href="order.workorder_pdf_url" target="_blank">
-              {{ $trans('Order') }} {{ order.order_id }}
+              {{ $trans('Order') }} {{ order.order_id }} |{{ order.workorder_pdf_url }}|
             </b-link>
           </b-col>
       </b-row>

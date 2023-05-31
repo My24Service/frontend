@@ -68,6 +68,9 @@ class Order extends BaseModel {
   }
 
   preInsert(order) {
+    delete order.created
+    delete order.modified
+
     // check date types
     if (typeof order.start_date === 'object') {
       order.start_date = moment(order.start_date).format('YYYY-MM-DD')
@@ -81,6 +84,9 @@ class Order extends BaseModel {
   }
 
   preUpdate(order) {
+    delete order.created
+    delete order.modified
+
     // check date types
     if (typeof order.start_date === 'object') {
       order.start_date = moment(order.start_date).format('YYYY-MM-DD')
