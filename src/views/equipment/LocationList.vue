@@ -58,6 +58,11 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(name)="data">
+          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
+            {{ data.item.name }}
+          </router-link><br/>
+        </template>
         <template #cell(customer)="data">
           <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
@@ -116,6 +121,13 @@ export default {
         return 'customers-location-edit'
       }
     },
+    viewLink() {
+      if (this.hasBranches) {
+        return 'equipment-location-view'
+      } else {
+        return 'customers-location-view'
+      }
+    },
     newLink() {
       if (this.hasBranches) {
         return 'equipment-location-add'
@@ -161,6 +173,7 @@ export default {
     }
   },
   created() {
+    locationModel.resetListArgs()
     if (this.hasBranches) {
       if (this.isEmployee) {
         this.fields = this.fieldsBranchNonPlanning
