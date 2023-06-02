@@ -39,6 +39,10 @@ class BaseModel {
     this.listArgs = [listArgs]
   }
 
+  resetListArgs() {
+    this.listArgs = []
+  }
+
   getCsrfToken() {
     return this.axios.get('/get-csrf-token/').then((response) => response.data.token)
   }

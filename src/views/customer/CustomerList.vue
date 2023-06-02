@@ -49,6 +49,10 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
+                <ButtonLinkDownload
+                  v-bind:method="function() { downloadList() }"
+                  v-bind:title="$trans('Download')"
+                />
               </b-button-group>
             </b-button-toolbar>
           </div>
@@ -145,15 +149,17 @@
 </template>
 
 <script>
-import customerModel from '@/models/customer/Customer.js'
-import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
+import customerModel from '../../models/customer/Customer.js'
+import IconLinkDocuments from '../../components/IconLinkDocuments.vue'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import ButtonLinkDownload from "../../components/ButtonLinkDownload";
+import Pagination from "../../components/Pagination.vue"
+import my24 from "../../services/my24";
 
 export default {
   name: 'CustomerList',
@@ -163,6 +169,7 @@ export default {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
+    ButtonLinkDownload,
     ButtonLinkAdd,
     SearchModal,
     Pagination,
@@ -186,6 +193,13 @@ export default {
     this.loadData()
   },
   methods: {
+    // download
+    downloadList() {
+      if (confirm(this.$trans('Are you sure you want to export all customers?'))) {
+        const url = this.model.getExportUrl()
+        my24.downloadItem(url, 'customers.xlsx')
+      }
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

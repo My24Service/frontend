@@ -103,7 +103,11 @@
     </b-row>
     <b-row>
       <b-col cols="12">
-        <h6><b-badge>{{ $trans('Status') }}</b-badge><span class="info">{{ order.last_status_full }}</span></h6>
+        <h6>
+          <b-badge>{{ $trans('Status') }}</b-badge>
+          <span v-if="order.last_status_full" class="info">{{ order.last_status_full }}</span>
+          <span v-if="!order.last_status_full" class="info">{{ order.last_status.created }} {{ order.last_status.status }}</span>
+        </h6>
       </b-col>
     </b-row>
     <b-row>

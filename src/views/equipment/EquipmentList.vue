@@ -58,6 +58,11 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(name)="data">
+          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
+            {{ data.item.name }}
+          </router-link><br/>
+        </template>
         <template #cell(customer)="data">
           <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
@@ -97,6 +102,7 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {componentMixin} from "../../utils";
+import locationModel from "../../models/equipment/location";
 
 export default {
   mixins: [componentMixin],
@@ -116,6 +122,13 @@ export default {
         return 'equipment-equipment-edit'
       } else {
         return 'customers-equipment-edit'
+      }
+    },
+    viewLink() {
+      if (this.hasBranches) {
+        return 'equipment-equipment-view'
+      } else {
+        return 'customers-equipment-view'
       }
     },
     newLink() {
@@ -166,6 +179,7 @@ export default {
     }
   },
   async created() {
+    equipmentModel.resetListArgs()
     this.isLoading = true
     this.model.currentPage = this.$route.query.page || 1
 

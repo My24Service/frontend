@@ -20,7 +20,7 @@ class My24 extends BaseModel {
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
-  downloadItem(url, name) {
+  downloadItem(url, name, callback) {
     this.axios
       .get(url, { responseType: 'blob' })
       .then((response) => {
@@ -30,6 +30,12 @@ class My24 extends BaseModel {
         link.download = name;
         link.click();
         URL.revokeObjectURL(link.href);
+        link.remove()
+
+        if (callback) {
+          return callback()
+        }
+
       })
       .catch(console.error);
   }

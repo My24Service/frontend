@@ -7,6 +7,8 @@ import LocationForm from '../views/equipment/LocationForm.vue'
 import SubNavEquipment from "../components/SubNavEquipment";
 import TheAppLayout from "../components/TheAppLayout";
 import {AUTH_LEVELS} from "../constants";
+import EquipmentView from "../views/equipment/EquipmentView";
+import LocationView from "../views/equipment/LocationView";
 
 export default [
   {
@@ -33,6 +35,19 @@ export default [
         path: '/equipment/equipment/form/:pk',
         components: {
           'app-content': EquipmentForm,
+          'app-subnav': SubNavEquipment
+        },
+        props: {
+          'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'equipment-equipment-view',
+        path: '/equipment/equipment/:pk',
+        components: {
+          'app-content': EquipmentView,
           'app-subnav': SubNavEquipment
         },
         props: {
@@ -73,6 +88,19 @@ export default [
         path: '/equipment/locations/form/:pk',
         components: {
           'app-content': LocationForm,
+          'app-subnav': SubNavEquipment
+        },
+        props: {
+          'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'equipment-location-view',
+        path: '/equipment/locations/:pk',
+        components: {
+          'app-content': LocationView,
           'app-subnav': SubNavEquipment
         },
         props: {

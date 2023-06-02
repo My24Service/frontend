@@ -15,6 +15,11 @@ import VueRouter from 'vue-router'
 import Loading from 'vue-loading-overlay'
 import { ColorPicker, ColorPanel } from "one-colorpicker"
 
+import 'vue-spinners/dist/vue-spinners.css'
+import VueSpinners from 'vue-spinners/dist/vue-spinners.common'
+
+Vue.use(VueSpinners)
+
 import VueCompositionAPI from '@vue/composition-api'
 Vue.use(VueCompositionAPI)
 
@@ -127,7 +132,8 @@ import './scss/shared.scss'
 // themes
 const defaultTheme = 'theme-default'
 const themes = {
-  'saled': 'theme-saled'
+  'saled': 'theme-saled',
+  'shltr': 'theme-shltr'
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 

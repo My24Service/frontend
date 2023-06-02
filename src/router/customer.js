@@ -22,6 +22,8 @@ import LocationForm from '../views/equipment/LocationForm.vue'
 
 import Calendar from '../views/customer/Calendar.vue'
 import {AUTH_LEVELS} from "../constants";
+import EquipmentView from "../views/equipment/EquipmentView";
+import LocationView from "../views/equipment/LocationView";
 
 export default [
 {
@@ -241,6 +243,18 @@ export default [
       },
     },
     {
+      name: 'customers-equipment-view',
+      path: '/customers/equipment/:pk',
+      components: {
+        'app-content': EquipmentView,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
+    {
       name: 'customers-equipment-add',
       path: '/customers/equipment/form',
       components: {
@@ -270,6 +284,18 @@ export default [
       path: '/customers/locations/form/:pk',
       components: {
         'app-content': LocationForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'customers-location-view',
+      path: '/customers/locations/:pk',
+      components: {
+        'app-content': LocationView,
         'app-subnav': SubNavCustomers
       },
       props: {
