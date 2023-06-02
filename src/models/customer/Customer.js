@@ -48,6 +48,17 @@ class Customer extends BaseModel {
   getNewCustomerIdFromLatest() {
     return this.axios.get(`${this.url}get_new_customer_id_from_latest/`).then((result) => result.data)
   }
+
+  getExportUrl() {
+    let listArgs = []
+
+    if (this.searchQuery) {
+      listArgs.push(`q=${this.searchQuery}`)
+    }
+
+    return `/customer/export/?${listArgs.join('&')}`
+  }
+
 }
 
 let customerModel = new Customer()
