@@ -1,5 +1,4 @@
 import BaseModel from '@/models/base';
-import {saveAs} from 'file-saver';
 
 
 class My24 extends BaseModel {
