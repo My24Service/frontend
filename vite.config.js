@@ -10,7 +10,7 @@ export default defineConfig({
   //   sourcemap: true
   // },
   server: {
-    host: 'stormy.my24service.com',
+    host: 'demo.my24service-dev.com',
   },
   plugins: [
     vue(),

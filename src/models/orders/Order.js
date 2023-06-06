@@ -36,6 +36,7 @@ class Order extends BaseModel {
     'end_date': tomorrow.toDate(),
     'end_time': null,
     'order_date': '',
+    // 'visibility': 'private',
     'customer_remarks': '',
     'remarks': '',
     'required_users': 1,

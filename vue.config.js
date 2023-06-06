@@ -1,6 +1,6 @@
 module.exports = {
   devServer: {
-    host: 'stormy.my24service.com'
+    host: 'demo.my24service-dev.com'
   },
   filenameHashing: false,
   productionSourceMap: false,
