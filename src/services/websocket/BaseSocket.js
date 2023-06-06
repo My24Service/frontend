@@ -64,14 +64,16 @@ class BaseSocket {
     }
 
     const response = await axios.get(url)
-    if (response && typeof response.then === "function") {
-      const result = response.then((response) => response.data)
+    if (response) {
+      const result = response.data
       if (this.debug) {
         console.log(`${this.name}: got room from backend: ${result.room}`)
       }
       this._storeRoom(url, result.room)
 
       return result.room
+    } else {
+      console.log(`no valid response for ${url}`)
     }
   }
 

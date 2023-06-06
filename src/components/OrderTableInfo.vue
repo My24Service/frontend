@@ -1,6 +1,6 @@
 <template>
   <b-container v-if="isLoaded">
-    <b-row v-if="!order.orderlines.length && !order.infolines.length">
+    <b-row v-if="!order.orderlines.length && !hasInfolines">
       <b-col>
         {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
           {{ order.order_id }}
@@ -35,7 +35,7 @@
         </p>
       </b-col>
     </b-row>
-    <b-row v-if="order.orderlines.length || order.infolines.length" >
+    <b-row v-if="order.orderlines.length || hasInfolines" >
       <b-col>
         {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
           {{ order.order_id }}
@@ -141,6 +141,15 @@ export default {
   async created() {
     this.memberType = await this.$store.dispatch('getMemberType')
     this.isLoaded = true
+  },
+  computed: {
+    hasInfolines() {
+      if (!this.order.infolines) {
+        return false
+      }
+
+      return this.order.infolines.length > 0
+    }
   },
   data() {
     return {
