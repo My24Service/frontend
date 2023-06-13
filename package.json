@@ -40,6 +40,7 @@
     "vue-password-strength-meter": "^1.7.2",
     "vue-router": "^3.5.2",
     "vue-spinners": "^1.0.2",
+    "vue-tour": "^2.0.0",
     "vuex": "^3.6.2",
     "zxcvbn": "^4.4.2"
   },
