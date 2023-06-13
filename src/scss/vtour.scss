@@ -1,0 +1,33 @@
+.v-step {
+  background: white;
+  box-shadow: 0 1ex 1rem #0000004d;
+  border-radius: 1ex;
+
+  .v-step__content {
+    padding: 1ex 1rem
+  }
+
+  .v-step__buttons {
+    padding: 1ex 1rem;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    gap: 1ex;
+  }
+
+  button {
+    color: $my24;
+    border: 1px solid currentColor;
+    border-radius: .35ex;
+    background: white;
+    &:hover {
+      color: white;
+      background-color: $my24;
+      border: 1px solid $my24;
+    }
+    &:focus {
+      box-shadow: 0 0 0 2px lighten($my24, 25%);
+      border-color: white;
+    }
+  }
+}

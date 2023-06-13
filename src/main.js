@@ -13,7 +13,10 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import Loading from 'vue-loading-overlay'
-import { ColorPicker, ColorPanel } from "one-colorpicker"
+import { ColorPicker, ColorPanel } from 'one-colorpicker'
+
+import VueTour from 'vue-tour'
+Vue.use(VueTour);
 
 import 'vue-spinners/dist/vue-spinners.css'
 import VueSpinners from 'vue-spinners/dist/vue-spinners.common'
