@@ -152,26 +152,12 @@
       <b-table
         small
         id="workhours-table"
-        :fields="workHoursFields"
-        :items="workHours"
+        :fields="userDataFields"
+        :items="userData"
         responsive="md"
         class="data-table"
       >
       </b-table>
-
-      <div v-if="activity.length > 0">
-        <h4 align="center">{{ $trans("Activity") }}</h4>
-        <b-table
-          small
-          id="activity-table"
-          :fields="activityFields"
-          :items="activity"
-          responsive="md"
-          class="data-table"
-        >
-        </b-table>
-
-      </div>
     </div>
 
   </div>
@@ -219,31 +205,18 @@ export default {
       fullName: null,
       // excludeDays: ['Su', 'Sa'],
       excludeDays: [],
-      workHours: [],
-      workHoursFields: [
+      userData: [],
+      userDataFields: [
+        {label: this.$trans('Date'), key: 'date'},
+        {label: this.$trans('Source'), key: 'source'},
+        {label: this.$trans('Work start'), key: 'work_start'},
+        {label: this.$trans('Work end'), key: 'work_end'},
+        {label: this.$trans('Travel to'), key: 'travel_to'},
+        {label: this.$trans('Travel back'), key: 'travel_back'},
+        {label: this.$trans('Distance to'), key: 'distance_to'},
+        {label: this.$trans('Distance back'), key: 'distance_back'},
         {label: this.$trans('Project'), key: 'project_name'},
-        {label: this.$trans('Date'), key: 'start_date'},
-        {label: this.$trans('Work start'), key: 'work_start'},
-        {label: this.$trans('Work end'), key: 'work_end'},
-        {label: this.$trans('Travel to'), key: 'travel_to'},
-        {label: this.$trans('Travel back'), key: 'travel_back'},
-        {label: this.$trans('Distance to'), key: 'distance_to'},
-        {label: this.$trans('Distance back'), key: 'distance_back'},
-      ],
-      activity: [],
-      activityFields: [
-        {label: this.$trans('Order'), key: 'order'},
-        {label: this.$trans('Date'), key: 'activity_date'},
-        {label: this.$trans('Work start'), key: 'work_start'},
-        {label: this.$trans('Work end'), key: 'work_end'},
-        {label: this.$trans('Travel to'), key: 'travel_to'},
-        {label: this.$trans('Travel back'), key: 'travel_back'},
-        {label: this.$trans('Distance to'), key: 'distance_to'},
-        {label: this.$trans('Distance back'), key: 'distance_back'},
-        {label: this.$trans('Distance to'), key: 'distance_to'},
-        {label: this.$trans('Extra work'), key: 'extra_work'},
-        {label: this.$trans('Extra work description'), key: 'extra_work_description'},
-        {label: this.$trans('Actual work'), key: 'actual_work'},
+        {label: this.$trans('Customer'), key: 'customer_name'},
       ],
       dateQueryMode: [
         {
@@ -356,15 +329,15 @@ export default {
       }
       this.$router.push({ query }).catch(e => {})
     },
-    formatDays(day_data) {
+    formatFields(day_data) {
       let result = []
       if (day_data) {
         for(let i=0; i<day_data.length; i++) {
           if (day_data[i]) {
-            if (this.field_types[i] === 'duration') {
-              result.push(this.displayDurationFromSeconds(day_data[i], true))
+            if (day_data[i].type === 'duration') {
+              result.push(this.displayDurationFromSeconds(day_data[i].total, true))
             } else {
-              result.push(day_data[i])
+              result.push(day_data[i].total)
             }
           }
         }
@@ -375,29 +348,20 @@ export default {
     addUserDataToResults(userData, results) {
       const keys = Object.keys(userData)
       const data = userData[keys[0]]
-      let user_totals = []
-      for (let k = 0; k < this.annotate_fields.length; k++) {
-        if (this.field_types[k] === 'duration') {
-          user_totals.push(data.user_totals[this.annotate_fields[k]].asMilliseconds())
-        } else {
-          user_totals.push(data.user_totals[this.annotate_fields[k]])
-        }
-      }
-      data.user_totals = user_totals
       results.push(data)
 
       return results
     },
-    formatValue(val, index) {
-      if (!val) {
+    formatValue(valObj) {
+      if (!valObj) {
         return
       }
 
-      if (this.field_types[index] === 'duration') {
-        return this.displayDurationFromSeconds(val, true)
+      if (valObj.type === 'duration') {
+        return this.displayDurationFromSeconds(valObj.total, true)
       }
 
-      return val
+      return valObj.total
     },
     normalizeData(result) {
       let userData = {}
@@ -418,15 +382,7 @@ export default {
           userData[obj.user_id] = {
             user: obj,
             interval_totals: [],
-            user_totals: {}
-          }
-
-          for (let k=0; k<this.annotate_fields.length; k++) {
-            if (this.field_types[k] === 'duration') {
-              userData[obj.user_id].user_totals[this.annotate_fields[k]] = moment.duration(0)
-            } else {
-              userData[obj.user_id].user_totals[this.annotate_fields[k]] = 0
-            }
+            user_totals: []
           }
         }
 
@@ -435,18 +391,27 @@ export default {
           if (date.format('YYYY-MM-DD') === this.date_list[j]) {
             let interval_data = []
             if (this.excludeDays.indexOf(date.format("dd")) === -1) {
-              for (let k=0; k<this.annotate_fields.length; k++) {
-                interval_data.push(result[i][this.annotate_fields[k]])
-                if (this.field_types[k] === 'duration') {
-                  userData[obj.user_id].user_totals[this.annotate_fields[k]].add(
-                    moment.duration(result[i][this.annotate_fields[k]]))
-                } else {
-                  userData[obj.user_id].user_totals[this.annotate_fields[k]] +=
-                    result[i][this.annotate_fields[k]]
-                }
+              for (const [field, window_fields] of Object.entries(this.totals_fields)) {
+                const total = result[i][window_fields.interval_total]
+                interval_data.push({
+                  total,
+                  field,
+                  type: window_fields.type
+                })
               }
             }
             userData[obj.user_id].interval_totals[j] = interval_data
+          }
+        }
+
+        if (userData[obj.user_id].user_totals.length === 0) {
+          for (const [field, window_fields] of Object.entries(this.totals_fields)) {
+            const total = result[i][window_fields.total]
+            userData[obj.user_id].user_totals.push({
+              total,
+              field,
+              type: window_fields.type
+            })
           }
         }
       }
@@ -488,8 +453,7 @@ export default {
       return label
     },
     _processData(data) {
-      this.annotate_fields = data.annotate_fields
-      this.field_types = data.field_types
+      this.totals_fields = data.totals_fields
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
       })
@@ -525,7 +489,7 @@ export default {
 
       this.fields = header_columns
 
-      const normalizedData = this.normalizeData(data.result)
+      const normalizedData = this.normalizeData(data.totals)
       // console.log(normalizedData)
       let results = []
 
@@ -534,11 +498,11 @@ export default {
         let obj = normalizedData[i].user
 
         for(let j=0; j<normalizedData[i].interval_totals.length; j++) {
-          obj[`field${j}`] = this.formatDays(normalizedData[i].interval_totals[j])
+          obj[`field${j}`] = this.formatFields(normalizedData[i].interval_totals[j])
         }
 
         // add week totals
-        const user_totals = this.formatDays(normalizedData[i].user_totals)
+        const user_totals = this.formatFields(normalizedData[i].user_totals)
         if (user_totals) {
           obj['total'] = user_totals
           // obj['total'] = `${week_totals} (${data.result[i].perc})`
@@ -553,10 +517,8 @@ export default {
     },
     _processDataDetail(data) {
       this.fullName = data.full_name
-      this.annotate_fields = data.annotate_fields
-      this.field_types = data.field_types
-      this.workHours = data.workhours_data
-      this.activity = data.activity_data
+      this.totals_fields = data.totals_fields
+      this.userData = data.user_data
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
       })
@@ -582,25 +544,36 @@ export default {
       this.fields = header_columns
 
       // create array for table
-      const normalizedData = this.normalizeData(data.result)
-      // console.log(normalizedData)
+      const normalizedData = this.normalizeData(data.totals)
       let results = []
 
-      if (data.result.length) {
-        for(let i=0; i<this.annotate_fields.length; i++) {
-          let field = this.annotate_fields[i]
-
+      if (data.totals.length) {
+        for (const [field, _] of Object.entries(this.totals_fields)) {
           let row = {
             field: this.translateHoursField(field)
           }
 
           for(let j=0; j<normalizedData.interval_totals.length; j++) {
-            if (j in normalizedData.interval_totals && i in normalizedData.interval_totals[j]) {
-              row[`field${j}`] = this.formatValue(normalizedData.interval_totals[j][i], i)
+            if (!normalizedData.interval_totals[j]) {
+              continue
+            }
+
+            for(let k=0; k<normalizedData.interval_totals[j].length; k++) {
+              if (!normalizedData.interval_totals[j][k]) {
+                continue
+              }
+
+              if (normalizedData.interval_totals[j][k].field === field) {
+                row[`field${j}`] = this.formatValue(normalizedData.interval_totals[j][k])
+              }
             }
           }
 
-          row['total'] = this.formatValue(normalizedData.user_totals[i], i)
+          for (let i=0; i<normalizedData.user_totals.length; i++) {
+            if (normalizedData.user_totals[i].field === field) {
+              row['total'] = this.formatValue(normalizedData.user_totals[i])
+            }
+          }
 
           results.push(row)
         }
