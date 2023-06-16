@@ -29,7 +29,7 @@
         </b-link>
       </b-col>
       <b-col cols="8" class="text-center">
-        <h4 align="center" v-if="!isDetail">{{ hoursTitle }} - {{ today.format('YYYY') }}</h4>
+        <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('YYYY') }}</h4>
         <h4 align="center" v-if="isDetail">{{ $trans('Year totals') }} - {{ today.format('YYYY') }}</h4>
       </b-col>
       <b-col cols="2">
@@ -48,7 +48,7 @@
         </b-link>
       </b-col>
       <b-col cols="8" class="text-center">
-        <h4 align="center" v-if="!isDetail">{{ hoursTitle }} - {{ today.format('MMM YYYY') }}</h4>
+        <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('MMM YYYY') }}</h4>
         <h4 align="center" v-if="isDetail">{{ $trans('Month totals') }} - {{ today.format('MMM YYYY') }}</h4>
       </b-col>
       <b-col cols="2">
@@ -67,7 +67,7 @@
         </b-link>
       </b-col>
       <b-col cols="8">
-        <h4 align="center" v-if="!isDetail">{{ hoursTitle }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
+        <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
         <h4 align="center" v-if="isDetail">{{ $trans('Week totals') }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
       </b-col>
       <b-col cols="2">
@@ -232,6 +232,7 @@ export default {
           value: 'year'
         },
       ],
+      listTitle: null
     }
   },
   computed: {
@@ -253,15 +254,6 @@ export default {
     isDetail() {
       return !!this.user_id
     },
-    hoursTitle() {
-      let result = []
-      if (this.annotate_fields) {
-        for(let i=0; i<this.annotate_fields.length; i++) {
-          result.push(this.translateHoursField(this.annotate_fields[i]))
-        }
-      }
-      return result.join(' / ')
-    }
   },
   created() {
     const lang = this.$store.getters.getCurrentLanguage
@@ -272,6 +264,13 @@ export default {
     this.activeDateQueryMode = this.$route.query.mode ? this.$route.query.mode : 'week'
   },
   methods: {
+    getListTitle(totalsFields) {
+      let result = []
+      for (const key of Object.keys(totalsFields)) {
+        result.push(this.translateHoursField(key))
+      }
+      return result.join(' / ')
+    },
     nextWeek() {
       this.today.add(7, 'days')
       const query = {
@@ -334,11 +333,7 @@ export default {
       if (day_data) {
         for(let i=0; i<day_data.length; i++) {
           if (day_data[i]) {
-            if (day_data[i].type === 'duration') {
-              result.push(this.displayDurationFromSeconds(day_data[i].total, true))
-            } else {
-              result.push(day_data[i].total)
-            }
+            result.push(day_data[i].total)
           }
         }
       }
@@ -353,17 +348,9 @@ export default {
       return results
     },
     formatValue(valObj) {
-      if (!valObj) {
-        return
-      }
-
-      if (valObj.type === 'duration') {
-        return this.displayDurationFromSeconds(valObj.total, true)
-      }
-
       return valObj.total
     },
-    normalizeData(result) {
+    normalizeData(result, totalsFields, intervals) {
       let userData = {}
       let results = []
       // for(let i=0; i<20; i++) {
@@ -386,31 +373,28 @@ export default {
           }
         }
 
-        for (let j = 0; j < this.date_list.length; j++) {
-          const date = this.$moment(result[i].bucket)
-          if (date.format('YYYY-MM-DD') === this.date_list[j]) {
-            let interval_data = []
-            if (this.excludeDays.indexOf(date.format("dd")) === -1) {
-              for (const [field, window_fields] of Object.entries(this.totals_fields)) {
-                const total = result[i][window_fields.interval_total]
-                interval_data.push({
-                  total,
-                  field,
-                  type: window_fields.type
-                })
-              }
-            }
+        for (let j = 0; j < intervals.length; j++) {
+          if (result[i].interval !== intervals[j]) {
+            continue
+          }
+
+          let interval_data = []
+          for (const [field, window_fields] of Object.entries(totalsFields)) {
+            const total = result[i][window_fields.interval_total]
+            interval_data.push({
+              total,
+              field,
+            })
             userData[obj.user_id].interval_totals[j] = interval_data
           }
         }
 
         if (userData[obj.user_id].user_totals.length === 0) {
-          for (const [field, window_fields] of Object.entries(this.totals_fields)) {
+          for (const [field, window_fields] of Object.entries(totalsFields)) {
             const total = result[i][window_fields.total]
             userData[obj.user_id].user_totals.push({
               total,
               field,
-              type: window_fields.type
             })
           }
         }
@@ -453,7 +437,7 @@ export default {
       return label
     },
     _processData(data) {
-      this.totals_fields = data.totals_fields
+      this.listTitle = this.getListTitle(data.totals_fields)
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
       })
@@ -489,7 +473,7 @@ export default {
 
       this.fields = header_columns
 
-      const normalizedData = this.normalizeData(data.totals)
+      const normalizedData = this.normalizeData(data.totals, data.totals_fields, data.intervals)
       // console.log(normalizedData)
       let results = []
 
@@ -517,7 +501,6 @@ export default {
     },
     _processDataDetail(data) {
       this.fullName = data.full_name
-      this.totals_fields = data.totals_fields
       this.userData = data.user_data
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
@@ -544,11 +527,12 @@ export default {
       this.fields = header_columns
 
       // create array for table
-      const normalizedData = this.normalizeData(data.totals)
+      const normalizedData = this.normalizeData(data.totals, data.totals_fields, data.intervals)
+      // console.log(normalizedData)
       let results = []
 
       if (data.totals.length) {
-        for (const [field, _] of Object.entries(this.totals_fields)) {
+        for (const [field, _] of Object.entries(data.totals_fields)) {
           let row = {
             field: this.translateHoursField(field)
           }
@@ -564,14 +548,14 @@ export default {
               }
 
               if (normalizedData.interval_totals[j][k].field === field) {
-                row[`field${j}`] = this.formatValue(normalizedData.interval_totals[j][k])
+                row[`field${j}`] = normalizedData.interval_totals[j][k].total
               }
             }
           }
 
           for (let i=0; i<normalizedData.user_totals.length; i++) {
             if (normalizedData.user_totals[i].field === field) {
-              row['total'] = this.formatValue(normalizedData.user_totals[i])
+              row['total'] = normalizedData.user_totals[i].total
             }
           }
 
