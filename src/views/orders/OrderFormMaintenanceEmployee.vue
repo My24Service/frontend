@@ -386,21 +386,20 @@
                     @search-change="getEquipmentDebounced"
                     @select="selectEquipment"
                   >
-                <span slot="noResult">
-                  <h5>{{ $trans('No equipment found') }}</h5>
-                  <p>
-                    <b-button
-                      @click="showAddEquipmentModal"
-                      class="btn btn-primary"
-                      size="sm"
-                      type="button"
-                      variant="primary"
-                    >
-                      {{ $trans("Add new equipment") }}
-                    </b-button>
-                  </p>
-
-                </span>
+                    <span slot="noResult">
+                      <h5>{{ $trans('No equipment found') }}</h5>
+                      <p v-if="canQuickCreateEquipment">
+                        <b-button
+                          @click="showAddEquipmentModal"
+                          class="btn btn-primary"
+                          size="sm"
+                          type="button"
+                          variant="primary"
+                        >
+                          {{ $trans("Add new equipment") }}
+                        </b-button>
+                      </p>
+                    </span>
                   </multiselect>
                 </b-form-group>
               </b-col>
@@ -454,21 +453,22 @@
                     :hide-selected="true"
                     @search-change="getLocationDebounced"
                     @select="selectLocation"
+                    :disabled="locationSearchDisabled"
                   >
-                <span slot="noResult">
-                  <h5>{{ $trans('No locations found') }}</h5>
-                  <p>
-                    <b-button
-                      @click="showAddLocationModal"
-                      class="btn btn-primary"
-                      size="sm"
-                      type="button"
-                      variant="primary"
-                    >
-                      {{ $trans("Add new location") }}
-                    </b-button>
-                  </p>
-                </span>
+                    <span slot="noResult">
+                      <h5>{{ $trans('No locations found') }}</h5>
+                      <p v-if="canQuickCreateEquipmentLocation">
+                        <b-button
+                          @click="showAddLocationModal"
+                          class="btn btn-primary"
+                          size="sm"
+                          type="button"
+                          variant="primary"
+                        >
+                          {{ $trans("Add new location") }}
+                        </b-button>
+                      </p>
+                    </span>
                   </multiselect>
                 </b-form-group>
               </b-col>
@@ -657,6 +657,7 @@ export default {
       getLocationDebounced: null,
       locationSearch: [],
       newLocationName: null,
+      locationSearchDisabled: false,
 
       isEditEquipment: false,
 
@@ -688,6 +689,12 @@ export default {
     }
   },
   computed: {
+    canQuickCreateEquipment() {
+      return this.$store.getters.getSettingEquipmentQuickCreate
+    },
+    canQuickCreateEquipmentLocation() {
+      return this.$store.getters.getSettingEquipmentLocationQuickCreate
+    },
     startDate() {
       return this.order.start_date
     },
@@ -750,6 +757,12 @@ export default {
     selectEquipment(option) {
       this.equipment = option.id
       this.product = option.name
+
+      if (option.location) {
+        this.equipment_location = option.location.id
+        this.location = option.location.name
+        this.locationSearchDisabled = true
+      }
     },
     // equipment locations
     showAddLocationModal() {
@@ -998,7 +1011,6 @@ export default {
     try {
       this.countries = await this.$store.dispatch('getCountries')
       const branch = await branchModel.getMyBranch()
-      console.log(branch)
 
       if (this.isCreate) {
         this.order = orderModel.getFields()
@@ -1006,7 +1018,7 @@ export default {
         this.order.order_name = branch.name
         this.order.order_address = branch.address
         this.order.order_postal = branch.postal
-        this.order.city = branch.city
+        this.order.order_city = branch.city
         this.order.order_country_code = branch.country_code
       } else {
         this.order = await this.loadOrder()

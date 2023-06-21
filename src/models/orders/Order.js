@@ -160,6 +160,13 @@ class Order extends BaseModel {
     return response && 'data' in response ? response.data.order_types_stats : {}
   }
 
+  async getOrderTypesStatsBuilding(buildingPk) {
+    const url = `${this.url}order_types_stats/?building=${buildingPk}`
+
+    const response = await this.axios.get(url)
+    return response && 'data' in response ? response.data.order_types_stats : {}
+  }
+
   // order types month
   async getOrderTypesMonthsStatsCustomer(customerPk) {
     const url = customerPk ? `${this.url}order_types_month_stats/?customer=${customerPk}` : `${this.url}order_types_month_stats/`
@@ -184,6 +191,13 @@ class Order extends BaseModel {
 
   async getOrderTypesMonthsStatsEquipment(equipmentPk) {
     const url = `${this.url}order_types_month_stats/?equipment=${equipmentPk}`
+
+    const response = await this.axios.get(url)
+    return response && 'data' in response ? response.data.order_types_month_stats : {}
+  }
+
+  async getOrderTypesMonthsStatsBuilding(buildingPk) {
+    const url = `${this.url}order_types_month_stats/?building=${buildingPk}`
 
     const response = await this.axios.get(url)
     return response && 'data' in response ? response.data.order_types_month_stats : {}
@@ -218,6 +232,13 @@ class Order extends BaseModel {
     return response && 'data' in response ? response.data.order_counts_stats : {}
   }
 
+  async getMonthsStatsBuilding(buildingPk) {
+    const url = `${this.url}order_counts_stats/?building=${buildingPk}`
+
+    const response = await this.axios.get(url)
+    return response && 'data' in response ? response.data.order_counts_stats : {}
+  }
+
   // order types year
   async getCountsYearOrdertypeStatsCustomer(customerPk) {
     const url = customerPk ? `${this.url}counts_year_order_type_stats/?customer=${customerPk}` : `${this.url}counts_year_order_type_stats/`
@@ -239,6 +260,12 @@ class Order extends BaseModel {
 
   async getCountsYearOrdertypeStatsEquipment(equipmentPk) {
     const url = `${this.url}counts_year_order_type_stats/?equipment=${equipmentPk}`
+    const response = await this.axios.get(url)
+    return response && 'data' in response ? response.data.counts_year_order_type_stats : {}
+  }
+
+  async getCountsYearOrdertypeStatsBuilding(buildingPk) {
+    const url = `${this.url}counts_year_order_type_stats/?building=${buildingPk}`
     const response = await this.axios.get(url)
     return response && 'data' in response ? response.data.counts_year_order_type_stats : {}
   }

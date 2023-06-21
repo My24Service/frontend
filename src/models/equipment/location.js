@@ -5,6 +5,7 @@ class Location extends BaseModel {
     'customer': null,
     'branch': null,
     'name': null,
+    'building': null,
     'created': null,
     'modified': null,
   }
@@ -60,6 +61,11 @@ class Location extends BaseModel {
     }
 
     return this.axios.post(`${this.url}create_quick/`, data).then(response => response.data)
+  }
+
+  listForSelect() {
+    return this.axios.get(`${this.url}list_for_select/`)
+      .then((response) => response.data)
   }
 }
 

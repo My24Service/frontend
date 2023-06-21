@@ -537,6 +537,12 @@ export default {
     }
   },
   computed: {
+    // canQuickCreateEquipment() {
+    //   return this.$store.getters.getSettingEquipmentQuickCreate
+    // },
+    // canQuickCreateEquipmentLocation() {
+    //   return this.$store.getters.getSettingEquipmentLocationQuickCreate
+    // },
     startDate() {
       return this.order.start_date
     },
