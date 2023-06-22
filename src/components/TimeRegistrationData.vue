@@ -215,8 +215,8 @@ export default {
         {label: this.$trans('Travel back'), key: 'travel_back'},
         {label: this.$trans('Distance to'), key: 'distance_to'},
         {label: this.$trans('Distance back'), key: 'distance_back'},
-        {label: this.$trans('Project'), key: 'project_name'},
-        {label: this.$trans('Customer'), key: 'customer_name'},
+        {label: this.$trans('Leave hours'), key: 'leave_duration'},
+        {label: this.$trans('Description'), key: 'description'},
       ],
       dateQueryMode: [
         {
