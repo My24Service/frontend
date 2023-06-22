@@ -23,6 +23,7 @@ class Order extends BaseModel {
     'order_city': '',
     'order_country_code': 'NL',
     'customer_relation': null,
+    'branch': null,
     'order_type': null,
     'order_reference': '',
     'order_tel': '',
