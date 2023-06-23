@@ -147,13 +147,26 @@
     >
     </b-table>
 
+    <div v-if="isDetail && leaveData.length > 0">
+      <h4 align="center">{{ $trans("Leave") }}</h4>
+      <b-table
+        small
+        id="workhours-table"
+        :fields="leaveDataFields"
+        :items="leaveData"
+        responsive="md"
+        class="data-table"
+      >
+      </b-table>
+    </div>
+
     <div v-if="isDetail">
       <h4 align="center">{{ $trans("Workhours") }}</h4>
       <b-table
         small
         id="workhours-table"
-        :fields="userDataFields"
-        :items="userData"
+        :fields="workhourDataFields"
+        :items="workhourData"
         responsive="md"
         class="data-table"
       >
@@ -197,16 +210,14 @@ export default {
       dataFields: [],
       sortBy: "full_name",
       sortDesc: false,
-      annotate_fields: [],
-      field_types: [],
       date_list: [],
       date_list_moment: [],
       activeDateQueryMode: 'week',
       fullName: null,
       // excludeDays: ['Su', 'Sa'],
       excludeDays: [],
-      userData: [],
-      userDataFields: [
+      workhourData: [],
+      workhourDataFields: [
         {label: this.$trans('Date'), key: 'date'},
         {label: this.$trans('Source'), key: 'source'},
         {label: this.$trans('Work start'), key: 'work_start'},
@@ -215,8 +226,13 @@ export default {
         {label: this.$trans('Travel back'), key: 'travel_back'},
         {label: this.$trans('Distance to'), key: 'distance_to'},
         {label: this.$trans('Distance back'), key: 'distance_back'},
-        {label: this.$trans('Leave hours'), key: 'leave_duration'},
         {label: this.$trans('Description'), key: 'description'},
+      ],
+      leaveData: [],
+      leaveDataFields: [
+        {label: this.$trans('Date'), key: 'date'},
+        {label: this.$trans('Leave hours'), key: 'leave_duration'},
+        {label: this.$trans('Leave type'), key: 'leave_type'},
       ],
       dateQueryMode: [
         {
@@ -266,7 +282,7 @@ export default {
   methods: {
     getListTitle(totalsFields) {
       let result = []
-      for (const key of Object.keys(totalsFields)) {
+      for (const key of totalsFields) {
         result.push(this.translateHoursField(key))
       }
       return result.join(' / ')
@@ -379,19 +395,19 @@ export default {
           }
 
           let interval_data = []
-          for (const [field, window_fields] of Object.entries(totalsFields)) {
-            const total = result[i][window_fields.interval_total]
+          for (const field of totalsFields) {
+            const total = result[i][field].interval_total
             interval_data.push({
               total,
               field,
             })
             userData[obj.user_id].interval_totals[j] = interval_data
           }
-        }
+        } // end for all intervals
 
         if (userData[obj.user_id].user_totals.length === 0) {
-          for (const [field, window_fields] of Object.entries(totalsFields)) {
-            const total = result[i][window_fields.total]
+          for (const field of totalsFields) {
+            const total = result[i][field].total
             userData[obj.user_id].user_totals.push({
               total,
               field,
@@ -437,6 +453,8 @@ export default {
       return label
     },
     _processData(data) {
+      this.workhourData = []
+      this.leaveData = []
       this.listTitle = this.getListTitle(data.totals_fields)
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
@@ -501,7 +519,8 @@ export default {
     },
     _processDataDetail(data) {
       this.fullName = data.full_name
-      this.userData = data.user_data
+      this.workhourData = data.workhour_data
+      this.leaveData = data.leave_data
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
       })
@@ -532,7 +551,7 @@ export default {
       let results = []
 
       if (data.totals.length) {
-        for (const [field, _] of Object.entries(data.totals_fields)) {
+        for (const field of data.totals_fields) {
           let row = {
             field: this.translateHoursField(field)
           }
