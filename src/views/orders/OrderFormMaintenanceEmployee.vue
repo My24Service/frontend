@@ -1024,6 +1024,10 @@ export default {
         this.order.order_postal = branch.postal
         this.order.order_city = branch.city
         this.order.order_country_code = branch.country_code
+        this.order.order_tel = branch.tel
+        this.order.order_mobile = branch.mobile
+        this.order.order_email = branch.email
+        this.order.order_contact = branch.contact
       } else {
         this.order = await this.loadOrder()
         this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
