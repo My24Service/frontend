@@ -484,9 +484,13 @@ export default {
       buttonDisabled: false,
       editIndex: null,
       isEditOrderLine: false,
+
+      orderline_pk: null,
       product: '',
       location: '',
       remarks: '',
+
+      infoline_pk: null,
       info: '',
       orderLineFields: [
         { key: 'product', label: this.$trans('Product') },
@@ -592,17 +596,20 @@ export default {
       this.editIndex = index
       this.isEditOrderLine = true
 
+      this.orderline_pk = item.id
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
     },
     emptyOrderLine() {
+      this.orderline_pk = null
       this.product = ''
       this.location = ''
       this.remarks = ''
     },
     doEditOrderLine() {
       const orderLine = {
+        id: this.orderline_pk,
         product: this.product,
         location: this.location,
         remarks: this.remarks

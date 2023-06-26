@@ -624,6 +624,7 @@ export default {
       editIndex: null,
       isEditOrderLine: false,
 
+      orderline_pk: null,
       product: '',
       equipment: null,
       location: '',
@@ -848,6 +849,7 @@ export default {
       this.editIndex = index
       this.isEditOrderLine = true
 
+      this.orderline_pk = item.id
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
@@ -859,6 +861,7 @@ export default {
       }
     },
     emptyOrderLine() {
+      this.orderline_pk = null
       this.product = ''
       this.location = ''
       this.remarks = ''
@@ -867,6 +870,7 @@ export default {
     },
     doEditOrderLine() {
       const orderLine = {
+        id: this.orderline_pk,
         product: this.product,
         location: this.location,
         remarks: this.remarks,

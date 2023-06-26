@@ -836,7 +836,7 @@
               {{ $trans('Submit') }}
             </b-button>
           </footer>
-          <footer class="modal-footer" v-if="!isCreate && !hasBranches && (unaccepted || !order.customer_order_accepted)">
+          <footer class="modal-footer" v-if="!isCreate && (unaccepted || !order.customer_order_accepted)">
             <b-button
               @click="reject"
               class="btn btn-danger"
@@ -928,6 +928,7 @@ export default {
       editIndex: null,
       acceptOrder: false,
 
+      orderline_pk: null,
       product: '',
       equipment: null,
       location: '',
@@ -936,6 +937,7 @@ export default {
 
       isEditOrderLine: false,
 
+      infoline_pk: null,
       info: '',
       isEditInfoLine: false,
 
@@ -1241,9 +1243,11 @@ export default {
       this.editIndex = index
       this.isEditOrderLine = true
 
+      this.orderline_pk = item.id
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
+      console.log(this.orderline_pk)
 
       if (item.equipment && item.equipment_location) {
         this.equipment_location = item.equipment_location
@@ -1252,6 +1256,7 @@ export default {
       }
     },
     emptyOrderLine() {
+      this.orderline_pk = null
       this.product = ''
       this.location = ''
       this.remarks = ''
@@ -1260,6 +1265,7 @@ export default {
     },
     doEditOrderLine() {
       const orderLine = {
+        id: this.orderline_pk,
         product: this.product,
         location: this.location,
         remarks: this.remarks,
@@ -1289,16 +1295,19 @@ export default {
       this.order.infolines.splice(index, 1)
     },
     editInfoLine(item, index) {
+      this.infoline_pk = item.id
       this.editIndex = index
       this.isEditInfoLine = true
 
       this.info = item.info
     },
     emptyInfoLine() {
+      this.infoline_pk = null
       this.info = ''
     },
     doEditInfoLine() {
       const infoLine = {
+        id: this.infoline_pk,
         info: this.info,
       }
       this.order.infolines.splice(this.editIndex, 1, infoLine)
@@ -1484,6 +1493,7 @@ export default {
         return
       }
 
+      // edit
       try {
         delete this.order.customer_order_accepted
         const orderlines = this.order.orderlines
