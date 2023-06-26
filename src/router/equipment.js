@@ -10,6 +10,10 @@ import {AUTH_LEVELS} from "../constants";
 import EquipmentView from "../views/equipment/EquipmentView";
 import LocationView from "../views/equipment/LocationView";
 
+import BuildingList from "../views/equipment/BuildingList";
+import BuildingForm from "../views/equipment/BuildingForm";
+import BuildingView from "../views/equipment/BuildingView";
+
 export default [
   {
     path: '/equipment',
@@ -114,6 +118,59 @@ export default [
         path: '/equipment/locations/form',
         components: {
           'app-content': LocationForm,
+          'app-subnav': SubNavEquipment
+        },
+        props: {
+          'app-content': {},
+          'app-subnav': true
+        },
+      },
+      // buildings
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'equipment-building-list',
+        path: '/equipment/buildings',
+        components: {
+          'app-content': BuildingList,
+          'app-subnav': SubNavEquipment
+        },
+        props: {
+          'app-content': {},
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'equipment-building-edit',
+        path: '/equipment/buildings/form/:pk',
+        components: {
+          'app-content': BuildingForm,
+          'app-subnav': SubNavEquipment
+        },
+        props: {
+          'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'equipment-building-view',
+        path: '/equipment/buildings/:pk',
+        components: {
+          'app-content': BuildingView,
+          'app-subnav': SubNavEquipment
+        },
+        props: {
+          'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'equipment-building-add',
+        path: '/equipment/buildings/form',
+        components: {
+          'app-content': BuildingForm,
           'app-subnav': SubNavEquipment
         },
         props: {

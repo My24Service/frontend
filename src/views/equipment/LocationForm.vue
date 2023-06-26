@@ -197,7 +197,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="12" role="group">
+          <b-col cols="8" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Name')"
@@ -214,6 +214,21 @@
                 :state="isSubmitClicked ? !v$.location.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col size="4">
+            <b-form-group
+              v-bind:label="$trans('Building')"
+              label-for="location_building"
+            >
+              <b-form-select
+                id="location_building"
+                v-model="location.building"
+                :options="buildings"
+                size="sm"
+                value-field="id"
+                text-field="name"
+              ></b-form-select>
             </b-form-group>
           </b-col>
         </b-row>
@@ -251,6 +266,7 @@ import locationModel from '../../models/equipment/location.js'
 import {componentMixin} from "../../utils";
 import customerModel from "../../models/customer/Customer";
 import branchModel from "../../models/company/Branch";
+import buildingModel from "../../models/equipment/building";
 
 export default {
   mixins: [componentMixin],
@@ -280,6 +296,7 @@ export default {
       getBranchesDebounced: null,
       branchesSearch: [],
       branch: null,
+      buildings: []
     }
   },
   validations() {
@@ -326,9 +343,10 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
+  async created() {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
+    this.buildings = await buildingModel.listForSelect()
 
     if (!this.isCreate) {
       this.loadData()

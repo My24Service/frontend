@@ -472,21 +472,20 @@
                     @select="selectEquipment"
                     :disabled="!equipmentFormSearchOk"
                   >
-                <span slot="noResult">
-                  <h5>{{ $trans('No equipment found') }}</h5>
-                  <p>
-                    <b-button
-                      @click="showAddEquipmentModal"
-                      class="btn btn-primary"
-                      size="sm"
-                      type="button"
-                      variant="primary"
-                    >
-                      {{ $trans("Add new equipment") }}
-                    </b-button>
-                  </p>
-
-                </span>
+                    <span slot="noResult">
+                      <h5>{{ $trans('No equipment found') }}</h5>
+                      <p v-if="canQuickCreateEquipment">
+                        <b-button
+                          @click="showAddEquipmentModal"
+                          class="btn btn-primary"
+                          size="sm"
+                          type="button"
+                          variant="primary"
+                        >
+                          {{ $trans("Add new equipment") }}
+                        </b-button>
+                      </p>
+                    </span>
                   </multiselect>
                 </b-form-group>
               </b-col>
@@ -556,22 +555,22 @@
                     :hide-selected="true"
                     @search-change="getLocationDebounced"
                     @select="selectLocation"
-                    :disabled="!equipmentFormSearchOk"
+                    :disabled="!equipmentFormSearchOk || locationSearchDisabled"
                   >
-                <span slot="noResult">
-                  <h5>{{ $trans('No locations found') }}</h5>
-                  <p>
-                    <b-button
-                      @click="showAddLocationModal"
-                      class="btn btn-primary"
-                      size="sm"
-                      type="button"
-                      variant="primary"
-                    >
-                      {{ $trans("Add new location") }}
-                    </b-button>
-                  </p>
-                </span>
+                    <span slot="noResult">
+                      <h5>{{ $trans('No locations found') }}</h5>
+                      <p v-if="canQuickCreateEquipmentLocation">
+                        <b-button
+                          @click="showAddLocationModal"
+                          class="btn btn-primary"
+                          size="sm"
+                          type="button"
+                          variant="primary"
+                        >
+                          {{ $trans("Add new location") }}
+                        </b-button>
+                      </p>
+                    </span>
                   </multiselect>
                 </b-form-group>
               </b-col>
@@ -837,7 +836,7 @@
               {{ $trans('Submit') }}
             </b-button>
           </footer>
-          <footer class="modal-footer" v-if="!isCreate && !hasBranches && (unaccepted || !order.customer_order_accepted)">
+          <footer class="modal-footer" v-if="!isCreate && (unaccepted || !order.customer_order_accepted)">
             <b-button
               @click="reject"
               class="btn btn-danger"
@@ -929,6 +928,7 @@ export default {
       editIndex: null,
       acceptOrder: false,
 
+      orderline_pk: null,
       product: '',
       equipment: null,
       location: '',
@@ -937,6 +937,7 @@ export default {
 
       isEditOrderLine: false,
 
+      infoline_pk: null,
       info: '',
       isEditInfoLine: false,
 
@@ -986,6 +987,7 @@ export default {
       getLocationDebounced: null,
       locationSearch: [],
       newLocationName: null,
+      locationSearchDisabled: false,
 
       isEditEquipment: false,
 
@@ -1046,6 +1048,12 @@ export default {
     }
   },
   computed: {
+    canQuickCreateEquipment() {
+      return this.$store.getters.getSettingEquipmentPlanningQuickCreate
+    },
+    canQuickCreateEquipmentLocation() {
+      return this.$store.getters.getSettingEquipmentLocationPlanningQuickCreate
+    },
     equipmentFormSearchOk() {
       if (!this.hasBranches) {
         return this.order.customer_relation !== null
@@ -1054,7 +1062,6 @@ export default {
       }
     },
     usesEquipment() {
-      // return true
       return this.hasBranches || this.isEditEquipment
     },
     startDate() {
@@ -1072,7 +1079,6 @@ export default {
     isOrderLineValid() {
       return this.location !== null && this.location !== "" && this.product !== null && this.product !== ""
     }
-
   },
   async created () {
     const lang = this.$store.getters.getCurrentLanguage
@@ -1144,6 +1150,12 @@ export default {
     selectEquipment(option) {
       this.equipment = option.id
       this.product = option.name
+
+      if (option.location) {
+        this.equipment_location = option.location.id
+        this.location = option.location.name
+        this.locationSearchDisabled = true
+      }
     },
     // equipment locations
     showAddLocationModal() {
@@ -1231,9 +1243,11 @@ export default {
       this.editIndex = index
       this.isEditOrderLine = true
 
+      this.orderline_pk = item.id
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
+      console.log(this.orderline_pk)
 
       if (item.equipment && item.equipment_location) {
         this.equipment_location = item.equipment_location
@@ -1242,6 +1256,7 @@ export default {
       }
     },
     emptyOrderLine() {
+      this.orderline_pk = null
       this.product = ''
       this.location = ''
       this.remarks = ''
@@ -1250,6 +1265,7 @@ export default {
     },
     doEditOrderLine() {
       const orderLine = {
+        id: this.orderline_pk,
         product: this.product,
         location: this.location,
         remarks: this.remarks,
@@ -1279,16 +1295,19 @@ export default {
       this.order.infolines.splice(index, 1)
     },
     editInfoLine(item, index) {
+      this.infoline_pk = item.id
       this.editIndex = index
       this.isEditInfoLine = true
 
       this.info = item.info
     },
     emptyInfoLine() {
+      this.infoline_pk = null
       this.info = ''
     },
     doEditInfoLine() {
       const infoLine = {
+        id: this.infoline_pk,
         info: this.info,
       }
       this.order.infolines.splice(this.editIndex, 1, infoLine)
@@ -1307,7 +1326,7 @@ export default {
       return full_name
     },
     addEngineer(value) {
-      console.log(value)
+      // console.log(value)
     },
 
     customerLabel({ name, address, city}) {
@@ -1474,6 +1493,7 @@ export default {
         return
       }
 
+      // edit
       try {
         delete this.order.customer_order_accepted
         const orderlines = this.order.orderlines
