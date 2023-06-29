@@ -366,7 +366,50 @@ export default {
     formatValue(valObj) {
       return valObj.total
     },
-    normalizeData(result, totalsFields, intervals) {
+    getIntervalData(result, totalsFields, intervals, userId) {
+      let intervalResult = []
+
+      for (let i = 0; i < intervals.length; i++) {
+        let intervalData = []
+
+        for (let j = 0; j < result.length; j++) {
+          if (result[j].user_id === userId && result[j].interval === intervals[i]) {
+            for (let k = 0; k < totalsFields.length; k++) {
+              const field = totalsFields[k]
+              const total = result[j][field].interval_total
+              intervalData.push({
+                total,
+                field
+              });
+            }
+          }
+        }
+
+        intervalResult.push(intervalData)
+      }
+
+      return intervalResult
+    },
+    getUserTotals(result, totalsFields, userId) {
+      for (let i = 0; i < result.length; i++) {
+        if (result[i].user_id === userId) {
+          let intervalResult = []
+          for (let k = 0; k < totalsFields.length; k++) {
+            const field = totalsFields[k]
+            const total = result[i][field].total
+            intervalResult.push({
+              total,
+              field,
+            });
+          }
+
+          return intervalResult;
+        }
+      }
+
+      return [];
+  },
+  normalizeData(result, totalsFields, intervals) {
       let userData = {}
       let results = []
       // for(let i=0; i<20; i++) {
@@ -384,34 +427,8 @@ export default {
 
           userData[obj.user_id] = {
             user: obj,
-            interval_totals: [],
-            user_totals: []
-          }
-        }
-
-        for (let j = 0; j < intervals.length; j++) {
-          if (result[i].interval !== intervals[j]) {
-            continue
-          }
-
-          let interval_data = []
-          for (const field of totalsFields) {
-            const total = result[i][field].interval_total
-            interval_data.push({
-              total,
-              field,
-            })
-            userData[obj.user_id].interval_totals[j] = interval_data
-          }
-        } // end for all intervals
-
-        if (userData[obj.user_id].user_totals.length === 0) {
-          for (const field of totalsFields) {
-            const total = result[i][field].total
-            userData[obj.user_id].user_totals.push({
-              total,
-              field,
-            })
+            interval_totals: this.getIntervalData(result, totalsFields, intervals, obj.user_id),
+            user_totals: this.getUserTotals(result, totalsFields, obj.user_id)
           }
         }
       }
