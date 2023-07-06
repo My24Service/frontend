@@ -107,6 +107,19 @@ export default [
         'app-subnav': SubNavOrders
       },
     },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
+      name: 'order-detail',
+      path: '/orders/orders/detail/:uuid',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': OrderView,
+        'app-subnav': SubNavOrders
+      },
+    },
 	  {
       meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
 	  	name: 'past-order-list',
