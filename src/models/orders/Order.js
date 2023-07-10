@@ -275,6 +275,11 @@ class Order extends BaseModel {
     const response = await this.axios.get(`${this.url}get_top_x_customers/`)
     return response.data.get_top_x_customers
   }
+
+  async detailUuid(uuid) {
+    const url = `${this.url}detail/${uuid}/`
+    return this.axios.get(url).then((response) => response.data)
+  }
 }
 
 let orderModel = new Order()

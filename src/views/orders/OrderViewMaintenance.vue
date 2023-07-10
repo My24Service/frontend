@@ -220,6 +220,10 @@ export default {
       type: [String, Number],
       default: null
     },
+    uuid: {
+      type: [String],
+      default: null
+    },
     past: {
       type: [Boolean],
       default: false
@@ -271,7 +275,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.order = await orderModel.detail(this.pk)
+        this.order = this.pk !== null ? await orderModel.detail(this.pk) : await orderModel.detailUuid(this.uuid)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
