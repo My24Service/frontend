@@ -836,7 +836,7 @@
               {{ $trans('Submit') }}
             </b-button>
           </footer>
-          <footer class="modal-footer" v-if="!isCreate && (unaccepted || !order.customer_order_accepted)">
+          <footer class="modal-footer" v-if="!isCreate && !hasBranches && (unaccepted || !order.customer_order_accepted)">
             <b-button
               @click="reject"
               class="btn btn-danger"
