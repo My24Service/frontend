@@ -1,6 +1,6 @@
 <template>
   <div v-if="isLoaded">
-    <b-nav tabs>
+    <b-nav>
       <b-nav-item
         :active="isActive('dashboard')"
         v-if="hasDashBoard"
@@ -15,15 +15,21 @@
       </b-nav-item>
       <b-nav-item
         v-if="memberType === 'maintenance'"
+        :active="isActive('settings')"
+        :to="{ name: 'company-settings' }">
+        {{ $trans('Settings') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="memberType === 'maintenance'"
         :active="isActive('users')"
         :to="getToRouteMaintenanceUsers">
-        {{ $trans('Users') }}
+        {{ $trans('People') }}
       </b-nav-item>
       <b-nav-item
         v-if="memberType === 'temps'"
         :active="isActive('users')"
         :to="getToRouteTempsUsers">
-        {{ $trans('Users') }}
+        {{ $trans('People') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('partners')"
