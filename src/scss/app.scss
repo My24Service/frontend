@@ -2,10 +2,19 @@
 $my24: #ff9933;
 $primary: $my24;
 $navbar-light-color: $my24;
-$active-link: #222222;
+$active-link: #232c2fd9;
 $normal-link: #fff;
 $font-size-base: 0.9rem;
 
 // Then import Bootstrap an BootstrapVue SCSS files (order is important)
 @import 'node_modules/bootstrap/scss/bootstrap.scss';
 @import 'node_modules/bootstrap-vue/src/index.scss';
+
+html, body {
+  height: 100%;
+  background: #f8f9fe;
+}
+
+#app {
+  // overflow: hidden;
+}
