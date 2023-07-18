@@ -1,84 +1,110 @@
 <template>
-  <div class="app-grid" ref="order-list-past">
+  <div class="app-page" ref="order-list-sales">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="clipboard"></b-icon>
+          <span>Orders</span>
+        </h3>
 
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
+        <div class="flex-columns">
+          <b-button-toolbar>
+            <b-button-group>
+              <ButtonLinkRefresh
+                v-bind:method="function() { loadData() }"
+                v-bind:title="$trans('Refresh')"
+              />
+              <ButtonLinkSearch
+                v-bind:method="function() { showSearchModal() }"
+              />
+              <ButtonLinkSort
+                v-bind:method="function() { showSortModal() }"
+              />
+            </b-button-group>
+          </b-button-toolbar>
+          <router-link class="btn button" :to="{name:'order-add'}">
+            <b-icon icon="clipboard-plus"></b-icon>  {{ $trans('Add Order') }}
+          </router-link>
+        </div>
+      </div>
+    </header>
 
-    <OrderFilters
-      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
-      @set-filter="setStatusFilter"
-      @remove-filter="removeStatusFilter"
-    />
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Order')"
+    <div class="app-detail">
+      <SearchModal
+        id="search-modal"
+        ref="search-modal"
+        @do-search="handleSearchOk"
       />
 
-      <b-table
-        id="order-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="orders"
-        responsive="md"
-        class="data-table"
-        v-bind:tbody-tr-attr="rowStyle"
-      >
-        <template #head(id)="">
-          <span class="text-info">{{ $trans('Order') }}</span>
-        </template>
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(id)="data">
-          <OrderTableInfo
-            v-bind:order="data.item"
-          />
-        </template>
-      </b-table>
+      <OrderFilters
+        :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+        @set-filter="setStatusFilter"
+        @remove-filter="removeStatusFilter"
+      />
+
+      <div class="overflow-auto">
+        <div class="flex-columns">
+
+          <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
+          <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+          <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
+          <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
+          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
+        </div>
+        <hr/>
+
+        <ul class="listing">
+          <li><!-- FIXME -->
+            <div class="headings">
+              <span class="order-id"></span>
+              <span class="order-type">type</span>
+              <span class="order-company-name">company</span>
+              <span class="order-due-date">due date</span>
+              <span class="order-assignees">people</span>
+              <span class="order-status">status</span>
+            </div>
+          </li>
+
+          <li v-if="isLoading" class="text-center my-2">
+            <b-spinner class="align-middle"></b-spinner><br>
+            <strong>{{ $trans('loading orders') }}</strong>
+          </li>
+
+          <li v-for="order in orders" :key="order.id">
+            <OrderTableInfo
+            v-bind:order="order"
+            />
+          </li>
+        </ul>
+
+        <Pagination
+          v-if="!isLoading"
+          :model="this.model"
+          :model_name="$trans('Order')"
+        />
+      </div>
+
     </div>
   </div>
 </template>
 
 <script>
-import my24 from '../../services/my24.js'
 import { OrderSalesService } from '../../models/orders/OrderSales.js'
-import OrderTableInfo from '../../components/OrderTableInfo.vue'
-import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import SearchModal from '../../components/SearchModal.vue'
-import OrderFilters from "../../components/OrderFilters";
-import Pagination from "../../components/Pagination.vue"
+import my24 from '@/services/my24.js'
+import OrderTableInfo from '@/components/OrderTableInfo.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
+import SearchModal from '@/components/SearchModal.vue'
+import OrderFilters from "@/components/OrderFilters";
+import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
     OrderTableInfo,
     ButtonLinkRefresh,
     ButtonLinkSearch,
+    ButtonLinkSort,
     SearchModal,
     OrderFilters,
     Pagination,
