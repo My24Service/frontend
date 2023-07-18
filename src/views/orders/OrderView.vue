@@ -1,5 +1,20 @@
 <template>
-  <div v-if="isLoaded">
+  <div v-if="isLoaded" class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="clipboard"></b-icon>
+          <router-link :to="{name: 'order-list'}">Orders</router-link> / 
+          <strong><span>#</span>{{ pk }}</strong>
+        </h3>
+        <div class="flex-columns">
+          <router-link class="btn button" :to="{name:'order-edit', pk: pk}">
+            <b-icon icon="pencil" font-scale="0.85"></b-icon>
+            edit
+          </router-link>
+        </div>
+      </div>
+    </header>
     <OrderViewMaintenance
       v-if="memberType === 'maintenance'"
       v-bind:pk="pk"
@@ -44,6 +59,11 @@ export default {
   components: {
     OrderViewMaintenance,
     OrderViewTemps,
+  },
+  methods: {
+    goBack() {
+      this.$router.go(-1)
+    }
   },
   async created() {
     // get member type
