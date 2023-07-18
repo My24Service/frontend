@@ -1,100 +1,111 @@
 <template>
-  <div class="app-grid">
-    <b-row align-v="center">
-      <b-col cols="2">
-        <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
-          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
-      </b-col>
-      <b-col cols="8" class="text-center">
-        <h4>{{ $trans('Total orders in ') }} {{ monthTxt }} {{ year }}</h4>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3><b-icon icon="clipboard-data"></b-icon> Order Stats</h3>
+        <div class="flex-columns">
+          view 
+          <router-link class="btn button" to="./year-stats">year</router-link>
+          <router-link class="btn button" to="./month-stats" disabled>month</router-link>
+        </div>
+      </div>
+    </header>
+    <div class="app-detail">
+      <b-row align-v="center">
+        <b-col cols="2">
+          <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+          </b-link>
+        </b-col>
+        <b-col cols="8" class="text-center">
+          <h4>{{ $trans('Total orders in ') }} {{ monthTxt }} {{ year }}</h4>
+          <b-row>
+            <b-col cols="3">
+            </b-col>
+            <b-col cols="2">
+              {{ $trans('Order type') }}:
+            </b-col>
+            <b-col cols="4">
+              <OrderTypesSelect
+                :order-type.sync="orderType"
+                :include-all="true"
+              />
+            </b-col>
+            <b-col cols="3">
+            </b-col>
+          </b-row>
+        </b-col>
+        <b-col cols="2">
+          <div class="float-right">
+            <b-link @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            </b-link>
+          </div>
+        </b-col>
+      </b-row>
+
+      <div class="app-grid">
         <b-row>
-          <b-col cols="3">
-          </b-col>
-          <b-col cols="2">
-            {{ $trans('Order type') }}:
-          </b-col>
-          <b-col cols="4">
-            <OrderTypesSelect
-              :order-type.sync="orderType"
-              :include-all="true"
+          <b-col cols="6">
+            <bar-chart
+              v-if="loaded && !isLoading"
+              :chart-data="chartdataMonthBar"
+              :options="options"
             />
           </b-col>
-          <b-col cols="3">
+          <b-col cols="6">
+            <pie-chart
+              id="pie-chart-year"
+              v-if="!isLoading"
+              :chart-data="chartdataMonthPie"
+              :options="pieOptions"
+            />
           </b-col>
         </b-row>
-      </b-col>
-      <b-col cols="2">
-        <div class="float-right">
-          <b-link @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
-            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-          </b-link>
-        </div>
-      </b-col>
-    </b-row>
+      </div>
 
-    <div class="app-grid">
-      <b-row>
-        <b-col cols="6">
-          <bar-chart
-            v-if="loaded && !isLoading"
-            :chart-data="chartdataMonthBar"
-            :options="options"
-          />
-        </b-col>
-        <b-col cols="6">
-          <pie-chart
-            id="pie-chart-year"
-            v-if="!isLoading"
-            :chart-data="chartdataMonthPie"
-            :options="pieOptions"
-          />
-        </b-col>
-      </b-row>
+      <div class="app-grid">
+        <b-row v-for="(charts, week) in this.weekChartData" :key="week" class="chart-section">
+          <b-col cols="6">
+            <bar-chart
+              :id="`bar-chart-order-types-${week}`"
+              v-if="!isLoading"
+              :chart-data="charts.bar"
+              :options="options"
+            />
+          </b-col>
+          <b-col cols="6">
+            <pie-chart
+              :id="`pie-chart-order-types-${week}`"
+              v-if="!isLoading"
+              :chart-data="charts.pie"
+              :options="pieOptions"
+            />
+          </b-col>
+        </b-row>
+      </div>
+
+      <div class="app-grid">
+        <b-row v-for="(charts, week) in this.weekChartDataAssignedOrders" :key="week" class="chart-section">
+          <b-col cols="6">
+            <bar-chart
+              :id="`bar-chart-assigned-orders-${week}`"
+              v-if="!isLoading"
+              :chart-data="charts.bar"
+              :options="options"
+            />
+          </b-col>
+          <b-col cols="6">
+            <pie-chart
+              :id="`pie-chart-assigned-orders-${week}`"
+              v-if="!isLoading"
+              :chart-data="charts.pie"
+              :options="pieOptions"
+            />
+          </b-col>
+        </b-row>
+      </div>
     </div>
-
-    <div class="app-grid">
-      <b-row v-for="(charts, week) in this.weekChartData" :key="week" class="chart-section">
-        <b-col cols="6">
-          <bar-chart
-            :id="`bar-chart-order-types-${week}`"
-            v-if="!isLoading"
-            :chart-data="charts.bar"
-            :options="options"
-          />
-        </b-col>
-        <b-col cols="6">
-          <pie-chart
-            :id="`pie-chart-order-types-${week}`"
-            v-if="!isLoading"
-            :chart-data="charts.pie"
-            :options="pieOptions"
-          />
-        </b-col>
-      </b-row>
-    </div>
-
-    <div class="app-grid">
-      <b-row v-for="(charts, week) in this.weekChartDataAssignedOrders" :key="week" class="chart-section">
-        <b-col cols="6">
-          <bar-chart
-            :id="`bar-chart-assigned-orders-${week}`"
-            v-if="!isLoading"
-            :chart-data="charts.bar"
-            :options="options"
-          />
-        </b-col>
-        <b-col cols="6">
-          <pie-chart
-            :id="`pie-chart-assigned-orders-${week}`"
-            v-if="!isLoading"
-            :chart-data="charts.pie"
-            :options="pieOptions"
-          />
-        </b-col>
-      </b-row>
-    </div>
-
   </div>
 </template>
 
