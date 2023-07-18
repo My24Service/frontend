@@ -3,12 +3,13 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="clipboard"></b-icon> Orders
+          <b-icon icon="clipboard"></b-icon>
+          <span>Orders</span>
         </h3>
 
         <div class="flex-columns">
           <b-button-toolbar>
-            <b-button-group class="mr-1">
+            <b-button-group>
               <ButtonLinkRefresh
                 v-bind:method="function() { loadData() }"
                 v-bind:title="$trans('Refresh')"
