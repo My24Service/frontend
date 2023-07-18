@@ -1,189 +1,246 @@
 <template>
-  <div class="app-grid" ref="order-list-maintenance">
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="clipboard"></b-icon> Orders
+        </h3>
 
-    <b-modal
-      id="sort-modal"
-      ref="sort-modal"
-      :title="$trans('Sort')"
-      @ok="doSort"
-    >
-      <form ref="sort-form">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <div>
-                <b-form-group :label="$trans('Sort')">
-                  <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
-                  <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
+        <div class="flex-columns">
+          <b-button-toolbar>
+            <b-button-group class="mr-1">
+              <ButtonLinkRefresh
+                v-bind:method="function() { loadData() }"
+                v-bind:title="$trans('Refresh')"
+              />
+              <ButtonLinkSearch
+                v-bind:method="function() { showSearchModal() }"
+              />
+              <ButtonLinkSort
+                v-bind:method="function() { showSortModal() }"
+              />
+            </b-button-group>
+          </b-button-toolbar>
+          <router-link class="btn button" :to="{name:'order-add'}">
+            <b-icon icon="clipboard-plus"></b-icon>  {{ $trans('Add Order') }}
+          </router-link>
+        </div>
+      </div>
+
+    </header>
+    <div class="app-detail" ref="order-list-maintenance">
+      <!-- FIXME sorting modal -->
+      <b-modal
+        id="sort-modal"
+        ref="sort-modal"
+        :title="$trans('Sort')"
+        @ok="doSort"
+      >
+        <form ref="sort-form">
+          <b-container fluid>
+            <b-row role="group">
+              <b-col size="12">
+                <div>
+                  <b-form-group :label="$trans('Sort')">
+                    <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
+                    <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
+                  </b-form-group>
+                </div>
+              </b-col>
+            </b-row>
+          </b-container>
+        </form>
+      </b-modal>
+
+      <!-- FIXME search modal -->
+      <SearchModal
+        id="search-modal"
+        ref="search-modal"
+        @do-search="handleSearchOk"
+      />
+      
+      <!-- delete order modal -->
+      <b-modal
+        v-if="!isCustomer && !isBranchEmployee"
+        id="delete-order-modal"
+        ref="delete-order-modal"
+        v-bind:title="$trans('Delete?')"
+        @ok="doDelete"
+      >
+        <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
+      </b-modal>
+
+      <!-- FIXME change status modal -->
+      <b-modal
+        v-if="!isCustomer && !isBranchEmployee"
+        id="change-status-modal"
+        ref="change-status-modal"
+        v-bind:title="$trans('Add status')"
+        @ok="changeStatus"
+      >
+        <form ref="change-status-form">
+          <b-container fluid>
+            <b-row role="group">
+              <b-col size="4">
+                <b-form-group
+                  v-bind:label="$trans('New status')"
+                  label-for="change-status-status"
+                >
+                  <b-form-select
+                    id="change-status-status"
+                    v-model="status.statuscode"
+                    :options="statuscodes"
+                    size="sm"
+                    value-field="statuscode"
+                    text-field="statuscode"
+                  ></b-form-select>
                 </b-form-group>
-              </div>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+              </b-col>
+              <b-col size="8">
+                <b-form-group
+                  v-bind:label="$trans('Extra text')"
+                  label-for="change-status-extra-text"
+                >
+                  <b-form-input
+                    size="sm"
+                    id="change-status-extra-text"
+                    v-model="status.extra_text"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </b-container>
+        </form>
+      </b-modal>
 
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
-
-    <b-modal
-      v-if="!isCustomer && !isBranchEmployee"
-      id="delete-order-modal"
-      ref="delete-order-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
-    </b-modal>
-
-    <b-modal
-      v-if="!isCustomer && !isBranchEmployee"
-      id="change-status-modal"
-      ref="change-status-modal"
-      v-bind:title="$trans('Add status')"
-      @ok="changeStatus"
-    >
-      <form ref="change-status-form">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="4">
-              <b-form-group
-                v-bind:label="$trans('New status')"
-                label-for="change-status-status"
-              >
-                <b-form-select
-                  id="change-status-status"
-                  v-model="status.statuscode"
-                  :options="statuscodes"
-                  size="sm"
-                  value-field="statuscode"
-                  text-field="statuscode"
-                ></b-form-select>
-              </b-form-group>
-            </b-col>
-            <b-col size="8">
-              <b-form-group
-                v-bind:label="$trans('Extra text')"
-                label-for="change-status-extra-text"
-              >
-                <b-form-input
-                  size="sm"
-                  id="change-status-extra-text"
-                  v-model="status.extra_text"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
-
-    <OrderFilters
-      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
-      @set-filter="setStatusFilter"
-      @remove-filter="removeStatusFilter"
-    />
-
-    <b-row v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
-      <b-col cols="12">
-        <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
-        <span v-for="(order, index) in selectedOrders" :key="order.id">
-          {{ order.order_id }}
-          <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
-        </span>
-        <b-link v-if="dispatch" class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
-          <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
-        </b-link>
-      </b-col>
-    </b-row>
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="model"
-        :model_name="$trans('Order')"
+      <OrderFilters
+        :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+        @set-filter="setStatusFilter"
+        @remove-filter="removeStatusFilter"
       />
 
-      <b-table
-        id="order-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="orders"
-        responsive="md"
-        class="data-table"
-        v-bind:tbody-tr-attr="rowStyle"
-      >
-        <template #head(id)="">
-          <span class="text-info">{{ $trans('Order') }}</span>
-        </template>
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="order-add"
-                  v-bind:title="$trans('New order')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-                <ButtonLinkSort
-                  v-bind:method="function() { showSortModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(id)="data">
-          <OrderTableInfo
-            v-bind:order="data.item"
-          />
-        </template>
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="order-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
+      <b-row v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
+        <b-col cols="12">
+          <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
+          <span v-for="(order, index) in selectedOrders" :key="order.id">
+            {{ order.order_id }}
+            <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
+          </span>
+          <b-link v-if="dispatch" class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
+            <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
+          </b-link>
+        </b-col>
+      </b-row>
+      
+      <div class="overflow-auto">
+        <div class="flex-columns">
+          <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
+          <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+          <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
+          <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
+          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>        
+        </div>
+        <br>
+        <ul class="listing order-list">
+          <li><!-- FIXME -->
+            <div class="headings">
+              <span class="order-id">order id</span>
+              <span class="order-type">type</span>
+              <span class="order-company-name">company</span>
+              <span class="order-start-date">start date</span>
+              <span class="order-assignees">people</span>
+              <span class="order-status">status</span>
+            </div>
+          </li>
+          <li v-if="isLoading" class="text-center my-2 list-loading">
+            <b-spinner class="align-middle"></b-spinner><br>
+            <span>{{ $trans('loading orders') }}</span>
+          </li>
+          <li v-for="order in orders" :key="order.id">
+            <OrderTableInfo
+                v-bind:order="order"
+              />
+          </li>
+        </ul>
+        <Pagination
+          v-if="!isLoading"
+          :model="model"
+          :model_name="$trans('Order')"
+        />
+  <!-- 
+        <b-table
+          id="order-table"
+          small
+          :busy='isLoading'
+          :fields="fields"
+          :items="orders"
+          responsive="md"
+          class="data-table"
+          v-bind:tbody-tr-attr="rowStyle"
+        >
+          <template #head(icons)="">
+            <div class="float-right">
+              <b-button-toolbar>
+                <b-button-group class="mr-1">
+
+                  <ButtonLinkRefresh
+                    v-bind:method="function() { loadData() }"
+                    v-bind:title="$trans('Refresh')"
+                  />
+                  <ButtonLinkSearch
+                    v-bind:method="function() { showSearchModal() }"
+                  />
+                  <ButtonLinkSort
+                    v-bind:method="function() { showSortModal() }"
+                  />
+                </b-button-group>
+              </b-button-toolbar>
+            </div>
+          </template>
+          <template #table-busy>
+            <div class="text-center text-danger my-2">
+              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+              <strong>{{ $trans('Loading...') }}</strong>
+            </div>
+          </template>
+          <template #cell(id)="data">
+            <OrderTableInfo
+              v-bind:order="data.item"
             />
-            <IconLinkPlus
-              v-if="!isCustomer && !isBranchEmployee"
-              type="tr"
-              v-bind:title="$trans('Change status')"
-              v-bind:method="function() { showChangeStatusModal(data.item.id) }"
-            />
-            <IconLinkDocuments
-              router_name="order-documents"
-              v-bind:router_params="{orderPk: data.item.id}"
-              v-bind:title="$trans('Documents')"
-            />
-            <IconLinkAssign
-              v-if="!isCustomer && !isBranchEmployee && dispatch"
-              v-bind:title="$trans('Assign')"
-              v-bind:method="function() { selectOrder(data.item) }"
-            />
-            <IconLinkDelete
-              v-if="!isCustomer && !isBranchEmployee"
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-            />
-          </div>
-        </template>
-      </b-table>
+          </template>
+          <template #cell(icons)="data">
+            <div class="h2 float-right">
+              <IconLinkEdit
+                router_name="order-edit"
+                v-bind:router_params="{pk: data.item.id}"
+                v-bind:title="$trans('Edit')"
+              />
+              <IconLinkPlus
+                v-if="!isCustomer && !isBranchEmployee"
+                type="tr"
+                v-bind:title="$trans('Change status')"
+                v-bind:method="function() { showChangeStatusModal(data.item.id) }"
+              />
+              <IconLinkDocuments
+                router_name="order-documents"
+                v-bind:router_params="{orderPk: data.item.id}"
+                v-bind:title="$trans('Documents')"
+              />
+              <IconLinkAssign
+                v-if="!isCustomer && !isBranchEmployee && dispatch"
+                v-bind:title="$trans('Assign')"
+                v-bind:method="function() { selectOrder(data.item) }"
+              />
+              <IconLinkDelete
+                v-if="!isCustomer && !isBranchEmployee"
+                v-bind:title="$trans('Delete')"
+                v-bind:method="function() { showDeleteModal(data.item.id) }"
+              />
+            </div>
+          </template>
+        </b-table>
+        -->
+      </div>
     </div>
   </div>
 </template>
