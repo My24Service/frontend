@@ -57,22 +57,266 @@
   color: $active-link !important
 }
 
-.main-app-container {
-  margin-top: 70px;
+#app-layout {
+  height: 100vh;
+  width: 100%;
+  padding-left: 240px;
+}
+
+.main-menu {
+  width: 240px;
+  padding: 1rem;
+  background-color: white;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  overflow-y: auto;
+  
+  nav {
+    position: sticky;
+    top:0;
+
+    a.navbar-brand {
+      padding: 0;
+      margin: 0 auto 1rem;
+      display: block;
+      text-align: center;
+    }
+  }
+
+  li {
+    list-style: none;
+    flex-grow: 1;
+    a {
+      border-radius: .5ex;
+      color: #232c2fa0;
+      display: flex;
+      gap: 1ex;
+      align-items: center;
+      position: relative;
+
+      &.active {
+        font-weight: bold;
+      }
+      
+      &.router-link-active {
+        font-weight: bold;
+        color: #232c2fd9;
+      }
+
+    }
+    &.has-children a::after {
+        content: '›';
+        position: absolute;
+        right: 1ex;
+    }
+  }
+
+  .page-subnav {
+    padding-inline-start: 1.6rem;
+  }
+
+  .nav-items > li > a.active {
+    background: #f6f9fc;
+  }
+}
+
+.app-page {
+  padding: 0;
+  height: 100vh;
+  overflow-y: scroll;
+
+  > header {
+    margin: 0 0rem -2rem;
+    padding: 2rem 1rem 4rem;
+    background: var(--primary);
+    color: white;
+    position: sticky;
+    top: 0;
+
+    .page-title {
+      display: flex;
+      justify-content: space-between;
+      h3 {
+        font-weight: normal;
+        a {
+          color: white;
+        }
+      }
+    }
+
+    .flex-columns {
+      align-items: center;
+    }
+
+    .button {
+      background-color: white;
+      color: $my24;
+    }
+  }
+
+  > header + div {
+    margin: 0 1rem 5rem !important;
+  }
 }
 
 /* main app layouts */
-.app-grid, .app-detail, .app-form {
-  margin-top: 24px;
-}
 
-.app-grid {
-}
-
-.app-detail {
+.app-detail, .panel {
   @extend .mx-auto;
-  @extend .bg-light;
   @extend .p-4;
+  background: white;
+  border-radius: .5ex;
+  box-shadow: 0 1ex 1rem #394b5923;
+  position: relative;
+  --text-color: #757a7c;
+  color: var(--text-color);
+}
+
+
+/* app ui components / blocks */
+
+.panel h6 {
+  text-transform: uppercase;
+  color: #232c2f;
+}
+
+.flex-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 2ex;
+  &.wrap {
+    flex-wrap: wrap;
+  }
+  > div {
+    flex-grow: 1;
+    &.panel {
+      max-width: 33%;
+    }
+  }
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  line-height: 2.4rem;
+  font-size: .8rem;
+  dt {
+    margin: 0;
+  }
+  dd {
+    margin: 0;
+  }
+}
+
+ul.listing {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  
+  &.order-list {
+    li > .listing-item,
+    li > .headings {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+    }
+  }
+
+  li {
+    line-height: 2.4rem;
+    box-shadow: 0px 1px #f2f3f4;
+
+
+    > .listing-item,
+    .headings {
+      display: flex;
+      justify-content: space-between;
+      text-align: initial;
+      gap: 1rem;
+      padding-inline: 1ex;
+      color:var(--text-color);
+      text-decoration: none!important;
+
+      > * {
+        text-wrap: nowrap;
+        font-size: .8rem;
+        text-overflow: ellipsis;
+        transition: all .3s;
+
+        select {
+          border-color: transparent;
+          max-width: 9rem;
+          font-size: .7rem;
+          &:hover, 
+          &:focus {
+            border-color: #0003 !important;
+          }
+        }
+      }
+
+      strong {
+        color: #323435;
+      }
+
+      .order-id {
+        color: lighten(#757a7c, 20%);
+        text-align: end;
+        width: 5rem;
+      }
+      .order-type {
+        width: 10rem;
+      }
+      .order-company-name {
+        width: 7rem;
+      }
+      .order-start-date {
+        width: 9rem;
+      }
+      .order-due-date,
+      .order-assignees,
+      .order-status {
+        min-width: 10rem;
+      }
+    }
+
+    .headings {
+      text-transform: uppercase;
+      font-size: xx-small;
+      letter-spacing: 1px;
+    }
+    
+    > .listing-item:hover {
+      background: #f6f9fc;
+      > * {
+        color: #323435;
+      }
+    }
+    
+  }
+}
+
+.my24-pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.filter-item {
+  padding: 0 1.2ex;
+  border-radius: 2rem;
+  text-decoration: none !important;
+  transition: background .1s;
+  &:hover {
+    background-color: lighten($my24, 30%) !important;
+  }
+  &.router-link-active {
+    font-weight: bold;
+    color: white!important;
+    background-color: lighten($my24, 5%) !important;
+  }
 }
 
 .app-form {
@@ -81,35 +325,14 @@
   @extend .p-md-2;
 }
 
-.page-subnav {
-  margin-top: -20px;
-}
-
-.main-app-container .page-subnav {
-  padding-bottom: 8px;
-  padding-left: 168px;
-  margin-top: -48px;
-  width: 100%;
-  font-size: 12px;
-}
-
 .carousel-item img {
   width: 640px !important;
   height: 480px !important;
 }
 
-.navbar-nav {
-  margin-left: 145px;
-}
-
 .subnav-pills {
   margin-top: 20px;
 }
-
-.data-table {
-  font-size: 12px;
-}
-
 .data-table table thead tr:first-child {
   border-top-style: hidden;
 }

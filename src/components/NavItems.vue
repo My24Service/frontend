@@ -1,118 +1,140 @@
 <template>
-  <span>
-    <b-navbar-nav ref="nav-items">
-      <b-nav-item
-        :active="isActive('orders')"
-        v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
-        to="/orders/orders">{{ $trans('Orders') }}
-        <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
-      </b-nav-item>
+  <div class="nav-items" ref="nav-items">
+    <b-nav-item
+      :active="isActive('orders')"
+      v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
+      to="/orders/orders"
+      class="has-children">
+      <b-icon icon="clipboard"></b-icon>
+      {{ $trans('Orders') }}
+      <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
+    </b-nav-item>
 
-      <!-- dashboard for customer users -->
-      <div
-        v-if="showCustomerDashBoard"
-        class="main-nav-divider">
-        &nbsp;|&nbsp;
-      </div>
+    <!-- custom Orders submenu -->
+    <div class="page-subnav">
       <b-nav-item
-        :active="isActive('customers')"
-        v-if="showCustomerDashBoard"
-        to="/customers/dashboard">{{ $trans('Dashboard') }}
+        v-if="isActive('orders')"
+        :active="isActive('orders','statuscodes')"
+        to="/orders/statuscodes">
+        {{ $trans('Statuscodes') }}
       </b-nav-item>
-
-      <!-- equipment -->
-      <div
-        v-if="showEquipment"
-        class="main-nav-divider">
-        &nbsp;|&nbsp;
-      </div>
       <b-nav-item
-        :active="isActive('equipment')"
-        v-if="showEquipment"
-        to="/equipment/equipment">{{ $trans('Equipment') }}
+        v-if="isActive('orders')"
+        :active="isActive('orders','year-stats') || isActive('orders','month-stats')"
+        to="/orders/year-stats">
+        {{ $trans('Stats') }}
       </b-nav-item>
+    </div>
 
-      <!-- dashboard for branch employees -->
-      <div
-        v-if="showBranchEmployeeDashBoard"
-        class="main-nav-divider">
-        &nbsp;|&nbsp;
-      </div>
-      <b-nav-item
-        :active="isActive('company')"
-        v-if="showBranchEmployeeDashBoard"
-        to="/company/employee-dashboard">{{ $trans('Dashboard') }}
-      </b-nav-item>
+    <!-- dashboard for customer users -->
+    <b-nav-item
+      :active="isActive('customers')"
+      v-if="showCustomerDashBoard"
+      to="/customers/dashboard"
+      class="has-children">{{ $trans('test') }}
+    </b-nav-item>
+    <SubNav v-if="showCustomerDashBoard && isActive('customers')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+  
+    <!-- equipment -->
+    
+    <b-nav-item
+      :active="isActive('equipment')"
+      v-if="showEquipment"
+      to="/equipment/equipment"
+      class="has-children">
+      <b-icon icon="clipboard"></b-icon>{{ $trans('Equipment') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('equipment')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
 
-      <!-- customers -->
-      <div
-        v-if="showCustomers"
-        class="main-nav-divider">
-        &nbsp;|&nbsp;
-      </div>
-      <b-nav-item
-        :active="isActive('customers')"
-        v-if="showCustomers"
-        to="/customers/customers">{{ $trans('Customers') }}
-      </b-nav-item>
+    <!-- dashboard for branch employees -->
+    <b-nav-item
+      :active="isActive('company')"
+      v-if="showBranchEmployeeDashBoard"
+      to="/company/employee-dashboard"
+      class="has-children">
+      <b-icon></b-icon> {{ $trans('Dashboard') }}
+    </b-nav-item>
+    <SubNav v-if="showBranchEmployeeDashBoard && isActive('company')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
 
-      <!-- inventory -->
-      <div
-        v-if="showInventory"
-        class="main-nav-divider">
-        &nbsp;|&nbsp;
-      </div>
-      <b-nav-item
-        :active="isActive('inventory')"
-        v-if="showInventory"
-        to="/inventory/purchaseorders">{{ $trans('Inventory') }}
-      </b-nav-item>
+    <!-- customers -->
+    <b-nav-item
+      :active="isActive('customers')"
+      v-if="showCustomers"
+      to="/customers/customers"
+      class="has-children">
+      <b-icon icon="building"></b-icon> {{ $trans('Customers') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('customers')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
 
-      <!-- mobile -->
-      <div
-        v-if="showMobile"
-        class="main-nav-divider">
-        &nbsp;|&nbsp;
-      </div>
-      <b-nav-item
-        :active="isActive('mobile')"
-        v-if="showMobile"
-        to="/mobile/dispatch">{{ $trans('Mobile') }}
-      </b-nav-item>
+    <!-- inventory -->
+    <b-nav-item
+      :active="isActive('inventory')"
+      v-if="showInventory"
+      to="/inventory/purchaseorders"
+      class="has-children">
+      <b-icon icon="collection"></b-icon> {{ $trans('Inventory') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('inventory')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
 
-      <!-- company -->
-      <div
-        v-if="showCompany"
-        class="main-nav-divider">
-        &nbsp;|&nbsp;
-      </div>
+    <!-- mobile -->
+    <b-nav-item
+      :active="isActive('mobile')"
+      v-if="showMobile"
+      to="/mobile/dispatch"
+      class="has-children">
+      <b-icon icon="person-badge-fill"></b-icon> {{ $trans('Mobile') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('mobile')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+
+    <!-- company -->
 <!--       <b-nav-item :active="isActive('quotations')" v-if="hasQuotations" to="/quotations/quotations">{{ $trans('Quotations') }}</b-nav-item>
       <div class="main-nav-divider">
         &nbsp;|&nbsp;
       </div>
  -->
 
-      <b-nav-item
-        :active="isActive('company')"
-        v-if="showCompany"
-        to="/company/dashboard">{{ $trans('Company') }}
-      </b-nav-item>
-      <div v-if="hasMembers" class="main-nav-divider">
-        &nbsp;|&nbsp;
-      </div>
-
-      <!-- members -->
-      <b-nav-item
-        :active="isActive('members')"
-        v-if="showMembers"
-        to="/members/members">{{ $trans('Members') }}
-      </b-nav-item>
-    </b-navbar-nav>
-  </span>
+    <b-nav-item
+      :active="isActive('company')"
+      v-if="showCompany"
+      to="/company/dashboard"
+      class="has-children">
+      <b-icon icon="pie-chart-fill"></b-icon> {{ $trans('Company') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('company')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+    
+    <!-- members -->
+    <b-nav-item
+      :active="isActive('members')"
+      v-if="showMembers"
+      to="/members/members"
+      class="has-children">
+      <b-icon icon="people"></b-icon> {{ $trans('Members') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('members')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+  </div>
 </template>
 
 <script>
 import { componentMixin } from '../utils.js'
+import SubNav from '@/components/SubNav';
+import SubNavCustomers from '@/components/SubNavCustomers';
+import SubNavInventory from '@/components/SubNavInventory';
 
 export default {
   mixins: [componentMixin],
@@ -121,9 +143,13 @@ export default {
     }
   },
   methods: {
-    isActive(item) {
+    isActive(item, subsection) {
       const parts = this.$route.path.split('/')
-      return parts[1] === item
+      if(!subsection) {
+        return parts[1] === item
+      } else {
+        return parts[parts.length] === item
+      }
     }
   },
   computed: {
@@ -187,6 +213,11 @@ export default {
     unacceptedCount (oldValue, newValue) {
     }
   },
+  components: {
+    SubNav,
+    SubNavCustomers,
+    SubNavInventory
+  }
 }
 </script>
 

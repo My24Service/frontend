@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div class="main-menu logged-in">
     <Notification v-if="isLoggedIn && !isCustomer" />
     <TokenRefresh />
     <b-modal
       id="password-change-modal"
       ref="password-change-modal"
-      v-bind:title="$trans('Password change')"
+      v-bind:title="$trans('Change password')"
       @show="resetModal"
       @hidden="resetModal"
       @ok="handleOk"
@@ -71,28 +71,34 @@
     >
       <p class="my-4">{{ $trans('Are you sure you want to log out?') }}</p>
     </b-modal>
+    
+    <b-modal
+    id="lang-modal"
+    ref="lang-modal"
+    v-bind:title="$trans('Change language')"
+    ok-disabled
+    >
+    <TheLanguageChooser />
+  </b-modal>
 
-    <b-navbar toggleable="sm" variant="primary">
-      <b-container>
-
-        <NavBrand />
-
-        <NavItems />
-
-        <b-collapse id="nav-collapse" is-nav>
-          <b-navbar-nav class="ml-auto">
-            <b-nav-item-dropdown v-bind:text="username" right>
-              <b-dropdown-item v-b-modal.password-change-modal>{{ $trans('Change password') }}</b-dropdown-item>
-              <b-dropdown-item @click="logout">{{ $trans('Logout') }}</b-dropdown-item>
-            </b-nav-item-dropdown>
-            <TheLanguageChooser />
-          </b-navbar-nav>
-        </b-collapse>
-
-        <Version />
-
-      </b-container>
-    </b-navbar>
+    <nav class="app-sidebar">
+      <NavBrand />
+      <NavItems />
+      <hr />
+      <b-nav-item-dropdown v-bind:text="username" right>
+        <template slot="button-content">
+          <b-icon icon="person-circle"></b-icon>
+          <span>{{ username }}</span>
+        </template>
+        <li style="text-align: center;">
+          {{ memberInfo.name }}<br><br>
+        </li>
+        <li><Version /></li>
+        <b-dropdown-item v-b-modal.lang-modal>{{ $trans('App Language') }}</b-dropdown-item>
+        <b-dropdown-item v-b-modal.password-change-modal>{{ $trans('Change password') }}</b-dropdown-item>
+        <b-dropdown-item @click="logout">{{ $trans('Logout') }}</b-dropdown-item>
+      </b-nav-item-dropdown>
+    </nav>
   </div>
 </template>
 
@@ -150,6 +156,7 @@ export default {
   },
   data() {
     return {
+      memberInfo: this.$store.state.memberInfo,
       memberNewDataSocket: new MemberNewDataSocket(),
       old_password: null,
       new_password1: null,

@@ -1,6 +1,6 @@
 <template>
   <b-navbar-brand ref="nav-brand" to="/">
-    <img class="memberLogo" v-bind:src="memberLogo()" v-bind:alt="memberName()">
+    <img class="memberLogo" v-bind:src="memberLogo()" v-bind:alt="memberName()" style="max-width: 200px; max-height: 100px">
   </b-navbar-brand>
 </template>
 
@@ -18,12 +18,3 @@ export default {
 }
 </script>
 
-<style>
-.memberLogo {
-  position: absolute;
-  top: 0;
-  z-index: 10;
-  max-height: 120px;
-  max-width: 120px;
-}
-</style>
