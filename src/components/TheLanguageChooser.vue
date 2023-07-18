@@ -1,7 +1,9 @@
 <template>
-  <b-form ref='language-chooser' inline>
-    <b-form-select size="sm" v-model="selected" :options="languages"></b-form-select>
-    <b-button size="sm" @click="setLanguage">Go</b-button>
+  <b-form ref='language-chooser'>
+    <div class="flex-columns">
+      <b-form-select size="sm" v-model="selected" :options="languages"></b-form-select>
+      <b-button size="sm" @click="setLanguage">Go</b-button>
+    </div>
   </b-form>
 </template>
 

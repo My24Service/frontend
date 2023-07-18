@@ -1,24 +1,23 @@
 <template>
-  <div>
+  <span class="version">
+    <b-link class="dropdown-item" @click="openReloadModal">{{ version }}
+      <b-badge v-if="newVersionAvailable">
+        {{ $trans('update')  }}
+      </b-badge>
+    </b-link>
+
     <b-modal
       id="reload-modal"
       ref="reload-modal"
       v-bind:title="$trans('Reload page?')"
       @ok="doReload"
     >
-      <p class="my-4">
+      <p class="my-4" v-if="newVersionAvailable">
         {{ $trans('A new version is available') }}: {{ newVersion }} {{ $trans('Do you want to reload the page?') }}
       </p>
+      <p class="my-4" v-else>Using the latest version.</p>
     </b-modal>
-
-    <div class="version">
-      <h6>{{ version }}
-        <b-badge v-if="newVersionAvailable">
-          <b-link @click="openReloadModal">{{ $trans('New version available')  }}</b-link>
-        </b-badge>
-      </h6>
-    </div>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -26,7 +25,7 @@ import { VERSION } from '@/version.js'
 import axios from '@/services/api.js'
 
 export default {
-  name: "Version",
+  name: "appVersion",
   data() {
     return {
       version: VERSION,
@@ -68,13 +67,9 @@ export default {
 
 <style scoped>
   .version {
-    padding-top: 6px;
-    padding-left: 8px;
-    color: white;
     font-size: 14px;
   }
   .version a {
-    color: white;
     text-decoration: none;
   }
 </style>
