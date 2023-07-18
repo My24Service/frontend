@@ -1,8 +1,5 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="subnav-pills">
-      <PillsCompanyCompany />
-    </div>
     <div class="container app-form">
       <b-form>
         <h2>{{ $trans('Company info') }}</h2>
