@@ -4,7 +4,7 @@ class Equipment extends BaseModel {
   fields = {
     'customer': null,
     'branch': null,
-
+    'location': null,
     'name': null,
     'brand': null,
     'identifier': null,

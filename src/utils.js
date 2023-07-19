@@ -182,7 +182,7 @@ let componentMixin = {
     translateHoursField(field) {
       const allFields = {
         'work_total': this.$trans("Work total"),
-        'travel_total': this.$trans('Travel to total'),
+        'travel_total': this.$trans('Travel total'),
         'distance_total': this.$trans('Distance total'),
         'extra_work': this.$trans('Total extra work'),
         'actual_work': this.$trans('Total actual work'),
@@ -196,7 +196,7 @@ let componentMixin = {
     },
     displayDuration(duration, exclude_seconds) {
       const totalMilliseconds = duration.as('milliseconds')
-      const hours = moment.duration(totalMilliseconds).asHours().toFixed()
+      const hours = parseInt(moment.duration(totalMilliseconds).asHours())
       const format = exclude_seconds ? 'mm' : 'mm:ss'
       return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
     },

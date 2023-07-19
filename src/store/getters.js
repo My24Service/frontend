@@ -49,4 +49,16 @@ export const getters = {
   getLanguages(state) {
     return state.languages
   },
+  getSettingEquipmentPlanningQuickCreate(state) {
+    return state.memberInfo.settings.equipment_planning_quick_create
+  },
+  getSettingEquipmentQuickCreate(state) {
+    return state.memberInfo.settings.equipment_quick_create
+  },
+  getSettingEquipmentLocationPlanningQuickCreate(state) {
+    return state.memberInfo.settings.equipment_location_planning_quick_create
+  },
+  getSettingEquipmentLocationQuickCreate(state) {
+    return state.memberInfo.settings.equipment_location_quick_create
+  },
 }

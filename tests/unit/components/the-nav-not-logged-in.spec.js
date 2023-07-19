@@ -30,7 +30,7 @@ describe('TheNavNotLoggedIn.vue', () => {
       }
     })
 
-    const modal = wrapper.findComponent({ ref: 'login-modal' })
+    const modal = wrapper.findComponent({ ref: 'login-modal-component' })
     expect(modal.exists()).to.be.true
   })
 

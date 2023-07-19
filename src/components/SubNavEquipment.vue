@@ -13,6 +13,12 @@
         :to="{ name: 'equipment-location-list' }">
         {{ $trans('Locations') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('buildings')"
+        v-if="hasEquipmentBuildings"
+        :to="{ name: 'equipment-building-list' }">
+        {{ $trans('Buildings') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
@@ -35,6 +41,9 @@ export default {
     },
     hasEquipmentLocations() {
       return this.hasAccessToModule('equipment', 'locations')
+    },
+    hasEquipmentBuildings() {
+      return this.hasAccessToModule('equipment', 'buildings')
     },
   },
 }

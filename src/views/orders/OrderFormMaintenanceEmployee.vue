@@ -386,21 +386,20 @@
                     @search-change="getEquipmentDebounced"
                     @select="selectEquipment"
                   >
-                <span slot="noResult">
-                  <h5>{{ $trans('No equipment found') }}</h5>
-                  <p>
-                    <b-button
-                      @click="showAddEquipmentModal"
-                      class="btn btn-primary"
-                      size="sm"
-                      type="button"
-                      variant="primary"
-                    >
-                      {{ $trans("Add new equipment") }}
-                    </b-button>
-                  </p>
-
-                </span>
+                    <span slot="noResult">
+                      <h5>{{ $trans('No equipment found') }}</h5>
+                      <p v-if="canQuickCreateEquipment">
+                        <b-button
+                          @click="showAddEquipmentModal"
+                          class="btn btn-primary"
+                          size="sm"
+                          type="button"
+                          variant="primary"
+                        >
+                          {{ $trans("Add new equipment") }}
+                        </b-button>
+                      </p>
+                    </span>
                   </multiselect>
                 </b-form-group>
               </b-col>
@@ -454,21 +453,22 @@
                     :hide-selected="true"
                     @search-change="getLocationDebounced"
                     @select="selectLocation"
+                    :disabled="locationSearchDisabled"
                   >
-                <span slot="noResult">
-                  <h5>{{ $trans('No locations found') }}</h5>
-                  <p>
-                    <b-button
-                      @click="showAddLocationModal"
-                      class="btn btn-primary"
-                      size="sm"
-                      type="button"
-                      variant="primary"
-                    >
-                      {{ $trans("Add new location") }}
-                    </b-button>
-                  </p>
-                </span>
+                    <span slot="noResult">
+                      <h5>{{ $trans('No locations found') }}</h5>
+                      <p v-if="canQuickCreateEquipmentLocation">
+                        <b-button
+                          @click="showAddLocationModal"
+                          class="btn btn-primary"
+                          size="sm"
+                          type="button"
+                          variant="primary"
+                        >
+                          {{ $trans("Add new location") }}
+                        </b-button>
+                      </p>
+                    </span>
                   </multiselect>
                 </b-form-group>
               </b-col>
@@ -624,6 +624,7 @@ export default {
       editIndex: null,
       isEditOrderLine: false,
 
+      orderline_pk: null,
       product: '',
       equipment: null,
       location: '',
@@ -657,6 +658,7 @@ export default {
       getLocationDebounced: null,
       locationSearch: [],
       newLocationName: null,
+      locationSearchDisabled: false,
 
       isEditEquipment: false,
 
@@ -688,6 +690,12 @@ export default {
     }
   },
   computed: {
+    canQuickCreateEquipment() {
+      return this.$store.getters.getSettingEquipmentQuickCreate
+    },
+    canQuickCreateEquipmentLocation() {
+      return this.$store.getters.getSettingEquipmentLocationQuickCreate
+    },
     startDate() {
       return this.order.start_date
     },
@@ -750,6 +758,12 @@ export default {
     selectEquipment(option) {
       this.equipment = option.id
       this.product = option.name
+
+      if (option.location) {
+        this.equipment_location = option.location.id
+        this.location = option.location.name
+        this.locationSearchDisabled = true
+      }
     },
     // equipment locations
     showAddLocationModal() {
@@ -835,6 +849,7 @@ export default {
       this.editIndex = index
       this.isEditOrderLine = true
 
+      this.orderline_pk = item.id
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
@@ -846,6 +861,7 @@ export default {
       }
     },
     emptyOrderLine() {
+      this.orderline_pk = null
       this.product = ''
       this.location = ''
       this.remarks = ''
@@ -854,6 +870,7 @@ export default {
     },
     doEditOrderLine() {
       const orderLine = {
+        id: this.orderline_pk,
         product: this.product,
         location: this.location,
         remarks: this.remarks,
@@ -998,7 +1015,6 @@ export default {
     try {
       this.countries = await this.$store.dispatch('getCountries')
       const branch = await branchModel.getMyBranch()
-      console.log(branch)
 
       if (this.isCreate) {
         this.order = orderModel.getFields()
@@ -1006,8 +1022,12 @@ export default {
         this.order.order_name = branch.name
         this.order.order_address = branch.address
         this.order.order_postal = branch.postal
-        this.order.city = branch.city
+        this.order.order_city = branch.city
         this.order.order_country_code = branch.country_code
+        this.order.order_tel = branch.tel
+        this.order.order_mobile = branch.mobile
+        this.order.order_email = branch.email
+        this.order.order_contact = branch.contact
       } else {
         this.order = await this.loadOrder()
         this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
