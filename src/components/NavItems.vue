@@ -5,7 +5,8 @@
       v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
       to="/orders/orders"
       class="has-children">
-      <b-icon icon="clipboard"></b-icon>
+      <b-icon icon="file-earmark-text" v-if="!isActive('orders')"></b-icon>
+      <b-icon icon="file-earmark-text-fill" v-else></b-icon>
       {{ $trans('Orders') }}
       <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
     </b-nav-item>
@@ -38,13 +39,14 @@
     </SubNav>
   
     <!-- equipment -->
-    
     <b-nav-item
       :active="isActive('equipment')"
       v-if="showEquipment"
       to="/equipment/equipment"
       class="has-children">
-      <b-icon icon="clipboard"></b-icon>{{ $trans('Equipment') }}
+      <b-icon icon="briefcase" v-if="!isActive('equipment')"></b-icon>
+      <b-icon icon="briefcase-fill" v-if="isActive('equipment')"></b-icon>
+      {{ $trans('Equipment') }}
     </b-nav-item>
     <SubNav v-if="isActive('equipment')">
       <router-view name="app-subnav"></router-view>
@@ -68,7 +70,9 @@
       v-if="showCustomers"
       to="/customers/customers"
       class="has-children">
-      <b-icon icon="building"></b-icon> {{ $trans('Customers') }}
+      <b-icon icon="building" v-if="!isActive('customers')"></b-icon>
+      <b-icon icon="building-fill" v-else></b-icon> 
+      {{ $trans('Customers') }}
     </b-nav-item>
     <SubNav v-if="isActive('customers')">
       <router-view name="app-subnav"></router-view>
@@ -80,7 +84,9 @@
       v-if="showInventory"
       to="/inventory/purchaseorders"
       class="has-children">
-      <b-icon icon="collection"></b-icon> {{ $trans('Inventory') }}
+      <b-icon icon="collection" v-if="!isActive('inventory')"></b-icon>
+      <b-icon icon="collection-fill" v-else></b-icon>
+      {{ $trans('Inventory') }}
     </b-nav-item>
     <SubNav v-if="isActive('inventory')">
       <router-view name="app-subnav"></router-view>
@@ -92,7 +98,9 @@
       v-if="showMobile"
       to="/mobile/dispatch"
       class="has-children">
-      <b-icon icon="person-badge-fill"></b-icon> {{ $trans('Mobile') }}
+      <b-icon icon="person-badge" v-if="!isActive('mobile')"></b-icon>
+      <b-icon icon="person-badge-fill" v-else></b-icon>
+      {{ $trans('Mobile') }}
     </b-nav-item>
     <SubNav v-if="isActive('mobile')">
       <router-view name="app-subnav"></router-view>
@@ -110,7 +118,9 @@
       v-if="showCompany"
       to="/company/dashboard"
       class="has-children">
-      <b-icon icon="pie-chart-fill"></b-icon> {{ $trans('Company') }}
+      <b-icon icon="pie-chart" v-if="!isActive('company')"></b-icon>
+      <b-icon icon="pie-chart-fill" v-if="isActive('company')"></b-icon>
+      {{ $trans('Company') }}
     </b-nav-item>
     <SubNav v-if="isActive('company')">
       <router-view name="app-subnav"></router-view>
@@ -222,4 +232,7 @@ export default {
 </script>
 
 <style scoped>
+.nav-items {
+  flex-grow: 1;
+}
 </style>
