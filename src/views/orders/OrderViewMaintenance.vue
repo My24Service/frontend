@@ -1,89 +1,93 @@
 <template>
-  <div v-if="order">
+  <div v-if="order" class="page-detail">
     <b-modal ref="workorder-viewer" id="workorder-viewer" size="xl" scrollable title="Workorder">
-      <iframe :src="this.workorderURL" style="min-height:720px; width: 100%;"></iframe>
+      <div class="flex-columns">
+        <b-button
+          v-if="!past && !isCustomer && !isBranchEmployee"
+          id="recreateWorkorderPdfButton"
+          @click="recreateWorkorderPdf"
+          :disabled="buttonDisabled || isGeneratingPDF"
+          class="btn btn-secondary"
+          type="button"
+          variant="secondary"
+        >
+
+          <b-spinner small v-if="isGeneratingPDF"></b-spinner>
+          {{ $trans('Generate PDF') }}
+        </b-button>
+        <b-button
+          v-if="!past && !isCustomer && !isBranchEmployee"
+          id="recreateWorkorderPdfButtonGotenberg"
+          @click="recreateWorkorderPdfGotenberg"
+          :disabled="buttonDisabled"
+          class="btn btn-secondary"
+          type="button"
+          variant="secondary"
+        >
+          <b-spinner small v-if="isGeneratingPDF"></b-spinner>
+          {{ $trans('re-generate PDF (new)') }}
+        </b-button>
+        <b-link class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+          <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+        </b-link>
+      </div>
+      <hr>
+      <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
+        <b-spinner medium></b-spinner>
+      </div>
+      <iframe :src="this.workorderURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
       <template #modal-footer="{ ok }">
-        <div class="flex-columns">
-          <b-button size="sm">download pdf</b-button>
-          <b-button size="sm">print</b-button>
           <!-- Emulate built in modal footer ok and cancel button actions -->
           <b-button size="sm" @click="ok()" variant="primary">
             close
           </b-button>
-        </div>
       </template>
     </b-modal>
     <div class="flex-columns wrap">
       <div class="panel">
         <h6>
-          <strong>{{ order.order_name }}</strong> <em>{{ order.order_type }}</em>
-          <div v-if="isLoading">Loading</div>
+          <span><strong>{{ order.order_name }}</strong> <em>{{ order.order_type }}</em></span>
         </h6>
         <dl>
+          <dt>Status</dt>
+          <dd>{{ order.last_status }}</dd>
           <dt>Dates</dt>
           <dd>{{ order.order_date }}</dd>
           <dt>Service &numero;</dt>
           <dd>{{ order.service_number }}</dd>
           <dt>Reference</dt>
           <dd>{{ order.order_reference }}</dd>
+          <dt>Workorder {{  order.order_id }}</dt>
+          <dd>
+            <b-link class="" @click.prevent="showWorkorderDialog()" target="_blank">
+              <b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}
+            </b-link>
+            &nbsp;&nbsp;
+            <b-link class="" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+              <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+            </b-link>
+          </dd>
           <dt v-if="order.customer_remarks">Remarks</dt>
           <dd v-if="order.customer_remarks">{{ order.customer_remarks }}</dd>
         </dl>
         <hr>
 
-        <h6>Workorder  {{ order.order_id }}</h6>
-          <div class="flex-columns">
-            <b-link class="" @click="openWorkorder()" target="_blank">
-              <b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}
-            </b-link>
-            <button @click="showWorkorderDialog()"></button>
-            &nbsp;
-            <b-link class="" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
-              <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
-            </b-link>
-          </div>
-          <br>
-          <div class="flex-columns">
-            <b-button
-              v-if="!past && !isCustomer && !isBranchEmployee"
-              id="recreateWorkorderPdfButton"
-              @click="recreateWorkorderPdf"
-              :disabled="buttonDisabled"
-              class="btn btn-secondary"
-              type="button"
-              variant="secondary"
-            >
-              {{ $trans('Generate PDF') }}
-            </b-button>
-            <b-button
-              v-if="!past && !isCustomer && !isBranchEmployee"
-              id="recreateWorkorderPdfButtonGotenberg"
-              @click="recreateWorkorderPdfGotenberg"
-              :disabled="buttonDisabled"
-              class="btn btn-secondary"
-              type="button"
-              variant="secondary"
-            >
-              {{ $trans('re-generate PDF (new)') }}
-            </b-button>
-          </div>
-        <hr>
-
-        <h6>{{ $trans('Documents') }}</h6>
-        <div class="my-2" v-if="order.workorder_documents.length > 0">
+        <h6 class="flex-columns">
+          <span>{{ $trans('Documents') }}</span>
+          <router-link :to="{name: 'order-documents', params : {'orderPk': pk}}">edit documents</router-link>
+        </h6>
+        <div class="my-2" v-if="order.documents.length > 0">
           <ul class="listing">
-            <li v-for="doc in order.workorder_documents" :key="doc.url">
+            <li v-for="doc in order.documents" :key="doc.url">
               <a class="listing-item" :href="doc.url" target="_blank">
                 <span>{{ doc.name}}</span>
               </a>
             </li>
           </ul>
         </div>
-        <div v-else>
-          <p>No documents. </p>
-        </div>
+        <hr>
 
-        <h6>Orderlines</h6>
+        <h6>{{ $trans('Orderlines') }}</h6>
         <ul class="listing" v-if="order.orderlines.length">
           <li v-for="line in order.orderlines" :key="line.id">
             <div class="listing-item flex-columns">
@@ -152,6 +156,55 @@
       </b-row>
       </div>
     </div>
+    <b-container>
+      <b-row v-if="hasBranches">
+        <hr/>
+        <b-col cols="12">
+          <div class="purchase-invoices-table">
+            <h4>{{ $trans('Purchase invoices') }}</h4>
+            <b-table
+              id="purchase-invoices-table"
+              small
+              :busy='isLoading'
+              :fields="purchaseInvoiceFields"
+              :items="order.purchaseInvoices"
+              responsive="md"
+              class="data-table"
+              sort-icon-left
+            >
+              <template #head(icons)="">
+                <div class="float-right">
+                  <b-button-toolbar>
+                    <b-button-group class="mr-1">
+                      <IconLinkPlus
+                        type="th"
+                        :method="addPurchaseInvoice"
+                        :title="$trans('New purchase invoice')"
+                      />
+                    </b-button-group>
+                  </b-button-toolbar>
+                </div>
+              </template>
+              <template #cell(vat)="data">
+                {{ data.item.vat_dinero.toFormat('$0.00') }}
+              </template>
+              <template #cell(total)="data">
+                {{ data.item.total_dinero.toFormat('$0.00') }}
+              </template>
+              <template #cell(icons)="data">
+                <div class="h2 float-right">
+                  <IconLinkDelete
+                    v-bind:title="$trans('Delete')"
+                    v-bind:method="function() { showDeletePurchaseInvoiceModal(data.item.id) }"
+                  />
+                </div>
+              </template>
+            </b-table>
+
+          </div>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
@@ -167,9 +220,11 @@ export default {
   data() {
     return {
       isLoading: false,
+      isGeneratingPDF: false,
       buttonDisabled: false,
       order: null,
       workorderURL: '',
+      iframeLoading: true,
       orderLineFields: [
         { key: 'product', label: this.$trans('Product') },
         { key: 'location', label: this.$trans('Location') },
@@ -249,50 +304,61 @@ export default {
     },
 
     // the rest
+    iframeLoaded() {
+      this.iframeLoading = false;
+    },
     openWorkorder() {
       const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
       window.open(`${document.location.origin}/${routeData.href}`, '_blank')
     },
     getWorkorderURL() {
+      this.isLoading = true;
       const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
       return `${document.location.origin}/${routeData.href}`;
     },
     showWorkorderDialog() {
+      this.iframeLoading = true;
       this.workorderURL = this.getWorkorderURL();
       this.$refs['workorder-viewer'].show()
     },
     async recreateWorkorderPdf() {
       this.isLoading = true
       this.buttonDisabled = true
+      this.isGeneratingPDF = true
 
       try {
         await orderModel.recreateWorkorderPdf(this.pk)
         this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
         this.isLoading = false
         this.buttonDisabled = false
+        this.isGeneratingPDF = false
         await this.loadOrder()
       } catch(err) {
         console.log('Error recreating workorder', err)
         this.errorToast(this.$trans('Error recreating workorder'))
         this.buttonDisabled = false
         this.isLoading = false
+        this.isGeneratingPDF = false
       }
     },
     async recreateWorkorderPdfGotenberg() {
       this.isLoading = true
       this.buttonDisabled = true
+      this.isGeneratingPDF = true
 
       try {
         await this.orderService.recreateWorkorderPdfGotenberg(this.pk)
         this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
+        await this.loadOrder()
         this.isLoading = false
         this.buttonDisabled = false
-        await this.loadOrder()
+        this.isGeneratingPDF = false
       } catch(err) {
         console.log('Error recreating workorder', err)
         this.errorToast(this.$trans('Error recreating workorder'))
         this.buttonDisabled = false
         this.isLoading = false
+        this.isGeneratingPDF = false
       }
     },
     async loadOrder() {
@@ -319,7 +385,7 @@ export default {
       }
     }
   },
-  created() {
+  async created() {
     this.loadOrder();
   }
 }
@@ -328,5 +394,13 @@ export default {
 <style scoped>
 .purchase-invoices-table {
   padding-top: 10px;
+}
+
+.iframe-loader {
+  min-height: 720px
+}
+iframe {
+  min-height: 720px;
+  width: 100%;
 }
 </style>
