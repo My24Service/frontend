@@ -2,8 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
+        <!-- WIP -->
+        <!-- <SearchForm @do-search="handleSearchOk" placeholderText="Search orders"/> -->
         <h3>
-          <b-icon icon="clipboard"></b-icon>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
           <span>Orders</span>
         </h3>
 
@@ -29,7 +31,7 @@
       </div>
 
     </header>
-    <div class="app-detail" ref="order-list-maintenance">
+    <div class="panel app-detail" ref="order-list-maintenance">
       <!-- FIXME sorting modal -->
       <b-modal
         id="sort-modal"
@@ -150,6 +152,7 @@
               <span class="order-company-name">company</span>
               <span class="order-start-date">start date</span>
               <span class="order-assignees">people</span>
+              <span class="order-documents">Documents</span>
               <span class="order-status">status</span>
             </div>
           </li>
@@ -261,6 +264,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import SearchModal from '../../components/SearchModal.vue'
+import SearchForm from '../../components/SearchForm.vue'
 import OrderFilters from "../../components/OrderFilters.vue"
 import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '../../utils'
@@ -282,8 +286,9 @@ export default {
     ButtonLinkSort,
     SearchModal,
     OrderFilters,
-    Pagination
-  },
+    Pagination,
+    SearchForm
+},
   props: {
     dispatch: {
       type: [Boolean],
