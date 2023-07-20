@@ -33,12 +33,21 @@
         </span>
         <span v-else title="Not assigned to anyone">&ndash;</span>
       </span>
-
+      <span>
+        <span v-if="order.documents.length">
+          <b-icon icon="paperclip"></b-icon>
+        </span>
+        <router-link v-if="isLoaded && order.documents.length" :to="{name: 'order-documents', params: {orderPk: order.id}}" class="order-type">
+          {{ order.documents.length && order.documents.length }} document{{ order.documents.length == 1 ? '' : 's' }}
+        </router-link>
+        <span v-else>&ndash;</span>
+      </span>
       <span class="order-status">
-        <b v-bind:style="status2color(orderStatus)" :title="order.last_status">&#9679;</b>&nbsp;
+        <b-icon icon="circle-fill" v-bind:style="`color:${this.orderStatusColorCode}`" :title="order.last_status_full"></b-icon>
         <b-form-select
+          :title="this.orderStatusCode.statuscode"
           :id="order.id + 'change-status-status'"
-          v-model="orderStatus"
+          v-model="orderStatusCode"
           :options="statuscodes"
           size="sm"
           value-field="statuscode"
@@ -47,18 +56,16 @@
           @change="handleStatusChange(order.id, $event)"
         ></b-form-select>
       </span>
-
   </div>
-
-    <!-- documents
-    <div>
-      <span v-if="order.documents.length > 0">
-        <router-link :to="{name: 'order-documents', params: {pk: order.id}}">{{ order.documents.length }} documents {{ order.id }}</router-link>
-      </span>
-    </div>
-    -->
-
 </template>
+
+<style scope>
+.order-status {
+  display: flex;
+  gap: 1ex;
+  align-items: center;
+}
+</style>
 
 <script>
 import my24 from '../services/my24.js'
@@ -70,7 +77,8 @@ export default {
   async created() {
     this.memberType = await this.$store.dispatch('getMemberType')
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
-    this.isLoaded = true
+    this.isLoaded = true;
+    this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
   },
   computed: {
     hasInfolines() {
@@ -79,13 +87,19 @@ export default {
       }
 
       return this.order.infolines.length > 0
-    }
+    },
+    orderStatusCode() {
+      let statusCode = my24.getStatuscode(this.statuscodes, this.order.last_status);
+      return statusCode.statuscode;
+    },
+
   },
   data() {
     return {
       isLoaded: false,
       memberType: null,
       orderStatus: this.order.last_status,
+      orderStatusColorCode: '#666',
       orderLineFields: [
         { key: 'product', label: this.$trans('Product'), thAttr: {width: '25%'} },
         { key: 'location', label: this.$trans('Location'), thAttr: {width: '25%'} },
@@ -107,11 +121,9 @@ export default {
     }
   },
   methods: {
-    status2color(status) {
-      return `color: ${my24.status2color(this.statuscodes, status)}`;
-    },
     handleStatusChange(id, value) {
       this.changeStatus(id, value);
+      this.orderStatusColorCode = my24.status2color(this.statuscodes, value);
     },
     async changeStatus(id, value) {
       const status = {
