@@ -130,7 +130,7 @@ export default {
         order: id,
         status: value
       }
-      
+
       try {
         await statusModel.insert(status)
       } catch(error) {
