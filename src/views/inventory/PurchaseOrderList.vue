@@ -1,6 +1,8 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
+    <header>
 
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -43,12 +45,7 @@
       </form>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Purchase order')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="purchaseorder-table"
@@ -124,6 +121,12 @@
           </div>
         </template>
       </b-table>
+      
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Purchase order')"
+      />
     </div>
   </div>
 </template>

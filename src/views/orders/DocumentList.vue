@@ -1,23 +1,18 @@
 <template>
-  <div class="app-grid">
-    <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
-
-    <b-modal
-      id="delete-order-document-modal"
-      ref="delete-order-document-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this document?') }}</p>
-    </b-modal>
-
-    <div class="overflow-auto">
+  <div class="app-page">
+    <!-- <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb> -->
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <router-link :to="{name: 'order-list'}">Orders</router-link> /
+          <router-link :to="{name: 'order-view', params: {pk:orderPk}}">#<strong>{{ orderPk }}</strong></router-link> / 
+          docs
+        </h3>
+      </div>
+    </header>
+    
+    <div class="panel overflow-auto">
       <Pagination
         v-if="!isLoading"
         :model="this.model"
@@ -73,6 +68,21 @@
         </template>
       </b-table>
     </div>
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <b-modal
+      id="delete-order-document-modal"
+      ref="delete-order-document-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this document?') }}</p>
+    </b-modal>
+
   </div>
 </template>
 

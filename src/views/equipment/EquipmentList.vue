@@ -1,28 +1,9 @@
 <template>
-  <div class="app-grid" v-if="!isLoading">
-
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
-
-    <b-modal
-      id="delete-equipment-modal"
-      ref="delete-equipment-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
-    </b-modal>
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Equipment')"
-      />
-
+  <div class="app-page" v-if="!isLoading">
+    <header>
+      <h3>Equipment</h3>
+    </header>
+    <div class="panel overflow-auto">
       <b-table
         id="equipment-table"
         small
@@ -87,7 +68,26 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Equipment')"
+      />
     </div>
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <b-modal
+      id="delete-equipment-modal"
+      ref="delete-equipment-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
+    </b-modal>
   </div>
 </template>
 

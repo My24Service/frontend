@@ -3,9 +3,9 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="clipboard"></b-icon>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
           <router-link :to="{name: 'order-list'}">Orders</router-link> / 
-          <strong><span>#</span>{{ pk }}</strong>
+          #<strong>{{ pk }}</strong>
         </h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{name:'order-edit', pk: pk}">

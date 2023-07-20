@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="clipboard-data"></b-icon> Order Stats</h3>
+        <h3><b-icon icon="file-earmark-bar-graph-fill"></b-icon>Order Stats</h3>
         <div class="flex-columns">
           view 
           <router-link class="btn button" to="./year-stats">year</router-link>

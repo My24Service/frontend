@@ -3,8 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="clipboard-check"></b-icon>
-          Order statuscodes
+          <b-icon icon="file-earmark-check-fill"></b-icon>Order statuscodes
         </h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="'/orders/statuscodes/form'">
