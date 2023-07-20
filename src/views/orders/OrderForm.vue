@@ -3,15 +3,15 @@
     <header>
       <div class='page-title'>
         <h3 v-if="!pk">
-          <b-icon icon="clipboard"></b-icon>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
           <router-link :to="{name:'order-list'}">Orders</router-link> / 
           <strong>new order</strong>
         </h3>
         <h3 v-if="pk">
           <b-icon icon="clipboard"></b-icon>
           <router-link :to="{name:'order-list'}">Orders</router-link> / 
-          <router-link :to="{name: 'order-view', pk:pk}">#{{ pk }}</router-link>
-         / <strong>edit</strong>
+          <router-link :to="{name: 'order-view', pk:pk}">#<strong>{{ pk }}</strong></router-link>
+         / edit
         </h3>
       </div>
     </header>

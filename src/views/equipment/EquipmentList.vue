@@ -1,66 +1,9 @@
 <template>
-  <div class="app-grid" v-if="!isLoading">
-
-    <b-modal
-      id="add-state-modal"
-      ref="add-state-modal"
-      v-bind:title="$trans('Add state')"
-      @ok="addState"
-    >
-      <form ref="add-state-form">
-        <b-container>
-          <b-row>
-            <b-col cols="7">
-              <b-form-group
-                v-bind:label="$trans('State')"
-                label-for="add-state-state"
-              >
-                <b-form-input
-                  size="sm"
-                  id="add-state-state"
-                  v-model="state.state"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="5">
-              <b-form-group
-                v-bind:label="$trans('Replace after months')"
-                label-for="add-state-replace_months"
-              >
-                <b-form-input
-                  size="sm"
-                  id="add-state-replace_months"
-                  v-model="state.replace_months"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
-
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
-
-    <b-modal
-      id="delete-equipment-modal"
-      ref="delete-equipment-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
-    </b-modal>
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Equipment')"
-      />
-
+  <div class="app-page" v-if="!isLoading">
+    <header>
+      <h3>Equipment</h3>
+    </header>
+    <div class="panel overflow-auto">
       <b-table
         id="equipment-table"
         small
@@ -136,7 +79,26 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Equipment')"
+      />
     </div>
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <b-modal
+      id="delete-equipment-modal"
+      ref="delete-equipment-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
+    </b-modal>
   </div>
 </template>
 
