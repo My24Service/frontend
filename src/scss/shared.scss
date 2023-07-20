@@ -73,10 +73,16 @@
   left: 0;
   z-index: 1;
   overflow-y: auto;
+  display: flex;
   
+
   nav {
     position: sticky;
     top:0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
 
     a.navbar-brand {
       padding: 0;
@@ -88,7 +94,7 @@
 
   li {
     list-style: none;
-    flex-grow: 1;
+    
     a {
       border-radius: .5ex;
       color: #232c2fa0;
@@ -139,6 +145,8 @@
     .page-title {
       display: flex;
       justify-content: space-between;
+      align-items: center;
+
       h3 {
         font-weight: normal;
         a {
@@ -157,7 +165,8 @@
     }
   }
 
-  > header + div {
+  > header ~ div.panel,
+  > header ~ div.page-detail {
     margin: 0 1rem 5rem !important;
   }
 }
@@ -220,7 +229,7 @@ ul.listing {
     li > .listing-item,
     li > .headings {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(7, 1fr);
     }
   }
 
