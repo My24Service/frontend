@@ -1,6 +1,8 @@
 <template>
-  <div class="mt-4">
-
+  <div class="app-page">
+    <header>
+      <h3>Materials</h3>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -16,12 +18,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this material?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Material')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="material-table"
@@ -76,6 +73,12 @@
           </div>
         </template>
       </b-table>
+
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Material')"
+      />
     </div>
   </div>
 </template>

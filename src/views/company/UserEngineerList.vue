@@ -1,11 +1,9 @@
 <template>
-  <div class="app-grid">
-
-    <div class="subnav-pills">
-      <PillsCompanyUsers />
-    </div>
-
-    <PillsEngineer v-if="companycode === 'grm'" />
+  <div class="app-page">
+    <header>
+      <h3>People</h3>
+    </header>
+    
 
     <SearchModal
       id="search-modal"
@@ -22,13 +20,13 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this engineer?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Engineer')"
-      />
+    <div class="panel overflow-auto">
+      <div class="subnav-pills">
+        <PillsCompanyUsers />
+      </div>
 
+      <PillsEngineer v-if="companycode === 'grm'" />
+      <hr>  
       <b-table
         id="engineer-table"
         small
@@ -63,7 +61,7 @@
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
@@ -85,6 +83,12 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Engineer')"
+      />
+
     </div>
   </div>
 </template>

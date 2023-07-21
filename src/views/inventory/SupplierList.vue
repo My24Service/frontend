@@ -1,6 +1,10 @@
 <template>
-  <div class="mt-4">
-
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3>Suppliers</h3>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -16,12 +20,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this supplier?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Supplier')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="supplier-table"
@@ -53,7 +52,7 @@
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
@@ -75,6 +74,11 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Supplier')"
+      />
     </div>
   </div>
 </template>

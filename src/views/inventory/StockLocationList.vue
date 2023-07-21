@@ -1,6 +1,10 @@
 <template>
-  <div class="mt-4">
-
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3>Stock Locations</h3>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -16,12 +20,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this stock location?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Location')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="stock-location-table"
@@ -80,6 +79,11 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Location')"
+      />
     </div>
   </div>
 </template>

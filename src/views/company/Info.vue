@@ -1,8 +1,10 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
+  <div class="app-page">
+    <header>
+      <h3>{{ $trans('Company info') }}</h3>
+    </header>
+    <div class="panel app-detail">
       <b-form>
-        <h2>{{ $trans('Company info') }}</h2>
         <b-row>
           <b-col cols="4" role="group">
             <b-form-group
@@ -298,7 +300,7 @@
         </div>
       </b-form>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
