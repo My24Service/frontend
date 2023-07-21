@@ -70,8 +70,7 @@
       v-if="showCustomers"
       to="/customers/customers"
       class="has-children">
-      <b-icon icon="building" v-if="!isActive('customers')"></b-icon>
-      <b-icon icon="building-fill" v-else></b-icon> 
+      <b-icon icon="building"></b-icon>
       {{ $trans('Customers') }}
     </b-nav-item>
     <SubNav v-if="isActive('customers')">
