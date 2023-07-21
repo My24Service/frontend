@@ -1,7 +1,9 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-detail">
+  <div class="app-page">
+    <header>
       <h3>{{ $trans('Purchase order info') }}</h3>
+    </header>
+    <div class="app-detail panel">
       <b-row>
         <b-col cols="6">
           <b-table-simple>
@@ -117,7 +119,7 @@
           {{ $trans('Back') }}</b-button>
       </footer>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>

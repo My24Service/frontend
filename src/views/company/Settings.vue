@@ -1,8 +1,10 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
+  <div class="app-page">
+    <header>
+      <h3>{{ $trans('Settings') }}</h3>
+    </header>
+    <div class='app-detail panel'>
       <b-form>
-        <h2>{{ $trans('Settings') }}</h2>
         <b-table-simple>
           <b-thead>
             <b-td><strong>{{ $trans('Key') }}:</strong></b-td>
@@ -15,14 +17,14 @@
                   {{ index+1 }}: {{ key }}
                 </b-td>
                 <b-td class="border px-4 py-2">
-		              <b-form-checkbox
-		              	v-if="typeof value === 'boolean'"
+                  <b-form-checkbox
+                    v-if="typeof value === 'boolean'"
                     size="sm"
-		                v-model="settings[key]"
-		              >
-		              </b-form-checkbox>
+                    v-model="settings[key]"
+                  >
+                  </b-form-checkbox>
                   <b-form-input
-		              	v-if="typeof value !== 'boolean'"
+                    v-if="typeof value !== 'boolean'"
                     size="sm"
                     v-model="settings[key]"
                   ></b-form-input>
@@ -43,17 +45,14 @@
         </div>
       </b-form>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
-import PillsCompanyCompany from "@/components/PillsCompanyCompany.vue"
+
 import memberModel from '@/models/member/Member.js'
 
-export default {
-  components: {
-    PillsCompanyCompany,
-  },
+export default {  
   data() {
     return {
       isLoading: false,

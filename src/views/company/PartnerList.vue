@@ -1,9 +1,9 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
+    <header>
+      <h3>{{ $trans('Partners') }}</h3>
+    </header>
 
-    <div class="subnav-pills">
-      <PillsCompanyPartners />
-    </div>
 
     <SearchModal
       id="search-modal"
@@ -20,13 +20,11 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this partner relation?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Partner')"
-      />
-
+    <div class="panel overflow-auto">
+      <div class="subnav-pills">
+        <PillsCompanyPartners />
+      </div>
+      <hr>
       <b-table
         id="partner-table"
         small
@@ -72,6 +70,11 @@
           ></b-icon-check-square-fill>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Partner')"
+      />
     </div>
   </div>
 </template>
