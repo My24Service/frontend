@@ -22,6 +22,8 @@ import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
 import {AUTH_LEVELS} from "../constants";
 
+import InvoiceForm from "../views/orders/InvoiceForm";
+
 
 export default [
 // orders
@@ -283,6 +285,20 @@ export default [
         'app-subnav': {}
       },
     },
+    // invoices
+    {
+      name: 'order-invoice-create',
+      path: '/orders/invoice/form/:uuid',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': InvoiceForm,
+        'app-subnav': SubNavOrders
+      },
+    },
+
   ],
 }
 ];

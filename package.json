@@ -21,6 +21,7 @@
     "bootstrap-vue": "^2.22.0",
     "chart.js": "2",
     "chartjs-plugin-datalabels": "^0.4.0",
+    "dinero.js": "^1.9.1",
     "is-ci": "^3.0.1",
     "mutationobserver-shim": "^0.3.7",
     "one-colorpicker": "^1.0.12",

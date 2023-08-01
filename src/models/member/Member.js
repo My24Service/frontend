@@ -65,6 +65,11 @@ class Member extends BaseModel {
   companycodeExists(companycode) {
     return this.axios.get(`/member/companycode-exists/?companycode=${companycode}`).then((response) => response.data['available'])
   }
+
+  getVATTypes() {
+    return this.axios.get(`/member/vat-types/`).then((response) => response.data)
+  }
+
 }
 
 let memberModel = new Member()
