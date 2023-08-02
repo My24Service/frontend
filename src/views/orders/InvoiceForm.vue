@@ -39,14 +39,14 @@
               <p class="flex">
                 <span class="value-container">{{ material.price_purchase_ex_dinero.toFormat('$0.00') }}</span>
                 <b-form-input
-                  @blur="setPurchasePrice(material.id)"
+                  @blur="material.setPurchasePrice()"
                   v-model="material.price_purchase_ex_number"
                   size="sm"
                   class="input-number"
                 ></b-form-input>
                 <span class="bottom">.</span>
                 <b-form-input
-                  @blur="setPurchasePrice(material.id)"
+                  @blur="material.setPurchasePrice()"
                   v-model="material.price_purchase_ex_decimal"
                   size="sm"
                   class="input-decimal"
@@ -67,20 +67,20 @@
               <p class="flex">
                 <span class="value-container">{{ material.price_selling_ex_dinero.toFormat('$0.00') }}</span>
                 <b-form-input
-                  @blur="setSellingPrice(material.id)"
+                  @blur="material.setSellingPrice()"
                   v-model="material.price_selling_ex_number"
                   size="sm"
                   class="input-number"
                 ></b-form-input>
                 <span class="bottom">.</span>
                 <b-form-input
-                  @blur="setSellingPrice(material.id)"
+                  @blur="material.setSellingPrice()"
                   v-model="material.price_selling_ex_decimal"
                   size="sm"
                   class="input-decimal"
                 ></b-form-input>
                 <b-link
-                  @click="() => { recalcSelling(material.id) }"
+                  @click="() => { material.recalcSelling() }"
                   :title="`${$trans('Recalculate selling price with margin')}`"
                 >{{ $trans("recalc")}}</b-link>
               </p>
@@ -193,7 +193,7 @@
 import invoiceModel from '../../models/orders/Invoice.js'
 import invoiceLineModel from '../../models/orders/InvoiceLine.js'
 import memberModel from "../../models/member/Member";
-import Dinero from 'dinero.js'
+import { MaterialModel } from "../../models/inventory/Material";
 
 export default {
   name: 'InvoiceForm',
@@ -219,6 +219,7 @@ export default {
       order: null,
       member: null,
       invoice_id: null,
+      vat_types: [],
       invoice_default_margin: null,
       invoice_default_hourly_rate: null,
       invoice_default_vat: null,
@@ -251,7 +252,6 @@ export default {
       this.vat_types = await memberModel.getVATTypes()
       this.invoice = invoiceModel.getFields()
       const invoiceData = await invoiceModel.getData(this.uuid)
-      console.log(invoiceData)
 
       this.order = invoiceData.order
       this.member = invoiceData.member
@@ -262,13 +262,16 @@ export default {
       this.call_out_costs = invoiceData.call_out_costs
       this.call_out_costs_from_customer = invoiceData.call_out_costs_from_customer
 
-      for (let material of invoiceData.used_materials) {
-        material.vat_type = this.invoice_default_vat
-        material.margin = this.invoice_default_margin
-        material.usePrice = 'purchase'
-      }
-      this.used_materials = invoiceData.used_materials
-      this.material_models = this.setModelPrices(invoiceData.material_models)
+      this.used_materials = invoiceData.used_materials.map((m) => ({
+        ...m,
+        vat_type: this.invoice_default_vat,
+        margin:  this.invoice_default_margin,
+        usePrice: 'purchase',
+      }))
+
+      this.material_models = invoiceData.material_models.map((m) => new MaterialModel(
+        {...m, margin: this.invoice_default_margin})
+      )
       this.updateMaterialTotals()
 
       this.activity = invoiceData.activity
@@ -282,90 +285,26 @@ export default {
     }
   },
   methods: {
-    toDinero(priceDecimal, currency) {
-      if (currency === 'EUR' || currency === 'USD') {
-        const price = priceDecimal * 100
-        return Dinero({ amount: price, currency })
-      } else {
-        throw `${currency} not supported`
-      }
-    },
     updateMaterial(material_id) {
 
-    },
-    recalcSelling(material_id) {
-      const material = this.material_models.find((m) => m.id === material_id)
-      if (!material) {
-        throw `material ${material_id} not found`
-      }
-      material.price_selling_ex_dinero = material.price_purchase_ex_dinero.multiply(1+material.margin/100)
-      let parts = material.price_selling_ex_dinero.toFormat('0.00').split('.')
-      material.price_selling_ex_number = parts[0]
-      material.price_selling_ex_decimal = parts[1]
-    },
-    setModelPrice(material_id) {
-      let material = this.material_models.find((m) => m.id === material_id)
-      material.margin = this.invoice_default_margin
-      material.price_purchase_ex_dinero = this.toDinero(material.price_purchase_ex, material.price_purchase_ex_currency)
-      material.price_selling_ex_dinero = this.toDinero(material.price_selling_ex, material.price_selling_ex_currency)
-    },
-    setPageModelPrices() {
-      this.material_models = this.setModelPrices(this.material_models)
-    },
-    setPurchasePrice(material_id) {
-      let material = this.material_models.find((m) => m.id === material_id)
-      const price = parseInt(`${material.price_purchase_ex_number}${material.price_purchase_ex_decimal}`)
-      material.price_purchase_ex_dinero = Dinero({ amount: price, currency: material.price_purchase_ex_currency })
-    },
-    setSellingPrice(material_id) {
-      let material = this.material_models.find((m) => m.id === material_id)
-      const price = parseInt(`${material.price_selling_ex_number}${material.price_selling_ex_decimal}`)
-      material.price_selling_ex_dinero = Dinero({ amount: price, currency: material.price_selling_ex_currency })
-    },
-    setModelPrices(material_models) {
-      let new_models = []
-      for (let material of material_models) {
-        material.margin = this.invoice_default_margin
-        console.log(material.price_purchase_ex_number)
-        material.price_purchase_ex_dinero = this.toDinero(material.price_purchase_ex, material.price_purchase_ex_currency)
-        let parts = material.price_purchase_ex_dinero.toFormat('0.00').split('.')
-        material.price_purchase_ex_number = parts[0]
-        material.price_purchase_ex_decimal = parts[1]
-
-        material.price_selling_ex_dinero = this.toDinero(material.price_selling_ex, material.price_selling_ex_currency)
-        parts = material.price_selling_ex_dinero.toFormat('0.00').split('.')
-        material.price_selling_ex_number = parts[0]
-        material.price_selling_ex_decimal = parts[1]
-
-        new_models.push(material)
-      }
-      return new_models
     },
     getMaterialPrice(used_material) {
       const model = this.material_models.find((m) => m.id === used_material.material_id)
       if (model) {
-        console.log('found model', model)
-        let price = used_material.usePrice === 'purchase' ? model.price_purchase_ex : model.price_selling_ex
-        const currency = used_material.usePrice === 'purchase' ? model.price_purchase_ex_currency : model.price_selling_ex_currency
-        return this.toDinero(price, currency)
+        return used_material.usePrice === 'purchase' ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
       } else {
         console.error('MODEL NOT FOUND for ', used_material)
       }
     },
     updateMaterialTotals() {
-      let new_materials = []
-      for (let material of this.used_materials) {
-        const new_material = this.updateMaterialTotal(material)
-        new_materials.push(new_material)
-      }
-      this.used_materials = new_materials
+      this.used_materials = this.used_materials.map((m) => this.updateMaterialTotal(m))
     },
     updateMaterialTotal(material) {
       const price = this.getMaterialPrice(material)
       const total = price.multiply(material.amount)
       const margin = total.multiply(material.margin)
       const total_with_margin = total.add(margin)
-      const vat = total_with_margin.multiply(parseInt(material.vat_type))
+      const vat = total_with_margin.multiply(parseInt(material.vat_type)/100)
       material.total = total_with_margin
       material.vat = vat
 

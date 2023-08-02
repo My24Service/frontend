@@ -5,6 +5,7 @@ import orderNotAcceptedModel from './models/orders/OrderNotAccepted.js'
 import {
   AUTH_LEVELS
 } from "./constants";
+import Dinero from "dinero.js";
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
@@ -218,6 +219,15 @@ let componentMixin = {
   }
 }
 
+function toDinero(priceDecimal, currency) {
+  if (currency === 'EUR' || currency === 'USD') {
+    const price = priceDecimal * 100
+    return Dinero({ amount: price, currency })
+  } else {
+    throw `${currency} not supported`
+  }
+}
+
 export {
   isEmpty,
   getIsStaff,
@@ -230,5 +240,6 @@ export {
   getIsLoggedIn,
   hasAccessRouteAuthLevel,
   getUserAuthLevel,
-  componentMixin
+  componentMixin,
+  toDinero
 }

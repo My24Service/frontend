@@ -1,6 +1,85 @@
 import BaseModel from '@/models/base'
+import {toDinero} from "../../utils";
+import Dinero from "dinero.js";
 
+class MaterialModel {
+  name_short;
+  name;
+  identifier;
+  unit;
 
+  supplier;
+  supplier_relation;
+  supplier_name;
+
+  product_type;
+  location;
+
+  margin;
+
+  price_purchase;
+  price_selling;
+  price_selling_alt;
+
+  price_purchase_ex;
+  price_purchase_ex_dinero;
+  price_purchase_ex_number;
+  price_purchase_ex_decimal;
+  price_purchase_ex_currency;
+
+  price_selling_ex;
+  price_selling_ex_dinero;
+  price_selling_ex_number;
+  price_selling_ex_decimal;
+  price_selling_ex_currency;
+  price_selling_alt_ex;
+
+  image;
+
+  constructor(material) {
+    if (material.price_purchase_ex && material.price_purchase_ex_currency) {
+      material.price_purchase_ex_dinero = toDinero(
+        material.price_purchase_ex, material.price_purchase_ex_currency)
+      let parts = material.price_purchase_ex_dinero.toFormat('0.00').split('.')
+      material.price_purchase_ex_number = parts[0]
+      material.price_purchase_ex_decimal = parts[1]
+
+      material.price_selling_ex_dinero = toDinero(material.price_selling_ex, material.price_selling_ex_currency)
+      parts = material.price_selling_ex_dinero.toFormat('0.00').split('.')
+      material.price_selling_ex_number = parts[0]
+      material.price_selling_ex_decimal = parts[1]
+    }
+
+    for (const [k,v] of Object.entries(material)) {
+      this[k] = v
+    }
+  }
+
+  recalcSelling() {
+    this.price_selling_ex_dinero = this.price_purchase_ex_dinero.multiply(1+this.margin/100)
+    let parts = this.price_selling_ex_dinero.toFormat('0.00').split('.')
+    this.price_selling_ex_number = parts[0]
+    this.price_selling_ex_decimal = parts[1]
+  }
+
+  setPurchasePrice() {
+    const price = parseInt(`${this.price_purchase_ex_number}${this.price_purchase_ex_decimal}`)
+    this.price_purchase_ex_dinero = Dinero({
+      amount: price,
+      currency: this.price_purchase_ex_currency
+    })
+  }
+
+  setSellingPrice() {
+    const price = parseInt(`${this.price_selling_ex_number}${this.price_selling_ex_decimal}`)
+    this.price_selling_ex_dinero = Dinero({
+      amount: price,
+      currency: this.price_selling_ex_currency
+    })
+  }
+}
+
+// rename to service?
 class Material extends BaseModel {
   fields = {
     'name_short': '',
@@ -20,7 +99,16 @@ class Material extends BaseModel {
     'price_selling_alt': '0.00',
 
     'price_purchase_ex': '0.00',
+    'price_purchase_ex_dinero': null,
+    'price_purchase_ex_number': '0',
+    'price_purchase_ex_decimal': '00',
+    'price_purchase_ex_currency': 'EUR',
+
     'price_selling_ex': '0.00',
+    'price_selling_ex_dinero': null,
+    'price_selling_ex_number': '0',
+    'price_selling_ex_decimal': '00',
+    'price_selling_ex_currency': 'EUR',
     'price_selling_alt_ex': '0.00',
 
     'image': null
@@ -75,4 +163,5 @@ class Material extends BaseModel {
 
 let materialModel = new Material()
 
+export { MaterialModel }
 export default materialModel
