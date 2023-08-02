@@ -154,7 +154,7 @@
                 ></b-form-input>
               </b-form-radio-group>
             </b-col>
-            <b-col cols="1">
+            <b-col size="1">
               <b-form-input
                 v-model="material.margin"
                 size="sm"
@@ -269,7 +269,6 @@ export default {
       }
       this.used_materials = invoiceData.used_materials
       this.material_models = this.setModelPrices(invoiceData.material_models)
-      console.log(this.material_models)
       this.updateMaterialTotals()
 
       this.activity = invoiceData.activity
