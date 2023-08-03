@@ -16,13 +16,13 @@
               {{ $trans("Identifier") }}
             </b-col>
             <b-col cols="2">
-              {{ $trans("Price purchase") }}
+              {{ $trans("Price purchase ex.") }}
             </b-col>
             <b-col cols="1">
               {{ $trans("Margin") }}
             </b-col>
             <b-col cols="3">
-              {{ $trans("Price selling") }}
+              {{ $trans("Price selling ex.") }}
             </b-col>
             <b-col cols="1">
 
@@ -39,14 +39,14 @@
               <p class="flex">
                 <span class="value-container">{{ material.price_purchase_ex_dinero.toFormat('$0.00') }}</span>
                 <b-form-input
-                  @blur="material.setPurchasePrice()"
+                  @blur="material.setPurchasePrice() && updateMaterialTotals()"
                   v-model="material.price_purchase_ex_number"
                   size="sm"
                   class="input-number"
                 ></b-form-input>
                 <span class="bottom">.</span>
                 <b-form-input
-                  @blur="material.setPurchasePrice()"
+                  @blur="material.setPurchasePrice() && updateMaterialTotals()"
                   v-model="material.price_purchase_ex_decimal"
                   size="sm"
                   class="input-decimal"
@@ -67,20 +67,20 @@
               <p class="flex">
                 <span class="value-container">{{ material.price_selling_ex_dinero.toFormat('$0.00') }}</span>
                 <b-form-input
-                  @blur="material.setSellingPrice()"
+                  @blur="material.setSellingPrice() && updateMaterialTotals()"
                   v-model="material.price_selling_ex_number"
                   size="sm"
                   class="input-number"
                 ></b-form-input>
                 <span class="bottom">.</span>
                 <b-form-input
-                  @blur="material.setSellingPrice()"
+                  @blur="material.setSellingPrice() && updateMaterialTotals()"
                   v-model="material.price_selling_ex_decimal"
                   size="sm"
                   class="input-decimal"
                 ></b-form-input>
                 <b-link
-                  @click="() => { material.recalcSelling() }"
+                  @click="() => { material.recalcSelling() && updateMaterialTotals() }"
                   :title="`${$trans('Recalculate selling price with margin')}`"
                 >{{ $trans("recalc")}}</b-link>
               </p>
@@ -106,72 +106,111 @@
         <b-container fluid>
           <h3>{{ $trans("Used materials") }}</h3>
           <b-row>
-            <b-col cols="3">
+            <b-col cols="2">
               {{ $trans("Engineer") }}
             </b-col>
-            <b-col cols="3">
+            <b-col cols="2">
               {{ $trans("Material") }}
             </b-col>
             <b-col cols="1">
               {{ $trans("Amount") }}
             </b-col>
-            <b-col cols="1">
-              {{ $trans("Price") }}
+            <b-col cols="3">
+              {{ $trans("Use price") }}
             </b-col>
             <b-col cols="1">
               {{ $trans("Margin") }}
             </b-col>
             <b-col cols="1">
-              {{ $trans("VAT") }}
+              {{ $trans("VAT type") }}
             </b-col>
-            <b-col cols="1">
-              {{ $trans("Total") }}
-            </b-col>
+            <b-col cols="2"></b-col>
           </b-row>
           <b-row v-for="material in used_materials" :key="material.id" class="material_row">
-            <b-col cols="3">
+            <b-col cols="2">
               {{ material.full_name }}
             </b-col>
-            <b-col cols="3">
+            <b-col cols="2">
               {{ material.name }}
             </b-col>
             <b-col cols="1">
               {{ material.amount }}
             </b-col>
-            <b-col cols="1">
+            <b-col cols="3">
               <b-form-radio-group
+                @change="updateMaterialTotals()"
                 v-model="material.usePrice"
               >
-                <b-form-radio value="purchase"></b-form-radio>
-                  Purchase <b-form-input
-                  v-model="material.price_purchase_ex"
-                  size="sm"
-                ></b-form-input>
-                <b-form-radio value="selling"></b-form-radio>
-                  Selling <b-form-input
-                  v-model="material.price_selling_ex"
-                  size="sm"
-                ></b-form-input>
+                <b-form-radio value="purchase">
+                  Pur. {{ getMaterialPriceFor(material, "purchase").toFormat('$0.00') }}
+                </b-form-radio>
+
+                <b-form-radio value="selling">
+                  Sel. {{ getMaterialPriceFor(material, "selling").toFormat('$0.00') }}
+                </b-form-radio>
               </b-form-radio-group>
             </b-col>
-            <b-col size="1">
-              <b-form-input
-                v-model="material.margin"
-                size="sm"
-              ></b-form-input>
+            <b-col cols="1">
+              <p class="flex">
+                <b-form-input
+                  @blur="updateMaterialTotals()"
+                  v-model="material.margin"
+                  size="sm"
+                  class="input-decimal"
+                ></b-form-input>
+                <span class="percentage-container">%</span>
+              </p>
             </b-col>
             <b-col cols="1">
               <b-form-select
+                @change="updateMaterialTotals"
                 :value="invoice_default_vat"
-                v-model="material.vat.amount"
+                v-model="material.vat_type"
                 :options="vat_types" size="sm"
               ></b-form-select>
             </b-col>
-            <b-col cols="1">
-              <b-form-input
-                v-model="material.total.amount"
-                size="sm"
-              ></b-form-input>
+            <b-col cols="2">
+              <b-container>
+                <b-row>
+                  <b-col cols="4">
+                    <span class="value-container">{{ $trans("Total") }}</span>
+                  </b-col>
+                  <b-col cols="8">
+                    <b-form-input
+                      readonly
+                      v-model="material.total"
+                      size="sm"
+                      class="input-total-used"
+                    ></b-form-input>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col cols="4">
+                    <span class="value-container">{{ $trans("Margin") }}</span>
+                  </b-col>
+                  <b-col cols="8">
+                    <b-form-input
+                      readonly
+                      v-model="material.margin_amount"
+                      size="sm"
+                      class="input-total-used"
+                    ></b-form-input>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col cols="4">
+                    <span class="value-container">{{ $trans("VAT") }}</span>
+                  </b-col>
+                  <b-col cols="8">
+                    <b-form-input
+                      readonly
+                      v-model="material.vat"
+                      size="sm"
+                      class="input-total-used"
+                    ></b-form-input>
+                  </b-col>
+                </b-row>
+              </b-container>
             </b-col>
           </b-row>
         </b-container>
@@ -194,6 +233,7 @@ import invoiceModel from '../../models/orders/Invoice.js'
 import invoiceLineModel from '../../models/orders/InvoiceLine.js'
 import memberModel from "../../models/member/Member";
 import { MaterialModel } from "../../models/inventory/Material";
+import materialService from "../../models/inventory/Material";
 
 export default {
   name: 'InvoiceForm',
@@ -285,8 +325,14 @@ export default {
     }
   },
   methods: {
-    updateMaterial(material_id) {
+    async updateMaterial(material_id) {
+      let material = this.material_models.find((m) => m.id === material_id)
+      delete material.image
+      const updatedMaterialJson = await materialService.update(material_id, material)
+      material.setPriceFields(updatedMaterialJson)
+      this.updateMaterialTotals()
 
+      this.infoToast(this.$trans('Updated'), this.$trans('Material has been updated'))
     },
     getMaterialPrice(used_material) {
       const model = this.material_models.find((m) => m.id === used_material.material_id)
@@ -296,17 +342,32 @@ export default {
         console.error('MODEL NOT FOUND for ', used_material)
       }
     },
-    updateMaterialTotals() {
-      this.used_materials = this.used_materials.map((m) => this.updateMaterialTotal(m))
+    getMaterialPriceFor(used_material, usePrice) {
+      const model = this.material_models.find((m) => m.id === used_material.material_id)
+      if (model) {
+        return usePrice === 'purchase' ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
+      } else {
+        console.error('MODEL NOT FOUND for ', used_material)
+      }
     },
-    updateMaterialTotal(material) {
+    updateMaterialTotals() {
+      this.used_materials = this.used_materials.map((m) => this.updateUsedMaterialTotals(m))
+    },
+    updateUsedMaterialTotals(material) {
       const price = this.getMaterialPrice(material)
       const total = price.multiply(material.amount)
-      const margin = total.multiply(material.margin)
-      const total_with_margin = total.add(margin)
+      let total_with_margin = total
+      let margin_txt = "0.00"
+      if (material.margin > 0) {
+        const margin_perc = material.margin/100
+        const margin = total.multiply(margin_perc)
+        total_with_margin = total.add(margin)
+        margin_txt = margin.toFormat("$0.00")
+      }
       const vat = total_with_margin.multiply(parseInt(material.vat_type)/100)
-      material.total = total_with_margin
-      material.vat = vat
+      material.total = total_with_margin.toFormat("$0.00")
+      material.vat = vat.toFormat("$0.00")
+      material.margin_amount = margin_txt
 
       return material
     },
@@ -407,7 +468,16 @@ export default {
 .input-number {
   width: 60px;
 }
+.input-vat-used {
+  width: 90px;
+}
+.input-total-used {
+  width: 90px;
+}
 .update-button {
   margin-bottom: 8px;
+}
+.used-total {
+  margin-right: 8px;
 }
 </style>

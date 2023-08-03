@@ -34,6 +34,7 @@ export default {
                 "documents": [],
                 "user_order_is_available": true,
                 "created": "21/10/2021 18:10",
+                "materials": [],
                 "statusses": [
                     {
                         "id": 4985,
@@ -121,6 +122,7 @@ export default {
                 "documents": [],
                 "user_order_is_available": true,
                 "created": "21/10/2021 18:10",
+                "materials": [],
                 "statusses": [
                     {
                         "id": 4980,

@@ -26,6 +26,7 @@ export default {
         "last_status_full": "22/10/2021 19:53 gewijzigd door admin",
         "created": "21/10/2021 18:10",
         "documents": [],
+        "materials": [],
         'maintenance_product_lines': [],
         "statusses": [
             {

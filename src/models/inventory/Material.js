@@ -37,21 +37,27 @@ class MaterialModel {
   image;
 
   constructor(material) {
-    if (material.price_purchase_ex && material.price_purchase_ex_currency) {
-      material.price_purchase_ex_dinero = toDinero(
-        material.price_purchase_ex, material.price_purchase_ex_currency)
-      let parts = material.price_purchase_ex_dinero.toFormat('0.00').split('.')
-      material.price_purchase_ex_number = parts[0]
-      material.price_purchase_ex_decimal = parts[1]
+    for (const [k, v] of Object.entries(material)) {
+      this[k] = v
+    }
+    this.setPriceFields(this)
+  }
 
-      material.price_selling_ex_dinero = toDinero(material.price_selling_ex, material.price_selling_ex_currency)
-      parts = material.price_selling_ex_dinero.toFormat('0.00').split('.')
-      material.price_selling_ex_number = parts[0]
-      material.price_selling_ex_decimal = parts[1]
+  setPriceFields(obj) {
+    let parts = []
+    if (obj.price_purchase_ex && obj.price_purchase_ex_currency) {
+      this.price_purchase_ex_dinero = toDinero(
+        obj.price_purchase_ex, obj.price_purchase_ex_currency)
+      parts = this.price_purchase_ex_dinero.toFormat('0.00').split('.')
+      this.price_purchase_ex_number = parts[0]
+      this.price_purchase_ex_decimal = parts[1]
     }
 
-    for (const [k,v] of Object.entries(material)) {
-      this[k] = v
+    if (obj.price_selling_ex && obj.price_selling_ex_currency) {
+      this.price_selling_ex_dinero = toDinero(obj.price_selling_ex, obj.price_selling_ex_currency)
+      parts = this.price_selling_ex_dinero.toFormat('0.00').split('.')
+      this.price_selling_ex_number = parts[0]
+      this.price_selling_ex_decimal = parts[1]
     }
   }
 
@@ -60,6 +66,8 @@ class MaterialModel {
     let parts = this.price_selling_ex_dinero.toFormat('0.00').split('.')
     this.price_selling_ex_number = parts[0]
     this.price_selling_ex_decimal = parts[1]
+    this.price_selling_ex = this.price_selling_ex_dinero.toFormat('0.00')
+    this.price_selling_ex_currency = this.price_selling_ex_dinero.getCurrency()
   }
 
   setPurchasePrice() {
@@ -68,6 +76,8 @@ class MaterialModel {
       amount: price,
       currency: this.price_purchase_ex_currency
     })
+    this.price_purchase_ex = this.price_purchase_ex_dinero.toFormat('0.00')
+    this.price_purchase_ex_currency = this.price_purchase_ex_dinero.getCurrency()
   }
 
   setSellingPrice() {
@@ -76,11 +86,13 @@ class MaterialModel {
       amount: price,
       currency: this.price_selling_ex_currency
     })
+    this.price_selling_ex = this.price_selling_ex_dinero.toFormat('0.00')
+    this.price_selling_ex_currency = this.price_selling_ex_dinero.getCurrency()
   }
 }
 
 // rename to service?
-class Material extends BaseModel {
+class MaterialService extends BaseModel {
   fields = {
     'name_short': '',
     'name': '',
@@ -161,7 +173,7 @@ class Material extends BaseModel {
   }
 }
 
-let materialModel = new Material()
+let materialService = new MaterialService()
 
 export { MaterialModel }
-export default materialModel
+export default materialService

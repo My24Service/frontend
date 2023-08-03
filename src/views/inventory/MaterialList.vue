@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import materialModel from '../../models/inventory/Material.js'
+import materialService from '../../models/inventory/Material.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -103,7 +103,7 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: materialModel,
+      model: materialService,
       materialPk: null,
       isLoading: false,
       materials: [],

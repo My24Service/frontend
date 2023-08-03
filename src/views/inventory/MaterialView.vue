@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import materialModel from '../../models/inventory/Material.js'
+import materialService from '../../models/inventory/Material.js'
 import inventoryModel from '../../models/inventory/Inventory.js'
 import {NO_IMAGE_URL} from "../../constants";
 
@@ -90,7 +90,7 @@ export default {
   data() {
     return {
       isLoading: false,
-      material: materialModel.getFields(),
+      material: materialService.getFields(),
       inventory: [],
       inventoryFields: [
         { key: 'location_name', label: this.$trans('Location') },
@@ -113,7 +113,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.material = await materialModel.detail(this.pk)
+        this.material = await materialService.detail(this.pk)
         this.inventory = await inventoryModel.getLocationsForMaterial(this.pk)
         this.isLoading = false
       } catch(error) {
