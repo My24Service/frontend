@@ -64,7 +64,7 @@
             <b-col cols="1">
               <p class="flex pl-3">
                 <b-form-input
-                  v-model="material.margin"
+                  v-model="material.margin_perc"
                   size="sm"
                   class="input-margin"
                 ></b-form-input>
@@ -176,7 +176,7 @@
               <p class="flex">
                 <b-form-input
                   @blur="updateMaterialTotals()"
-                  v-model="material.margin"
+                  v-model="material.margin_perc"
                   size="sm"
                   class="input-margin"
                 ></b-form-input>
@@ -200,7 +200,7 @@
                   <b-col cols="8">
                     <b-form-input
                       readonly
-                      v-model="material.total"
+                      :value="material.total.toFormat('$0.00')"
                       size="sm"
                       class="input-total-used"
                     ></b-form-input>
@@ -213,7 +213,7 @@
                   <b-col cols="8">
                     <b-form-input
                       readonly
-                      v-model="material.margin_amount"
+                      :value="material.margin.toFormat('$0.00')"
                       size="sm"
                       class="input-total-used"
                     ></b-form-input>
@@ -226,7 +226,7 @@
                   <b-col cols="8">
                     <b-form-input
                       readonly
-                      v-model="material.vat"
+                      :value="material.vat.toFormat('$0.00')"
                       size="sm"
                       class="input-total-used"
                     ></b-form-input>
@@ -364,12 +364,12 @@ export default {
       this.used_materials = invoiceData.used_materials.map((m) => ({
         ...m,
         vat_type: this.invoice_default_vat,
-        margin:  this.invoice_default_margin,
+        margin_perc:  this.invoice_default_margin,
         usePrice: 'purchase',
       }))
 
       this.material_models = invoiceData.material_models.map((m) => new MaterialModel(
-        {...m, margin: this.invoice_default_margin})
+        {...m, margin_perc: this.invoice_default_margin})
       )
       this.updateMaterialTotals()
 
@@ -427,33 +427,28 @@ export default {
       const currency = this.getMaterialCurrency(material)
       const total = price.multiply(material.amount)
       let total_with_margin = total
-      let margin_txt = "0.00"
-      if (material.margin > 0) {
-        const margin_perc = material.margin/100
-        const margin = total.multiply(margin_perc)
+      let margin = toDinero("0.00", currency)
+      if (material.margin_perc > 0) {
+        margin = total.multiply(material.margin_perc/100)
         total_with_margin = total.add(margin)
-        margin_txt = margin.toFormat("$0.00")
       }
       const vat = total_with_margin.multiply(parseInt(material.vat_type)/100)
-      material.total_dinero = total_with_margin
       material.currency = currency
-      material.total = total_with_margin.toFormat("$0.00")
-
-      material.vat = vat.toFormat("$0.00")
-      material.vat_dinero = vat
-      material.margin_amount = margin_txt
+      material.total = total_with_margin
+      material.vat = vat
+      material.margin = margin
 
       return material
     },
     getMaterialsTotal(materials) {
       return materials.reduce(
-        (total, m) => (total.add(m.total_dinero)),
+        (total, m) => (total.add(m.total)),
         toDinero("0.00", materials[0].currency)
       )
     },
     getMaterialsTotalVAT(materials) {
       return materials.reduce(
-        (total, m) => (total.add(m.vat_dinero)),
+        (total, m) => (total.add(m.vat)),
         toDinero("0.00", materials[0].currency)
       )
     },
