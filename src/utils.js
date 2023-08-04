@@ -221,8 +221,12 @@ let componentMixin = {
 
 function toDinero(priceDecimal, currency) {
   if (currency === 'EUR' || currency === 'USD') {
-    const price = priceDecimal * 100
-    return Dinero({ amount: price, currency })
+    const amount = priceDecimal * 100
+    // console.log('toDinero amount=', amount)
+    if (isNaN(amount)) {
+      throw `invalid input: ${priceDecimal}`
+    }
+    return Dinero({ amount, currency })
   } else {
     throw `${currency} not supported`
   }

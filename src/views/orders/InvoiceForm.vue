@@ -37,21 +37,11 @@
               <b-container>
                 <b-row>
                   <b-col cols="7">
-                    <p class="flex">
-                      <b-form-input
-                        @blur="material.setPurchasePrice() && updateMaterialTotals()"
-                        v-model="material.price_purchase_ex_number"
-                        size="sm"
-                        class="input-number"
-                      ></b-form-input>
-                      <span class="bottom">.</span>
-                      <b-form-input
-                        @blur="material.setPurchasePrice() && updateMaterialTotals()"
-                        v-model="material.price_purchase_ex_decimal"
-                        size="sm"
-                        class="input-decimal"
-                      ></b-form-input>
-                    </p>
+                    <PriceInput
+                      v-model="material.price_purchase_ex"
+                      :currency="material.price_purchase_ex_currency"
+                      @priceChanged="(val) => material.setPurchasePrice(val) && updateMaterialTotals()"
+                    />
                   </b-col>
                   <b-col cols="5">
                     <p class="flex">
@@ -81,19 +71,12 @@
                   </b-col>
                   <b-col cols="9">
                     <p class="flex">
-                      <b-form-input
-                        @blur="material.setSellingPrice() && updateMaterialTotals()"
-                        v-model="material.price_selling_ex_number"
-                        size="sm"
-                        class="input-number"
-                      ></b-form-input>
-                      <span class="bottom">.</span>
-                      <b-form-input
-                        @blur="material.setSellingPrice() && updateMaterialTotals()"
-                        v-model="material.price_selling_ex_decimal"
-                        size="sm"
-                        class="input-decimal"
-                      ></b-form-input>
+                      <PriceInput
+                        :ref="`selling_price_${material.id}`"
+                        v-model="material.price_selling_ex"
+                        :currency="material.price_selling_ex_currency"
+                        @priceChanged="(val) => material.setSellingPrice(val) && updateMaterialTotals()"
+                      />
                       <span class="value-container">
                         <b-link
                           @click="() => { material.recalcSelling() && updateMaterialTotals() }"
@@ -169,6 +152,27 @@
 
                 <b-form-radio value="selling">
                   Sel. {{ getMaterialPriceFor(material, "selling").toFormat('$0.00') }}
+                </b-form-radio>
+                <b-form-radio value="other">
+                  <p class="flex">
+                    {{ $trans("Other") }}:
+                    <b-container>
+                      <b-row>
+                        <b-col cols="7">
+                          <PriceInput
+                            v-model="material.price_purchase_ex_other"
+                            :currency="material.price_purchase_ex_other_currency"
+                            @priceChanged="(val) => setPurchasePriceOther(val, material.material_id) && updateMaterialTotals()"
+                          />
+                        </b-col>
+                        <b-col cols="5">
+                          <p class="flex">
+                            <span class="value-container">{{ material.price_purchase_ex_other_dinero.toFormat('$0.00') }}</span>
+                          </p>
+                        </b-col>
+                      </b-row>
+                    </b-container>
+                  </p>
                 </b-form-radio>
               </b-form-radio-group>
             </b-col>
@@ -290,9 +294,13 @@ import memberModel from "../../models/member/Member";
 import { MaterialModel } from "../../models/inventory/Material";
 import materialService from "../../models/inventory/Material";
 import {toDinero} from "../../utils";
+import PriceInput from "../../components/PriceInput";
 
 export default {
   name: 'InvoiceForm',
+  components: {
+    PriceInput
+  },
   props: {
     uuid: {
       type: [String],
@@ -316,6 +324,7 @@ export default {
       member: null,
       invoice_id: null,
       vat_types: [],
+      default_currency: null,
       invoice_default_margin: null,
       invoice_default_hourly_rate: null,
       invoice_default_vat: null,
@@ -355,6 +364,7 @@ export default {
       this.order = invoiceData.order
       this.member = invoiceData.member
       this.invoice_id = invoiceData.invoice_id
+      this.default_currency = invoiceData.default_currency
       this.invoice_default_margin = invoiceData.invoice_default_margin
       this.invoice_default_hourly_rate = invoiceData.invoice_default_hourly_rate
       this.invoice_default_vat = invoiceData.invoice_default_vat
@@ -365,12 +375,16 @@ export default {
         ...m,
         vat_type: this.invoice_default_vat,
         margin_perc:  this.invoice_default_margin,
+        price_purchase_ex_other: "0.00",
+        price_purchase_ex_other_currency: this.default_currency,
+        price_purchase_ex_other_dinero: toDinero("0.00", this.default_currency),
         usePrice: 'purchase',
       }))
 
-      this.material_models = invoiceData.material_models.map((m) => new MaterialModel(
-        {...m, margin_perc: this.invoice_default_margin})
-      )
+      this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
+          ...m,
+        margin_perc: this.invoice_default_margin
+      }))
       this.updateMaterialTotals()
 
       this.activity = invoiceData.activity
@@ -394,19 +408,31 @@ export default {
       this.infoToast(this.$trans('Updated'), this.$trans('Material has been updated'))
     },
     getMaterialPrice(used_material) {
-      const model = this.material_models.find((m) => m.id === used_material.material_id)
-      if (model) {
-        return used_material.usePrice === 'purchase' ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
+      if (used_material.usePrice === 'purchase') {
+        const model = this.material_models.find((m) => m.id === used_material.material_id)
+        return model.price_purchase_ex_dinero
+      } else if (used_material.usePrice === 'selling') {
+        const model = this.material_models.find((m) => m.id === used_material.material_id)
+        return model.price_selling_ex_dinero
+      } else if (used_material.usePrice === 'other') {
+        const model = this.used_materials.find((m) => m.material_id === used_material.material_id)
+        return model.price_purchase_ex_other_dinero
       } else {
-        console.error('MODEL NOT FOUND for ', used_material)
+        throw `unknown use price: ${used_material.usePrice}`
       }
     },
     getMaterialCurrency(used_material) {
-      const model = this.material_models.find((m) => m.id === used_material.material_id)
-      if (model) {
-        return used_material.usePrice === 'purchase' ? model.price_purchase_ex_currency : model.price_selling_ex_currency
+      if (used_material.usePrice === 'purchase') {
+        const model = this.material_models.find((m) => m.id === used_material.material_id)
+        return model.price_purchase_ex_currency
+      } else if (used_material.usePrice === 'selling') {
+        const model = this.material_models.find((m) => m.id === used_material.material_id)
+        return model.price_selling_ex_currency
+      } else if (used_material.usePrice === 'other') {
+        const model = this.used_materials.find((m) => m.material_id === used_material.material_id)
+        return model.price_purchase_ex_other_currency
       } else {
-        console.error('MODEL NOT FOUND for ', used_material)
+        throw `unknown use price: ${used_material.usePrice}`
       }
     },
     getMaterialPriceFor(used_material, usePrice) {
@@ -416,6 +442,13 @@ export default {
       } else {
         console.error('MODEL NOT FOUND for ', used_material)
       }
+    },
+    setPurchasePriceOther(priceDinero, material_id) {
+      let model = this.used_materials.find((m) => m.material_id === material_id)
+      model.price_purchase_ex_other_dinero = priceDinero
+      model.price_purchase_ex_other = model.price_purchase_ex_other_dinero.toFormat('0.00')
+      model.price_purchase_ex_other_currency = model.price_purchase_ex_other_dinero.getCurrency()
+      return true
     },
     updateMaterialTotals() {
       this.used_materials = this.used_materials.map((m) => this.updateUsedMaterialTotals(m))
@@ -531,16 +564,6 @@ export default {
   display : flex;
   margin-top: auto;
 }
-.bottom {
-  /*margin-bottom: auto;*/
-  margin-top: auto;
-}
-.input-decimal {
-  width: 24px;
-  padding: 1px;
-  margin: 1px;
-  text-align: center;
-}
 .input-margin {
   width: 30px;
   padding: 1px;
@@ -556,11 +579,6 @@ export default {
   padding-top: 4px;
   padding-left: 4px;
 }
-.input-number {
-  width: 60px;
-  text-align: right;
-}
-
 .input-total-used {
   width: 90px;
   padding: 1px;

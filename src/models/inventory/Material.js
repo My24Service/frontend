@@ -16,6 +16,7 @@ class MaterialModel {
   location;
 
   margin;
+  margin_perc;
 
   price_purchase;
   price_selling;
@@ -23,14 +24,10 @@ class MaterialModel {
 
   price_purchase_ex;
   price_purchase_ex_dinero;
-  price_purchase_ex_number;
-  price_purchase_ex_decimal;
   price_purchase_ex_currency;
 
   price_selling_ex;
   price_selling_ex_dinero;
-  price_selling_ex_number;
-  price_selling_ex_decimal;
   price_selling_ex_currency;
   price_selling_alt_ex;
 
@@ -44,50 +41,36 @@ class MaterialModel {
   }
 
   setPriceFields(obj) {
-    let parts = []
     if (obj.price_purchase_ex && obj.price_purchase_ex_currency) {
       this.price_purchase_ex_dinero = toDinero(
         obj.price_purchase_ex, obj.price_purchase_ex_currency)
-      parts = this.price_purchase_ex_dinero.toFormat('0.00').split('.')
-      this.price_purchase_ex_number = parts[0]
-      this.price_purchase_ex_decimal = parts[1]
     }
 
     if (obj.price_selling_ex && obj.price_selling_ex_currency) {
-      this.price_selling_ex_dinero = toDinero(obj.price_selling_ex, obj.price_selling_ex_currency)
-      parts = this.price_selling_ex_dinero.toFormat('0.00').split('.')
-      this.price_selling_ex_number = parts[0]
-      this.price_selling_ex_decimal = parts[1]
+      this.price_selling_ex_dinero = toDinero(
+        obj.price_selling_ex, obj.price_selling_ex_currency)
     }
   }
 
   recalcSelling() {
-    this.price_selling_ex_dinero = this.price_purchase_ex_dinero.multiply(1+this.margin/100)
-    let parts = this.price_selling_ex_dinero.toFormat('0.00').split('.')
-    this.price_selling_ex_number = parts[0]
-    this.price_selling_ex_decimal = parts[1]
+    this.price_selling_ex_dinero = this.price_purchase_ex_dinero.multiply(1+this.margin_perc/100)
     this.price_selling_ex = this.price_selling_ex_dinero.toFormat('0.00')
     this.price_selling_ex_currency = this.price_selling_ex_dinero.getCurrency()
+    return true
   }
 
-  setPurchasePrice() {
-    const price = parseInt(`${this.price_purchase_ex_number}${this.price_purchase_ex_decimal}`)
-    this.price_purchase_ex_dinero = Dinero({
-      amount: price,
-      currency: this.price_purchase_ex_currency
-    })
+  setPurchasePrice(priceDinero) {
+    this.price_purchase_ex_dinero = priceDinero
     this.price_purchase_ex = this.price_purchase_ex_dinero.toFormat('0.00')
     this.price_purchase_ex_currency = this.price_purchase_ex_dinero.getCurrency()
+    return true
   }
 
-  setSellingPrice() {
-    const price = parseInt(`${this.price_selling_ex_number}${this.price_selling_ex_decimal}`)
-    this.price_selling_ex_dinero = Dinero({
-      amount: price,
-      currency: this.price_selling_ex_currency
-    })
+  setSellingPrice(priceDinero) {
+    this.price_selling_ex_dinero = priceDinero
     this.price_selling_ex = this.price_selling_ex_dinero.toFormat('0.00')
     this.price_selling_ex_currency = this.price_selling_ex_dinero.getCurrency()
+    return true
   }
 }
 
@@ -112,15 +95,16 @@ class MaterialService extends BaseModel {
 
     'price_purchase_ex': '0.00',
     'price_purchase_ex_dinero': null,
-    'price_purchase_ex_number': '0',
-    'price_purchase_ex_decimal': '00',
     'price_purchase_ex_currency': 'EUR',
+
+    'price_purchase_ex_other': '0.00',
+    'price_purchase_ex_other_dinero': null,
+    'price_purchase_ex_other_currency': 'EUR',
 
     'price_selling_ex': '0.00',
     'price_selling_ex_dinero': null,
-    'price_selling_ex_number': '0',
-    'price_selling_ex_decimal': '00',
     'price_selling_ex_currency': 'EUR',
+
     'price_selling_alt_ex': '0.00',
 
     'image': null
@@ -128,12 +112,12 @@ class MaterialService extends BaseModel {
 
   url = '/inventory/material/'
 
-  async move(materialPk, fromLoctionPk, toLocationPk, amount) {
+  async move(materialPk, fromLocationPk, toLocationPk, amount) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const url = `${this.url}${materialPk}/move/`
     const body = {
-      'from_location_id': fromLoctionPk,
+      'from_location_id': fromLocationPk,
       'to_location_id': toLocationPk,
       amount,
     }
