@@ -1,6 +1,5 @@
 import BaseModel from '@/models/base'
 import {toDinero} from "../../utils";
-import Dinero from "dinero.js";
 
 class MaterialModel {
   name_short;

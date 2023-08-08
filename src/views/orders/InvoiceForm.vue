@@ -16,13 +16,13 @@
               {{ $trans("Identifier") }}
             </b-col>
             <b-col cols="2" class="header ml-3">
-              {{ $trans("Price purchase ex.") }}
+              {{ $trans("Purchase price ex.") }}
             </b-col>
             <b-col cols="1" class="header">
               {{ $trans("Margin") }}
             </b-col>
             <b-col cols="3" class="header">
-              {{ $trans("Price selling ex.") }}
+              {{ $trans("Selling price ex.") }}
             </b-col>
             <b-col cols="1" />
           </b-row>
@@ -106,6 +106,55 @@
           </b-row>
         </b-container>
 
+        <b-container fluid>
+          <h3>{{ $trans("Engineers") }}</h3>
+          <b-row>
+            <b-col cols="9" class="header">
+              {{ $trans("Name") }}
+            </b-col>
+            <b-col cols="2" class="header ml-3">
+              {{ $trans("Hourly price") }}
+            </b-col>
+            <b-col cols="1" />
+          </b-row>
+          <b-row v-for="user in engineer_models" :key="user.id">
+            <b-col cols="9">
+              {{ user.full_name }}
+            </b-col>
+            <b-col cols="2">
+              <b-container>
+                <b-row>
+                  <b-col cols="7">
+                    <PriceInput
+                      v-model="user.engineer.hourly_rate"
+                      :currency="user.engineer.hourly_rate_currency"
+                      @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateActivityTotals()"
+                    />
+                  </b-col>
+                  <b-col cols="5">
+                    <p class="flex">
+                      <span class="value-container">{{ user.engineer.hourly_rate_dinero.toFormat('$0.00') }}</span>
+                    </p>
+                  </b-col>
+                </b-row>
+              </b-container>
+            </b-col>
+            <b-col cols="1">
+              <p class="flex">
+                <b-button
+                  @click="() => { updateEngineer(user.id) }"
+                  class="btn btn-primary update-button"
+                  size="sm"
+                  type="button"
+                  variant="primary"
+                >
+                  {{ $trans("Update") }}
+                </b-button>
+              </p>
+            </b-col>
+          </b-row>
+        </b-container>
+
         <hr/>
 
         <b-container fluid>
@@ -153,6 +202,7 @@
                 <b-form-radio value="selling">
                   Sel. {{ getMaterialPriceFor(material, "selling").toFormat('$0.00') }}
                 </b-form-radio>
+
                 <b-form-radio value="other">
                   <p class="flex">
                     {{ $trans("Other") }}:
@@ -167,7 +217,9 @@
                         </b-col>
                         <b-col cols="5">
                           <p class="flex">
-                            <span class="value-container">{{ material.price_purchase_ex_other_dinero.toFormat('$0.00') }}</span>
+                            <span class="value-container">
+                              {{ material.price_purchase_ex_other_dinero.toFormat('$0.00') }}
+                            </span>
                           </p>
                         </b-col>
                       </b-row>
@@ -274,7 +326,109 @@
           </b-row>
         </b-container>
 
-        <div class="mx-auto">
+        <b-container fluid>
+          <h3>{{ $trans("Activity") }}</h3>
+          <b-row>
+            <b-col cols="2" class="header">
+              {{ $trans("Engineer") }}
+            </b-col>
+            <b-col cols="2" class="header">
+              {{ $trans("Work hours") }}
+            </b-col>
+            <b-col cols="2" class="header">
+              {{ $trans("Travel hours") }}
+            </b-col>
+            <b-col cols="2" class="header">
+              {{ $trans("Engineer rate") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("Margin") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("VAT type") }}
+            </b-col>
+            <b-col cols="2" />
+          </b-row>
+          <b-row v-for="activity in activity_user_totals" :key="activity.user_id" class="material_row">
+            <b-col cols="2">
+              {{ getFullname(activity.user_id) }}
+            </b-col>
+            <b-col cols="2">
+              {{ activity.work_total }}
+            </b-col>
+            <b-col cols="2">
+              {{ activity.travel_total }}
+            </b-col>
+            <b-col cols="2">
+              {{ activity.engineer_rate_dinero.toFormat("$0.00") }}
+            </b-col>
+            <b-col cols="1">
+              <p class="flex">
+                <b-form-input
+                  @blur="updateActivityTotals()"
+                  v-model="activity.margin_perc"
+                  size="sm"
+                  class="input-margin"
+                ></b-form-input>
+                <span class="percentage-container">%</span>
+              </p>
+            </b-col>
+            <b-col cols="1">
+              <b-form-select
+                @change="updateActivityTotals"
+                :value="invoice_default_vat"
+                v-model="activity.vat_type"
+                :options="vat_types" size="sm"
+              ></b-form-select>
+            </b-col>
+            <b-col cols="2">
+              <b-container>
+                <b-row>
+                  <b-col cols="4">
+                    <span class="value-container">{{ $trans("Total") }}</span>
+                  </b-col>
+                  <b-col cols="8">
+                    <b-form-input
+                      readonly
+                      :value="activity.total.toFormat('$0.00')"
+                      size="sm"
+                      class="input-total-used"
+                    ></b-form-input>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col cols="4">
+                    <span class="value-container">{{ $trans("Margin") }}</span>
+                  </b-col>
+                  <b-col cols="8">
+                    <b-form-input
+                      readonly
+                      :value="activity.margin.toFormat('$0.00')"
+                      size="sm"
+                      class="input-total-used"
+                    ></b-form-input>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col cols="4">
+                    <span class="value-container">{{ $trans("VAT") }}</span>
+                  </b-col>
+                  <b-col cols="8">
+                    <b-form-input
+                      readonly
+                      :value="activity.vat.toFormat('$0.00')"
+                      size="sm"
+                      class="input-total-used"
+                    ></b-form-input>
+                  </b-col>
+                </b-row>
+              </b-container>
+            </b-col>
+
+          </b-row>
+        </b-container>
+
+          <div class="mx-auto">
           <footer class="modal-footer">
             <b-button @click="cancelForm" type="button" variant="secondary">
               {{ $trans('Cancel') }}</b-button>
@@ -291,10 +445,14 @@
 import invoiceModel from '../../models/orders/Invoice.js'
 import invoiceLineModel from '../../models/orders/InvoiceLine.js'
 import memberModel from "../../models/member/Member";
-import { MaterialModel } from "../../models/inventory/Material";
-import materialService from "../../models/inventory/Material";
+//
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
+
+import { MaterialModel } from "../../models/inventory/Material";
+import materialService from "../../models/inventory/Material";
+import { EngineerUserModel } from "../../models/company/UserEngineer";
+import engineerService from "../../models/company/UserEngineer";
 
 export default {
   name: 'InvoiceForm',
@@ -334,19 +492,27 @@ export default {
 
       used_materials: [],
       material_models: [],
-
-      activity: [],
-      activity_totals: {},
-      extra_work: [],
-      extra_work_totals: {},
-
-      usePriceOptions: [
+      materialsTotal: null,
+      materialsTotalVAT: null,
+      usePriceOptionsMaterial: [
         { text: 'Purchase', value: 'purchase' },
         { text: 'Selling', value: 'selling' },
       ],
 
-      materialsTotal: null,
-      materialsTotalVAT: null,
+      activity: [],
+      activity_user_totals: {},
+      engineer_models: [],
+      activityTotal: null,
+      activityTotalVAT: null,
+      usePriceOptionsActivity: [
+        { text: 'Customer', value: 'customer' },
+        { text: 'Engineer', value: 'engineer' },
+      ],
+
+      extra_work: [],
+      extra_work_totals: {},
+
+
     }
   },
   computed: {
@@ -387,8 +553,22 @@ export default {
       }))
       this.updateMaterialTotals()
 
-      this.activity = invoiceData.activity
-      this.activity_totals = invoiceData.activity_totals
+      this.activity = invoiceData.activity //
+      this.engineer_models = invoiceData.engineer_models.map((m) => new EngineerUserModel({
+        ...m,
+        margin_perc: this.invoice_default_margin
+      }))
+
+      this.activity_user_totals = invoiceData.activity_totals['user_totals'].map((a) => ({
+        ...a,
+        vat_type: this.invoice_default_vat,
+        engineer_rate: this.getEngineerRate(a.user_id),
+        engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
+        engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
+        margin_perc: this.invoice_default_margin
+      }))
+      this.updateActivityTotals()
+
       this.extra_work = invoiceData.extra_work
       this.extra_work_totals = invoiceData.extra_work_totals
       this.hourly_rate_engineer_customer = invoiceData.hourly_rate_engineer_customer
@@ -398,6 +578,88 @@ export default {
     }
   },
   methods: {
+    // activity
+    async updateEngineer(user_id) {
+      let engineer_user = this.engineer_models.find((m) => m.id === user_id)
+      // removed unused fields, TODO make this smarter lol
+      delete engineer_user.engineer.address
+      delete engineer_user.engineer.postal
+      delete engineer_user.engineer.city
+      delete engineer_user.engineer.mobile
+      delete engineer_user.engineer.email_tablet
+      delete engineer_user.engineer.vca
+      delete engineer_user.engineer.passport
+      delete engineer_user.engineer.cost_price
+      delete engineer_user.engineer.license_plate
+      delete engineer_user.engineer.inspection_date_car
+      delete engineer_user.engineer.cost_price_car
+      delete engineer_user.engineer.inspection_date_tools
+      delete engineer_user.engineer.cost_price_tools
+      delete engineer_user.engineer.remarks
+      delete engineer_user.engineer.contract_hours_week
+      delete engineer_user.engineer.latest_event
+      delete engineer_user.engineer.prefered_location
+
+      delete engineer_user.username
+      delete engineer_user.first_name
+      delete engineer_user.last_name
+      delete engineer_user.email
+      delete engineer_user.password1
+      delete engineer_user.password2
+      delete engineer_user.password
+      delete engineer_user.date_joined
+
+      const updatedEngineerUserJson = await engineerService.update(user_id, engineer_user)
+      engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
+      this.updateActivityTotals()
+
+      this.infoToast(this.$trans('Updated'), this.$trans('Hourly rate engineer has been updated'))
+    },
+    getFullname(user_id) {
+      const user = this.engineer_models.find((m) => m.id === user_id)
+      return user.full_name
+    },
+    getEngineerRateDinero(user_id) {
+      const user = this.engineer_models.find((m) => m.id === user_id)
+      return toDinero(user.engineer.hourly_rate, user.engineer.hourly_rate_currency)
+    },
+    getEngineerRate(user_id) {
+      const user = this.engineer_models.find((m) => m.id === user_id)
+      return user.engineer.hourly_rate
+    },
+    getEngineerRateCurrency(user_id) {
+      const user = this.engineer_models.find((m) => m.id === user_id)
+      return user.engineer.hourly_rate_currency
+    },
+    updateActivityTotals() {
+      this.activity_user_totals = this.activity_user_totals.map((m) => this.updateUserActivityTotals(m))
+      this.materialsTotal = this.getItemsTotal(this.used_materials)
+      this.materialsTotalVAT = this.getItemsTotalVAT(this.used_materials)
+    },
+    updateUserActivityTotals(activity) {
+      const price = this.getEngineerRateDinero(activity.user_id)
+      const currency = this.getEngineerRateCurrency(activity.user_id)
+      // 16:15
+      const hours_parts = activity.hours_total.split(':')
+      let total = price.multiply(hours_parts[0])
+      total = total.add(price.multiply(hours_parts[1]/60))
+      console.log(activity.hours_total, total.toFormat("$0.00"))
+      let total_with_margin = total
+      let margin = toDinero("0.00", currency)
+      if (activity.margin_perc > 0) {
+        margin = total.multiply(activity.margin_perc/100)
+        total_with_margin = total.add(margin)
+      }
+      const vat = total_with_margin.multiply(parseInt(activity.vat_type)/100)
+      activity.currency = currency
+      activity.total = total_with_margin
+      activity.vat = vat
+      activity.margin = margin
+
+      return activity
+
+    },
+    // materials
     async updateMaterial(material_id) {
       let material = this.material_models.find((m) => m.id === material_id)
       delete material.image
@@ -405,7 +667,7 @@ export default {
       material.setPriceFields(updatedMaterialJson)
       this.updateMaterialTotals()
 
-      this.infoToast(this.$trans('Updated'), this.$trans('Material has been updated'))
+      this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
     },
     getMaterialPrice(used_material) {
       if (used_material.usePrice === 'purchase') {
@@ -452,8 +714,8 @@ export default {
     },
     updateMaterialTotals() {
       this.used_materials = this.used_materials.map((m) => this.updateUsedMaterialTotals(m))
-      this.materialsTotal = this.getMaterialsTotal(this.used_materials)
-      this.materialsTotalVAT = this.getMaterialsTotalVAT(this.used_materials)
+      this.materialsTotal = this.getItemsTotal(this.used_materials)
+      this.materialsTotalVAT = this.getItemsTotalVAT(this.used_materials)
     },
     updateUsedMaterialTotals(material) {
       const price = this.getMaterialPrice(material)
@@ -473,16 +735,16 @@ export default {
 
       return material
     },
-    getMaterialsTotal(materials) {
-      return materials.reduce(
+    getItemsTotal(items) {
+      return items.reduce(
         (total, m) => (total.add(m.total)),
-        toDinero("0.00", materials[0].currency)
+        toDinero("0.00", items[0].currency)
       )
     },
-    getMaterialsTotalVAT(materials) {
-      return materials.reduce(
+    getItemsTotalVAT(items) {
+      return items.reduce(
         (total, m) => (total.add(m.vat)),
-        toDinero("0.00", materials[0].currency)
+        toDinero("0.00", items[0].currency)
       )
     },
     async submitForm() {
