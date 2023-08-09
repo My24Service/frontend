@@ -75,12 +75,15 @@ class CustomerPriceModel {
   id
   call_out_costs
   call_out_costs_currency
+
   hourly_rate_engineer
   hourly_rate_engineer_currency
 
   constructor(customerData) {
     for (const [k, v] of Object.entries(customerData)) {
-      this[k] = v
+      if (this.hasOwnProperty(k)) {
+        this[k] = v
+      }
     }
   }
 }

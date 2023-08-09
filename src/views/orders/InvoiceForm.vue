@@ -15,13 +15,13 @@
             <b-col cols="2" class="header">
               {{ $trans("Identifier") }}
             </b-col>
-            <b-col cols="2" class="header ml-3">
+            <b-col cols="3" class="header ml-3">
               {{ $trans("Purchase price ex.") }}
             </b-col>
             <b-col cols="1" class="header">
               {{ $trans("Margin") }}
             </b-col>
-            <b-col cols="3" class="header">
+            <b-col cols="2" class="header">
               {{ $trans("Selling price ex.") }}
             </b-col>
             <b-col cols="1" />
@@ -33,20 +33,17 @@
             <b-col cols="2">
               {{ material.identifier }}
             </b-col>
-            <b-col cols="2">
+            <b-col cols="3">
               <b-container>
                 <b-row>
-                  <b-col cols="7">
+                  <b-col cols="10">
                     <PriceInput
                       v-model="material.price_purchase_ex"
                       :currency="material.price_purchase_ex_currency"
                       @priceChanged="(val) => material.setPurchasePrice(val) && updateMaterialTotals()"
                     />
                   </b-col>
-                  <b-col cols="5">
-                    <p class="flex">
-                      <span class="value-container">{{ material.price_purchase_ex_dinero.toFormat('$0.00') }}</span>
-                    </p>
+                  <b-col cols="2">
                   </b-col>
                 </b-row>
               </b-container>
@@ -61,34 +58,23 @@
                 <span class="percentage-container">%</span>
               </p>
             </b-col>
-            <b-col cols="3">
-              <b-container>
-                <b-row>
-                  <b-col cols="3">
-                    <p class="flex">
-                      <span class="value-container">{{ material.price_selling_ex_dinero.toFormat('$0.00') }}</span>
-                    </p>
-                  </b-col>
-                  <b-col cols="9">
-                    <p class="flex">
-                      <PriceInput
-                        :ref="`selling_price_${material.id}`"
-                        v-model="material.price_selling_ex"
-                        :currency="material.price_selling_ex_currency"
-                        @priceChanged="(val) => material.setSellingPrice(val) && updateMaterialTotals()"
-                      />
-                      <span class="value-container">
-                        <b-link
-                          @click="() => { material.recalcSelling() && updateMaterialTotals() }"
-                          :title="`${$trans('Recalculate selling price with margin')}`"
-                        >
-                          {{ $trans("recalc")}}
-                        </b-link>
-                      </span>
-                    </p>
-                  </b-col>
-                </b-row>
-              </b-container>
+            <b-col cols="2">
+              <p class="flex">
+                <PriceInput
+                  :ref="`selling_price_${material.id}`"
+                  v-model="material.price_selling_ex"
+                  :currency="material.price_selling_ex_currency"
+                  @priceChanged="(val) => material.setSellingPrice(val) && updateMaterialTotals()"
+                />
+                <span class="value-container">
+                  <b-link
+                    @click="() => { material.recalcSelling() && updateMaterialTotals() }"
+                    :title="`${$trans('Recalculate selling price with margin')}`"
+                  >
+                    {{ $trans("recalc")}}
+                  </b-link>
+                </span>
+              </p>
             </b-col>
             <b-col cols="1">
               <p class="flex">
@@ -197,7 +183,45 @@
             <b-col cols="1">
               <p class="flex">
                 <b-button
-                  @click="() => { updateHourlyRateCustomer() }"
+                  @click="() => { updateCustomer() }"
+                  class="btn btn-primary update-button"
+                  size="sm"
+                  type="button"
+                  variant="primary"
+                >
+                  {{ $trans("Update") }}
+                </b-button>
+              </p>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="9">
+              {{ $trans("Call out costs") }}
+            </b-col>
+            <b-col cols="2">
+              <b-container>
+                <b-row>
+                  <b-col cols="7">
+                    <PriceInput
+                      v-model="customer.call_out_costs"
+                      :currency="customer.call_out_costs_currency"
+                      @priceChanged="(val) => customer.setCallOutCosts(val) && updateActivityTotals()"
+                    />
+                  </b-col>
+                  <b-col cols="5">
+                    <p class="flex">
+                      <span class="value-container">
+                        {{ customer.call_out_costs_dinero.toFormat('$0.00') }}
+                      </span>
+                    </p>
+                  </b-col>
+                </b-row>
+              </b-container>
+            </b-col>
+            <b-col cols="1">
+              <p class="flex">
+                <b-button
+                  @click="() => { updateCustomer() }"
                   class="btn btn-primary update-button"
                   size="sm"
                   type="button"
@@ -689,15 +713,20 @@ export default {
       this.customer = new CustomerModel(customerData)
       console.log(this.customer)
     },
-    updateHourlyRateCustomer() {
+    async updateCustomer() {
       // use minimal model for patch
+      const minimalModel = new CustomerPriceModel(this.customer)
 
+      const customerData = await customerService.update(this.customerPk, minimalModel)
+      this.customer = new CustomerModel(customerData)
+      this.infoToast(this.$trans('Updated'), this.$trans('Customer data has been updated'))
     },
     // activity
     async updateEngineer(user_id) {
       let engineer_user = this.engineer_models.find((m) => m.id === user_id)
+      const minimalModel = new RateEngineerUserModel(engineer_user)
 
-      let updatedEngineerUserJson = await engineerService.update(user_id, engineer_user)
+      let updatedEngineerUserJson = await engineerService.update(user_id, minimalModel)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
       this.updateActivityTotals()
 
