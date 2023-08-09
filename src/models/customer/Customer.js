@@ -1,7 +1,91 @@
 import BaseModel from '../base'
+import {toDinero} from "../../utils";
 
+class CustomerModel {
+  id
+  name
+  address
+  postal
+  city
+  country_code
+  tel
+  email
+  contact
+  mobile
+  time
+  time2
+  timealt
+  timealt2
+  remarks
+  customer_id
+  external_identifier
+  products_without_tax
+  maintenance_contract
+  standard_hours_hour
+  standard_hours_minute
+  branch_partner
+  branch_id
+  use_branch_address
 
-class Customer extends BaseModel {
+  call_out_costs
+  call_out_costs_currency
+  call_out_costs_dinero
+
+  hourly_rate_engineer
+  hourly_rate_engineer_currency
+  hourly_rate_engineer_dinero
+
+  constructor(customerData) {
+    for (const [k, v] of Object.entries(customerData)) {
+      this[k] = v
+    }
+
+    this.setPriceFields(this)
+  }
+
+  setHourlyRate(priceDinero) {
+    this.hourly_rate_engineer_dinero = priceDinero
+    this.hourly_rate_engineer = this.hourly_rate_engineer_dinero.toFormat('0.00')
+    this.hourly_rate_engineer_currency = this.hourly_rate_engineer_dinero.getCurrency()
+    return true
+  }
+
+  setCallOutCosts(priceDinero) {
+    this.call_out_costs_dinero = priceDinero
+    this.call_out_costs = this.call_out_costs_dinero.toFormat('0.00')
+    this.call_out_costs_currency = this.call_out_costs_dinero.getCurrency()
+    return true
+  }
+
+  setPriceFields(obj) {
+    if (obj.hourly_rate_engineer && obj.hourly_rate_engineer_currency) {
+      this.hourly_rate_engineer_dinero = toDinero(
+        obj.hourly_rate_engineer, obj.hourly_rate_engineer_currency)
+    }
+
+    if (obj.call_out_costs && obj.call_out_costs_currency) {
+      this.call_out_costs_dinero = toDinero(
+        obj.call_out_costs, obj.call_out_costs_currency)
+    }
+  }
+}
+
+class CustomerPriceModel {
+  // minimal model for prices PATCH
+  id
+  call_out_costs
+  call_out_costs_currency
+  hourly_rate_engineer
+  hourly_rate_engineer_currency
+
+  constructor(customerData) {
+    for (const [k, v] of Object.entries(customerData)) {
+      this[k] = v
+    }
+  }
+}
+
+class CustomerService extends BaseModel {
   fields = {
     'id': null,
     'name': '',
@@ -61,6 +145,5 @@ class Customer extends BaseModel {
 
 }
 
-let customerModel = new Customer()
-
-export default customerModel
+export default new CustomerService()
+export { CustomerPriceModel, CustomerModel }

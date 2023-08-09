@@ -2,9 +2,11 @@ import BaseModel from '@/models/base'
 import {toDinero} from "../../utils";
 
 class EngineerUserModel {
+  id
   username
   first_name
   last_name
+  full_name
   email
   password1
   password2
@@ -19,6 +21,53 @@ class EngineerUserModel {
       } else {
         this[k] = v
       }
+    }
+  }
+}
+
+class RateEngineerUserModel {
+  id
+  full_name
+  engineer
+
+  constructor(user) {
+    for (const [k, v] of Object.entries(user)) {
+      if (k === 'engineer') {
+        this.engineer = new RateEngineerModel(v)
+      } else {
+        if (this.hasOwnProperty(k)) {
+          this[k] = v
+        }
+      }
+    }
+  }
+}
+
+class RateEngineerModel {
+  hourly_rate
+  hourly_rate_currency
+  hourly_rate_dinero
+
+  constructor(engineer) {
+    for (const [k, v] of Object.entries(engineer)) {
+      if (this.hasOwnProperty(k)) {
+        this[k] = v
+      }
+    }
+    this.setPriceFields(this)
+  }
+
+  setHourlyRate(priceDinero) {
+    this.hourly_rate_dinero = priceDinero
+    this.hourly_rate = this.hourly_rate_dinero.toFormat('0.00')
+    this.hourly_rate_currency = this.hourly_rate_dinero.getCurrency()
+    return true
+  }
+
+  setPriceFields(obj) {
+    if (obj.hourly_rate && obj.hourly_rate_currency) {
+      this.hourly_rate_dinero = toDinero(
+        obj.hourly_rate, obj.hourly_rate_currency)
     }
   }
 }
@@ -147,4 +196,4 @@ class EngineerService extends BaseModel {
 }
 
 export default new EngineerService()
-export { EngineerUserModel }
+export { EngineerUserModel, RateEngineerUserModel }

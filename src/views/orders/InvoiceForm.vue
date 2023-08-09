@@ -106,6 +106,8 @@
           </b-row>
         </b-container>
 
+        <hr/>
+
         <b-container fluid>
           <h3>{{ $trans("Engineers") }}</h3>
           <b-row>
@@ -143,6 +145,59 @@
               <p class="flex">
                 <b-button
                   @click="() => { updateEngineer(user.id) }"
+                  class="btn btn-primary update-button"
+                  size="sm"
+                  type="button"
+                  variant="primary"
+                >
+                  {{ $trans("Update") }}
+                </b-button>
+              </p>
+            </b-col>
+          </b-row>
+        </b-container>
+
+        <hr/>
+
+        <b-container fluid>
+          <h3>{{ $trans("Prices for customer") }}</h3>
+          <b-row>
+            <b-col cols="9" class="header">
+              {{ $trans("Name") }}
+            </b-col>
+            <b-col cols="2" class="header ml-3">
+              {{ $trans("Price") }}
+            </b-col>
+            <b-col cols="1" />
+          </b-row>
+          <b-row>
+            <b-col cols="9">
+              {{ $trans("Hourly price engineer") }}
+            </b-col>
+            <b-col cols="2">
+              <b-container>
+                <b-row>
+                  <b-col cols="7">
+                    <PriceInput
+                      v-model="customer.hourly_rate_engineer"
+                      :currency="customer.hourly_rate_engineer_currency"
+                      @priceChanged="(val) => customer.setHourlyRate(val) && updateActivityTotals()"
+                    />
+                  </b-col>
+                  <b-col cols="5">
+                    <p class="flex">
+                      <span class="value-container">
+                        {{ customer.hourly_rate_engineer_dinero.toFormat('$0.00') }}
+                      </span>
+                    </p>
+                  </b-col>
+                </b-row>
+              </b-container>
+            </b-col>
+            <b-col cols="1">
+              <p class="flex">
+                <b-button
+                  @click="() => { updateHourlyRateCustomer() }"
                   class="btn btn-primary update-button"
                   size="sm"
                   type="button"
@@ -216,11 +271,11 @@
                           />
                         </b-col>
                         <b-col cols="5">
-                          <p class="flex">
+                          <span class="flex">
                             <span class="value-container">
                               {{ material.price_purchase_ex_other_dinero.toFormat('$0.00') }}
                             </span>
-                          </p>
+                          </span>
                         </b-col>
                       </b-row>
                     </b-container>
@@ -329,16 +384,16 @@
         <b-container fluid>
           <h3>{{ $trans("Activity") }}</h3>
           <b-row>
-            <b-col cols="2" class="header">
+            <b-col cols="3" class="header">
               {{ $trans("Engineer") }}
             </b-col>
-            <b-col cols="2" class="header">
+            <b-col cols="1" class="header">
               {{ $trans("Work hours") }}
             </b-col>
-            <b-col cols="2" class="header">
+            <b-col cols="1" class="header">
               {{ $trans("Travel hours") }}
             </b-col>
-            <b-col cols="2" class="header">
+            <b-col cols="3" class="header">
               {{ $trans("Engineer rate") }}
             </b-col>
             <b-col cols="1" class="header">
@@ -350,17 +405,58 @@
             <b-col cols="2" />
           </b-row>
           <b-row v-for="activity in activity_user_totals" :key="activity.user_id" class="material_row">
-            <b-col cols="2">
+            <b-col cols="3">
               {{ getFullname(activity.user_id) }}
             </b-col>
-            <b-col cols="2">
+            <b-col cols="1">
               {{ activity.work_total }}
             </b-col>
-            <b-col cols="2">
+            <b-col cols="1">
               {{ activity.travel_total }}
             </b-col>
-            <b-col cols="2">
-              {{ activity.engineer_rate_dinero.toFormat("$0.00") }}
+            <b-col cols="3">
+              <b-form-radio-group
+                @change="updateActivityTotals()"
+                v-model="activity.usePrice"
+              >
+                <b-form-radio value="engineer">
+                  Engineer {{ getEngineerRateDinero(activity.user_id).toFormat("$0.00") }}
+                </b-form-radio>
+
+                <b-form-radio value="customer">
+                  Customer
+                  <span v-if="customer.hourly_rate_engineer_dinero">
+                    {{ customer.hourly_rate_engineer_dinero.toFormat("$0.00") }}
+                  </span>
+                  <span v-if="!customer.hourly_rate_engineer_dinero">
+                    {{ $trans('not set') }}
+                  </span>
+                </b-form-radio>
+
+                <b-form-radio value="other">
+                  <p class="flex">
+                    {{ $trans("Other") }}:
+                    <b-container>
+                      <b-row>
+                        <b-col cols="7">
+                          <PriceInput
+                            v-model="activity.engineer_rate_other"
+                            :currency="activity.engineer_rate_other_currency"
+                            @priceChanged="(val) => setEngineerPriceOther(val, activity.user_id) && updateActivityTotals()"
+                          />
+                        </b-col>
+                        <b-col cols="5">
+                          <span class="flex">
+                            <span class="value-container">
+                              {{ activity.engineer_rate_other_dinero.toFormat('$0.00') }}
+                            </span>
+                          </span>
+                        </b-col>
+                      </b-row>
+                    </b-container>
+                  </p>
+                </b-form-radio>
+              </b-form-radio-group>
             </b-col>
             <b-col cols="1">
               <p class="flex">
@@ -451,8 +547,10 @@ import PriceInput from "../../components/PriceInput";
 
 import { MaterialModel } from "../../models/inventory/Material";
 import materialService from "../../models/inventory/Material";
-import { EngineerUserModel } from "../../models/company/UserEngineer";
+import { RateEngineerUserModel } from "../../models/company/UserEngineer";
 import engineerService from "../../models/company/UserEngineer";
+import customerService from "../../models/customer/Customer";
+import { CustomerModel, CustomerPriceModel } from "../../models/customer/Customer";
 
 export default {
   name: 'InvoiceForm',
@@ -486,9 +584,7 @@ export default {
       invoice_default_margin: null,
       invoice_default_hourly_rate: null,
       invoice_default_vat: null,
-      hourly_rate_engineer_customer: null,
-      call_out_costs: null,
-      call_out_costs_from_customer: null,
+      invoice_default_call_out_costs: null,
 
       used_materials: [],
       material_models: [],
@@ -512,7 +608,8 @@ export default {
       extra_work: [],
       extra_work_totals: {},
 
-
+      customerPk: null,
+      customer: null,
     }
   },
   computed: {
@@ -527,6 +624,9 @@ export default {
       this.invoice = invoiceModel.getFields()
       const invoiceData = await invoiceModel.getData(this.uuid)
 
+      this.customerPk = invoiceData.customer_pk
+      await this.getCustomer()
+
       this.order = invoiceData.order
       this.member = invoiceData.member
       this.invoice_id = invoiceData.invoice_id
@@ -534,9 +634,9 @@ export default {
       this.invoice_default_margin = invoiceData.invoice_default_margin
       this.invoice_default_hourly_rate = invoiceData.invoice_default_hourly_rate
       this.invoice_default_vat = invoiceData.invoice_default_vat
-      this.call_out_costs = invoiceData.call_out_costs
-      this.call_out_costs_from_customer = invoiceData.call_out_costs_from_customer
+      this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
 
+      // materials
       this.used_materials = invoiceData.used_materials.map((m) => ({
         ...m,
         vat_type: this.invoice_default_vat,
@@ -553,8 +653,9 @@ export default {
       }))
       this.updateMaterialTotals()
 
-      this.activity = invoiceData.activity //
-      this.engineer_models = invoiceData.engineer_models.map((m) => new EngineerUserModel({
+      // activity
+      this.activity = invoiceData.activity
+      this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
         ...m,
         margin_perc: this.invoice_default_margin
       }))
@@ -562,54 +663,41 @@ export default {
       this.activity_user_totals = invoiceData.activity_totals['user_totals'].map((a) => ({
         ...a,
         vat_type: this.invoice_default_vat,
+        margin_perc: this.invoice_default_margin,
         engineer_rate: this.getEngineerRate(a.user_id),
         engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
         engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
-        margin_perc: this.invoice_default_margin
+        engineer_rate_other: "0.00",
+        engineer_rate_other_currency: this.default_currency,
+        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
+        usePrice: 'engineer',
       }))
       this.updateActivityTotals()
 
       this.extra_work = invoiceData.extra_work
       this.extra_work_totals = invoiceData.extra_work_totals
-      this.hourly_rate_engineer_customer = invoiceData.hourly_rate_engineer_customer
+
       this.isLoading = false
     } else {
       await this.loadInvoice()
     }
   },
   methods: {
+    // customer
+    async getCustomer() {
+      const customerData = await customerService.detail(this.customerPk)
+      this.customer = new CustomerModel(customerData)
+      console.log(this.customer)
+    },
+    updateHourlyRateCustomer() {
+      // use minimal model for patch
+
+    },
     // activity
     async updateEngineer(user_id) {
       let engineer_user = this.engineer_models.find((m) => m.id === user_id)
-      // removed unused fields, TODO make this smarter lol
-      delete engineer_user.engineer.address
-      delete engineer_user.engineer.postal
-      delete engineer_user.engineer.city
-      delete engineer_user.engineer.mobile
-      delete engineer_user.engineer.email_tablet
-      delete engineer_user.engineer.vca
-      delete engineer_user.engineer.passport
-      delete engineer_user.engineer.cost_price
-      delete engineer_user.engineer.license_plate
-      delete engineer_user.engineer.inspection_date_car
-      delete engineer_user.engineer.cost_price_car
-      delete engineer_user.engineer.inspection_date_tools
-      delete engineer_user.engineer.cost_price_tools
-      delete engineer_user.engineer.remarks
-      delete engineer_user.engineer.contract_hours_week
-      delete engineer_user.engineer.latest_event
-      delete engineer_user.engineer.prefered_location
 
-      delete engineer_user.username
-      delete engineer_user.first_name
-      delete engineer_user.last_name
-      delete engineer_user.email
-      delete engineer_user.password1
-      delete engineer_user.password2
-      delete engineer_user.password
-      delete engineer_user.date_joined
-
-      const updatedEngineerUserJson = await engineerService.update(user_id, engineer_user)
+      let updatedEngineerUserJson = await engineerService.update(user_id, engineer_user)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
       this.updateActivityTotals()
 
@@ -639,11 +727,9 @@ export default {
     updateUserActivityTotals(activity) {
       const price = this.getEngineerRateDinero(activity.user_id)
       const currency = this.getEngineerRateCurrency(activity.user_id)
-      // 16:15
       const hours_parts = activity.hours_total.split(':')
       let total = price.multiply(hours_parts[0])
       total = total.add(price.multiply(hours_parts[1]/60))
-      console.log(activity.hours_total, total.toFormat("$0.00"))
       let total_with_margin = total
       let margin = toDinero("0.00", currency)
       if (activity.margin_perc > 0) {
@@ -659,6 +745,14 @@ export default {
       return activity
 
     },
+    setEngineerPriceOther(priceDinero, user_id) {
+      let model = this.activity_user_totals.find((a) => a.user_id === user_id)
+      model.engineer_rate_other_dinero = priceDinero
+      model.engineer_rate_other = model.engineer_rate_other_dinero.toFormat('0.00')
+      model.engineer_rate_other_currency = model.engineer_rate_other_dinero.getCurrency()
+      return true
+    },
+
     // materials
     async updateMaterial(material_id) {
       let material = this.material_models.find((m) => m.id === material_id)
