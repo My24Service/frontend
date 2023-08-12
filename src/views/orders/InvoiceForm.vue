@@ -9,7 +9,7 @@
         <b-container fluid>
           <h3>{{ $trans("Materials") }}</h3>
           <b-row>
-            <b-col cols="3" class="header">
+            <b-col cols="2" class="header">
               {{ $trans("Name") }}
             </b-col>
             <b-col cols="2" class="header">
@@ -21,13 +21,13 @@
             <b-col cols="1" class="header">
               {{ $trans("Margin") }}
             </b-col>
-            <b-col cols="2" class="header">
+            <b-col cols="3" class="header">
               {{ $trans("Selling price ex.") }}
             </b-col>
             <b-col cols="1" />
           </b-row>
           <b-row v-for="material in material_models" :key="material.id">
-            <b-col cols="3">
+            <b-col cols="2">
               {{ material.name }}
             </b-col>
             <b-col cols="2">
@@ -58,23 +58,31 @@
                 <span class="percentage-container">%</span>
               </p>
             </b-col>
-            <b-col cols="2">
-              <p class="flex">
-                <PriceInput
-                  :ref="`selling_price_${material.id}`"
-                  v-model="material.price_selling_ex"
-                  :currency="material.price_selling_ex_currency"
-                  @priceChanged="(val) => material.setSellingPrice(val) && updateMaterialTotals()"
-                />
-                <span class="value-container">
-                  <b-link
-                    @click="() => { material.recalcSelling() && updateMaterialTotals() }"
-                    :title="`${$trans('Recalculate selling price with margin')}`"
-                  >
-                    {{ $trans("recalc")}}
-                  </b-link>
-                </span>
-              </p>
+            <b-col cols="3">
+              <b-container>
+                <b-row>
+                  <b-col cols="10">
+                    <PriceInput
+                      :ref="`selling_price_${material.id}`"
+                      v-model="material.price_selling_ex"
+                      :currency="material.price_selling_ex_currency"
+                      @priceChanged="(val) => material.setSellingPrice(val) && updateMaterialTotals()"
+                    />
+                  </b-col>
+                  <b-col cols="2">
+                    <p class="flex">
+                      <span class="value-container">
+                        <b-link
+                          @click="() => { material.recalcSelling() && updateMaterialTotals() }"
+                          :title="`${$trans('Recalculate selling price with margin')}`"
+                        >
+                          <b-icon-arrow-repeat aria-hidden="true"></b-icon-arrow-repeat>
+                        </b-link>
+                      </span>
+                    </p>
+                  </b-col>
+                </b-row>
+              </b-container>
             </b-col>
             <b-col cols="1">
               <p class="flex">
@@ -110,22 +118,11 @@
               {{ user.full_name }}
             </b-col>
             <b-col cols="2">
-              <b-container>
-                <b-row>
-                  <b-col cols="7">
-                    <PriceInput
-                      v-model="user.engineer.hourly_rate"
-                      :currency="user.engineer.hourly_rate_currency"
-                      @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateActivityTotals()"
-                    />
-                  </b-col>
-                  <b-col cols="5">
-                    <p class="flex">
-                      <span class="value-container">{{ user.engineer.hourly_rate_dinero.toFormat('$0.00') }}</span>
-                    </p>
-                  </b-col>
-                </b-row>
-              </b-container>
+              <PriceInput
+                v-model="user.engineer.hourly_rate"
+                :currency="user.engineer.hourly_rate_currency"
+                @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateActivityTotals()"
+              />
             </b-col>
             <b-col cols="1">
               <p class="flex">
@@ -161,24 +158,11 @@
               {{ $trans("Hourly price engineer") }}
             </b-col>
             <b-col cols="2">
-              <b-container>
-                <b-row>
-                  <b-col cols="7">
-                    <PriceInput
-                      v-model="customer.hourly_rate_engineer"
-                      :currency="customer.hourly_rate_engineer_currency"
-                      @priceChanged="(val) => customer.setHourlyRate(val) && updateActivityTotals()"
-                    />
-                  </b-col>
-                  <b-col cols="5">
-                    <p class="flex">
-                      <span class="value-container">
-                        {{ customer.hourly_rate_engineer_dinero.toFormat('$0.00') }}
-                      </span>
-                    </p>
-                  </b-col>
-                </b-row>
-              </b-container>
+              <PriceInput
+                v-model="customer.hourly_rate_engineer"
+                :currency="customer.hourly_rate_engineer_currency"
+                @priceChanged="(val) => customer.setHourlyRate(val) && updateActivityTotals()"
+              />
             </b-col>
             <b-col cols="1">
               <p class="flex">
@@ -199,24 +183,11 @@
               {{ $trans("Call out costs") }}
             </b-col>
             <b-col cols="2">
-              <b-container>
-                <b-row>
-                  <b-col cols="7">
-                    <PriceInput
-                      v-model="customer.call_out_costs"
-                      :currency="customer.call_out_costs_currency"
-                      @priceChanged="(val) => customer.setCallOutCosts(val) && updateActivityTotals()"
-                    />
-                  </b-col>
-                  <b-col cols="5">
-                    <p class="flex">
-                      <span class="value-container">
-                        {{ customer.call_out_costs_dinero.toFormat('$0.00') }}
-                      </span>
-                    </p>
-                  </b-col>
-                </b-row>
-              </b-container>
+              <PriceInput
+                v-model="customer.call_out_costs"
+                :currency="customer.call_out_costs_currency"
+                @priceChanged="(val) => customer.setCallOutCosts(val) && updateActivityTotals()"
+              />
             </b-col>
             <b-col cols="1">
               <p class="flex">
@@ -284,25 +255,12 @@
 
                 <b-form-radio value="other">
                   <p class="flex">
-                    {{ $trans("Other") }}:
-                    <b-container>
-                      <b-row>
-                        <b-col cols="7">
-                          <PriceInput
-                            v-model="material.price_purchase_ex_other"
-                            :currency="material.price_purchase_ex_other_currency"
-                            @priceChanged="(val) => setPurchasePriceOther(val, material.material_id) && updateMaterialTotals()"
-                          />
-                        </b-col>
-                        <b-col cols="5">
-                          <span class="flex">
-                            <span class="value-container">
-                              {{ material.price_purchase_ex_other_dinero.toFormat('$0.00') }}
-                            </span>
-                          </span>
-                        </b-col>
-                      </b-row>
-                    </b-container>
+                    {{ $trans("Other") }}:&nbsp;&nbsp;
+                    <PriceInput
+                      v-model="material.price_purchase_ex_other"
+                      :currency="material.price_purchase_ex_other_currency"
+                      @priceChanged="(val) => setPurchasePriceOther(val, material.material_id) && updateMaterialTotals()"
+                    />
                   </p>
                 </b-form-radio>
               </b-form-radio-group>
@@ -327,80 +285,21 @@
               ></b-form-select>
             </b-col>
             <b-col cols="2">
-              <b-container>
-                <b-row>
-                  <b-col cols="4">
-                    <span class="value-container">{{ $trans("Total") }}</span>
-                  </b-col>
-                  <b-col cols="8">
-                    <b-form-input
-                      readonly
-                      :value="material.total.toFormat('$0.00')"
-                      size="sm"
-                      class="input-total-used"
-                    ></b-form-input>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col cols="4">
-                    <span class="value-container">{{ $trans("Margin") }}</span>
-                  </b-col>
-                  <b-col cols="8">
-                    <b-form-input
-                      readonly
-                      :value="material.margin.toFormat('$0.00')"
-                      size="sm"
-                      class="input-total-used"
-                    ></b-form-input>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col cols="4">
-                    <span class="value-container">{{ $trans("VAT") }}</span>
-                  </b-col>
-                  <b-col cols="8">
-                    <b-form-input
-                      readonly
-                      :value="material.vat.toFormat('$0.00')"
-                      size="sm"
-                      class="input-total-used"
-                    ></b-form-input>
-                  </b-col>
-                </b-row>
-              </b-container>
+              <InvoiceFormTotals
+                :total="material.total"
+                :margin="material.margin"
+                :vat="material.vat"
+              />
             </b-col>
           </b-row>
           <b-row>
             <b-col cols="10"/>
             <b-col cols="2">
-              <b-container>
-                <b-row>
-                  <b-col cols="4">
-                    <span class="value-container header">{{ $trans("Total") }}</span>
-                  </b-col>
-                  <b-col cols="8">
-                    <b-form-input
-                      readonly
-                      :value='materialsTotal.toFormat("$0.00")'
-                      size="sm"
-                      class="input-total-used"
-                    ></b-form-input>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col cols="4">
-                    <span class="value-container header">{{ $trans("VAT") }}</span>
-                  </b-col>
-                  <b-col cols="8">
-                    <b-form-input
-                      readonly
-                      :value='materialsTotalVAT.toFormat("$0.00")'
-                      size="sm"
-                      class="input-total-used"
-                    ></b-form-input>
-                  </b-col>
-                </b-row>
-              </b-container>
+              <InvoiceFormTotals
+                :total="materialsTotal"
+                :show-margin="false"
+                :vat="materialsTotalVAT"
+              />
             </b-col>
           </b-row>
         </b-container>
@@ -459,25 +358,12 @@
 
                 <b-form-radio value="other">
                   <p class="flex">
-                    {{ $trans("Other") }}:
-                    <b-container>
-                      <b-row>
-                        <b-col cols="7">
-                          <PriceInput
-                            v-model="activity.engineer_rate_other"
-                            :currency="activity.engineer_rate_other_currency"
-                            @priceChanged="(val) => setEngineerPriceOther(val, activity.user_id) && updateActivityTotals()"
-                          />
-                        </b-col>
-                        <b-col cols="5">
-                          <span class="flex">
-                            <span class="value-container">
-                              {{ activity.engineer_rate_other_dinero.toFormat('$0.00') }}
-                            </span>
-                          </span>
-                        </b-col>
-                      </b-row>
-                    </b-container>
+                    {{ $trans("Other") }}:&nbsp;&nbsp;
+                    <PriceInput
+                      v-model="activity.engineer_rate_other"
+                      :currency="activity.engineer_rate_other_currency"
+                      @priceChanged="(val) => setEngineerPriceOther(val, activity.user_id) && updateActivityTotals()"
+                    />
                   </p>
                 </b-form-radio>
               </b-form-radio-group>
@@ -502,49 +388,12 @@
               ></b-form-select>
             </b-col>
             <b-col cols="2">
-              <b-container>
-                <b-row>
-                  <b-col cols="4">
-                    <span class="value-container">{{ $trans("Total") }}</span>
-                  </b-col>
-                  <b-col cols="8">
-                    <b-form-input
-                      readonly
-                      :value="activity.total.toFormat('$0.00')"
-                      size="sm"
-                      class="input-total-used"
-                    ></b-form-input>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col cols="4">
-                    <span class="value-container">{{ $trans("Margin") }}</span>
-                  </b-col>
-                  <b-col cols="8">
-                    <b-form-input
-                      readonly
-                      :value="activity.margin.toFormat('$0.00')"
-                      size="sm"
-                      class="input-total-used"
-                    ></b-form-input>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col cols="4">
-                    <span class="value-container">{{ $trans("VAT") }}</span>
-                  </b-col>
-                  <b-col cols="8">
-                    <b-form-input
-                      readonly
-                      :value="activity.vat.toFormat('$0.00')"
-                      size="sm"
-                      class="input-total-used"
-                    ></b-form-input>
-                  </b-col>
-                </b-row>
-              </b-container>
+              <InvoiceFormTotals
+                :total="activity.total"
+                :margin="activity.margin"
+                :vat="activity.vat"
+                />
             </b-col>
-
           </b-row>
         </b-container>
 
@@ -565,21 +414,21 @@
 import invoiceModel from '../../models/orders/Invoice.js'
 import invoiceLineModel from '../../models/orders/InvoiceLine.js'
 import memberModel from "../../models/member/Member";
-//
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
-
 import { MaterialModel } from "../../models/inventory/Material";
 import materialService from "../../models/inventory/Material";
 import { RateEngineerUserModel } from "../../models/company/UserEngineer";
 import engineerService from "../../models/company/UserEngineer";
 import customerService from "../../models/customer/Customer";
 import { CustomerModel, CustomerPriceModel } from "../../models/customer/Customer";
+import InvoiceFormTotals from './InvoiceFormTotals';
 
 export default {
   name: 'InvoiceForm',
   components: {
-    PriceInput
+    PriceInput,
+    InvoiceFormTotals
   },
   props: {
     uuid: {
@@ -711,7 +560,6 @@ export default {
     async getCustomer() {
       const customerData = await customerService.detail(this.customerPk)
       this.customer = new CustomerModel(customerData)
-      console.log(this.customer)
     },
     async updateCustomer() {
       // use minimal model for patch
@@ -950,7 +798,7 @@ export default {
   margin-top: auto;
 }
 .input-margin {
-  width: 30px;
+  width: 40px;
   padding: 1px;
   margin: 1px;
   text-align: center;
