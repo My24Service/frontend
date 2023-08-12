@@ -107,7 +107,7 @@ describe('OrderMaintenanceView.vue', () => {
 
     await flushPromises()
 
-    const button = wrapper.find('#recreateWorkorderPdfButton')
+    const button = wrapper.find('#recreateWorkorderPdfButtonGotenberg')
     expect(button.exists()).to.be.true
   })
 
@@ -128,8 +128,7 @@ describe('OrderMaintenanceView.vue', () => {
 
     await flushPromises()
 
-    const button = wrapper.find('#recreateWorkorderPdfButton')
+    const button = wrapper.find('#recreateWorkorderPdfButtonGotenberg')
     expect(button.exists()).not.to.be.true
   })
 })
-
