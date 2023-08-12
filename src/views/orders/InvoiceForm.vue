@@ -161,7 +161,7 @@
               <PriceInput
                 v-model="customer.hourly_rate_engineer"
                 :currency="customer.hourly_rate_engineer_currency"
-                @priceChanged="(val) => customer.setHourlyRate(val) && updateActivityTotals()"
+                @priceChanged="(val) => customer.setHourlyRateEngineer(val) && updateActivityTotals()"
               />
             </b-col>
             <b-col cols="1">

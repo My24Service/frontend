@@ -35,6 +35,10 @@ class CustomerModel {
   hourly_rate_engineer_currency
   hourly_rate_engineer_dinero
 
+  hourly_rate_partner_engineer
+  hourly_rate_partner_engineer_currency
+  hourly_rate_partner_engineer_dinero
+
   constructor(customerData) {
     for (const [k, v] of Object.entries(customerData)) {
       this[k] = v
@@ -43,10 +47,17 @@ class CustomerModel {
     this.setPriceFields(this)
   }
 
-  setHourlyRate(priceDinero) {
+  setHourlyRateEngineer(priceDinero) {
     this.hourly_rate_engineer_dinero = priceDinero
     this.hourly_rate_engineer = this.hourly_rate_engineer_dinero.toFormat('0.00')
     this.hourly_rate_engineer_currency = this.hourly_rate_engineer_dinero.getCurrency()
+    return true
+  }
+
+  setHourlyRatePartnerEngineer(priceDinero) {
+    this.hourly_rate_partner_engineer_dinero = priceDinero
+    this.hourly_rate_partner_engineer = this.hourly_rate_partner_engineer_dinero.toFormat('0.00')
+    this.hourly_rate_partner_engineer_currency = this.hourly_rate_partner_engineer_dinero.getCurrency()
     return true
   }
 
@@ -61,6 +72,11 @@ class CustomerModel {
     if (obj.hourly_rate_engineer && obj.hourly_rate_engineer_currency) {
       this.hourly_rate_engineer_dinero = toDinero(
         obj.hourly_rate_engineer, obj.hourly_rate_engineer_currency)
+    }
+
+    if (obj.hourly_rate_partner_engineer && obj.hourly_rate_partner_engineer_currency) {
+      this.hourly_rate_partner_engineer_dinero = toDinero(
+        obj.hourly_rate_partner_engineer, obj.hourly_rate_partner_engineer_currency)
     }
 
     if (obj.call_out_costs && obj.call_out_costs_currency) {
@@ -78,6 +94,9 @@ class CustomerPriceModel {
 
   hourly_rate_engineer
   hourly_rate_engineer_currency
+
+  hourly_rate_partner_engineer
+  hourly_rate_partner_engineer_currency
 
   constructor(customerData) {
     for (const [k, v] of Object.entries(customerData)) {
