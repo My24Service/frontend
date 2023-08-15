@@ -42,17 +42,17 @@
         <template #cell(name)="data">
           <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
             {{ data.item.name }}
-          </router-link><br/>
+          </router-link>
         </template>
         <template #cell(customer)="data">
           <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link><br/>
+          </router-link>
         </template>
         <template #cell(branch)="data">
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link><br/>
+          </router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -147,16 +147,16 @@ export default {
       equipmentObjects: [],
       equipmentFields: [],
       equipmentFieldsCustomerPlanning: [
-        {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Equipment')},
+        {key: 'customer', label: this.$trans('Customer')},
         {key: 'brand', label: this.$trans('Brand')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
       ],
       equipmentFieldsBranchPlanning: [
-        {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Equipment')},
+        {key: 'branch', label: this.$trans('Branch')},
         {key: 'brand', label: this.$trans('Brand')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},

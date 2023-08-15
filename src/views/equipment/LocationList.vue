@@ -145,15 +145,15 @@ export default {
       isLoading: false,
       locations: [],
       fieldsCustomerPlanning: [
-        {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'customer', label: this.$trans('Customer')},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchPlanning: [
-        {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'branch', label: this.$trans('Branch')},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons'}
