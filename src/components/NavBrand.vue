@@ -1,5 +1,5 @@
 <template>
-  <b-navbar-brand ref="nav-brand" to="/">
+  <b-navbar-brand ref="nav-brand" to="/" :title="memberName()" >
     <img class="memberLogo" v-bind:src="memberLogo()" v-bind:alt="memberName()" >
   </b-navbar-brand>
 </template>
