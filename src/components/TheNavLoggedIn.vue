@@ -93,7 +93,7 @@
         <li style="text-align: center;">
           {{ memberInfo.name }}<br><br>
         </li>
-        <li><Version /></li>
+        <li><span class='dropdown-item'><Version /></span></li>
         <b-dropdown-item v-b-modal.lang-modal>{{ $trans('App Language') }}</b-dropdown-item>
         <b-dropdown-item v-b-modal.password-change-modal>{{ $trans('Change password') }}</b-dropdown-item>
         <b-dropdown-item @click="logout">{{ $trans('Logout') }}</b-dropdown-item>
@@ -227,8 +227,6 @@ export default {
         await this.memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
         this.memberNewDataSocket.removeOnmessageHandler()
         this.memberNewDataSocket.removeSocket()
-
-        this.infoToast(this.$trans('Logged out'), this.$trans('You are now logged out'))
 
         if(this.$router.currentRoute.path !== '/') {
           await this.$router.push({path: '/'})

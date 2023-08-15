@@ -1,6 +1,11 @@
 <template>
   <div>
-    
+    <b-nav-item
+      :active="isActive('dashboard')"
+      v-if="showCustomerDashBoard"
+      :to="{name: 'customer-dashboard'}">
+      {{ $trans('Dashboard') }}
+    </b-nav-item>
       <!-- <b-nav-item
         :active="isActive('customers')"
         v-if="hasCustomers"
@@ -61,6 +66,9 @@ export default {
     },
     hasMaintenanceOrdersPerYear() {
       return this.hasAccessToModule('customers', 'maintenance-order-year')
+    },
+    showCustomerDashBoard() {
+      return !this.hasBranches && this.isCustomer
     },
   },
 }

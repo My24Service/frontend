@@ -1,5 +1,6 @@
 <template>
   <div class="nav-items" ref="nav-items">
+    <!-- Orders -->
     <b-nav-item
       :active="isActive('orders')"
       v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
@@ -11,7 +12,7 @@
       <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
     </b-nav-item>
 
-    <!-- custom Orders submenu -->
+    <!-- Orders submenu -->
     <div class="page-subnav">
       <b-nav-item
         v-if="isActive('orders')"
@@ -26,18 +27,7 @@
         {{ $trans('Stats') }}
       </b-nav-item>
     </div>
-
-    <!-- dashboard for customer users -->
-    <b-nav-item
-      :active="isActive('customers')"
-      v-if="showCustomerDashBoard"
-      to="/customers/dashboard"
-      class="has-children">{{ $trans('test') }}
-    </b-nav-item>
-    <SubNav v-if="showCustomerDashBoard && isActive('customers')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-  
+ 
     <!-- equipment -->
     <b-nav-item
       :active="isActive('equipment')"
@@ -76,6 +66,8 @@
     <SubNav v-if="isActive('customers')">
       <router-view name="app-subnav"></router-view>
     </SubNav>
+
+
 
     <!-- inventory -->
     <b-nav-item
@@ -136,6 +128,21 @@
     <SubNav v-if="isActive('members')">
       <router-view name="app-subnav"></router-view>
     </SubNav>
+
+    <!-- budgets -->
+    <b-nav-item
+      v-if="isPlanning"
+      to="/budget"
+      :active="isActive('budget')"
+      >
+      <b-icon icon="credit-card2-front" v-if="!isActive('budget')"></b-icon>
+      <b-icon icon="credit-card2-front-fill" v-if="isActive('budget')"></b-icon>
+      {{ $trans('Budgets') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('budget')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+
   </div>
 </template>
 
