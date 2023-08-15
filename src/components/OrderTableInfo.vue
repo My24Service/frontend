@@ -46,7 +46,7 @@
         <b-icon icon="circle-fill" v-bind:style="`color:${this.orderStatusColorCode}`" :title="order.last_status_full"></b-icon>
         <b-form-select
           :title="this.orderStatusCode.statuscode"
-          :id="order.id + 'change-status-status'"
+          :id="order.id + '-change-status'"
           v-model="orderStatusCode"
           :options="statuscodes"
           size="sm"
