@@ -105,6 +105,7 @@
         @remove-filter="removeStatusFilter"
       />
 
+
       <div class="overflow-auto">
         <div class="flex-columns">
            
@@ -135,8 +136,7 @@
           
           <li v-for="order in orders" :key="order.id">
             <OrderTableInfo
-            v-bind:order="order"
-            />
+            v-bind:order="order"/>
           </li>
         </ul>
           
@@ -151,17 +151,17 @@
 </template>
 
 <script>
-import orderWorkorderModel from '@/models/orders/OrderWorkorder.js'
-import statusModel from '@/models/orders/Status.js'
-import my24 from '@/services/my24.js'
-import OrderTableInfo from '@/components/OrderTableInfo.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import OrderFilters from "@/components/OrderFilters"
-import Pagination from "@/components/Pagination.vue"
+import orderWorkorderModel from '../../models/orders/OrderWorkorder.js'
+import statusModel from '../../models/orders/Status.js'
+import my24 from '../../services/my24.js'
+import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import IconLinkPlus from '../../components/IconLinkPlus.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import OrderFilters from "../../components/OrderFilters"
+import Pagination from "../../components/Pagination.vue"
 
 export default {
   components: {

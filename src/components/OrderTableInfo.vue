@@ -15,13 +15,6 @@
     </span>
 
       <!-- fixme -->
-      <span v-if="memberType === 'temps'">
-        {{ $trans('Required users') }}: {{ order.required_users }}<br/>
-        {{ $trans('Users set available') }}: {{ order.user_order_available_set_count }}<br/>
-        {{ $trans('Assigned people') }}: {{ order.assigned_count }}<br/>
-      </span>
-
-      <!-- fixme -->
       <span v-if="memberType === 'maintenance'" class="order-assignees">
         <span v-if="order.assigned_count" :title="`assignees: ${order.required_assigned}`">
           {{ $trans('Assigned to') }} {{ order.assigned_count }} 

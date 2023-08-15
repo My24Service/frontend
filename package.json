@@ -21,6 +21,7 @@
     "bootstrap-vue": "^2.22.0",
     "chart.js": "2",
     "chartjs-plugin-datalabels": "^0.4.0",
+    "dinero.js": "^1.9.1",
     "is-ci": "^3.0.1",
     "mutationobserver-shim": "^0.3.7",
     "one-colorpicker": "^1.0.12",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.17.5",
+    "@babel/eslint-parser": "^7.22.9",
     "@babel/preset-env": "^7.16.11",
     "@testing-library/vue": "^5.8.2",
     "@vitejs/plugin-vue": "^1.6.1",

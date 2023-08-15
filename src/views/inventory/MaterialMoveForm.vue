@@ -188,7 +188,7 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 
 import inventoryModel from '@/models/inventory/Inventory.js'
-import materialModel from '@/models/inventory/Material.js'
+import materialService from '@/models/inventory/Material.js'
 import stockLocationModel from '@/models/inventory/StockLocation.js'
 
 const greaterThanZero = (value) => parseInt(value) > 0
@@ -323,7 +323,7 @@ export default {
       this.isLoading = true
 
       try {
-        await materialModel.move(this.selectedMaterialPk,
+        await materialService.move(this.selectedMaterialPk,
           this.selectedFromLocationPk,
           this.selectedToLocationPk,
           this.amount)

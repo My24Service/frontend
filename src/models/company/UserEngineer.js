@@ -1,7 +1,122 @@
 import BaseModel from '@/models/base'
+import {toDinero} from "../../utils";
 
+class EngineerUserModel {
+  id
+  username
+  first_name
+  last_name
+  full_name
+  email
+  password1
+  password2
+  password
+  date_joined
+  engineer
 
-class Engineer extends BaseModel {
+  constructor(user) {
+    for (const [k, v] of Object.entries(user)) {
+      if (k === 'engineer') {
+        this.engineer = new EngineerModel(v)
+      } else {
+        this[k] = v
+      }
+    }
+  }
+}
+
+class RateEngineerUserModel {
+  id
+  full_name
+  engineer
+
+  constructor(user) {
+    for (const [k, v] of Object.entries(user)) {
+      if (k === 'engineer') {
+        this.engineer = new RateEngineerModel(v)
+      } else {
+        if (this.hasOwnProperty(k)) {
+          this[k] = v
+        }
+      }
+    }
+  }
+}
+
+class RateEngineerModel {
+  hourly_rate
+  hourly_rate_currency
+  hourly_rate_dinero
+
+  constructor(engineer) {
+    for (const [k, v] of Object.entries(engineer)) {
+      if (this.hasOwnProperty(k)) {
+        this[k] = v
+      }
+    }
+    this.setPriceFields(this)
+  }
+
+  setHourlyRate(priceDinero) {
+    this.hourly_rate_dinero = priceDinero
+    this.hourly_rate = this.hourly_rate_dinero.toFormat('0.00')
+    this.hourly_rate_currency = this.hourly_rate_dinero.getCurrency()
+    return true
+  }
+
+  setPriceFields(obj) {
+    if (obj.hourly_rate && obj.hourly_rate_currency) {
+      this.hourly_rate_dinero = toDinero(
+        obj.hourly_rate, obj.hourly_rate_currency)
+    }
+  }
+}
+
+class EngineerModel {
+  address
+  postal
+  city
+  mobile
+  email_tablet
+  vca
+  passport
+  cost_price
+  license_plate
+  inspection_date_car
+  cost_price_car
+  inspection_date_tools
+  cost_price_tools
+  remarks
+  contract_hours_week
+  latest_event
+  prefered_location
+  hourly_rate
+  hourly_rate_currency
+  hourly_rate_dinero
+
+  constructor(engineer) {
+    for (const [k, v] of Object.entries(engineer)) {
+      this[k] = v
+    }
+    this.setPriceFields(this)
+  }
+
+  setHourlyRate(priceDinero) {
+    this.hourly_rate_dinero = priceDinero
+    this.hourly_rate = this.hourly_rate_dinero.toFormat('0.00')
+    this.hourly_rate_currency = this.hourly_rate_dinero.getCurrency()
+    return true
+  }
+
+  setPriceFields(obj) {
+    if (obj.hourly_rate && obj.hourly_rate_currency) {
+      this.hourly_rate_dinero = toDinero(
+        obj.hourly_rate, obj.hourly_rate_currency)
+    }
+  }
+}
+
+class EngineerService extends BaseModel {
   fields = {
     'username': '',
     'first_name': '',
@@ -80,6 +195,5 @@ class Engineer extends BaseModel {
   }
 }
 
-let engineerModel = new Engineer()
-
-export default engineerModel
+export default new EngineerService()
+export { EngineerUserModel, RateEngineerUserModel }
