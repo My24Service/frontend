@@ -395,6 +395,16 @@
                 />
             </b-col>
           </b-row>
+          <b-row>
+            <b-col cols="10"/>
+            <b-col cols="2">
+              <InvoiceFormTotals
+                :total="activityTotal"
+                :show-margin="false"
+                :vat="activityTotalVAT"
+              />
+            </b-col>
+          </b-row>
         </b-container>
 
           <div class="mx-auto">
@@ -468,9 +478,10 @@ export default {
         { text: 'Selling', value: 'selling' },
       ],
 
-      activity: [],
-      activity_user_totals: {},
       engineer_models: [],
+
+      activity: [],
+      activity_user_totals: [],
       activityTotal: null,
       activityTotalVAT: null,
       usePriceOptionsActivity: [
@@ -479,7 +490,10 @@ export default {
       ],
 
       extra_work: [],
-      extra_work_totals: {},
+      extra_work_user_totals: [],
+
+      actual_work: [],
+      actual_work_user_totals: [],
 
       customerPk: null,
       customer: null,
@@ -533,7 +547,7 @@ export default {
         margin_perc: this.invoice_default_margin
       }))
 
-      this.activity_user_totals = invoiceData.activity_totals['user_totals'].map((a) => ({
+      this.activity_user_totals = invoiceData.activity_totals.map((a) => ({
         ...a,
         vat_type: this.invoice_default_vat,
         margin_perc: this.invoice_default_margin,
@@ -547,8 +561,33 @@ export default {
       }))
       this.updateActivityTotals()
 
-      this.extra_work = invoiceData.extra_work
-      this.extra_work_totals = invoiceData.extra_work_totals
+      // extra work
+      this.extra_work_user_totals = invoiceData.extra_work_totals.map((a) => ({
+        ...a,
+        vat_type: this.invoice_default_vat,
+        margin_perc: this.invoice_default_margin,
+        engineer_rate: this.getEngineerRate(a.user_id),
+        engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
+        engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
+        engineer_rate_other: "0.00",
+        engineer_rate_other_currency: this.default_currency,
+        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
+        usePrice: 'engineer',
+      }))
+
+      // extra work
+      this.actual_work_user_totals = invoiceData.actual_work_totals.map((a) => ({
+        ...a,
+        vat_type: this.invoice_default_vat,
+        margin_perc: this.invoice_default_margin,
+        engineer_rate: this.getEngineerRate(a.user_id),
+        engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
+        engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
+        engineer_rate_other: "0.00",
+        engineer_rate_other_currency: this.default_currency,
+        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
+        usePrice: 'engineer',
+      }))
 
       this.isLoading = false
     } else {
@@ -598,8 +637,8 @@ export default {
     },
     updateActivityTotals() {
       this.activity_user_totals = this.activity_user_totals.map((m) => this.updateUserActivityTotals(m))
-      this.materialsTotal = this.getItemsTotal(this.used_materials)
-      this.materialsTotalVAT = this.getItemsTotalVAT(this.used_materials)
+      this.activityTotal = this.getItemsTotal(this.activity_user_totals)
+      this.activityTotalVAT = this.getItemsTotalVAT(this.activity_user_totals)
     },
     updateUserActivityTotals(activity) {
       const price = this.getEngineerRateDinero(activity.user_id)
