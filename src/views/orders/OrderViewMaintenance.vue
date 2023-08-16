@@ -11,7 +11,6 @@
           type="button"
           variant="secondary"
         >
-          
           <b-spinner small v-if="isGeneratingPDF"></b-spinner>
           {{ $trans('Generate PDF') }}
         </b-button>
@@ -26,6 +25,7 @@
         >
           <b-spinner small v-if="isGeneratingPDF"></b-spinner>
           {{ $trans('re-generate PDF (new)') }}
+
         </b-button>
         <b-link class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
           <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
@@ -213,6 +213,7 @@ export default {
       const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
       window.open(`${document.location.origin}/${routeData.href}`, '_blank')
     },
+
     getWorkorderURL() {
       this.isLoading = true;
       const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
@@ -243,6 +244,7 @@ export default {
         this.isGeneratingPDF = false
       }
     },
+
     async recreateWorkorderPdfGotenberg() {
       this.isLoading = true
       this.buttonDisabled = true
