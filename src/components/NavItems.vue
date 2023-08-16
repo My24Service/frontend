@@ -13,7 +13,7 @@
     </b-nav-item>
 
     <!-- Orders submenu -->
-    <div class="page-subnav">
+    <div class="page-subnav" v-if="isActive('orders')">
       <b-nav-item
         v-if="isActive('orders')"
         :active="isActive('orders','statuscodes')"
@@ -140,6 +140,49 @@
       {{ $trans('Budgets') }}
     </b-nav-item>
     <SubNav v-if="isActive('budget')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+
+    <!-- docks -->
+    <b-nav-item
+      v-if="isPlanning"
+      to="/docks"
+      :active="isActive('docks')"
+      >
+      <b-icon icon="truck-flatbed" v-if="!isActive('docks')"></b-icon>
+      <b-icon icon="truck" v-if="isActive('docks')"></b-icon>
+      {{ $trans('Docks') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('docks')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+
+    <!-- webshop -->
+    <b-nav-item
+      v-if="isPlanning"
+      to="/bim"
+      :active="isActive('bim')"
+      >
+      <b-icon icon="mouse2" v-if="!isActive('bim')"></b-icon>
+      <b-icon icon="mouse2-fill" v-if="isActive('bim')"></b-icon>
+      {{ $trans('BIM / 3D') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('bim')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+
+    <!-- webshop -->
+    <b-nav-item
+      v-if="isPlanning"
+      to="/webshop"
+      :active="isActive('webshop')"
+      class="has-children"
+      >
+      <b-icon icon="basket" v-if="!isActive('webshop')"></b-icon>
+      <b-icon icon="basket-fill" v-if="isActive('webshop')"></b-icon>
+      {{ $trans('Webshop') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('webshop')">
       <router-view name="app-subnav"></router-view>
     </SubNav>
 
