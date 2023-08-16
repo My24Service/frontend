@@ -1,6 +1,4 @@
 <template>
-  
-  
     <div class="app-page">
       <h1><b-icon icon="truck"></b-icon></h1>
       <div class="panel coming-soon">
@@ -8,7 +6,6 @@
         <p align="center">{{ $trans('This section of the app is under construction') }}</p>
       </div>
     </div>
-  
 </template>
 
 <script>
