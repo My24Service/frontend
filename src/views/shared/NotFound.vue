@@ -1,12 +1,11 @@
 <template>
-  <b-row align-h="center">
-    <b-col cols="4">
-      <div class="no-access">
-        <h3>{{ $trans('Page not found') }}</h3>
-        <p align="center">{{ $trans('The requested page could not be found') }}</p>
-      </div>
-    </b-col>
-  </b-row>
+  <div class="app-page">
+    <h1><b-icon icon="cone-striped"></b-icon></h1>
+    <div class="panel no-access">
+      <h3>{{ $trans('Page not found') }}</h3>
+      <p align="center">{{ $trans('The requested page could not be found') }}</p>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -16,8 +15,16 @@ export default {
 </script>
 
 <style scoped>
-  .no-access {
-    padding-top: 120px;
+h1 {
+  color: #eceef8;
+  text-align: center;
+  padding-block: 3rem 1rem;
+  font-size: 5rem;
+}
+.no-access {
+    padding: 3rem!important;
     text-align: center;
+    margin: 3rem auto!important;
+    max-width: 60ch;
   }
 </style>
