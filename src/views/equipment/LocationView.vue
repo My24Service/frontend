@@ -1,67 +1,48 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <div class="app-page">
+    <header>
 
-    <div class="app-detail">
-      <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-      <b-row align-h="center">
-        <h2>{{ location.name }}</h2>
-      </b-row>
-      <b-row>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
-              <b-td>{{ location.name }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-        <b-col cols="6">
-        </b-col>
-      </b-row>
-
-      <OrderStats
-        v-if="!isLoading"
-        ref="order-stats"
-      />
-
-      <div class="spacer"></div>
-
-      <div>
-        <b-row align-h="center">
-          <h3>{{ $trans("Past orders") }}</h3>
-        </b-row>
-        <SearchModal
+      <div class='page-title'>
+        <h3>
+          <span @click="goBack">
+            <b>Equipment</b>
+          </span>
+          / {{ location.name }}
+        </h3>
+      </div>
+      <SearchModal
           id="search-modal"
           ref="search-modal"
           @do-search="handleSearchOk"
         />
+    </header>
 
-        <b-pagination
-          v-if="this.orderPastModel.count > 20"
-          class="pt-4"
-          v-model="currentPage"
-          :total-rows="this.orderPastModel.count"
-          :per-page="this.orderPastModel.perPage"
-          aria-controls="customer-past-table"
-        ></b-pagination>
+    <div class='page-detail flex-columns'>
+      <div class='panel'>
+        <h6>{{ $trans('Location details') }}</h6>
+        <dl>
+            <dt>{{ $trans('Name') }}</dt>
+            <dd>{{ location.name }}</dd>
+        </dl>
 
+        <h6>{{ $trans("Past orders") }}</h6>
         <b-table
-          id="customer-past-table"
-          small
-          :busy='isLoading'
-          :fields="orderPastFields"
+        id="customer-past-table"
+        small
+        :busy='isLoading'
+        :fields="orderPastFields"
           :items="orders"
           responsive="md"
           class="data-table"
         >
-          <template #head(icons)="">
+        <template #head(icons)="">
             <div class="float-right">
               <b-button-toolbar>
                 <b-button-group class="mr-1">
                   <ButtonLinkRefresh
                     v-bind:method="function() { loadData() }"
                     v-bind:title="$trans('Refresh')"
-                  />
+                    />
                   <ButtonLinkSearch
                     v-bind:method="function() { showSearchModal() }"
                   />
@@ -77,18 +58,30 @@
           </template>
           <template #cell(id)="data">
             <OrderTableInfo
-              v-bind:order="data.item"
+            v-bind:order="data.item"
             />
           </template>
         </b-table>
+        
+        <b-pagination
+          v-if="this.orderPastModel.count > 20"
+          class="pt-4"
+          v-model="currentPage"
+          :total-rows="this.orderPastModel.count"
+          :per-page="this.orderPastModel.perPage"
+          aria-controls="customer-past-table"
+        ></b-pagination>
       </div>
-
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
+      
+      <div class='panel wide'>
+        <h6>Stats for {{ location.name }}</h6>
+        <OrderStats
+        v-if="!isLoading"
+        ref="order-stats"
+        />
+      </div>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
@@ -215,10 +208,8 @@ export default {
 </script>
 
 <style scoped>
-span.spacer {
-  width: 10px;
-}
-div.spacer {
-  margin: 10px;
-}
+  .wide {
+    min-width: 66%;
+    max-width: unset;
+  }
 </style>
