@@ -192,6 +192,7 @@
   > header ~ div.page-detail {
     margin: 0 1rem 5rem !important;
   }
+
 }
 
 .navbar-brand {
@@ -234,8 +235,13 @@
     flex-grow: 1;
     &.panel {
       max-width: 33%;
+      margin-top: 0;
     }
   }
+}
+
+.flex-stack > .panel + .panel {
+  margin-top: 1rem;
 }
 
 dl {
