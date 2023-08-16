@@ -1,97 +1,60 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm" v-if="equipment">
+  <div class="app-page">
+    <header>
 
-    <div class="app-detail">
-      <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-      <b-row align-h="center">
-        <h2>{{ equipment.name }}</h2>
-      </b-row>
-      <b-row>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
-              <b-td>{{ equipment.name }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Brand') }}:</strong></b-td>
-              <b-td>{{ equipment.brand }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Identifier') }}:</strong></b-td>
-              <b-td>{{ equipment.identifier }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Description') }}:</strong></b-td>
-              <b-td>{{ equipment.description }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Installation date') }}:</strong></b-td>
-              <b-td>{{ equipment.installation_date }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Production date') }}:</strong></b-td>
-              <b-td>{{ equipment.production_date }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Serial number') }}:</strong></b-td>
-              <b-td>{{ equipment.serialnumber }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Standard hours') }}:</strong></b-td>
-              <b-td>{{ equipment.standard_hours }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Lifespan (months)') }}:</strong></b-td>
-              <b-td>{{ equipment.default_replace_months }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Price') }}:</strong></b-td>
-              <b-td>{{ equipment.price_dinero.toFormat('$0.00') }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-      </b-row>
-
-      <OrderStats
-        v-if="!isLoading"
-        ref="order-stats"
-      />
-
-      <div class="spacer"></div>
-
-      <div>
-        <b-row align-h="center">
-          <h3>{{ $trans("Past orders") }}</h3>
-        </b-row>
-        <SearchModal
+      <div class='page-title'>
+        <h3>
+          <span @click="goBack">
+            <b>Equipment</b>
+          </span>
+          / {{ equipment.name }}
+        </h3>
+      </div>
+      <SearchModal
           id="search-modal"
           ref="search-modal"
           @do-search="handleSearchOk"
         />
+    </header>
+    <div class='page-detail flex-columns'>
+      <div class='panel'>
+        <h6>Equipment details</h6>
+        <dl>
+              <dt>{{ $trans('Name') }}</dt>
+              <dd>{{ equipment.name }}</dd>
+              <dt>{{ $trans('Brand') }}</dt>
+              <dd>{{ equipment.brand }}</dd>
+              <dt>{{ $trans('Identifier') }}</dt>
+              <dd>{{ equipment.identifier }}</dd>
+              <dt>{{ $trans('Description') }}</dt>
+              <dd>{{ equipment.description }}</dd>
+              <dt>{{ $trans('Installation date') }}</dt>
+              <dd>{{ equipment.installation_date }}</dd>
+              <dt>{{ $trans('Production date') }}</dt>
+              <dd>{{ equipment.production_date }}</dd>
+              <dt>{{ $trans('Serial number') }}</dt>
+              <dd>{{ equipment.serialnumber }}</dd>
+              <dt>{{ $trans('Standard hours') }}</dt>
+              <dd>{{ equipment.standard_hours }}</dd>
+              <b-tr>
+                <b-td><strong>{{ $trans('Lifespan (months)') }}:</strong></b-td>
+                <b-td>{{ equipment.default_replace_months }}</b-td>
+              </b-tr>
+              <b-tr>
+                <b-td><strong>{{ $trans('Price') }}:</strong></b-td>
+                <b-td>{{ equipment.price_dinero.toFormat('$0.00') }}</b-td>
+              </b-tr>
+          </dl>
 
-        <b-pagination
-          v-if="this.orderPastModel.count > 20"
-          class="pt-4"
-          v-model="currentPage"
-          :total-rows="this.orderPastModel.count"
-          :per-page="this.orderPastModel.perPage"
-          aria-controls="customer-past-table"
-        ></b-pagination>
-
-        <b-table
-          id="customer-past-table"
-          small
-          :busy='isLoading'
-          :fields="orderPastFields"
-          :items="orders"
-          responsive="md"
-          class="data-table"
-        >
+          <b-table
+            id="customer-past-table"
+            small
+            :busy='isLoading'
+            :fields="orderPastFields"
+            :items="orders"
+            responsive="md"
+            class="data-table"
+          >
           <template #head(icons)="">
             <div class="float-right">
               <b-button-toolbar>
@@ -118,15 +81,26 @@
               v-bind:order="data.item"
             />
           </template>
-        </b-table>
+          </b-table>
+          <b-pagination
+            v-if="this.orderPastModel.count > 20"
+            class="pt-4"
+            v-model="currentPage"
+            :total-rows="this.orderPastModel.count"
+            :per-page="this.orderPastModel.perPage"
+            aria-controls="customer-past-table"
+          ></b-pagination>
       </div>
 
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
+      <div class='panel wide'>
+        <h6>Stats for {{ equipment.name }}</h6>
+        <OrderStats
+          v-if="!isLoading"
+          ref="order-stats"
+        />
+      </div>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
@@ -253,10 +227,8 @@ export default {
 </script>
 
 <style scoped>
-span.spacer {
-  width: 10px;
-}
-div.spacer {
-  margin: 10px;
+.wide {
+  min-width: 66%;
+  max-width: unset;
 }
 </style>

@@ -1,387 +1,412 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New equipment') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit equipment') }}</h2>
-        <b-row v-if="!hasBranches && !isCustomer">
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              label-class="p-sm-0"
-              v-bind:label="$trans('Search customer')"
-              label-for="equipment_customer_search"
-            >
-              <multiselect
-                v-if="!isLoading"
-                id="equipment_customer_search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="customersSearch"
-                :multiple="false"
-                :loading="isLoading"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="true"
-                :hide-selected="true"
-                @search-change="getCustomersDebounced"
-                @select="selectCustomer"
-                :custom-label="customerLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.equipment.customer.$error : null">
-                {{ $trans('Please select a customer') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row v-if="hasBranches && !isEmployee">
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              label-class="p-sm-0"
-              v-bind:label="$trans('Search branches')"
-              label-for="equipment_branch_search"
-            >
-              <multiselect
-                v-if="!isLoading"
-                id="equipment_branch_search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="branchesSearch"
-                :multiple="false"
-                :loading="isLoading"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="true"
-                :hide-selected="true"
-                @search-change="getBranchesDebounced"
-                @select="selectBranch"
-                :custom-label="branchLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.equipment.branch.$error : null">
-                {{ $trans('Please select a branch') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row v-if="customer && !hasBranches">
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Customer')"
-              label-for="equipment_customer_name"
-            >
-              <b-form-input
-                id="equipment_customer_name"
-                size="sm"
-                v-model="customer.name"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Address')"
-              label-for="equipment_customer_address"
-            >
-              <b-form-input
-                id="equipment_customer_address"
-                size="sm"
-                v-model="customer.address"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('City')"
-              label-for="equipment_customer_city"
-            >
-              <b-form-input
-                id="equipment_customer_city"
-                size="sm"
-                v-model="customer.city"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Country')"
-              label-for="equipment_customer_country_code"
-            >
-              <b-form-input
-                id="equipment_customer_country_code"
-                size="sm"
-                v-model="customer.country_code"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row v-if="branch && hasBranches">
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Branch')"
-              label-for="equipment_branch_name"
-            >
-              <b-form-input
-                id="equipment_branch_name"
-                size="sm"
-                v-model="branch.name"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Address')"
-              label-for="equipment_branch_address"
-            >
-              <b-form-input
-                id="equipment_branch_address"
-                size="sm"
-                v-model="branch.address"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('City')"
-              label-for="equipment_branch_city"
-            >
-              <b-form-input
-                id="equipment_branch_city"
-                size="sm"
-                v-model="branch.city"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Country')"
-              label-for="equipment_branch_country_code"
-            >
-              <b-form-input
-                id="equipment_branch_country_code"
-                size="sm"
-                v-model="branch.country_code"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Name')"
-              label-for="equipment_name"
-            >
-              <b-form-input
-                :state="isSubmitClicked ? !v$.equipment.name.$error : null"
-                id="equipment_name"
-                size="sm"
-                ref="name"
-                v-model="equipment.name"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.equipment.name.$error : null">
-                {{ $trans('Please enter a name') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Brand')"
-              label-for="equipment_name"
-            >
-              <b-form-input
-                id="equipment_name"
-                size="sm"
-                v-model="equipment.brand"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Identifier')"
-              label-for="equipment_identifier"
-            >
-              <b-form-input
-                id="equipment_identifier"
-                size="sm"
-                v-model="equipment.identifier"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Serial number')"
-              label-for="equipment_serialnumber"
-            >
-              <b-form-input
-                id="equipment_serialnumber"
-                size="sm"
-                v-model="equipment.serialnumber"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Lifespan (months)')"
-              label-for="equipment_default_replace_months"
-            >
-              <b-form-input
-                id="equipment_default_replace_months"
-                size="sm"
-                v-model="equipment.default_replace_months"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Price')"
-              label-for="equipment_serialnumber"
-            >
-              <PriceInput
-                v-model="equipment.price"
-                :currency="equipment.price_currency"
-                @priceChanged="(val) => priceChanged(val)"
-              />
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Installation date')"
-              label-for="equipment_installation_date"
-            >
-              <b-form-datepicker
-                id="equipment_installation_date"
-                size="sm"
-                class="p-sm-0"
-                v-model="equipment.installation_date"
-                v-bind:placeholder="$trans('Choose a date')"
-                value="equipment.installation_date"
-                locale="nl"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Production date')"
-              label-for="equipment_production_date"
-            >
-              <b-form-datepicker
-                id="equipment_production_date"
-                size="sm"
-                class="p-sm-0"
-                v-model="equipment.production_date"
-                v-bind:placeholder="$trans('Choose a date')"
-                value="equipment.production_date"
-                locale="nl"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Standard hours/mins.')"
-              label-for="equipment_standard_hours_hour"
-            >
-              <b-form-input
-                id="equipment_standard_hours_hour"
-                size="sm"
-                v-model="equipment.standard_hours_hour"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col size="3">
-            <b-form-group
-              v-bind:label="$trans('Location')"
-              label-for="equipment_location"
-            >
-              <b-form-select
-                id="equipment_location"
-                v-model="equipment.location"
-                :options="locations"
-                size="sm"
-                value-field="id"
-                text-field="name"
-              ></b-form-select>
-            </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Description')"
-              label-for="equipment_remarks"
-            >
-                <b-form-textarea
-                  id="equipment_remarks"
-                  v-model="equipment.description"
-                  rows="1"
-                ></b-form-textarea>
-            </b-form-group>
-          </b-col>
-        </b-row>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
-            <b-button
-              @click="submitFormBulk"
-              type="button"
-              variant="success"
-              v-if="isCreate"
-            >
-              {{ $trans('Bulk') }}
-            </b-button>
-          </footer>
+    <div class="app-page">
+      <header>
+        <div class='page-title'>
+            <h3 v-if="isCreate">{{ $trans('New equipment') }}</h3>
+            <h3 v-if="!isCreate">{{ $trans('Edit equipment') }}</h3>
         </div>
-      </b-form>
+      </header>
+      <div class='page-detail flex-stack'>
+        <div class='panel'>
+          <h6>{{  $trans('Equipment details') }}</h6>
+          <b-form>
+            <b-row v-if="branch && hasBranches">
+              <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Branch')"
+                  label-for="equipment_branch_name"
+                >
+                  <b-form-input
+                    id="equipment_branch_name"
+                    size="sm"
+                    v-model="branch.name"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Address')"
+                  label-for="equipment_branch_address"
+                >
+                  <b-form-input
+                    id="equipment_branch_address"
+                    size="sm"
+                    v-model="branch.address"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('City')"
+                  label-for="equipment_branch_city"
+                >
+                  <b-form-input
+                    id="equipment_branch_city"
+                    size="sm"
+                    v-model="branch.city"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Country')"
+                  label-for="equipment_branch_country_code"
+                >
+                  <b-form-input
+                    id="equipment_branch_country_code"
+                    size="sm"
+                    v-model="branch.country_code"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Name')"
+                  label-for="equipment_name"
+                >
+                  <b-form-input
+                    :state="isSubmitClicked ? !v$.equipment.name.$error : null"
+                    id="equipment_name"
+                    size="sm"
+                    ref="name"
+                    v-model="equipment.name"
+                  ></b-form-input>
+                  <b-form-invalid-feedback
+                    :state="isSubmitClicked ? !v$.equipment.name.$error : null">
+                    {{ $trans('Please enter a name') }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Brand')"
+                  label-for="equipment_name"
+                >
+                  <b-form-input
+                    id="equipment_name"
+                    size="sm"
+                    v-model="equipment.brand"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Identifier')"
+                  label-for="equipment_identifier"
+                >
+                  <b-form-input
+                    id="equipment_identifier"
+                    size="sm"
+                    v-model="equipment.identifier"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Serial number')"
+                  label-for="equipment_serialnumber"
+                >
+                  <b-form-input
+                    id="equipment_serialnumber"
+                    size="sm"
+                    v-model="equipment.serialnumber"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Installation date')"
+                  label-for="equipment_installation_date"
+                >
+                  <b-form-datepicker
+                    id="equipment_installation_date"
+                    size="sm"
+                    class="p-sm-0"
+                    v-model="equipment.installation_date"
+                    v-bind:placeholder="$trans('Choose a date')"
+                    value="equipment.installation_date"
+                    locale="nl"
+                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  ></b-form-datepicker>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Production date')"
+                  label-for="equipment_production_date"
+                >
+                  <b-form-datepicker
+                    id="equipment_production_date"
+                    size="sm"
+                    class="p-sm-0"
+                    v-model="equipment.production_date"
+                    v-bind:placeholder="$trans('Choose a date')"
+                    value="equipment.production_date"
+                    locale="nl"
+                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  ></b-form-datepicker>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Standard hours/mins.')"
+                  label-for="equipment_standard_hours_hour"
+                >
+                  <b-form-input
+                    id="equipment_standard_hours_hour"
+                    size="sm"
+                    v-model="equipment.standard_hours_hour"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col size="3">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Location')"
+                  label-for="equipment_location"
+                >
+                  <b-form-select
+                    id="equipment_location"
+                    v-model="equipment.location"
+                    :options="locations"
+                    size="sm"
+                    value-field="id"
+                    text-field="name"
+                  ></b-form-select>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Description')"
+                  label-for="equipment_remarks"
+                >
+                    <b-form-textarea
+                      id="equipment_remarks"
+                      v-model="equipment.description"
+                      rows="1"
+                    ></b-form-textarea>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Lifespan (months)')"
+                  label-for="equipment_default_replace_months"
+                >
+                  <b-form-input
+                    id="equipment_default_replace_months"
+                    size="sm"
+                    v-model="equipment.default_replace_months"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Price')"
+                  label-for="equipment_serialnumber"
+                >
+                  <PriceInput
+                    v-model="equipment.price"
+                    :currency="equipment.price_currency"
+                    @priceChanged="(val) => priceChanged(val)"
+                  />
+                </b-form-group>
+              </b-col>
+            </b-row>
+
+          </b-form>
+        </div>
+        <div class='panel'>
+          <h6>{{ $trans('Equipment') }} {{ $trans('Customer')}}</h6>
+
+          <b-row v-if="!hasBranches && !isCustomer">
+            <b-col cols="12" role="group">
+              <b-form-group
+                label-size="sm"
+                label-class="p-sm-0"
+                v-bind:label="$trans('Search customer')"
+                label-for="equipment_customer_search"
+              >
+                <multiselect
+                  v-if="!isLoading"
+                  id="equipment_customer_search"
+                  track-by="id"
+                  :placeholder="$trans('Type to search')"
+                  open-direction="bottom"
+                  :options="customersSearch"
+                  :multiple="false"
+                  :loading="isLoading"
+                  :internal-search="false"
+                  :clear-on-select="true"
+                  :close-on-select="true"
+                  :options-limit="30"
+                  :limit="10"
+                  :max-height="600"
+                  :show-no-results="true"
+                  :hide-selected="true"
+                  @search-change="getCustomersDebounced"
+                  @select="selectCustomer"
+                  :custom-label="customerLabel"
+                >
+                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                </multiselect>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.equipment.customer.$error : null">
+                  {{ $trans('Please select a customer') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+          </b-row>
+
+          <b-row v-if="hasBranches && !isEmployee">
+            <b-col cols="12" role="group">
+              <b-form-group
+                label-size="sm"
+                label-class="p-sm-0"
+                v-bind:label="$trans('Search branches')"
+                label-for="equipment_branch_search"
+              >
+                <multiselect
+                  v-if="!isLoading"
+                  id="equipment_branch_search"
+                  track-by="id"
+                  :placeholder="$trans('Type to search')"
+                  open-direction="bottom"
+                  :options="branchesSearch"
+                  :multiple="false"
+                  :loading="isLoading"
+                  :internal-search="false"
+                  :clear-on-select="true"
+                  :close-on-select="true"
+                  :options-limit="30"
+                  :limit="10"
+                  :max-height="600"
+                  :show-no-results="true"
+                  :hide-selected="true"
+                  @search-change="getBranchesDebounced"
+                  @select="selectBranch"
+                  :custom-label="branchLabel"
+                >
+                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                </multiselect>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.equipment.branch.$error : null">
+                  {{ $trans('Please select a branch') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+          </b-row>
+
+          <!-- customer info -->
+          <b-row v-if="customer && !hasBranches">
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Customer')"
+                label-for="equipment_customer_name"
+              >
+                <b-form-input
+                  id="equipment_customer_name"
+                  size="sm"
+                  v-model="customer.name"
+                  readonly
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Address')"
+                label-for="equipment_customer_address"
+              >
+                <b-form-input
+                  id="equipment_customer_address"
+                  size="sm"
+                  v-model="customer.address"
+                  readonly
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('City')"
+                label-for="equipment_customer_city"
+              >
+                <b-form-input
+                  id="equipment_customer_city"
+                  size="sm"
+                  v-model="customer.city"
+                  readonly
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Country')"
+                label-for="equipment_customer_country_code"
+              >
+                <b-form-input
+                  id="equipment_customer_country_code"
+                  size="sm"
+                  v-model="customer.country_code"
+                  readonly
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+
+
+
+          <footer class="modal-footer">
+                <b-button @click="cancelForm" type="button" variant="secondary">
+                  {{ $trans('Cancel') }}</b-button>
+                <b-button @click="submitForm" type="button" variant="primary">
+                  {{ $trans('Submit') }}</b-button>
+                <b-button
+                  @click="submitFormBulk"
+                  type="button"
+                  variant="success"
+                  v-if="isCreate"
+                >
+                  {{ $trans('Bulk') }}
+                </b-button>
+              </footer>
+        </div>
+      </div>
     </div>
   </b-overlay>
 </template>
+
+<style scoped>
+.wide {
+  min-width: 66%;
+  max-width: unset;
+}
+</style>
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
@@ -479,6 +504,7 @@ export default {
   async created() {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
+    this.locations = [] // await locationModel.listForSelect()
 
     if (!this.isCreate) {
       await this.loadData()
@@ -598,7 +624,7 @@ export default {
           this.customer = await customerModel.detail(this.equipment.customer)
           this.locations = await locationModel.listForSelectCustomer(this.customer.id)
         }
-
+        console.log(this.equipment)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)
