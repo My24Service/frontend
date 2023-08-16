@@ -146,7 +146,7 @@
     <!-- docks -->
     <b-nav-item
       v-if="isPlanning"
-      to="/docks"
+      :to="{name: 'docks-mockup'}"
       :active="isActive('docks')"
       >
       <b-icon icon="truck-flatbed" v-if="!isActive('docks')"></b-icon>
@@ -157,7 +157,7 @@
       <router-view name="app-subnav"></router-view>
     </SubNav>
 
-    <!-- webshop -->
+    <!-- BIM / 3D -->
     <b-nav-item
       v-if="isPlanning"
       to="/bim"
@@ -176,7 +176,6 @@
       v-if="isPlanning"
       to="/webshop"
       :active="isActive('webshop')"
-      class="has-children"
       >
       <b-icon icon="basket" v-if="!isActive('webshop')"></b-icon>
       <b-icon icon="basket-fill" v-if="isActive('webshop')"></b-icon>
