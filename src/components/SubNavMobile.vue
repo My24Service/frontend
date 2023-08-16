@@ -1,6 +1,6 @@
 <template>
   <div v-if="isLoaded">
-    <b-nav tabs>
+    <b-nav>
       <b-nav-item
         :active="isActive('dispatch')"
         v-if="hasDispatch"

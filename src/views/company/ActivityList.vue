@@ -1,19 +1,16 @@
 <template>
-  <div class="app-grid">
-
+  <div class="app-page">
+    <header>
+      <h3>{{$trans('Activity')}}</h3>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
       @do-search="handleSearchOk"
     />
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Activity')"
-      />
-
+    <div class="panel overflow-auto">
+      
       <b-table
         id="activity-table"
         small
@@ -46,6 +43,12 @@
           </div>
         </template>
       </b-table>
+
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Activity')"
+      />
     </div>
   </div>
 </template>

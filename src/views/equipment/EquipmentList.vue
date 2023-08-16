@@ -1,28 +1,9 @@
 <template>
-  <div class="app-grid" v-if="!isLoading">
-
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
-
-    <b-modal
-      id="delete-equipment-modal"
-      ref="delete-equipment-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
-    </b-modal>
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Equipment')"
-      />
-
+  <div class="app-page" v-if="!isLoading">
+    <header>
+      <h3>Equipment</h3>
+    </header>
+    <div class="panel overflow-auto">
       <b-table
         id="equipment-table"
         small
@@ -61,17 +42,17 @@
         <template #cell(name)="data">
           <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
             {{ data.item.name }}
-          </router-link><br/>
+          </router-link>
         </template>
         <template #cell(customer)="data">
           <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link><br/>
+          </router-link>
         </template>
         <template #cell(branch)="data">
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link><br/>
+          </router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -87,7 +68,26 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Equipment')"
+      />
     </div>
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <b-modal
+      id="delete-equipment-modal"
+      ref="delete-equipment-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
+    </b-modal>
   </div>
 </template>
 
@@ -147,16 +147,16 @@ export default {
       equipmentObjects: [],
       equipmentFields: [],
       equipmentFieldsCustomerPlanning: [
-        {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Equipment')},
+        {key: 'customer', label: this.$trans('Customer')},
         {key: 'brand', label: this.$trans('Brand')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
       ],
       equipmentFieldsBranchPlanning: [
-        {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Equipment')},
+        {key: 'branch', label: this.$trans('Branch')},
         {key: 'brand', label: this.$trans('Brand')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},

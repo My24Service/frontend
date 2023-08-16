@@ -1,19 +1,18 @@
 <template>
-  <div class="mt-4">
-
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3>Mutations</h3>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
       @do-search="handleSearchOk"
     />
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Mutation')"
-      />
-
+    <div class="panel overflow-auto">
+      
       <b-table
         id="stock-location-table"
         small
@@ -53,6 +52,12 @@
           <span v-html="data.item.summary"></span>
         </template>
       </b-table>
+
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Mutation')"
+      />
     </div>
   </div>
 </template>

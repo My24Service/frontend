@@ -1,17 +1,15 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-grid">
-      <b-row align-h="center">
-        <h2>{{ $trans('Overall statistics')}}</h2>
-        <b-col cols="12">
-          <OrderStats
-            ref="order-stats"
-          />
-        </b-col>
-      </b-row>
+  <div class="app-page">
+    <header>
+      <h3>{{ $trans('Overall statistics')}}</h3>
+    </header>
+    <div class="panel">
+      <OrderStats
+        ref="order-stats"
+      />
     </div>
-
-    <div class="app-grid">
+    
+    <div class="panel app-grid">
       <b-row align-v="center">
         <b-col cols="1">
           <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
@@ -149,7 +147,7 @@
       </b-row>
 
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>

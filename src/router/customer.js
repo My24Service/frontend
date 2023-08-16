@@ -36,7 +36,7 @@ export default [
       path: '/customers/dashboard',
       components: {
         'app-content': CustomerView,
-        // 'app-subnav': {}
+        'app-subnav': SubNavCustomers
       },
       props: {
         'app-content': {},

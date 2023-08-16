@@ -1,117 +1,124 @@
 <template>
-  <div class="app-grid" ref="order-list-not-accepted">
+  <div class="app-page" ref="order-list-not-accepted">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="clipboard"></b-icon>
+          <span>Orders</span>
+        </h3>
 
-    <b-modal
-      id="delete-order-modal"
-      ref="delete-order-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
-    </b-modal>
+        <div class="flex-columns">
+          <b-button-toolbar>
+            <b-button-group>
+              <ButtonLinkRefresh
+                v-bind:method="function() { loadData() }"
+                v-bind:title="$trans('Refresh')"
+              />
+              <ButtonLinkSearch
+                v-bind:method="function() { showSearchModal() }"
+              />
+              <ButtonLinkSort
+                v-bind:method="function() { showSortModal() }"
+              />
+            </b-button-group>
+          </b-button-toolbar>
+          <router-link class="btn button" :to="{name:'order-add'}">
+            <b-icon icon="clipboard-plus"></b-icon>  {{ $trans('Add Order') }}
+          </router-link>
+        </div>
+      </div>
+    </header>
 
-    <b-modal
-      id="sort-modal"
-      ref="sort-modal"
-      v-bind:title="$trans('Sort')"
-      @ok="doSort"
-    >
-      <form ref="sort-form">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <div>
-                <b-form-group :label="$trans('Sort')">
-                  <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
-                  <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
-                </b-form-group>
-              </div>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+    <div class="app-detail">
+      <b-modal
+        id="delete-order-modal"
+        ref="delete-order-modal"
+        v-bind:title="$trans('Delete?')"
+        @ok="doDelete"
+      >
+        <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
+      </b-modal>
 
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
+      <b-modal
+        id="sort-modal"
+        ref="sort-modal"
+        v-bind:title="$trans('Sort')"
+        @ok="doSort"
+      >
+        <form ref="sort-form">
+          <b-container fluid>
+            <b-row role="group">
+              <b-col size="12">
+                <div>
+                  <b-form-group :label="$trans('Sort')">
+                    <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
+                    <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
+                  </b-form-group>
+                </div>
+              </b-col>
+            </b-row>
+          </b-container>
+        </form>
+      </b-modal>
 
-    <OrderFilters
-      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
-      @set-filter="setStatusFilter"
-      @remove-filter="removeStatusFilter"
-    />
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Order')"
+      <SearchModal
+        id="search-modal"
+        ref="search-modal"
+        @do-search="handleSearchOk"
       />
 
-      <b-table
-        id="order-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="orders"
-        responsive="md"
-        class="data-table"
-        v-bind:tbody-tr-attr="rowStyle"
-      >
-        <template #head(id)="">
-          <span class="text-info">{{ $trans('Order') }}</span>
-        </template>
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="order-add"
-                  v-bind:title="$trans('New order')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-                <ButtonLinkSort
-                  v-bind:method="function() { showSortModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(id)="data">
-          <OrderTableInfo
-            v-bind:order="data.item"
-          />
-        </template>
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkEdit
-              v-if="!data.item.customer_order_accepted"
-              router_name="order-edit"
-              v-bind:router_params="{pk: data.item.id, unaccepted: true}"
-              v-bind:title="$trans('Edit')"
+      <OrderFilters
+        :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+        @set-filter="setStatusFilter"
+        @remove-filter="removeStatusFilter"
+      />
+
+      <div class="overflow-auto">
+        <div class="flex-columns">
+           
+          <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
+          <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+          <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
+          <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
+          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
+        </div>
+
+        <hr/>
+
+        <ul class="listing">
+          <li><!-- FIXME -->
+            <div class="headings">
+              <span class="order-id"></span>
+              <span class="order-type">type</span>
+              <span class="order-company-name">company</span>
+              <span class="order-due-date">due date</span>
+              <span class="order-assignees">people</span>
+              <span class="order-status">status</span>
+            </div>
+          </li>
+          
+          <li v-if="isLoading" class="text-center my-2">
+            <b-spinner class="align-middle"></b-spinner><br>
+            <strong>{{ $trans('loading orders') }}</strong>
+          </li>
+          
+          <li v-for="order in orders" :key="order.id">
+            <OrderTableInfo
+            v-bind:order="order"
             />
             <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-            />
-          </div>
-        </template>
-      </b-table>
+                v-bind:title="$trans('Delete')"
+                v-bind:method="function() { showDeleteModal(data.item.id) }"
+              />
+          </li>
+        </ul>
+
+        <Pagination
+          v-if="!isLoading"
+          :model="this.model"
+          :model_name="$trans('Order')"
+        />
+      </div>
     </div>
   </div>
 </template>

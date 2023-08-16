@@ -1,6 +1,8 @@
 <template>
-  <div class="app-grid" v-if="!isLoading">
-
+  <div class="app-page" v-if="!isLoading">
+    <header>
+      <h3>Maintenance Contracts</h3>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -16,12 +18,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance contract?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Contract')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="maintenance-contract-table"
@@ -96,6 +93,12 @@
           </div>
         </template>
       </b-table>
+      
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Contract')"
+      />
     </div>
   </div>
 </template>

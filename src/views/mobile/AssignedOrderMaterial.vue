@@ -1,221 +1,226 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <b-modal
-      id="delete-assignedorder-material-modal"
-      ref="delete-assignedorder-material-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this material?') }}</p>
-    </b-modal>
-
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="!editMode">{{ $trans('Register material') }}</h2>
-        <h2 v-if="editMode">{{ $trans('Edit material') }}</h2>
-        <b-row v-if="!editMode">
-          <b-col cols="6" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Search assigned orders')"
-              label-for="assignedorder-search"
-            >
-              <multiselect
-                id="assignedorder-search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="assignedOrders"
-                :multiple="false"
-                :internal-search="false"
-                :clear-on-select="false"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                :hide-selected="true"
-                @search-change="getAssignedOrdersDebounced"
-                @select="selectAssignedOrder"
-                :custom-label="assignedOrderLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-          <b-col cols="6" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Assigned order')"
-              label-for="assignedorder-material-order-info"
-            >
-              <b-form-input
-                v-model="selectedAssignedOrderInfo"
-                id="assignedorder-material-order-info"
-                size="sm"
-                readonly
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.selectedAssignedOrderPk.$error : null">
-                {{ $trans('Please select an order') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="6" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Search location')"
-              label-for="assignedorder-material-location-search"
-            >
-              <multiselect
-                id="assignedorder-material-location-search"
-                track-by="id"
-                open-direction="bottom"
-                :options="locations"
-                :multiple="false"
-                :searchable="false"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                @select="selectLocation"
-                :custom-label="locationLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-          <b-col cols="6" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Location')"
-              label-for="assignedorder-material-location-name"
-            >
-              <b-form-input
-                v-model="selectedLocationName"
-                id="assignedorder-material-location-name"
-                size="sm"
-                readonly
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.selectedLocationPk.$error : null">
-                {{ $trans('Please select a location') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="6" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Search material')"
-              label-for="move-material-purchase-order-material-search"
-            >
-              <multiselect
-                id="move-material-purchase-order-material-search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="materials"
-                :multiple="false"
-                :internal-search="false"
-                :clear-on-select="false"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                :hide-selected="true"
-                @search-change="getMaterials"
-                @select="selectMaterial"
-                :custom-label="materialLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Material')"
-              label-for="move-material-material-name"
-            >
-              <b-form-input
-                v-model="selectedMaterialName"
-                id="move-material-material-name"
-                size="sm"
-                readonly
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
-                {{ $trans('Please select a material') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Amount')"
-              label-for="assignedorder-material-amount"
-            >
-              <b-form-input
-                v-model="amount"
-                id="assignedorder-material-amount"
-                size="sm"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.amount.$error : null">
-                {{ $trans('Please enter an amount') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelEdit" v-if="editMode" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ editMode ? $trans('Update') : $trans('Submit') }}
-            </b-button>
-          </footer>
-        </div>
-      </b-form>
-
-      <b-table
-        id="assignedorder-material-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="assignedOrderMaterials"
-        responsive="md"
-        class="data-table"
+    <div class="app-page">
+      <header>
+        <h3>Materials</h3>
+      </header>
+      <b-modal
+        id="delete-assignedorder-material-modal"
+        ref="delete-assignedorder-material-modal"
+        v-bind:title="$trans('Delete?')"
+        @ok="doDelete"
       >
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkEdit
-              v-bind:method="function() { loadAssignedOrderMaterial(data.item.id) }"
-              v-bind:title="$trans('Edit')"
-            />
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-            />
-          </div>
-        </template>
-      </b-table>
-    </div>
+        <p class="my-4">{{ $trans('Are you sure you want to delete this material?') }}</p>
+      </b-modal>
 
+
+      <div class="panel">
+        <b-form>
+          <h2 v-if="!editMode">{{ $trans('Register material') }}</h2>
+          <h2 v-if="editMode">{{ $trans('Edit material') }}</h2>
+          <b-row v-if="!editMode">
+            <b-col cols="6" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Search assigned orders')"
+                label-for="assignedorder-search"
+              >
+                <multiselect
+                  id="assignedorder-search"
+                  track-by="id"
+                  :placeholder="$trans('Type to search')"
+                  open-direction="bottom"
+                  :options="assignedOrders"
+                  :multiple="false"
+                  :internal-search="false"
+                  :clear-on-select="false"
+                  :close-on-select="true"
+                  :options-limit="30"
+                  :limit="10"
+                  :max-height="600"
+                  :show-no-results="false"
+                  :hide-selected="true"
+                  @search-change="getAssignedOrdersDebounced"
+                  @select="selectAssignedOrder"
+                  :custom-label="assignedOrderLabel"
+                >
+                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                </multiselect>
+              </b-form-group>
+            </b-col>
+            <b-col cols="6" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Assigned order')"
+                label-for="assignedorder-material-order-info"
+              >
+                <b-form-input
+                  v-model="selectedAssignedOrderInfo"
+                  id="assignedorder-material-order-info"
+                  size="sm"
+                  readonly
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.selectedAssignedOrderPk.$error : null">
+                  {{ $trans('Please select an order') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="6" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Search location')"
+                label-for="assignedorder-material-location-search"
+              >
+                <multiselect
+                  id="assignedorder-material-location-search"
+                  track-by="id"
+                  open-direction="bottom"
+                  :options="locations"
+                  :multiple="false"
+                  :searchable="false"
+                  :close-on-select="true"
+                  :options-limit="30"
+                  :limit="10"
+                  :max-height="600"
+                  :show-no-results="false"
+                  @select="selectLocation"
+                  :custom-label="locationLabel"
+                >
+                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                </multiselect>
+              </b-form-group>
+            </b-col>
+            <b-col cols="6" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Location')"
+                label-for="assignedorder-material-location-name"
+              >
+                <b-form-input
+                  v-model="selectedLocationName"
+                  id="assignedorder-material-location-name"
+                  size="sm"
+                  readonly
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.selectedLocationPk.$error : null">
+                  {{ $trans('Please select a location') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="6" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Search material')"
+                label-for="move-material-purchase-order-material-search"
+              >
+                <multiselect
+                  id="move-material-purchase-order-material-search"
+                  track-by="id"
+                  :placeholder="$trans('Type to search')"
+                  open-direction="bottom"
+                  :options="materials"
+                  :multiple="false"
+                  :internal-search="false"
+                  :clear-on-select="false"
+                  :close-on-select="true"
+                  :options-limit="30"
+                  :limit="10"
+                  :max-height="600"
+                  :show-no-results="false"
+                  :hide-selected="true"
+                  @search-change="getMaterials"
+                  @select="selectMaterial"
+                  :custom-label="materialLabel"
+                >
+                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                </multiselect>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Material')"
+                label-for="move-material-material-name"
+              >
+                <b-form-input
+                  v-model="selectedMaterialName"
+                  id="move-material-material-name"
+                  size="sm"
+                  readonly
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
+                  {{ $trans('Please select a material') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Amount')"
+                label-for="assignedorder-material-amount"
+              >
+                <b-form-input
+                  v-model="amount"
+                  id="assignedorder-material-amount"
+                  size="sm"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.amount.$error : null">
+                  {{ $trans('Please enter an amount') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+          </b-row>
+
+          <div class="mx-auto">
+            <footer class="modal-footer">
+              <b-button @click="cancelEdit" v-if="editMode" class="btn btn-primary" type="button" variant="primary">
+                {{ $trans('Cancel') }}
+              </b-button>
+              <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+                {{ editMode ? $trans('Update') : $trans('Submit') }}
+              </b-button>
+            </footer>
+          </div>
+        </b-form>
+
+        <b-table
+          id="assignedorder-material-table"
+          small
+          :busy='isLoading'
+          :fields="fields"
+          :items="assignedOrderMaterials"
+          responsive="md"
+          class="data-table"
+        >
+          <template #table-busy>
+            <div class="text-center text-danger my-2">
+              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+              <strong>{{ $trans('Loading...') }}</strong>
+            </div>
+          </template>
+          <template #cell(icons)="data">
+            <div class="h2 float-right">
+              <IconLinkEdit
+                v-bind:method="function() { loadAssignedOrderMaterial(data.item.id) }"
+                v-bind:title="$trans('Edit')"
+              />
+              <IconLinkDelete
+                v-bind:title="$trans('Delete')"
+                v-bind:method="function() { showDeleteModal(data.item.id) }"
+              />
+            </div>
+          </template>
+        </b-table>
+      </div>
+    </div>
   </b-overlay>
 </template>
 

@@ -53,26 +53,316 @@
   color: $normal-link !important
 }
 
-.navbar-light .navbar-nav .nav-link.active, .navbar-light .navbar-nav {
+.navbar-light .navbar-nav .nav-link.active, 
+.navbar-light .navbar-nav {
   color: $active-link !important
 }
 
-.main-app-container {
-  margin-top: 70px;
+#app-layout {
+  height: 100vh;
+  width: 100%;
+  padding-left: 240px;
+}
+
+.main-menu {
+  background-color: white;
+  box-shadow: 1px 0px #f2f2f2;
+  width: 240px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  overflow-y: auto;
+  display: flex;
+  
+
+  nav {
+    position: sticky;
+    top:0;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    flex-grow: 1;
+
+    .nav-items {
+      overflow: auto;
+      padding: 0 1rem;
+    }
+
+    .b-nav-dropdown {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 0 1rem;
+    }
+    .nav {
+      flex-direction: column;
+    }
+
+    
+
+  }
+
+  li {
+    list-style: none;
+    
+    a {
+      border-radius: .5ex;
+      color: #232c2fa0;
+      display: flex;
+      gap: 1ex;
+      align-items: center;
+      position: relative;
+      transition: all .2s;
+      &.active {
+        font-weight: bold;
+      }
+      
+      &.router-link-active {
+        font-weight: bold;
+        color: #232c2fd9;
+      }
+
+    }
+    &.has-children a::after {
+        content: '›';
+        position: absolute;
+        right: 1ex;
+    }
+  }
+
+  .page-subnav {
+    padding-inline-start: 1.6rem;
+    transform: translateY(0);
+    opacity: .5;
+    animation: fade .5s .05s cubic-bezier(0.075, 0.82, 0.165, 1) both;
+  }
+
+  @keyframes fade {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .nav-items > li > a.active {
+    background: #f6f9fc;
+  }
+}
+
+.app-page {
+  padding: 0;
+  height: 100vh;
+  overflow-y: scroll;
+
+  > header {
+    margin: 0 0rem -2rem;
+    padding: 2rem 1rem 4rem;
+    background: var(--primary);
+    color: white;
+    position: sticky;
+    top: 0;
+
+    .page-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      h3 {
+        display: flex;
+        font-weight: normal;
+        gap: .5ex;
+        a {
+          color: white;
+        }
+      }
+    }
+
+    .flex-columns {
+      align-items: center;
+    }
+
+    .button {
+      background-color: white;
+      color: $my24;
+    }
+  }
+
+  > header ~ div.panel,
+  > header ~ div.page-detail {
+    margin: 0 1rem 5rem !important;
+  }
+
+}
+
+.navbar-brand {
+  padding: 0;
+  margin: 0 auto 1rem !important;
+  margin-right: auto!important;
+  display: block;
+  text-align: center;
 }
 
 /* main app layouts */
-.app-grid, .app-detail, .app-form {
-  margin-top: 24px;
-}
 
-.app-grid {
-}
-
-.app-detail {
+.app-detail, .panel {
   @extend .mx-auto;
-  @extend .bg-light;
   @extend .p-4;
+  background: white;
+  border-radius: .5ex;
+  box-shadow: 0 1ex 1rem #394b5923;
+  position: relative;
+  --text-color: #757a7c;
+  color: var(--text-color);
+}
+
+
+/* app ui components / blocks */
+
+.panel h6 {
+  text-transform: uppercase;
+  color: #232c2f;
+}
+
+.flex-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 2ex;
+  &.wrap {
+    flex-wrap: wrap;
+  }
+  > div {
+    flex-grow: 1;
+    &.panel {
+      max-width: 33%;
+      margin-top: 0;
+    }
+  }
+}
+
+.flex-stack > .panel + .panel {
+  margin-top: 1rem;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  line-height: 2.4rem;
+  font-size: .8rem;
+  dt {
+    margin: 0;
+  }
+  dd {
+    margin: 0;
+  }
+}
+
+ul.listing {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  
+  &.order-list {
+    li > .listing-item,
+    li > .headings {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+  }
+
+  li {
+    line-height: 2.4rem;
+    box-shadow: 0px 1px #f2f3f4;
+
+
+    > .listing-item,
+    .headings {
+      display: flex;
+      justify-content: space-between;
+      text-align: initial;
+      gap: 1rem;
+      padding-inline: 1ex;
+      color:var(--text-color);
+      text-decoration: none!important;
+
+      > * {
+        text-wrap: nowrap;
+        font-size: .8rem;
+        text-overflow: ellipsis;
+        transition: all .3s;
+
+        select {
+          border-color: transparent;
+          max-width: 9rem;
+          font-size: .7rem;
+          &:hover, 
+          &:focus {
+            border-color: #0003 !important;
+          }
+        }
+      }
+
+      strong {
+        color: #323435;
+      }
+
+      .order-id {
+        color: lighten(#757a7c, 20%);
+        text-align: end;
+        width: 5rem;
+      }
+      .order-type {
+        width: 10rem;
+      }
+      .order-company-name {
+        width: 7rem;
+      }
+      .order-start-date {
+        width: 9rem;
+      }
+      .order-due-date,
+      .order-assignees,
+      .order-status {
+        min-width: 10rem;
+      }
+    }
+
+    .headings {
+      text-transform: uppercase;
+      font-size: xx-small;
+      letter-spacing: 1px;
+    }
+    
+    > .listing-item:hover {
+      background: #f6f9fc;
+      > * {
+        color: #323435;
+      }
+    }
+    
+  }
+}
+
+.my24-pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.filter-item {
+  padding: 0 1.2ex;
+  border-radius: 2rem;
+  text-decoration: none !important;
+  transition: background .1s;
+  &:hover {
+    background-color: lighten($my24, 30%) !important;
+  }
+  &.router-link-active {
+    font-weight: bold;
+    color: white!important;
+    background-color: lighten($my24, 5%) !important;
+  }
 }
 
 .app-form {
@@ -81,33 +371,9 @@
   @extend .p-md-2;
 }
 
-.page-subnav {
-  margin-top: -20px;
-}
-
-.main-app-container .page-subnav {
-  padding-bottom: 8px;
-  padding-left: 168px;
-  margin-top: -48px;
-  width: 100%;
-  font-size: 12px;
-}
-
 .carousel-item img {
   width: 640px !important;
   height: 480px !important;
-}
-
-.navbar-nav {
-  margin-left: 145px;
-}
-
-.subnav-pills {
-  margin-top: 20px;
-}
-
-.data-table {
-  font-size: 12px;
 }
 
 .data-table table thead tr:first-child {

@@ -1,36 +1,31 @@
 <template>
-  <div class="app-grid">
-
+  <div class="app-page">
+    <header></header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
       @do-search="handleSearchOk"
     />
 
-    <b-row>
-      <b-col cols="2">
-        <b-link class="px-1" @click.prevent="backMonth" v-bind:title="$trans('Month back')">
-          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
-      </b-col>
-      <b-col cols="8">
-        {{ $trans('Assigned finished') }} {{ monthText}} {{ year }}
-      </b-col>
-      <b-col cols="2">
-        <div class="float-right">
-          <b-link class="px-1" @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
-            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+    <div class="panel overflow-auto">
+      <b-row>
+        <b-col cols="2">
+          <b-link class="px-1" @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
           </b-link>
-        </div>
-      </b-col>
-    </b-row>
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Order')"
-      />
+        </b-col>
+        <b-col cols="8">
+          {{ $trans('Assigned finished') }} {{ monthText}} {{ year }}
+        </b-col>
+        <b-col cols="2">
+          <div class="float-right">
+            <b-link class="px-1" @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            </b-link>
+          </div>
+        </b-col>
+      </b-row>
+      
       <b-table
         id="assigned-finished-table"
         small
@@ -71,6 +66,12 @@
           {{ data.item.engineer.user.first_name }} {{ data.item.engineer.user.last_name }}
         </template>
       </b-table>
+
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Order')"
+      />
     </div>
   </div>
 </template>

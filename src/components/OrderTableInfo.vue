@@ -1,147 +1,77 @@
 <template>
-  <b-container v-if="isLoaded">
-    <b-row v-if="!order.orderlines.length && !hasInfolines">
-      <b-col>
-        {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
-          {{ order.order_id }}
-        </router-link><br/>
-        <span v-if="!hasBranches">
-          {{ $trans('Customer ID') }}: {{ order.customer_id }}<br/>
-        </span>
-        {{ order.order_name }}<br/>
-        {{ order.order_address }}<br/>
-        {{ order.order_country_code }}-{{ order.order_postal }} {{ order.order_city }}<br/>
-        <br/>
-        <p>
-          {{ $trans('Order type') }}: <b>{{ order.order_type }}</b><br/>
-          {{ $trans('Order reference') }}: <b>{{ order.order_reference }}</b>
-        </p>
-      </b-col>
-      <b-col>
-        <span v-if="order.order_contact">{{ $trans('Contact') }}: {{ order.order_contact }}<br/></span>
-        <span v-if="order.order_mobile">{{ $trans('Mobile') }}: {{ order.order_mobile }}<br/></span>
-        <span v-if="order.order_tel">{{ $trans('Tel.') }}: {{ order.order_tel }}<br/></span>
-        <span v-if="order.order_email">{{ $trans('Email') }}: <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/></span>
-        {{ $trans('Date') }}: {{ order.order_date }}<br/>
-        {{ $trans('Created') }}: {{ order.created }}
+  <div class="listing-item">
+    <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-id">
+        #{{ order.order_id }}
+    </router-link>
+    <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-type">
+      <strong>{{ order.order_type }}</strong>
+    </router-link>
+    
+    <span class="order-company-name">{{ order.order_name }}</span>
+    
+    <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
+      {{ order.start_date }} 
+      <b v-if="order.start_time !== null" :title="order.start_time"><b-icon icon="clock"></b-icon></b>
+    </span>
 
-        <p v-if="memberType === 'temps'">
-          {{ $trans('Required users') }}: {{ order.required_users }}<br/>
-          {{ $trans('Users set available') }}: {{ order.user_order_available_set_count }}<br/>
-          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
-        </p>
-        <p v-if="memberType === 'maintenance'">
-          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
-        </p>
-      </b-col>
-    </b-row>
-    <b-row v-if="order.orderlines.length || hasInfolines" >
-      <b-col>
-        {{ $trans('Order') }}: <router-link :to="{name: 'order-view', params: {pk: order.id}}">
-          {{ order.order_id }}
-        </router-link><br/>
-        <span v-if="!hasBranches">
-          {{ $trans('Customer ID') }}: {{ order.customer_id }}<br/>
-        </span>
-        {{ order.order_name }}<br/>
-        {{ order.order_address }}<br/>
-        {{ order.order_country_code }}-{{ order.order_postal }} {{ order.order_city }}<br/>
-        <br/>
-        <p>
-          {{ $trans('Order type') }}: <b>{{ order.order_type }}</b><br/>
-          {{ $trans('Order reference') }}: <b>{{ order.order_reference }}</b>
-          <span v-if="order.remarks">
-            <br/>
-            {{ $trans('Remarks') }}: <b>{{ order.remarks }}</b>
+      <!-- fixme -->
+      <span v-if="memberType === 'maintenance'" class="order-assignees">
+        <span v-if="order.assigned_count" :title="`assignees: ${order.required_assigned}`">
+          {{ $trans('Assigned to') }} {{ order.assigned_count }} 
+          <span v-if="order.assigned_count > 1">
+            <span v-if="order.required_users"> / {{ order.required_users }}</span>
+            people
           </span>
-        </p>
-
-        <span v-if="order.order_contact">{{ $trans('Contact') }}: {{ order.order_contact }}<br/></span>
-        <span v-if="order.order_mobile">{{ $trans('Mobile') }}: {{ order.order_mobile }}<br/></span>
-        <span v-if="order.order_tel">{{ $trans('Tel.') }}: {{ order.order_tel }}<br/></span>
-        <span v-if="order.order_email">{{ $trans('Email') }}: <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/></span>
-        {{ $trans('Date') }}: {{ order.order_date }}<br/>
-        {{ $trans('Created') }}: {{ order.created }}<br/>
-
-        <p v-if="memberType === 'temps'">
-          {{ $trans('Required users') }}: {{ order.required_users }}<br/>
-          {{ $trans('Users set available') }}: {{ order.user_order_available_set_count }}<br/>
-          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
-        </p>
-        <p v-if="memberType === 'maintenance'">
-          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
-          {{ $trans('Used materials') }}: {{ order.materials.length }}<br/>
-        </p>
-      </b-col>
-      <b-col>
-        <b-table v-if="order.orderlines.length" dark borderless small :fields="orderLineFields" :items="order.orderlines" responsive="sm"></b-table>
-        <b-table
-          v-if="!isCustomer && !hasBranches && order.infolines.length"
-          dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"
-        ></b-table>
-      </b-col>
-    </b-row>
-    <b-row v-if="order.workorder_pdf_url || order.workorder_pdf_url_partner">
-      <b-col cols="6">
-        <p v-if="order.workorder_pdf_url">
-          {{ $trans('Workorder PDF') }}
-          <b-link :href="order.workorder_pdf_url" target="_blank">
-            {{ $trans('Order') }} {{ order.order_id }}
-          </b-link>
-        </p>
-        <p v-if="order.workorder_pdf_url_partner">
-          {{ $trans('Workorder PDF partner') }}
-          <b-link :href="order.workorder_pdf_url_partner" target="_blank">
-            {{ $trans('Order') }} {{ order.order_id }}
-          </b-link>
-        </p>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="12" v-if="order.customer_remarks && order.customer_remarks != ''">
-        {{ $trans('Customer remarks') }}: {{ order.customer_remarks }}
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="12">
-        <h6>
-          <b-badge>{{ $trans('Status') }}</b-badge>
-          <span v-if="order.last_status_full" class="info">{{ order.last_status_full }}</span>
-          <span v-if="!order.last_status_full" class="info">{{ order.last_status.created }} {{ order.last_status.status }}</span>
-        </h6>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="12" v-if="order.documents.length > 0">
-        <h5 class="my-2">{{ $trans('Documents') }}</h5>
-        <p v-for="item in order.documents" :key="item.filename">
-          <b-link v-bind:href="item.url" target="_blank">
-            {{ item.name }} <b-icon-download font-scale=".8"></b-icon-download>
-          </b-link>
-        </p>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col v-if="order.workorder_documents.length > 0" cols="12">
-        <h5 class="my-2">{{ $trans('Workorder documents') }}</h5>
-        <p v-for="item in order.workorder_documents" :key="item.filename">
-          <b-link v-bind:href="item.url" target="_blank">
-            {{ item.name }} <b-icon-download font-scale=".8"></b-icon-download>
-          </b-link>
-        </p>
-      </b-col>
-    </b-row>
-  </b-container>
+          <span v-else>person</span>
+        </span>
+        <span v-else title="Not assigned to anyone">&ndash;</span>
+      </span>
+      <span>
+        <span v-if="order.documents.length">
+          <b-icon icon="paperclip"></b-icon>
+        </span>
+        <router-link v-if="isLoaded && order.documents.length" :to="{name: 'order-documents', params: {orderPk: order.id}}" class="order-type">
+          {{ order.documents.length && order.documents.length }} document{{ order.documents.length == 1 ? '' : 's' }}
+        </router-link>
+        <span v-else>&ndash;</span>
+      </span>
+      <span class="order-status">
+        <b-icon icon="circle-fill" v-bind:style="`color:${this.orderStatusColorCode}`" :title="order.last_status_full"></b-icon>
+        <b-form-select
+          :title="this.orderStatusCode.statuscode"
+          :id="order.id + '-change-status'"
+          v-model="orderStatusCode"
+          :options="statuscodes"
+          size="sm"
+          value-field="statuscode"
+          text-field="statuscode"
+          style="border-color: transparent;"
+          @change="handleStatusChange(order.id, $event)"
+        ></b-form-select>
+      </span>
+  </div>
 </template>
 
+<style scope>
+.order-status {
+  display: flex;
+  gap: 1ex;
+  align-items: center;
+}
+</style>
+
 <script>
+import my24 from '../services/my24.js'
 import { componentMixin } from '../utils.js'
+import statusModel from '@/models/orders/Status.js'
 
 export default {
   mixins: [componentMixin],
   async created() {
     this.memberType = await this.$store.dispatch('getMemberType')
-    this.isLoaded = true
+    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.isLoaded = true;
+    this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
   },
   computed: {
     hasInfolines() {
@@ -150,12 +80,19 @@ export default {
       }
 
       return this.order.infolines.length > 0
-    }
+    },
+    orderStatusCode() {
+      let statusCode = my24.getStatuscode(this.statuscodes, this.order.last_status);
+      return statusCode.statuscode;
+    },
+
   },
   data() {
     return {
       isLoaded: false,
       memberType: null,
+      orderStatus: this.order.last_status,
+      orderStatusColorCode: '#666',
       orderLineFields: [
         { key: 'product', label: this.$trans('Product'), thAttr: {width: '25%'} },
         { key: 'location', label: this.$trans('Location'), thAttr: {width: '25%'} },
@@ -175,11 +112,26 @@ export default {
       type: [Object],
       required: true
     }
+  }, 
+  methods: {
+    handleStatusChange(id, value) {
+      this.changeStatus(id, value);
+      this.orderStatusColorCode = my24.status2color(this.statuscodes, value);
+    },
+    async changeStatus(id, value) {
+      const status = {
+        order: id,
+        status: value
+      }
+
+      try {
+        await statusModel.insert(status)
+      } catch(error) {
+        console.log('Error creating status', error)
+        this.errorToast(this.$trans('Error creating status'))
+      }
+    }
   }
 }
 </script>
-<style scoped>
-  span.info {
-    padding-left: 6px;
-  }
-</style>
+

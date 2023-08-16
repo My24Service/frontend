@@ -1,5 +1,4 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
     <div class="app-detail">
       <h3>{{ $trans('Order info') }}</h3>
       <b-row>
@@ -113,12 +112,7 @@
           </b-link>
         </b-col>
       </b-row>
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
     </div>
-  </b-overlay>
 </template>
 
 <script>
@@ -147,9 +141,6 @@ export default {
     },
   },
   methods: {
-    goBack() {
-      this.$router.go(-1)
-    },
     async loadOrder() {
       this.isLoading = true
 

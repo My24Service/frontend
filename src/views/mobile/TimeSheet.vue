@@ -1,21 +1,25 @@
 <template>
-  <div class="app-grid">
-    <UserHoursData
-      ref="user-hours-data"
-      detail_route_name="mobile-timesheet-detail"
-    />
+  <div class="app-page">
+    <header>
+      <h3>Timesheets</h3>
+    </header>
+    <div class="panel">
+      <UserHoursData
+        ref="user-hours-data"
+        detail_route_name="mobile-timesheet-detail"
+      />
 
-    <b-table
-      id="timesheet-material-table"
-      small
-      :busy='isLoading'
-      :fields="materialFields"
-      :items="materials"
-      responsive="md"
-      class="data-table"
-    >
-    </b-table>
-
+      <b-table
+        id="timesheet-material-table"
+        small
+        :busy='isLoading'
+        :fields="materialFields"
+        :items="materials"
+        responsive="md"
+        class="data-table"
+      >
+      </b-table>
+    </div>
   </div>
 </template>
 

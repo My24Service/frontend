@@ -1,5 +1,8 @@
 <template>
-  <div class="mt-4">
+  <div class="app-page">
+    <header>
+      <h3>Entries</h3>
+    </header>
 
     <SearchModal
       id="search-modal"
@@ -16,13 +19,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this entry?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Entry')"
-      />
-
+    <div class="panel overflow-auto">
       <b-table
         id="purchaseorder-entry-table"
         small
@@ -72,6 +69,11 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Entry')"
+      />
     </div>
   </div>
 </template>

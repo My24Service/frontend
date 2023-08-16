@@ -1,28 +1,10 @@
 <template>
-  <div class="mt-4 app-grid">
+  <div class="app-page">
+    <header>
+      <h3>Locations</h3>
+    </header>
 
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
-
-    <b-modal
-      id="delete-location-modal"
-      ref="delete-location-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this location?') }}</p>
-    </b-modal>
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Location')"
-      />
-
+    <div class="panel overflow-auto">
       <b-table
         id="location-table"
         small
@@ -87,7 +69,26 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Location')"
+      />
     </div>
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <b-modal
+      id="delete-location-modal"
+      ref="delete-location-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this location?') }}</p>
+    </b-modal>
   </div>
 </template>
 
@@ -144,15 +145,15 @@ export default {
       isLoading: false,
       locations: [],
       fieldsCustomerPlanning: [
-        {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'customer', label: this.$trans('Customer')},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchPlanning: [
-        {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'branch', label: this.$trans('Branch')},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons'}

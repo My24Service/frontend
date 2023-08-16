@@ -1,5 +1,9 @@
-<template xmlns="http://www.w3.org/1999/html">
-  <div class="mt-4">
+<template>
+  
+  <div class="app-page">
+    <header>
+      <h3>Reservations</h3>
+    </header>
 
     <SearchModal
       id="search-modal"
@@ -16,12 +20,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this reservation?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Reservation')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="supplier-reservation-table"
@@ -97,6 +96,11 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Reservation')"
+      />
     </div>
   </div>
 </template>

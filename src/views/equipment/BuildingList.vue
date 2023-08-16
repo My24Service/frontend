@@ -1,6 +1,10 @@
 <template>
-  <div class="mt-4 app-grid">
-
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3>Buildings</h3>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -16,7 +20,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this building?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
+    <div class="panel overflow-auto">
       <Pagination
         v-if="!isLoading"
         :model="this.model"

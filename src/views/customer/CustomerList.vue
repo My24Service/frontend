@@ -1,12 +1,11 @@
 <template>
-  <div class="app-grid">
-
+  <div class="app-page">
     <SearchModal
       id="search-modal"
       ref="search-modal"
       @do-search="handleSearchOk"
     />
-
+  
     <b-modal
       id="delete-customer-modal"
       ref="delete-customer-modal"
@@ -16,13 +15,17 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this customer?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Customer')"
-      />
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="building"></b-icon> Customers
+        </h3>
+      </div>
+    </header>
+    
 
+    <div class="app-detail panel overflow-auto">
+      
       <b-table
         id="customer-table"
         small
@@ -58,7 +61,7 @@
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
@@ -144,6 +147,11 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Customer')"
+      />
     </div>
   </div>
 </template>

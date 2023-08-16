@@ -11,7 +11,9 @@ import inventory from './inventory'
 import company from './company'
 import member from './member'
 import account from './account'
+import budget from './budget'
 import catchall from './catchall'
+import docks from './docks'
 import {AUTH_LEVELS} from "../constants";
 import {getIsLoggedIn, getUserAuthLevel, hasAccessRouteAuthLevel} from "../utils";
 
@@ -29,7 +31,9 @@ const routes = [
   ...company,
   ...member,
   ...account,
+  ...budget,
   ...catchall,
+  ...docks,
 ]
 
 const router = new VueRouter({

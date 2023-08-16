@@ -1,16 +1,16 @@
 <template>
-  <div class="app-page">
-    <h1><b-icon icon="cone-striped"></b-icon></h1>
-    <div class="panel no-access">
-      <h3>{{ $trans('Page not found') }}</h3>
-      <p align="center">{{ $trans('The requested page could not be found') }}</p>
+    <div class="app-page">
+      <h1><b-icon icon="truck"></b-icon></h1>
+      <div class="panel coming-soon">
+        <h3>{{ $trans('Coming Soon') }}</h3>
+        <p align="center">{{ $trans('This section of the app is under construction') }}</p>
+      </div>
     </div>
-  </div>
 </template>
 
 <script>
 export default {
-  name: 'NotFound',
+  name: 'ComingSoon',
 }
 </script>
 
@@ -21,7 +21,7 @@ h1 {
   padding-block: 3rem 1rem;
   font-size: 5rem;
 }
-.no-access {
+.coming-soon {
     padding: 3rem!important;
     text-align: center;
     margin: 3rem auto!important;

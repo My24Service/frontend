@@ -1,18 +1,17 @@
 <template>
   <div ref='index-layout'>
-    <TheNav />
-
-    <div class="container main-app-container">
-      <TheIndex />
-    </div>
+    <TheNav v-if="isLoggedIn"/>
+    <TheIndex />
   </div>
 </template>
 
 <script>
 import TheNav from './TheNav.vue'
 import TheIndex from './TheIndex.vue'
+import { componentMixin } from '@/utils.js'
 
 export default {
+  mixins: [componentMixin],
   components: {
     TheNav,
     TheIndex

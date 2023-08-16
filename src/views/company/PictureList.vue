@@ -1,5 +1,8 @@
 <template>
-  <div class="mt-4">
+  <div class="app-page">
+    <header>
+      <h3>{{  $trans('Pictures') }}</h3>
+    </header>
 
     <SearchModal
       id="search-modal"
@@ -16,12 +19,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this picture?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Picture')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="picture-table"
@@ -75,6 +73,12 @@
           </div>
         </template>
       </b-table>
+
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Picture')"
+      />
     </div>
   </div>
 </template>
