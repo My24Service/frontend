@@ -1,6 +1,17 @@
 import BaseModel from '@/models/base'
 
 
+class InvoiceLineModel {
+  id
+  invoice
+  description
+  amount
+  vat
+  price
+  price_currency
+}
+
+
 class InvoiceLine extends BaseModel {
   fields = {
     id: null,
@@ -21,3 +32,5 @@ class InvoiceLine extends BaseModel {
 }
 
 export default new InvoiceLine()
+
+export { InvoiceLineModel }

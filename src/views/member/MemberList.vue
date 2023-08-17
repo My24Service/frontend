@@ -51,7 +51,7 @@
           </div>
         </template>
         <template #cell(member_logo)="data">
-          <img :src="data.item.companylogo" width="100" alt=""/>
+          <img :src="data.item.companylogo_url" width="100" alt=""/>
         </template>
         <template #cell(member_info)="data">
           {{ $trans('Companycode') }}: {{ data.item.companycode }} <span v-if="!data.item.is_public">({{ $trans('private') }})</span> <br/>
