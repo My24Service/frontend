@@ -157,11 +157,12 @@
 
   > header {
     margin: 0 0rem -2rem;
-    padding: 2rem 1rem 4rem;
+    padding: 1rem 1rem 4rem;
     background: var(--primary);
     color: white;
     position: sticky;
     top: 0;
+    min-height: 200px;
 
     .page-title {
       display: flex;
@@ -172,9 +173,31 @@
         display: flex;
         font-weight: normal;
         gap: .5ex;
+        margin: 0;
         a {
           color: white;
         }
+      }
+
+      &:first-child {
+        margin-top: calc(52px + 2ex);
+      }
+    }
+
+    .search-form {
+      margin-bottom: 2ex;
+      
+      .form-control {
+        background-color: rgba(255,255,255,.75);
+        border-radius: 3rem;
+        border-color: transparent;
+        box-shadow: 0 .25ex .5ex rgba(0,0,0,.25);
+        min-height: 2.6rem;
+        padding: 2ex;
+        font-size: .85rem;
+      }
+      form {
+        max-width: 20ch;
       }
     }
 
@@ -182,9 +205,16 @@
       align-items: center;
     }
 
-    .button {
-      background-color: white;
-      color: $my24;
+    .button, .btn-primary {
+      background-color: white !important;
+      border-color: #fff6;
+      color: $my24 !important;
+      &:hover, 
+      &:focus {
+        background-color: #fffc;
+        border-color: white;
+        box-shadow: 0 0 0 .25ex rgba(255,255,255,.25)
+      }
     }
   }
 
@@ -222,6 +252,11 @@
 .panel h6 {
   text-transform: uppercase;
   color: #232c2f;
+  margin-bottom: 1ex;
+
+  &:not(:first-of-type) {
+    margin-top: 2rem;
+  }
 }
 
 .flex-columns {

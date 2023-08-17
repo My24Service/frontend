@@ -1,9 +1,11 @@
 <template>
   <div class="app-page">
     <header>
+      <!-- WIP -->
+      <div class='search-form'>
+        <SearchForm @do-search="handleSearchOk" placeholderText="Search orders"/> 
+      </div>
       <div class="page-title">
-        <!-- WIP -->
-        <!-- <SearchForm @do-search="handleSearchOk" placeholderText="Search orders"/> -->
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
           <span>Orders</span>
@@ -16,16 +18,13 @@
                 v-bind:method="function() { loadData() }"
                 v-bind:title="$trans('Refresh')"
               />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
               <ButtonLinkSort
                 v-bind:method="function() { showSortModal() }"
               />
             </b-button-group>
           </b-button-toolbar>
           <router-link class="btn button" :to="{name:'order-add'}">
-            <b-icon icon="clipboard-plus"></b-icon>  {{ $trans('Add Order') }}
+            <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add order') }}
           </router-link>
         </div>
       </div>
@@ -46,7 +45,7 @@
                 <div>
                   <b-form-group :label="$trans('Sort')">
                     <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
-                    <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
+                    <b-form-radio v-model="sortMode" value="start_date">{{ $trans('Start date') }}</b-form-radio>
                   </b-form-group>
                 </div>
               </b-col>
@@ -55,13 +54,7 @@
         </form>
       </b-modal>
 
-      <!-- FIXME search modal -->
-      <SearchModal
-        id="search-modal"
-        ref="search-modal"
-        @do-search="handleSearchOk"
-      />
-      
+
       <!-- delete order modal -->
       <b-modal
         v-if="!isCustomer && !isBranchEmployee"
@@ -359,12 +352,8 @@ export default {
       this.loadData()
     },
     handleSearchOk(val) {
-      this.$refs['search-modal'].hide()
       this.model.setSearchQuery(val)
       this.loadData()
-    },
-    showSearchModal() {
-      this.$refs['search-modal'].show()
     },
     doAssign() {
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
