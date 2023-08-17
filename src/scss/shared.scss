@@ -290,6 +290,7 @@ ul.listing {
         font-size: .8rem;
         text-overflow: ellipsis;
         transition: all .3s;
+        min-width: 5rem;
 
         select {
           border-color: transparent;
