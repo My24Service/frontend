@@ -20,7 +20,7 @@
           <li v-for="item in movements">
             <div class="listing-item">
               <strong class="">{{ item.type }}</strong>
-              <datetime class="order-start-date">{{ item.date }} {{ item.time }}</datetime>
+              <time :datetime="item.date" class="order-start-date">{{ item.date }} {{ item.time }}</time>
               <span>{{ formatDuration(item.duration)}}</span>
             </div>
           </li>
@@ -32,7 +32,7 @@
           <li v-for="item in inventory">
             <div class="listing-item">
               <strong class="">{{ item.name }}</strong>
-              <datetime class="order-start-date">{{ item.date }} {{ item.time }}</datetime>
+              <time :datetime="item.date" class="order-start-date">{{ item.date }} {{ item.time }}</time>
               <span>{{ formatDuration(item.duration)}}</span>
             </div>
           </li>
@@ -45,7 +45,7 @@
             <div class="listing-item">
               <strong class="">{{ item.type }}</strong>
               <span>{{ item.location  }}</span>
-              <datetime>{{ item.date }} {{ item.time }}</datetime>
+              <time :datetime="item.date">{{ item.date }} {{ item.time }}</time>
             </div>
           </li>
         </ul>
