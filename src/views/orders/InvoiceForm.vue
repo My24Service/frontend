@@ -124,7 +124,7 @@
                 <PriceInput
                   v-model="user.engineer.hourly_rate"
                   :currency="user.engineer.hourly_rate_currency"
-                  @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateActivityTotals() && updateExtraWorkTotals()"
+                  @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateAllTotals()"
                 />
               </b-col>
               <b-col cols="1">
@@ -164,7 +164,7 @@
                 <PriceInput
                   v-model="customer.hourly_rate_engineer"
                   :currency="customer.hourly_rate_engineer_currency"
-                  @priceChanged="(val) => customer.setHourlyRateEngineer(val) && updateActivityTotals() && updateExtraWorkTotals()"
+                  @priceChanged="(val) => customer.setHourlyRateEngineer(val) && updateAllTotals()"
                 />
               </b-col>
               <b-col cols="1">
@@ -189,7 +189,7 @@
                 <PriceInput
                   v-model="customer.call_out_costs"
                   :currency="customer.call_out_costs_currency"
-                  @priceChanged="(val) => customer.setCallOutCosts(val) && updateActivityTotals() && updateExtraWorkTotals()"
+                  @priceChanged="(val) => customer.setCallOutCosts(val) && updateAllTotals()"
                 />
               </b-col>
               <b-col cols="1">
@@ -349,7 +349,7 @@
             </b-col>
             <b-col cols="3">
               <b-form-radio-group
-                @change="updateActivityTotals()"
+                @change="updateAllTotals()"
                 v-model="activity.usePrice"
               >
                 <b-form-radio value="engineer">
@@ -372,7 +372,7 @@
                     <PriceInput
                       v-model="activity.engineer_rate_other"
                       :currency="activity.engineer_rate_other_currency"
-                      @priceChanged="(val) => setEngineerPriceOther(val, activity.user_id) && updateActivityTotals()"
+                      @priceChanged="(val) => setEngineerPriceOther(val, activity.user_id) && updateAllTotals()"
                     />
                   </p>
                 </b-form-radio>
@@ -381,7 +381,7 @@
             <b-col cols="1">
               <p class="flex">
                 <b-form-input
-                  @blur="updateActivityTotals()"
+                  @blur="updateAllTotals()"
                   v-model="activity.margin_perc"
                   size="sm"
                   class="input-margin"
@@ -391,7 +391,7 @@
             </b-col>
             <b-col cols="1">
               <b-form-select
-                @change="updateActivityTotals"
+                @change="updateAllTotals"
                 :value="invoice_default_vat"
                 v-model="activity.vat_type"
                 :options="vat_types" size="sm"
@@ -437,7 +437,7 @@
             </b-col>
             <b-col cols="2" />
           </b-row>
-          <b-row v-for="extra_work in extra_work_user_totals" :key="extra_work.user_id" class="material_row">
+          <b-row v-for="extra_work in extraWorkUserTotals" :key="extra_work.user_id" class="material_row">
             <b-col cols="3">
               {{ getFullname(extra_work.user_id) }}
             </b-col>
@@ -514,6 +514,49 @@
           </b-row>
         </b-container>
 
+        <hr/>
+
+        <div class="use-on-invoice-container">
+          <h3>{{ $trans("What to use as invoice lines") }}</h3>
+          <b-form-group :label="$trans('Activity')">
+            <b-form-radio-group
+              v-model="useOnInvoiceActivitySelected"
+              :options="useOnInvoiceActivityOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+
+          <b-form-group :label="$trans('Extra work')">
+            <b-form-radio-group
+              v-model="useOnInvoiceExtraWorkSelected"
+              :options="useOnInvoiceExtraWorkOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+
+          <b-form-group :label="$trans('Used materials')">
+            <b-form-radio-group
+              v-model="useOnInvoiceUsedMaterialsSelected"
+              :options="useOnInvoiceUsedMaterialsOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+
+          <b-form-group :label="$trans('Call out costs')">
+            <b-form-radio-group
+              v-model="useOnInvoiceCallOutCostsSelected"
+              :options="useOnInvoiceCallOutCostsOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+
+          <div class="mx-auto">
+            <footer class="modal-footer">
+              <b-button @click="resetInvoiceLines" type="button" variant="secondary">
+                {{ $trans('Rset') }}</b-button>
+              <b-button @click="createInvoiceLinesFromConfig" type="button" variant="primary">
+                {{ $trans('Create invoice lines') }}</b-button>
+            </footer>
+          </div>
+
+        </div>
+
         <div class="invoice-lines">
           <h3>{{ $trans("Invoice lines") }}</h3>
           <b-row>
@@ -587,6 +630,19 @@ import { CustomerModel, CustomerPriceModel } from "../../models/customer/Custome
 import InvoiceFormTotals from './InvoiceFormTotals';
 import Collapse from "../../components/Collapse";
 
+const OPTION_USER_TOTALS = 'user_totals'
+const OPTION_ACTIVITY_ACTIVITY_TOTALS = 'activity_totals'
+const OPTION_ACTIVITY_ACTUAL_WORK = 'actual_work'
+const OPTION_EXTRA_WORK_TOTALS = 'extra_work_totals'
+const OPTION_USED_MATERIALS_TOTALS = 'used_materials_totals'
+const OPTION_CALL_OUT_COSTS = 'call_out_costs'
+const OPTION_NONE = 'none'
+
+const INVOICE_LINE_TYPE_ACTIVITY = 'activity'
+const INVOICE_LINE_TYPE_EXTRA_WORK = 'extra-work'
+const INVOICE_LINE_TYPE_USED_MATERIALS = 'used-materials'
+const INVOICE_LINE_TYPE_CALL_OUT_COSTS = 'call-out-costs'
+
 export default {
   name: 'InvoiceForm',
   components: {
@@ -626,8 +682,8 @@ export default {
       materialsTotal: null,
       materialsTotalVAT: null,
       usePriceOptionsMaterial: [
-        { text: 'Purchase', value: 'purchase' },
-        { text: 'Selling', value: 'selling' },
+        { text: this.$trans('Purchase'), value: 'purchase' },
+        { text: this.$trans('Selling'), value: 'selling' },
       ],
 
       engineer_models: [],
@@ -636,20 +692,53 @@ export default {
       activity_user_totals: [],
       activityTotal: null,
       activityTotalVAT: null,
+      activityTotals: null,
 
-      extra_work: [],
-      extra_work_user_totals: [],
+      extraWork: [],
+      extraWorkUserTotals: [],
       extraWorkTotal: null,
       extraWorkTotalVAT: null,
+      extraWorkTotals: null,
 
-      actual_work: [],
-      actual_work_user_totals: [],
+      actualWork: [],
+      actualWorkUserTotals: [],
+      actualWorkTotals: null,
+      actualWorkTotal: null,
+      actualWorkTotalVAT: null,
 
       customerPk: null,
       customer: null,
 
       invoiceLines: [],
       deletedInvoiceLines: [],
+
+      useOnInvoiceActivityOptions: [
+        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
+        { text: this.$trans('Activity totals'), value: OPTION_ACTIVITY_ACTIVITY_TOTALS },
+        { text: this.$trans('Actual work'), value: OPTION_ACTIVITY_ACTUAL_WORK },
+        { text: this.$trans('None'), value: OPTION_NONE },
+      ],
+      useOnInvoiceActivitySelected: null,
+
+      useOnInvoiceExtraWorkOptions: [
+        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
+        { text: this.$trans('Extra work totals'), value: OPTION_EXTRA_WORK_TOTALS },
+        { text: this.$trans('None'), value: OPTION_NONE },
+      ],
+      useOnInvoiceExtraWorkSelected: null,
+
+      useOnInvoiceUsedMaterialsOptions: [
+        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
+        { text: this.$trans('Used materials totals'), value: OPTION_USED_MATERIALS_TOTALS },
+        { text: this.$trans('None'), value: OPTION_NONE },
+      ],
+      useOnInvoiceUsedMaterialsSelected: null,
+
+      useOnInvoiceCallOutCostsOptions: [
+        { text: this.$trans('Call out costs'), value: OPTION_CALL_OUT_COSTS },
+        { text: this.$trans('None'), value: 'none' },
+      ],
+      useOnInvoiceCallOutCostsSelected: null,
 
     }
   },
@@ -696,12 +785,13 @@ export default {
 
       // activity
       this.activity = invoiceData.activity
+      this.activityTotals = invoiceData.activity_totals
       this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
         ...m,
         margin_perc: this.invoice_default_margin
       }))
 
-      this.activity_user_totals = invoiceData.activity_totals.map((a) => ({
+      this.activity_user_totals = this.activityTotals.user_totals.map((a) => ({
         ...a,
         vat_type: this.invoice_default_vat,
         margin_perc: this.invoice_default_margin,
@@ -713,10 +803,10 @@ export default {
         engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
         usePrice: 'engineer',
       }))
-      this.updateActivityTotals()
 
       // extra work
-      this.extra_work_user_totals = invoiceData.extra_work_totals.map((a) => ({
+      this.extraWorkTotals = invoiceData.extra_work_totals
+      this.extraWorkUserTotals = this.extraWorkTotals.user_totals.map((a) => ({
         ...a,
         vat_type: this.invoice_default_vat,
         margin_perc: this.invoice_default_margin,
@@ -728,10 +818,10 @@ export default {
         engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
         usePrice: 'engineer',
       }))
-      this.updateExtraWorkTotals()
 
       // actual work
-      this.actual_work_user_totals = invoiceData.actual_work_totals.map((a) => ({
+      this.actualWorkTotals = invoiceData.actual_work_totals
+      this.actualWorkUserTotals = this.actualWorkTotals.user_totals.map((a) => ({
         ...a,
         vat_type: this.invoice_default_vat,
         margin_perc: this.invoice_default_margin,
@@ -743,6 +833,11 @@ export default {
         engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
         usePrice: 'engineer',
       }))
+
+      this.updateAllTotals()
+
+      // distance
+      // TODO add this
 
       this.isLoading = false
     } else {
@@ -751,8 +846,64 @@ export default {
   },
   methods: {
     // invoice lines
-    createInvoiceLine() {
+    resetInvoiceLines() {
 
+    },
+    createInvoiceLinesFromConfig() {
+      // activity
+      switch (this.useOnInvoiceActivitySelected) {
+        case OPTION_USER_TOTALS:
+          for (const activity of this.activity_user_totals) {
+            this.createInvoiceLine(
+              INVOICE_LINE_TYPE_ACTIVITY,
+              `${this.$trans("Work hours")} ${this.getFullname(activity.user_id)}`,
+              activity.total_hours,
+              activity.vat,
+              activity.total
+            )
+          }
+          break
+        case OPTION_ACTIVITY_ACTIVITY_TOTALS:
+          this.createInvoiceLine(
+            INVOICE_LINE_TYPE_ACTIVITY,
+            `${this.$trans("Work hours")}`,
+            this.activityTotals.hours_total,
+            this.activityTotalVAT,
+            this.activityTotal
+          )
+          break
+        case OPTION_ACTIVITY_ACTUAL_WORK:
+          this.createInvoiceLine(
+            INVOICE_LINE_TYPE_ACTIVITY,
+            `${this.$trans("Work hours")}`,
+            this.activityTotals.actual_work_totals.actual_work,
+            this.actualWorkTotalVAT,
+            this.actualWorkTotal
+          )
+          break
+        case OPTION_NONE:
+          console.debug("not adding any activity")
+      }
+
+      // extra work
+
+      // used materials
+
+      // call out costs
+
+    },
+    createInvoiceLine(type, description, amount, vat, price_dinero) {
+      const price = price_dinero.toFormat("$0.00")
+      const price_currency = price_dinero.getCurrency()
+      const model = new InvoiceLineModel({
+        type,
+        description,
+        amount,
+        vat,
+        price,
+        price_currency
+      })
+      this.invoiceLines.push(model)
     },
     // customer
     async getCustomer() {
@@ -794,6 +945,11 @@ export default {
       const user = this.engineer_models.find((m) => m.id === user_id)
       return user.engineer.hourly_rate_currency
     },
+    updateAllTotals() {
+      this.updateActivityTotals()
+      this.updateExtraWorkTotals()
+      this.updateActualWorkTotals()
+    },
     updateActivityTotals() {
       this.activity_user_totals = this.activity_user_totals.map((m) => this.updateUserActivityTotals(m))
       this.activityTotal = this.getItemsTotal(this.activity_user_totals)
@@ -822,16 +978,15 @@ export default {
       return activity
     },
     updateExtraWorkTotals() {
-      this.extra_work_user_totals = this.extra_work_user_totals.map((m) => this.updateUserExtraWorkTotals(m))
-      this.extraWorkTotal = this.getItemsTotal(this.extra_work_user_totals)
-      this.extraWorkTotalVAT = this.getItemsTotalVAT(this.extra_work_user_totals)
+      this.extraWorkUserTotals = this.extraWorkUserTotals.map((m) => this.updateUserExtraWorkTotals(m))
+      this.extraWorkTotal = this.getItemsTotal(this.extraWorkUserTotals)
+      this.extraWorkTotalVAT = this.getItemsTotalVAT(this.extraWorkUserTotals)
 
       return true
     },
     updateUserExtraWorkTotals(extraWork) {
       const price = this.getEngineerRateDinero(extraWork.user_id)
       const currency = this.getEngineerRateCurrency(extraWork.user_id)
-      console.log(extraWork, currency)
       const hours_parts = extraWork.work_total.split(':')
       let total = price.multiply(hours_parts[0])
       total = total.add(price.multiply(hours_parts[1]/60))
@@ -850,6 +1005,34 @@ export default {
       return extraWork
 
     },
+    updateActualWorkTotals() {
+      this.actualWorkUserTotals = this.actualWorkUserTotals.map((m) => this.updateUserActualWorkTotals(m))
+      this.actualWorkTotal = this.getItemsTotal(this.actualWorkUserTotals)
+      this.actualWorkTotalVAT = this.getItemsTotalVAT(this.actualWorkUserTotals)
+
+      return true
+    },
+    updateUserActualWorkTotals(actualWork) {
+      const price = this.getEngineerRateDinero(actualWork.user_id)
+      const currency = this.getEngineerRateCurrency(actualWork.user_id)
+      const hours_parts = actualWork.work_total.split(':')
+      let total = price.multiply(parseInt(hours_parts[0]))
+      total = total.add(price.multiply(hours_parts[1]/60))
+      let total_with_margin = total
+      let margin = toDinero("0.00", currency)
+      if (actualWork.margin_perc > 0) {
+        margin = total.multiply(actualWork.margin_perc/100)
+        total_with_margin = total.add(margin)
+      }
+      const vat = total_with_margin.multiply(parseInt(actualWork.vat_type)/100)
+      actualWork.currency = currency
+      actualWork.total = total_with_margin
+      actualWork.vat = vat
+      actualWork.margin = margin
+
+      return actualWork
+    },
+
     setEngineerPriceOther(priceDinero, user_id) {
       let model = this.activity_user_totals.find((a) => a.user_id === user_id)
       model.engineer_rate_other_dinero = priceDinero
