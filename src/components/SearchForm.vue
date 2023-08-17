@@ -2,11 +2,10 @@
   <form ref="search-form" @submit.stop.prevent="doSearch">
       <b-form-input
         size="sm"
-        autofocus
         v-model="query"
         :placeholder="placeholderText"
+        @keyup="checkInput"
       ></b-form-input>
-      
   </form>
 </template>
 
@@ -21,6 +20,11 @@ export default {
     }
   },
   methods: {
+    checkInput() {
+      if(!this.query) {
+        this.doSearch()
+      }
+    },
     doSearch() {
       this.$emit('do-search', this.query)
     },
