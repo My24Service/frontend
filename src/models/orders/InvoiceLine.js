@@ -3,12 +3,19 @@ import BaseModel from '@/models/base'
 
 class InvoiceLineModel {
   id
+  type
   invoice
   description
   amount
   vat
   price
   price_currency
+
+  constructor(invoiceLine) {
+    for (const [k, v] of Object.entries(invoiceLine)) {
+      this[k] = v
+    }
+  }
 }
 
 
