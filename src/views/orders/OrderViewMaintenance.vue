@@ -68,10 +68,9 @@
             </b-link>
           </dd>
           <dt v-if="order.customer_remarks">Remarks</dt>
-          <dd v-if="order.customer_remarks">{{ order.customer_remarks }}</dd>
+          <dd v-if="order.customer_remarks">{{ order.remarks }}</dd>
         </dl>
-        <hr>
-
+        
         <h6 class="flex-columns">
           <span>{{ $trans('Documents') }}</span>
           <router-link :to="{name: 'order-documents', params : {'orderPk': pk}}">edit documents</router-link>
@@ -85,8 +84,12 @@
             </li>
           </ul>
         </div>
-        <hr>
-        
+        <h6>{{ $trans('Info lines') }}</h6>
+        <ul class='listing' v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
+          <li v-for="item, index of order.infolines">
+            {{ item.info }}
+          </li>
+        </ul>
         <h6>Orderlines</h6>
         <ul class="listing" v-if="order.orderlines.length">
           <li v-for="line in order.orderlines" :key="line.id">
@@ -126,7 +129,6 @@
           {{ order.order_city }}, {{ order.order_country_code }}
         </address>
         <hr>
-        <b-table  v-if="!isCustomer && !hasBranches && order.infolines.length > 0" borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"></b-table>
         
         <b-row class="my-2" v-if="order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
           <b-col cols="12">
