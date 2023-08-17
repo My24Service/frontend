@@ -160,7 +160,7 @@
     <!-- BIM / 3D -->
     <b-nav-item
       v-if="isPlanning"
-      to="/bim"
+      to="/coming-soon"
       :active="isActive('bim')"
       >
       <b-icon icon="mouse2" v-if="!isActive('bim')"></b-icon>
@@ -174,7 +174,7 @@
     <!-- webshop -->
     <b-nav-item
       v-if="isPlanning"
-      to="/webshop"
+      to="/comingsoon"
       :active="isActive('webshop')"
       >
       <b-icon icon="basket" v-if="!isActive('webshop')"></b-icon>
