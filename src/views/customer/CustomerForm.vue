@@ -243,7 +243,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="6" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Contact')"
@@ -256,7 +256,7 @@
               ></b-form-textarea>
             </b-form-group>
           </b-col>
-          <b-col cols="6" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Remarks')"
@@ -269,9 +269,7 @@
               ></b-form-textarea>
             </b-form-group>
           </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="7" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Maintenance contract')"
@@ -284,6 +282,8 @@
               ></b-form-textarea>
             </b-form-group>
           </b-col>
+        </b-row>
+        <b-row>
           <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
@@ -298,7 +298,7 @@
               <b-form-select v-model="customer.standard_hours_minute" :options="minutes" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Products without tax?')"
@@ -309,6 +309,32 @@
                 v-model="customer.products_without_tax"
               >
               </b-form-checkbox>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Hourly rate engineer')"
+              label-for="customer_hourly_rate_engineer"
+            >
+              <PriceInput
+                v-model="customer.hourly_rate_engineer"
+                :currency="customer.hourly_rate_engineer_currency"
+                @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
+              />
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Call out costs')"
+              label-for="customer_hourly_rate_engineer"
+            >
+              <PriceInput
+                v-model="customer.call_out_costs"
+                :currency="customer.call_out_costs_currency"
+                @priceChanged="(val) => customer.setCallOutCosts(val)"
+              />
             </b-form-group>
           </b-col>
         </b-row>
@@ -331,9 +357,10 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import customerModel from '../../models/customer/Customer.js'
+import customerService, {CustomerModel} from '../../models/customer/Customer.js'
 import partnerModel from '../../models/company/Partner.js'
 import Collapse from '../../components/Collapse.vue'
+import PriceInput from "../../components/PriceInput";
 
 export default {
   setup() {
@@ -346,7 +373,8 @@ export default {
     },
   },
   components: {
-    Collapse
+    Collapse,
+    PriceInput,
   },
   validations() {
     return {
@@ -377,7 +405,7 @@ export default {
       customerId: null,
       minutes: ['00', '15', '30', '45'],
       submitClicked: false,
-      customer: customerModel.getFields(),
+      customer: customerService.getFields(),
       errorMessage: null,
       branchPartners: [],
       branches: [],
@@ -433,8 +461,9 @@ export default {
     }
 
     if (this.isCreate) {
-      this.customer = customerModel.getFields()
-      const result = await customerModel.getCustomerId()
+      const customerData = customerService.getFields()
+      this.customer = new CustomerModel(customerData)
+      const result = await customerService.getCustomerId()
       if (result.created) {
         this.customerIdCreated = true
         this.customer.customer_id = result.customer_id
@@ -472,7 +501,7 @@ export default {
       this.selectedBranch = this.branches.find((branch) => branch.id === this.customer.branch_id)
     },
     async getNewCustomerIdFromLatest() {
-      const data = await customerModel.getNewCustomerIdFromLatest()
+      const data = await customerService.getNewCustomerIdFromLatest()
       this.customer.customer_id = data.result.last_customer_id
     },
     async submitForm() {
@@ -495,7 +524,7 @@ export default {
 
       if (this.isCreate) {
         try {
-          await customerModel.insert(this.customer)
+          await customerService.insert(this.customer)
           this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
           this.isLoading = false
           this.cancelForm()
@@ -512,7 +541,7 @@ export default {
         if (this.customer.branch_partner === null) {
           this.customer.branch_id = null
         }
-        await customerModel.update(this.pk, this.customer)
+        await customerService.update(this.pk, this.customer)
         this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
         this.isLoading = false
         this.cancelForm()
@@ -526,7 +555,9 @@ export default {
       this.isLoading = true
 
       try {
-        this.customer = await customerModel.detail(this.pk)
+        const customerData = await customerService.detail(this.pk)
+        this.customer = new CustomerModel(customerData)
+
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer', error)

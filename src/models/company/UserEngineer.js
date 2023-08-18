@@ -89,7 +89,7 @@ class EngineerModel {
   remarks
   contract_hours_week
   latest_event
-  prefered_location
+  preferred_location
   hourly_rate
   hourly_rate_currency
   hourly_rate_dinero
@@ -142,7 +142,10 @@ class EngineerService extends BaseModel {
       'remarks': '',
       'contract_hours_week': 38.0,
       'latest_event': false,
-      'prefered_location': null
+      'preferred_location': null,
+      'hourly_rate': '0.00',
+      'hourly_rate_currency': 'EUR',
+
       // 'uses_time_registration': false
     }
   }
