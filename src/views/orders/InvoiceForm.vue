@@ -158,7 +158,7 @@
             </b-row>
             <b-row>
               <b-col cols="9">
-                {{ $trans("Hourly price engineer") }}
+                {{ $trans("Hourly rate engineer") }}
               </b-col>
               <b-col cols="2">
                 <PriceInput
