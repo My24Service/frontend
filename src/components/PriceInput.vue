@@ -70,6 +70,10 @@ export default {
       return this.v$.$invalid
     },
     currencyCode() {
+      if (!this.dinero) {
+        return
+      }
+
       if (this.dinero.getCurrency() === 'EUR') {
         return '€'
       }
@@ -86,6 +90,10 @@ export default {
   },
   methods: {
     setPrice(priceDecimal) {
+      if (!this.currency) {
+        return
+      }
+
       this.dinero = toDinero(priceDecimal, this.currency)
       const parts = this.dinero.toFormat('0.00').split('.')
       this.number = parts[0]

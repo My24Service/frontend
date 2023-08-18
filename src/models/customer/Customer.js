@@ -138,7 +138,16 @@ class CustomerService extends BaseModel {
     'branch_id': null,
     'branch_view': null,
     'use_branch_address': true,
-    'num_orders': 0
+    'num_orders': 0,
+
+    'call_out_costs': '0.00',
+    'call_out_costs_currency': 'EUR',
+
+    'hourly_rate_engineer': '0.00',
+    'hourly_rate_engineer_currency': 'EUR',
+
+    'hourly_rate_partner_engineer': '0.00',
+    'hourly_rate_partner_engineer_currency': 'EUR',
   }
 
   url = '/customer/customer/'

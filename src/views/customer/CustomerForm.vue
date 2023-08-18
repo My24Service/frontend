@@ -328,9 +328,10 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import customerModel from '../../models/customer/Customer.js'
+import customerService, {CustomerModel} from '../../models/customer/Customer.js'
 import partnerModel from '../../models/company/Partner.js'
 import Collapse from '../../components/Collapse.vue'
+import PriceInput from "../../components/PriceInput";
 
 export default {
   setup() {
@@ -343,7 +344,8 @@ export default {
     },
   },
   components: {
-    Collapse
+    Collapse,
+    PriceInput,
   },
   validations() {
     return {
@@ -374,7 +376,7 @@ export default {
       customerId: null,
       minutes: ['00', '15', '30', '45'],
       submitClicked: false,
-      customer: customerModel.getFields(),
+      customer: customerService.getFields(),
       errorMessage: null,
       branchPartners: [],
       branches: [],
@@ -430,8 +432,9 @@ export default {
     }
 
     if (this.isCreate) {
-      this.customer = customerModel.getFields()
-      const result = await customerModel.getCustomerId()
+      const customerData = customerService.getFields()
+      this.customer = new CustomerModel(customerData)
+      const result = await customerService.getCustomerId()
       if (result.created) {
         this.customerIdCreated = true
         this.customer.customer_id = result.customer_id
@@ -469,7 +472,7 @@ export default {
       this.selectedBranch = this.branches.find((branch) => branch.id === this.customer.branch_id)
     },
     async getNewCustomerIdFromLatest() {
-      const data = await customerModel.getNewCustomerIdFromLatest()
+      const data = await customerService.getNewCustomerIdFromLatest()
       this.customer.customer_id = data.result.last_customer_id
     },
     async submitForm() {
@@ -492,7 +495,7 @@ export default {
 
       if (this.isCreate) {
         try {
-          await customerModel.insert(this.customer)
+          await customerService.insert(this.customer)
           this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
           this.isLoading = false
           this.cancelForm()
@@ -509,7 +512,7 @@ export default {
         if (this.customer.branch_partner === null) {
           this.customer.branch_id = null
         }
-        await customerModel.update(this.pk, this.customer)
+        await customerService.update(this.pk, this.customer)
         this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
         this.isLoading = false
         this.cancelForm()
@@ -523,7 +526,9 @@ export default {
       this.isLoading = true
 
       try {
-        this.customer = await customerModel.detail(this.pk)
+        const customerData = await customerService.detail(this.pk)
+        this.customer = new CustomerModel(customerData)
+
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer', error)
