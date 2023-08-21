@@ -299,7 +299,7 @@
 
       <div>
         <b-row align-h="center">
-          <h3>{{ $trans("Past orders") }}</h3>
+          <h3>{{ $trans("Orders") }}</h3>
         </b-row>
         <SearchModal
           id="search-modal"
@@ -308,19 +308,19 @@
         />
 
         <b-pagination
-          v-if="this.orderPastModel.count > 20"
+          v-if="this.orderModel.count > 20"
           class="pt-4"
           v-model="currentPage"
-          :total-rows="this.orderPastModel.count"
-          :per-page="this.orderPastModel.perPage"
-          aria-controls="customer-past-table"
+          :total-rows="this.orderModel.count"
+          :per-page="this.orderModel.perPage"
+          aria-controls="customer-orders-table"
         ></b-pagination>
 
         <b-table
-          id="customer-past-table"
+          id="customer-orders-table"
           small
           :busy='isLoading'
-          :fields="orderPastFields"
+          :fields="orderFields"
           :items="orders"
           responsive="md"
           class="data-table"
@@ -364,13 +364,12 @@
 
 <script>
 import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
-import orderPastModel from '../../models/orders/OrderPast.js'
+import orderModel from '../../models/orders/Order.js'
 import customerModel from '../../models/customer/Customer.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import orderModel from '../../models/orders/Order.js'
 import OrderStats from "../../components/OrderStats";
 import {componentMixin} from "../../utils";
 import locationModel from "../../models/equipment/location";
@@ -390,11 +389,11 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderPastModel,
+      orderModel,
       buttonDisabled: false,
       customer: customerModel.fields,
       orders: [],
-      orderPastFields: [
+      orderFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
@@ -452,7 +451,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderPastModel.currentPage = val
+      this.orderModel.currentPage = val
       this.loadData()
     }
   },
@@ -460,7 +459,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderPastModel.setSearchQuery(val)
+      orderModel.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -474,8 +473,9 @@ export default {
       this.isLoading = true
 
       try {
+        await this.loadHistory()
+
         if (!this.isCustomer) {
-          await this.loadHistory()
           await this.loadMaintenanceContracts()
           this.customer = await customerModel.detail(this.pk)
 
@@ -500,8 +500,6 @@ export default {
 
           return
         }
-
-        await this.loadHistoryCustomer()
 
         const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer()
         const monthsStatsData = await orderModel.getMonthsStatsCustomer()
@@ -541,21 +539,12 @@ export default {
       }
     },
 
-    async loadHistoryCustomer() {
-      try {
-        const results = await orderPastModel.list()
-        this.orders = results.results
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
-        this.isLoading = false
-      }
-    },
     async loadHistory() {
       try {
-        orderPastModel.setListArgs(`customer_relation=${this.pk}`)
-        const results = await orderPastModel.list()
+        if (!this.isCustomer) {
+          orderModel.setListArgs(`customer_relation=${this.pk}`)
+        }
+        const results = await orderModel.list()
         this.orders = results.results
         this.isLoading = false
       } catch(error) {

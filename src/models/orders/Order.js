@@ -61,10 +61,6 @@ class Order extends BaseModel {
     return fields
   }
 
-  recreateWorkorderPdf(pk) {
-    return this.axios.post(`${this.url}${pk}/recreate_pdf/`)
-  }
-
   recreateWorkorderPdfGotenberg(pk) {
     return this.axios.post(`${this.url}${pk}/recreate_pdf/?gotenberg=1`)
   }

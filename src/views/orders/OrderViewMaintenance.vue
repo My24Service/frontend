@@ -159,17 +159,6 @@
       <footer class="modal-footer">
         <b-button
           v-if="!past && !isCustomer && !isBranchEmployee"
-          id="recreateWorkorderPdfButton"
-          @click="recreateWorkorderPdf"
-          :disabled="buttonDisabled"
-          class="btn btn-danger"
-          type="button"
-          variant="secondary"
-        >
-          {{ $trans('Recreate workorder PDF') }}
-        </b-button>
-        <b-button
-          v-if="!past && !isCustomer && !isBranchEmployee"
           id="recreateWorkorderPdfButtonGotenberg"
           @click="recreateWorkorderPdfGotenberg"
           :disabled="buttonDisabled"
@@ -177,7 +166,7 @@
           type="button"
           variant="secondary"
         >
-          {{ $trans('Recreate workorder PDF (new)') }}
+          {{ $trans('Recreate workorder PDF') }}
         </b-button>
         <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
           {{ $trans('Back') }}</b-button>
@@ -233,23 +222,6 @@ export default {
     openWorkorder() {
       const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
       window.open(`${document.location.origin}/${routeData.href}`, '_blank')
-    },
-    async recreateWorkorderPdf() {
-      this.isLoading = true
-      this.buttonDisabled = true
-
-      try {
-        await orderModel.recreateWorkorderPdf(this.pk)
-        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        await this.loadOrder()
-      } catch(err) {
-        console.log('Error recreating workorder', err)
-        this.errorToast(this.$trans('Error recreating workorder'))
-        this.buttonDisabled = false
-        this.isLoading = false
-      }
     },
     async recreateWorkorderPdfGotenberg() {
       this.isLoading = true

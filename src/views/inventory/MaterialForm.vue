@@ -260,7 +260,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 
-import materialModel from '../../models/inventory/Material.js'
+import materialService from '../../models/inventory/Material.js'
 import supplierModel from '../../models/inventory/Supplier.js'
 import {NO_IMAGE_URL} from "../../constants"
 
@@ -283,7 +283,7 @@ export default {
       buttonDisabled: false,
       submitClicked: false,
       countries: [],
-      material: materialModel.getFields(),
+      material: materialService.getFields(),
       errorMessage: null,
       suppliers: [],
       current_image: NO_IMAGE_URL,
@@ -312,7 +312,7 @@ export default {
     if (!this.isCreate) {
       this.loadData()
     } else {
-      this.material = materialModel.getFields()
+      this.material = materialService.getFields()
     }
   },
   methods: {
@@ -353,7 +353,7 @@ export default {
 
       if (this.isCreate) {
         try {
-          await materialModel.insert(this.material)
+          await materialService.insert(this.material)
           this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -373,7 +373,7 @@ export default {
           delete this.material.image
         }
 
-        await materialModel.update(this.pk, this.material)
+        await materialService.update(this.pk, this.material)
         this.infoToast(this.$trans('Updated'), this.$trans('Material has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -400,7 +400,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.material = await materialModel.detail(this.pk)
+        this.material = await materialService.detail(this.pk)
         this.current_image = this.material.image ? this.material.image : NO_IMAGE_URL
         this.isLoading = false
       } catch(error) {
