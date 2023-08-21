@@ -757,7 +757,10 @@ export default {
         this.order.order_address = customer.address
         this.order.order_postal = customer.postal
         this.order.city = customer.city
+        this.order.order_tel = customer.tel
+        this.order.order_mobile = customer.mobile
         this.order.order_email = customer.email
+        this.order.order_contact = customer.contact
         this.order.order_country_code = customer.country_code
       } else {
         this.order = await this.loadOrder()
