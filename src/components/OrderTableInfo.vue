@@ -35,6 +35,14 @@
           <span v-else>person</span>
         </span>
         <span v-else title="Not assigned to anyone">&ndash;</span>
+        
+        <span v-if="memberType === 'maintenance'">
+          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
+          <span v-if="order.materials">
+            {{ $trans('Used materials') }}: {{ order.materials.length }}<br/>
+          </span>
+        </span>
+
       </span>
       <span class="order-documents">
         <span v-if="order.documents.length" >
@@ -66,6 +74,48 @@
         />
       </span>
   </div>
+
+  <!-- FIXME -->
+    <div class="fixme" style="display: none">
+      <div>
+        <p v-if="memberType === 'temps'">
+          {{ $trans('Required users') }}: {{ order.required_users }}<br/>
+          {{ $trans('Users set available') }}: {{ order.user_order_available_set_count }}<br/>
+          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
+        </p>
+        
+      </div>
+      
+    
+      <b-row v-if="order.workorder_pdf_url || order.workorder_pdf_url_partner">
+        <b-col cols="6">
+          <p v-if="order.workorder_pdf_url">
+            {{ $trans('Workorder PDF') }}
+            <b-link :href="order.workorder_pdf_url" target="_blank">
+              {{ $trans('Order') }} {{ order.order_id }}
+            </b-link>
+          </p>
+          <p v-if="order.workorder_pdf_url_partner">
+            {{ $trans('Workorder PDF partner') }}
+            <b-link :href="order.workorder_pdf_url_partner" target="_blank">
+              {{ $trans('Order') }} {{ order.order_id }}
+            </b-link>
+          </p>
+        </b-col>
+      </b-row>
+
+      <b-row>
+        <b-col v-if="order.workorder_documents.length > 0" cols="12">
+          <h5 class="my-2">{{ $trans('Workorder documents') }}</h5>
+          <p v-for="item in order.workorder_documents" :key="item.filename">
+            <b-link v-bind:href="item.url" target="_blank">
+              {{ item.name }} <b-icon-download font-scale=".8"></b-icon-download>
+            </b-link>
+          </p>
+        </b-col>
+      </b-row>
+    </div>
+
 </template>
 
 <style scope>
