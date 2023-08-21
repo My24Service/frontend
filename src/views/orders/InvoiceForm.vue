@@ -549,7 +549,7 @@
           <div class="mx-auto">
             <footer class="modal-footer">
               <b-button @click="resetInvoiceLines" type="button" variant="secondary">
-                {{ $trans('Rset') }}</b-button>
+                {{ $trans('Reset') }}</b-button>
               <b-button @click="createInvoiceLinesFromConfig" type="button" variant="primary">
                 {{ $trans('Create invoice lines') }}</b-button>
             </footer>
