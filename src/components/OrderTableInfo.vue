@@ -70,7 +70,9 @@
         </p>
         <p v-if="memberType === 'maintenance'">
           {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
-          {{ $trans('Used materials') }}: {{ order.materials.length }}<br/>
+          <span v-if="order.materials">
+            {{ $trans('Used materials') }}: {{ order.materials.length }}<br/>
+          </span>
         </p>
       </b-col>
       <b-col>
