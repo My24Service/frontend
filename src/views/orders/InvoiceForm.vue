@@ -249,15 +249,15 @@
                 @change="updateMaterialTotals()"
                 v-model="material.usePrice"
               >
-                <b-form-radio value="purchase">
-                  Pur. {{ getMaterialPriceFor(material, "purchase").toFormat('$0.00') }}
+                <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE">
+                  {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE).toFormat('$0.00') }}
                 </b-form-radio>
 
-                <b-form-radio value="selling">
-                  Sel. {{ getMaterialPriceFor(material, "selling").toFormat('$0.00') }}
+                <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING">
+                  {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING).toFormat('$0.00') }}
                 </b-form-radio>
 
-                <b-form-radio value="other">
+                <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER">
                   <p class="flex">
                     {{ $trans("Other") }}:&nbsp;&nbsp;
                     <PriceInput
@@ -352,27 +352,28 @@
                 @change="updateAllTotals()"
                 v-model="activity.usePrice"
               >
-                <b-form-radio value="engineer">
-                  Engineer {{ getEngineerRateDinero(activity.user_id).toFormat("$0.00") }}
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER">
+                  {{ $trans('Engineer') }}
+                  {{ getEngineerRateFor(activity, usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER).toFormat("$0.00") }}
                 </b-form-radio>
 
-                <b-form-radio value="customer">
-                  Customer
-                  <span v-if="customer.hourly_rate_engineer_dinero">
-                    {{ customer.hourly_rate_engineer_dinero.toFormat("$0.00") }}
-                  </span>
-                  <span v-if="!customer.hourly_rate_engineer_dinero">
-                    {{ $trans('not set') }}
-                  </span>
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS">
+                  {{ $trans('Settings') }}
+                  {{ getEngineerRateFor(activity, usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS).toFormat("$0.00") }}
                 </b-form-radio>
 
-                <b-form-radio value="other">
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER">
+                  {{ $trans('Customer') }}
+                  {{ getEngineerRateFor(activity, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                </b-form-radio>
+
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER">
                   <p class="flex">
                     {{ $trans("Other") }}:&nbsp;&nbsp;
                     <PriceInput
                       v-model="activity.engineer_rate_other"
                       :currency="activity.engineer_rate_other_currency"
-                      @priceChanged="(val) => setEngineerPriceOther(val, activity.user_id) && updateAllTotals()"
+                      @priceChanged="(val) => setEngineerPriceOtherActivity(val, activity.user_id) && updateAllTotals()"
                     />
                   </p>
                 </b-form-radio>
@@ -449,27 +450,28 @@
                 @change="updateExtraWorkTotals()"
                 v-model="extra_work.usePrice"
               >
-                <b-form-radio value="engineer">
-                  Engineer {{ getEngineerRateDinero(extra_work.user_id).toFormat("$0.00") }}
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER">
+                  {{ $trans('Engineer') }}
+                  {{ getEngineerRateFor(extra_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
                 </b-form-radio>
 
-                <b-form-radio value="customer">
-                  Customer
-                  <span v-if="customer.hourly_rate_engineer_dinero">
-                    {{ customer.hourly_rate_engineer_dinero.toFormat("$0.00") }}
-                  </span>
-                  <span v-if="!customer.hourly_rate_engineer_dinero">
-                    {{ $trans('not set') }}
-                  </span>
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS">
+                  {{ $trans('Settings') }}
+                  {{ getEngineerRateFor(extra_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS).toFormat("$0.00") }}
                 </b-form-radio>
 
-                <b-form-radio value="other">
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER">
+                  {{ $trans('Customer') }}
+                  {{ getEngineerRateFor(extra_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                </b-form-radio>
+
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER">
                   <p class="flex">
                     {{ $trans("Other") }}:&nbsp;&nbsp;
                     <PriceInput
                       v-model="extra_work.engineer_rate_other"
                       :currency="extra_work.engineer_rate_other_currency"
-                      @priceChanged="(val) => setEngineerPriceOther(val, extra_work.user_id) && updateExtraWorkTotals()"
+                      @priceChanged="(val) => setEngineerPriceOtherExtraWork(val, extra_work.user_id) && updateExtraWorkTotals()"
                     />
                   </p>
                 </b-form-radio>
@@ -673,18 +675,25 @@ export default {
       vat_types: [],
       default_currency: null,
       invoice_default_margin: null,
-      invoice_default_hourly_rate: null,
       invoice_default_vat: null,
+
+      invoice_default_hourly_rate: null,
+      invoice_default_hourly_rate_dinero: null,
+      invoice_default_partner_hourly_rate: null,
+      invoice_default_partner_hourly_rate_dinero: null,
+
       invoice_default_call_out_costs: null,
+      invoice_default_call_out_costs_dinero: null,
 
       used_materials: [],
       material_models: [],
       materialsTotal: null,
       materialsTotalVAT: null,
-      usePriceOptionsMaterial: [
-        { text: this.$trans('Purchase'), value: 'purchase' },
-        { text: this.$trans('Selling'), value: 'selling' },
-      ],
+      usePriceOptionsMaterial: {
+        USED_MATERIALS_USE_PRICE_PURCHASE: 'purchase',
+        USED_MATERIALS_USE_PRICE_SELLING: 'selling',
+        USED_MATERIALS_USE_PRICE_OTHER: 'other',
+      },
 
       engineer_models: [],
 
@@ -693,6 +702,12 @@ export default {
       activityTotal: null,
       activityTotalVAT: null,
       activityTotals: null,
+      usePriceOptionsActivity: {
+        ACTIVITY_USE_PRICE_ENGINEER: 'engineer',
+        ACTIVITY_USE_PRICE_SETTINGS: 'settings',
+        ACTIVITY_USE_PRICE_CUSTOMER: 'customer',
+        ACTIVITY_USE_PRICE_OTHER: 'other',
+      },
 
       extraWork: [],
       extraWorkUserTotals: [],
@@ -762,9 +777,25 @@ export default {
       this.invoice_id = invoiceData.invoice_id
       this.default_currency = invoiceData.default_currency
       this.invoice_default_margin = invoiceData.invoice_default_margin
-      this.invoice_default_hourly_rate = invoiceData.invoice_default_hourly_rate
       this.invoice_default_vat = invoiceData.invoice_default_vat
+
       this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
+      this.invoice_default_call_out_costs_dinero = toDinero(
+        this.invoice_default_call_out_costs,
+        this.default_currency
+      )
+
+      this.invoice_default_hourly_rate = invoiceData.invoice_default_hourly_rate
+      this.invoice_default_hourly_rate_dinero = toDinero(
+        this.invoice_default_hourly_rate,
+        this.default_currency
+      )
+
+      this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
+      this.invoice_default_partner_hourly_rate_dinero = toDinero(
+        this.invoice_default_partner_hourly_rate,
+        this.default_currency
+      )
 
       // materials
       this.used_materials = invoiceData.used_materials.map((m) => ({
@@ -933,6 +964,61 @@ export default {
       const user = this.engineer_models.find((m) => m.id === user_id)
       return user.full_name
     },
+    getEngineerRateFor(obj, usePrice) {
+      const user = this.engineer_models.find((m) => m.id === obj.user_id)
+      if (user) {
+        switch (usePrice) {
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER:
+            return toDinero(user.engineer.hourly_rate, user.engineer.hourly_rate_currency)
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER:
+            return this.customer.hourly_rate_engineer_dinero
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS:
+            return this.invoice_default_hourly_rate_dinero
+          default:
+            throw `unknown usePrice for engineer: ${usePrice}`
+        }
+      } else {
+        console.error("getEngineerRateFor: model not found")
+      }
+    },
+    getSelectedEngineerRate(activity) {
+      const user = this.engineer_models.find((m) => m.id === activity.user_id)
+      if (user) {
+        switch (activity.usePrice) {
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER:
+            return toDinero(user.engineer.hourly_rate, user.engineer.hourly_rate_currency)
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER:
+            return this.customer.hourly_rate_engineer_dinero
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS:
+            return this.invoice_default_hourly_rate_dinero
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER:
+            return activity.engineer_rate_other_dinero
+          default:
+            throw `unknown usePrice for engineer: ${activity.usePrice}`
+        }
+      } else {
+        console.error("getEngineerRateFor: model not found")
+      }
+    },
+    getSelectedEngineerRateCurrency(activity) {
+      const user = this.engineer_models.find((m) => m.id === activity.user_id)
+      if (user) {
+        switch (activity.usePrice) {
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER:
+            return user.engineer.hourly_rate_currency
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER:
+            return this.customer.hourly_rate_engineer_currency
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS:
+            return this.default_currency
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER:
+            return this.default_currency
+          default:
+            throw `unknown usePrice for engineer: ${activity.usePrice}`
+        }
+      } else {
+        console.error("getEngineerRateFor: model not found")
+      }
+    },
     getEngineerRateDinero(user_id) {
       const user = this.engineer_models.find((m) => m.id === user_id)
       return toDinero(user.engineer.hourly_rate, user.engineer.hourly_rate_currency)
@@ -958,8 +1044,8 @@ export default {
       return true
     },
     updateUserActivityTotals(activity) {
-      const price = this.getEngineerRateDinero(activity.user_id)
-      const currency = this.getEngineerRateCurrency(activity.user_id)
+      const price = this.getSelectedEngineerRate(activity)
+      const currency = this.getSelectedEngineerRateCurrency(activity)
       const hours_parts = activity.hours_total.split(':')
       let total = price.multiply(hours_parts[0])
       total = total.add(price.multiply(hours_parts[1]/60))
@@ -985,8 +1071,8 @@ export default {
       return true
     },
     updateUserExtraWorkTotals(extraWork) {
-      const price = this.getEngineerRateDinero(extraWork.user_id)
-      const currency = this.getEngineerRateCurrency(extraWork.user_id)
+      const price = this.getSelectedEngineerRate(extraWork)
+      const currency = this.getSelectedEngineerRateCurrency(extraWork)
       const hours_parts = extraWork.work_total.split(':')
       let total = price.multiply(hours_parts[0])
       total = total.add(price.multiply(hours_parts[1]/60))
@@ -1013,8 +1099,8 @@ export default {
       return true
     },
     updateUserActualWorkTotals(actualWork) {
-      const price = this.getEngineerRateDinero(actualWork.user_id)
-      const currency = this.getEngineerRateCurrency(actualWork.user_id)
+      const price = this.getSelectedEngineerRate(actualWork)
+      const currency = this.getSelectedEngineerRateCurrency(actualWork)
       const hours_parts = actualWork.work_total.split(':')
       let total = price.multiply(parseInt(hours_parts[0]))
       total = total.add(price.multiply(hours_parts[1]/60))
@@ -1033,8 +1119,15 @@ export default {
       return actualWork
     },
 
-    setEngineerPriceOther(priceDinero, user_id) {
+    setEngineerPriceOtherActivity(priceDinero, user_id) {
       let model = this.activity_user_totals.find((a) => a.user_id === user_id)
+      model.engineer_rate_other_dinero = priceDinero
+      model.engineer_rate_other = model.engineer_rate_other_dinero.toFormat('0.00')
+      model.engineer_rate_other_currency = model.engineer_rate_other_dinero.getCurrency()
+      return true
+    },
+    setEngineerPriceOtherExtraWork(priceDinero, user_id) {
+      let model = this.extraWorkUserTotals.find((a) => a.user_id === user_id)
       model.engineer_rate_other_dinero = priceDinero
       model.engineer_rate_other = model.engineer_rate_other_dinero.toFormat('0.00')
       model.engineer_rate_other_currency = model.engineer_rate_other_dinero.getCurrency()
@@ -1052,13 +1145,13 @@ export default {
       this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
     },
     getMaterialPrice(used_material) {
-      if (used_material.usePrice === 'purchase') {
+      if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE) {
         const model = this.material_models.find((m) => m.id === used_material.material_id)
         return model.price_purchase_ex_dinero
-      } else if (used_material.usePrice === 'selling') {
+      } else if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING) {
         const model = this.material_models.find((m) => m.id === used_material.material_id)
         return model.price_selling_ex_dinero
-      } else if (used_material.usePrice === 'other') {
+      } else if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER) {
         const model = this.used_materials.find((m) => m.material_id === used_material.material_id)
         return model.price_purchase_ex_other_dinero
       } else {
@@ -1066,13 +1159,13 @@ export default {
       }
     },
     getMaterialCurrency(used_material) {
-      if (used_material.usePrice === 'purchase') {
+      if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE) {
         const model = this.material_models.find((m) => m.id === used_material.material_id)
         return model.price_purchase_ex_currency
-      } else if (used_material.usePrice === 'selling') {
+      } else if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING) {
         const model = this.material_models.find((m) => m.id === used_material.material_id)
         return model.price_selling_ex_currency
-      } else if (used_material.usePrice === 'other') {
+      } else if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER) {
         const model = this.used_materials.find((m) => m.material_id === used_material.material_id)
         return model.price_purchase_ex_other_currency
       } else {
@@ -1082,7 +1175,7 @@ export default {
     getMaterialPriceFor(used_material, usePrice) {
       const model = this.material_models.find((m) => m.id === used_material.material_id)
       if (model) {
-        return usePrice === 'purchase' ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
+        return usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
       } else {
         console.error('MODEL NOT FOUND for ', used_material)
       }
