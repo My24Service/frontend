@@ -541,15 +541,12 @@ export default {
 
     async loadHistory() {
       try {
-        if (!this.isCustomer) {
-          orderModel.setListArgs(`customer_relation=${this.pk}`)
-        }
-        const results = await orderModel.list()
+        const results = await orderModel.getAllForCustomer(this.pk)
         this.orders = results.results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        console.log('error fetching customer orders', error)
+        this.errorToast(this.$trans('Error fetching customer orders'))
         this.isLoading = false
       }
     }
