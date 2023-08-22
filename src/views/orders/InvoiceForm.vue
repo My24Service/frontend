@@ -124,7 +124,7 @@
                 <PriceInput
                   v-model="user.engineer.hourly_rate"
                   :currency="user.engineer.hourly_rate_currency"
-                  @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateAllTotals()"
+                  @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateHoursTotals()"
                 />
               </b-col>
               <b-col cols="1">
@@ -164,7 +164,7 @@
                 <PriceInput
                   v-model="customer.hourly_rate_engineer"
                   :currency="customer.hourly_rate_engineer_currency"
-                  @priceChanged="(val) => customer.setHourlyRateEngineer(val) && updateAllTotals()"
+                  @priceChanged="(val) => customer.setHourlyRateEngineer(val) && updateHoursTotals()"
                 />
               </b-col>
               <b-col cols="1">
@@ -189,7 +189,32 @@
                 <PriceInput
                   v-model="customer.call_out_costs"
                   :currency="customer.call_out_costs_currency"
-                  @priceChanged="(val) => customer.setCallOutCosts(val) && updateAllTotals()"
+                  @priceChanged="(val) => customer.setCallOutCosts(val) && updateHoursTotals()"
+                />
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-button
+                    @click="() => { updateCustomer() }"
+                    class="btn btn-primary update-button"
+                    size="sm"
+                    type="button"
+                    variant="primary"
+                  >
+                    {{ $trans("Update") }}
+                  </b-button>
+                </p>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="9">
+                {{ $trans("Price/KM") }}
+              </b-col>
+              <b-col cols="2">
+                <PriceInput
+                  v-model="customer.price_per_km"
+                  :currency="customer.price_per_km_currency"
+                  @priceChanged="(val) => customer.setPricePerKm(val) && updateDistanceTotals()"
                 />
               </b-col>
               <b-col cols="1">
@@ -301,12 +326,14 @@
             <b-col cols="2">
               <InvoiceFormTotals
                 :total="materialsTotal"
-                :show-margin="false"
+                :is-final-total="true"
                 :vat="materialsTotalVAT"
               />
             </b-col>
           </b-row>
         </b-container>
+
+        <hr/>
 
         <b-container fluid>
           <h3>{{ $trans("Activity") }}</h3>
@@ -349,7 +376,7 @@
             </b-col>
             <b-col cols="3">
               <b-form-radio-group
-                @change="updateAllTotals()"
+                @change="updateHoursTotals()"
                 v-model="activity.usePrice"
               >
                 <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER">
@@ -373,7 +400,7 @@
                     <PriceInput
                       v-model="activity.engineer_rate_other"
                       :currency="activity.engineer_rate_other_currency"
-                      @priceChanged="(val) => setEngineerPriceOtherActivity(val, activity.user_id) && updateAllTotals()"
+                      @priceChanged="(val) => setEngineerPriceOtherActivity(val, activity.user_id) && updateHoursTotals()"
                     />
                   </p>
                 </b-form-radio>
@@ -382,7 +409,7 @@
             <b-col cols="1">
               <p class="flex">
                 <b-form-input
-                  @blur="updateAllTotals()"
+                  @blur="updateHoursTotals()"
                   v-model="activity.margin_perc"
                   size="sm"
                   class="input-margin"
@@ -392,7 +419,7 @@
             </b-col>
             <b-col cols="1">
               <b-form-select
-                @change="updateAllTotals"
+                @change="updateHoursTotals"
                 :value="invoice_default_vat"
                 v-model="activity.vat_type"
                 :options="vat_types" size="sm"
@@ -407,16 +434,130 @@
             </b-col>
           </b-row>
           <b-row>
-            <b-col cols="10"/>
+            <b-col cols="8">
+              <span class="total-text">{{ $trans('Work total') }}</span>
+            </b-col>
+            <b-col cols="2">
+              <span class="total-text">{{ activityTotals.hours_total }}</span>
+            </b-col>
             <b-col cols="2">
               <InvoiceFormTotals
                 :total="activityTotal"
-                :show-margin="false"
+                :is-final-total="true"
                 :vat="activityTotalVAT"
               />
             </b-col>
           </b-row>
         </b-container>
+
+        <hr/>
+
+        <b-container fluid>
+          <h3>{{ $trans("Distance") }}</h3>
+          <b-row>
+            <b-col cols="2" class="header">
+              {{ $trans("Engineer") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("To") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("Back") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("Total") }}
+            </b-col>
+            <b-col cols="3" class="header">
+              {{ $trans("Rate") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("Margin") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("VAT type") }}
+            </b-col>
+            <b-col cols="2" />
+          </b-row>
+          <b-row v-for="distance in distanceUserTotals" :key="distance.user_id" class="material_row">
+            <b-col cols="2">
+              {{ getFullname(distance.user_id) }}
+            </b-col>
+            <b-col cols="1">
+              {{ distance.distance_to_total }}
+            </b-col>
+            <b-col cols="1">
+              {{ distance.distance_back_total }}
+            </b-col>
+            <b-col cols="1">
+              {{ distance.distance_total }}
+            </b-col>
+            <b-col cols="3">
+              <b-form-radio-group
+                @change="updateDistanceTotals"
+                v-model="distance.usePrice"
+              >
+                <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS">
+                  {{ $trans('Settings') }}
+                  {{ getDistancePriceFor(usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                </b-form-radio>
+
+                <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER">
+                  {{ $trans('Customer') }}
+                  {{ getDistancePriceFor(usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                </b-form-radio>
+
+                <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_OTHER">
+                  <p class="flex">
+                    {{ $trans("Other") }}:&nbsp;&nbsp;
+                    <PriceInput
+                      v-model="distance.price_per_km_other"
+                      :currency="distance.price_per_km_other_currency"
+                      @priceChanged="(val) => setDistancePriceOther(val, distance.user_id) && updateDistanceTotals()"
+                    />
+                  </p>
+                </b-form-radio>
+              </b-form-radio-group>
+            </b-col>
+            <b-col cols="1">
+              <p class="flex">
+                <b-form-input
+                  @blur="updateDistanceTotals"
+                  v-model="distance.margin_perc"
+                  size="sm"
+                  class="input-margin"
+                ></b-form-input>
+                <span class="percentage-container">%</span>
+              </p>
+            </b-col>
+            <b-col cols="1">
+              <b-form-select
+                @change="updateDistanceTotals"
+                :value="invoice_default_vat"
+                v-model="distance.vat_type"
+                :options="vat_types" size="sm"
+              ></b-form-select>
+            </b-col>
+            <b-col cols="2">
+              <InvoiceFormTotals
+                :total="distance.total"
+                :margin="distance.margin"
+                :vat="distance.vat"
+              />
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="10"/>
+            <b-col cols="2">
+              <InvoiceFormTotals
+                :total="distanceTotal"
+                :is-final-total="true"
+                :vat="distanceTotalVAT"
+              />
+            </b-col>
+          </b-row>
+        </b-container>
+
+        <hr/>
 
         <b-container fluid>
           <h3>{{ $trans("Extra work") }}</h3>
@@ -509,8 +650,108 @@
             <b-col cols="2">
               <InvoiceFormTotals
                 :total="extraWorkTotal"
-                :show-margin="false"
+                :is-final-total="true"
                 :vat="extraWorkTotalVAT"
+              />
+            </b-col>
+          </b-row>
+        </b-container>
+
+        <hr/>
+
+        <b-container fluid>
+          <h3>{{ $trans("Actual work") }}</h3>
+          <b-row>
+            <b-col cols="3" class="header">
+              {{ $trans("Engineer") }}
+            </b-col>
+            <b-col cols="2" class="header">
+              {{ $trans("Hours") }}
+            </b-col>
+            <b-col cols="3" class="header">
+              {{ $trans("Engineer rate") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("Margin") }}
+            </b-col>
+            <b-col cols="1" class="header">
+              {{ $trans("VAT type") }}
+            </b-col>
+            <b-col cols="2" />
+          </b-row>
+          <b-row v-for="actual_work in actualWorkUserTotals" :key="actual_work.user_id" class="material_row">
+            <b-col cols="3">
+              {{ getFullname(actual_work.user_id) }}
+            </b-col>
+            <b-col cols="2">
+              {{ actual_work.work_total }}
+            </b-col>
+            <b-col cols="3">
+              <b-form-radio-group
+                @change="updateActualWorkTotals()"
+                v-model="actual_work.usePrice"
+              >
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER">
+                  {{ $trans('Engineer') }}
+                  {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                </b-form-radio>
+
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS">
+                  {{ $trans('Settings') }}
+                  {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                </b-form-radio>
+
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER">
+                  {{ $trans('Customer') }}
+                  {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                </b-form-radio>
+
+                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER">
+                  <p class="flex">
+                    {{ $trans("Other") }}:&nbsp;&nbsp;
+                    <PriceInput
+                      v-model="actual_work.engineer_rate_other"
+                      :currency="actual_work.engineer_rate_other_currency"
+                      @priceChanged="(val) => setEngineerPriceOtherExtraWork(val, actual_work.user_id) && updateActualWorkTotals()"
+                    />
+                  </p>
+                </b-form-radio>
+              </b-form-radio-group>
+            </b-col>
+            <b-col cols="1">
+              <p class="flex">
+                <b-form-input
+                  @blur="updateActualWorkTotals"
+                  v-model="actual_work.margin_perc"
+                  size="sm"
+                  class="input-margin"
+                ></b-form-input>
+                <span class="percentage-container">%</span>
+              </p>
+            </b-col>
+            <b-col cols="1">
+              <b-form-select
+                @change="updateActualWorkTotals"
+                :value="invoice_default_vat"
+                v-model="actual_work.vat_type"
+                :options="vat_types" size="sm"
+              ></b-form-select>
+            </b-col>
+            <b-col cols="2">
+              <InvoiceFormTotals
+                :total="actual_work.total"
+                :margin="actual_work.margin"
+                :vat="actual_work.vat"
+              />
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="10"/>
+            <b-col cols="2">
+              <InvoiceFormTotals
+                :total="actualWorkTotal"
+                :is-final-total="true"
+                :vat="actualWorkTotalVAT"
               />
             </b-col>
           </b-row>
@@ -531,6 +772,20 @@
             <b-form-radio-group
               v-model="useOnInvoiceExtraWorkSelected"
               :options="useOnInvoiceExtraWorkOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+
+          <b-form-group :label="$trans('Actual work')">
+            <b-form-radio-group
+              v-model="useOnInvoiceActualWorkSelected"
+              :options="useOnInvoiceActualWorkOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+
+          <b-form-group :label="$trans('Distance')">
+            <b-form-radio-group
+              v-model="useOnInvoiceDistanceSelected"
+              :options="useOnInvoiceDistanceOptions"
             ></b-form-radio-group>
           </b-form-group>
 
@@ -637,7 +892,11 @@ const OPTION_ACTIVITY_ACTIVITY_TOTALS = 'activity_totals'
 const OPTION_ACTIVITY_ACTUAL_WORK = 'actual_work'
 const OPTION_EXTRA_WORK_TOTALS = 'extra_work_totals'
 const OPTION_USED_MATERIALS_TOTALS = 'used_materials_totals'
-const OPTION_CALL_OUT_COSTS = 'call_out_costs'
+const OPTION_ACTUAL_WORK_TOTALS = 'actual_work_totals'
+const OPTION_DISTANCE_TOTALS = 'distance_totals'
+const OPTION_CALL_OUT_COSTS_CUSTOMER = 'customer'
+const OPTION_CALL_OUT_COSTS_SETTINGS = 'settings'
+
 const OPTION_NONE = 'none'
 
 const INVOICE_LINE_TYPE_ACTIVITY = 'activity'
@@ -685,6 +944,9 @@ export default {
       invoice_default_call_out_costs: null,
       invoice_default_call_out_costs_dinero: null,
 
+      invoice_default_price_per_km: null,
+      invoice_default_price_per_km_dinero: null,
+
       used_materials: [],
       material_models: [],
       materialsTotal: null,
@@ -709,6 +971,16 @@ export default {
         ACTIVITY_USE_PRICE_OTHER: 'other',
       },
 
+      distanceUserTotals: [],
+      distanceTotal: null,
+      distanceTotalVAT: null,
+      distanceTotals: null,
+      usePriceOptionsDistance: {
+        DISTANCE_USE_PRICE_SETTINGS: 'settings',
+        DISTANCE_USE_PRICE_CUSTOMER: 'customer',
+        DISTANCE_USE_PRICE_OTHER: 'other',
+      },
+
       extraWork: [],
       extraWorkUserTotals: [],
       extraWorkTotal: null,
@@ -730,7 +1002,6 @@ export default {
       useOnInvoiceActivityOptions: [
         { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
         { text: this.$trans('Activity totals'), value: OPTION_ACTIVITY_ACTIVITY_TOTALS },
-        { text: this.$trans('Actual work'), value: OPTION_ACTIVITY_ACTUAL_WORK },
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceActivitySelected: null,
@@ -750,11 +1021,25 @@ export default {
       useOnInvoiceUsedMaterialsSelected: null,
 
       useOnInvoiceCallOutCostsOptions: [
-        { text: this.$trans('Call out costs'), value: OPTION_CALL_OUT_COSTS },
+        { text: this.$trans('Customer'), value: OPTION_CALL_OUT_COSTS_CUSTOMER },
+        { text: this.$trans('Settings'), value: OPTION_CALL_OUT_COSTS_SETTINGS },
         { text: this.$trans('None'), value: 'none' },
       ],
       useOnInvoiceCallOutCostsSelected: null,
 
+      useOnInvoiceActualWorkOptions: [
+        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
+        { text: this.$trans('Actual work totals'), value: OPTION_ACTUAL_WORK_TOTALS },
+        { text: this.$trans('None'), value: 'none' },
+      ],
+      useOnInvoiceActualWorkSelected: null,
+
+      useOnInvoiceDistanceOptions: [
+        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
+        { text: this.$trans('Distance totals'), value: OPTION_DISTANCE_TOTALS },
+        { text: this.$trans('None'), value: 'none' },
+      ],
+      useOnInvoiceDistanceSelected: null,
     }
   },
   computed: {
@@ -778,6 +1063,12 @@ export default {
       this.default_currency = invoiceData.default_currency
       this.invoice_default_margin = invoiceData.invoice_default_margin
       this.invoice_default_vat = invoiceData.invoice_default_vat
+
+      this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
+      this.invoice_default_price_per_km_dinero = toDinero(
+        this.invoice_default_price_per_km,
+        this.default_currency
+      )
 
       this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
       this.invoice_default_call_out_costs_dinero = toDinero(
@@ -805,7 +1096,7 @@ export default {
         price_purchase_ex_other: "0.00",
         price_purchase_ex_other_currency: this.default_currency,
         price_purchase_ex_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: 'purchase',
+        usePrice: this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE,
       }))
 
       this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
@@ -832,8 +1123,23 @@ export default {
         engineer_rate_other: "0.00",
         engineer_rate_other_currency: this.default_currency,
         engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: 'engineer',
+        usePrice: this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER,
       }))
+
+      // distance
+      this.distanceUserTotals = this.activityTotals.user_totals.map((a) => ({
+        user_id: a.user_id,
+        distance_to_total: a.distance_to_total,
+        distance_back_total: a.distance_back_total,
+        distance_total: a.distance_total,
+        vat_type: this.invoice_default_vat,
+        margin_perc: this.invoice_default_margin,
+        price_per_km_other: "0.00",
+        price_per_km_other_currency: this.default_currency,
+        price_per_km_other_dinero: toDinero("0.00", this.default_currency),
+        usePrice: this.usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS,
+      }))
+      this.updateDistanceTotals()
 
       // extra work
       this.extraWorkTotals = invoiceData.extra_work_totals
@@ -847,7 +1153,7 @@ export default {
         engineer_rate_other: "0.00",
         engineer_rate_other_currency: this.default_currency,
         engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: 'engineer',
+        usePrice: this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER,
       }))
 
       // actual work
@@ -862,13 +1168,10 @@ export default {
         engineer_rate_other: "0.00",
         engineer_rate_other_currency: this.default_currency,
         engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: 'engineer',
+        usePrice: this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER,
       }))
 
-      this.updateAllTotals()
-
-      // distance
-      // TODO add this
+      this.updateHoursTotals()
 
       this.isLoading = false
     } else {
@@ -1031,7 +1334,7 @@ export default {
       const user = this.engineer_models.find((m) => m.id === user_id)
       return user.engineer.hourly_rate_currency
     },
-    updateAllTotals() {
+    updateHoursTotals() {
       this.updateActivityTotals()
       this.updateExtraWorkTotals()
       this.updateActualWorkTotals()
@@ -1133,7 +1436,71 @@ export default {
       model.engineer_rate_other_currency = model.engineer_rate_other_dinero.getCurrency()
       return true
     },
+    // distance
+    setDistancePriceOther(priceDinero, user_id) {
+      let model = this.distanceUserTotals.find((a) => a.user_id === user_id)
+      model.price_per_km_other_dinero = priceDinero
+      model.price_per_km_other = model.price_per_km_other_dinero.toFormat('0.00')
+      model.price_per_km_other_currency = model.price_per_km_other_dinero.getCurrency()
+      return true
+    },
+    getDistancePriceFor(type) {
+      switch (type) {
+        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS:
+          return this.invoice_default_price_per_km_dinero
+        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER:
+          return this.customer.price_per_km_dinero
+        default:
+          throw `getDistancePrice: unknown usePrice: ${distance.usePrice}`
+      }
+    },
+    getDistancePrice(distance) {
+      switch (distance.usePrice) {
+        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS:
+          return this.invoice_default_price_per_km_dinero
+        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER:
+          return this.customer.price_per_km_dinero
+        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_OTHER:
+          return distance.price_per_km_other_dinero
+        default:
+          throw `getDistancePrice: unknown usePrice: ${distance.usePrice}`
+      }
+    },
+    getDistanceCurrency(distance) {
+      switch (distance.usePrice) {
+        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS:
+          return this.default_currency
+        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER:
+          return this.customer.price_per_km_currency
+        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_OTHER:
+          return distance.price_per_km_other_currency
+        default:
+          throw `getDistanceCurrency: unknown usePrice: ${distance.usePrice}`
+      }
+    },
+    updateDistanceTotals() {
+      this.distanceUserTotals = this.distanceUserTotals.map((m) => this.updateDistanceObjTotals(m))
+      this.distanceTotal = this.getItemsTotal(this.distanceUserTotals)
+      this.distanceTotalVAT = this.getItemsTotalVAT(this.distanceUserTotals)
+    },
+    updateDistanceObjTotals(distance) {
+      const price = this.getDistancePrice(distance)
+      const currency = this.getDistanceCurrency(distance)
+      const total = price.multiply(distance.distance_total)
+      let total_with_margin = total
+      let margin = toDinero("0.00", currency)
+      if (distance.margin_perc > 0) {
+        margin = total.multiply(distance.margin_perc/100)
+        total_with_margin = total.add(margin)
+      }
+      const vat = total_with_margin.multiply(parseInt(distance.vat_type)/100)
+      distance.currency = currency
+      distance.total = total_with_margin
+      distance.vat = vat
+      distance.margin = margin
 
+      return distance
+    },
     // materials
     async updateMaterial(material_id) {
       let material = this.material_models.find((m) => m.id === material_id)
@@ -1326,6 +1693,10 @@ export default {
   margin-bottom: 8px;
 }
 .header {
+  font-size: 14px;
+  font-weight: bold;
+}
+.total-text {
   font-size: 14px;
   font-weight: bold;
 }
