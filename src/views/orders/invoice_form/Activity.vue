@@ -96,12 +96,7 @@
         </p>
       </b-col>
       <b-col cols="1">
-        <b-form-select
-          @change="updateHoursTotals"
-          :value="defaultVat"
-          v-model="activity.vat_type"
-          :options="vatTypes" size="sm"
-        ></b-form-select>
+        <VAT @vatChanged="(val) => changeVatType(activity, val)" />
       </b-col>
       <b-col cols="2">
         <Totals
@@ -116,7 +111,7 @@
         <span class="total-text">{{ $trans('Work total') }}</span>
       </b-col>
       <b-col cols="2">
-        <span class="total-text">{{ activityTotals.hours_total }}</span>
+        <span class="total-text">{{ activity_totals.hours_total }}</span>
       </b-col>
       <b-col cols="2">
         <Totals
@@ -143,6 +138,7 @@ import {
 } from "./constants";
 import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
+import VAT from "./VAT";
 
 export default {
   name: "ActivityComponent",
@@ -153,25 +149,27 @@ export default {
     Totals,
     Collapse,
     HeaderCell,
+    VAT,
+  },
+  watch: {
+    engineer_models: {
+      handler(newValue) {
+        console.log('engineer_models changed', newValue)
+        this.updateActivityTotals()
+      },
+      deep: true
+    }
   },
   props: {
-    userTotals: {
-      type: [Array],
-      default: null
-    },
-    activityTotals: {
+    activity_totals: {
       type: [Object],
       default: null
     },
-    engineer_models: {
+    user_totals: {
       type: [Array],
       default: null
     },
-    defaultVat: {
-      type: [Number],
-      default: null
-    },
-    vatTypes: {
+    engineer_models: {
       type: [Array],
       default: null
     },
@@ -183,20 +181,20 @@ export default {
       type: [Object],
       default: null
     },
-    default_currency: {
-      type: [String],
-      default: null
-    },
   },
   created() {
-    this.user_totals = this.userTotals
+    this.userTotals = this.user_totals.map((m) => this.updateUserActivityTotals(m))
+    this.activityTotal = this.getItemsTotal(this.userTotals)
+    this.activityTotalVAT = this.getItemsTotalVAT(this.userTotals)
+
     this.updateActivityTotals()
   },
   data () {
     return {
       isLoading: false,
 
-      user_totals: [],
+      default_currency: this.$store.getters.getDefaultCurrency,
+      userTotals: [],
       activityTotal: null,
       activityTotalVAT: null,
       usePriceOptionsActivity: {
@@ -218,7 +216,7 @@ export default {
     createInvoiceLines() {
       switch (this.useOnInvoiceActivitySelected) {
         case OPTION_USER_TOTALS:
-          let invoiceLines = this.activity_user_totals.map((activity) => {
+          let invoiceLines = this.userTotals.map((activity) => {
             this.createInvoiceLine(
               INVOICE_LINE_TYPE_ACTIVITY,
               `${this.$trans("Work hours")} ${this.getFullname(activity.user_id)}`,
@@ -233,7 +231,7 @@ export default {
           this.createInvoiceLine(
             INVOICE_LINE_TYPE_ACTIVITY,
             `${this.$trans("Work hours")}`,
-            this.activityTotals.hours_total,
+            this.activity_totals.hours_total,
             this.activityTotalVAT,
             this.activityTotal
           )
@@ -242,7 +240,7 @@ export default {
           this.createInvoiceLine(
             INVOICE_LINE_TYPE_ACTIVITY,
             `${this.$trans("Work hours")}`,
-            this.activityTotals.actual_work_totals.actual_work,
+            this.activity_totals.actual_work_totals.actual_work,
             this.actualWorkTotalVAT,
             this.actualWorkTotal
           )
@@ -251,15 +249,19 @@ export default {
           console.debug("not adding any activity")
       }
     },
+    changeVatType(activity, vatType) {
+      activity.vat_type = vatType
+      this.updateHoursTotals()
+    },
     updateHoursTotals() {
       this.updateActivityTotals()
       // this.updateExtraWorkTotals()
       // this.updateActualWorkTotals()
     },
     updateActivityTotals() {
-      this.user_totals = this.user_totals.map((m) => this.updateUserActivityTotals(m))
-      this.activityTotal = this.getItemsTotal(this.user_totals)
-      this.activityTotalVAT = this.getItemsTotalVAT(this.user_totals)
+      this.userTotals = this.userTotals.map((m) => this.updateUserActivityTotals(m))
+      this.activityTotal = this.getItemsTotal(this.userTotals)
+      this.activityTotalVAT = this.getItemsTotalVAT(this.userTotals)
 
       return true
     },
@@ -284,7 +286,7 @@ export default {
       return activity
     },
     setEngineerPriceOtherActivity(priceDinero, user_id) {
-      let model = this.user_totals.find((a) => a.user_id === user_id)
+      let model = this.userTotals.find((a) => a.user_id === user_id)
       model.engineer_rate_other_dinero = priceDinero
       model.engineer_rate_other = model.engineer_rate_other_dinero.toFormat('0.00')
       model.engineer_rate_other_currency = model.engineer_rate_other_dinero.getCurrency()

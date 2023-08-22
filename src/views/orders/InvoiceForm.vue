@@ -336,14 +336,11 @@
         <hr/>
 
         <ActivityComponent
-          :activity-totals="activityTotals"
-          :default-vat="invoice_default_vat"
-          :vat-types="vat_types"
+          :activity_totals="activityTotals"
           :engineer_models="engineer_models"
-          :user-totals="activity_user_totals"
+          :user_totals="activity_user_totals"
           :invoice_default_hourly_rate_dinero="invoice_default_hourly_rate_dinero"
           :customer="customer"
-          :default_currency="default_currency"
           @invoiceLinesCreated="activityInvoiceLinesCreated"
         />
 

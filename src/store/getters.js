@@ -61,4 +61,13 @@ export const getters = {
   getSettingEquipmentLocationQuickCreate(state) {
     return state.memberInfo.settings.equipment_location_quick_create
   },
+  getVATTypes(state) {
+    return state.vat_types
+  },
+  getInvoiceDefaultVat(state) {
+    return state.memberInfo.settings.invoice_default_vat
+  },
+  getDefaultCurrency(state) {
+    return state.memberInfo.settings.default_currency
+  },
 }
