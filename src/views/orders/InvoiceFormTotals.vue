@@ -2,7 +2,8 @@
   <b-container>
     <b-row>
       <b-col cols="4">
-        <span class="value-container">{{ $trans("Total") }}</span>
+        <span v-if="!isFinalTotal" class="value-container">{{ $trans("Total") }}</span>
+        <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("Total") }}</span>
       </b-col>
       <b-col cols="8">
         <b-form-input
@@ -13,9 +14,10 @@
         ></b-form-input>
       </b-col>
     </b-row>
-    <b-row v-if="showMargin">
+    <b-row v-if="!isFinalTotal">
       <b-col cols="4">
-        <span class="value-container">{{ $trans("Margin") }}</span>
+        <span v-if="!isFinalTotal" class="value-container">{{ $trans("Margin") }}</span>
+        <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("Margin") }}</span>
       </b-col>
       <b-col cols="8">
         <b-form-input
@@ -28,7 +30,8 @@
     </b-row>
     <b-row>
       <b-col cols="4">
-        <span class="value-container">{{ $trans("VAT") }}</span>
+        <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
+        <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("VAT") }}</span>
       </b-col>
       <b-col cols="8">
         <b-form-input
@@ -58,9 +61,9 @@ export default {
       type: [Object],
       default: null
     },
-    showMargin: {
+    isFinalTotal: {
       type: [Boolean],
-      default: true
+      default: false
     }
   },
 }
@@ -71,6 +74,13 @@ export default {
   padding-top: 4px;
   padding-right: 4px;
   padding-left: 4px;
+}
+.value-container-bold {
+  padding-top: 4px;
+  padding-right: 4px;
+  padding-left: 4px;
+  font-size: 14px;
+  font-weight: bold;
 }
 .input-total-used {
   width: 90px;
