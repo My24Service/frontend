@@ -29,7 +29,7 @@
       </div>
     </header>
 
-    <div class="app-detail">
+    <div class="app-detail panel">
       <SearchModal
         id="search-modal"
         ref="search-modal"
@@ -86,12 +86,12 @@
 
       <div class="overflow-auto">
         <div class="flex-columns">
-           
+
           <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
           <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
           <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
           <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
-          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>        
+          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
         </div>
         <hr/>
 

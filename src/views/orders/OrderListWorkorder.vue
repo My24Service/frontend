@@ -28,7 +28,7 @@
         </div>
       </div>
     </header>
-    <div class="app-detail">
+    <div class="app-detail panel">
 
       <SearchModal
         id="search-modal"
@@ -108,15 +108,15 @@
 
       <div class="overflow-auto">
         <div class="flex-columns">
-           
+
           <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
           <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
           <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
           <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
-          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>        
+          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
         </div>
         <hr/>
-        
+
         <ul class="listing">
           <li><!-- FIXME -->
             <div class="headings">
@@ -128,18 +128,18 @@
               <span class="order-status">status</span>
             </div>
           </li>
-          
+
           <li v-if="isLoading" class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner><br>
             <strong>{{ $trans('loading orders') }}</strong>
           </li>
-          
+
           <li v-for="order in orders" :key="order.id">
             <OrderTableInfo
             v-bind:order="order"/>
           </li>
         </ul>
-          
+
         <Pagination
           v-if="!isLoading"
           :model="this.model"

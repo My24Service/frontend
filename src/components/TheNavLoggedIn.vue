@@ -71,7 +71,7 @@
     >
       <p class="my-4">{{ $trans('Are you sure you want to log out?') }}</p>
     </b-modal>
-    
+
     <b-modal
     id="lang-modal"
     ref="lang-modal"
@@ -85,15 +85,16 @@
       <NavBrand />
       <NavItems />
       <hr />
-      <b-nav-item-dropdown v-bind:text="username" right>
+      <b-nav-item-dropdown dropup v-bind:text="username" right>
         <template slot="button-content">
           <b-icon icon="person-circle"></b-icon>
           <span>{{ username }}</span>
         </template>
         <li style="text-align: center;">
-          {{ memberInfo.name }}<br><br>
+          {{ memberInfo.name }}
         </li>
         <li><span class='dropdown-item'><Version /></span></li>
+        <b-dropdown-divider></b-dropdown-divider>
         <b-dropdown-item v-b-modal.lang-modal>{{ $trans('App Language') }}</b-dropdown-item>
         <b-dropdown-item v-b-modal.password-change-modal>{{ $trans('Change password') }}</b-dropdown-item>
         <b-dropdown-item @click="logout">{{ $trans('Logout') }}</b-dropdown-item>

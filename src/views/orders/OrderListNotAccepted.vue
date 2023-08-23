@@ -29,7 +29,7 @@
       </div>
     </header>
 
-    <div class="app-detail">
+    <div class="app-detail panel">
       <b-modal
         id="delete-order-modal"
         ref="delete-order-modal"
@@ -75,7 +75,7 @@
 
       <div class="overflow-auto">
         <div class="flex-columns">
-           
+
           <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
           <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
           <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
@@ -96,12 +96,12 @@
               <span class="order-status">status</span>
             </div>
           </li>
-          
+
           <li v-if="isLoading" class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner><br>
             <strong>{{ $trans('loading orders') }}</strong>
           </li>
-          
+
           <li v-for="order in orders" :key="order.id">
             <OrderTableInfo
             v-bind:order="order"
