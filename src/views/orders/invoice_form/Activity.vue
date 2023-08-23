@@ -78,7 +78,7 @@
               <PriceInput
                 v-model="activity.engineer_rate_other"
                 :currency="activity.engineer_rate_other_currency"
-                @priceChanged="(val) => setEngineerPriceOtherActivity(val, activity.user_id) && updateHoursTotals()"
+                @priceChanged="(val) => setEngineerRateOtherActivity(val, activity)"
               />
             </p>
           </b-form-radio>
@@ -165,16 +165,8 @@ export default {
       type: [Object],
       default: null
     },
-    user_totals: {
-      type: [Array],
-      default: null
-    },
     engineer_models: {
       type: [Array],
-      default: null
-    },
-    invoice_default_hourly_rate_dinero: {
-      type: [Object],
       default: null
     },
     customer: {
@@ -183,9 +175,18 @@ export default {
     },
   },
   created() {
-    this.userTotals = this.user_totals.map((m) => this.updateUserActivityTotals(m))
-    this.activityTotal = this.getItemsTotal(this.userTotals)
-    this.activityTotalVAT = this.getItemsTotalVAT(this.userTotals)
+    this.userTotals = this.activity_totals.user_totals.map((a) => ({
+      ...a,
+      vat_type: this.invoice_default_vat,
+      margin_perc: this.invoice_default_margin,
+      engineer_rate: this.getEngineerRate(a.user_id),
+      engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
+      engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
+      engineer_rate_other: "0.00",
+      engineer_rate_other_currency: this.default_currency,
+      engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
+      usePrice: this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER,
+    }))
 
     this.updateActivityTotals()
   },
@@ -194,15 +195,12 @@ export default {
       isLoading: false,
 
       default_currency: this.$store.getters.getDefaultCurrency,
+      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
+
       userTotals: [],
       activityTotal: null,
       activityTotalVAT: null,
-      usePriceOptionsActivity: {
-        ACTIVITY_USE_PRICE_ENGINEER: 'engineer',
-        ACTIVITY_USE_PRICE_SETTINGS: 'settings',
-        ACTIVITY_USE_PRICE_CUSTOMER: 'customer',
-        ACTIVITY_USE_PRICE_OTHER: 'other',
-      },
 
       useOnInvoiceActivityOptions: [
         { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
@@ -285,12 +283,12 @@ export default {
 
       return activity
     },
-    setEngineerPriceOtherActivity(priceDinero, user_id) {
-      let model = this.userTotals.find((a) => a.user_id === user_id)
-      model.engineer_rate_other_dinero = priceDinero
-      model.engineer_rate_other = model.engineer_rate_other_dinero.toFormat('0.00')
-      model.engineer_rate_other_currency = model.engineer_rate_other_dinero.getCurrency()
-      return true
+    setEngineerRateOtherActivity(priceDinero, activity) {
+      activity.engineer_rate_other_dinero = priceDinero
+      activity.engineer_rate_other = activity.engineer_rate_other_dinero.toFormat('0.00')
+      activity.engineer_rate_other_currency = activity.engineer_rate_other_dinero.getCurrency()
+
+      this.updateHoursTotals()
     },
   }
 }

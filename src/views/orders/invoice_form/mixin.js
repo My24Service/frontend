@@ -2,7 +2,23 @@ import {toDinero} from "../../../utils";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 
 let invoiceMixin = {
+  data() {
+    return {
+      usePriceOptionsActivity: {
+        ACTIVITY_USE_PRICE_ENGINEER: 'engineer',
+        ACTIVITY_USE_PRICE_SETTINGS: 'settings',
+        ACTIVITY_USE_PRICE_CUSTOMER: 'customer',
+        ACTIVITY_USE_PRICE_OTHER: 'other',
+      },
+    }
+  },
   methods: {
+    getInvoiceDefaultHourlyRateDinero() {
+      return toDinero(
+        this.$store.getters.getInvoiceDefaultHourlyRate,
+        this.$store.getters.getDefaultCurrency
+      )
+    },
     getItemsTotal(items) {
       return items.reduce(
         (total, m) => (total.add(m.total)),
@@ -28,7 +44,7 @@ let invoiceMixin = {
           case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER:
             return this.customer.hourly_rate_engineer_dinero
           case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS:
-            return this.invoice_default_hourly_rate_dinero
+            return this.getInvoiceDefaultHourlyRateDinero()
           default:
             throw `unknown usePrice for engineer: ${usePrice}`
         }
@@ -45,7 +61,7 @@ let invoiceMixin = {
           case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER:
             return this.customer.hourly_rate_engineer_dinero
           case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS:
-            return this.invoice_default_hourly_rate_dinero
+            return this.getInvoiceDefaultHourlyRateDinero()
           case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER:
             return activity.engineer_rate_other_dinero
           default:
