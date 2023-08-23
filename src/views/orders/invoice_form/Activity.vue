@@ -154,7 +154,14 @@ export default {
   watch: {
     engineer_models: {
       handler(newValue) {
-        console.log('engineer_models changed', newValue)
+        // console.log('engineer_models changed', newValue)
+        this.updateActivityTotals()
+      },
+      deep: true
+    },
+    customer: {
+      handler(newValue) {
+        // console.log('customer changed', newValue)
         this.updateActivityTotals()
       },
       deep: true
