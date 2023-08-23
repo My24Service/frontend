@@ -55,36 +55,13 @@
           {{ activity.hours_total }}
         </b-col>
         <b-col cols="3">
-          <b-form-radio-group
-            @change="updateHoursTotals"
-            v-model="activity.usePrice"
-          >
-            <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER">
-              {{ $trans('Engineer') }}
-              {{ getEngineerRateFor(activity, usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER).toFormat("$0.00") }}
-            </b-form-radio>
-
-            <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS">
-              {{ $trans('Settings') }}
-              {{ getEngineerRateFor(activity, usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS).toFormat("$0.00") }}
-            </b-form-radio>
-
-            <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER">
-              {{ $trans('Customer') }}
-              {{ getEngineerRateFor(activity, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-            </b-form-radio>
-
-            <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER">
-              <p class="flex">
-                {{ $trans("Other") }}:&nbsp;&nbsp;
-                <PriceInput
-                  v-model="activity.engineer_rate_other"
-                  :currency="activity.engineer_rate_other_currency"
-                  @priceChanged="(val) => setEngineerRateOtherActivity(val, activity)"
-                />
-              </p>
-            </b-form-radio>
-          </b-form-radio-group>
+          <EngineerPriceRadio
+            :item="activity"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @otherPriceChanged="(dineroVal) => setEngineerRateOther(dineroVal, activity)"
+            @radioChanged="(usePrice) => engineerPriceRadioChanged(activity, usePrice)"
+          />
         </b-col>
         <b-col cols="1">
           <p class="flex">
@@ -117,9 +94,9 @@
         </b-col>
         <b-col cols="2">
           <Totals
-            :total="activityTotal"
+            :total="total"
             :is-final-total="true"
-            :vat="activityTotalVAT"
+            :vat="totalVAT"
           />
         </b-col>
       </b-row>
@@ -139,7 +116,6 @@
 </template>
 
 <script>
-import PriceInput from "../../../components/PriceInput";
 import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
@@ -153,17 +129,18 @@ import {
 import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
+import EngineerPriceRadio from "./EngineerPriceRadio";
 
 export default {
   name: "ActivityComponent",
   emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
   components: {
-    PriceInput,
     Totals,
     Collapse,
     HeaderCell,
     VAT,
+    EngineerPriceRadio,
   },
   watch: {
     engineer_models: {
@@ -222,8 +199,8 @@ export default {
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
       userTotals: [],
-      activityTotal: null,
-      activityTotalVAT: null,
+      total: null,
+      totalVAT: null,
 
       useOnInvoiceActivityOptions: [
         { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
@@ -253,8 +230,8 @@ export default {
             INVOICE_LINE_TYPE_ACTIVITY,
             `${this.$trans("Work hours")}`,
             this.activity_totals.hours_total,
-            this.activityTotalVAT,
-            this.activityTotal
+            this.totalVAT,
+            this.total
           )
           break
         case OPTION_ACTIVITY_ACTUAL_WORK:
@@ -270,6 +247,10 @@ export default {
           console.debug("not adding any activity")
       }
     },
+    engineerPriceRadioChanged(activity, usePrice) {
+      activity.usePrice = usePrice
+      this.updateHoursTotals()
+    },
     changeVatType(activity, vatType) {
       activity.vat_type = vatType
       this.updateHoursTotals()
@@ -281,8 +262,8 @@ export default {
     },
     updateActivityTotals() {
       this.userTotals = this.userTotals.map((m) => this.updateUserActivityTotals(m))
-      this.activityTotal = this.getItemsTotal(this.userTotals)
-      this.activityTotalVAT = this.getItemsTotalVAT(this.userTotals)
+      this.total = this.getItemsTotal(this.userTotals)
+      this.totalVAT = this.getItemsTotalVAT(this.userTotals)
 
       return true
     },
@@ -306,7 +287,7 @@ export default {
 
       return activity
     },
-    setEngineerRateOtherActivity(priceDinero, activity) {
+    setEngineerRateOther(priceDinero, activity) {
       activity.engineer_rate_other_dinero = priceDinero
       activity.engineer_rate_other = activity.engineer_rate_other_dinero.toFormat('0.00')
       activity.engineer_rate_other_currency = activity.engineer_rate_other_dinero.getCurrency()
@@ -336,5 +317,4 @@ export default {
   font-size: 14px;
   font-weight: bold;
 }
-
 </style>
