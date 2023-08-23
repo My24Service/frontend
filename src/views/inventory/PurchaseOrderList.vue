@@ -1,7 +1,7 @@
 <template>
   <div class="app-page">
     <header>
-
+      <h3>Purchase orders</h3>
     </header>
     <SearchModal
       id="search-modal"
@@ -121,7 +121,7 @@
           </div>
         </template>
       </b-table>
-      
+
       <Pagination
         v-if="!isLoading"
         :model="this.model"
