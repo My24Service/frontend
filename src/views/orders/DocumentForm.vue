@@ -1,74 +1,86 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <div v-if="isCreate">
-          <h2>{{ $trans('New document') }}</h2>
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Choose files')"
-          >
-            <b-form-file
-              v-model="files"
-              multiple
-              v-bind:placeholder="$trans('Choose a file or drop it here...')"
-              @input="filesSelected"
-            ></b-form-file>
-          </b-form-group>
+    <div class="app-page">
+      <header>
+        <div class='page-title'>
+          <h3>
+            <b-icon icon="file-earmark-text-fill"></b-icon>
+            <router-link :to="{name: 'order-list'}">Orders</router-link> /
+            <router-link :to="{name: 'order-view', params: {pk:orderPk}}">#<strong>{{ orderPk }}</strong></router-link> /
+            docs
+          </h3>
+        </div>
+      </header>
+      <div class="panel page-detail">
+        <b-form>
+          <div v-if="isCreate">
+            <h2>{{ $trans('New document') }}</h2>
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Choose files')"
+            >
+              <b-form-file
+                v-model="files"
+                multiple
+                v-bind:placeholder="$trans('Choose a file or drop it here...')"
+                @input="filesSelected"
+              ></b-form-file>
+            </b-form-group>
 
-          <b-row>
-            <b-col cols="12">
-              <b-table v-if="documents.length > 0" small :fields="documentFields" :items="documents" responsive="md">
-              </b-table>
-            </b-col>
-          </b-row>
-        </div>
-        <div v-if="!isCreate">
-          <h2>{{ $trans('Edit document') }}</h2>
-          <b-row>
-            <b-col cols="12" role="group">
-              {{ document.file }}
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Name')"
-                label-for="order-document-name"
-              >
-                <b-form-input
-                  id="order-document-name"
-                  size="sm"
-                  v-model="document.name"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="8" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Description')"
-                label-for="order-document-description"
-              >
-                <b-form-textarea
-                  id="order-document-description"
-                  v-model="document.description"
-                  rows="1"
-                ></b-form-textarea>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </div>
+            <b-row>
+              <b-col cols="12">
+                <b-table v-if="documents.length > 0" small :fields="documentFields" :items="documents" responsive="md">
+                </b-table>
+              </b-col>
+            </b-row>
+          </div>
+          <div v-if="!isCreate">
+            <h2>{{ $trans('Edit document') }}</h2>
+            <b-row>
+              <b-col cols="12" role="group">
+                {{ document.file }}
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Name')"
+                  label-for="order-document-name"
+                >
+                  <b-form-input
+                    id="order-document-name"
+                    size="sm"
+                    v-model="document.name"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="8" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Description')"
+                  label-for="order-document-description"
+                >
+                  <b-form-textarea
+                    id="order-document-description"
+                    v-model="document.description"
+                    rows="1"
+                  ></b-form-textarea>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </div>
 
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
-          </footer>
-        </div>
-      </b-form>
+          <div class="mx-auto">
+            <footer class="modal-footer">
+              <b-button @click="cancelForm" type="button" variant="secondary">
+                {{ $trans('Cancel') }}</b-button>
+              <b-button @click="submitForm" type="button" variant="primary">
+                {{ $trans('Submit') }}</b-button>
+            </footer>
+          </div>
+        </b-form>
+      </div>
     </div>
   </b-overlay>
 </template>

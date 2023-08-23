@@ -6,18 +6,20 @@
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
           <router-link :to="{name: 'order-list'}">Orders</router-link> /
-          <router-link :to="{name: 'order-view', params: {pk:orderPk}}">#<strong>{{ orderPk }}</strong></router-link> / 
+          <router-link :to="{name: 'order-view', params: {pk:orderPk}}">#<strong>{{ orderPk }}</strong></router-link> /
           docs
         </h3>
+        <div class="toolbar">
+          <router-link
+            class="btn button"
+            :to="{name: 'order-document-add', params: {orderPk: this.orderPk}}"
+            v-bind:title="$trans('New document')"
+            >{{  $trans('New document') }}</router-link>
+        </div>
       </div>
     </header>
-    
+
     <div class="panel overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Document')"
-      />
       <b-table
         small
         id="document-table"
@@ -67,7 +69,13 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Document')"
+      />
     </div>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"

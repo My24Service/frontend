@@ -29,7 +29,7 @@
       </div>
     </header>
 
-    <div class="app-detail">
+    <div class="app-detail panel">
       <SearchModal
         id="search-modal"
         ref="search-modal"
