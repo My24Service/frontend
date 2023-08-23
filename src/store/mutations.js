@@ -13,7 +13,6 @@ import {
   SET_UNACCEPTED_COUNT,
   SET_MAINTENANCE_PRODUCTS,
   SET_STREAM_INFO,
-  SET_VAT_TYPES,
 } from './mutation-types'
 
 export const mutations = {
@@ -54,7 +53,4 @@ export const mutations = {
   [SET_STATUSCODES](state, statuscodes) {
     state.statuscodes = statuscodes
   },
-  [SET_VAT_TYPES](state, vat_types) {
-    state.vat_types = vat_types
-  }
 };

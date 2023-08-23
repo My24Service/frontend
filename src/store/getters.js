@@ -62,10 +62,16 @@ export const getters = {
     return state.memberInfo.settings.equipment_location_quick_create
   },
   getVATTypes(state) {
-    return state.vat_types
+    return state.memberInfo.vat_types
   },
   getInvoiceDefaultVat(state) {
     return state.memberInfo.settings.invoice_default_vat
+  },
+  getInvoiceDefaultMargin(state) {
+    return state.memberInfo.settings.invoice_default_margin
+  },
+  getInvoiceDefaultHourlyRate(state) {
+    return state.memberInfo.settings.invoice_default_hourly_rate
   },
   getDefaultCurrency(state) {
     return state.memberInfo.settings.default_currency

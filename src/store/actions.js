@@ -13,10 +13,7 @@ import {
   SET_UNACCEPTED_COUNT,
   SET_MAINTENANCE_PRODUCTS,
   SET_STREAM_INFO,
-  SET_VAT_TYPES
 } from './mutation-types'
-import accountModel from "../models/account/Account";
-import memberModel from "../models/member/Member";
 
 export const actions = {
   setStreamInfo({commit}, streamInfo) {
@@ -39,7 +36,6 @@ export const actions = {
       try {
         const languageVars = await my24.getLanguageVars()
         const initialData = await my24.getInitialData()
-        const vat_types = await memberModel.getVATTypes()
 
         const memberContract = !isEmpty(initialData.memberInfo) && initialData.memberInfo.contract ? my24.getModelsFromString(initialData.memberInfo.contract.member_contract) : {}
 
@@ -53,7 +49,6 @@ export const actions = {
         commit(SET_MEMBER_INFO, initialData.memberInfo)
         commit(SET_MEMBER_CONTRACT, memberContract)
         commit(SET_STATUSCODES, initialData.statuscodes)
-        commit(SET_VAT_TYPES, vat_types)
         resolve()
       } catch(e) {
         reject(e)
