@@ -86,7 +86,6 @@
 
       <div class="overflow-auto">
         <div class="flex-columns">
-
           <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
           <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
           <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
