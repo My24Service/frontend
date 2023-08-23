@@ -105,8 +105,8 @@
       <h3>{{ $trans("What to add as invoice lines")}}</h3>
         <b-form-group>
           <b-form-radio-group
-            v-model="useOnInvoiceActivitySelected"
-            :options="useOnInvoiceActivityOptions"
+            v-model="useOnInvoiceSelected"
+            :options="useOnInvoiceOptions"
           ></b-form-radio-group>
         </b-form-group>
       </div>
@@ -146,14 +146,14 @@ export default {
     engineer_models: {
       handler(newValue) {
         // console.log('engineer_models changed', newValue)
-        this.updateActivityTotals()
+        this.updateTotals()
       },
       deep: true
     },
     customer: {
       handler(newValue) {
         // console.log('customer changed', newValue)
-        this.updateActivityTotals()
+        this.updateTotals()
       },
       deep: true
     }
@@ -188,7 +188,7 @@ export default {
       usePrice: this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER,
     }))
 
-    this.updateActivityTotals()
+    this.updateTotals()
   },
   data () {
     return {
@@ -202,12 +202,12 @@ export default {
       total: null,
       totalVAT: null,
 
-      useOnInvoiceActivityOptions: [
+      useOnInvoiceOptions: [
         { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
         { text: this.$trans('Activity totals'), value: OPTION_ACTIVITY_ACTIVITY_TOTALS },
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
-      useOnInvoiceActivitySelected: null,
+      useOnInvoiceSelected: null,
     }
   },
   methods: {
@@ -256,18 +256,18 @@ export default {
       this.updateHoursTotals()
     },
     updateHoursTotals() {
-      this.updateActivityTotals()
+      this.updateTotals()
       // this.updateExtraWorkTotals()
       // this.updateActualWorkTotals()
     },
-    updateActivityTotals() {
-      this.userTotals = this.userTotals.map((m) => this.updateUserActivityTotals(m))
+    updateTotals() {
+      this.userTotals = this.userTotals.map((m) => this.updateUserTotals(m))
       this.total = this.getItemsTotal(this.userTotals)
       this.totalVAT = this.getItemsTotalVAT(this.userTotals)
 
       return true
     },
-    updateUserActivityTotals(activity) {
+    updateUserTotals(activity) {
       const price = this.getSelectedEngineerRate(activity)
       const currency = this.getSelectedEngineerRateCurrency(activity)
       const hours_parts = activity.hours_total.split(':')
