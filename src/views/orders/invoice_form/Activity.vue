@@ -66,6 +66,7 @@
         <b-col cols="1">
           <p class="flex">
             <b-form-input
+              @blur="updateTotals"
               v-model="activity.margin_perc"
               size="sm"
               class="input-margin"
@@ -142,13 +143,6 @@ export default {
     EngineerPriceRadio,
   },
   watch: {
-    // userTotals: {
-    //   handler(newValue) {
-    //     // console.log('engineer_models changed', newValue)
-    //     this.updateTotals()
-    //   },
-    //   deep: true
-    // },
     engineer_models: {
       handler(newValue) {
         // console.log('engineer_models changed', newValue)
@@ -259,11 +253,11 @@ export default {
     },
     engineerPriceRadioChanged(activity, usePrice) {
       activity.usePrice = usePrice
-      this.updateHoursTotals()
+      this.updateTotals()
     },
     changeVatType(activity, vatType) {
       activity.vat_type = vatType
-      this.updateHoursTotals()
+      this.updateTotals()
     },
     updateTotals() {
       this.userTotals = this.userTotals.map((m) => this.updateHoursUserTotals(m))
