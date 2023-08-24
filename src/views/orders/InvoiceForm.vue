@@ -732,9 +732,10 @@ export default {
       member: null,
       invoice_id: null,
       vat_types: [],
-      default_currency: null,
-      invoice_default_margin: null,
-      invoice_default_vat: null,
+
+      default_currency: this.$store.getters.getDefaultCurrency,
+      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
       invoice_default_partner_hourly_rate: null,
       invoice_default_partner_hourly_rate_dinero: null,
@@ -832,9 +833,6 @@ export default {
       this.order = invoiceData.order
       this.member = invoiceData.member
       this.invoice_id = invoiceData.invoice_id
-      this.default_currency = invoiceData.default_currency
-      this.invoice_default_margin = invoiceData.invoice_default_margin
-      this.invoice_default_vat = invoiceData.invoice_default_vat
 
       this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
       this.invoice_default_price_per_km_dinero = toDinero(
