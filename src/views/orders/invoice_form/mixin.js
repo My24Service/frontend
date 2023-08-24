@@ -13,6 +13,33 @@ let invoiceMixin = {
     }
   },
   methods: {
+    setEngineerRateOther(priceDinero, item) {
+      item.engineer_rate_other_dinero = priceDinero
+      item.engineer_rate_other = item.engineer_rate_other_dinero.toFormat('0.00')
+      item.engineer_rate_other_currency = item.engineer_rate_other_dinero.getCurrency()
+
+      return true
+    },
+    updateHoursUserTotals(item) {
+      const price = this.getSelectedEngineerRate(item)
+      const currency = this.getSelectedEngineerRateCurrency(item)
+      const hours_parts = item.hours_total.split(':')
+      let total = price.multiply(hours_parts[0])
+      total = total.add(price.multiply(hours_parts[1]/60))
+      let total_with_margin = total
+      let margin = toDinero("0.00", currency)
+      if (item.margin_perc > 0) {
+        margin = total.multiply(item.margin_perc/100)
+        total_with_margin = total.add(margin)
+      }
+      const vat = total_with_margin.multiply(parseInt(item.vat_type)/100)
+      item.currency = currency
+      item.total = total_with_margin
+      item.vat = vat
+      item.margin = margin
+
+      return item
+    },
     getInvoiceDefaultHourlyRateDinero() {
       return toDinero(
         this.$store.getters.getInvoiceDefaultHourlyRate,
