@@ -236,102 +236,105 @@
 
         <hr/>
 
-        <b-container fluid>
-          <h3>{{ $trans("Used materials") }}</h3>
-          <b-row>
-            <b-col cols="2" class="header">
-              {{ $trans("Engineer") }}
-            </b-col>
-            <b-col cols="2" class="header">
-              {{ $trans("Material") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Amount") }}
-            </b-col>
-            <b-col cols="3" class="header">
-              {{ $trans("Use price") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Margin") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("VAT type") }}
-            </b-col>
-            <b-col cols="2" />
-          </b-row>
-          <b-row v-for="material in used_materials" :key="material.id" class="material_row">
-            <b-col cols="2">
-              {{ material.full_name }}
-            </b-col>
-            <b-col cols="2">
-              {{ material.name }}
-            </b-col>
-            <b-col cols="1">
-              {{ material.amount }}
-            </b-col>
-            <b-col cols="3">
-              <b-form-radio-group
-                @change="updateMaterialTotals()"
-                v-model="material.usePrice"
-              >
-                <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE">
-                  {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE).toFormat('$0.00') }}
-                </b-form-radio>
+        <Collapse
+          :title="$trans('Used materials')"
+        >
+          <b-container fluid>
+            <b-row>
+              <b-col cols="2" class="header">
+                {{ $trans("Engineer") }}
+              </b-col>
+              <b-col cols="2" class="header">
+                {{ $trans("Material") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("Amount") }}
+              </b-col>
+              <b-col cols="3" class="header">
+                {{ $trans("Use price") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("Margin") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("VAT type") }}
+              </b-col>
+              <b-col cols="2" />
+            </b-row>
+            <b-row v-for="material in used_materials" :key="material.id" class="material_row">
+              <b-col cols="2">
+                {{ material.full_name }}
+              </b-col>
+              <b-col cols="2">
+                {{ material.name }}
+              </b-col>
+              <b-col cols="1">
+                {{ material.amount }}
+              </b-col>
+              <b-col cols="3">
+                <b-form-radio-group
+                  @change="updateMaterialTotals()"
+                  v-model="material.usePrice"
+                >
+                  <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE">
+                    {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE).toFormat('$0.00') }}
+                  </b-form-radio>
 
-                <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING">
-                  {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING).toFormat('$0.00') }}
-                </b-form-radio>
+                  <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING">
+                    {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING).toFormat('$0.00') }}
+                  </b-form-radio>
 
-                <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER">
-                  <p class="flex">
-                    {{ $trans("Other") }}:&nbsp;&nbsp;
-                    <PriceInput
-                      v-model="material.price_purchase_ex_other"
-                      :currency="material.price_purchase_ex_other_currency"
-                      @priceChanged="(val) => setPurchasePriceOther(val, material.material_id) && updateMaterialTotals()"
-                    />
-                  </p>
-                </b-form-radio>
-              </b-form-radio-group>
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
-                <b-form-input
-                  @blur="updateMaterialTotals()"
-                  v-model="material.margin_perc"
-                  size="sm"
-                  class="input-margin"
-                ></b-form-input>
-                <span class="percentage-container">%</span>
-              </p>
-            </b-col>
-            <b-col cols="1">
-              <b-form-select
-                @change="updateMaterialTotals"
-                :value="invoice_default_vat"
-                v-model="material.vat_type"
-                :options="vat_types" size="sm"
-              ></b-form-select>
-            </b-col>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="material.total"
-                :margin="material.margin"
-                :vat="material.vat"
-              />
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="10"/>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="materialsTotal"
-                :is-final-total="true"
-                :vat="materialsTotalVAT"
-              />
-            </b-col>
-          </b-row>
-        </b-container>
+                  <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER">
+                    <p class="flex">
+                      {{ $trans("Other") }}:&nbsp;&nbsp;
+                      <PriceInput
+                        v-model="material.price_purchase_ex_other"
+                        :currency="material.price_purchase_ex_other_currency"
+                        @priceChanged="(val) => setPurchasePriceOther(val, material.material_id) && updateMaterialTotals()"
+                      />
+                    </p>
+                  </b-form-radio>
+                </b-form-radio-group>
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-form-input
+                    @blur="updateMaterialTotals()"
+                    v-model="material.margin_perc"
+                    size="sm"
+                    class="input-margin"
+                  ></b-form-input>
+                  <span class="percentage-container">%</span>
+                </p>
+              </b-col>
+              <b-col cols="1">
+                <b-form-select
+                  @change="updateMaterialTotals"
+                  :value="invoice_default_vat"
+                  v-model="material.vat_type"
+                  :options="vat_types" size="sm"
+                ></b-form-select>
+              </b-col>
+              <b-col cols="2">
+                <InvoiceFormTotals
+                  :total="material.total"
+                  :margin="material.margin"
+                  :vat="material.vat"
+                />
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="10"/>
+              <b-col cols="2">
+                <InvoiceFormTotals
+                  :total="materialsTotal"
+                  :is-final-total="true"
+                  :vat="materialsTotalVAT"
+                />
+              </b-col>
+            </b-row>
+          </b-container>
+        </Collapse>
 
         <hr/>
 
@@ -344,110 +347,114 @@
 
         <hr/>
 
-        <b-container fluid>
-          <h3>{{ $trans("Distance") }}</h3>
-          <b-row>
-            <b-col cols="2" class="header">
-              {{ $trans("Engineer") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("To") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Back") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Total") }}
-            </b-col>
-            <b-col cols="3" class="header">
-              {{ $trans("Rate") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Margin") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("VAT type") }}
-            </b-col>
-            <b-col cols="2" />
-          </b-row>
-          <b-row v-for="distance in distanceUserTotals" :key="distance.user_id" class="material_row">
-            <b-col cols="2">
-              {{ getFullname(distance.user_id) }}
-            </b-col>
-            <b-col cols="1">
-              {{ distance.distance_to_total }}
-            </b-col>
-            <b-col cols="1">
-              {{ distance.distance_back_total }}
-            </b-col>
-            <b-col cols="1">
-              {{ distance.distance_total }}
-            </b-col>
-            <b-col cols="3">
-              <b-form-radio-group
-                @change="updateDistanceTotals"
-                v-model="distance.usePrice"
-              >
-                <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS">
-                  {{ $trans('Settings') }}
-                  {{ getDistancePriceFor(usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS).toFormat("$0.00") }}
-                </b-form-radio>
+        <Collapse
+          :title="$trans('Distance')"
+        >
+          <b-container fluid>
+            <h3>{{ $trans("Distance") }}</h3>
+            <b-row>
+              <b-col cols="2" class="header">
+                {{ $trans("Engineer") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("To") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("Back") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("Total") }}
+              </b-col>
+              <b-col cols="3" class="header">
+                {{ $trans("Rate") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("Margin") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("VAT type") }}
+              </b-col>
+              <b-col cols="2" />
+            </b-row>
+            <b-row v-for="distance in distanceUserTotals" :key="distance.user_id" class="material_row">
+              <b-col cols="2">
+                {{ getFullname(distance.user_id) }}
+              </b-col>
+              <b-col cols="1">
+                {{ distance.distance_to_total }}
+              </b-col>
+              <b-col cols="1">
+                {{ distance.distance_back_total }}
+              </b-col>
+              <b-col cols="1">
+                {{ distance.distance_total }}
+              </b-col>
+              <b-col cols="3">
+                <b-form-radio-group
+                  @change="updateDistanceTotals"
+                  v-model="distance.usePrice"
+                >
+                  <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS">
+                    {{ $trans('Settings') }}
+                    {{ getDistancePriceFor(usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                  </b-form-radio>
 
-                <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER">
-                  {{ $trans('Customer') }}
-                  {{ getDistancePriceFor(usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                </b-form-radio>
+                  <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER">
+                    {{ $trans('Customer') }}
+                    {{ getDistancePriceFor(usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                  </b-form-radio>
 
-                <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_OTHER">
-                  <p class="flex">
-                    {{ $trans("Other") }}:&nbsp;&nbsp;
-                    <PriceInput
-                      v-model="distance.price_per_km_other"
-                      :currency="distance.price_per_km_other_currency"
-                      @priceChanged="(val) => setDistancePriceOther(val, distance.user_id) && updateDistanceTotals()"
-                    />
-                  </p>
-                </b-form-radio>
-              </b-form-radio-group>
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
-                <b-form-input
-                  @blur="updateDistanceTotals"
-                  v-model="distance.margin_perc"
-                  size="sm"
-                  class="input-margin"
-                ></b-form-input>
-                <span class="percentage-container">%</span>
-              </p>
-            </b-col>
-            <b-col cols="1">
-              <b-form-select
-                @change="updateDistanceTotals"
-                :value="invoice_default_vat"
-                v-model="distance.vat_type"
-                :options="vat_types" size="sm"
-              ></b-form-select>
-            </b-col>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="distance.total"
-                :margin="distance.margin"
-                :vat="distance.vat"
-              />
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="10"/>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="distanceTotal"
-                :is-final-total="true"
-                :vat="distanceTotalVAT"
-              />
-            </b-col>
-          </b-row>
-        </b-container>
+                  <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_OTHER">
+                    <p class="flex">
+                      {{ $trans("Other") }}:&nbsp;&nbsp;
+                      <PriceInput
+                        v-model="distance.price_per_km_other"
+                        :currency="distance.price_per_km_other_currency"
+                        @priceChanged="(val) => setDistancePriceOther(val, distance.user_id) && updateDistanceTotals()"
+                      />
+                    </p>
+                  </b-form-radio>
+                </b-form-radio-group>
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-form-input
+                    @blur="updateDistanceTotals"
+                    v-model="distance.margin_perc"
+                    size="sm"
+                    class="input-margin"
+                  ></b-form-input>
+                  <span class="percentage-container">%</span>
+                </p>
+              </b-col>
+              <b-col cols="1">
+                <b-form-select
+                  @change="updateDistanceTotals"
+                  :value="invoice_default_vat"
+                  v-model="distance.vat_type"
+                  :options="vat_types" size="sm"
+                ></b-form-select>
+              </b-col>
+              <b-col cols="2">
+                <InvoiceFormTotals
+                  :total="distance.total"
+                  :margin="distance.margin"
+                  :vat="distance.vat"
+                />
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="10"/>
+              <b-col cols="2">
+                <InvoiceFormTotals
+                  :total="distanceTotal"
+                  :is-final-total="true"
+                  :vat="distanceTotalVAT"
+                />
+              </b-col>
+            </b-row>
+          </b-container>
+        </Collapse>
 
         <hr/>
 
@@ -460,102 +467,105 @@
 
         <hr/>
 
-        <b-container fluid>
-          <h3>{{ $trans("Actual work") }}</h3>
-          <b-row>
-            <b-col cols="3" class="header">
-              {{ $trans("Engineer") }}
-            </b-col>
-            <b-col cols="2" class="header">
-              {{ $trans("Hours") }}
-            </b-col>
-            <b-col cols="3" class="header">
-              {{ $trans("Engineer rate") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Margin") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("VAT type") }}
-            </b-col>
-            <b-col cols="2" />
-          </b-row>
-          <b-row v-for="actual_work in actualWorkUserTotals" :key="actual_work.user_id" class="material_row">
-            <b-col cols="3">
-              {{ getFullname(actual_work.user_id) }}
-            </b-col>
-            <b-col cols="2">
-              {{ actual_work.work_total }}
-            </b-col>
-            <b-col cols="3">
-              <b-form-radio-group
-                @change="updateActualWorkTotals"
-                v-model="actual_work.usePrice"
-              >
-                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER">
-                  {{ $trans('Engineer') }}
-                  {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                </b-form-radio>
+        <Collapse
+          :title="$trans('Actual work')"
+        >
+          <b-container fluid>
+            <b-row>
+              <b-col cols="3" class="header">
+                {{ $trans("Engineer") }}
+              </b-col>
+              <b-col cols="2" class="header">
+                {{ $trans("Hours") }}
+              </b-col>
+              <b-col cols="3" class="header">
+                {{ $trans("Engineer rate") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("Margin") }}
+              </b-col>
+              <b-col cols="1" class="header">
+                {{ $trans("VAT type") }}
+              </b-col>
+              <b-col cols="2" />
+            </b-row>
+            <b-row v-for="actual_work in actualWorkUserTotals" :key="actual_work.user_id" class="material_row">
+              <b-col cols="3">
+                {{ getFullname(actual_work.user_id) }}
+              </b-col>
+              <b-col cols="2">
+                {{ actual_work.work_total }}
+              </b-col>
+              <b-col cols="3">
+                <b-form-radio-group
+                  @change="updateActualWorkTotals"
+                  v-model="actual_work.usePrice"
+                >
+                  <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER">
+                    {{ $trans('Engineer') }}
+                    {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                  </b-form-radio>
 
-                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS">
-                  {{ $trans('Settings') }}
-                  {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS).toFormat("$0.00") }}
-                </b-form-radio>
+                  <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS">
+                    {{ $trans('Settings') }}
+                    {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                  </b-form-radio>
 
-                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER">
-                  {{ $trans('Customer') }}
-                  {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                </b-form-radio>
+                  <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER">
+                    {{ $trans('Customer') }}
+                    {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                  </b-form-radio>
 
-                <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER">
-                  <p class="flex">
-                    {{ $trans("Other") }}:&nbsp;&nbsp;
-                    <PriceInput
-                      v-model="actual_work.engineer_rate_other"
-                      :currency="actual_work.engineer_rate_other_currency"
-                      @priceChanged="(val) => setEngineerPriceOtherActualWork(val, actual_work.user_id) && updateActualWorkTotals()"
-                    />
-                  </p>
-                </b-form-radio>
-              </b-form-radio-group>
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
-                <b-form-input
-                  @blur="updateActualWorkTotals"
-                  v-model="actual_work.margin_perc"
-                  size="sm"
-                  class="input-margin"
-                ></b-form-input>
-                <span class="percentage-container">%</span>
-              </p>
-            </b-col>
-            <b-col cols="1">
-              <VAT @vatChanged="(val) => changeVatTypeActualWork(actual_work, val)" />
-            </b-col>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="actual_work.total"
-                :margin="actual_work.margin"
-                :vat="actual_work.vat"
-              />
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="10"/>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="actualWorkTotal"
-                :is-final-total="true"
-                :vat="actualWorkTotalVAT"
-              />
-            </b-col>
-          </b-row>
-        </b-container>
+                  <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER">
+                    <p class="flex">
+                      {{ $trans("Other") }}:&nbsp;&nbsp;
+                      <PriceInput
+                        v-model="actual_work.engineer_rate_other"
+                        :currency="actual_work.engineer_rate_other_currency"
+                        @priceChanged="(val) => setEngineerPriceOtherActualWork(val, actual_work.user_id) && updateActualWorkTotals()"
+                      />
+                    </p>
+                  </b-form-radio>
+                </b-form-radio-group>
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-form-input
+                    @blur="updateActualWorkTotals"
+                    v-model="actual_work.margin_perc"
+                    size="sm"
+                    class="input-margin"
+                  ></b-form-input>
+                  <span class="percentage-container">%</span>
+                </p>
+              </b-col>
+              <b-col cols="1">
+                <VAT @vatChanged="(val) => changeVatTypeActualWork(actual_work, val)" />
+              </b-col>
+              <b-col cols="2">
+                <InvoiceFormTotals
+                  :total="actual_work.total"
+                  :margin="actual_work.margin"
+                  :vat="actual_work.vat"
+                />
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="10"/>
+              <b-col cols="2">
+                <InvoiceFormTotals
+                  :total="actualWorkTotal"
+                  :is-final-total="true"
+                  :vat="actualWorkTotalVAT"
+                />
+              </b-col>
+            </b-row>
+          </b-container>
+        </Collapse>
 
         <hr/>
 
-        <div class="use-on-invoice-container">
+        <div class="use-on-invoice-container" v-if="false">
 
           <b-form-group :label="$trans('Actual work')">
             <b-form-radio-group
@@ -954,33 +964,12 @@ export default {
       this.updateActualWorkTotals()
     },
     updateActualWorkTotals() {
-      this.actualWorkUserTotals = this.actualWorkUserTotals.map((m) => this.updateUserActualWorkTotals(m))
+      this.actualWorkUserTotals = this.actualWorkUserTotals.map((m) => this.updateHoursUserTotals(m))
       this.actualWorkTotal = this.getItemsTotal(this.actualWorkUserTotals)
       this.actualWorkTotalVAT = this.getItemsTotalVAT(this.actualWorkUserTotals)
 
       return true
     },
-    updateUserActualWorkTotals(actualWork) {
-      const price = this.getSelectedEngineerRate(actualWork)
-      const currency = this.getSelectedEngineerRateCurrency(actualWork)
-      const hours_parts = actualWork.work_total.split(':')
-      let total = price.multiply(parseInt(hours_parts[0]))
-      total = total.add(price.multiply(hours_parts[1]/60))
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (actualWork.margin_perc > 0) {
-        margin = total.multiply(actualWork.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(actualWork.vat_type)/100)
-      actualWork.currency = currency
-      actualWork.total = total_with_margin
-      actualWork.vat = vat
-      actualWork.margin = margin
-
-      return actualWork
-    },
-
     setEngineerPriceOtherActualWork(priceDinero, user_id) {
       let model = this.actualWorkUserTotals.find((a) => a.user_id === user_id)
       model.engineer_rate_other_dinero = priceDinero

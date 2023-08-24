@@ -43,14 +43,13 @@
             :item="extra_work"
             :engineer_models="engineer_models"
             :customer="customer"
-            @otherPriceChanged="(dineroVal) => setEngineerRateOther(dineroVal, extra_work)"
+            @otherPriceChanged="(dineroVal) => otherPriceChanged(dineroVal, extra_work)"
             @radioChanged="(usePrice) => engineerPriceRadioChanged(extra_work, usePrice)"
           />
         </b-col>
         <b-col cols="1">
           <p class="flex">
             <b-form-input
-              @blur="updateTotals"
               v-model="extra_work.margin_perc"
               size="sm"
               class="input-margin"
@@ -127,6 +126,13 @@ export default {
     EngineerPriceRadio,
   },
   watch: {
+    // userTotals: {
+    //   handler(newValue) {
+    //     // console.log('engineer_models changed', newValue)
+    //     this.updateTotals()
+    //   },
+    //   deep: true
+    // },
     engineer_models: {
       handler(newValue) {
         // console.log('engineer_models changed', newValue)
@@ -197,6 +203,10 @@ export default {
   methods: {
     createInvoiceLines() {
     },
+    otherPriceChanged(dineroVal, extra_work) {
+      this.setEngineerRateOther(dineroVal, extra_work)
+      this.updateTotals()
+    },
     engineerPriceRadioChanged(extra_work, usePrice) {
       extra_work.usePrice = usePrice
       this.updateHoursTotals()
@@ -211,38 +221,11 @@ export default {
       // this.updateActualWorkTotals()
     },
     updateTotals() {
-      this.userTotals = this.userTotals.map((m) => this.updateUserTotals(m))
+      this.userTotals = this.userTotals.map((m) => this.updateHoursUserTotals(m))
       this.total = this.getItemsTotal(this.userTotals)
       this.totalVAT = this.getItemsTotalVAT(this.userTotals)
 
       return true
-    },
-    updateUserTotals(extraWork) {
-      const price = this.getSelectedEngineerRate(extraWork)
-      const currency = this.getSelectedEngineerRateCurrency(extraWork)
-      const hours_parts = extraWork.work_total.split(':')
-      let total = price.multiply(hours_parts[0])
-      total = total.add(price.multiply(hours_parts[1]/60))
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (extraWork.margin_perc > 0) {
-        margin = total.multiply(extraWork.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(extraWork.vat_type)/100)
-      extraWork.currency = currency
-      extraWork.total = total_with_margin
-      extraWork.vat = vat
-      extraWork.margin = margin
-
-      return extraWork
-    },
-    setEngineerRateOther(priceDinero, extra_work) {
-      extra_work.engineer_rate_other_dinero = priceDinero
-      extra_work.engineer_rate_other = extra_work.engineer_rate_other_dinero.toFormat('0.00')
-      extra_work.engineer_rate_other_currency = extra_work.engineer_rate_other_dinero.getCurrency()
-
-      this.updateHoursTotals()
     },
   }
 }

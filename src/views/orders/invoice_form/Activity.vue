@@ -59,14 +59,13 @@
             :item="activity"
             :engineer_models="engineer_models"
             :customer="customer"
-            @otherPriceChanged="(dineroVal) => setEngineerRateOther(dineroVal, activity)"
+            @otherPriceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
             @radioChanged="(usePrice) => engineerPriceRadioChanged(activity, usePrice)"
           />
         </b-col>
         <b-col cols="1">
           <p class="flex">
             <b-form-input
-              @blur="updateHoursTotals"
               v-model="activity.margin_perc"
               size="sm"
               class="input-margin"
@@ -143,6 +142,13 @@ export default {
     EngineerPriceRadio,
   },
   watch: {
+    // userTotals: {
+    //   handler(newValue) {
+    //     // console.log('engineer_models changed', newValue)
+    //     this.updateTotals()
+    //   },
+    //   deep: true
+    // },
     engineer_models: {
       handler(newValue) {
         // console.log('engineer_models changed', newValue)
@@ -247,6 +253,10 @@ export default {
           console.debug("not adding any activity")
       }
     },
+    otherPriceChanged(dineroVal, extra_work) {
+      this.setEngineerRateOther(dineroVal, extra_work)
+      this.updateTotals()
+    },
     engineerPriceRadioChanged(activity, usePrice) {
       activity.usePrice = usePrice
       this.updateHoursTotals()
@@ -255,44 +265,12 @@ export default {
       activity.vat_type = vatType
       this.updateHoursTotals()
     },
-    updateHoursTotals() {
-      this.updateTotals()
-      // this.updateExtraWorkTotals()
-      // this.updateActualWorkTotals()
-    },
     updateTotals() {
-      this.userTotals = this.userTotals.map((m) => this.updateUserTotals(m))
+      this.userTotals = this.userTotals.map((m) => this.updateHoursUserTotals(m))
       this.total = this.getItemsTotal(this.userTotals)
       this.totalVAT = this.getItemsTotalVAT(this.userTotals)
 
       return true
-    },
-    updateUserTotals(activity) {
-      const price = this.getSelectedEngineerRate(activity)
-      const currency = this.getSelectedEngineerRateCurrency(activity)
-      const hours_parts = activity.hours_total.split(':')
-      let total = price.multiply(hours_parts[0])
-      total = total.add(price.multiply(hours_parts[1] / 60))
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (activity.margin_perc > 0) {
-        margin = total.multiply(activity.margin_perc / 100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(activity.vat_type) / 100)
-      activity.currency = currency
-      activity.total = total_with_margin
-      activity.vat = vat
-      activity.margin = margin
-
-      return activity
-    },
-    setEngineerRateOther(priceDinero, activity) {
-      activity.engineer_rate_other_dinero = priceDinero
-      activity.engineer_rate_other = activity.engineer_rate_other_dinero.toFormat('0.00')
-      activity.engineer_rate_other_currency = activity.engineer_rate_other_dinero.getCurrency()
-
-      this.updateHoursTotals()
     },
   }
 }
