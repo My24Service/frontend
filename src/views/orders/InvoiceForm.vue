@@ -236,105 +236,12 @@
 
         <hr/>
 
-        <Collapse
-          :title="$trans('Used materials')"
-        >
-          <b-container fluid>
-            <b-row>
-              <b-col cols="2" class="header">
-                {{ $trans("Engineer") }}
-              </b-col>
-              <b-col cols="2" class="header">
-                {{ $trans("Material") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("Amount") }}
-              </b-col>
-              <b-col cols="3" class="header">
-                {{ $trans("Use price") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("Margin") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("VAT type") }}
-              </b-col>
-              <b-col cols="2" />
-            </b-row>
-            <b-row v-for="material in used_materials" :key="material.id" class="material_row">
-              <b-col cols="2">
-                {{ material.full_name }}
-              </b-col>
-              <b-col cols="2">
-                {{ material.name }}
-              </b-col>
-              <b-col cols="1">
-                {{ material.amount }}
-              </b-col>
-              <b-col cols="3">
-                <b-form-radio-group
-                  @change="updateMaterialTotals()"
-                  v-model="material.usePrice"
-                >
-                  <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE">
-                    {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE).toFormat('$0.00') }}
-                  </b-form-radio>
-
-                  <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING">
-                    {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING).toFormat('$0.00') }}
-                  </b-form-radio>
-
-                  <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER">
-                    <p class="flex">
-                      {{ $trans("Other") }}:&nbsp;&nbsp;
-                      <PriceInput
-                        v-model="material.price_purchase_ex_other"
-                        :currency="material.price_purchase_ex_other_currency"
-                        @priceChanged="(val) => setPurchasePriceOther(val, material.material_id) && updateMaterialTotals()"
-                      />
-                    </p>
-                  </b-form-radio>
-                </b-form-radio-group>
-              </b-col>
-              <b-col cols="1">
-                <p class="flex">
-                  <b-form-input
-                    @blur="updateMaterialTotals()"
-                    v-model="material.margin_perc"
-                    size="sm"
-                    class="input-margin"
-                  ></b-form-input>
-                  <span class="percentage-container">%</span>
-                </p>
-              </b-col>
-              <b-col cols="1">
-                <b-form-select
-                  @change="updateMaterialTotals"
-                  :value="invoice_default_vat"
-                  v-model="material.vat_type"
-                  :options="vat_types" size="sm"
-                ></b-form-select>
-              </b-col>
-              <b-col cols="2">
-                <InvoiceFormTotals
-                  :total="material.total"
-                  :margin="material.margin"
-                  :vat="material.vat"
-                />
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="10"/>
-              <b-col cols="2">
-                <InvoiceFormTotals
-                  :total="materialsTotal"
-                  :is-final-total="true"
-                  :vat="materialsTotalVAT"
-                />
-              </b-col>
-            </b-row>
-          </b-container>
-        </Collapse>
+        <MaterialsComponent
+          :customer="customer"
+          :material_models="material_models"
+          :used_materials="used_materials"
+          @invoiceLinesCreated="materialsInvoiceLinesCreated"
+        />
 
         <hr/>
 
@@ -601,6 +508,8 @@ import InvoiceFormTotals from './invoice_form/Totals';
 import Collapse from "../../components/Collapse";
 import invoiceMixin from "./invoice_form/mixin";
 import HoursComponent from "./invoice_form/Hours";
+import MaterialsComponent from "./invoice_form/Materials";
+
 import VAT from "./invoice_form/VAT";
 import {
   HOURS_TYPE_ACTUAL_WORK,
@@ -613,7 +522,6 @@ import {
   OPTION_USER_TOTALS
 } from "./invoice_form/constants";
 
-
 export default {
   name: 'InvoiceForm',
   mixins: [invoiceMixin],
@@ -622,6 +530,7 @@ export default {
     InvoiceFormTotals,
     Collapse,
     HoursComponent,
+    MaterialsComponent,
     VAT
   },
   props: {
@@ -664,16 +573,6 @@ export default {
       invoice_default_price_per_km: null,
       invoice_default_price_per_km_dinero: null,
 
-      used_materials: [],
-      material_models: [],
-      materialsTotal: null,
-      materialsTotalVAT: null,
-      usePriceOptionsMaterial: {
-        USED_MATERIALS_USE_PRICE_PURCHASE: 'purchase',
-        USED_MATERIALS_USE_PRICE_SELLING: 'selling',
-        USED_MATERIALS_USE_PRICE_OTHER: 'other',
-      },
-
       engineer_models: [],
 
       distanceUserTotals: [],
@@ -690,18 +589,15 @@ export default {
       extra_work_totals: null,
       actual_work_totals: null,
 
+      material_models: null,
+      used_materials: null,
+
       customerPk: null,
       customer: null,
 
       invoiceLines: [],
       deletedInvoiceLines: [],
 
-      // useOnInvoiceUsedMaterialsOptions: [
-      //   { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-      //   { text: this.$trans('Used materials totals'), value: OPTION_USED_MATERIALS_TOTALS },
-      //   { text: this.$trans('None'), value: OPTION_NONE },
-      // ],
-      // useOnInvoiceUsedMaterialsSelected: null,
       //
       // useOnInvoiceCallOutCostsOptions: [
       //   { text: this.$trans('Customer'), value: OPTION_CALL_OUT_COSTS_CUSTOMER },
@@ -742,6 +638,9 @@ export default {
       this.actual_work_totals = invoiceData.actual_work_totals
       this.activity_totals = invoiceData.activity_totals
 
+      this.material_models = invoiceData.material_models
+      this.used_materials = invoiceData.used_materials
+
       this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
       this.invoice_default_price_per_km_dinero = toDinero(
         this.invoice_default_price_per_km,
@@ -759,23 +658,6 @@ export default {
         this.invoice_default_partner_hourly_rate,
         this.default_currency
       )
-
-      // materials
-      this.used_materials = invoiceData.used_materials.map((m) => ({
-        ...m,
-        vat_type: this.invoice_default_vat,
-        margin_perc:  this.invoice_default_margin,
-        price_purchase_ex_other: "0.00",
-        price_purchase_ex_other_currency: this.default_currency,
-        price_purchase_ex_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE,
-      }))
-
-      this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
-          ...m,
-        margin_perc: this.invoice_default_margin
-      }))
-      this.updateMaterialTotals()
 
       // create engineer models
       this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
@@ -815,6 +697,9 @@ export default {
 
     },
     actualWorkInvoiceLinesCreated() {
+
+    },
+    materialsInvoiceLinesCreated() {
 
     },
     resetInvoiceLines() {
@@ -910,94 +795,6 @@ export default {
       distance.margin = margin
 
       return distance
-    },
-    // materials
-    async updateMaterial(material_id) {
-      let material = this.material_models.find((m) => m.id === material_id)
-      delete material.image
-      const updatedMaterialJson = await materialService.update(material_id, material)
-      material.setPriceFields(updatedMaterialJson)
-      this.updateMaterialTotals()
-
-      this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
-    },
-    getMaterialPrice(used_material) {
-      if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE) {
-        const model = this.material_models.find((m) => m.id === used_material.material_id)
-        return model.price_purchase_ex_dinero
-      } else if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING) {
-        const model = this.material_models.find((m) => m.id === used_material.material_id)
-        return model.price_selling_ex_dinero
-      } else if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER) {
-        const model = this.used_materials.find((m) => m.material_id === used_material.material_id)
-        return model.price_purchase_ex_other_dinero
-      } else {
-        throw `unknown use price: ${used_material.usePrice}`
-      }
-    },
-    getMaterialCurrency(used_material) {
-      if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE) {
-        const model = this.material_models.find((m) => m.id === used_material.material_id)
-        return model.price_purchase_ex_currency
-      } else if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING) {
-        const model = this.material_models.find((m) => m.id === used_material.material_id)
-        return model.price_selling_ex_currency
-      } else if (used_material.usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER) {
-        const model = this.used_materials.find((m) => m.material_id === used_material.material_id)
-        return model.price_purchase_ex_other_currency
-      } else {
-        throw `unknown use price: ${used_material.usePrice}`
-      }
-    },
-    getMaterialPriceFor(used_material, usePrice) {
-      const model = this.material_models.find((m) => m.id === used_material.material_id)
-      if (model) {
-        return usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
-      } else {
-        console.error('MODEL NOT FOUND for ', used_material)
-      }
-    },
-    setPurchasePriceOther(priceDinero, material_id) {
-      let model = this.used_materials.find((m) => m.material_id === material_id)
-      model.price_purchase_ex_other_dinero = priceDinero
-      model.price_purchase_ex_other = model.price_purchase_ex_other_dinero.toFormat('0.00')
-      model.price_purchase_ex_other_currency = model.price_purchase_ex_other_dinero.getCurrency()
-      return true
-    },
-    updateMaterialTotals() {
-      this.used_materials = this.used_materials.map((m) => this.updateUsedMaterialTotals(m))
-      this.materialsTotal = this.getItemsTotal(this.used_materials)
-      this.materialsTotalVAT = this.getItemsTotalVAT(this.used_materials)
-    },
-    updateUsedMaterialTotals(material) {
-      const price = this.getMaterialPrice(material)
-      const currency = this.getMaterialCurrency(material)
-      const total = price.multiply(material.amount)
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (material.margin_perc > 0) {
-        margin = total.multiply(material.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(material.vat_type)/100)
-      material.currency = currency
-      material.total = total_with_margin
-      material.vat = vat
-      material.margin = margin
-
-      return material
-    },
-    getItemsTotal(items) {
-      return items.reduce(
-        (total, m) => (total.add(m.total)),
-        toDinero("0.00", items[0].currency)
-      )
-    },
-    getItemsTotalVAT(items) {
-      return items.reduce(
-        (total, m) => (total.add(m.vat)),
-        toDinero("0.00", items[0].currency)
-      )
     },
     async submitForm() {
       this.isLoading = true

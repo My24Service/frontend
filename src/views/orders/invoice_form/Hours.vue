@@ -229,8 +229,8 @@ export default {
       totalVAT: null,
 
       useOnInvoiceOptions: [
+        { text: this.$trans('Total'), value: OPTION_ACTIVITY_ACTIVITY_TOTALS },
         { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('Hour totals'), value: OPTION_ACTIVITY_ACTIVITY_TOTALS },
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
