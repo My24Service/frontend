@@ -14,3 +14,8 @@ export const INVOICE_LINE_TYPE_ACTIVITY = 'activity'
 export const INVOICE_LINE_TYPE_EXTRA_WORK = 'extra-work'
 export const INVOICE_LINE_TYPE_USED_MATERIALS = 'used-materials'
 export const INVOICE_LINE_TYPE_CALL_OUT_COSTS = 'call-out-costs'
+
+export const HOURS_TYPE_WORK = 'work'
+export const HOURS_TYPE_TRAVEL = 'travel'
+export const HOURS_TYPE_EXTRA_WORK = 'extra-work'
+export const HOURS_TYPE_ACTUAL_WORK = 'actual-work'

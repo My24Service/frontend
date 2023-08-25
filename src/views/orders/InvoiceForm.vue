@@ -338,15 +338,27 @@
 
         <hr/>
 
-        <ActivityComponent
-          :activity_totals="activityTotals"
+        <HoursComponent
+          :type="HOURS_TYPE_WORK"
+          :hours_total="activity_totals.work_total"
+          :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
-          @invoiceLinesCreated="activityInvoiceLinesCreated"
+          @invoiceLinesCreated="workHoursInvoiceLinesCreated"
         />
 
         <hr/>
 
+        <HoursComponent
+          :type="HOURS_TYPE_TRAVEL"
+          :hours_total="activity_totals.travel_total"
+          :user_totals="activity_totals.user_totals"
+          :engineer_models="engineer_models"
+          :customer="customer"
+          @invoiceLinesCreated="travelHoursInvoiceLinesCreated"
+        />
+
+        <hr/>
         <Collapse
           :title="$trans('Distance')"
         >
@@ -458,8 +470,10 @@
 
         <hr/>
 
-        <ExtraWorkComponent
-          :extra_work_totals="extraWorkTotals"
+        <HoursComponent
+          :type="HOURS_TYPE_EXTRA_WORK"
+          :hours_total="extra_work_totals.hours_total"
+          :user_totals="extra_work_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="extraWorkInvoiceLinesCreated"
@@ -467,144 +481,51 @@
 
         <hr/>
 
-        <Collapse
-          :title="$trans('Actual work')"
-        >
-          <b-container fluid>
-            <b-row>
-              <b-col cols="3" class="header">
-                {{ $trans("Engineer") }}
-              </b-col>
-              <b-col cols="2" class="header">
-                {{ $trans("Hours") }}
-              </b-col>
-              <b-col cols="3" class="header">
-                {{ $trans("Engineer rate") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("Margin") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("VAT type") }}
-              </b-col>
-              <b-col cols="2" />
-            </b-row>
-            <b-row v-for="actual_work in actualWorkUserTotals" :key="actual_work.user_id" class="material_row">
-              <b-col cols="3">
-                {{ getFullname(actual_work.user_id) }}
-              </b-col>
-              <b-col cols="2">
-                {{ actual_work.work_total }}
-              </b-col>
-              <b-col cols="3">
-                <b-form-radio-group
-                  @change="updateActualWorkTotals"
-                  v-model="actual_work.usePrice"
-                >
-                  <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER">
-                    {{ $trans('Engineer') }}
-                    {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                  </b-form-radio>
-
-                  <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS">
-                    {{ $trans('Settings') }}
-                    {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS).toFormat("$0.00") }}
-                  </b-form-radio>
-
-                  <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER">
-                    {{ $trans('Customer') }}
-                    {{ getEngineerRateFor(actual_work, usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                  </b-form-radio>
-
-                  <b-form-radio :value="usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER">
-                    <p class="flex">
-                      {{ $trans("Other") }}:&nbsp;&nbsp;
-                      <PriceInput
-                        v-model="actual_work.engineer_rate_other"
-                        :currency="actual_work.engineer_rate_other_currency"
-                        @priceChanged="(val) => setEngineerPriceOtherActualWork(val, actual_work.user_id) && updateActualWorkTotals()"
-                      />
-                    </p>
-                  </b-form-radio>
-                </b-form-radio-group>
-              </b-col>
-              <b-col cols="1">
-                <p class="flex">
-                  <b-form-input
-                    @blur="updateActualWorkTotals"
-                    v-model="actual_work.margin_perc"
-                    size="sm"
-                    class="input-margin"
-                  ></b-form-input>
-                  <span class="percentage-container">%</span>
-                </p>
-              </b-col>
-              <b-col cols="1">
-                <VAT @vatChanged="(val) => changeVatTypeActualWork(actual_work, val)" />
-              </b-col>
-              <b-col cols="2">
-                <InvoiceFormTotals
-                  :total="actual_work.total"
-                  :margin="actual_work.margin"
-                  :vat="actual_work.vat"
-                />
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="10"/>
-              <b-col cols="2">
-                <InvoiceFormTotals
-                  :total="actualWorkTotal"
-                  :is-final-total="true"
-                  :vat="actualWorkTotalVAT"
-                />
-              </b-col>
-            </b-row>
-          </b-container>
-        </Collapse>
+        <HoursComponent
+          :type="HOURS_TYPE_ACTUAL_WORK"
+          :hours_total="actual_work_totals.hours_total"
+          :user_totals="actual_work_totals.user_totals"
+          :engineer_models="engineer_models"
+          :customer="customer"
+          @invoiceLinesCreated="actualWorkInvoiceLinesCreated"
+        />
 
         <hr/>
 
-        <div class="use-on-invoice-container" v-if="false">
+<!--        <div class="use-on-invoice-container" v-if="false">-->
 
-          <b-form-group :label="$trans('Actual work')">
-            <b-form-radio-group
-              v-model="useOnInvoiceActualWorkSelected"
-              :options="useOnInvoiceActualWorkOptions"
-            ></b-form-radio-group>
-          </b-form-group>
 
-          <b-form-group :label="$trans('Distance')">
-            <b-form-radio-group
-              v-model="useOnInvoiceDistanceSelected"
-              :options="useOnInvoiceDistanceOptions"
-            ></b-form-radio-group>
-          </b-form-group>
+<!--          <b-form-group :label="$trans('Distance')">-->
+<!--            <b-form-radio-group-->
+<!--              v-model="useOnInvoiceDistanceSelected"-->
+<!--              :options="useOnInvoiceDistanceOptions"-->
+<!--            ></b-form-radio-group>-->
+<!--          </b-form-group>-->
 
-          <b-form-group :label="$trans('Used materials')">
-            <b-form-radio-group
-              v-model="useOnInvoiceUsedMaterialsSelected"
-              :options="useOnInvoiceUsedMaterialsOptions"
-            ></b-form-radio-group>
-          </b-form-group>
+<!--          <b-form-group :label="$trans('Used materials')">-->
+<!--            <b-form-radio-group-->
+<!--              v-model="useOnInvoiceUsedMaterialsSelected"-->
+<!--              :options="useOnInvoiceUsedMaterialsOptions"-->
+<!--            ></b-form-radio-group>-->
+<!--          </b-form-group>-->
 
-          <b-form-group :label="$trans('Call out costs')">
-            <b-form-radio-group
-              v-model="useOnInvoiceCallOutCostsSelected"
-              :options="useOnInvoiceCallOutCostsOptions"
-            ></b-form-radio-group>
-          </b-form-group>
+<!--          <b-form-group :label="$trans('Call out costs')">-->
+<!--            <b-form-radio-group-->
+<!--              v-model="useOnInvoiceCallOutCostsSelected"-->
+<!--              :options="useOnInvoiceCallOutCostsOptions"-->
+<!--            ></b-form-radio-group>-->
+<!--          </b-form-group>-->
 
-          <div class="mx-auto">
-            <footer class="modal-footer">
-              <b-button @click="resetInvoiceLines" type="button" variant="secondary">
-                {{ $trans('Reset') }}</b-button>
-              <b-button @click="createInvoiceLinesFromConfig" type="button" variant="primary">
-                {{ $trans('Create invoice lines') }}</b-button>
-            </footer>
-          </div>
+<!--          <div class="mx-auto">-->
+<!--            <footer class="modal-footer">-->
+<!--              <b-button @click="resetInvoiceLines" type="button" variant="secondary">-->
+<!--                {{ $trans('Reset') }}</b-button>-->
+<!--              <b-button @click="createInvoiceLinesFromConfig" type="button" variant="primary">-->
+<!--                {{ $trans('Create invoice lines') }}</b-button>-->
+<!--            </footer>-->
+<!--          </div>-->
 
-        </div>
+<!--        </div>-->
 
         <div class="invoice-lines">
           <h3>{{ $trans("Invoice lines") }}</h3>
@@ -679,26 +600,19 @@ import { CustomerModel, CustomerPriceModel } from "../../models/customer/Custome
 import InvoiceFormTotals from './invoice_form/Totals';
 import Collapse from "../../components/Collapse";
 import invoiceMixin from "./invoice_form/mixin";
-import ActivityComponent from "./invoice_form/Activity";
-import ExtraWorkComponent from "./invoice_form/ExtraWork";
+import HoursComponent from "./invoice_form/Hours";
 import VAT from "./invoice_form/VAT";
+import {
+  HOURS_TYPE_ACTUAL_WORK,
+  HOURS_TYPE_EXTRA_WORK,
+  HOURS_TYPE_TRAVEL,
+  HOURS_TYPE_WORK,
+  INVOICE_LINE_TYPE_ACTIVITY,
+  OPTION_ACTIVITY_ACTIVITY_TOTALS, OPTION_ACTIVITY_ACTUAL_WORK,
+  OPTION_NONE,
+  OPTION_USER_TOTALS
+} from "./invoice_form/constants";
 
-const OPTION_USER_TOTALS = 'user_totals'
-const OPTION_ACTIVITY_ACTIVITY_TOTALS = 'activity_totals'
-const OPTION_ACTIVITY_ACTUAL_WORK = 'actual_work'
-const OPTION_EXTRA_WORK_TOTALS = 'extra_work_totals'
-const OPTION_USED_MATERIALS_TOTALS = 'used_materials_totals'
-const OPTION_ACTUAL_WORK_TOTALS = 'actual_work_totals'
-const OPTION_DISTANCE_TOTALS = 'distance_totals'
-const OPTION_CALL_OUT_COSTS_CUSTOMER = 'customer'
-const OPTION_CALL_OUT_COSTS_SETTINGS = 'settings'
-
-const OPTION_NONE = 'none'
-
-const INVOICE_LINE_TYPE_ACTIVITY = 'activity'
-const INVOICE_LINE_TYPE_EXTRA_WORK = 'extra-work'
-const INVOICE_LINE_TYPE_USED_MATERIALS = 'used-materials'
-const INVOICE_LINE_TYPE_CALL_OUT_COSTS = 'call-out-costs'
 
 export default {
   name: 'InvoiceForm',
@@ -707,8 +621,7 @@ export default {
     PriceInput,
     InvoiceFormTotals,
     Collapse,
-    ActivityComponent,
-    ExtraWorkComponent,
+    HoursComponent,
     VAT
   },
   props: {
@@ -723,6 +636,11 @@ export default {
   },
   data () {
     return {
+      HOURS_TYPE_EXTRA_WORK,
+      HOURS_TYPE_ACTUAL_WORK,
+      HOURS_TYPE_WORK,
+      HOURS_TYPE_TRAVEL,
+
       isLoading: false,
       submitClicked: false,
       invoice: invoiceService.getFields(),
@@ -758,9 +676,6 @@ export default {
 
       engineer_models: [],
 
-      activity: [],
-      activityTotals: [],
-
       distanceUserTotals: [],
       distanceTotal: null,
       distanceTotalVAT: null,
@@ -771,13 +686,9 @@ export default {
         DISTANCE_USE_PRICE_OTHER: 'other',
       },
 
-      extraWorkTotals: null,
-
-      actualWork: [],
-      actualWorkUserTotals: [],
-      actualWorkTotals: null,
-      actualWorkTotal: null,
-      actualWorkTotalVAT: null,
+      activity_totals: null,
+      extra_work_totals: null,
+      actual_work_totals: null,
 
       customerPk: null,
       customer: null,
@@ -785,34 +696,27 @@ export default {
       invoiceLines: [],
       deletedInvoiceLines: [],
 
-
-      useOnInvoiceUsedMaterialsOptions: [
-        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('Used materials totals'), value: OPTION_USED_MATERIALS_TOTALS },
-        { text: this.$trans('None'), value: OPTION_NONE },
-      ],
-      useOnInvoiceUsedMaterialsSelected: null,
-
-      useOnInvoiceCallOutCostsOptions: [
-        { text: this.$trans('Customer'), value: OPTION_CALL_OUT_COSTS_CUSTOMER },
-        { text: this.$trans('Settings'), value: OPTION_CALL_OUT_COSTS_SETTINGS },
-        { text: this.$trans('None'), value: 'none' },
-      ],
-      useOnInvoiceCallOutCostsSelected: null,
-
-      useOnInvoiceActualWorkOptions: [
-        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('Actual work totals'), value: OPTION_ACTUAL_WORK_TOTALS },
-        { text: this.$trans('None'), value: 'none' },
-      ],
-      useOnInvoiceActualWorkSelected: null,
-
-      useOnInvoiceDistanceOptions: [
-        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('Distance totals'), value: OPTION_DISTANCE_TOTALS },
-        { text: this.$trans('None'), value: 'none' },
-      ],
-      useOnInvoiceDistanceSelected: null,
+      // useOnInvoiceUsedMaterialsOptions: [
+      //   { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
+      //   { text: this.$trans('Used materials totals'), value: OPTION_USED_MATERIALS_TOTALS },
+      //   { text: this.$trans('None'), value: OPTION_NONE },
+      // ],
+      // useOnInvoiceUsedMaterialsSelected: null,
+      //
+      // useOnInvoiceCallOutCostsOptions: [
+      //   { text: this.$trans('Customer'), value: OPTION_CALL_OUT_COSTS_CUSTOMER },
+      //   { text: this.$trans('Settings'), value: OPTION_CALL_OUT_COSTS_SETTINGS },
+      //   { text: this.$trans('None'), value: 'none' },
+      // ],
+      // useOnInvoiceCallOutCostsSelected: null,
+      //
+      //
+      // useOnInvoiceDistanceOptions: [
+      //   { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
+      //   { text: this.$trans('Distance totals'), value: OPTION_DISTANCE_TOTALS },
+      //   { text: this.$trans('None'), value: 'none' },
+      // ],
+      // useOnInvoiceDistanceSelected: null,
     }
   },
   computed: {
@@ -833,6 +737,10 @@ export default {
       this.order = invoiceData.order
       this.member = invoiceData.member
       this.invoice_id = invoiceData.invoice_id
+
+      this.extra_work_totals = invoiceData.extra_work_totals
+      this.actual_work_totals = invoiceData.actual_work_totals
+      this.activity_totals = invoiceData.activity_totals
 
       this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
       this.invoice_default_price_per_km_dinero = toDinero(
@@ -869,16 +777,14 @@ export default {
       }))
       this.updateMaterialTotals()
 
-      // activity
-      this.activity = invoiceData.activity
-      this.activityTotals = invoiceData.activity_totals
+      // create engineer models
       this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
         ...m,
         margin_perc: this.invoice_default_margin
       }))
 
       // distance
-      this.distanceUserTotals = this.activityTotals.user_totals.map((a) => ({
+      this.distanceUserTotals = invoiceData.activity_totals.user_totals.map((a) => ({
         user_id: a.user_id,
         distance_to_total: a.distance_to_total,
         distance_back_total: a.distance_back_total,
@@ -892,26 +798,6 @@ export default {
       }))
       this.updateDistanceTotals()
 
-      // extra work
-      this.extraWorkTotals = invoiceData.extra_work_totals
-
-      // actual work
-      this.actualWorkTotals = invoiceData.actual_work_totals
-      this.actualWorkUserTotals = this.actualWorkTotals.user_totals.map((a) => ({
-        ...a,
-        vat_type: this.invoice_default_vat,
-        margin_perc: this.invoice_default_margin,
-        engineer_rate: this.getEngineerRate(a.user_id),
-        engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
-        engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
-        engineer_rate_other: "0.00",
-        engineer_rate_other_currency: this.default_currency,
-        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER,
-      }))
-
-      this.updateHoursTotals()
-
       this.isLoading = false
     } else {
       await this.loadInvoice()
@@ -922,7 +808,13 @@ export default {
     extraWorkInvoiceLinesCreated(invoiceLines) {
 
     },
-    activityInvoiceLinesCreated(invoiceLines) {
+    workHoursInvoiceLinesCreated(invoiceLines) {
+
+    },
+    travelHoursInvoiceLinesCreated(invoiceLines) {
+
+    },
+    actualWorkInvoiceLinesCreated() {
 
     },
     resetInvoiceLines() {
@@ -953,27 +845,6 @@ export default {
       this.updateActivityTotals()
 
       this.infoToast(this.$trans('Updated'), this.$trans('Hourly rate engineer has been updated'))
-    },
-    updateHoursTotals() {
-      this.updateActualWorkTotals()
-    },
-    changeVatTypeActualWork(actual_work, vatType) {
-      actual_work.vat_type = vatType
-      this.updateActualWorkTotals()
-    },
-    updateActualWorkTotals() {
-      this.actualWorkUserTotals = this.actualWorkUserTotals.map((m) => this.updateHoursUserTotals(m))
-      this.actualWorkTotal = this.getItemsTotal(this.actualWorkUserTotals)
-      this.actualWorkTotalVAT = this.getItemsTotalVAT(this.actualWorkUserTotals)
-
-      return true
-    },
-    setEngineerPriceOtherActualWork(priceDinero, user_id) {
-      let model = this.actualWorkUserTotals.find((a) => a.user_id === user_id)
-      model.engineer_rate_other_dinero = priceDinero
-      model.engineer_rate_other = model.engineer_rate_other_dinero.toFormat('0.00')
-      model.engineer_rate_other_currency = model.engineer_rate_other_dinero.getCurrency()
-      return true
     },
     // distance
     setDistancePriceOther(priceDinero, user_id) {
