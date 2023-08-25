@@ -34,6 +34,7 @@
 <script>
 import PriceInput from "../../../components/PriceInput";
 import invoiceMixin from "./mixin";
+import {toDinero} from "../../../utils";
 
 export default {
   name: "EngineerPriceRadio",
@@ -68,6 +69,23 @@ export default {
     },
   },
   methods: {
+    getEngineerRateFor(obj, usePrice) {
+      const user = this.engineer_models.find((m) => m.id === obj.user_id)
+      if (user) {
+        switch (usePrice) {
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER:
+            return toDinero(user.engineer.hourly_rate, user.engineer.hourly_rate_currency)
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER:
+            return this.customer.hourly_rate_engineer_dinero
+          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS:
+            return this.getInvoiceDefaultHourlyRateDinero()
+          default:
+            throw `unknown usePrice for engineer: ${usePrice}`
+        }
+      } else {
+        console.error("getEngineerRateFor: model not found")
+      }
+    },
     priceChanged(dineroVal) {
       this.$emit('otherPriceChanged', dineroVal)
     },
