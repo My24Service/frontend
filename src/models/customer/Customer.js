@@ -39,6 +39,10 @@ class CustomerModel {
   hourly_rate_partner_engineer_currency
   hourly_rate_partner_engineer_dinero
 
+  price_per_km
+  price_per_km_currency
+  price_per_km_dinero
+
   constructor(customerData) {
     for (const [k, v] of Object.entries(customerData)) {
       this[k] = v
@@ -51,6 +55,13 @@ class CustomerModel {
     this.hourly_rate_engineer_dinero = priceDinero
     this.hourly_rate_engineer = this.hourly_rate_engineer_dinero.toFormat('0.00')
     this.hourly_rate_engineer_currency = this.hourly_rate_engineer_dinero.getCurrency()
+    return true
+  }
+
+  setPricePerKm(priceDinero) {
+    this.price_per_km_dinero = priceDinero
+    this.price_per_km = this.price_per_km_dinero.toFormat('0.00')
+    this.price_per_km_currency = this.price_per_km_dinero.getCurrency()
     return true
   }
 
@@ -83,6 +94,11 @@ class CustomerModel {
       this.call_out_costs_dinero = toDinero(
         obj.call_out_costs, obj.call_out_costs_currency)
     }
+
+    if (obj.price_per_km && obj.price_per_km_currency) {
+      this.price_per_km_dinero = toDinero(
+        obj.price_per_km, obj.price_per_km_currency)
+    }
   }
 }
 
@@ -97,6 +113,9 @@ class CustomerPriceModel {
 
   hourly_rate_partner_engineer
   hourly_rate_partner_engineer_currency
+
+  price_per_km
+  price_per_km_currency
 
   constructor(customerData) {
     for (const [k, v] of Object.entries(customerData)) {
@@ -148,6 +167,9 @@ class CustomerService extends BaseModel {
 
     'hourly_rate_partner_engineer': '0.00',
     'hourly_rate_partner_engineer_currency': 'EUR',
+
+    'price_per_km': '0.00',
+    'price_per_km_currency': 'EUR',
   }
 
   url = '/customer/customer/'

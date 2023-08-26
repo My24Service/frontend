@@ -14,7 +14,6 @@ import {
   SET_MAINTENANCE_PRODUCTS,
   SET_STREAM_INFO,
 } from './mutation-types'
-import accountModel from "../models/account/Account";
 
 export const actions = {
   setStreamInfo({commit}, streamInfo) {
