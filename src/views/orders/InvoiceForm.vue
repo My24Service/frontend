@@ -95,10 +95,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateMaterial(material.id) }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -135,10 +136,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateEngineer(user.id) }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -175,10 +177,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateCustomer() }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -200,10 +203,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateCustomer() }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -225,10 +229,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateCustomer() }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
