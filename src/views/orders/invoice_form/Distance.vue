@@ -27,7 +27,7 @@
         </b-col>
         <b-col cols="2" />
       </b-row>
-      <b-row v-for="distance in distanceTotals" :key="distance.user_id" class="material_row">
+      <b-row v-for="distance in distanceTotals" :key="distance.user_id" class="distance_row">
         <b-col cols="2">
           {{ getFullname(distance.user_id) }}
         </b-col>
