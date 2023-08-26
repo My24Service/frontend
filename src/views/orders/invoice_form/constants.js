@@ -5,6 +5,8 @@ export const OPTION_EXTRA_WORK_TOTALS = 'extra_work_totals'
 export const OPTION_USED_MATERIALS_TOTALS = 'used_materials_totals'
 export const OPTION_ACTUAL_WORK_TOTALS = 'actual_work_totals'
 export const OPTION_DISTANCE_TOTALS = 'distance_totals'
+export const OPTION_CALL_OUT_COSTS_TOTALS = 'coc_totals'
+
 export const OPTION_CALL_OUT_COSTS_CUSTOMER = 'customer'
 export const OPTION_CALL_OUT_COSTS_SETTINGS = 'settings'
 

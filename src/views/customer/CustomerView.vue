@@ -273,6 +273,7 @@ import DocumentList from '../customer/DocumentList.vue'
 import {componentMixin} from "../../utils";
 import locationModel from "../../models/equipment/location";
 import equipmentModel from "../../models/equipment/equipment";
+import CustomerDetail from "../../components/CustomerDetail";
 
 export default {
   mixins: [componentMixin],
@@ -282,6 +283,8 @@ export default {
     SearchModal,
     OrderStats,
     DocumentList
+    CustomerDetail,
+
   },
   data() {
     return {

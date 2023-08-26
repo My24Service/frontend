@@ -3,7 +3,6 @@
     :title="$trans('Distance')"
   >
     <b-container fluid>
-      <h3>{{ $trans("Distance") }}</h3>
       <b-row>
         <b-col cols="2" class="header">
           {{ $trans("Engineer") }}
@@ -46,17 +45,17 @@
             @change="updateTotals"
             v-model="distance.usePrice"
           >
-            <b-form-radio :value="usePriceOptions.DISTANCE_USE_PRICE_SETTINGS">
+            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
               {{ $trans('Settings') }}
-              {{ getPriceFor(usePriceOptions.DISTANCE_USE_PRICE_SETTINGS).toFormat("$0.00") }}
+              {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
             </b-form-radio>
 
-            <b-form-radio :value="usePriceOptions.DISTANCE_USE_PRICE_CUSTOMER">
+            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
               {{ $trans('Customer') }}
-              {{ getPriceFor(usePriceOptions.DISTANCE_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+              {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
             </b-form-radio>
 
-            <b-form-radio :value="usePriceOptions.DISTANCE_USE_PRICE_OTHER">
+            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
@@ -91,12 +90,15 @@
         :total_vat="totalVAT"
       />
 
-      <b-form-group :label="$trans('Distance')">
-        <b-form-radio-group
-          v-model="useOnInvoiceSelected"
-          :options="useOnInvoiceOptions"
-        ></b-form-radio-group>
-      </b-form-group>
+      <div class="use-on-invoice-container">
+        <h3>{{ $trans("What to add as invoice lines")}}</h3>
+        <b-form-group>
+          <b-form-radio-group
+            v-model="useOnInvoiceSelected"
+            :options="useOnInvoiceOptions"
+          ></b-form-radio-group>
+        </b-form-group>
+      </div>
 
     </b-container>
   </Collapse>
@@ -121,6 +123,7 @@ import TotalRow from "./TotalRow";
 
 export default {
   name: "DistanceComponent",
+  emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
   components: {
     PriceInput,
@@ -170,14 +173,14 @@ export default {
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
       usePriceOptions: {
-        DISTANCE_USE_PRICE_SETTINGS: 'settings',
-        DISTANCE_USE_PRICE_CUSTOMER: 'customer',
-        DISTANCE_USE_PRICE_OTHER: 'other',
+        USE_PRICE_SETTINGS: 'settings',
+        USE_PRICE_CUSTOMER: 'customer',
+        USE_PRICE_OTHER: 'other',
       },
 
       useOnInvoiceOptions: [
+        { text: this.$trans('Total'), value: OPTION_DISTANCE_TOTALS },
         { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('Distance totals'), value: OPTION_DISTANCE_TOTALS },
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
@@ -199,7 +202,7 @@ export default {
       price_per_km_other: "0.00",
       price_per_km_other_currency: this.default_currency,
       price_per_km_other_dinero: toDinero("0.00", this.default_currency),
-      usePrice: this.usePriceOptions.DISTANCE_USE_PRICE_SETTINGS,
+      usePrice: this.usePriceOptions.USE_PRICE_SETTINGS,
     }))
     this.updateTotals()
 
@@ -214,21 +217,21 @@ export default {
     },
     getPriceFor(type) {
       switch (type) {
-        case this.usePriceOptions.DISTANCE_USE_PRICE_SETTINGS:
+        case this.usePriceOptions.USE_PRICE_SETTINGS:
           return this.invoice_default_price_per_km_dinero
-        case this.usePriceOptions.DISTANCE_USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km_dinero
         default:
-          throw `getPrice: unknown usePrice: ${distance.usePrice}`
+          throw `getPrice: unknown usePrice: ${type}`
       }
     },
     getPrice(distance) {
       switch (distance.usePrice) {
-        case this.usePriceOptions.DISTANCE_USE_PRICE_SETTINGS:
+        case this.usePriceOptions.USE_PRICE_SETTINGS:
           return this.invoice_default_price_per_km_dinero
-        case this.usePriceOptions.DISTANCE_USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km_dinero
-        case this.usePriceOptions.DISTANCE_USE_PRICE_OTHER:
+        case this.usePriceOptions.USE_PRICE_OTHER:
           return distance.price_per_km_other_dinero
         default:
           throw `getPrice: unknown usePrice: ${distance.usePrice}`
@@ -236,11 +239,11 @@ export default {
     },
     getCurrency(distance) {
       switch (distance.usePrice) {
-        case this.usePriceOptions.DISTANCE_USE_PRICE_SETTINGS:
+        case this.usePriceOptions.USE_PRICE_SETTINGS:
           return this.default_currency
-        case this.usePriceOptions.DISTANCE_USE_PRICE_CUSTOMER:
+        case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km_currency
-        case this.usePriceOptions.DISTANCE_USE_PRICE_OTHER:
+        case this.usePriceOptions.USE_PRICE_OTHER:
           return distance.price_per_km_other_currency
         default:
           throw `getCurrency: unknown usePrice: ${distance.usePrice}`
