@@ -13,6 +13,14 @@ let invoiceMixin = {
     }
   },
   methods: {
+    marginChanged(obj, val) {
+      obj.margin_perc = val
+      this.updateTotals()
+    },
+    changeVatType(obj, vatType) {
+      obj.vat_type = vatType
+      this.updateTotals()
+    },
     getInvoiceDefaultHourlyRateDinero() {
       return toDinero(
         this.$store.getters.getInvoiceDefaultHourlyRate,

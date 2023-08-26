@@ -48,15 +48,10 @@
           />
         </b-col>
         <b-col cols="1">
-          <p class="flex">
-            <b-form-input
-              @blur="updateTotals"
-              v-model="activity.margin_perc"
-              size="sm"
-              class="input-margin"
-            ></b-form-input>
-            <span class="percentage-container">%</span>
-          </p>
+          <MarginInput
+            :margin="activity.margin_perc"
+            @inputChanged="(val) => marginChanged(activity, val)"
+          />
         </b-col>
         <b-col cols="1">
           <VAT @vatChanged="(val) => changeVatType(activity, val)" />
@@ -69,21 +64,11 @@
           />
         </b-col>
       </b-row>
-      <b-row>
-        <b-col cols="8">
-          <span class="total-text">{{ $trans('Total') }}</span>
-        </b-col>
-        <b-col cols="2">
-          <span class="total-text">{{ hours_total }}</span>
-        </b-col>
-        <b-col cols="2">
-          <Totals
-            :total="total"
-            :is-final-total="true"
-            :vat="totalVAT"
-          />
-        </b-col>
-      </b-row>
+      <TotalRow
+        :items_total="hours_total"
+        :total="total"
+        :total_vat="totalVAT"
+      />
 
       <div class="use-on-invoice-container">
       <h3>{{ $trans("What to add as invoice lines")}}</h3>
@@ -118,6 +103,8 @@ import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import EngineerPriceRadio from "./EngineerPriceRadio";
+import MarginInput from "./MarginInput";
+import TotalRow from "./TotalRow";
 
 export default {
   name: "ActivityComponent",
@@ -129,6 +116,8 @@ export default {
     HeaderCell,
     VAT,
     EngineerPriceRadio,
+    MarginInput,
+    TotalRow,
   },
   watch: {
     engineer_models: {
@@ -310,10 +299,6 @@ export default {
       activity.usePrice = usePrice
       this.updateTotals()
     },
-    changeVatType(activity, vatType) {
-      activity.vat_type = vatType
-      this.updateTotals()
-    },
     updateTotals() {
       this.userTotals = this.userTotals.map((m) => this.updateHoursUserTotals(m))
       this.total = this.getItemsTotal(this.userTotals)
@@ -404,22 +389,5 @@ export default {
 </script>
 
 <style scoped>
-.flex {
-  display : flex;
-  margin-top: auto;
-}
-.input-margin {
-  width: 40px;
-  padding: 1px;
-  margin: 1px;
-  text-align: center;
-}
-.percentage-container {
-  padding-top: 4px;
-  padding-left: 4px;
-}
-.total-text {
-  font-size: 14px;
-  font-weight: bold;
-}
+
 </style>
