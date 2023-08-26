@@ -214,7 +214,7 @@
                 <PriceInput
                   v-model="customer.price_per_km"
                   :currency="customer.price_per_km_currency"
-                  @priceChanged="(val) => customer.setPricePerKm(val) && updateDistanceTotals()"
+                  @priceChanged="(val) => customer.setPricePerKm(val)"
                 />
               </b-col>
               <b-col cols="1">
@@ -266,114 +266,15 @@
         />
 
         <hr/>
-        <Collapse
-          :title="$trans('Distance')"
-        >
-          <b-container fluid>
-            <h3>{{ $trans("Distance") }}</h3>
-            <b-row>
-              <b-col cols="2" class="header">
-                {{ $trans("Engineer") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("To") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("Back") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("Total") }}
-              </b-col>
-              <b-col cols="3" class="header">
-                {{ $trans("Rate") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("Margin") }}
-              </b-col>
-              <b-col cols="1" class="header">
-                {{ $trans("VAT type") }}
-              </b-col>
-              <b-col cols="2" />
-            </b-row>
-            <b-row v-for="distance in distanceUserTotals" :key="distance.user_id" class="material_row">
-              <b-col cols="2">
-                {{ getFullname(distance.user_id) }}
-              </b-col>
-              <b-col cols="1">
-                {{ distance.distance_to_total }}
-              </b-col>
-              <b-col cols="1">
-                {{ distance.distance_back_total }}
-              </b-col>
-              <b-col cols="1">
-                {{ distance.distance_total }}
-              </b-col>
-              <b-col cols="3">
-                <b-form-radio-group
-                  @change="updateDistanceTotals"
-                  v-model="distance.usePrice"
-                >
-                  <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS">
-                    {{ $trans('Settings') }}
-                    {{ getDistancePriceFor(usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS).toFormat("$0.00") }}
-                  </b-form-radio>
 
-                  <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER">
-                    {{ $trans('Customer') }}
-                    {{ getDistancePriceFor(usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                  </b-form-radio>
-
-                  <b-form-radio :value="usePriceOptionsDistance.DISTANCE_USE_PRICE_OTHER">
-                    <p class="flex">
-                      {{ $trans("Other") }}:&nbsp;&nbsp;
-                      <PriceInput
-                        v-model="distance.price_per_km_other"
-                        :currency="distance.price_per_km_other_currency"
-                        @priceChanged="(val) => setDistancePriceOther(val, distance.user_id) && updateDistanceTotals()"
-                      />
-                    </p>
-                  </b-form-radio>
-                </b-form-radio-group>
-              </b-col>
-              <b-col cols="1">
-                <p class="flex">
-                  <b-form-input
-                    @blur="updateDistanceTotals"
-                    v-model="distance.margin_perc"
-                    size="sm"
-                    class="input-margin"
-                  ></b-form-input>
-                  <span class="percentage-container">%</span>
-                </p>
-              </b-col>
-              <b-col cols="1">
-                <b-form-select
-                  @change="updateDistanceTotals"
-                  :value="invoice_default_vat"
-                  v-model="distance.vat_type"
-                  :options="vat_types" size="sm"
-                ></b-form-select>
-              </b-col>
-              <b-col cols="2">
-                <InvoiceFormTotals
-                  :total="distance.total"
-                  :margin="distance.margin"
-                  :vat="distance.vat"
-                />
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="10"/>
-              <b-col cols="2">
-                <InvoiceFormTotals
-                  :total="distanceTotal"
-                  :is-final-total="true"
-                  :vat="distanceTotalVAT"
-                />
-              </b-col>
-            </b-row>
-          </b-container>
-        </Collapse>
+        <DistanceComponent
+          :customer="customer"
+          :user_totals="activity_totals.user_totals"
+          :engineer_models="engineer_models"
+          :distance_total="activity_totals.distance_total"
+          :invoice_default_price_per_km="invoice_default_price_per_km"
+          @invoiceLinesCreated="distanceInvoiceLinesCreated"
+        />
 
         <hr/>
 
@@ -401,20 +302,6 @@
 
 <!--        <div class="use-on-invoice-container" v-if="false">-->
 
-
-<!--          <b-form-group :label="$trans('Distance')">-->
-<!--            <b-form-radio-group-->
-<!--              v-model="useOnInvoiceDistanceSelected"-->
-<!--              :options="useOnInvoiceDistanceOptions"-->
-<!--            ></b-form-radio-group>-->
-<!--          </b-form-group>-->
-
-<!--          <b-form-group :label="$trans('Used materials')">-->
-<!--            <b-form-radio-group-->
-<!--              v-model="useOnInvoiceUsedMaterialsSelected"-->
-<!--              :options="useOnInvoiceUsedMaterialsOptions"-->
-<!--            ></b-form-radio-group>-->
-<!--          </b-form-group>-->
 
 <!--          <b-form-group :label="$trans('Call out costs')">-->
 <!--            <b-form-radio-group-->
@@ -498,7 +385,6 @@ import { InvoiceLineModel } from '../../models/orders/InvoiceLine.js'
 import memberModel from "../../models/member/Member";
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
-import { MaterialModel } from "../../models/inventory/Material";
 import materialService from "../../models/inventory/Material";
 import { RateEngineerUserModel } from "../../models/company/UserEngineer";
 import engineerService from "../../models/company/UserEngineer";
@@ -508,6 +394,7 @@ import InvoiceFormTotals from './invoice_form/Totals';
 import Collapse from "../../components/Collapse";
 import invoiceMixin from "./invoice_form/mixin";
 import HoursComponent from "./invoice_form/Hours";
+import DistanceComponent from "./invoice_form/Distance";
 import MaterialsComponent from "./invoice_form/Materials";
 
 import VAT from "./invoice_form/VAT";
@@ -531,6 +418,7 @@ export default {
     Collapse,
     HoursComponent,
     MaterialsComponent,
+    DistanceComponent,
     VAT
   },
   props: {
@@ -571,19 +459,8 @@ export default {
       invoice_default_call_out_costs_dinero: null,
 
       invoice_default_price_per_km: null,
-      invoice_default_price_per_km_dinero: null,
 
       engineer_models: [],
-
-      distanceUserTotals: [],
-      distanceTotal: null,
-      distanceTotalVAT: null,
-      distanceTotals: null,
-      usePriceOptionsDistance: {
-        DISTANCE_USE_PRICE_SETTINGS: 'settings',
-        DISTANCE_USE_PRICE_CUSTOMER: 'customer',
-        DISTANCE_USE_PRICE_OTHER: 'other',
-      },
 
       activity_totals: null,
       extra_work_totals: null,
@@ -607,12 +484,6 @@ export default {
       // useOnInvoiceCallOutCostsSelected: null,
       //
       //
-      // useOnInvoiceDistanceOptions: [
-      //   { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-      //   { text: this.$trans('Distance totals'), value: OPTION_DISTANCE_TOTALS },
-      //   { text: this.$trans('None'), value: 'none' },
-      // ],
-      // useOnInvoiceDistanceSelected: null,
     }
   },
   computed: {
@@ -642,10 +513,6 @@ export default {
       this.used_materials = invoiceData.used_materials
 
       this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
-      this.invoice_default_price_per_km_dinero = toDinero(
-        this.invoice_default_price_per_km,
-        this.default_currency
-      )
 
       this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
       this.invoice_default_call_out_costs_dinero = toDinero(
@@ -664,21 +531,6 @@ export default {
         ...m,
         margin_perc: this.invoice_default_margin
       }))
-
-      // distance
-      this.distanceUserTotals = invoiceData.activity_totals.user_totals.map((a) => ({
-        user_id: a.user_id,
-        distance_to_total: a.distance_to_total,
-        distance_back_total: a.distance_back_total,
-        distance_total: a.distance_total,
-        vat_type: this.invoice_default_vat,
-        margin_perc: this.invoice_default_margin,
-        price_per_km_other: "0.00",
-        price_per_km_other_currency: this.default_currency,
-        price_per_km_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: this.usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS,
-      }))
-      this.updateDistanceTotals()
 
       this.isLoading = false
     } else {
@@ -700,6 +552,9 @@ export default {
 
     },
     materialsInvoiceLinesCreated() {
+
+    },
+    distanceInvoiceLinesCreated() {
 
     },
     resetInvoiceLines() {
@@ -731,77 +586,22 @@ export default {
 
       this.infoToast(this.$trans('Updated'), this.$trans('Hourly rate engineer has been updated'))
     },
-    // distance
-    setDistancePriceOther(priceDinero, user_id) {
-      let model = this.distanceUserTotals.find((a) => a.user_id === user_id)
-      model.price_per_km_other_dinero = priceDinero
-      model.price_per_km_other = model.price_per_km_other_dinero.toFormat('0.00')
-      model.price_per_km_other_currency = model.price_per_km_other_dinero.getCurrency()
-      return true
-    },
-    getDistancePriceFor(type) {
-      switch (type) {
-        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS:
-          return this.invoice_default_price_per_km_dinero
-        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER:
-          return this.customer.price_per_km_dinero
-        default:
-          throw `getDistancePrice: unknown usePrice: ${distance.usePrice}`
-      }
-    },
-    getDistancePrice(distance) {
-      switch (distance.usePrice) {
-        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS:
-          return this.invoice_default_price_per_km_dinero
-        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER:
-          return this.customer.price_per_km_dinero
-        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_OTHER:
-          return distance.price_per_km_other_dinero
-        default:
-          throw `getDistancePrice: unknown usePrice: ${distance.usePrice}`
-      }
-    },
-    getDistanceCurrency(distance) {
-      switch (distance.usePrice) {
-        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_SETTINGS:
-          return this.default_currency
-        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_CUSTOMER:
-          return this.customer.price_per_km_currency
-        case this.usePriceOptionsDistance.DISTANCE_USE_PRICE_OTHER:
-          return distance.price_per_km_other_currency
-        default:
-          throw `getDistanceCurrency: unknown usePrice: ${distance.usePrice}`
-      }
-    },
-    updateDistanceTotals() {
-      this.distanceUserTotals = this.distanceUserTotals.map((m) => this.updateDistanceObjTotals(m))
-      this.distanceTotal = this.getItemsTotal(this.distanceUserTotals)
-      this.distanceTotalVAT = this.getItemsTotalVAT(this.distanceUserTotals)
-    },
-    updateDistanceObjTotals(distance) {
-      const price = this.getDistancePrice(distance)
-      const currency = this.getDistanceCurrency(distance)
-      const total = price.multiply(distance.distance_total)
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (distance.margin_perc > 0) {
-        margin = total.multiply(distance.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(distance.vat_type)/100)
-      distance.currency = currency
-      distance.total = total_with_margin
-      distance.vat = vat
-      distance.margin = margin
+    // materials
+    async updateMaterial(material_id) {
+      let material = this.material_models.find((m) => m.id === material_id)
+      delete material.image
+      const updatedMaterialJson = await materialService.update(material_id, material)
+      material.setPriceFields(updatedMaterialJson)
+      this.updateTotals()
 
-      return distance
+      this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
     },
     async submitForm() {
       this.isLoading = true
 
       if (this.isCreate) {
         try {
-          const invoice = invoiceModel.insert(this.invoice)
+          const invoice = await invoiceService.insert(this.invoice)
           for (let invoiceLine of this.invoiceLines) {
             invoiceLine.invoice = invoice.id
             await invoiceLineModel.insert(invoiceLine)

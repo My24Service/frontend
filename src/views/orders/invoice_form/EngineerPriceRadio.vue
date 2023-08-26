@@ -97,5 +97,8 @@ export default {
 </script>
 
 <style scoped>
-
+.flex {
+  display : flex;
+  margin-top: auto;
+}
 </style>

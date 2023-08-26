@@ -60,15 +60,10 @@
           </b-form-radio-group>
         </b-col>
         <b-col cols="1">
-          <p class="flex">
-            <b-form-input
-              @blur="updateTotals"
-              v-model="material.margin_perc"
-              size="sm"
-              class="input-margin"
-            ></b-form-input>
-            <span class="percentage-container">%</span>
-          </p>
+          <MarginInput
+            :margin="material.margin_perc"
+            @inputChanged="(val) => marginChanged(material, val)"
+          />
         </b-col>
         <b-col cols="1">
           <VAT @vatChanged="(val) => changeVatType(material, val)" />
@@ -81,21 +76,11 @@
           />
         </b-col>
       </b-row>
-      <b-row>
-        <b-col cols="8">
-          <span class="total-text">{{ $trans('Total') }}</span>
-        </b-col>
-        <b-col cols="2">
-          <span class="total-text">{{ totalAmount }}</span>
-        </b-col>
-        <b-col cols="2">
-          <Totals
-            :total="total"
-            :is-final-total="true"
-            :vat="totalVAT"
-          />
-        </b-col>
-      </b-row>
+      <TotalRow
+        :items_total="totalAmount"
+        :total="total"
+        :total_vat="totalVAT"
+      />
 
       <div class="use-on-invoice-container">
         <h3>{{ $trans("What to add as invoice lines")}}</h3>
@@ -116,12 +101,6 @@ import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 import {
-  HOURS_TYPE_ACTUAL_WORK,
-  HOURS_TYPE_EXTRA_WORK,
-  HOURS_TYPE_TRAVEL,
-  HOURS_TYPE_WORK,
-  INVOICE_LINE_TYPE_ACTIVITY,
-  OPTION_ACTIVITY_ACTIVITY_TOTALS, OPTION_ACTIVITY_ACTUAL_WORK, OPTION_ACTUAL_WORK_TOTALS,
   OPTION_NONE, OPTION_USED_MATERIALS_TOTALS,
   OPTION_USER_TOTALS
 } from "./constants";
@@ -131,6 +110,8 @@ import VAT from "./VAT";
 import EngineerPriceRadio from "./EngineerPriceRadio";
 import materialService, {MaterialModel} from "../../../models/inventory/Material";
 import PriceInput from "../../../components/PriceInput";
+import MarginInput from "./MarginInput";
+import TotalRow from "./TotalRow";
 
 export default {
   name: "MaterialsComponent",
@@ -143,6 +124,8 @@ export default {
     HeaderCell,
     VAT,
     EngineerPriceRadio,
+    MarginInput,
+    TotalRow,
   },
   props: {
     material_models: {
@@ -208,19 +191,6 @@ export default {
     this.updateTotals()
   },
   methods: {
-    changeVatType(material, vatType) {
-      material.vat_type = vatType
-      this.updateTotals()
-    },
-    async updateMaterial(material_id) {
-      let material = this.materialModels.find((m) => m.id === material_id)
-      delete material.image
-      const updatedMaterialJson = await materialService.update(material_id, material)
-      material.setPriceFields(updatedMaterialJson)
-      this.updateTotals()
-
-      this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
-    },
     getMaterialPrice(used_material) {
       let model
       switch (used_material.usePrice) {
@@ -297,19 +267,5 @@ export default {
 .flex {
   display : flex;
   margin-top: auto;
-}
-.input-margin {
-  width: 40px;
-  padding: 1px;
-  margin: 1px;
-  text-align: center;
-}
-.percentage-container {
-  padding-top: 4px;
-  padding-left: 4px;
-}
-.total-text {
-  font-size: 14px;
-  font-weight: bold;
 }
 </style>
