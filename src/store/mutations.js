@@ -52,5 +52,5 @@ export const mutations = {
   },
   [SET_STATUSCODES](state, statuscodes) {
     state.statuscodes = statuscodes
-  }
+  },
 };
