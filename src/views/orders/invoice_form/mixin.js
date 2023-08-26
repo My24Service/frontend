@@ -30,13 +30,13 @@ let invoiceMixin = {
     getItemsTotal(items) {
       return items.reduce(
         (total, m) => (total.add(m.total)),
-        toDinero("0.00", items[0].currency)
+        toDinero("0.00", this.$store.getters.getDefaultCurrency)
       )
     },
     getItemsTotalVAT(items) {
       return items.reduce(
         (total, m) => (total.add(m.vat)),
-        toDinero("0.00", items[0].currency)
+        toDinero("0.00", this.$store.getters.getDefaultCurrency)
       )
     },
     getFullname(user_id) {
