@@ -71,7 +71,7 @@
       />
 
       <div class="use-on-invoice-container">
-      <h3>{{ $trans("What to add as invoice lines")}}</h3>
+        <h3>{{ $trans("What to add as invoice lines")}}</h3>
         <b-form-group>
           <b-form-radio-group
             v-model="useOnInvoiceSelected"

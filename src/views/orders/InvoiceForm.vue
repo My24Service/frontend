@@ -6,6 +6,10 @@
           <h2>{{ $trans('New invoice') }}</h2>
         </div>
 
+        <CustomerDetail
+          :customer="customer"
+        />
+
         <Collapse
           :title="$trans('Manage prices')"
         >
@@ -300,26 +304,11 @@
 
         <hr/>
 
-<!--        <div class="use-on-invoice-container" v-if="false">-->
-
-
-<!--          <b-form-group :label="$trans('Call out costs')">-->
-<!--            <b-form-radio-group-->
-<!--              v-model="useOnInvoiceCallOutCostsSelected"-->
-<!--              :options="useOnInvoiceCallOutCostsOptions"-->
-<!--            ></b-form-radio-group>-->
-<!--          </b-form-group>-->
-
-<!--          <div class="mx-auto">-->
-<!--            <footer class="modal-footer">-->
-<!--              <b-button @click="resetInvoiceLines" type="button" variant="secondary">-->
-<!--                {{ $trans('Reset') }}</b-button>-->
-<!--              <b-button @click="createInvoiceLinesFromConfig" type="button" variant="primary">-->
-<!--                {{ $trans('Create invoice lines') }}</b-button>-->
-<!--            </footer>-->
-<!--          </div>-->
-
-<!--        </div>-->
+        <CallOutCostsComponent
+          :customer="customer"
+          :invoice_default_call_out_costs="invoice_default_call_out_costs"
+          @invoiceLinesCreated="callOutCostsInvoiceLinesCreated"
+        />
 
         <div class="invoice-lines">
           <h3>{{ $trans("Invoice lines") }}</h3>
@@ -382,7 +371,6 @@
 import invoiceService from '../../models/orders/Invoice.js'
 import invoiceLineService from '../../models/orders/InvoiceLine.js'
 import { InvoiceLineModel } from '../../models/orders/InvoiceLine.js'
-import memberModel from "../../models/member/Member";
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
 import materialService from "../../models/inventory/Material";
@@ -396,6 +384,7 @@ import invoiceMixin from "./invoice_form/mixin";
 import HoursComponent from "./invoice_form/Hours";
 import DistanceComponent from "./invoice_form/Distance";
 import MaterialsComponent from "./invoice_form/Materials";
+import CallOutCostsComponent from "./invoice_form/CallOutCosts";
 
 import VAT from "./invoice_form/VAT";
 import {
@@ -403,11 +392,8 @@ import {
   HOURS_TYPE_EXTRA_WORK,
   HOURS_TYPE_TRAVEL,
   HOURS_TYPE_WORK,
-  INVOICE_LINE_TYPE_ACTIVITY,
-  OPTION_ACTIVITY_ACTIVITY_TOTALS, OPTION_ACTIVITY_ACTUAL_WORK,
-  OPTION_NONE,
-  OPTION_USER_TOTALS
 } from "./invoice_form/constants";
+import CustomerDetail from "../../components/CustomerDetail";
 
 export default {
   name: 'InvoiceForm',
@@ -419,7 +405,9 @@ export default {
     HoursComponent,
     MaterialsComponent,
     DistanceComponent,
-    VAT
+    CallOutCostsComponent,
+    VAT,
+    CustomerDetail,
   },
   props: {
     uuid: {
@@ -446,7 +434,6 @@ export default {
       order: null,
       member: null,
       invoice_id: null,
-      vat_types: [],
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
@@ -456,7 +443,6 @@ export default {
       invoice_default_partner_hourly_rate_dinero: null,
 
       invoice_default_call_out_costs: null,
-      invoice_default_call_out_costs_dinero: null,
 
       invoice_default_price_per_km: null,
 
@@ -475,15 +461,6 @@ export default {
       invoiceLines: [],
       deletedInvoiceLines: [],
 
-      //
-      // useOnInvoiceCallOutCostsOptions: [
-      //   { text: this.$trans('Customer'), value: OPTION_CALL_OUT_COSTS_CUSTOMER },
-      //   { text: this.$trans('Settings'), value: OPTION_CALL_OUT_COSTS_SETTINGS },
-      //   { text: this.$trans('None'), value: 'none' },
-      // ],
-      // useOnInvoiceCallOutCostsSelected: null,
-      //
-      //
     }
   },
   computed: {
@@ -494,7 +471,6 @@ export default {
   async created() {
     if (this.isCreate) {
       this.isLoading = true
-      this.vat_types = await memberModel.getVATTypes()
       this.invoice = invoiceService.getFields()
       const invoiceData = await invoiceService.getData(this.uuid)
 
@@ -513,12 +489,7 @@ export default {
       this.used_materials = invoiceData.used_materials
 
       this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
-
       this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
-      this.invoice_default_call_out_costs_dinero = toDinero(
-        this.invoice_default_call_out_costs,
-        this.default_currency
-      )
 
       this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
       this.invoice_default_partner_hourly_rate_dinero = toDinero(
@@ -555,6 +526,9 @@ export default {
 
     },
     distanceInvoiceLinesCreated() {
+
+    },
+    callOutCostsInvoiceLinesCreated() {
 
     },
     resetInvoiceLines() {
