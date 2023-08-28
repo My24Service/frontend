@@ -4,7 +4,7 @@
       <span class="total-text">{{ $trans('Total') }}</span>
     </b-col>
     <b-col cols="2">
-      <span class="total-text">{{ items_total }}</span>
+      <span class="total-text items-total">{{ items_total }}</span>
     </b-col>
     <b-col cols="2">
       <Totals
