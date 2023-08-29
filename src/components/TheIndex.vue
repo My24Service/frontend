@@ -22,7 +22,7 @@
           </h3>
         </div>
       </header>
-      
+
     </div>
   </div>
 </template>
@@ -47,12 +47,12 @@ export default {
       memberInfo: this.$store.state.memberInfo,
     }
   },
-  
+
   created() {
     setTimeout(() => {
       if (this.isPlanning) {
         console.info(`planning, redirecting to 'order-list'`)
-        this.$router.push({ name: 'order-list' });
+        this.$router.push({ name: 'material-list' });
       }
     }, 100);
   }
