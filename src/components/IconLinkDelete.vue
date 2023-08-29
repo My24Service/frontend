@@ -1,6 +1,6 @@
 <template>
   <span>
-    <b-link class="px-1" v-bind:title="title" v-on:click.native="method()">
+    <b-link class="px-1" v-bind:title="title" v-on:click="method()">
       <b-icon-trash class="edit-icon"></b-icon-trash>
     </b-link>
   </span>
