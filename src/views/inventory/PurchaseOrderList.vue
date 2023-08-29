@@ -1,7 +1,9 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>Purchase orders</h3>
+      <div class="page-title">
+        <h3><b-icon icon="file-earmark-medical"></b-icon> Purchase orders</h3>
+      </div>
     </header>
     <SearchModal
       id="search-modal"

@@ -94,7 +94,7 @@
         </div>
         <hr/>
 
-        <ul class="listing">
+        <ul class="listing order-list">
             <li><!-- FIXME -->
               <div class="headings">
                 <span class="order-id"></span>
@@ -117,13 +117,13 @@
             />
             </li>
         </ul>
-        <Pagination
-          v-if="!isLoading"
-          :model="this.model"
-          :model_name="$trans('Order')"
-        />
       </div>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Order')"
+    />
   </div>
 </template>
 

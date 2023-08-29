@@ -1,7 +1,9 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>Locations</h3>
+      <div class="page-title">
+        <h3><b-icon icon="shop-window"></b-icon> Locations</h3>
+      </div>
     </header>
 
     <div class="panel overflow-auto">
@@ -75,6 +77,7 @@
         :model_name="$trans('Location')"
       />
     </div>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"

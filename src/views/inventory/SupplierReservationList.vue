@@ -1,8 +1,10 @@
 <template>
-  
+
   <div class="app-page">
     <header>
-      <h3>Reservations</h3>
+      <div class="page-title">
+        <h3>Reservations</h3>
+      </div>
     </header>
 
     <SearchModal

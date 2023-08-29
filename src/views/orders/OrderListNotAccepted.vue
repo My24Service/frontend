@@ -85,7 +85,7 @@
 
         <hr/>
 
-        <ul class="listing">
+        <ul class="listing order-list">
           <li><!-- FIXME -->
             <div class="headings">
               <span class="order-id"></span>

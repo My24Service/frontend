@@ -1,6 +1,5 @@
 <template>
-
-<div class="app-page">
+  <div class="app-page">
     <b-modal
       id="new-equipment-modal"
       ref="new-equipment-modal"
@@ -54,20 +53,21 @@
         </b-container>
       </form>
     </b-modal>
+
     <header>
       <div class='page-title'>
         <h3 v-if="!pk">
           <b-icon icon="file-earmark-plus"></b-icon>
-          <router-link :to="{name:'order-list'}">Orders</router-link> / 
+          <router-link :to="{name:'order-list'}">Orders</router-link> /
           <strong>new</strong>
         </h3>
         <h3 v-if="pk">
           <b-icon icon="file-earmark-text-fill"></b-icon>
-          <router-link :to="{name:'order-list'}">Orders</router-link> / 
+          <router-link :to="{name:'order-list'}">Orders</router-link> /
           <router-link :to="{name: 'order-view', pk:pk}">#<strong>{{ pk }}</strong></router-link>
         / edit
         </h3>
-        
+
         <div class="flex-columns" v-if="!unaccepted || hasBranches">
           <b-button
             @click="cancelForm"
@@ -101,9 +101,9 @@
         </div>
       </div>
     </header>
-    
+
     <div class='page-detail'>
-      
+
       <div class='flex-columns'>
         <div class='panel'>
             <h6>Order details</h6>
@@ -198,7 +198,7 @@
               rows="3"
             ></b-form-textarea>
           </b-form-group>
-            
+
           <h6>
             {{ $trans('Documents') }}
             <router-link v-if="!isCreate" :to="{name: 'order-documents', params : {'orderPk': pk}}">edit documents</router-link>
@@ -225,7 +225,7 @@
                 @input="filesSelected"
               ></b-form-file>
             </b-form-group>
-              
+
             <b-row>
               <b-col cols="12">
                 <b-table v-if="documents.length > 0" small :fields="documentFields" :items="documents" responsive="md">
@@ -261,7 +261,7 @@
                       id="order-infoline-info"
                       v-model="info"
                     ></b-form-input>
-                    
+
                     <b-button v-if="isEditInfoLine" @click="doEditInfoLine" class="btn btn-primary" size="sm" type="button" variant="warning">
                       {{ $trans('edit') }}
                     </b-button>
@@ -547,7 +547,7 @@
                   {{ $trans('Please enter a start date') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-              
+
               <b-form-group
                 label-size="sm"
                 label-class="p-sm-0"
@@ -587,7 +587,7 @@
                   {{ $trans('Please enter an end date') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-              
+
               <b-form-group
                 label-size="sm"
                 :label="$trans('End time')"
@@ -840,7 +840,7 @@
           <h4>{{ $trans('Next page after create') }}</h4>
           <b-row>
             <b-col cols="12">
-              <b-form-group 
+              <b-form-group
                 label-size="sm"
                 label-for="order-done-next"
               >
@@ -861,7 +861,7 @@
       </b-form>
       <div class="bottom"></div>
     </div>
-</div>
+  </div>
 </template>
 
 <script>
@@ -913,11 +913,13 @@ export default {
   },
   watch: {
     startDate(val) {
+      console.info("WATCH: startDate", val)
       if (new Date(this.endDate) < new Date(val)) {
         this.order.end_date = val
       }
     },
     endDate(val) {
+      console.info("WATCH: endDate", val)
       if (new Date(val) < new Date(this.startDate)) {
         this.order.start_date = val
       }
@@ -1067,9 +1069,11 @@ export default {
       return this.hasBranches || this.isEditEquipment
     },
     startDate() {
+      console.info("COMPUTED: startDate", this.order.start_date)
       return this.order.start_date
     },
     endDate() {
+      console.info("COMPUTED: endDate", this.order.end_date)
       return this.order.end_date
     },
     isCreate() {
@@ -1594,7 +1598,7 @@ export default {
         this.customers = await customerModel.search(query)
         this.isLoading = false
       } catch(error) {
-        console.log('Error fetching customers', error)
+        console.warn('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
         this.isLoading = false
       }
@@ -1617,11 +1621,11 @@ export default {
 
       try {
         this.order = await orderModel.detail(this.pk)
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
+        this.order.start_date = this.$moment(this.order.start_date).format('YYYY-MM-DD')
+        this.order.end_date = this.$moment(this.order.end_date).format('YYYY-MM-DD')
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching order', error)
+        console.warn('error fetching order', error)
         this.errorToast(this.$trans('Error fetching order'))
         this.isLoading = false
       }

@@ -1,7 +1,9 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>Entries</h3>
+      <div class="page-title">
+        <h3>Entries</h3>
+      </div>
     </header>
 
     <SearchModal
@@ -50,7 +52,7 @@
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
