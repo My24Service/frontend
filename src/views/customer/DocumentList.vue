@@ -46,7 +46,7 @@
                 <ButtonLinkAdd
                   router_name="customer-document-add"
                   v-bind:router_params="{customerPk: data.field.value}"
-                  v-bind:title="$trans('New document')"
+                  v-bind:title="$trans('Add document')"
                 />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
