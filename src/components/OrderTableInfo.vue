@@ -1,5 +1,15 @@
 <template>
   <div class="listing-item">
+    <!-- delete order modal -->
+    <b-modal
+      v-if="!isCustomer && !isBranchEmployee"
+      id="delete-order-modal"
+      ref="delete-order-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="this.doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
+    </b-modal>
     <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-id">
         #{{ order.order_id }}
     </router-link>
@@ -33,8 +43,8 @@
         </span>
         <span v-else title="Not assigned to anyone">&ndash;</span>
       </span>
-      <span>
-        <span v-if="order.documents.length">
+      <span class="order-documents">
+        <span v-if="order.documents.length" >
           <b-icon icon="paperclip"></b-icon>
         </span>
         <router-link v-if="isLoaded && order.documents.length" :to="{name: 'order-documents', params: {orderPk: order.id}}" class="order-type">
@@ -55,6 +65,11 @@
           style="border-color: transparent;"
           @change="handleStatusChange(order.id, $event)"
         ></b-form-select>
+        <IconLinkDelete
+          v-if="!isCustomer && !isBranchEmployee"
+          v-bind:title="$trans('Delete')"
+          v-bind:method="this.showDeleteModal"
+        />
       </span>
   </div>
 </template>
@@ -71,9 +86,13 @@
 import my24 from '../services/my24.js'
 import { componentMixin } from '../utils.js'
 import statusModel from '@/models/orders/Status.js'
+import IconLinkDelete from './IconLinkDelete.vue'
 
 export default {
   mixins: [componentMixin],
+  components: {
+    IconLinkDelete
+  },
   async created() {
     this.memberType = await this.$store.dispatch('getMemberType')
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
@@ -118,9 +137,26 @@ export default {
     order: {
       type: [Object],
       required: true
+    },
+    model: {
+      type: [Object],
     }
   },
   methods: {
+    showDeleteModal() {
+      console.info('show modal')
+      this.$refs['delete-order-modal'].show()
+    },
+    async doDelete() {
+      try {
+        await this.model.delete(this.order.id)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        this.$emit('reload-data')
+      } catch(error) {
+        console.log('Error deleting order', error)
+        this.errorToast(this.$trans('Error deleting order'))
+      }
+    },
     handleStatusChange(id, value) {
       this.changeStatus(id, value);
       this.orderStatusColorCode = my24.status2color(this.statuscodes, value);
