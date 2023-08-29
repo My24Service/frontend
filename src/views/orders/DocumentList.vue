@@ -13,8 +13,8 @@
           <router-link
             class="btn button"
             :to="{name: 'order-document-add', params: {orderPk: this.orderPk}}"
-            v-bind:title="$trans('New document')"
-            >{{  $trans('New document') }}</router-link>
+            v-bind:title="$trans('Add document')"
+            >{{  $trans('Add document') }}</router-link>
         </div>
       </div>
     </header>

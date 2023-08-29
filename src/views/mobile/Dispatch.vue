@@ -1,6 +1,13 @@
 <template>
   <div class="app-page">
-    <header></header>
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="person-lines-fill"></b-icon>
+          Dispatch
+        </h3>
+      </div>
+    </header>
     <b-button @click="backToTop" id="btn-back-to-top">
       <b-icon-arrow-up-circle-fill></b-icon-arrow-up-circle-fill>
     </b-button>

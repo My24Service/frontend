@@ -1,7 +1,9 @@
 <template>
-  <div class="app-page" v-if="!isLoading">
+  <div class="app-page">
     <header>
-      <h3>Equipment</h3>
+      <div class="page-title">
+        <h3><b-icon icon="tools"></b-icon> Equipment</h3>
+      </div>
     </header>
     <div class="panel overflow-auto">
       <b-table
@@ -71,10 +73,12 @@
               :router_name="editLink"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
+              class="h2"
             />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
+              class="h2"
             />
           </div>
         </template>

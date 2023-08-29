@@ -1,7 +1,9 @@
 <template>
-  <div class="app-page" v-if="!isLoading">
+  <div class="app-page">
     <header>
-      <h3>Maintenance Contracts</h3>
+      <div class="page-title">
+        <h3><b-icon icon="file-earmark-lock"></b-icon> Maintenance Contracts</h3>
+      </div>
     </header>
     <SearchModal
       id="search-modal"

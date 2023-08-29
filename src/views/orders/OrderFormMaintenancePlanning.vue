@@ -1,6 +1,5 @@
 <template>
-
-<div class="app-page">
+  <div class="app-page">
     <b-modal
       id="new-equipment-modal"
       ref="new-equipment-modal"
@@ -54,6 +53,7 @@
         </b-container>
       </form>
     </b-modal>
+
     <header>
       <div class='page-title'>
         <h3 v-if="!pk">
@@ -906,7 +906,7 @@
       </b-form>
       <div class="bottom"></div>
     </div>
-</div>
+  </div>
 </template>
 
 <script>
@@ -958,11 +958,13 @@ export default {
   },
   watch: {
     startDate(val) {
+      console.info("WATCH: startDate", val)
       if (new Date(this.endDate) < new Date(val)) {
         this.order.end_date = val
       }
     },
     endDate(val) {
+      console.info("WATCH: endDate", val)
       if (new Date(val) < new Date(this.startDate)) {
         this.order.start_date = val
       }
@@ -1121,9 +1123,11 @@ export default {
       return this.hasBranches || this.isEditEquipment || this.maintenance
     },
     startDate() {
+      console.info("COMPUTED: startDate", this.order.start_date)
       return this.order.start_date
     },
     endDate() {
+      console.info("COMPUTED: endDate", this.order.end_date)
       return this.order.end_date
     },
     isCreate() {
@@ -1681,7 +1685,7 @@ export default {
         this.customers = await customerModel.search(query)
         this.isLoading = false
       } catch(error) {
-        console.log('Error fetching customers', error)
+        console.warn('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
         this.isLoading = false
       }
@@ -1704,11 +1708,11 @@ export default {
 
       try {
         this.order = await orderModel.detail(this.pk)
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
+        this.order.start_date = this.$moment(this.order.start_date).format('YYYY-MM-DD')
+        this.order.end_date = this.$moment(this.order.end_date).format('YYYY-MM-DD')
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching order', error)
+        console.warn('error fetching order', error)
         this.errorToast(this.$trans('Error fetching order'))
         this.isLoading = false
       }

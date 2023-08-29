@@ -1,7 +1,9 @@
 <template>
   <div class="app-page">
     <header>
-      <h2>{{ $trans('Move material') }}</h2>
+      <div class="page-title">
+        <h3>{{ $trans('Move material') }}</h3>
+      </div>
     </header>
     <div class="app-detail panel">
       <b-form>

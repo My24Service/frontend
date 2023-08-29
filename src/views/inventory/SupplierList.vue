@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3>Suppliers</h3>
+        <h3><b-icon icon="shop"></b-icon>Suppliers</h3>
       </div>
     </header>
     <SearchModal
