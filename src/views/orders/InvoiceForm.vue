@@ -257,6 +257,7 @@
         <HoursComponent
           :type="HOURS_TYPE_WORK"
           :hours_total="activity_totals.work_total"
+          :hours_total_secs="activity_totals.work_total_secs"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
@@ -268,6 +269,7 @@
         <HoursComponent
           :type="HOURS_TYPE_TRAVEL"
           :hours_total="activity_totals.travel_total"
+          :hours_total_sesc="activity_totals.travel_total_secs"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
@@ -289,8 +291,9 @@
 
         <HoursComponent
           :type="HOURS_TYPE_EXTRA_WORK"
-          :hours_total="extra_work_totals.hours_total"
-          :user_totals="extra_work_totals.user_totals"
+          :hours_total="activity_totals.extra_work_total"
+          :hours_total_secs="activity_totals.extra_work_total_secs"
+          :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="extraWorkInvoiceLinesCreated"
@@ -300,8 +303,9 @@
 
         <HoursComponent
           :type="HOURS_TYPE_ACTUAL_WORK"
-          :hours_total="actual_work_totals.hours_total"
-          :user_totals="actual_work_totals.user_totals"
+          :hours_total="activity_totals.actual_work_total"
+          :hours_total_secs="activity_totals.actual_work_total_secs"
+          :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="actualWorkInvoiceLinesCreated"
@@ -486,8 +490,6 @@ export default {
       this.member = invoiceData.member
       this.invoice_id = invoiceData.invoice_id
 
-      this.extra_work_totals = invoiceData.extra_work_totals
-      this.actual_work_totals = invoiceData.actual_work_totals
       this.activity_totals = invoiceData.activity_totals
 
       this.material_models = invoiceData.material_models

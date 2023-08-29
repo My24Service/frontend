@@ -107,7 +107,7 @@ import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 
 export default {
-  name: "ActivityComponent",
+  name: "HoursComponent",
   emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
   components: {
@@ -144,6 +144,10 @@ export default {
       type: [String],
       default: null
     },
+    hours_total_secs: {
+      type: [String],
+      default: null
+    },
     user_totals: {
       type: [Array],
       default: null
@@ -160,37 +164,46 @@ export default {
   created() {
     // map input to usable dataset
     let count = 0
+    let user_totals
     switch (this.type) {
       case HOURS_TYPE_WORK:
+        // filter out empty values
+        user_totals = this.user_totals.filter((m) => m.work_secs !== null)
         this.userTotals = this.user_totals.map((a) => ({
           ...a,
           ...this.getDefaultItemProps(a.user_id),
-          // use different field for total hours
-          hours_total: a.work_total,
+          hours_total: a.work,
+          hours_total_secs: parseInt(a.work_secs),
           data_index: count++,
         }))
         break
       case HOURS_TYPE_TRAVEL:
-        this.userTotals = this.user_totals.map((a) => ({
+        user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
+        this.userTotals = user_totals.map((a) => ({
           ...a,
           ...this.getDefaultItemProps(a.user_id),
-          // use different field for total hours
           hours_total: a.travel_total,
+          hours_total_secs: parseInt(a.travel_total_secs),
           data_index: count++,
         }))
         break
       case HOURS_TYPE_EXTRA_WORK:
-        this.userTotals = this.user_totals.map((a) => ({
+        user_totals = this.user_totals.filter((m) => m.extra_work_secs !== null)
+        this.userTotals = user_totals.map((a) => ({
           ...a,
           ...this.getDefaultItemProps(a.user_id),
-          // not different, this has hours_total
+          hours_total: a.extra_work,
+          hours_total_secs: parseInt(a.extra_work_secs),
           data_index: count++,
         }))
         break
       case HOURS_TYPE_ACTUAL_WORK:
-        this.userTotals = this.user_totals.map((a) => ({
+        user_totals = this.user_totals.filter((m) => m.actual_work_secs !== null)
+        this.userTotals = user_totals.map((a) => ({
           ...a,
           ...this.getDefaultItemProps(a.user_id),
+          hours_total: a.actual_work,
+          hours_total_secs: parseInt(a.actual_work_secs),
           data_index: count++,
         }))
         break
@@ -317,9 +330,9 @@ export default {
     updateHoursUserTotals(item) {
       const price = this.getSelectedEngineerRate(item)
       const currency = this.getSelectedEngineerRateCurrency(item)
-      const hours_parts = item.hours_total.split(':')
-      let total = price.multiply(hours_parts[0])
-      total = total.add(price.multiply(hours_parts[1]/60))
+      const seconds = item.hours_total_secs ? item.hours_total_secs : 0
+      let total = price.multiply(seconds)
+      total = total.divide(60*60)
       let total_with_margin = total
       let margin = toDinero("0.00", currency)
       if (item.margin_perc > 0) {

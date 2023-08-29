@@ -4,26 +4,40 @@
   >
     <b-container fluid>
       <b-row>
-        <b-col cols="2" class="header">
-          {{ $trans("Engineer") }}
+        <b-col cols="2">
+          <HeaderCell
+          :text='$trans("Engineer")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("To") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("To")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Back") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Back")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Total") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Total")'
+          />
         </b-col>
-        <b-col cols="3" class="header">
-          {{ $trans("Rate") }}
+        <b-col cols="3">
+          <HeaderCell
+            :text='$trans("Rate")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Margin") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Margin")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("VAT type") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("VAT type")'
+          />
         </b-col>
         <b-col cols="2" />
       </b-row>
@@ -32,10 +46,10 @@
           {{ getFullname(distance.user_id) }}
         </b-col>
         <b-col cols="1">
-          {{ distance.distance_to_total }}
+          {{ distance.distance_to }}
         </b-col>
         <b-col cols="1">
-          {{ distance.distance_back_total }}
+          {{ distance.distance_back }}
         </b-col>
         <b-col cols="1">
           {{ distance.distance_total }}
@@ -194,8 +208,8 @@ export default {
 
     this.distanceTotals = this.user_totals.map((a) => ({
       user_id: a.user_id,
-      distance_to_total: a.distance_to_total,
-      distance_back_total: a.distance_back_total,
+      distance_to: a.distance_to,
+      distance_back: a.distance_back,
       distance_total: a.distance_total,
       vat_type: this.invoice_default_vat,
       margin_perc: this.invoice_default_margin,
