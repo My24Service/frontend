@@ -1,21 +1,144 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm" v-if="orderService">
-    <div class="app-detail">
-      <div v-if="!isCustomer">
-        <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-
-        <CustomerDetail
-          :customer="customer"
-        />
-
+    <div class="app-page">
+      <header>
+        <div class="page-title">
+          <h3>
+            <b-icon icon="building"></b-icon>
+            <router-link :to="{name: 'customer-list'}">Customers</router-link>
+            / {{ customer.name }}
+          </h3>
+        </div>
+      </header>
+      <div class="page-detail customer-details" v-if="!isCustomer">
+        <div class="flex-columns">
+          <div class="panel">
+            <h6>{{ $trans('info')}}</h6>
+            <dl>
+              <dt>Address</dt>
+              <dd>
+                <address>
+                  {{ customer.address }} <br>
+                  {{ customer.postal }} <br>
+                  {{ customer.city }} {{  customer.country_code }}
+                </address>
+              </dd>
+              <dt>Customer ID</dt>
+              <dd>{{ customer.id }}</dd>
+              <dt v-if="customer.external_identifier">Ext. ID</dt>
+              <dd v-if="customer.external_identifier">{{ customer.external_identifier }}</dd>
+            </dl>
+          </div>
+          <div class="panel">
+            <h6>{{ $trans('Contact') }}</h6>
+            <dl>
+              <dt>{{ customer.contact }}</dt>
+              <dd>
+                {{ customer.email || '(email unknown)' }} <br>
+                {{ customer.tel }} <br>
+                {{ customer.mobile }}
+              </dd>
+            </dl>
+          </div>
+          <div class="panel">
+            <h6>{{ $trans('Remarks') }}</h6>
+            <p>{{ customer.remarks }}</p>
+          </div>
+        </div>
       </div>
 
-      <OrderStats
-        v-if="!isLoading"
-        ref="order-stats"
-      />
+      <div class="page-detail flex-columns">
+        <div class="panel">
 
-      <div class="app-grid" v-if="!isCustomer">
+          <h6>{{ $trans("Maintenance contracts") }}</h6>
+          <b-table
+              id="customer-maintenance-contracts-table"
+              small
+              :busy='isLoading'
+              :fields="maintenanceContractFields"
+              :items="maintenanceContracts"
+              responsive="md"
+              class="data-table"
+            >
+              <template #cell(contract)="data">
+                <b-row>
+                  <b-col cols="5">
+                    <table class="totals">
+                      <tr>
+                        <td><strong>{{ $trans('Name') }}:</strong></td>
+                        <td>{{ data.item.name }}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>{{ $trans('Contract value') }}:</strong></td>
+                        <td>EUR {{ data.item.contract_value }}</td>
+                      </tr>
+                    </table>
+                  </b-col>
+                  <b-col cols="4">
+                    <table class="totals">
+                      <tr>
+                        <td><strong>{{ $trans('Created orders') }}</strong></td>
+                        <td>{{ data.item.created_orders}}</td>
+                      </tr>
+                      <tr>
+                        <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
+                        <td>{{ data.item.num_order_equipment}}</td>
+                      </tr>
+                    </table>
+                  </b-col>
+                  <b-col cols="3">
+                    <div class="float-right">
+                      <span class="button-container">
+                        <b-button
+                          class="btn btn-outline-primary"
+                          :to="{name: 'order-add-maintenance'}"
+                          size="sm"
+                          type="button"
+                          variant="outline-primary"
+                        >
+                          {{ $trans('Create order') }}
+                        </b-button>
+                      </span>
+
+                      <span class="button-container">
+                        <b-button
+                          :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}"
+                          class="btn btn-outline-secondary"
+                          size="sm"
+                          type="button"
+                          variant="outline-secondary"
+                        >
+                          {{ $trans('Edit') }}
+                        </b-button>
+                      </span>
+                    </div>
+                  </b-col>
+                </b-row>
+              </template>
+          </b-table>
+          <h6>Orders</h6>
+          <div class="overflow-auto">
+            <ul class="listing order-list">
+              <li v-for="item in orders" :key="item.id">
+                <OrderTableInfo
+                  v-bind:order="item"
+                />
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="panel">
+          <!-- Stats -->
+          <OrderStats
+            v-if="!isLoading"
+            ref="order-stats"
+          />
+        </div>
+      </div>
+
+      <div class="panel">
+        <!-- Maintenance contracts -->
+        <div class="app-grid" v-if="!isCustomer">
         <b-row align-h="center">
           <b-col cols="10">
             <b-row align-h="center">
@@ -112,8 +235,9 @@
             </b-row>
           </b-col>
         </b-row>
+        </div>
       </div>
-
+      <!-- Equipment -->
       <div class="app-grid">
         <b-row align-h="center">
           <b-col cols="6">
@@ -239,8 +363,7 @@
         </b-row>
       </div>
 
-      <div class="spacer"></div>
-
+      <!-- Orders -->
       <div>
         <b-row align-h="center">
           <h3>{{ $trans("Orders") }}</h3>
@@ -521,10 +644,8 @@ table.totals tr:first-child td {
 span.button-container {
   padding: 8px;
 }
-span.spacer {
-  width: 10px;
-}
-div.spacer {
-  margin: 10px;
+p {
+  line-height: 1.7;
+  padding-top: 0.5rem;
 }
 </style>
