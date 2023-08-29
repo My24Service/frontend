@@ -3,26 +3,16 @@
     <header>
       <!-- WIP -->
       <div class='search-form'>
-        <SearchForm @do-search="handleSearchOk" placeholderText="Search orders"/> 
+        <SearchForm @do-search="handleSearchOk" placeholderText="Search orders"/>
       </div>
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
           <span>Orders</span>
+          {{ /* this.queryMode */ }}
         </h3>
 
         <div class="flex-columns">
-          <b-button-toolbar>
-            <b-button-group>
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSort
-                v-bind:method="function() { showSortModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
           <router-link class="btn button" :to="{name:'order-add'}">
             <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add order') }}
           </router-link>
@@ -53,7 +43,6 @@
           </b-container>
         </form>
       </b-modal>
-
 
       <!-- delete order modal -->
       <b-modal
@@ -127,44 +116,60 @@
           </b-link>
         </b-col>
       </b-row>
-      
-      <div class="overflow-auto">
+
+      <div>
         <div class="flex-columns">
-          <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
-          <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
-          <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
-          <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
-          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>        
+          <div>
+            <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
+            <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+            <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
+            <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
+            <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
+          </div>
+
+          <!-- INSERT BUTTONS -->
+          <b-button-toolbar>
+            <b-button-group>
+              <ButtonLinkRefresh
+                v-bind:method="function() { loadData() }"
+                v-bind:title="$trans('Refresh')"
+              />
+              <ButtonLinkSort
+                v-bind:method="function() { showSortModal() }"
+              />
+            </b-button-group>
+          </b-button-toolbar>
+
         </div>
         <br>
-        <ul class="listing order-list">
-          <li><!-- FIXME -->
-            <div class="headings">
-              <span class="order-id">order id</span>
-              <span class="order-type">type</span>
-              <span class="order-company-name">company</span>
-              <span class="order-start-date">start date</span>
-              <span class="order-assignees">people</span>
-              <span class="order-documents">Documents</span>
-              <span class="order-status">status</span>
-            </div>
-          </li>
-          <li v-if="isLoading" class="text-center my-2 list-loading">
-            <b-spinner class="align-middle"></b-spinner><br>
-            <span>{{ $trans('loading orders') }}</span>
-          </li>
-          <li v-for="order in orders" :key="order.id">
-            <OrderTableInfo
-                v-bind:order="order"
-              />
-          </li>
-        </ul>
-        <Pagination
-          v-if="!isLoading"
-          :model="model"
-          :model_name="$trans('Order')"
-        />
-  <!-- 
+        <div class="overflow-auto">
+          <ul class="listing order-list">
+            <li><!-- FIXME -->
+              <div class="headings">
+                <span class="order-id">order id</span>
+                <span class="order-type">type</span>
+                <span class="order-company-name">company</span>
+                <span class="order-start-date">start date</span>
+                <span class="order-assignees">people</span>
+                <span class="order-documents">Documents</span>
+                <span class="order-status">status</span>
+              </div>
+            </li>
+            <section v-if="isLoading" class="text-center my-2 list-loading">
+              <b-spinner class="align-middle"></b-spinner><br>
+              <span>{{ $trans('loading orders') }}</span>
+            </section>
+            <li v-for="order in orders" :key="order.id">
+              <OrderTableInfo
+                  v-bind:order="order"
+                  :model="model"
+                  @reload-data="loadData"
+                />
+            </li>
+          </ul>
+        </div>
+
+  <!--
         <b-table
           id="order-table"
           small
@@ -239,9 +244,25 @@
         -->
       </div>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="model"
+      :model_name="$trans('Order')"
+    />
   </div>
 </template>
+<style scoped>
+.flex-columns {
+  justify-content: space-between;
+}
+.flex-columns > div {
+    flex-grow: 0;
+    display: flex;
+    align-items: center;
+    gap: 2ex;
+}
 
+</style>
 <script>
 import orderModel from '../../models/orders/Order.js'
 import statusModel from '../../models/orders/Status.js'
