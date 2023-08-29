@@ -4,17 +4,25 @@
   >
     <b-container fluid>
       <b-row>
-        <b-col cols="2" class="header">
-          {{ $trans("Amount") }}
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("Amount")'
+          />
         </b-col>
-        <b-col cols="6" class="header">
-          {{ $trans("Rate") }}
+        <b-col cols="6">
+          <HeaderCell
+            :text='$trans("Rate")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Margin") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Margin")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("VAT type") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("VAT type")'
+          />
         </b-col>
         <b-col cols="2" />
       </b-row>

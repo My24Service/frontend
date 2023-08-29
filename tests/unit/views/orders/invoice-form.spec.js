@@ -10,10 +10,12 @@ import CallOutCosts from '../../../../src/views/orders/invoice_form/CallOutCosts
 import Distance from '../../../../src/views/orders/invoice_form/Distance'
 import Materials from '../../../../src/views/orders/invoice_form/Materials'
 import Hours from '../../../../src/views/orders/invoice_form/Hours'
+import HeaderCell from '../../../../src/views/orders/invoice_form/Header'
 
 import invoiceResponse from '../../fixtures/invoiceData'
 import customerResponse from '../../fixtures/customer.js'
 import {CustomerModel} from "../../../../src/models/customer/Customer";
+import {HOURS_TYPE_WORK} from "../../../../src/views/orders/invoice_form/constants";
 
 jest.mock('axios')
 
@@ -163,7 +165,7 @@ describe('CallOutCosts', () => {
     })
   })
 
-  it('has headers', async () => {
+  it('has 4 HeaderCells', async () => {
     const wrapper = shallowMount(CallOutCosts, {
       localVue,
       store,
@@ -178,7 +180,7 @@ describe('CallOutCosts', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('.header')
+    const trs = wrapper.findAllComponents(HeaderCell)
     expect(trs.length).to.equal(4)
   })
 
@@ -212,7 +214,7 @@ describe('Distance', () => {
     })
   })
 
-  it('has headers', async () => {
+  it('has 7 HeaderCells', async () => {
     const wrapper = shallowMount(Distance, {
       localVue,
       store,
@@ -230,7 +232,7 @@ describe('Distance', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('.header')
+    const trs = wrapper.findAllComponents(HeaderCell)
     expect(trs.length).to.equal(7)
   })
 
@@ -275,7 +277,7 @@ describe('Distance', () => {
 
     await flushPromises()
 
-    const els = wrapper.findAll('.distance_row')
+    const els = wrapper.findAllComponents('.distance_row')
     expect(els.length).to.equal(3)
   })
 
@@ -360,7 +362,7 @@ describe('Materials', () => {
     })
   })
 
-  it('has 6 headers', async () => {
+  it('has 6 HeaderCells', async () => {
     const wrapper = shallowMount(Materials, {
       localVue,
       store,
@@ -376,7 +378,7 @@ describe('Materials', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('.header')
+    const trs = wrapper.findAllComponents(HeaderCell)
     expect(trs.length).to.equal(6)
   })
 
@@ -399,6 +401,8 @@ describe('Materials', () => {
     // 50x 955 a 0.25 = 12.5, vat 2.63
     // total 20.5, vat 4.30
 
+    // amount is DecimalField(decimal_places=2)
+
     await flushPromises()
 
     const total_input = wrapper.find('input.total-input-final')
@@ -406,6 +410,64 @@ describe('Materials', () => {
 
     const vat_input = wrapper.find('input.vat-input-final')
     expect(vat_input.element.value).to.contain("€4.30")
+  })
+  //
+})
+
+describe('Hours', () => {
+  let store
+
+  beforeEach(() => {
+    store = new Vuex.Store({
+      getters,
+    })
+  })
+
+  it('has 6 HeaderCells', async () => {
+    const wrapper = shallowMount(Hours, {
+      localVue,
+      store,
+      mocks: {
+        $trans: (f) => f
+      },
+      propsData: {
+        type: HOURS_TYPE_WORK,
+        hours_total: invoiceResponse.data.activity_totals.work_total,
+        user_totals: invoiceResponse.data.activity_totals.user_totals,
+        engineer_models: invoiceResponse.data.engineer_models,
+        customer: new CustomerModel(customerResponse.data)
+      }
+    })
+
+    await flushPromises()
+
+    const trs = wrapper.findAllComponents(HeaderCell)
+    expect(trs.length).to.equal(5)
+  })
+
+  it('has a total of €230.00 and VAT €48.30', async () => {
+    const wrapper = mount(Hours, {
+      localVue,
+      store,
+      mocks: {
+        $trans: (f) => f
+      },
+      propsData: {
+        type: HOURS_TYPE_WORK,
+        hours_total: invoiceResponse.data.activity_totals.work_total,
+        user_totals: invoiceResponse.data.activity_totals.user_totals,
+        engineer_models: invoiceResponse.data.engineer_models,
+        customer: new CustomerModel(customerResponse.data)
+      }
+    })
+
+    await flushPromises()
+
+    const total_input = wrapper.find('input.total-input-final')
+    expect(total_input.element.value).to.equal('€230.00')
+
+    const vat_input = wrapper.find('input.vat-input-final')
+    expect(vat_input.element.value).to.contain("€48.30")
   })
   //
 })

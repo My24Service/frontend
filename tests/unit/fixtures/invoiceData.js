@@ -106,155 +106,81 @@ export default {
         "year_used": null
       }
     ],
-    "activity": [
-      {
-        "date": "21/06/2023",
-        "full_name": "Piet Jannemans",
-        "work_start": "09:30",
-        "work_end": "15:45",
-        "travel_to": "00:35",
-        "travel_back": "00:35",
-        "distance_to": 42,
-        "distance_back": 42,
-        "distance_fixed_rate_amount": 0,
-        "is_partner": false
-      },
-      {
-        "date": "22/06/2023",
-        "full_name": "Piet Jannemans",
-        "work_start": "08:00",
-        "work_end": "15:30",
-        "travel_to": "00:35",
-        "travel_back": "00:35",
-        "distance_to": 42,
-        "distance_back": 42,
-        "distance_fixed_rate_amount": 0,
-        "is_partner": false
-      },
-      {
-        "date": "22/06/2023",
-        "full_name": "Henk Janssen",
-        "work_start": "09:00",
-        "work_end": "15:30",
-        "travel_to": "01:00",
-        "travel_back": "00:45",
-        "distance_to": 72,
-        "distance_back": 57,
-        "distance_fixed_rate_amount": 0,
-        "is_partner": false
-      },
-      {
-        "date": "21/06/2023",
-        "full_name": "Michael de Bla",
-        "work_start": "07:30",
-        "work_end": "15:45",
-        "travel_to": "00:10",
-        "travel_back": "00:10",
-        "distance_to": 7,
-        "distance_back": 7,
-        "distance_fixed_rate_amount": 0,
-        "is_partner": false
-      },
-      {
-        "date": "22/06/2023",
-        "full_name": "Michael de Bla",
-        "work_start": "07:30",
-        "work_end": "15:30",
-        "travel_to": "00:10",
-        "travel_back": "00:10",
-        "distance_to": 7,
-        "distance_back": 7,
-        "distance_fixed_rate_amount": 0,
-        "is_partner": false
-      }
-    ],
     "activity_totals": {
+      "user_totals": [
+        {
+          "work": "06:30",
+          "work_secs": "23400.0",
+          "travel_to": "01:00",
+          "travel_to_secs": "3600.0",
+          "travel_back": "00:45",
+          "travel_back_secs": "2700.0",
+          "travel_total": "01:45",
+          "travel_total_secs": "6300.0",
+          "distance_to": 72,
+          "distance_back": 57,
+          "distance_total": 129,
+          "extra_work": "00:00",
+          "extra_work_secs": null,
+          "actual_work": "01:15",
+          "actual_work_secs": "4500.0",
+          "user_id": 6,
+          "is_partner": false
+        },
+        {
+          "work": "13:45",
+          "work_secs": "49500.0",
+          "travel_to": "01:10",
+          "travel_to_secs": "4200.0",
+          "travel_back": "01:10",
+          "travel_back_secs": "4200.0",
+          "travel_total": "02:20",
+          "travel_total_secs": "8400.0",
+          "distance_to": 84,
+          "distance_back": 84,
+          "distance_total": 168,
+          "extra_work": "00:35",
+          "extra_work_secs": "2100.0",
+          "actual_work": "00:00",
+          "actual_work_secs": null,
+          "user_id": 77,
+          "is_partner": false
+        },
+        {
+          "work": "16:15",
+          "work_secs": "58500.0",
+          "travel_to": "00:20",
+          "travel_to_secs": "1200.0",
+          "travel_back": "00:20",
+          "travel_back_secs": "1200.0",
+          "travel_total": "00:40",
+          "travel_total_secs": "2400.0",
+          "distance_to": 14,
+          "distance_back": 14,
+          "distance_total": 28,
+          "extra_work": "00:00",
+          "extra_work_secs": null,
+          "actual_work": "00:00",
+          "actual_work_secs": null,
+          "user_id": 93,
+          "is_partner": false
+        }
+      ],
       "work_total": "36:30",
+      "work_total_secs": "131400.0",
       "travel_to_total": "02:30",
+      "travel_to_total_secs": "9000.0",
       "travel_back_total": "02:15",
+      "travel_back_total_secs": "8100.0",
       "travel_total": "04:45",
-      "hours_total": "41:15",
+      "travel_total_secs": "17100.0",
       "distance_to_total": 170,
       "distance_back_total": 155,
       "distance_total": 325,
-      "distance_fixed_rate_amount_total": 0,
-      "user_totals": [
-        {
-          "work_total": "13:45",
-          "travel_to_total": "01:10",
-          "travel_back_total": "01:10",
-          "travel_total": "02:20",
-          "hours_total": "16:05",
-          "distance_to_total": 84,
-          "distance_back_total": 84,
-          "distance_total": 168,
-          "distance_fixed_rate_amount_total": 0,
-          "user_id": 77
-        },
-        {
-          "work_total": "06:30",
-          "travel_to_total": "01:00",
-          "travel_back_total": "00:45",
-          "travel_total": "01:45",
-          "hours_total": "08:15",
-          "distance_to_total": 72,
-          "distance_back_total": 57,
-          "distance_total": 129,
-          "distance_fixed_rate_amount_total": 0,
-          "user_id": 6
-        },
-        {
-          "work_total": "16:15",
-          "travel_to_total": "00:20",
-          "travel_back_total": "00:20",
-          "travel_total": "00:40",
-          "hours_total": "16:55",
-          "distance_to_total": 14,
-          "distance_back_total": 14,
-          "distance_total": 28,
-          "distance_fixed_rate_amount_total": 0,
-          "user_id": 93
-        }
-      ]
-    },
-    "extra_work": [
-      {
-        "full_name": "Piet Jannemans",
-        "extra_work": "0:10:00",
-        "extra_work_description": null,
-        "is_partner": false
-      },
-      {
-        "full_name": "Piet Jannemans",
-        "extra_work": "0:25:00",
-        "extra_work_description": null,
-        "is_partner": false
-      }
-    ],
-    "extra_work_totals": {
-      "hours_total": "00:35",
-      "user_totals": [
-        {
-          "hours_total": "00:35",
-          "user_id": 77
-        }
-      ]
-    },
-    "actual_work": [
-      {
-        "full_name": "Henk Janssen",
-        "actual_work": "01:15:00",
-        "is_partner": false
-      }
-    ],
-    "actual_work_totals": {
-      "hours_total": "01:15",
-      "user_totals": [
-        {
-          "hours_total": "01:15",
-          "user_id": 6
-        }
-      ]
+      "extra_work_total": "00:35",
+      "extra_work_total_secs": "2100.0",
+      "actual_work_total": "01:15",
+      "actual_work_total_secs": "4500.0"
     },
     "engineer_models": [
       {
