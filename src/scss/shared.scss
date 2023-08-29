@@ -53,7 +53,7 @@
   color: $normal-link !important
 }
 
-.navbar-light .navbar-nav .nav-link.active, 
+.navbar-light .navbar-nav .nav-link.active,
 .navbar-light .navbar-nav {
   color: $active-link !important
 }
@@ -75,7 +75,7 @@
   z-index: 1;
   overflow-y: auto;
   display: flex;
-  
+
 
   nav {
     position: sticky;
@@ -100,13 +100,13 @@
       flex-direction: column;
     }
 
-    
+
 
   }
 
   li {
     list-style: none;
-    
+
     a {
       border-radius: .5ex;
       color: #232c2fa0;
@@ -118,7 +118,7 @@
       &.active {
         font-weight: bold;
       }
-      
+
       &.router-link-active {
         font-weight: bold;
         color: #232c2fd9;
@@ -157,17 +157,19 @@
 
   > header {
     margin: 0 0rem -2rem;
-    padding: 1rem 1rem 4rem;
+    padding: 2rem 2.5rem 3rem;
     background: var(--primary);
     color: white;
     position: sticky;
     top: 0;
     min-height: 200px;
 
+    h3:first-child {margin-top: calc(52px + 2ex);}
     .page-title {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-top: calc(52px + 2ex);
 
       h3 {
         display: flex;
@@ -178,15 +180,12 @@
           color: white;
         }
       }
-
-      &:first-child {
-        margin-top: calc(52px + 2ex);
-      }
     }
 
     .search-form {
       margin-bottom: 2ex;
-      
+      position: absolute;
+
       .form-control {
         background-color: rgba(255,255,255,.75);
         border-radius: 3rem;
@@ -205,11 +204,15 @@
       align-items: center;
     }
 
+    .button, .btn {
+      padding-block: .23rem !important;
+    }
+
     .button, .btn-primary {
       background-color: white !important;
       border-color: #fff6;
       color: $my24 !important;
-      &:hover, 
+      &:hover,
       &:focus {
         background-color: #fffc;
         border-color: white;
@@ -227,8 +230,7 @@
 
 .navbar-brand {
   padding: 0;
-  margin: 0 auto 1rem !important;
-  margin-right: auto!important;
+  margin: 1rem auto !important;
   display: block;
   text-align: center;
 }
@@ -244,6 +246,16 @@
   position: relative;
   --text-color: #757a7c;
   color: var(--text-color);
+
+  table td {
+    vertical-align: middle;
+    overflow: hidden;
+    height: 2rem;
+    & > a {
+      height: 1.5rem;
+      white-space: nowrap;
+    }
+  }
 }
 
 
@@ -283,12 +295,15 @@ dl {
   display: grid;
   grid-template-columns: 1fr 1fr;
   line-height: 2.4rem;
-  font-size: .8rem;
+  gap: .5rem;
+
   dt {
     margin: 0;
   }
   dd {
     margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -296,7 +311,12 @@ ul.listing {
   padding: 0;
   margin: 0;
   list-style: none;
-  
+  width:100%;
+
+  &.order-list {
+    inline-size: fit-content;
+  }
+
   &.order-list {
     li > .listing-item,
     li > .headings {
@@ -309,7 +329,6 @@ ul.listing {
     line-height: 2.4rem;
     box-shadow: 0px 1px #f2f3f4;
 
-
     > .listing-item,
     .headings {
       display: flex;
@@ -321,17 +340,14 @@ ul.listing {
       text-decoration: none!important;
 
       > * {
-        text-wrap: nowrap;
-        font-size: .8rem;
         text-overflow: ellipsis;
-        transition: all .3s;
+        transition: all .1s;
         min-width: 5rem;
 
         select {
           border-color: transparent;
-          max-width: 9rem;
-          font-size: .7rem;
-          &:hover, 
+          max-width: 22ch;
+          &:hover,
           &:focus {
             border-color: #0003 !important;
           }
@@ -356,26 +372,53 @@ ul.listing {
       .order-start-date {
         width: 9rem;
       }
-      .order-due-date,
-      .order-assignees,
+      .order-documents {
+        flex-grow: grow;
+      }
       .order-status {
         min-width: 10rem;
+      }
+
+      .order-status > span {
+        display: flex;
+        align-content: center;
+        min-width: 2rem;
+      }
+
+      a.px-1 {
+        font-size: 2rem;
+        opacity: .1;
+        pointer-events: none;
+        transition: all .1s;
+        svg {
+          border: none!important;
+        }
       }
     }
 
     .headings {
       text-transform: uppercase;
-      font-size: xx-small;
+      font-size: smaller;
       letter-spacing: 1px;
     }
-    
+
+    .listing-item span {
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
     > .listing-item:hover {
       background: #f6f9fc;
       > * {
         color: #323435;
       }
+
+      a.px-1 {
+        opacity: 1;
+        pointer-events: all;
+
+      }
     }
-    
   }
 }
 
