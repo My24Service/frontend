@@ -1,5 +1,5 @@
 import BaseModel from '@/models/base'
-import {toDinero} from "../../utils";
+import priceMixin from "../../mixins/price";
 
 class MaterialModel {
   name_short;
@@ -26,9 +26,10 @@ class MaterialModel {
   price_purchase_ex_currency;
 
   price_selling_ex;
-  price_selling_ex_dinero;
   price_selling_ex_currency;
   price_selling_alt_ex;
+
+  priceFields = ['price_purchase_ex', 'price_selling_ex']
 
   image;
 
@@ -39,18 +40,6 @@ class MaterialModel {
     this.setPriceFields(this)
   }
 
-  setPriceFields(obj) {
-    if (obj.price_purchase_ex && obj.price_purchase_ex_currency) {
-      this.price_purchase_ex_dinero = toDinero(
-        obj.price_purchase_ex, obj.price_purchase_ex_currency)
-    }
-
-    if (obj.price_selling_ex && obj.price_selling_ex_currency) {
-      this.price_selling_ex_dinero = toDinero(
-        obj.price_selling_ex, obj.price_selling_ex_currency)
-    }
-  }
-
   recalcSelling() {
     this.price_selling_ex_dinero = this.price_purchase_ex_dinero.multiply(1+this.margin_perc/100)
     this.price_selling_ex = this.price_selling_ex_dinero.toFormat('0.00')
@@ -59,22 +48,18 @@ class MaterialModel {
   }
 
   setPurchasePrice(priceDinero) {
-    this.price_purchase_ex_dinero = priceDinero
-    this.price_purchase_ex = this.price_purchase_ex_dinero.toFormat('0.00')
-    this.price_purchase_ex_currency = this.price_purchase_ex_dinero.getCurrency()
-    return true
+    return this.setPriceField('price_purchase_ex', priceDinero)
   }
 
   setSellingPrice(priceDinero) {
-    this.price_selling_ex_dinero = priceDinero
-    this.price_selling_ex = this.price_selling_ex_dinero.toFormat('0.00')
-    this.price_selling_ex_currency = this.price_selling_ex_dinero.getCurrency()
-    return true
+    return this.setPriceField('price_selling_ex', priceDinero)
   }
 }
 
-// rename to service?
+Object.assign(MaterialModel.prototype, priceMixin);
+
 class MaterialService extends BaseModel {
+  // TODO: remove this and use model
   fields = {
     'name_short': '',
     'name': '',

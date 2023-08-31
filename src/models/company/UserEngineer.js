@@ -1,5 +1,5 @@
 import BaseModel from '@/models/base'
-import {toDinero} from "../../utils";
+import priceMixin from "../../mixins/price";
 
 class EngineerUserModel {
   id
@@ -46,7 +46,8 @@ class RateEngineerUserModel {
 class RateEngineerModel {
   hourly_rate
   hourly_rate_currency
-  hourly_rate_dinero
+
+  priceFields = ['hourly_rate']
 
   constructor(engineer) {
     for (const [k, v] of Object.entries(engineer)) {
@@ -58,19 +59,12 @@ class RateEngineerModel {
   }
 
   setHourlyRate(priceDinero) {
-    this.hourly_rate_dinero = priceDinero
-    this.hourly_rate = this.hourly_rate_dinero.toFormat('0.00')
-    this.hourly_rate_currency = this.hourly_rate_dinero.getCurrency()
-    return true
+    return this.setPriceField('hourly_rate', priceDinero)
   }
 
-  setPriceFields(obj) {
-    if (obj.hourly_rate && obj.hourly_rate_currency) {
-      this.hourly_rate_dinero = toDinero(
-        obj.hourly_rate, obj.hourly_rate_currency)
-    }
-  }
 }
+
+Object.assign(RateEngineerModel.prototype, priceMixin);
 
 class EngineerModel {
   address
@@ -92,7 +86,8 @@ class EngineerModel {
   preferred_location
   hourly_rate
   hourly_rate_currency
-  hourly_rate_dinero
+
+  priceFields = ['hourly_rate']
 
   constructor(engineer) {
     for (const [k, v] of Object.entries(engineer)) {
@@ -102,21 +97,14 @@ class EngineerModel {
   }
 
   setHourlyRate(priceDinero) {
-    this.hourly_rate_dinero = priceDinero
-    this.hourly_rate = this.hourly_rate_dinero.toFormat('0.00')
-    this.hourly_rate_currency = this.hourly_rate_dinero.getCurrency()
-    return true
-  }
-
-  setPriceFields(obj) {
-    if (obj.hourly_rate && obj.hourly_rate_currency) {
-      this.hourly_rate_dinero = toDinero(
-        obj.hourly_rate, obj.hourly_rate_currency)
-    }
+    return this.setPriceField('hourly_rate', priceDinero)
   }
 }
 
+Object.assign(EngineerModel.prototype, priceMixin);
+
 class EngineerService extends BaseModel {
+  // TODO: remove this and use model
   fields = {
     'username': '',
     'first_name': '',
