@@ -1,5 +1,6 @@
 import BaseModel from '@/models/base'
 import priceMixin from "../../mixins/price";
+import {toDinero} from "../../utils";
 
 class MaterialModel {
   name_short;
@@ -29,6 +30,9 @@ class MaterialModel {
   price_selling_ex_currency;
   price_selling_alt_ex;
 
+  price_other
+  price_other_currency
+
   priceFields = ['price_purchase_ex', 'price_selling_ex']
 
   image;
@@ -54,6 +58,7 @@ class MaterialModel {
   setSellingPrice(priceDinero) {
     return this.setPriceField('price_selling_ex', priceDinero)
   }
+
 }
 
 Object.assign(MaterialModel.prototype, priceMixin);
@@ -81,9 +86,9 @@ class MaterialService extends BaseModel {
     'price_purchase_ex_dinero': null,
     'price_purchase_ex_currency': 'EUR',
 
-    'price_purchase_ex_other': '0.00',
-    'price_purchase_ex_other_dinero': null,
-    'price_purchase_ex_other_currency': 'EUR',
+    'price_other': '0.00',
+    'price_other_dinero': null,
+    'price_other_currency': 'EUR',
 
     'price_selling_ex': '0.00',
     'price_selling_ex_dinero': null,

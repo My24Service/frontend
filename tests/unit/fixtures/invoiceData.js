@@ -8,6 +8,7 @@ export default {
     "invoice_default_price_per_km": "0.00",
     "used_materials": [
       {
+        "user_id": 93,
         "full_name": "Michael de Bla",
         "name": "HAMERBOOR SDS+ 4 SPIR 16,0 - 18,0",
         "material_id": 947,
@@ -15,6 +16,7 @@ export default {
         "amount": 4.0
       },
       {
+        "user_id": 93,
         "full_name": "Michael de Bla",
         "name": "Zebra doorslijpschijf ",
         "material_id": 1001,
@@ -22,6 +24,7 @@ export default {
         "amount": 4.0
       },
       {
+        "user_id": 93,
         "full_name": "Michael de Bla",
         "name": "HSS Mach Tap M10 - M16",
         "material_id": 955,

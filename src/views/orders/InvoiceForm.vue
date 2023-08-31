@@ -248,6 +248,7 @@
         <MaterialsComponent
           :customer="customer"
           :material_models="material_models"
+          :engineer_models="engineer_models"
           :used_materials="used_materials"
           @invoiceLinesCreated="materialsInvoiceLinesCreated"
         />

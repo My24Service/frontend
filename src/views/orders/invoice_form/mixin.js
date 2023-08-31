@@ -39,6 +39,18 @@ let invoiceMixin = {
         toDinero("0.00", this.$store.getters.getDefaultCurrency)
       )
     },
+    getItemsTotalv2(items) {
+      return items.reduce(
+        (total, m) => (total.add(m.total_dinero)),
+        toDinero("0.00", this.$store.getters.getDefaultCurrency)
+      )
+    },
+    getItemsTotalVATv2(items) {
+      return items.reduce(
+        (total, m) => (total.add(m.vat_dinero)),
+        toDinero("0.00", this.$store.getters.getDefaultCurrency)
+      )
+    },
     getFullname(user_id) {
       const user = this.engineer_models.find((m) => m.id === user_id)
       return user.full_name

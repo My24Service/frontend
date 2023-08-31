@@ -372,6 +372,7 @@ describe('Materials', () => {
       propsData: {
         material_models: invoiceResponse.data.material_models,
         used_materials: invoiceResponse.data.used_materials,
+        engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data)
       }
     })
@@ -391,6 +392,7 @@ describe('Materials', () => {
       },
       propsData: {
         material_models: invoiceResponse.data.material_models,
+        engineer_models: invoiceResponse.data.engineer_models,
         used_materials: invoiceResponse.data.used_materials,
         customer: new CustomerModel(customerResponse.data)
       }
