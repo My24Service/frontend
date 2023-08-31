@@ -463,6 +463,13 @@ describe('Hours', () => {
 
     await flushPromises()
 
+    // 16:15 + 13:45 + 06:30 = 36:30
+    // ACTIVITY_USE_PRICE_ENGINEER
+    // user_id 93 rate 0.00
+    // user_id 77 rate 12.00
+    // user_id 6 rate 10.00
+    // 0 + ((12 * 13) + (12*0.75)) + (6 * 10) + (0.5 * 10)) = 230
+
     const total_input = wrapper.find('input.total-input-final')
     expect(total_input.element.value).to.equal('€230.00')
 

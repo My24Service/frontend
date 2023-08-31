@@ -1,5 +1,5 @@
 import BaseModel from '../base'
-import {toDinero} from "../../utils";
+import priceMixin from "../../mixins/price";
 
 class CustomerModel {
   id
@@ -29,19 +29,22 @@ class CustomerModel {
 
   call_out_costs
   call_out_costs_currency
-  call_out_costs_dinero
 
   hourly_rate_engineer
   hourly_rate_engineer_currency
-  hourly_rate_engineer_dinero
 
   hourly_rate_partner_engineer
   hourly_rate_partner_engineer_currency
-  hourly_rate_partner_engineer_dinero
 
   price_per_km
   price_per_km_currency
-  price_per_km_dinero
+
+  priceFields = [
+    'call_out_costs',
+    'hourly_rate_engineer',
+    'hourly_rate_partner_engineer',
+    'price_per_km'
+  ]
 
   constructor(customerData) {
     for (const [k, v] of Object.entries(customerData)) {
@@ -52,58 +55,26 @@ class CustomerModel {
   }
 
   setHourlyRateEngineer(priceDinero) {
-    this.hourly_rate_engineer_dinero = priceDinero
-    this.hourly_rate_engineer = this.hourly_rate_engineer_dinero.toFormat('0.00')
-    this.hourly_rate_engineer_currency = this.hourly_rate_engineer_dinero.getCurrency()
-    return true
+    return this.setPriceField('hourly_rate_engineer', priceDinero)
   }
 
   setPricePerKm(priceDinero) {
-    this.price_per_km_dinero = priceDinero
-    this.price_per_km = this.price_per_km_dinero.toFormat('0.00')
-    this.price_per_km_currency = this.price_per_km_dinero.getCurrency()
-    return true
+    return this.setPriceField('price_per_km', priceDinero)
   }
 
   setHourlyRatePartnerEngineer(priceDinero) {
-    this.hourly_rate_partner_engineer_dinero = priceDinero
-    this.hourly_rate_partner_engineer = this.hourly_rate_partner_engineer_dinero.toFormat('0.00')
-    this.hourly_rate_partner_engineer_currency = this.hourly_rate_partner_engineer_dinero.getCurrency()
-    return true
+    return this.setPriceField('hourly_rate_partner_engineer', priceDinero)
   }
 
   setCallOutCosts(priceDinero) {
-    this.call_out_costs_dinero = priceDinero
-    this.call_out_costs = this.call_out_costs_dinero.toFormat('0.00')
-    this.call_out_costs_currency = this.call_out_costs_dinero.getCurrency()
-    return true
-  }
-
-  setPriceFields(obj) {
-    if (obj.hourly_rate_engineer && obj.hourly_rate_engineer_currency) {
-      this.hourly_rate_engineer_dinero = toDinero(
-        obj.hourly_rate_engineer, obj.hourly_rate_engineer_currency)
-    }
-
-    if (obj.hourly_rate_partner_engineer && obj.hourly_rate_partner_engineer_currency) {
-      this.hourly_rate_partner_engineer_dinero = toDinero(
-        obj.hourly_rate_partner_engineer, obj.hourly_rate_partner_engineer_currency)
-    }
-
-    if (obj.call_out_costs && obj.call_out_costs_currency) {
-      this.call_out_costs_dinero = toDinero(
-        obj.call_out_costs, obj.call_out_costs_currency)
-    }
-
-    if (obj.price_per_km && obj.price_per_km_currency) {
-      this.price_per_km_dinero = toDinero(
-        obj.price_per_km, obj.price_per_km_currency)
-    }
+    return this.setPriceField('call_out_costs', priceDinero)
   }
 }
 
+Object.assign(CustomerModel.prototype, priceMixin);
+
 class CustomerPriceModel {
-  // minimal model for prices PATCH
+  // minimal model for prices PATCH, no mixin needed
   id
   call_out_costs
   call_out_costs_currency
@@ -127,6 +98,7 @@ class CustomerPriceModel {
 }
 
 class CustomerService extends BaseModel {
+  // TODO: remove this and use model
   fields = {
     'id': null,
     'name': '',
