@@ -79,10 +79,40 @@ class CostModel {
 Object.assign(CostModel.prototype, priceMixin);
 
 class CostService extends BaseModel {
+  collection = []
 
+  getItemsTotal() {
+    if (!this.collection.length) {
+      return null
+    }
+
+    return this.collection.reduce(
+      (total, m) => (total.add(m.total_dinero)),
+      toDinero("0.00", this.collection[0].total_currency)
+    )
+  }
+
+  getItemsTotalVAT() {
+    if (!this.collection.length) {
+      return null
+    }
+
+    return this.collection.reduce(
+      (total, m) => (total.add(m.vat_dinero)),
+      toDinero("0.00", this.collection[0].vat_currency)
+    )
+  }
+
+  updateTotals(getPriceFunc, getCurrencyFunc) {
+    for (const model of this.collection) {
+      model.updateTotals(getPriceFunc(model), getCurrencyFunc(model))
+    }
+  }
 }
 
 export { CostModel }
+
+export default CostService
 
 export const COST_TYPE_USED_MATERIALS = 'used_materials'
 export const COST_TYPE_WORK_HOURS = 'work_hours'

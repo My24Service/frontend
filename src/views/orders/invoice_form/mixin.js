@@ -3,10 +3,12 @@ import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 
 let invoiceMixin = {
   methods: {
+    // TODO can we move this to Cost model?
     marginChanged(obj, val) {
       obj.margin_perc = val
       this.updateTotals()
     },
+    // TODO can we move this to Cost model?
     changeVatType(obj, vatType) {
       obj.vat_type = vatType
       this.updateTotals()
