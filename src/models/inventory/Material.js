@@ -1,41 +1,40 @@
-import BaseModel from '@/models/base'
+import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
-import {toDinero} from "../../utils";
 
 class MaterialModel {
-  name_short;
-  name;
-  identifier;
-  unit;
+  name_short
+  name
+  identifier
+  unit
 
-  supplier;
-  supplier_relation;
-  supplier_name;
+  supplier
+  supplier_relation
+  supplier_name
 
-  product_type;
-  location;
+  product_type
+  location
 
-  margin;
-  margin_perc;
+  price_purchase = "0.00"
+  price_purchase_currency
 
-  price_purchase;
-  price_selling;
-  price_selling_alt;
+  price_selling = "0.00"
+  price_selling_currency
 
-  price_purchase_ex;
-  price_purchase_ex_dinero;
-  price_purchase_ex_currency;
+  price_selling_alt
+  price_selling_alt_currency
 
-  price_selling_ex;
-  price_selling_ex_currency;
-  price_selling_alt_ex;
+  price_purchase_ex = "0.00"
+  price_purchase_ex_currency
 
-  price_other
-  price_other_currency
+  price_selling_ex = "0.00"
+  price_selling_ex_currency
+
+  price_selling_alt_ex = "0.00"
+  price_selling_alt_ex_currency
 
   priceFields = ['price_purchase_ex', 'price_selling_ex']
 
-  image;
+  image
 
   constructor(material) {
     for (const [k, v] of Object.entries(material)) {
