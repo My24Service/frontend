@@ -36,7 +36,7 @@
         </b-col>
         <b-col cols="2" />
       </b-row>
-      <b-row v-for="material in usedMaterials" :key="material.id" class="material_row">
+      <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
         <b-col cols="2">
           {{ getFullname(material.user_id) }}
         </b-col>
@@ -112,7 +112,7 @@ import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
-import {COST_TYPE_USED_MATERIALS, CostModel} from "../../../models/orders/Cost";
+import CostService, {COST_TYPE_USED_MATERIALS, CostModel} from "../../../models/orders/Cost";
 import {
   OPTION_NONE, OPTION_USED_MATERIALS_TOTALS,
   OPTION_USER_TOTALS, USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING
@@ -157,12 +157,13 @@ export default {
   },
   data() {
     return {
-      usedMaterials: null,
       materialModels: null,
 
       total: null,
       totalVAT: null,
       totalAmount: null,
+
+      costService: new CostService(),
 
       usePriceOptionsMaterial: {
         USE_PRICE_PURCHASE,
@@ -197,7 +198,7 @@ export default {
 
     // create cost models
     let count = 0
-    this.usedMaterials = this.used_materials.map((m) => (
+    this.costService.collection = this.used_materials.map((m) => (
       new CostModel({
         ...m,
         ...this.getDefaultCostProps(),
@@ -270,12 +271,14 @@ export default {
       }
     },
     updateTotals() {
-      for (const material of this.usedMaterials) {
-        material.updateTotals(this.getMaterialPrice(material), this.getMaterialCurrency(material))
-      }
+      // provide methods to get price and currency
+      this.costService.updateTotals(
+        this.getMaterialPrice,
+        this.getMaterialCurrency
+      )
 
-      this.total = this.getItemsTotalv2(this.usedMaterials)
-      this.totalVAT = this.getItemsTotalVATv2(this.usedMaterials)
+      this.total = this.costService.getItemsTotal()
+      this.totalVAT = this.costService.getItemsTotalVAT()
     },
   }
 }

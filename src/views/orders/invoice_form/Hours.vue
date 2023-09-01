@@ -31,7 +31,7 @@
         </b-col>
         <b-col cols="2" />
       </b-row>
-      <b-row v-for="activity in userTotals" :key="activity.user_id" class="material_row">
+      <b-row v-for="activity in costService.collection" :key="activity.user_id" class="material_row">
         <b-col cols="3">
           {{ getFullname(activity.user_id) }}
         </b-col>
@@ -127,11 +127,11 @@ import HeaderCell from "./Header";
 import VAT from "./VAT";
 import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
-import {
+import CostService, {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS, CostModel
+  COST_TYPE_WORK_HOURS, CostModel,
 } from "../../../models/orders/Cost";
 import PriceInput from "../../../components/PriceInput";
 
@@ -190,61 +190,6 @@ export default {
       default: null
     },
   },
-  created() {
-    // map input to usable dataset
-    let count = 0
-    let user_totals
-    switch (this.type) {
-      case HOURS_TYPE_WORK:
-        // filter out empty values
-        user_totals = this.user_totals.filter((m) => m.work_secs !== null)
-        this.userTotals = user_totals.map((a) => (
-          new CostModel({...a,
-          ...this.getDefaultCostProps(a.user_id),
-          hours_total: a.work,
-          amount_duration: parseInt(a.work_secs),
-          data_index: count++,
-        })))
-        break
-      case HOURS_TYPE_TRAVEL:
-        user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
-        this.userTotals = user_totals.map((a) => (
-          new CostModel({
-          ...a,
-          ...this.getDefaultCostProps(a.user_id),
-          hours_total: a.travel_total,
-          amount_duration: parseInt(a.work_secs),
-          data_index: count++,
-        })))
-        break
-      case HOURS_TYPE_EXTRA_WORK:
-        user_totals = this.user_totals.filter((m) => m.extra_work_secs !== null)
-        this.userTotals = user_totals.map((a) => (
-          new CostModel({
-          ...a,
-          ...this.getDefaultCostProps(a.user_id),
-          hours_total: a.extra_work,
-          amount_duration: parseInt(a.work_secs),
-          data_index: count++,
-        })))
-        break
-      case HOURS_TYPE_ACTUAL_WORK:
-        user_totals = this.user_totals.filter((m) => m.actual_work_secs !== null)
-        this.userTotals = user_totals.map((a) => (
-          new CostModel({
-          ...a,
-          ...this.getDefaultCostProps(a.user_id),
-          hours_total: a.actual_work,
-          amount_duration: parseInt(a.work_secs),
-          data_index: count++,
-        })))
-        break
-      default:
-        throw `created set userTotals, unknown type ${this.type}`
-    }
-
-    this.updateTotals()
-  },
   data () {
     return {
       isLoading: false,
@@ -254,11 +199,12 @@ export default {
       HOURS_TYPE_EXTRA_WORK,
       HOURS_TYPE_ACTUAL_WORK,
 
+      costService: new CostService(),
+
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
-      userTotals: [],
       total: null,
       totalVAT: null,
 
@@ -277,6 +223,61 @@ export default {
       },
     }
   },
+  created() {
+    // map input to usable dataset
+    let count = 0
+    let user_totals
+    switch (this.type) {
+      case HOURS_TYPE_WORK:
+        // filter out empty values
+        user_totals = this.user_totals.filter((m) => m.work_secs !== null)
+        this.costService.collection = user_totals.map((a) => (
+          new CostModel({...a,
+          ...this.getDefaultCostProps(a.user_id),
+          hours_total: a.work,
+          amount_duration: parseInt(a.work_secs),
+          data_index: count++,
+        })))
+        break
+      case HOURS_TYPE_TRAVEL:
+        user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
+        this.costService.collection = user_totals.map((a) => (
+          new CostModel({
+          ...a,
+          ...this.getDefaultCostProps(a.user_id),
+          hours_total: a.travel_total,
+          amount_duration: parseInt(a.work_secs),
+          data_index: count++,
+        })))
+        break
+      case HOURS_TYPE_EXTRA_WORK:
+        user_totals = this.user_totals.filter((m) => m.extra_work_secs !== null)
+        this.costService.collection = user_totals.map((a) => (
+          new CostModel({
+          ...a,
+          ...this.getDefaultCostProps(a.user_id),
+          hours_total: a.extra_work,
+          amount_duration: parseInt(a.work_secs),
+          data_index: count++,
+        })))
+        break
+      case HOURS_TYPE_ACTUAL_WORK:
+        user_totals = this.user_totals.filter((m) => m.actual_work_secs !== null)
+        this.costService.collection = user_totals.map((a) => (
+          new CostModel({
+          ...a,
+          ...this.getDefaultCostProps(a.user_id),
+          hours_total: a.actual_work,
+          amount_duration: parseInt(a.work_secs),
+          data_index: count++,
+        })))
+        break
+      default:
+        throw `created set userTotals, unknown type ${this.type}`
+    }
+
+    this.updateTotals()
+  },
   methods: {
     getDefaultCostProps(user_id) {
       // default props for cost model
@@ -294,6 +295,7 @@ export default {
         engineer_rate_dinero: this.getEngineerRateDinero(user_id),
         engineer_rate_other: "0.00",
         engineer_rate_other_currency: this.default_currency,
+        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
         use_price: this.usePriceOptionsActivity.USE_PRICE_USER,
         cost_type: this.getCostType(),
       }
@@ -326,53 +328,19 @@ export default {
           throw `getCostType(), unknown type ${this.type}`
       }
     },
-    createInvoiceLines() {
-      switch (this.useOnInvoiceActivitySelected) {
-        case OPTION_USER_TOTALS:
-          let invoiceLines = this.userTotals.map((activity) => {
-            this.createInvoiceLine(
-              INVOICE_LINE_TYPE_ACTIVITY,
-              `${this.$trans("Work hours")} ${this.getFullname(activity.user_id)}`,
-              activity.total_hours,
-              activity.vat,
-              activity.total
-            )
-          })
-          this.$emit('invoiceLinesCreated', invoiceLines)
-          break
-        case OPTION_ACTIVITY_ACTIVITY_TOTALS:
-          this.createInvoiceLine(
-            INVOICE_LINE_TYPE_ACTIVITY,
-            `${this.$trans("Work hours")}`,
-            this.activity_totals.hours_total,
-            this.totalVAT,
-            this.total
-          )
-          break
-        case OPTION_ACTIVITY_ACTUAL_WORK:
-          this.createInvoiceLine(
-            INVOICE_LINE_TYPE_ACTIVITY,
-            `${this.$trans("Work hours")}`,
-            this.activity_totals.actual_work_totals.actual_work,
-            this.actualWorkTotalVAT,
-            this.actualWorkTotal
-          )
-          break
-        case OPTION_NONE:
-          console.debug("not adding any activity")
-      }
-    },
     otherPriceChanged(dineroVal, model) {
-      model.setPriceField('other', dineroVal)
+      model.setPriceField('engineer_rate_other', dineroVal)
       this.updateTotals()
     },
     updateTotals() {
-      for (const model of this.userTotals) {
-        model.updateTotals(this.getSelectedEngineerRate(model), this.getSelectedEngineerRateCurrency(model))
-      }
+      // provide methods to get price and currency
+      this.costService.updateTotals(
+        this.getSelectedEngineerRate,
+        this.getSelectedEngineerRateCurrency
+      )
 
-      this.total = this.getItemsTotalv2(this.userTotals)
-      this.totalVAT = this.getItemsTotalVATv2(this.userTotals)
+      this.total = this.costService.getItemsTotal()
+      this.totalVAT = this.costService.getItemsTotalVAT()
 
       return true
     },
@@ -441,6 +409,42 @@ export default {
         }
       } else {
         console.error("getEngineerRateFor: model not found")
+      }
+    },
+    createInvoiceLines() {
+      switch (this.useOnInvoiceActivitySelected) {
+        case OPTION_USER_TOTALS:
+          let invoiceLines = this.userTotals.map((activity) => {
+            this.createInvoiceLine(
+              INVOICE_LINE_TYPE_ACTIVITY,
+              `${this.$trans("Work hours")} ${this.getFullname(activity.user_id)}`,
+              activity.total_hours,
+              activity.vat,
+              activity.total
+            )
+          })
+          this.$emit('invoiceLinesCreated', invoiceLines)
+          break
+        case OPTION_ACTIVITY_ACTIVITY_TOTALS:
+          this.createInvoiceLine(
+            INVOICE_LINE_TYPE_ACTIVITY,
+            `${this.$trans("Work hours")}`,
+            this.activity_totals.hours_total,
+            this.totalVAT,
+            this.total
+          )
+          break
+        case OPTION_ACTIVITY_ACTUAL_WORK:
+          this.createInvoiceLine(
+            INVOICE_LINE_TYPE_ACTIVITY,
+            `${this.$trans("Work hours")}`,
+            this.activity_totals.actual_work_totals.actual_work,
+            this.actualWorkTotalVAT,
+            this.actualWorkTotal
+          )
+          break
+        case OPTION_NONE:
+          console.debug("not adding any activity")
       }
     },
   }
