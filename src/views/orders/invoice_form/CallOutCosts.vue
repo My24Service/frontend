@@ -102,16 +102,14 @@
 <script>
 import {toDinero} from "../../../utils";
 import {
-  OPTION_CALL_OUT_COSTS_CUSTOMER,
-  OPTION_CALL_OUT_COSTS_SETTINGS, OPTION_CALL_OUT_COSTS_TOTALS,
-  OPTION_NONE, OPTION_USER_TOTALS
+  OPTION_CALL_OUT_COSTS_TOTALS,
+  OPTION_NONE
 } from "./constants";
 import PriceInput from "../../../components/PriceInput";
 import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import EngineerPriceRadio from "./EngineerPriceRadio";
 import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
@@ -125,7 +123,6 @@ export default {
     Collapse,
     HeaderCell,
     VAT,
-    EngineerPriceRadio,
     MarginInput,
     TotalRow,
   },

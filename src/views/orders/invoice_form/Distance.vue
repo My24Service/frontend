@@ -131,7 +131,6 @@ import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import MarginInput from "./MarginInput";
-import EngineerPriceRadio from "./EngineerPriceRadio";
 import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
 
@@ -145,7 +144,6 @@ export default {
     Collapse,
     HeaderCell,
     VAT,
-    EngineerPriceRadio,
     MarginInput,
     TotalRow,
   },

@@ -2,16 +2,6 @@ import {toDinero} from "../../../utils";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 
 let invoiceMixin = {
-  data() {
-    return {
-      usePriceOptionsActivity: {
-        ACTIVITY_USE_PRICE_ENGINEER: 'engineer',
-        ACTIVITY_USE_PRICE_SETTINGS: 'settings',
-        ACTIVITY_USE_PRICE_CUSTOMER: 'customer',
-        ACTIVITY_USE_PRICE_OTHER: 'other',
-      },
-    }
-  },
   methods: {
     marginChanged(obj, val) {
       obj.margin_perc = val

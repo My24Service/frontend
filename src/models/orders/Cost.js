@@ -14,18 +14,18 @@ class CostModel {
   use_price
 
   margin_perc
-  margin
+  margin = "0.00"
   margin_currency
 
-  price
+  price = "0.00"
   price_currency
 
   vat_type
 
-  vat
+  vat = "0.00"
   vat_currency
 
-  total
+  total = "0.00"
   total_currency
 
   priceFields = ['margin', 'price', 'vat', 'total']

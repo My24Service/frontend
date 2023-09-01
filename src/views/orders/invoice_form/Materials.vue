@@ -119,7 +119,6 @@ import {
 } from "./constants";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import EngineerPriceRadio from "./EngineerPriceRadio";
 import materialService, {MaterialModel} from "../../../models/inventory/Material";
 import PriceInput from "../../../components/PriceInput";
 import MarginInput from "./MarginInput";
@@ -135,7 +134,6 @@ export default {
     Collapse,
     HeaderCell,
     VAT,
-    EngineerPriceRadio,
     MarginInput,
     TotalRow,
   },
@@ -197,46 +195,20 @@ export default {
       margin_perc: this.invoice_default_margin
     }))
 
-    const defaultProps = {
-      margin_perc:  this.invoice_default_margin,
-      vat_type: this.invoice_default_vat,
-
-      vat: "0.00",
-      vat_currency: this.default_currency,
-
-      margin: "0.00",
-      margin_currency: this.default_currency,
-
-      price: "0.00",
-      price_currency: this.default_currency,
-
-      total: "0.00",
-      total_currency: this.default_currency,
-
-      price_other: "0.00",
-      price_other_currency: this.default_currency,
-
-      use_price: this.usePriceOptionsMaterial.USE_PRICE_PURCHASE,
-      cost_type: COST_TYPE_USED_MATERIALS
-    }
-
-    // create models
+    // create cost models
+    let count = 0
     this.usedMaterials = this.used_materials.map((m) => (
       new CostModel({
         ...m,
-        ...defaultProps,
+        ...this.getDefaultCostProps(),
         material: m.material_id,
         amount_decimal: m.amount,
         user: m.user_id,
-      })
-    ))
-
-    // also add prices now we have basic data set
-    this.usedMaterials = this.usedMaterials.map((m) => (
-      new CostModel({
-        ...m,
-        price: this.getMaterialPrice(m).toFormat('0.00'),
-        price_currency: this.getMaterialCurrency(m),
+        price: this.getMaterialPrice(
+          {...m, use_price: this.usePriceOptionsMaterial.USE_PRICE_PURCHASE}).toFormat('0.00'),
+        price_currency: this.getMaterialCurrency(
+          {...m, use_price: this.usePriceOptionsMaterial.USE_PRICE_PURCHASE}),
+        data_index: count++,
       })
     ))
 
@@ -244,6 +216,21 @@ export default {
     this.updateTotals()
   },
   methods: {
+    getDefaultCostProps() {
+      // default props for cost model
+      return {
+        margin_perc:  this.invoice_default_margin,
+        vat_type: this.invoice_default_vat,
+        vat_currency: this.default_currency,
+        margin_currency: this.default_currency,
+        price_currency: this.default_currency,
+        total_currency: this.default_currency,
+        price_other: "0.00",
+        price_other_currency: this.default_currency,
+        use_price: this.usePriceOptionsMaterial.USE_PRICE_PURCHASE,
+        cost_type: COST_TYPE_USED_MATERIALS
+      }
+    },
     getMaterialPrice(used_material) {
       let model
       switch (used_material.use_price) {
