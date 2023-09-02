@@ -1,6 +1,7 @@
-import BaseModel from '@/models/base'
+import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
 import {toDinero} from "../../utils";
+import orderlineModel from "./Orderline";
 
 class CostModel {
   order
@@ -79,7 +80,7 @@ class CostModel {
 Object.assign(CostModel.prototype, priceMixin);
 
 class CostService extends BaseModel {
-  collection = []
+  model = CostModel
 
   getItemsTotal() {
     if (!this.collection.length) {
