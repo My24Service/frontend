@@ -7,17 +7,15 @@ let priceMixin = {
       const currency_field = `${field}_currency`
 
       if (obj[field] && obj[currency_field]) {
-        // console.log(`creating dinero object for field: ${field}, amount: ${obj[field]}, currency: ${obj[currency_field]}`)
         const dinero = toDinero(obj[field], obj[currency_field])
         this.setPriceField(field, dinero)
       } else {
-        console.debug(`not all fields here for field ${field}`)
+        console.debug(`not all fields here for field: ${field}`)
       }
     }
   },
 
   setPriceField(field, priceDinero) {
-    // console.log(`setPriceField(${field}, ${priceDinero.toFormat('0.00')})`)
     const dinero_field = `${field}_dinero`
     const currency_field = `${field}_currency`
     this[dinero_field] = priceDinero
