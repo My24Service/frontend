@@ -112,7 +112,7 @@ import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
-import CostService, {COST_TYPE_USED_MATERIALS, CostModel} from "../../../models/orders/Cost";
+import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/orders/Cost";
 import {
   OPTION_NONE, OPTION_USED_MATERIALS_TOTALS,
   OPTION_USER_TOTALS, USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING
@@ -199,7 +199,7 @@ export default {
     // create cost models
     let count = 0
     this.costService.collection = this.used_materials.map((m) => (
-      new CostModel({
+      new this.costService.model({
         ...m,
         ...this.getDefaultCostProps(),
         material: m.material_id,

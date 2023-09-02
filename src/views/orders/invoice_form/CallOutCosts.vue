@@ -113,7 +113,7 @@ import VAT from "./VAT";
 import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
-import CostService, {COST_TYPE_CALL_OUT_COSTS, CostModel} from "../../../models/orders/Cost";
+import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
 
 export default {
   name: "CallOutCostsComponent",
@@ -169,7 +169,7 @@ export default {
       this.default_currency
     )
 
-    this.coc_item = new CostModel({
+    this.coc_item = new this.costService.model({
       ...this.getDefaultCostProps(),
     })
     this.costService.collection.push(this.coc_item)
