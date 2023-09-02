@@ -135,8 +135,6 @@ import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
 import CostService, {
   COST_TYPE_DISTANCE,
-  COST_TYPE_USED_MATERIALS,
-  CostModel
 } from "../../../models/orders/Cost";
 
 export default {
@@ -209,7 +207,7 @@ export default {
     )
 
     this.costService.collection = this.user_totals.map((a) => (
-      new CostModel({
+      new this.costService.model({
       ...this.getDefaultCostProps(),
       user_id: a.user_id,
       distance_to: a.distance_to,

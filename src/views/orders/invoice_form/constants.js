@@ -7,9 +7,6 @@ export const OPTION_ACTUAL_WORK_TOTALS = 'actual_work_totals'
 export const OPTION_DISTANCE_TOTALS = 'distance_totals'
 export const OPTION_CALL_OUT_COSTS_TOTALS = 'coc_totals'
 
-export const OPTION_CALL_OUT_COSTS_CUSTOMER = 'customer'
-export const OPTION_CALL_OUT_COSTS_SETTINGS = 'settings'
-
 export const OPTION_NONE = 'none'
 
 export const INVOICE_LINE_TYPE_ACTIVITY = 'activity'

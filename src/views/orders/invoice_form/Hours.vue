@@ -118,7 +118,7 @@ import {
   HOURS_TYPE_TRAVEL,
   HOURS_TYPE_WORK,
   INVOICE_LINE_TYPE_ACTIVITY,
-  OPTION_ACTIVITY_ACTIVITY_TOTALS, OPTION_ACTIVITY_ACTUAL_WORK, OPTION_ACTUAL_WORK_TOTALS,
+  OPTION_ACTIVITY_ACTIVITY_TOTALS, OPTION_ACTIVITY_ACTUAL_WORK,
   OPTION_NONE,
   OPTION_USER_TOTALS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER, USE_PRICE_SETTINGS, USE_PRICE_USER
 } from "./constants";
@@ -131,7 +131,7 @@ import CostService, {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS, CostModel,
+  COST_TYPE_WORK_HOURS,
 } from "../../../models/orders/Cost";
 import PriceInput from "../../../components/PriceInput";
 
@@ -232,7 +232,7 @@ export default {
         // filter out empty values
         user_totals = this.user_totals.filter((m) => m.work_secs !== null)
         this.costService.collection = user_totals.map((a) => (
-          new CostModel({...a,
+          new this.costService.model({...a,
           ...this.getDefaultCostProps(a.user_id),
           hours_total: a.work,
           amount_duration: parseInt(a.work_secs),
@@ -242,7 +242,7 @@ export default {
       case HOURS_TYPE_TRAVEL:
         user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
         this.costService.collection = user_totals.map((a) => (
-          new CostModel({
+          new this.costService.model({
           ...a,
           ...this.getDefaultCostProps(a.user_id),
           hours_total: a.travel_total,
@@ -253,7 +253,7 @@ export default {
       case HOURS_TYPE_EXTRA_WORK:
         user_totals = this.user_totals.filter((m) => m.extra_work_secs !== null)
         this.costService.collection = user_totals.map((a) => (
-          new CostModel({
+          new this.costService.model({
           ...a,
           ...this.getDefaultCostProps(a.user_id),
           hours_total: a.extra_work,
@@ -264,7 +264,7 @@ export default {
       case HOURS_TYPE_ACTUAL_WORK:
         user_totals = this.user_totals.filter((m) => m.actual_work_secs !== null)
         this.costService.collection = user_totals.map((a) => (
-          new CostModel({
+          new this.costService.model({
           ...a,
           ...this.getDefaultCostProps(a.user_id),
           hours_total: a.actual_work,
