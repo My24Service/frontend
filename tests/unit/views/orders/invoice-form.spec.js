@@ -16,6 +16,7 @@ import invoiceResponse from '../../fixtures/invoiceData'
 import customerResponse from '../../fixtures/customer.js'
 import {CustomerModel} from "../../../../src/models/customer/Customer";
 import {HOURS_TYPE_WORK} from "../../../../src/views/orders/invoice_form/constants";
+import {RateEngineerUserModel} from "../../../../src/models/company/UserEngineer";
 
 jest.mock('axios')
 
@@ -37,7 +38,7 @@ const getters = {
   getDefaultCurrency: () => 'EUR',
   getInvoiceDefaultVat: () => 21,
   getInvoiceDefaultMargin: () => 0,
-  getInvoiceDefaultHourlyRate: () => '0.00',
+  getInvoiceDefaultHourlyRate: () => '10.00',
   getVATTypes: () => [0, 9, 21],
 }
 
@@ -426,6 +427,11 @@ describe('Hours', () => {
   })
 
   it('has 6 HeaderCells', async () => {
+    const engineer_models = invoiceResponse.data.engineer_models.map((m) => new RateEngineerUserModel({
+      ...m,
+      margin_perc: 0
+    }))
+
     const wrapper = shallowMount(Hours, {
       localVue,
       store,
@@ -436,7 +442,7 @@ describe('Hours', () => {
         type: HOURS_TYPE_WORK,
         hours_total: invoiceResponse.data.activity_totals.work_total,
         user_totals: invoiceResponse.data.activity_totals.user_totals,
-        engineer_models: invoiceResponse.data.engineer_models,
+        engineer_models,
         customer: new CustomerModel(customerResponse.data)
       }
     })
@@ -448,6 +454,11 @@ describe('Hours', () => {
   })
 
   it('has a total of €230.00 and VAT €48.30', async () => {
+    const engineer_models = invoiceResponse.data.engineer_models.map((m) => new RateEngineerUserModel({
+      ...m,
+      margin_perc: 0
+    }))
+
     const wrapper = mount(Hours, {
       localVue,
       store,
@@ -458,7 +469,7 @@ describe('Hours', () => {
         type: HOURS_TYPE_WORK,
         hours_total: invoiceResponse.data.activity_totals.work_total,
         user_totals: invoiceResponse.data.activity_totals.user_totals,
-        engineer_models: invoiceResponse.data.engineer_models,
+        engineer_models,
         customer: new CustomerModel(customerResponse.data)
       }
     })
@@ -466,17 +477,13 @@ describe('Hours', () => {
     await flushPromises()
 
     // 16:15 + 13:45 + 06:30 = 36:30
-    // ACTIVITY_USE_PRICE_ENGINEER
-    // user_id 93 rate 0.00
-    // user_id 77 rate 12.00
-    // user_id 6 rate 10.00
-    // 0 + ((12 * 13) + (12*0.75)) + (6 * 10) + (0.5 * 10)) = 230
+    // 36:30 * 10 = 365
 
     const total_input = wrapper.find('input.total-input-final')
-    expect(total_input.element.value).to.equal('€230.00')
+    expect(total_input.element.value).to.equal('€365.00')
 
     const vat_input = wrapper.find('input.vat-input-final')
-    expect(vat_input.element.value).to.contain("€48.30")
+    expect(vat_input.element.value).to.contain("€76.65")
   })
   //
 })

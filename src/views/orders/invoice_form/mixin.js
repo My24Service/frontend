@@ -13,12 +13,6 @@ let invoiceMixin = {
       obj.vat_type = vatType
       this.updateTotals()
     },
-    getInvoiceDefaultHourlyRateDinero() {
-      return toDinero(
-        this.$store.getters.getInvoiceDefaultHourlyRate,
-        this.$store.getters.getDefaultCurrency
-      )
-    },
     getItemsTotal(items) {
       return items.reduce(
         (total, m) => (total.add(m.total)),
