@@ -258,7 +258,6 @@
         <HoursComponent
           :type="HOURS_TYPE_WORK"
           :hours_total="activity_totals.work_total"
-          :hours_total_secs="activity_totals.work_total_secs"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
@@ -270,7 +269,6 @@
         <HoursComponent
           :type="HOURS_TYPE_TRAVEL"
           :hours_total="activity_totals.travel_total"
-          :hours_total_sesc="activity_totals.travel_total_secs"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
@@ -293,7 +291,6 @@
         <HoursComponent
           :type="HOURS_TYPE_EXTRA_WORK"
           :hours_total="activity_totals.extra_work_total"
-          :hours_total_secs="activity_totals.extra_work_total_secs"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
@@ -305,7 +302,6 @@
         <HoursComponent
           :type="HOURS_TYPE_ACTUAL_WORK"
           :hours_total="activity_totals.actual_work_total"
-          :hours_total_secs="activity_totals.actual_work_total_secs"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"

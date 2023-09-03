@@ -73,8 +73,8 @@
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
-                  v-model="distance.price_per_km_other"
-                  :currency="distance.price_per_km_other_currency"
+                  v-model="distance.price_other"
+                  :currency="distance.price_other_currency"
                   @priceChanged="(val) => otherPriceChanged(val, distance)"
                 />
               </p>
@@ -201,41 +201,29 @@ export default {
     }
   },
   created() {
+    // set vars in service
+    this.costService.invoice_default_margin = this.invoice_default_margin
+    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_currency = this.default_currency
+
     this.invoice_default_price_per_km_dinero = toDinero(
       this.invoice_default_price_per_km,
       this.default_currency
     )
 
-    this.costService.collection = this.user_totals.map((a) => (
-      new this.costService.model({
-      ...this.getDefaultCostProps(),
-      user_id: a.user_id,
-      distance_to: a.distance_to,
-      distance_back: a.distance_back,
-      distance_total: a.distance_total,
-      amount_int: a.distance_total,
-    })))
+    // map input to Cost model collection
+    this.costService.collection = this.user_totals.map((activity) => (
+      this.costService.newModelFromDistance(
+        activity,
+        this.getPrice({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+        this.getCurrency({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+        this.usePriceOptions.USE_PRICE_SETTINGS
+      )))
     this.updateTotals()
   },
   methods: {
-    getDefaultCostProps() {
-      // default props for cost model
-      return {
-        vat_type: this.invoice_default_vat,
-        margin_perc: this.invoice_default_margin,
-        price_per_km_other: "0.00",
-        price_per_km_other_currency: this.default_currency,
-        price_per_km_other_dinero: toDinero("0.00", this.default_currency),
-        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
-        cost_type: COST_TYPE_DISTANCE,
-        vat_currency: this.default_currency,
-        margin_currency: this.default_currency,
-        price_currency: this.default_currency,
-        total_currency: this.default_currency,
-      }
-    },
     otherPriceChanged(priceDinero, distance) {
-      distance.setPriceField('price_per_km_other', priceDinero)
+      distance.setPriceField('price_other', priceDinero)
       this.updateTotals()
     },
     getPriceFor(type) {
@@ -251,11 +239,11 @@ export default {
     getPrice(distance) {
       switch (distance.use_price) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.invoice_default_price_per_km_dinero
+          return this.invoice_default_price_per_km
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
-          return this.customer.price_per_km_dinero
+          return this.customer.price_per_km
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return distance.price_per_km_other_dinero
+          return distance.price_other
         default:
           throw `getPrice: unknown use_price: ${distance.use_price}`
       }
@@ -267,7 +255,7 @@ export default {
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km_currency
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return distance.price_per_km_other_currency
+          return distance.price_other_currency
         default:
           throw `getCurrency: unknown use_price: ${distance.use_price}`
       }

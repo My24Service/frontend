@@ -54,8 +54,8 @@
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
-                  v-model="coc_item.other"
-                  :currency="coc_item.other_currency"
+                  v-model="coc_item.price_other"
+                  :currency="coc_item.price_other_currency"
                   @priceChanged="(val) => otherPriceChanged(val)"
                 />
               </p>
@@ -164,30 +164,28 @@ export default {
     }
   },
   created() {
+    // set vars in service
+    this.costService.invoice_default_margin = this.invoice_default_margin
+    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_currency = this.default_currency
+
     this.invoice_default_call_out_costs_dinero = toDinero(
       this.invoice_default_call_out_costs,
       this.default_currency
     )
 
-    this.coc_item = new this.costService.model({
-      ...this.getDefaultCostProps(),
-    })
+    // create Cost model and set collection
+    this.coc_item = this.costService.newModelFromCallOutCosts({
+        amount_int: 1,
+      },
+      this.getPrice({use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+      this.getCurrency({use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+      this.usePriceOptions.USE_PRICE_SETTINGS
+    )
     this.costService.collection.push(this.coc_item)
     this.updateTotals()
   },
   methods: {
-    getDefaultCostProps() {
-      return {
-        vat_type: this.invoice_default_vat,
-        margin_perc: this.invoice_default_margin,
-        other: "0.00",
-        other_currency: this.default_currency,
-        other_dinero: toDinero("0.00", this.default_currency),
-        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
-        cost_type: COST_TYPE_CALL_OUT_COSTS,
-        amount_int: 1,
-      }
-    },
     getPriceFor(type) {
       switch (type) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
@@ -198,32 +196,32 @@ export default {
           throw `getPrice: unknown use_price: ${type}`
       }
     },
-    getPrice() {
-      switch (this.coc_item.use_price) {
+    getPrice(item) {
+      switch (item.use_price) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.invoice_default_call_out_costs_dinero
+          return this.invoice_default_call_out_costs
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
-          return this.customer.call_out_costs_dinero
+          return this.customer.call_out_costs
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return this.coc_item.other_dinero
+          return item.price_other
         default:
-          throw `getPrice: unknown use_price: ${this.use_price}`
+          throw `getPrice: unknown use_price: ${this.coc_item.use_price}`
       }
     },
-    getCurrency() {
-      switch (this.coc_item.use_price) {
+    getCurrency(item) {
+      switch (item.use_price) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
           return this.default_currency
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.call_out_costs_currency
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return this.coc_item.other_currency
+          return item.price_other_currency
         default:
-          throw `getCurrency: unknown use_price: ${this.use_price}`
+          throw `getCurrency: unknown use_price: ${this.coc_item.use_price}`
       }
     },
     otherPriceChanged(priceDinero) {
-      this.coc_item.setPriceField('other', priceDinero)
+      this.coc_item.setPriceField('price_other', priceDinero)
       this.updateTotals()
     },
     updateTotals() {
