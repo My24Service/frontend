@@ -160,6 +160,10 @@ export default {
     }
   },
   props: {
+    order_pk: {
+      type: [Number],
+      default: null
+    },
     type: {
       type: [String],
       default: null
@@ -196,6 +200,8 @@ export default {
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
+      created_by: this.$store.getters.getUserPk,
+      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       total: null,
       totalVAT: null,
@@ -234,7 +240,7 @@ export default {
             activity,
             this.getPrice({...activity, use_price}),
             this.getCurrency({...activity, use_price}),
-            use_price
+            this.getDefaultProps()
         )))
         break
       case HOURS_TYPE_TRAVEL:
@@ -244,7 +250,7 @@ export default {
             activity,
             this.getPrice({...activity, use_price}),
             this.getCurrency({...activity, use_price}),
-            use_price
+            this.getDefaultProps()
         )))
         break
       case HOURS_TYPE_EXTRA_WORK:
@@ -254,7 +260,7 @@ export default {
             activity,
             this.getPrice({...activity, use_price}),
             this.getCurrency({...activity, use_price}),
-            use_price
+            this.getDefaultProps()
         )))
         break
       case HOURS_TYPE_ACTUAL_WORK:
@@ -264,7 +270,7 @@ export default {
             activity,
             this.getPrice({...activity, use_price}),
             this.getCurrency({...activity, use_price}),
-            use_price
+            this.getDefaultProps()
         )))
         break
       default:
@@ -274,6 +280,14 @@ export default {
     this.updateTotals()
   },
   methods: {
+    getDefaultProps() {
+      return {
+        created_by: this.created_by,
+        created_by_is_admin: this.created_by_is_admin,
+        order: this.order_pk,
+        use_price: this.usePriceOptions.USE_PRICE_SETTINGS
+      }
+    },
     getTitle() {
       switch (this.type) {
         case HOURS_TYPE_WORK:

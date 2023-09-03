@@ -246,6 +246,7 @@
         <hr/>
 
         <MaterialsComponent
+          :order_pk="order_pk"
           :customer="customer"
           :material_models="material_models"
           :engineer_models="engineer_models"
@@ -256,6 +257,7 @@
         <hr/>
 
         <HoursComponent
+          :order_pk="order_pk"
           :type="HOURS_TYPE_WORK"
           :hours_total="activity_totals.work_total"
           :user_totals="activity_totals.user_totals"
@@ -267,6 +269,7 @@
         <hr/>
 
         <HoursComponent
+          :order_pk="order_pk"
           :type="HOURS_TYPE_TRAVEL"
           :hours_total="activity_totals.travel_total"
           :user_totals="activity_totals.user_totals"
@@ -278,6 +281,7 @@
         <hr/>
 
         <DistanceComponent
+          :order_pk="order_pk"
           :customer="customer"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
@@ -289,6 +293,7 @@
         <hr/>
 
         <HoursComponent
+          :order_pk="order_pk"
           :type="HOURS_TYPE_EXTRA_WORK"
           :hours_total="activity_totals.extra_work_total"
           :user_totals="activity_totals.user_totals"
@@ -300,6 +305,7 @@
         <hr/>
 
         <HoursComponent
+          :order_pk="order_pk"
           :type="HOURS_TYPE_ACTUAL_WORK"
           :hours_total="activity_totals.actual_work_total"
           :user_totals="activity_totals.user_totals"
@@ -311,6 +317,7 @@
         <hr/>
 
         <CallOutCostsComponent
+          :order_pk="order_pk"
           :customer="customer"
           :invoice_default_call_out_costs="invoice_default_call_out_costs"
           @invoiceLinesCreated="callOutCostsInvoiceLinesCreated"
@@ -437,9 +444,8 @@ export default {
       invoice: invoiceService.getFields(),
       errorMessage: null,
 
-      order: null,
-      member: null,
       invoice_id: null,
+      order_pk: null,
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
@@ -483,9 +489,8 @@ export default {
       this.customerPk = invoiceData.customer_pk
       await this.getCustomer()
 
-      this.order = invoiceData.order
-      this.member = invoiceData.member
       this.invoice_id = invoiceData.invoice_id
+      this.order_pk = invoiceData.order_pk
 
       this.activity_totals = invoiceData.activity_totals
 

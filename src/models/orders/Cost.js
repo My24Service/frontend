@@ -101,85 +101,86 @@ class CostService extends BaseModel {
   }
 
   // method to create cost from material
-  newModelFromMaterial(material, price, price_currency, use_price) {
+  newModelFromMaterial(material, price, price_currency, defaultPropsView) {
     return new this.model({
       ...material,
       ...this.getDefaultCostProps(),
+      ...defaultPropsView,
       material: material.material_id,
       amount_decimal: material.amount,
       user: material.user_id,
       price,
       price_currency,
       cost_type: COST_TYPE_USED_MATERIALS,
-      use_price,
     })
   }
 
   // method to create cost from work hours
-  newModelFromWorkHours(activity, price, price_currency, use_price) {
+  newModelFromWorkHours(activity, price, price_currency, defaultPropsView) {
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
+      ...defaultPropsView,
       hours_total: activity.work,
       amount_duration: parseInt(activity.work_secs),
       user: activity.user_id,
       price,
       price_currency,
       cost_type: COST_TYPE_WORK_HOURS,
-      use_price,
     })
   }
 
   // method to create cost from travel hours
-  newModelFromTravelHours(activity, price, price_currency, use_price) {
+  newModelFromTravelHours(activity, price, price_currency, defaultPropsView) {
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
+      ...defaultPropsView,
       hours_total: activity.travel_total,
       amount_duration: parseInt(activity.travel_total_secs),
       user: activity.user_id,
       price,
       price_currency,
       cost_type: COST_TYPE_TRAVEL_HOURS,
-      use_price,
     })
   }
 
   // method to create cost from extra work
-  newModelFromExtraWork(activity, price, price_currency, use_price) {
+  newModelFromExtraWork(activity, price, price_currency, defaultPropsView) {
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
+      ...defaultPropsView,
       hours_total: activity.extra_work,
       amount_duration: parseInt(activity.extra_work_secs),
       user: activity.user_id,
       price,
       price_currency,
       cost_type: COST_TYPE_EXTRA_WORK,
-      use_price,
     })
   }
 
   // method to create cost from actual work
-  newModelFromActualWork(activity, price, price_currency, use_price) {
+  newModelFromActualWork(activity, price, price_currency, defaultPropsView) {
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
+      ...defaultPropsView,
       hours_total: activity.actual_work,
       amount_duration: parseInt(activity.actual_work_secs),
       user: activity.user_id,
       price,
       price_currency,
       cost_type: COST_TYPE_ACTUAL_WORK,
-      use_price,
     })
   }
 
   // method to create cost from distance
-  newModelFromDistance(activity, price, price_currency, use_price) {
+  newModelFromDistance(activity, price, price_currency, defaultPropsView) {
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
+      ...defaultPropsView,
       distance_to: activity.distance_to,
       distance_back: activity.distance_back,
       distance_total: activity.distance_total,
@@ -188,19 +189,18 @@ class CostService extends BaseModel {
       price,
       price_currency,
       cost_type: COST_TYPE_DISTANCE,
-      use_price,
     })
   }
 
   // method to create cost from distance
-  newModelFromCallOutCosts(obj, price, price_currency, use_price) {
+  newModelFromCallOutCosts(obj, price, price_currency, defaultPropsView) {
     return new this.model({
       ...obj,
       ...this.getDefaultCostProps(),
+      ...defaultPropsView,
       price,
       price_currency,
       cost_type: COST_TYPE_CALL_OUT_COSTS,
-      use_price,
     })
   }
 
