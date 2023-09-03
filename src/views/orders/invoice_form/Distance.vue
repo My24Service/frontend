@@ -151,6 +151,10 @@ export default {
     TotalRow,
   },
   props: {
+    order_pk: {
+      type: [Number],
+      default: null
+    },
     user_totals: {
       type: [Array],
       default: null
@@ -185,6 +189,8 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
+      created_by: this.$store.getters.getUserPk,
+      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       usePriceOptions: {
         USE_PRICE_SETTINGS,
@@ -217,11 +223,19 @@ export default {
         activity,
         this.getPrice({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
         this.getCurrency({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-        this.usePriceOptions.USE_PRICE_SETTINGS
+        this.getDefaultProps()
       )))
     this.updateTotals()
   },
   methods: {
+    getDefaultProps() {
+      return {
+        created_by: this.created_by,
+        created_by_is_admin: this.created_by_is_admin,
+        order: this.order_pk,
+        use_price: this.usePriceOptions.USE_PRICE_SETTINGS
+      }
+    },
     otherPriceChanged(priceDinero, distance) {
       distance.setPriceField('price_other', priceDinero)
       this.updateTotals()

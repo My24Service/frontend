@@ -128,6 +128,10 @@ export default {
     TotalRow,
   },
   props: {
+    order_pk: {
+      type: [Number],
+      default: null
+    },
     invoice_default_call_out_costs: {
       type: [Number, String],
       default: null
@@ -143,6 +147,8 @@ export default {
       invoice_default_call_out_costs_dinero: null,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
+      created_by: this.$store.getters.getUserPk,
+      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       costService: new CostService(),
 
@@ -177,15 +183,23 @@ export default {
     // create Cost model and set collection
     this.coc_item = this.costService.newModelFromCallOutCosts({
         amount_int: 1,
+      ...this.getDefaultProps(),
       },
       this.getPrice({use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
       this.getCurrency({use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-      this.usePriceOptions.USE_PRICE_SETTINGS
+      this.getDefaultProps()
     )
     this.costService.collection.push(this.coc_item)
     this.updateTotals()
   },
   methods: {
+    getDefaultProps() {
+      return {
+        created_by: this.created_by,
+        created_by_is_admin: this.created_by_is_admin,
+        order: this.order_pk,
+        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,      }
+    },
     getPriceFor(type) {
       switch (type) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:

@@ -138,6 +138,10 @@ export default {
     TotalRow,
   },
   props: {
+    order_pk: {
+      type: [Number],
+      default: null
+    },
     material_models: {
       type: [Array],
       default: null
@@ -174,6 +178,8 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
+      created_by: this.$store.getters.getUserPk,
+      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       useOnInvoiceOptions: [
         { text: this.$trans('Total'), value: OPTION_USED_MATERIALS_TOTALS },
@@ -209,7 +215,7 @@ export default {
           {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
         this.getCurrency(
           {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
-        this.usePriceOptions.USE_PRICE_PURCHASE
+        this.getDefaultProps()
       )
     ))
 
@@ -217,6 +223,14 @@ export default {
     this.updateTotals()
   },
   methods: {
+    getDefaultProps() {
+      return {
+        created_by: this.created_by,
+        created_by_is_admin: this.created_by_is_admin,
+        use_price: this.usePriceOptions.USE_PRICE_PURCHASE,
+        order: this.order_pk,
+      }
+    },
     otherPriceChanged(priceDinero, material) {
       material.setPriceField('price_other', priceDinero)
       this.updateTotals()
