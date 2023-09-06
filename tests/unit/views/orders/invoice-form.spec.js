@@ -14,6 +14,7 @@ import HeaderCell from '../../../../src/views/orders/invoice_form/Header'
 
 import invoiceResponse from '../../fixtures/invoiceData'
 import customerResponse from '../../fixtures/customer.js'
+import costsCocResponse from '../../fixtures/order_cost_coc'
 import {CustomerModel} from "../../../../src/models/customer/Customer";
 import {HOURS_TYPE_WORK} from "../../../../src/views/orders/invoice_form/constants";
 import {RateEngineerUserModel} from "../../../../src/models/company/UserEngineer";
@@ -22,12 +23,24 @@ jest.mock('axios')
 
 const uuid = '6487254-2387'
 
+const emptyCosts = {
+  data: {
+    "next": null,
+    "previous": null,
+    "count": 1,
+    "num_pages": 1,
+    "results": []
+  }
+}
+
 axios.get.mockImplementation((url) => {
   switch (url) {
     case `/order/invoice/data/${uuid}/`:
       return Promise.resolve(invoiceResponse)
     case '/customer/customer/424/':
       return Promise.resolve(customerResponse)
+    case '/order/cost/?page=1&order=null&cost_type=call_out_costs':
+      return Promise.resolve(emptyCosts)
     default:
       console.log(url)
       return Promise.reject(new Error('not found'))
@@ -40,6 +53,8 @@ const getters = {
   getInvoiceDefaultMargin: () => 0,
   getInvoiceDefaultHourlyRate: () => '10.00',
   getVATTypes: () => [0, 9, 21],
+  getIsAdmin: () => false,
+  getUserPk: () => 1,
 }
 
 describe('InvoiceForm', () => {

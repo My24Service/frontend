@@ -4,9 +4,9 @@ import {toDinero} from "../../utils";
 
 class CostModel {
   order
-  created_by
   cost_type
   user
+  user_full_name
   material
   amount_int
   amount_decimal
@@ -82,6 +82,7 @@ Object.assign(CostModel.prototype, priceMixin);
 
 class CostService extends BaseModel {
   model = CostModel
+  url = '/order/cost/'
   invoice_default_margin = null
   invoice_default_vat = null
   default_currency = null

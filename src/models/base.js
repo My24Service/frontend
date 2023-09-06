@@ -59,6 +59,14 @@ class BaseModel {
     this.emptyCollectionItem()
   }
 
+  async emptyCollection() {
+    for (let item of this.collection) {
+      if (item.id) {
+        await this.delete(item.id)
+      }
+    }
+  }
+
   async updateCollection() {
     // create/update
     for (let item of this.collection) {
