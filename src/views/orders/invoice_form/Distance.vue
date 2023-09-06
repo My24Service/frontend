@@ -204,6 +204,16 @@ export default {
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
+
+      tableFields: [
+        {key: 'user_full_name', label: this.$trans('User')},
+        {key: 'amount_int', label: this.$trans('Amount')},
+        {key: 'use_price', label: this.$trans('Use price')},
+        {key: 'margin_dinero', label: this.$trans('Margin')},
+        {key: 'vat_type', label: this.$trans('VAT type')},
+        {key: 'vat_dinero', label: this.$trans('VAT')},
+        {key: 'total_dinero', label: this.$trans('Total')},
+      ]
     }
   },
   created() {
