@@ -7,9 +7,6 @@ export const OPTION_ACTUAL_WORK_TOTALS = 'actual_work_totals'
 export const OPTION_DISTANCE_TOTALS = 'distance_totals'
 export const OPTION_CALL_OUT_COSTS_TOTALS = 'coc_totals'
 
-export const OPTION_CALL_OUT_COSTS_CUSTOMER = 'customer'
-export const OPTION_CALL_OUT_COSTS_SETTINGS = 'settings'
-
 export const OPTION_NONE = 'none'
 
 export const INVOICE_LINE_TYPE_ACTIVITY = 'activity'
@@ -21,3 +18,11 @@ export const HOURS_TYPE_WORK = 'work'
 export const HOURS_TYPE_TRAVEL = 'travel'
 export const HOURS_TYPE_EXTRA_WORK = 'extra-work'
 export const HOURS_TYPE_ACTUAL_WORK = 'actual-work'
+
+// new from API
+export const USE_PRICE_SETTINGS = 'settings'
+export const USE_PRICE_CUSTOMER = 'customer'
+export const USE_PRICE_USER = 'user'
+export const USE_PRICE_PURCHASE = 'purchase'
+export const USE_PRICE_SELLING = 'selling'
+export const USE_PRICE_OTHER = 'other'

@@ -31,7 +31,7 @@
         </b-col>
         <b-col cols="2" />
       </b-row>
-      <b-row v-for="activity in userTotals" :key="activity.user_id" class="material_row">
+      <b-row v-for="activity in costService.collection" :key="activity.user_id" class="material_row">
         <b-col cols="3">
           {{ getFullname(activity.user_id) }}
         </b-col>
@@ -39,13 +39,36 @@
           {{ activity.hours_total }}
         </b-col>
         <b-col cols="3">
-          <EngineerPriceRadio
-            :item="activity"
-            :engineer_models="engineer_models"
-            :customer="customer"
-            @otherPriceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
-            @radioChanged="(usePrice) => engineerPriceRadioChanged(activity, usePrice)"
-          />
+          <b-form-radio-group
+            @change="updateTotals"
+            v-model="activity.use_price"
+          >
+            <b-form-radio :value="usePriceOptions.USE_PRICE_USER">
+              {{ $trans('Engineer') }}
+              {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_USER).toFormat("$0.00") }}
+            </b-form-radio>
+
+            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              {{ $trans('Settings') }}
+              {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+            </b-form-radio>
+
+            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              {{ $trans('Customer') }}
+              {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+            </b-form-radio>
+
+            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+              <p class="flex">
+                {{ $trans("Other") }}:&nbsp;&nbsp;
+                <PriceInput
+                  v-model="activity.price_other"
+                  :currency="activity.price_other_currency"
+                  @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
+                />
+              </p>
+            </b-form-radio>
+          </b-form-radio-group>
         </b-col>
         <b-col cols="1">
           <MarginInput
@@ -58,9 +81,9 @@
         </b-col>
         <b-col cols="2">
           <Totals
-            :total="activity.total"
-            :margin="activity.margin"
-            :vat="activity.vat"
+            :total="activity.total_dinero"
+            :margin="activity.margin_dinero"
+            :vat="activity.vat_dinero"
           />
         </b-col>
       </b-row>
@@ -95,19 +118,20 @@ import {
   HOURS_TYPE_TRAVEL,
   HOURS_TYPE_WORK,
   INVOICE_LINE_TYPE_ACTIVITY,
-  OPTION_ACTIVITY_ACTIVITY_TOTALS, OPTION_ACTIVITY_ACTUAL_WORK, OPTION_ACTUAL_WORK_TOTALS,
+  OPTION_ACTIVITY_ACTIVITY_TOTALS, OPTION_ACTIVITY_ACTUAL_WORK,
   OPTION_NONE,
-  OPTION_USER_TOTALS
+  OPTION_USER_TOTALS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER, USE_PRICE_SETTINGS, USE_PRICE_USER
 } from "./constants";
-import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import EngineerPriceRadio from "./EngineerPriceRadio";
 import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
+import CostService from "../../../models/orders/Cost";
+import PriceInput from "../../../components/PriceInput";
+import {toDinero} from "../../../utils";
 
 export default {
-  name: "ActivityComponent",
+  name: "HoursComponent",
   emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
   components: {
@@ -115,9 +139,9 @@ export default {
     Collapse,
     HeaderCell,
     VAT,
-    EngineerPriceRadio,
     MarginInput,
     TotalRow,
+    PriceInput,
   },
   watch: {
     engineer_models: {
@@ -136,6 +160,10 @@ export default {
     }
   },
   props: {
+    order_pk: {
+      type: [Number],
+      default: null
+    },
     type: {
       type: [String],
       default: null
@@ -157,49 +185,6 @@ export default {
       default: null
     },
   },
-  created() {
-    // map input to usable dataset
-    let count = 0
-    switch (this.type) {
-      case HOURS_TYPE_WORK:
-        this.userTotals = this.user_totals.map((a) => ({
-          ...a,
-          ...this.getDefaultItemProps(a.user_id),
-          // use different field for total hours
-          hours_total: a.work_total,
-          data_index: count++,
-        }))
-        break
-      case HOURS_TYPE_TRAVEL:
-        this.userTotals = this.user_totals.map((a) => ({
-          ...a,
-          ...this.getDefaultItemProps(a.user_id),
-          // use different field for total hours
-          hours_total: a.travel_total,
-          data_index: count++,
-        }))
-        break
-      case HOURS_TYPE_EXTRA_WORK:
-        this.userTotals = this.user_totals.map((a) => ({
-          ...a,
-          ...this.getDefaultItemProps(a.user_id),
-          // not different, this has hours_total
-          data_index: count++,
-        }))
-        break
-      case HOURS_TYPE_ACTUAL_WORK:
-        this.userTotals = this.user_totals.map((a) => ({
-          ...a,
-          ...this.getDefaultItemProps(a.user_id),
-          data_index: count++,
-        }))
-        break
-      default:
-        throw `created set userTotals, unknown type ${this.type}`
-    }
-
-    this.updateTotals()
-  },
   data () {
     return {
       isLoading: false,
@@ -209,11 +194,15 @@ export default {
       HOURS_TYPE_EXTRA_WORK,
       HOURS_TYPE_ACTUAL_WORK,
 
+      costService: new CostService(),
+
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
+      default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
+      created_by: this.$store.getters.getUserPk,
+      created_by_is_admin: this.$store.getters.getIsAdmin,
 
-      userTotals: [],
       total: null,
       totalVAT: null,
 
@@ -224,21 +213,79 @@ export default {
       ],
       useOnInvoiceSelected: null,
 
+      usePriceOptions: {
+        USE_PRICE_USER,
+        USE_PRICE_SETTINGS,
+        USE_PRICE_CUSTOMER,
+        USE_PRICE_OTHER,
+      },
     }
   },
+  created() {
+    // set vars in service
+    this.costService.invoice_default_margin = this.invoice_default_margin
+    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_currency = this.default_currency
+
+    // map input to Cost model collection
+    let user_totals
+    const use_price = this.usePriceOptions.USE_PRICE_SETTINGS
+
+    switch (this.type) {
+      case HOURS_TYPE_WORK:
+        // filter out empty values
+        user_totals = this.user_totals.filter((m) => m.work_secs !== null)
+        this.costService.collection = user_totals.map((activity) => (
+          this.costService.newModelFromWorkHours(
+            activity,
+            this.getPrice({...activity, use_price}),
+            this.getCurrency({...activity, use_price}),
+            this.getDefaultProps()
+        )))
+        break
+      case HOURS_TYPE_TRAVEL:
+        user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
+        this.costService.collection = user_totals.map((activity) => (
+          this.costService.newModelFromTravelHours(
+            activity,
+            this.getPrice({...activity, use_price}),
+            this.getCurrency({...activity, use_price}),
+            this.getDefaultProps()
+        )))
+        break
+      case HOURS_TYPE_EXTRA_WORK:
+        user_totals = this.user_totals.filter((m) => m.extra_work_secs !== null)
+        this.costService.collection = user_totals.map((activity) => (
+          this.costService.newModelFromExtraWork(
+            activity,
+            this.getPrice({...activity, use_price}),
+            this.getCurrency({...activity, use_price}),
+            this.getDefaultProps()
+        )))
+        break
+      case HOURS_TYPE_ACTUAL_WORK:
+        user_totals = this.user_totals.filter((m) => m.actual_work_secs !== null)
+        this.costService.collection = user_totals.map((activity) => (
+          this.costService.newModelFromActualWork(
+            activity,
+            this.getPrice({...activity, use_price}),
+            this.getCurrency({...activity, use_price}),
+            this.getDefaultProps()
+        )))
+        break
+      default:
+        throw `created set userTotals, unknown type ${this.type}`
+    }
+
+    this.updateTotals()
+  },
   methods: {
-    getDefaultItemProps(user_id) {
-      // default props for items
+    getDefaultProps() {
       return {
-        vat_type: this.invoice_default_vat,
-        margin_perc: this.invoice_default_margin,
-        engineer_rate: this.getEngineerRate(user_id),
-        engineer_rate_currency: this.getEngineerRateCurrency(user_id),
-        engineer_rate_dinero: this.getEngineerRateDinero(user_id),
-        engineer_rate_other: "0.00",
-        engineer_rate_other_currency: this.default_currency,
-        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER,
+        created_by: this.created_by,
+        created_by_is_admin: this.created_by_is_admin,
+        order: this.order_pk,
+        use_price: this.usePriceOptions.USE_PRICE_SETTINGS
       }
     },
     getTitle() {
@@ -253,6 +300,77 @@ export default {
           return this.$trans("Actual work")
         default:
           throw `getTitle(), unknown type ${this.type}`
+      }
+    },
+    otherPriceChanged(dineroVal, model) {
+      model.setPriceField('price_other', dineroVal)
+      this.updateTotals()
+    },
+    updateTotals() {
+      // provide methods to get price and currency
+      this.costService.updateTotals(
+        this.getPrice,
+        this.getCurrency
+      )
+
+      this.total = this.costService.getItemsTotal()
+      this.totalVAT = this.costService.getItemsTotalVAT()
+
+      return true
+    },
+    getPrice(activity) {
+      const user = this.engineer_models.find((m) => m.id === activity.user_id)
+      if (user) {
+        switch (activity.use_price) {
+          case this.usePriceOptions.USE_PRICE_USER:
+            return user.engineer.hourly_rate
+          case this.usePriceOptions.USE_PRICE_CUSTOMER:
+            return this.customer.hourly_rate_engineer
+          case this.usePriceOptions.USE_PRICE_SETTINGS:
+            return this.default_hourly_rate
+          case this.usePriceOptions.USE_PRICE_OTHER:
+            return activity.price_other
+          default:
+            throw `getPrice: unknown use_price for engineer: ${activity.use_price}`
+        }
+      } else {
+        console.error("getPrice: model not found")
+      }
+    },
+    getCurrency(activity) {
+      const user = this.engineer_models.find((m) => m.id === activity.user_id)
+      if (user) {
+        switch (activity.use_price) {
+          case this.usePriceOptions.USE_PRICE_USER:
+            return user.engineer.hourly_rate_currency
+          case this.usePriceOptions.USE_PRICE_CUSTOMER:
+            return this.customer.hourly_rate_engineer_currency
+          case this.usePriceOptions.USE_PRICE_SETTINGS:
+            return this.default_currency
+          case this.usePriceOptions.USE_PRICE_OTHER:
+            return this.default_currency
+          default:
+            throw `getCurrency: unknown use_price for engineer: ${activity.use_price}`
+        }
+      } else {
+        console.error("getCurrency: model not found")
+      }
+    },
+    getEngineerRateFor(obj, usePrice) {
+      const user = this.engineer_models.find((m) => m.id === obj.user_id)
+      if (user) {
+        switch (usePrice) {
+          case this.usePriceOptions.USE_PRICE_USER:
+            return user.engineer.hourly_rate_dinero
+          case this.usePriceOptions.USE_PRICE_CUSTOMER:
+            return this.customer.hourly_rate_engineer_dinero
+          case this.usePriceOptions.USE_PRICE_SETTINGS:
+            return toDinero(this.default_hourly_rate, this.default_currency)
+          default:
+            throw `getEngineerRateFor: unknown usePrice for engineer: ${usePrice}`
+        }
+      } else {
+        console.error("getEngineerRateFor: model not found")
       }
     },
     createInvoiceLines() {
@@ -290,99 +408,6 @@ export default {
         case OPTION_NONE:
           console.debug("not adding any activity")
       }
-    },
-    otherPriceChanged(dineroVal, extra_work) {
-      this.setEngineerRateOther(dineroVal, extra_work)
-      this.updateTotals()
-    },
-    engineerPriceRadioChanged(activity, usePrice) {
-      activity.usePrice = usePrice
-      this.updateTotals()
-    },
-    updateTotals() {
-      this.userTotals = this.userTotals.map((m) => this.updateHoursUserTotals(m))
-      this.total = this.getItemsTotal(this.userTotals)
-      this.totalVAT = this.getItemsTotalVAT(this.userTotals)
-
-      return true
-    },
-
-    setEngineerRateOther(priceDinero, item) {
-      item.engineer_rate_other_dinero = priceDinero
-      item.engineer_rate_other = item.engineer_rate_other_dinero.toFormat('0.00')
-      item.engineer_rate_other_currency = item.engineer_rate_other_dinero.getCurrency()
-
-      return true
-    },
-    updateHoursUserTotals(item) {
-      const price = this.getSelectedEngineerRate(item)
-      const currency = this.getSelectedEngineerRateCurrency(item)
-      const hours_parts = item.hours_total.split(':')
-      let total = price.multiply(hours_parts[0])
-      total = total.add(price.multiply(hours_parts[1]/60))
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (item.margin_perc > 0) {
-        margin = total.multiply(item.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(item.vat_type)/100)
-      item.currency = currency
-      item.total = total_with_margin
-      item.vat = vat
-      item.margin = margin
-
-      return item
-    },
-    getSelectedEngineerRate(activity) {
-      const user = this.engineer_models.find((m) => m.id === activity.user_id)
-      if (user) {
-        switch (activity.usePrice) {
-          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER:
-            return toDinero(user.engineer.hourly_rate, user.engineer.hourly_rate_currency)
-          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER:
-            return this.customer.hourly_rate_engineer_dinero
-          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS:
-            return this.getInvoiceDefaultHourlyRateDinero()
-          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER:
-            return activity.engineer_rate_other_dinero
-          default:
-            throw `unknown usePrice for engineer: ${activity.usePrice}`
-        }
-      } else {
-        console.error("getEngineerRateFor: model not found")
-      }
-    },
-    getSelectedEngineerRateCurrency(activity) {
-      const user = this.engineer_models.find((m) => m.id === activity.user_id)
-      if (user) {
-        switch (activity.usePrice) {
-          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_ENGINEER:
-            return user.engineer.hourly_rate_currency
-          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_CUSTOMER:
-            return this.customer.hourly_rate_engineer_currency
-          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_SETTINGS:
-            return this.default_currency
-          case this.usePriceOptionsActivity.ACTIVITY_USE_PRICE_OTHER:
-            return this.default_currency
-          default:
-            throw `unknown usePrice for engineer: ${activity.usePrice}`
-        }
-      } else {
-        console.error("getEngineerRateFor: model not found")
-      }
-    },
-    getEngineerRateDinero(user_id) {
-      const user = this.engineer_models.find((m) => m.id === user_id)
-      return toDinero(user.engineer.hourly_rate, user.engineer.hourly_rate_currency)
-    },
-    getEngineerRate(user_id) {
-      const user = this.engineer_models.find((m) => m.id === user_id)
-      return user.engineer.hourly_rate
-    },
-    getEngineerRateCurrency(user_id) {
-      const user = this.engineer_models.find((m) => m.id === user_id)
-      return user.engineer.hourly_rate_currency
     },
   }
 }

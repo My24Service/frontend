@@ -4,29 +4,41 @@
   >
     <b-container fluid>
       <b-row>
-        <b-col cols="2" class="header">
-          {{ $trans("Engineer") }}
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("Engineer")'
+          />
         </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("Material") }}
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("Material")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Amount") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Amount")'
+          />
         </b-col>
-        <b-col cols="3" class="header">
-          {{ $trans("Use price") }}
+        <b-col cols="3">
+          <HeaderCell
+            :text='$trans("Use price")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Margin") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Margin")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("VAT type") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("VAT type")'
+          />
         </b-col>
         <b-col cols="2" />
       </b-row>
-      <b-row v-for="material in usedMaterials" :key="material.id" class="material_row">
+      <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
         <b-col cols="2">
-          {{ material.full_name }}
+          {{ getFullname(material.user_id) }}
         </b-col>
         <b-col cols="2">
           {{ material.name }}
@@ -37,23 +49,23 @@
         <b-col cols="3">
           <b-form-radio-group
             @change="updateTotals"
-            v-model="material.usePrice"
+            v-model="material.use_price"
           >
-            <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE">
-              {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE).toFormat('$0.00') }}
+            <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+              {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
             </b-form-radio>
 
-            <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING">
-              {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING).toFormat('$0.00') }}
+            <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+              {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
             </b-form-radio>
 
-            <b-form-radio :value="usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER">
+            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
-                  v-model="material.price_purchase_ex_other"
-                  :currency="material.price_purchase_ex_other_currency"
-                  @priceChanged="(val) => setPurchasePriceOther(val, material.material_id) && updateTotals()"
+                  v-model="material.price_other"
+                  :currency="material.price_other_currency"
+                  @priceChanged="(val) => otherPriceChanged(val, material)"
                 />
               </p>
             </b-form-radio>
@@ -70,9 +82,9 @@
         </b-col>
         <b-col cols="2">
           <Totals
-            :total="material.total"
-            :margin="material.margin"
-            :vat="material.vat"
+            :total="material.total_dinero"
+            :margin="material.margin_dinero"
+            :vat="material.vat_dinero"
           />
         </b-col>
       </b-row>
@@ -100,14 +112,13 @@ import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
+import CostService from "../../../models/orders/Cost";
 import {
   OPTION_NONE, OPTION_USED_MATERIALS_TOTALS,
-  OPTION_USER_TOTALS
+  OPTION_USER_TOTALS, USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING
 } from "./constants";
-import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import EngineerPriceRadio from "./EngineerPriceRadio";
 import materialService, {MaterialModel} from "../../../models/inventory/Material";
 import PriceInput from "../../../components/PriceInput";
 import MarginInput from "./MarginInput";
@@ -123,16 +134,23 @@ export default {
     Collapse,
     HeaderCell,
     VAT,
-    EngineerPriceRadio,
     MarginInput,
     TotalRow,
   },
   props: {
+    order_pk: {
+      type: [Number],
+      default: null
+    },
     material_models: {
       type: [Array],
       default: null
     },
     used_materials: {
+      type: [Array],
+      default: null
+    },
+    engineer_models: {
       type: [Array],
       default: null
     },
@@ -143,22 +161,25 @@ export default {
   },
   data() {
     return {
-      usedMaterials: null,
       materialModels: null,
 
       total: null,
       totalVAT: null,
       totalAmount: null,
 
-      usePriceOptionsMaterial: {
-        USED_MATERIALS_USE_PRICE_PURCHASE: 'purchase',
-        USED_MATERIALS_USE_PRICE_SELLING: 'selling',
-        USED_MATERIALS_USE_PRICE_OTHER: 'other',
+      costService: new CostService(),
+
+      usePriceOptions: {
+        USE_PRICE_PURCHASE,
+        USE_PRICE_SELLING,
+        USE_PRICE_OTHER,
       },
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
+      created_by: this.$store.getters.getUserPk,
+      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       useOnInvoiceOptions: [
         { text: this.$trans('Total'), value: OPTION_USED_MATERIALS_TOTALS },
@@ -169,95 +190,98 @@ export default {
     }
   },
   created() {
+    // set vars in service
+    this.costService.invoice_default_margin = this.invoice_default_margin
+    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_currency = this.default_currency
+
+    // calc total amount
     this.totalAmount = this.used_materials.reduce(
       (total, m) => (total + m.amount),
       0
     )
 
-    this.usedMaterials = this.used_materials.map((m) => ({
-      ...m,
-      vat_type: this.invoice_default_vat,
-      margin_perc:  this.invoice_default_margin,
-      price_purchase_ex_other: "0.00",
-      price_purchase_ex_other_currency: this.default_currency,
-      price_purchase_ex_other_dinero: toDinero("0.00", this.default_currency),
-      usePrice: this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE,
-    }))
-
+    // set material models with margin perc
     this.materialModels = this.material_models.map((m) => new MaterialModel({
       ...m,
       margin_perc: this.invoice_default_margin
     }))
+
+    // map input to Cost model collection
+    this.costService.collection = this.used_materials.map((material) => (
+      this.costService.newModelFromMaterial(
+        material,
+        this.getPrice(
+          {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
+        this.getCurrency(
+          {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
+        this.getDefaultProps()
+      )
+    ))
+
+    // update totals
     this.updateTotals()
   },
   methods: {
-    getMaterialPrice(used_material) {
-      let model
-      switch (used_material.usePrice) {
-        case this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE:
-          model = this.materialModels.find((m) => m.id === used_material.material_id)
-          return model.price_purchase_ex_dinero
-        case this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING:
-          model = this.materialModels.find((m) => m.id === used_material.material_id)
-          return model.price_selling_ex_dinero
-        case this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER:
-          return used_material.price_purchase_ex_other_dinero
-        default:
-          throw `unknown use price: ${used_material.usePrice}`
+    getDefaultProps() {
+      return {
+        created_by: this.created_by,
+        created_by_is_admin: this.created_by_is_admin,
+        use_price: this.usePriceOptions.USE_PRICE_PURCHASE,
+        order: this.order_pk,
       }
     },
-    getMaterialCurrency(used_material) {
+    otherPriceChanged(priceDinero, material) {
+      material.setPriceField('price_other', priceDinero)
+      this.updateTotals()
+    },
+    getPrice(used_material) {
       let model
-      switch (used_material.usePrice) {
-        case this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE:
+      switch (used_material.use_price) {
+        case this.usePriceOptions.USE_PRICE_PURCHASE:
+          model = this.materialModels.find((m) => m.id === used_material.material_id)
+          return model.price_purchase_ex
+        case this.usePriceOptions.USE_PRICE_SELLING:
+          model = this.materialModels.find((m) => m.id === used_material.material_id)
+          return model.price_selling_ex
+        case this.usePriceOptions.USE_PRICE_OTHER:
+          return used_material.price_other
+        default:
+          throw `unknown use price: ${used_material.use_price}`
+      }
+    },
+    getCurrency(used_material) {
+      let model
+      switch (used_material.use_price) {
+        case this.usePriceOptions.USE_PRICE_PURCHASE:
           model = this.materialModels.find((m) => m.id === used_material.material_id)
           return model.price_purchase_ex_currency
-        case this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_SELLING:
+        case this.usePriceOptions.USE_PRICE_SELLING:
           model = this.materialModels.find((m) => m.id === used_material.material_id)
           return model.price_selling_ex_currency
-        case this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_OTHER:
-          return used_material.price_purchase_ex_other_currency
+        case this.usePriceOptions.USE_PRICE_OTHER:
+          return used_material.price_other_currency
         default:
-          throw `unknown use price: ${used_material.usePrice}`
+          throw `unknown use price: ${used_material.use_price}`
       }
     },
-    getMaterialPriceFor(used_material, usePrice) {
+    getMaterialPriceFor(used_material, use_price) {
       const model = this.materialModels.find((m) => m.id === used_material.material_id)
       if (model) {
-        return usePrice === this.usePriceOptionsMaterial.USED_MATERIALS_USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
+        return use_price === this.usePriceOptions.USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
       } else {
         console.error('MODEL NOT FOUND for ', used_material)
       }
     },
-    setPurchasePriceOther(priceDinero, material_id) {
-      let model = this.usedMaterials.find((m) => m.material_id === material_id)
-      model.price_purchase_ex_other_dinero = priceDinero
-      model.price_purchase_ex_other = model.price_purchase_ex_other_dinero.toFormat('0.00')
-      model.price_purchase_ex_other_currency = model.price_purchase_ex_other_dinero.getCurrency()
-      return true
-    },
     updateTotals() {
-      this.usedMaterials = this.usedMaterials.map((m) => this.updateUsedMaterialTotals(m))
-      this.total = this.getItemsTotal(this.usedMaterials)
-      this.totalVAT = this.getItemsTotalVAT(this.usedMaterials)
-    },
-    updateUsedMaterialTotals(material) {
-      const price = this.getMaterialPrice(material)
-      const currency = this.getMaterialCurrency(material)
-      const total = price.multiply(material.amount)
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (material.margin_perc > 0) {
-        margin = total.multiply(material.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(material.vat_type)/100)
-      material.currency = currency
-      material.total = total_with_margin
-      material.vat = vat
-      material.margin = margin
+      // provide methods to get price and currency
+      this.costService.updateTotals(
+        this.getPrice,
+        this.getCurrency
+      )
 
-      return material
+      this.total = this.costService.getItemsTotal()
+      this.totalVAT = this.costService.getItemsTotalVAT()
     },
   }
 }

@@ -10,7 +10,7 @@
           readonly
           :value="total.toFormat('$0.00')"
           size="sm"
-          class="input-total-used"
+          :class="totalClass"
         ></b-form-input>
       </b-col>
     </b-row>
@@ -24,7 +24,7 @@
           readonly
           :value="margin.toFormat('$0.00')"
           size="sm"
-          class="input-total-used"
+          :class="marginClass"
         ></b-form-input>
       </b-col>
     </b-row>
@@ -38,7 +38,7 @@
           readonly
           :value="vat.toFormat('$0.00')"
           size="sm"
-          class="input-total-used"
+          :class="vatClass"
         ></b-form-input>
       </b-col>
     </b-row>
@@ -66,6 +66,20 @@ export default {
       default: false
     }
   },
+  computed: {
+    totalClass() {
+      let base = 'input-total-used'
+      return this.isFinalTotal ? `${base} total-input-final` : `${base} total-input`
+    },
+    vatClass() {
+      let base = 'input-total-used'
+      return this.isFinalTotal ? `${base} vat-input-final` : `${base} vat-input`
+    },
+    marginClass() {
+      let base = 'input-total-used'
+      return this.isFinalTotal ? `${base} margin-input-final` : `${base} margin-input`
+    },
+  }
 }
 </script>
 

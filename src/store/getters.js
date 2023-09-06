@@ -22,6 +22,9 @@ export const getters = {
   getMemberHasBranches: state => {
     return state.memberInfo.has_branches
   },
+  getIsAdmin: state => {
+    return state.userInfo.user.is_superuser || state.userInfo.user.is_staff
+  },
   getUserName: state => {
     if (state.userInfo.is_superuser) {
       return 'superuser'

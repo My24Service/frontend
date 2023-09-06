@@ -1,84 +1,158 @@
 <template>
-  <Collapse
-    :title="$trans('Call out costs')"
-  >
-    <b-container fluid>
-      <b-row>
-        <b-col cols="2" class="header">
-          {{ $trans("Amount") }}
-        </b-col>
-        <b-col cols="6" class="header">
-          {{ $trans("Rate") }}
-        </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Margin") }}
-        </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("VAT type") }}
-        </b-col>
-        <b-col cols="2" />
-      </b-row>
-      <b-row>
-        <b-col cols="2">
-          <b-form-input
-            @blur="updateTotals"
-            v-model="coc_item.amount"
-            size="sm"
-            class="input-margin"
-          ></b-form-input>
-        </b-col>
-        <b-col cols="6">
-          <b-form-radio-group
-            @change="updateTotals"
-            v-model="coc_item.usePrice"
-          >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
-              {{ $trans('Settings') }}
-              {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-            </b-form-radio>
+  <b-overlay :show="isLoading" rounded="sm">
+    <Collapse
+      :title="$trans('Call out costs')"
+    >
+      <div
+        class="costs=table"
+        v-if="hasStoredData"
+      >
+        <b-table
+          small
+          id="document-table"
+          :fields="tableFields"
+          :items="costService.collection"
+          responsive="md"
+          class="data-table"
+        >
+          <template #cell(margin)="data">
+            {{ data.item.margin_dinero.toFormat('$0.00') }} ({{ data.item.margin_perc }}%)
+          </template>
+          <template #cell(vat)="data">
+            {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ data.item.vat_type }}%)
+          </template>
+          <template #cell(total)="data">
+            {{ data.item.total_dinero.toFormat('$0.00') }}
+          </template>
+        </b-table>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
-              {{ $trans('Customer') }}
-              {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-            </b-form-radio>
+        <div class="save-collection">
+          <b-container>
+            <b-row>
+              <b-col cols="8"></b-col>
+              <b-col cols="4" class="pull-right">
+                <b-button
+                  @click="() => { emptyCollection() }"
+                  class="btn btn-danger update-button"
+                  type="button"
+                  variant="danger"
+                >
+                  {{ $trans("Remove saved costs") }}
+                </b-button>
+              </b-col>
+            </b-row>
+          </b-container>
+        </div>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
-              <p class="flex">
-                {{ $trans("Other") }}:&nbsp;&nbsp;
-                <PriceInput
-                  v-model="coc_item.other"
-                  :currency="coc_item.other_currency"
-                  @priceChanged="(val) => setPriceOther(val)"
-                />
-              </p>
-            </b-form-radio>
-          </b-form-radio-group>
-        </b-col>
-        <b-col cols="1">
-          <MarginInput
-            :margin="coc_item.margin_perc"
-            @inputChanged="(val) => marginChanged(coc_item, val)"
-          />
-        </b-col>
-        <b-col cols="1">
-          <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />
-        </b-col>
-        <b-col cols="2">
-          <Totals
-            :total="coc_item.total"
-            :margin="coc_item.margin"
-            :vat="coc_item.vat"
-          />
-        </b-col>
-      </b-row>
-      <TotalRow
-        :items_total="coc_item.amount"
-        :total="total"
-        :total_vat="totalVAT"
-      />
+      </div>
+
+      <b-container fluid v-if="!isLoading && !hasStoredData">
+        <b-row>
+          <b-col cols="2">
+            <HeaderCell
+              :text='$trans("Amount")'
+            />
+          </b-col>
+          <b-col cols="6">
+            <HeaderCell
+              :text='$trans("Rate")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("Margin")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("VAT type")'
+            />
+          </b-col>
+          <b-col cols="2" />
+        </b-row>
+        <b-row>
+          <b-col cols="2">
+            <b-form-input
+              @blur="updateTotals"
+              v-model="coc_item.amount_int"
+              size="sm"
+              class="input-margin"
+            ></b-form-input>
+          </b-col>
+          <b-col cols="6">
+            <b-form-radio-group
+              @change="updateTotals"
+              v-model="coc_item.use_price"
+            >
+              <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                {{ $trans('Settings') }}
+                {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                {{ $trans('Customer') }}
+                {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                <p class="flex">
+                  {{ $trans("Other") }}:&nbsp;&nbsp;
+                  <PriceInput
+                    v-model="coc_item.price_other"
+                    :currency="coc_item.price_other_currency"
+                    @priceChanged="(val) => otherPriceChanged(val)"
+                  />
+                </p>
+              </b-form-radio>
+            </b-form-radio-group>
+          </b-col>
+          <b-col cols="1">
+            <MarginInput
+              :margin="coc_item.margin_perc"
+              @inputChanged="(val) => marginChanged(coc_item, val)"
+            />
+          </b-col>
+          <b-col cols="1">
+            <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />
+          </b-col>
+          <b-col cols="2">
+            <Totals
+              :total="coc_item.total_dinero"
+              :margin="coc_item.margin_dinero"
+              :vat="coc_item.vat_dinero"
+            />
+          </b-col>
+        </b-row>
+        <TotalRow
+          :items_total="coc_item.amount_int"
+          :total="total"
+          :total_vat="totalVAT"
+        />
+
+        <div class="save-collection">
+          <b-container>
+            <b-row>
+              <b-col cols="8"></b-col>
+              <b-col cols="4" class="pull-right">
+                <p>
+                  <i>{{ $trans('Saving costs will give insights in profit') }}</i>
+                </p>
+                <b-button
+                  @click="() => { saveCollection() }"
+                  class="btn btn-danger update-button"
+                  type="button"
+                  variant="danger"
+                >
+                  {{ $trans("Save costs") }}
+                </b-button>
+              </b-col>
+            </b-row>
+          </b-container>
+        </div>
+      </b-container>
 
       <div class="use-on-invoice-container">
-        <h3>{{ $trans("What to add as invoice lines")}}</h3>
+        <h4>{{ $trans("What to add as invoice lines")}}</h4>
         <b-form-group>
           <b-form-radio-group
             v-model="useOnInvoiceSelected"
@@ -87,26 +161,25 @@
         </b-form-group>
       </div>
 
-    </b-container>
-  </Collapse>
+    </Collapse>
+  </b-overlay>
 </template>
 
 <script>
 import {toDinero} from "../../../utils";
 import {
-  OPTION_CALL_OUT_COSTS_CUSTOMER,
-  OPTION_CALL_OUT_COSTS_SETTINGS, OPTION_CALL_OUT_COSTS_TOTALS,
-  OPTION_NONE, OPTION_USER_TOTALS
+  OPTION_CALL_OUT_COSTS_TOTALS,
+  OPTION_NONE, USE_PRICE_CUSTOMER, USE_PRICE_OTHER, USE_PRICE_SETTINGS
 } from "./constants";
 import PriceInput from "../../../components/PriceInput";
 import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import EngineerPriceRadio from "./EngineerPriceRadio";
 import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
+import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
 
 export default {
   name: "CallOutCostsComponent",
@@ -117,11 +190,14 @@ export default {
     Collapse,
     HeaderCell,
     VAT,
-    EngineerPriceRadio,
     MarginInput,
     TotalRow,
   },
   props: {
+    order_pk: {
+      type: [Number],
+      default: null
+    },
     invoice_default_call_out_costs: {
       type: [Number, String],
       default: null
@@ -133,21 +209,14 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_call_out_costs_dinero: null,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
-      coc_item: {
-        margin: null,
-        vat: null,
-        margin_perc: null,
-        other_dinero: null,
-        other_currency: null,
-        other: null,
-        amount: 1,
-        usePrice: null,
-      },
+      costService: new CostService(),
+      coc_item: null,
 
       total: null,
       totalVAT: null,
@@ -159,33 +228,94 @@ export default {
       useOnInvoiceSelected: null,
 
       usePriceOptions: {
-        USE_PRICE_SETTINGS: 'settings',
-        USE_PRICE_CUSTOMER: 'customer',
-        USE_PRICE_OTHER: 'other',
+        USE_PRICE_SETTINGS,
+        USE_PRICE_CUSTOMER,
+        USE_PRICE_OTHER,
       },
 
+      tableFields: [
+        {key: 'amount_int', label: this.$trans('Amount')},
+        {key: 'use_price', label: this.$trans('Use price')},
+        {key: 'margin', label: this.$trans('Margin')},
+        {key: 'vat', label: this.$trans('VAT')},
+        {key: 'total', label: this.$trans('Total')},
+      ],
+
+      hasStoredData: false
     }
   },
-  created() {
+  async created() {
+    this.isLoading = true
+    // set vars in service
+    this.costService.invoice_default_margin = this.invoice_default_margin
+    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_currency = this.default_currency
+
+    this.costService.addListArg(`order=${this.order_pk}`)
+    this.costService.addListArg(`cost_type=${COST_TYPE_CALL_OUT_COSTS}`)
+
     this.invoice_default_call_out_costs_dinero = toDinero(
       this.invoice_default_call_out_costs,
       this.default_currency
     )
 
-    this.coc_item = {
-      ...this.coc_item,
-      vat_type: this.invoice_default_vat,
-      margin_perc: this.invoice_default_margin,
-      other: "0.00",
-      other_currency: this.default_currency,
-      other_dinero: toDinero("0.00", this.default_currency),
-      usePrice: this.usePriceOptions.USE_PRICE_SETTINGS,
-    }
-    this.updateTotals()
+    await this.loadData()
+
+    this.isLoading = false
   },
   methods: {
-    radioChanged() {
-      this.$emit('radioChanged', this.usePrice)
+    async loadData() {
+      this.costService.collection = []
+      this.hasStoredData = false
+      // check if we already stored costs
+      const response = await this.costService.list()
+      if (response.results.length > 0) {
+        this.costService.collection = response.results.map((cost) => (
+          new this.costService.model(cost)
+        ))
+        this.hasStoredData = true
+      } else {
+        // create Cost model and set collection
+        this.coc_item = this.costService.newModelFromCallOutCosts({
+            amount_int: 1,
+            ...this.getDefaultProps(),
+          },
+          this.getPrice({use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+          this.getCurrency({use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+          this.getDefaultProps()
+        )
+        this.costService.collection.push(this.coc_item)
+        this.updateTotals()
+      }
+    },
+    async emptyCollection() {
+      this.isLoading = true
+      try {
+        await this.costService.emptyCollection()
+        await this.loadData()
+      } catch (e) {
+        console.log(e)
+        this.errorToast(this.$trans('Error removing costs'))
+      }
+      this.isLoading = false
+    },
+    async saveCollection() {
+      this.isLoading = true
+      try {
+        await this.costService.updateCollection()
+        await this.loadData()
+        this.infoToast(this.$trans('Saved'), this.$trans('Costs saved'))
+      } catch (e) {
+        console.log(e)
+        this.errorToast(this.$trans('Error saving costs'))
+      }
+      this.isLoading = false
+    },
+    getDefaultProps() {
+      return {
+        order: this.order_pk,
+        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
+      }
     },
     getPriceFor(type) {
       switch (type) {
@@ -194,67 +324,52 @@ export default {
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.call_out_costs_dinero
         default:
-          throw `getPrice: unknown usePrice: ${type}`
+          throw `getPrice: unknown use_price: ${type}`
       }
     },
-    getPrice() {
-      switch (this.coc_item.usePrice) {
+    getPrice(item) {
+      switch (item.use_price) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.invoice_default_call_out_costs_dinero
+          return this.invoice_default_call_out_costs
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
-          return this.customer.call_out_costs_dinero
+          return this.customer.call_out_costs
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return this.coc_item.other_dinero
+          return item.price_other
         default:
-          throw `getPrice: unknown usePrice: ${this.usePrice}`
+          throw `getPrice: unknown use_price: ${this.coc_item.use_price}`
       }
     },
-    getCurrency() {
-      switch (this.coc_item.usePrice) {
+    getCurrency(item) {
+      switch (item.use_price) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
           return this.default_currency
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.call_out_costs_currency
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return this.coc_item.other_currency
+          return item.price_other_currency
         default:
-          throw `getCurrency: unknown usePrice: ${this.usePrice}`
+          throw `getCurrency: unknown use_price: ${this.coc_item.use_price}`
       }
     },
-    setPriceOther(priceDinero) {
-      this.coc_item.other_dinero = priceDinero
-      this.coc_item.other = this.coc_item.other_dinero.toFormat('0.00')
-      this.coc_item.other_currency = this.coc_item.other_dinero.getCurrency()
+    otherPriceChanged(priceDinero) {
+      this.coc_item.setPriceField('price_other', priceDinero)
       this.updateTotals()
     },
     updateTotals() {
-      this.coc_item = this.updateUserTotals()
-      this.total = this.getItemsTotal([this.coc_item])
-      this.totalVAT = this.getItemsTotalVAT([this.coc_item])
-    },
-    updateUserTotals() {
-      let item = this.coc_item
-      const price = this.getPrice(item)
-      const currency = this.getCurrency(item)
-      const total = price.multiply(item.amount)
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (item.margin_perc > 0) {
-        margin = total.multiply(item.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(item.vat_type)/100)
-      item.currency = currency
-      item.total = total_with_margin
-      item.vat = vat
-      item.margin = margin
+      this.costService.updateTotals(
+        this.getPrice,
+        this.getCurrency
+      )
 
-      return item
+      this.total = this.costService.getItemsTotal()
+      this.totalVAT = this.costService.getItemsTotalVAT()
     },
   }
 }
 </script>
 
 <style scoped>
-
+.save-collection {
+  padding-top: 10px;
+}
 </style>

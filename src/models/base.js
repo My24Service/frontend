@@ -1,5 +1,9 @@
 import client from '@/services/api'
 
+class VoidModel {
+  constructor(data) {}
+}
+
 class BaseModel {
   axios = client
   component = null
@@ -14,6 +18,73 @@ class BaseModel {
   count = 0
   numPages = 0
   perPage = 20
+
+  model = VoidModel
+  collection = []
+  deletedItems = []
+  editIndex = null
+  isEdit = false
+  editPk = null
+  editItem = null
+
+  // TODO: finish this for adding items in quotation form
+  // TODO: also implement this for orderlines/infolines/etc
+  deleteCollectionItem(index) {
+    this.deletedItems.push(this.collection[index])
+    this.collection.splice(index, 1)
+  }
+  editCollectionItem(item, index) {
+    this.editIndex = index
+    this.isEdit = true
+
+    this.editItem = item
+  }
+  emptyCollectionItem() {
+    this.editItem = new this.model({})
+    this.editPk = null
+  }
+  doEditCollectionItem() {
+    const newItem = new this.model({
+      ...this.editItem
+    })
+    this.collection.splice(this.editIndex, 1, newItem)
+    this.editIndex = null
+    this.isEdit = false
+    this.emptyCollectionItem()
+  }
+  addCollectionItem() {
+    this.collection.push(new this.model({
+      ...this.editItem
+    }))
+    this.emptyCollectionItem()
+  }
+
+  async emptyCollection() {
+    for (let item of this.collection) {
+      if (item.id) {
+        await this.delete(item.id)
+      }
+    }
+  }
+
+  async updateCollection() {
+    // create/update
+    for (let item of this.collection) {
+      if (item.id) {
+        await this.update(item.id, item)
+      } else {
+        await this.insert(item)
+      }
+    }
+
+    // deleted items
+    for (const item of this.deletedItems) {
+      if (item.id) {
+        await this.delete(item.id)
+      }
+    }
+  }
+  // end TODO
 
   getFields() {
     return this.postCopyFields(JSON.parse(JSON.stringify(this.fields)))

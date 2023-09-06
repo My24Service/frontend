@@ -95,10 +95,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateMaterial(material.id) }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -135,10 +136,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateEngineer(user.id) }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -175,10 +177,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateCustomer() }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -200,10 +203,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateCustomer() }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -225,10 +229,11 @@
                 <p class="flex">
                   <b-button
                     @click="() => { updateCustomer() }"
-                    class="btn btn-primary update-button"
+                    class="btn btn-danger update-button"
                     size="sm"
                     type="button"
-                    variant="primary"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
                   >
                     {{ $trans("Update") }}
                   </b-button>
@@ -241,8 +246,10 @@
         <hr/>
 
         <MaterialsComponent
+          :order_pk="order_pk"
           :customer="customer"
           :material_models="material_models"
+          :engineer_models="engineer_models"
           :used_materials="used_materials"
           @invoiceLinesCreated="materialsInvoiceLinesCreated"
         />
@@ -250,6 +257,7 @@
         <hr/>
 
         <HoursComponent
+          :order_pk="order_pk"
           :type="HOURS_TYPE_WORK"
           :hours_total="activity_totals.work_total"
           :user_totals="activity_totals.user_totals"
@@ -261,6 +269,7 @@
         <hr/>
 
         <HoursComponent
+          :order_pk="order_pk"
           :type="HOURS_TYPE_TRAVEL"
           :hours_total="activity_totals.travel_total"
           :user_totals="activity_totals.user_totals"
@@ -272,6 +281,7 @@
         <hr/>
 
         <DistanceComponent
+          :order_pk="order_pk"
           :customer="customer"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
@@ -283,9 +293,10 @@
         <hr/>
 
         <HoursComponent
+          :order_pk="order_pk"
           :type="HOURS_TYPE_EXTRA_WORK"
-          :hours_total="extra_work_totals.hours_total"
-          :user_totals="extra_work_totals.user_totals"
+          :hours_total="activity_totals.extra_work_total"
+          :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="extraWorkInvoiceLinesCreated"
@@ -294,9 +305,10 @@
         <hr/>
 
         <HoursComponent
+          :order_pk="order_pk"
           :type="HOURS_TYPE_ACTUAL_WORK"
-          :hours_total="actual_work_totals.hours_total"
-          :user_totals="actual_work_totals.user_totals"
+          :hours_total="activity_totals.actual_work_total"
+          :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="actualWorkInvoiceLinesCreated"
@@ -305,6 +317,7 @@
         <hr/>
 
         <CallOutCostsComponent
+          :order_pk="order_pk"
           :customer="customer"
           :invoice_default_call_out_costs="invoice_default_call_out_costs"
           @invoiceLinesCreated="callOutCostsInvoiceLinesCreated"
@@ -431,9 +444,8 @@ export default {
       invoice: invoiceService.getFields(),
       errorMessage: null,
 
-      order: null,
-      member: null,
       invoice_id: null,
+      order_pk: null,
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
@@ -477,12 +489,9 @@ export default {
       this.customerPk = invoiceData.customer_pk
       await this.getCustomer()
 
-      this.order = invoiceData.order
-      this.member = invoiceData.member
       this.invoice_id = invoiceData.invoice_id
+      this.order_pk = invoiceData.order_pk
 
-      this.extra_work_totals = invoiceData.extra_work_totals
-      this.actual_work_totals = invoiceData.actual_work_totals
       this.activity_totals = invoiceData.activity_totals
 
       this.material_models = invoiceData.material_models

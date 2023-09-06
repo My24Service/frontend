@@ -4,38 +4,52 @@
   >
     <b-container fluid>
       <b-row>
-        <b-col cols="2" class="header">
-          {{ $trans("Engineer") }}
+        <b-col cols="2">
+          <HeaderCell
+          :text='$trans("Engineer")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("To") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("To")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Back") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Back")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Total") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Total")'
+          />
         </b-col>
-        <b-col cols="3" class="header">
-          {{ $trans("Rate") }}
+        <b-col cols="3">
+          <HeaderCell
+            :text='$trans("Rate")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("Margin") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Margin")'
+          />
         </b-col>
-        <b-col cols="1" class="header">
-          {{ $trans("VAT type") }}
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("VAT type")'
+          />
         </b-col>
         <b-col cols="2" />
       </b-row>
-      <b-row v-for="distance in distanceTotals" :key="distance.user_id" class="material_row">
+      <b-row v-for="distance in costService.collection" :key="distance.user_id" class="distance_row">
         <b-col cols="2">
           {{ getFullname(distance.user_id) }}
         </b-col>
         <b-col cols="1">
-          {{ distance.distance_to_total }}
+          {{ distance.distance_to }}
         </b-col>
         <b-col cols="1">
-          {{ distance.distance_back_total }}
+          {{ distance.distance_back }}
         </b-col>
         <b-col cols="1">
           {{ distance.distance_total }}
@@ -43,7 +57,7 @@
         <b-col cols="3">
           <b-form-radio-group
             @change="updateTotals"
-            v-model="distance.usePrice"
+            v-model="distance.use_price"
           >
             <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
               {{ $trans('Settings') }}
@@ -59,9 +73,9 @@
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
-                  v-model="distance.price_per_km_other"
-                  :currency="distance.price_per_km_other_currency"
-                  @priceChanged="(val) => setPriceOther(val, distance.user_id) && updateDistanceTotals()"
+                  v-model="distance.price_other"
+                  :currency="distance.price_other_currency"
+                  @priceChanged="(val) => otherPriceChanged(val, distance)"
                 />
               </p>
             </b-form-radio>
@@ -78,9 +92,9 @@
         </b-col>
         <b-col cols="2">
           <Totals
-            :total="distance.total"
-            :margin="distance.margin"
-            :vat="distance.vat"
+            :total="distance.total_dinero"
+            :margin="distance.margin_dinero"
+            :vat="distance.vat_dinero"
           />
         </b-col>
       </b-row>
@@ -111,15 +125,17 @@ import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 import {
   OPTION_DISTANCE_TOTALS, OPTION_NONE,
-  OPTION_USER_TOTALS
+  OPTION_USER_TOTALS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER, USE_PRICE_SETTINGS
 } from "./constants";
 import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import MarginInput from "./MarginInput";
-import EngineerPriceRadio from "./EngineerPriceRadio";
 import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
+import CostService, {
+  COST_TYPE_DISTANCE,
+} from "../../../models/orders/Cost";
 
 export default {
   name: "DistanceComponent",
@@ -131,11 +147,14 @@ export default {
     Collapse,
     HeaderCell,
     VAT,
-    EngineerPriceRadio,
     MarginInput,
     TotalRow,
   },
   props: {
+    order_pk: {
+      type: [Number],
+      default: null
+    },
     user_totals: {
       type: [Array],
       default: null
@@ -159,8 +178,7 @@ export default {
   },
   data() {
     return {
-
-      distanceTotals: null,
+      costService: new CostService(),
 
       total: null,
       totalVAT: null,
@@ -171,11 +189,13 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
+      created_by: this.$store.getters.getUserPk,
+      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       usePriceOptions: {
-        USE_PRICE_SETTINGS: 'settings',
-        USE_PRICE_CUSTOMER: 'customer',
-        USE_PRICE_OTHER: 'other',
+        USE_PRICE_SETTINGS,
+        USE_PRICE_CUSTOMER,
+        USE_PRICE_OTHER,
       },
 
       useOnInvoiceOptions: [
@@ -184,36 +204,51 @@ export default {
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
+
+      tableFields: [
+        {key: 'user_full_name', label: this.$trans('User')},
+        {key: 'amount_int', label: this.$trans('Amount')},
+        {key: 'use_price', label: this.$trans('Use price')},
+        {key: 'margin_dinero', label: this.$trans('Margin')},
+        {key: 'vat_type', label: this.$trans('VAT type')},
+        {key: 'vat_dinero', label: this.$trans('VAT')},
+        {key: 'total_dinero', label: this.$trans('Total')},
+      ]
     }
   },
   created() {
+    // set vars in service
+    this.costService.invoice_default_margin = this.invoice_default_margin
+    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_currency = this.default_currency
+
     this.invoice_default_price_per_km_dinero = toDinero(
       this.invoice_default_price_per_km,
       this.default_currency
     )
 
-    this.distanceTotals = this.user_totals.map((a) => ({
-      user_id: a.user_id,
-      distance_to_total: a.distance_to_total,
-      distance_back_total: a.distance_back_total,
-      distance_total: a.distance_total,
-      vat_type: this.invoice_default_vat,
-      margin_perc: this.invoice_default_margin,
-      price_per_km_other: "0.00",
-      price_per_km_other_currency: this.default_currency,
-      price_per_km_other_dinero: toDinero("0.00", this.default_currency),
-      usePrice: this.usePriceOptions.USE_PRICE_SETTINGS,
-    }))
+    // map input to Cost model collection
+    this.costService.collection = this.user_totals.map((activity) => (
+      this.costService.newModelFromDistance(
+        activity,
+        this.getPrice({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+        this.getCurrency({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+        this.getDefaultProps()
+      )))
     this.updateTotals()
-
   },
   methods: {
-    setPriceOther(priceDinero, user_id) {
-      let model = this.distanceTotals.find((a) => a.user_id === user_id)
-      model.price_per_km_other_dinero = priceDinero
-      model.price_per_km_other = model.price_per_km_other_dinero.toFormat('0.00')
-      model.price_per_km_other_currency = model.price_per_km_other_dinero.getCurrency()
-      return true
+    getDefaultProps() {
+      return {
+        created_by: this.created_by,
+        created_by_is_admin: this.created_by_is_admin,
+        order: this.order_pk,
+        use_price: this.usePriceOptions.USE_PRICE_SETTINGS
+      }
+    },
+    otherPriceChanged(priceDinero, distance) {
+      distance.setPriceField('price_other', priceDinero)
+      this.updateTotals()
     },
     getPriceFor(type) {
       switch (type) {
@@ -222,55 +257,41 @@ export default {
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km_dinero
         default:
-          throw `getPrice: unknown usePrice: ${type}`
+          throw `getPrice: unknown use_price: ${type}`
       }
     },
     getPrice(distance) {
-      switch (distance.usePrice) {
+      switch (distance.use_price) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.invoice_default_price_per_km_dinero
+          return this.invoice_default_price_per_km
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
-          return this.customer.price_per_km_dinero
+          return this.customer.price_per_km
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return distance.price_per_km_other_dinero
+          return distance.price_other
         default:
-          throw `getPrice: unknown usePrice: ${distance.usePrice}`
+          throw `getPrice: unknown use_price: ${distance.use_price}`
       }
     },
     getCurrency(distance) {
-      switch (distance.usePrice) {
+      switch (distance.use_price) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
           return this.default_currency
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km_currency
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return distance.price_per_km_other_currency
+          return distance.price_other_currency
         default:
-          throw `getCurrency: unknown usePrice: ${distance.usePrice}`
+          throw `getCurrency: unknown use_price: ${distance.use_price}`
       }
     },
     updateTotals() {
-      this.distanceTotals = this.distanceTotals.map((m) => this.updateUserTotals(m))
-      this.total = this.getItemsTotal(this.distanceTotals)
-      this.totalVAT = this.getItemsTotalVAT(this.distanceTotals)
-    },
-    updateUserTotals(distance) {
-      const price = this.getPrice(distance)
-      const currency = this.getCurrency(distance)
-      const total = price.multiply(distance.distance_total)
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (distance.margin_perc > 0) {
-        margin = total.multiply(distance.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(distance.vat_type)/100)
-      distance.currency = currency
-      distance.total = total_with_margin
-      distance.vat = vat
-      distance.margin = margin
+      this.costService.updateTotals(
+        this.getPrice,
+        this.getCurrency
+      )
 
-      return distance
+      this.total = this.costService.getItemsTotal()
+      this.totalVAT = this.costService.getItemsTotalVAT()
     },
   },
 }
