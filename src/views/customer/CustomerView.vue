@@ -6,103 +6,158 @@
           <h3>
             <b-icon icon="building"></b-icon>
             <router-link :to="{name: 'customer-list'}">Customers</router-link>
-            / {{ customer.name }}
           </h3>
+          <div class="flex-columns">
+          <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
+            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit customer') }}
+          </router-link>
+        </div>
         </div>
       </header>
+
       <div class="page-detail customer-details" v-if="!isCustomer">
-        <div class="flex-columns">
-          <div class="panel">
-            <h6>{{ $trans('info')}}</h6>
+        <div class='flex-columns'>
+          <div class="panel sidebar">
+            <h3>{{ customer.name }}</h3>
             <dl>
               <dt>Address</dt>
               <dd>
                 <address>
-                  {{ customer.address }} <br>
-                  {{ customer.postal }} <br>
-                  {{ customer.city }} {{  customer.country_code }}
+                  {{ customer.address }}, {{ customer.city }} {{  customer.country_code }},
+                  {{ customer.postal.toUpperCase() }}
                 </address>
               </dd>
+
+              <dt>{{ $trans('Contact') }}</dt>
+              <dd>
+                {{ customer.contact }} <br />
+                {{ customer.email || '(email unknown)' }} <br>
+                <span v-if="customer.tel">{{ customer.tel }} <br></span>
+                <span v-if="customer.mobile">{{ customer.mobile }}</span>
+              </dd>
+
               <dt>Customer ID</dt>
               <dd>{{ customer.id }}</dd>
+
               <dt v-if="customer.external_identifier">Ext. ID</dt>
               <dd v-if="customer.external_identifier">{{ customer.external_identifier }}</dd>
+              <dt :v-if="customer.remarks.trim()">{{ $trans('Remarks') }}</dt>
+              <dd v-if="customer.remarks">{{ customer.remarks }}</dd>
             </dl>
-          </div>
-          <div class="panel">
-            <h6>{{ $trans('Contact') }}</h6>
-            <dl>
-              <dt>{{ customer.contact }}</dt>
-              <dd>
-                {{ customer.email || '(email unknown)' }} <br>
-                {{ customer.tel }} <br>
-                {{ customer.mobile }}
-              </dd>
-            </dl>
-          </div>
-          <div class="panel">
-            <h6>{{ $trans('Remarks') }}</h6>
-            <p>{{ customer.remarks }}</p>
-          </div>
-        </div>
-      </div>
 
-      <div class="page-detail flex-columns">
-        <div class="panel">
+          </div>
 
-          <h6>{{ $trans("Maintenance contracts") }}</h6>
-          <b-table
-              id="customer-maintenance-contracts-table"
-              small
-              :busy='isLoading'
-              :fields="maintenanceContractFields"
-              :items="maintenanceContracts"
-              responsive="md"
-              class="data-table"
-            >
-              <template #cell(contract)="data">
-                <b-row>
-                  <b-col cols="5">
-                    <table class="totals">
-                      <tr>
-                        <td><strong>{{ $trans('Name') }}:</strong></td>
-                        <td>{{ data.item.name }}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>{{ $trans('Contract value') }}:</strong></td>
-                        <td>EUR {{ data.item.contract_value }}</td>
-                      </tr>
-                    </table>
-                  </b-col>
-                  <b-col cols="4">
-                    <table class="totals">
-                      <tr>
-                        <td><strong>{{ $trans('Created orders') }}</strong></td>
-                        <td>{{ data.item.created_orders}}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
-                        <td>{{ data.item.num_order_equipment}}</td>
-                      </tr>
-                    </table>
-                  </b-col>
-                  <b-col cols="3">
-                    <div class="float-right">
+          <div class="panel col-2-3">
+            <b-tabs>
+              <b-tab :title="$trans('Orders')">
+                <!-- <h6>Orders</h6> -->
+                <div class="overflow-auto">
+                  <ul class="listing order-list">
+                    <li v-for="item in orders" :key="item.id">
+                      <OrderTableInfo
+                        v-bind:order="item"
+                      />
+                    </li>
+                  </ul>
+
+                  <SearchModal
+                    id="search-modal"
+                    ref="search-modal"
+                    @do-search="handleSearchOk"
+                  />
+
+                  <b-pagination
+                    v-if="orderService.count > 20"
+                    class="pt-4"
+                    v-model="currentPage"
+                    :total-rows="orderService.count"
+                    :per-page="orderService.perPage"
+                    aria-controls="customer-orders-table"
+                  ></b-pagination>
+
+                  <b-table
+                    id="customer-orders-table"
+                    small
+                    :busy='isLoading'
+                    :fields="orderFields"
+                    :items="orders"
+                    responsive="md"
+                    class="data-table"
+                  >
+                    <template #head(icons)="">
+                      <div class="float-right">
+                        <b-button-toolbar>
+                          <b-button-group class="mr-1">
+                            <ButtonLinkRefresh
+                              v-bind:method="function() { loadData() }"
+                              v-bind:title="$trans('Refresh')"
+                            />
+                            <ButtonLinkSearch
+                              v-bind:method="function() { showSearchModal() }"
+                            />
+                          </b-button-group>
+                        </b-button-toolbar>
+                      </div>
+                    </template>
+                    <template #table-busy>
+                      <div class="text-center text-danger my-2">
+                        <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+                        <strong>{{ $trans('Loading...') }}</strong>
+                      </div>
+                    </template>
+                    <template #cell(id)="data">
+                      <OrderTableInfo
+                        v-bind:order="data.item"
+                      />
+                    </template>
+                  </b-table>
+
+                </div>
+              </b-tab>
+              <b-tab :title="$trans('Equipment')">
+                <span class="button-container">
+                  <b-button
+                    class="btn btn-outline-secondary"
+                    :to="{name: 'customers-equipment-add'}"
+                    size="sm"
+                    type="button"
+                    variant="outline-secondary"
+                  >
+                    {{ $trans('Add equipment') }}
+                  </b-button>
+                </span>
+                <span class="button-container">
+                  <b-button
+                    class="btn btn-outline-secondary"
+                    :to="{name: 'customers-equipment-list'}"
+                    size="sm"
+                    type="button"
+                    variant="outline-secondary"
+                  >
+                    {{ $trans('Manage equipment') }}
+                  </b-button>
+                </span>
+                <hr/>
+                <b-table
+                  id="customer-equipment-table"
+                  small
+                  :busy='isLoading'
+                  :fields="equipmentFields"
+                  :items="equipment"
+                  responsive="md"
+                  class="data-table"
+                >
+                  <template #cell(customer)="data">
+                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                  </template>
+                  <template #cell(branch)="data">
+                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                  </template>
+                  <template #cell(icons)="data">
+                    <div class="h2 float-right">
                       <span class="button-container">
                         <b-button
-                          class="btn btn-outline-primary"
-                          :to="{name: 'order-add-maintenance'}"
-                          size="sm"
-                          type="button"
-                          variant="outline-primary"
-                        >
-                          {{ $trans('Create order') }}
-                        </b-button>
-                      </span>
-
-                      <span class="button-container">
-                        <b-button
-                          :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}"
+                          :to="{name: 'customers-equipment-edit', params: {pk: data.item.id}}"
                           class="btn btn-outline-secondary"
                           size="sm"
                           type="button"
@@ -112,105 +167,78 @@
                         </b-button>
                       </span>
                     </div>
-                  </b-col>
-                </b-row>
-              </template>
-          </b-table>
-          <h6>Orders</h6>
-          <div class="overflow-auto">
-            <ul class="listing order-list">
-              <li v-for="item in orders" :key="item.id">
-                <OrderTableInfo
-                  v-bind:order="item"
-                />
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="panel">
-          <!-- Stats -->
-          <OrderStats
-            v-if="!isLoading"
-            ref="order-stats"
-          />
-        </div>
-      </div>
+                  </template>
+                </b-table>
+              </b-tab>
+              <b-tab :title="$trans('Maintenance contracts')">
+                <!-- <h6>{{ $trans("Maintenance contracts") }}</h6> -->
+                <b-table
+                    id="customer-maintenance-contracts-table"
+                    small
+                    :busy='isLoading'
+                    :fields="maintenanceContractFields"
+                    :items="maintenanceContracts"
+                    responsive="md"
+                    class="data-table"
+                  >
+                    <template #cell(contract)="data">
+                      <b-row>
+                        <b-col cols="5">
+                          <table class="totals">
+                            <tr>
+                              <td><strong>{{ $trans('Name') }}:</strong></td>
+                              <td>{{ data.item.name }}</td>
+                            </tr>
+                            <tr>
+                              <td><strong>{{ $trans('Contract value') }}:</strong></td>
+                              <td>EUR {{ data.item.contract_value }}</td>
+                            </tr>
+                          </table>
+                        </b-col>
+                        <b-col cols="4">
+                          <table class="totals">
+                            <tr>
+                              <td><strong>{{ $trans('Created orders') }}</strong></td>
+                              <td>{{ data.item.created_orders}}</td>
+                            </tr>
+                            <tr>
+                              <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
+                              <td>{{ data.item.num_order_equipment}}</td>
+                            </tr>
+                          </table>
+                        </b-col>
+                        <b-col cols="3">
+                          <div class="float-right">
+                            <span class="button-container">
+                              <b-button
+                                class="btn btn-outline-primary"
+                                :to="{name: 'order-add-maintenance'}"
+                                size="sm"
+                                type="button"
+                                variant="outline-primary"
+                              >
+                                {{ $trans('Create order') }}
+                              </b-button>
+                            </span>
 
-      <div class="panel">
-        <!-- Maintenance contracts -->
-        <div class="app-grid" v-if="!isCustomer">
-        <b-row align-h="center">
-          <b-col cols="10">
-            <b-row align-h="center">
-              <h3>{{ $trans("Maintenance contracts") }}</h3>
-            </b-row>
-            <b-table
-              id="customer-maintenance-contracts-table"
-              small
-              :busy='isLoading'
-              :fields="maintenanceContractFields"
-              :items="maintenanceContracts"
-              responsive="md"
-              class="data-table"
-            >
-              <template #cell(contract)="data">
-                <b-row>
-                  <b-col cols="5">
-                    <table class="totals">
-                      <tr>
-                        <td><strong>{{ $trans('Name') }}:</strong></td>
-                        <td>{{ data.item.name }}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>{{ $trans('Contract value') }}:</strong></td>
-                        <td>EUR {{ data.item.contract_value }}</td>
-                      </tr>
-                    </table>
-                  </b-col>
-                  <b-col cols="4">
-                    <table class="totals">
-                      <tr>
-                        <td><strong>{{ $trans('Created orders') }}</strong></td>
-                        <td>{{ data.item.created_orders}}</td>
-                      </tr>
-                      <tr>
-                        <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
-                        <td>{{ data.item.num_order_equipment}}</td>
-                      </tr>
-                    </table>
-                  </b-col>
-                  <b-col cols="3">
-                    <div class="float-right">
-                      <span class="button-container">
-                        <b-button
-                          class="btn btn-outline-primary"
-                          :to="{name: 'order-add-maintenance'}"
-                          size="sm"
-                          type="button"
-                          variant="outline-primary"
-                        >
-                          {{ $trans('Create order') }}
-                        </b-button>
-                      </span>
-
-                      <span class="button-container">
-                        <b-button
-                          :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}"
-                          class="btn btn-outline-secondary"
-                          size="sm"
-                          type="button"
-                          variant="outline-secondary"
-                        >
-                          {{ $trans('Edit') }}
-                        </b-button>
-                      </span>
-                    </div>
-                  </b-col>
-                </b-row>
-              </template>
-            </b-table>
-            <b-row align-h="end">
-              <span class="button-container">
+                            <span class="button-container">
+                              <b-button
+                                :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}"
+                                class="btn btn-outline-secondary"
+                                size="sm"
+                                type="button"
+                                variant="outline-secondary"
+                              >
+                                {{ $trans('Edit') }}
+                              </b-button>
+                            </span>
+                          </div>
+                        </b-col>
+                      </b-row>
+                    </template>
+                </b-table>
+                <hr/>
+                <span class="button-container">
                 <b-button
                   class="btn btn-outline-secondary"
                   :to="{name: 'maintenance-contract-add'}"
@@ -218,7 +246,7 @@
                   type="button"
                   variant="outline-secondary"
                 >
-                  {{ $trans('New') }}
+                  {{ $trans('Add contract') }}
                 </b-button>
               </span>
               <span class="button-container">
@@ -229,203 +257,83 @@
                   type="button"
                   variant="outline-secondary"
                 >
-                  {{ $trans('Manage >>') }}
+                  {{ $trans('Manage contracts') }}
                 </b-button>
               </span>
-            </b-row>
-          </b-col>
-        </b-row>
+              </b-tab>
+              <b-tab :title="$trans('Locations')">
+                <b-table
+                  id="customer-location-table"
+                  small
+                  :busy='isLoading'
+                  :fields="locationFields"
+                  :items="locations"
+                  responsive="md"
+                  class="data-table">
+                  <template #cell(customer)="data">
+                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                  </template>
+                  <template #cell(branch)="data">
+                    {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+                  </template>
+                  <template #cell(icons)="data">
+                    <div class="h2 float-right">
+                      <span class="button-container">
+                        <b-button
+                          :to="{name: 'customers-location-edit', params: {pk: data.item.id}}"
+                          class="btn btn-outline-secondary"
+                          size="sm"
+                          type="button"
+                          variant="outline-secondary"
+                        >
+                          {{ $trans('Edit') }}
+                        </b-button>
+                      </span>
+                    </div>
+                  </template>
+                </b-table>
+                <b-row align-h="end">
+                  <span class="button-container">
+                    <b-button
+                      class="btn btn-outline-secondary"
+                      :to="{name: 'customers-location-add'}"
+                      size="sm"
+                      type="button"
+                      variant="outline-secondary"
+                    >
+                      {{ $trans('New') }}
+                    </b-button>
+                  </span>
+                  <span class="button-container">
+                    <b-button
+                      class="btn btn-outline-secondary"
+                      :to="{name: 'customers-location-list'}"
+                      size="sm"
+                      type="button"
+                      variant="outline-secondary"
+                    >
+                      {{ $trans('Manage >>') }}
+                    </b-button>
+                  </span>
+                </b-row>
+              </b-tab>
+              <b-tab title="Insights" key="stats">
+                <OrderStats
+                  v-if="!isLoading"
+                  ref="order-stats"
+                />
+              </b-tab>
+            </b-tabs>
+          </div>
         </div>
-      </div>
-      <!-- Equipment -->
-      <div class="app-grid">
-        <b-row align-h="center">
-          <b-col cols="6">
-            <b-row align-h="center">
-              <h3>{{ $trans("Equipment") }}</h3>
-            </b-row>
-            <b-table
-              id="customer-equipment-table"
-              small
-              :busy='isLoading'
-              :fields="equipmentFields"
-              :items="equipment"
-              responsive="md"
-              class="data-table"
-            >
-              <template #cell(customer)="data">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </template>
-              <template #cell(branch)="data">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </template>
-              <template #cell(icons)="data">
-                <div class="h2 float-right">
-                  <span class="button-container">
-                    <b-button
-                      :to="{name: 'customers-equipment-edit', params: {pk: data.item.id}}"
-                      class="btn btn-outline-secondary"
-                      size="sm"
-                      type="button"
-                      variant="outline-secondary"
-                    >
-                      {{ $trans('Edit') }}
-                    </b-button>
-                  </span>
-                </div>
-              </template>
-            </b-table>
-            <b-row align-h="end">
-              <span class="button-container">
-                <b-button
-                  class="btn btn-outline-secondary"
-                  :to="{name: 'customers-equipment-add'}"
-                  size="sm"
-                  type="button"
-                  variant="outline-secondary"
-                >
-                  {{ $trans('New') }}
-                </b-button>
-              </span>
-              <span class="button-container">
-                <b-button
-                  class="btn btn-outline-secondary"
-                  :to="{name: 'customers-equipment-list'}"
-                  size="sm"
-                  type="button"
-                  variant="outline-secondary"
-                >
-                  {{ $trans('Manage >>') }}
-                </b-button>
-              </span>
-            </b-row>
-          </b-col>
-          <b-col cols="6">
-            <b-row align-h="center">
-              <h3>{{ $trans("Locations") }}</h3>
-            </b-row>
-            <b-table
-              id="customer-location-table"
-              small
-              :busy='isLoading'
-              :fields="locationFields"
-              :items="locations"
-              responsive="md"
-              class="data-table"
-            >
-              <template #cell(customer)="data">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </template>
-              <template #cell(branch)="data">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </template>
-              <template #cell(icons)="data">
-                <div class="h2 float-right">
-                  <span class="button-container">
-                    <b-button
-                      :to="{name: 'customers-location-edit', params: {pk: data.item.id}}"
-                      class="btn btn-outline-secondary"
-                      size="sm"
-                      type="button"
-                      variant="outline-secondary"
-                    >
-                      {{ $trans('Edit') }}
-                    </b-button>
-                  </span>
-                </div>
-              </template>
-            </b-table>
-            <b-row align-h="end">
-              <span class="button-container">
-                <b-button
-                  class="btn btn-outline-secondary"
-                  :to="{name: 'customers-location-add'}"
-                  size="sm"
-                  type="button"
-                  variant="outline-secondary"
-                >
-                  {{ $trans('New') }}
-                </b-button>
-              </span>
-              <span class="button-container">
-                <b-button
-                  class="btn btn-outline-secondary"
-                  :to="{name: 'customers-location-list'}"
-                  size="sm"
-                  type="button"
-                  variant="outline-secondary"
-                >
-                  {{ $trans('Manage >>') }}
-                </b-button>
-              </span>
-            </b-row>
-          </b-col>
-        </b-row>
+        <!--
+        <footer class="modal-footer">
+          <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
+            {{ $trans('Back') }}</b-button>
+        </footer>
+        -->
       </div>
 
-      <!-- Orders -->
-      <div>
-        <b-row align-h="center">
-          <h3>{{ $trans("Orders") }}</h3>
-        </b-row>
-
-        <SearchModal
-          id="search-modal"
-          ref="search-modal"
-          @do-search="handleSearchOk"
-        />
-
-        <b-pagination
-          v-if="orderService.count > 20"
-          class="pt-4"
-          v-model="currentPage"
-          :total-rows="orderService.count"
-          :per-page="orderService.perPage"
-          aria-controls="customer-orders-table"
-        ></b-pagination>
-
-        <b-table
-          id="customer-orders-table"
-          small
-          :busy='isLoading'
-          :fields="orderFields"
-          :items="orders"
-          responsive="md"
-          class="data-table"
-        >
-          <template #head(icons)="">
-            <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-                  <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
-                  />
-                  <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
-                  />
-                </b-button-group>
-              </b-button-toolbar>
-            </div>
-          </template>
-          <template #table-busy>
-            <div class="text-center text-danger my-2">
-              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-              <strong>{{ $trans('Loading...') }}</strong>
-            </div>
-          </template>
-          <template #cell(id)="data">
-            <OrderTableInfo
-              v-bind:order="data.item"
-            />
-          </template>
-        </b-table>
-      </div>
-
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
     </div>
   </b-overlay>
 </template>
@@ -612,7 +520,11 @@ export default {
 
     async loadHistory() {
       try {
-        const results = await this.orderService.getAllForCustomer(this.pk)
+        if (!this.isCustomer) {
+          this.orderService.setListArgs(`customer_relation=${this.pk}`)
+          console.log('not Customer', this.pk)
+        }
+        const results = await this.orderService.list()
         this.orders = results.results
         this.isLoading = false
       } catch(error) {
@@ -647,5 +559,8 @@ span.button-container {
 p {
   line-height: 1.7;
   padding-top: 0.5rem;
+}
+.flex-columns > .panel {
+  max-width: unset;
 }
 </style>

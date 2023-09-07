@@ -67,7 +67,7 @@
           </div>
         </template>
         <template #cell(id)="data">
-          <div v-if="data.item.branch_view">
+          <div v-if="data.item.branch_view" class="listing-item">
             <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
               {{ data.item.branch_view.name }}, {{ data.item.branch_view.city }}, {{ data.item.branch_view.country_code }}
               (<span class="branch">{{ $trans("Branch") }}</span>)
@@ -88,45 +88,29 @@
                 <b>{{ $trans('Mobile') }}</b>: {{ data.item.branch_view.mobile }}<br/>
             </span>
           </div>
-          <div v-if="!data.item.branch_view">
-            <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
-              {{ data.item.name }}, {{ data.item.city }}, {{ data.item.country_code }}
-            </router-link><br/>
-            {{ $trans('Customer ID') }}: {{ data.item.customer_id }}<br/>
-            {{ data.item.address }}<br/>
-            {{ data.item.country_code }}-{{ data.item.postal }}<br/>
-            <span v-if="data.item.contact && data.item.contact.trim() !== ''">
-                <b>{{ $trans('Contact') }}</b>: {{ data.item.contact }}<br/>
-            </span>
-              <span v-if="data.item.email">
-              {{ $trans('Email') }}: <b-link class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.email }}</b-link><br/>
-              </span>
-              <span v-if="data.item.tel && data.item.tel.trim() !== ''">
-                  <b>{{ $trans('Tel') }}</b>: {{ data.item.tel }}<br/>
-              </span>
-              <span v-if="data.item.mobile && data.item.mobile.trim() !== ''">
-                <b>{{ $trans('Mobile') }}</b>: {{ data.item.mobile }}<br/>
-              </span>
-          </div>
-          <span v-if="data.item.remarks && data.item.remarks.trim() != ''">
-            <b>{{ $trans('Remarks') }}</b>: {{ data.item.remarks }}<br/>
+          <span v-if="!data.item.branch_view" class="listing-item" :title="`${$trans('Customer ID:')} ${data.item.customer_id}`" >
+            <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">{{ data.item.name }}</router-link>
           </span>
+          
           <span v-if="data.item.maintenance_contract && data.item.maintenance_contract.trim() != ''">
-            <b>{{ $trans('Maintenance contract') }}</b>: {{ data.item.maintenance_contract }}<br/>
+            &middot; {{ $trans('Maintenance contract') }} <b>{{ data.item.maintenance_contract }}</b>
           </span>
           <span v-if="data.item.standard_hours_txt !== '0:00'">
-            <b>{{ $trans('Standard hours') }}</b>: {{ data.item.standard_hours_txt }}<br/>
+            &middot; <b>{{ data.item.standard_hours_txt }}</b>{{ $trans('Standard hours') }}
           </span>
           <b-row>
-            <b-col cols="12" v-if="data.item.documents.length > 0">
-              <b>{{ $trans('Documents') }}</b>:
-              <span v-for="item in data.item.documents" :key="item.file">
-                <b-link v-bind:href="item.url" target="_blank">
-                  {{ item.name }} <b-icon-download font-scale="1"></b-icon-download>
-                </b-link>&nbsp;
-              </span>
-            </b-col>
+            
           </b-row>
+        </template>
+        <template #cell(remarks)="data">
+          <span v-if="data.item.remarks && data.item.remarks.trim() != ''" class="dimmed" :title="data.item.remarks">
+            <b-icon icon="info-square"></b-icon>
+          </span>
+          {{ data.item.remarks }}
+        </template>
+
+        <template #cell(contact)="data">
+          {{  data.item.contact}}
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -147,12 +131,12 @@
           </div>
         </template>
       </b-table>
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Customer')"
-      />
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Customer')"
+    />
   </div>
 </template>
 
@@ -190,8 +174,11 @@ export default {
       isLoading: false,
       customers: [],
       customerFields: [
-        {key: 'id', label: this.$trans('Company'), sortable: true, thAttr: {width: '75%'}},
-        {key: 'num_orders', label: this.$trans('# orders'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'id', label: this.$trans('Company'), sortable: true },
+        {key: 'city', label: ''},
+        {key: 'num_orders', label: this.$trans('Orders'), sortable: true, },
+        {key: 'remarks', label: this.$trans('Remarks'), tdAttr: {style: 'max-width: 20ch; white-space: pre'}},
+        {key: 'contact', label: this.$trans('Contact')},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
     }

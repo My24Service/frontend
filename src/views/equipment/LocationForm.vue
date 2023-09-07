@@ -209,7 +209,7 @@
                 size="sm"
                 ref="name"
                 :state="isSubmitClicked ? !v$.location.name.$error : null"
-              ></b-form-input>
+              ></b-form-input> 
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.location.name.$error : null">
                 {{ $trans('Please enter a name') }}
