@@ -40,9 +40,10 @@
         <span v-if="order.documents.length" >
           <b-icon icon="paperclip"></b-icon>
         </span>
-        <router-link v-if="isLoaded && order.documents.length" :to="{name: 'order-documents', params: {orderPk: order.id}}" class="order-type">
-          {{ order.documents.length && order.documents.length }} document{{ order.documents.length == 1 ? '' : 's' }}
-        </router-link>
+        <router-link 
+          v-if="isLoaded && order.documents.length"
+          :to="{name: 'order-documents', params: {orderPk: order.id}}"
+          class="order-type">{{ order.documents.length && order.documents.length }} document{{ order.documents.length == 1 ? '' : 's' }}</router-link>
         <span v-else>&ndash;</span>
       </span>
       <span class="order-status">

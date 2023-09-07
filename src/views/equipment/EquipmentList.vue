@@ -47,13 +47,11 @@
           </router-link>
         </template>
         <template #cell(customer)="data">
-          <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}">
-            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link>
+            {{ data.item.customer_branch_view.name }} &middot; {{ data.item.customer_branch_view.city }}
         </template>
         <template #cell(branch)="data">
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
-            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+            {{ data.item.customer_branch_view.name }} &middot; {{ data.item.customer_branch_view.city }}
           </router-link>
         </template>
         <template #cell(icons)="data">

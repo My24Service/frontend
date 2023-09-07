@@ -1,7 +1,10 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>People</h3>
+      <div class='page-title'>
+        <h3><b-icon icon="people"></b-icon>People</h3>
+        <b-link :to="{name: 'engineer-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add engineer</b-link>
+      </div>
     </header>
     
 
@@ -83,13 +86,13 @@
           </div>
         </template>
       </b-table>
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Engineer')"
-      />
-
     </div>
+
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Engineer')"
+    />
   </div>
 </template>
 

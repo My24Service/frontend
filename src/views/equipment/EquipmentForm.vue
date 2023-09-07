@@ -378,7 +378,7 @@
 <style scoped>
 .wide {
   min-width: 66%;
-  max-width: unset;
+  max-width: unset !important;
 }
 </style>
 

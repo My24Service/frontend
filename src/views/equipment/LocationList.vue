@@ -45,17 +45,17 @@
         <template #cell(name)="data">
           <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
             {{ data.item.name }}
-          </router-link><br/>
+          </router-link>
         </template>
         <template #cell(customer)="data">
-          <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
-            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link><br/>
+          <!-- <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}"> -->
+            {{ data.item.customer_branch_view.name }} &middot; {{ data.item.customer_branch_view.city }}
+          <!-- </router-link> -->
         </template>
         <template #cell(branch)="data">
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
-            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link><br/>
+            {{ data.item.customer_branch_view.name }} &middot; {{ data.item.customer_branch_view.city }}
+          </router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
