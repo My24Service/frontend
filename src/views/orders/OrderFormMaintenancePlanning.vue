@@ -105,7 +105,7 @@
     <div class='page-detail'>
 
       <div class='flex-columns'>
-        <div class='panel'>
+        <div class='panel col-1-3'>
             <h6>Order details</h6>
             <b-form-group
               label-size="sm"
@@ -565,7 +565,7 @@
           </div>
 
         </div>
-        <div class='panel'>
+        <div class='panel col-1-3'>
           <!-- order start/end times -->
             <h6>Planning</h6>
             <div class='flex-columns'>
@@ -651,7 +651,7 @@
               </b-form-group>
             </div>
         </div>
-        <div class='panel'>
+        <div class='panel col-1-3'>
           <h6>contact</h6>
           <b-row>
             <b-col cols="12" role="group" v-if="!hasBranches">

@@ -44,12 +44,12 @@
         </template>
       </b-table>
 
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Activity')"
-      />
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Activity')"
+    />
   </div>
 </template>
 

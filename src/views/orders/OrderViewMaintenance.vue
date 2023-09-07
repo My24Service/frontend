@@ -44,10 +44,10 @@
       </template>
     </b-modal>
     <div class="flex-columns wrap">
-      <div class="panel">
-        <h6>
-          <span><strong>{{ order.order_name }}</strong> <em>{{ order.order_type }}</em></span>
-        </h6>
+      <div class="panel col-1-3">
+        <h3>
+          <span><strong>{{ order.order_type }}</strong> <br><small>{{ order.order_name }}</small></span>
+        </h3>
         <dl>
           <dt>Status</dt>
           <dd>{{ order.last_status }}</dd>
@@ -103,7 +103,7 @@
         </ul>
       </div>
 
-      <div class="panel">
+      <div class="panel col-1-3">
         <h6>Timeline</h6>
         <ul class="listing" style="max-height: 75vh; overflow: auto;">
           <li v-for="status in order.statuses.slice().reverse()" :key="status.id">
@@ -115,7 +115,7 @@
         </ul>
       </div>
 
-      <div class="panel">
+      <div class="panel col-1-3">
         <h6>Contact</h6>
         <p>
           {{ order.order_contact }}<br/>
