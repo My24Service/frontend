@@ -1,4 +1,4 @@
-# my24frontend
+# pt-vue
 
 ## Project setup
 ```
