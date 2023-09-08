@@ -4,44 +4,26 @@
       :title="$trans('Call out costs')"
     >
       <div
-        class="costs=table"
-        v-if="hasStoredData"
+        class="costs-table"
+        v-if="!isLoading && hasStoredData"
       >
-        <b-table
-          small
-          id="document-table"
-          :fields="tableFields"
-          :items="costService.collection"
-          responsive="md"
-          class="data-table"
-        >
-          <template #cell(margin)="data">
-            {{ data.item.margin_dinero.toFormat('$0.00') }} ({{ data.item.margin_perc }}%)
-          </template>
-          <template #cell(vat)="data">
-            {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ data.item.vat_type }}%)
-          </template>
-          <template #cell(total)="data">
-            {{ data.item.total_dinero.toFormat('$0.00') }}
-          </template>
-        </b-table>
+        <CostsTable
+          :collection="costService.collection"
+          :type="costType"
+        />
 
-        <div class="save-collection">
-          <b-container>
-            <b-row>
-              <b-col cols="8"></b-col>
-              <b-col cols="4" class="pull-right">
-                <b-button
-                  @click="() => { emptyCollection() }"
-                  class="btn btn-danger update-button"
-                  type="button"
-                  variant="danger"
-                >
-                  {{ $trans("Remove saved costs") }}
-                </b-button>
-              </b-col>
-            </b-row>
-          </b-container>
+        <CollectionEmptyContainer
+          @buttonClicked="() => { emptyCollection() }"
+        />
+
+        <div class="use-on-invoice-container">
+          <h4>{{ $trans("What to add as invoice lines")}}</h4>
+          <b-form-group>
+            <b-form-radio-group
+              v-model="useOnInvoiceSelected"
+              :options="useOnInvoiceOptions"
+            ></b-form-radio-group>
+          </b-form-group>
         </div>
 
       </div>
@@ -129,37 +111,11 @@
           :total_vat="totalVAT"
         />
 
-        <div class="save-collection">
-          <b-container>
-            <b-row>
-              <b-col cols="8"></b-col>
-              <b-col cols="4" class="pull-right">
-                <p>
-                  <i>{{ $trans('Saving costs will give insights in profit') }}</i>
-                </p>
-                <b-button
-                  @click="() => { saveCollection() }"
-                  class="btn btn-danger update-button"
-                  type="button"
-                  variant="danger"
-                >
-                  {{ $trans("Save costs") }}
-                </b-button>
-              </b-col>
-            </b-row>
-          </b-container>
-        </div>
-      </b-container>
+        <CollectionSaveContainer
+          @buttonClicked="() => { saveCollection() }"
+        />
 
-      <div class="use-on-invoice-container">
-        <h4>{{ $trans("What to add as invoice lines")}}</h4>
-        <b-form-group>
-          <b-form-radio-group
-            v-model="useOnInvoiceSelected"
-            :options="useOnInvoiceOptions"
-          ></b-form-radio-group>
-        </b-form-group>
-      </div>
+      </b-container>
 
     </Collapse>
   </b-overlay>
@@ -169,7 +125,10 @@
 import {toDinero} from "../../../utils";
 import {
   OPTION_CALL_OUT_COSTS_TOTALS,
-  OPTION_NONE, USE_PRICE_CUSTOMER, USE_PRICE_OTHER, USE_PRICE_SETTINGS
+  OPTION_NONE,
+  USE_PRICE_CUSTOMER,
+  USE_PRICE_OTHER,
+  USE_PRICE_SETTINGS
 } from "./constants";
 import PriceInput from "../../../components/PriceInput";
 import Totals from "./Totals";
@@ -180,6 +139,9 @@ import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
 import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
+import CollectionSaveContainer from "./CollectionSaveContainer";
+import CollectionEmptyContainer from "./CollectionEmptyContainer";
+import CostsTable from "./CostsTable";
 
 export default {
   name: "CallOutCostsComponent",
@@ -192,6 +154,9 @@ export default {
     VAT,
     MarginInput,
     TotalRow,
+    CollectionSaveContainer,
+    CollectionEmptyContainer,
+    CostsTable,
   },
   props: {
     order_pk: {
@@ -233,15 +198,8 @@ export default {
         USE_PRICE_OTHER,
       },
 
-      tableFields: [
-        {key: 'amount_int', label: this.$trans('Amount')},
-        {key: 'use_price', label: this.$trans('Use price')},
-        {key: 'margin', label: this.$trans('Margin')},
-        {key: 'vat', label: this.$trans('VAT')},
-        {key: 'total', label: this.$trans('Total')},
-      ],
-
-      hasStoredData: false
+      hasStoredData: false,
+      costType: COST_TYPE_CALL_OUT_COSTS
     }
   },
   async created() {
@@ -287,29 +245,6 @@ export default {
         this.costService.collection.push(this.coc_item)
         this.updateTotals()
       }
-    },
-    async emptyCollection() {
-      this.isLoading = true
-      try {
-        await this.costService.emptyCollection()
-        await this.loadData()
-      } catch (e) {
-        console.log(e)
-        this.errorToast(this.$trans('Error removing costs'))
-      }
-      this.isLoading = false
-    },
-    async saveCollection() {
-      this.isLoading = true
-      try {
-        await this.costService.updateCollection()
-        await this.loadData()
-        this.infoToast(this.$trans('Saved'), this.$trans('Costs saved'))
-      } catch (e) {
-        console.log(e)
-        this.errorToast(this.$trans('Error saving costs'))
-      }
-      this.isLoading = false
     },
     getDefaultProps() {
       return {
