@@ -241,7 +241,7 @@ export default CostService
 export const COST_TYPE_USED_MATERIALS = 'used_materials'
 export const COST_TYPE_WORK_HOURS = 'work_hours'
 export const COST_TYPE_TRAVEL_HOURS = 'travel_hours'
-export const COST_TYPE_DISTANCE = 'distance'
 export const COST_TYPE_EXTRA_WORK = 'extra_work'
 export const COST_TYPE_ACTUAL_WORK = 'actual_work'
+export const COST_TYPE_DISTANCE = 'distance'
 export const COST_TYPE_CALL_OUT_COSTS = 'call_out_costs'

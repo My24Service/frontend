@@ -258,7 +258,7 @@
 
         <HoursComponent
           :order_pk="order_pk"
-          :type="HOURS_TYPE_WORK"
+          :type="COST_TYPE_WORK_HOURS"
           :hours_total="activity_totals.work_total"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
@@ -270,7 +270,7 @@
 
         <HoursComponent
           :order_pk="order_pk"
-          :type="HOURS_TYPE_TRAVEL"
+          :type="COST_TYPE_TRAVEL_HOURS"
           :hours_total="activity_totals.travel_total"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
@@ -294,7 +294,7 @@
 
         <HoursComponent
           :order_pk="order_pk"
-          :type="HOURS_TYPE_EXTRA_WORK"
+          :type="COST_TYPE_EXTRA_WORK"
           :hours_total="activity_totals.extra_work_total"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
@@ -306,7 +306,7 @@
 
         <HoursComponent
           :order_pk="order_pk"
-          :type="HOURS_TYPE_ACTUAL_WORK"
+          :type="COST_TYPE_ACTUAL_WORK"
           :hours_total="activity_totals.actual_work_total"
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
@@ -400,13 +400,13 @@ import MaterialsComponent from "./invoice_form/Materials";
 import CallOutCostsComponent from "./invoice_form/CallOutCosts";
 
 import VAT from "./invoice_form/VAT";
-import {
-  HOURS_TYPE_ACTUAL_WORK,
-  HOURS_TYPE_EXTRA_WORK,
-  HOURS_TYPE_TRAVEL,
-  HOURS_TYPE_WORK,
-} from "./invoice_form/constants";
 import CustomerDetail from "../../components/CustomerDetail";
+import {
+  COST_TYPE_ACTUAL_WORK,
+  COST_TYPE_EXTRA_WORK,
+  COST_TYPE_TRAVEL_HOURS,
+  COST_TYPE_WORK_HOURS
+} from "../../models/orders/Cost";
 
 export default {
   name: 'InvoiceForm',
@@ -434,10 +434,10 @@ export default {
   },
   data () {
     return {
-      HOURS_TYPE_EXTRA_WORK,
-      HOURS_TYPE_ACTUAL_WORK,
-      HOURS_TYPE_WORK,
-      HOURS_TYPE_TRAVEL,
+      COST_TYPE_WORK_HOURS,
+      COST_TYPE_TRAVEL_HOURS,
+      COST_TYPE_EXTRA_WORK,
+      COST_TYPE_ACTUAL_WORK,
 
       isLoading: false,
       submitClicked: false,

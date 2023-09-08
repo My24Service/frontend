@@ -1,121 +1,142 @@
 <template>
-  <Collapse
-    :title="$trans('Distance')"
-  >
-    <b-container fluid>
-      <b-row>
-        <b-col cols="2">
-          <HeaderCell
-          :text='$trans("Engineer")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("To")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("Back")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("Total")'
-          />
-        </b-col>
-        <b-col cols="3">
-          <HeaderCell
-            :text='$trans("Rate")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("Margin")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("VAT type")'
-          />
-        </b-col>
-        <b-col cols="2" />
-      </b-row>
-      <b-row v-for="distance in costService.collection" :key="distance.user_id" class="distance_row">
-        <b-col cols="2">
-          {{ getFullname(distance.user_id) }}
-        </b-col>
-        <b-col cols="1">
-          {{ distance.distance_to }}
-        </b-col>
-        <b-col cols="1">
-          {{ distance.distance_back }}
-        </b-col>
-        <b-col cols="1">
-          {{ distance.distance_total }}
-        </b-col>
-        <b-col cols="3">
-          <b-form-radio-group
-            @change="updateTotals"
-            v-model="distance.use_price"
-          >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
-              {{ $trans('Settings') }}
-              {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-            </b-form-radio>
+  <b-overlay :show="isLoading" rounded="sm">
+    <Collapse
+      :title="$trans('Distance')"
+    >
+      <div
+        class="costs-table"
+        v-if="!isLoading && hasStoredData"
+      >
+        <CostsTable
+          :collection="costService.collection"
+          :type="costType"
+        />
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
-              {{ $trans('Customer') }}
-              {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-            </b-form-radio>
+        <CollectionEmptyContainer
+          @buttonClicked="() => { emptyCollection() }"
+        />
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
-              <p class="flex">
-                {{ $trans("Other") }}:&nbsp;&nbsp;
-                <PriceInput
-                  v-model="distance.price_other"
-                  :currency="distance.price_other_currency"
-                  @priceChanged="(val) => otherPriceChanged(val, distance)"
-                />
-              </p>
-            </b-form-radio>
-          </b-form-radio-group>
-        </b-col>
-        <b-col cols="1">
-          <MarginInput
-            :margin="distance.margin_perc"
-            @inputChanged="(val) => marginChanged(distance, val)"
-          />
-        </b-col>
-        <b-col cols="1">
-          <VAT @vatChanged="(val) => changeVatType(distance, val)" />
-        </b-col>
-        <b-col cols="2">
-          <Totals
-            :total="distance.total_dinero"
-            :margin="distance.margin_dinero"
-            :vat="distance.vat_dinero"
-          />
-        </b-col>
-      </b-row>
-      <TotalRow
-        :items_total="distance_total"
-        :total="total"
-        :total_vat="totalVAT"
-      />
+        <div class="use-on-invoice-container">
+          <h4>{{ $trans("What to add as invoice lines")}}</h4>
+          <b-form-group>
+            <b-form-radio-group
+              v-model="useOnInvoiceSelected"
+              :options="useOnInvoiceOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+        </div>
 
-      <div class="use-on-invoice-container">
-        <h3>{{ $trans("What to add as invoice lines")}}</h3>
-        <b-form-group>
-          <b-form-radio-group
-            v-model="useOnInvoiceSelected"
-            :options="useOnInvoiceOptions"
-          ></b-form-radio-group>
-        </b-form-group>
       </div>
 
-    </b-container>
-  </Collapse>
+      <b-container fluid v-if="!isLoading && !hasStoredData">
+        <b-row>
+          <b-col cols="2">
+            <HeaderCell
+            :text='$trans("Engineer")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("To")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("Back")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("Total")'
+            />
+          </b-col>
+          <b-col cols="3">
+            <HeaderCell
+              :text='$trans("Rate")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("Margin")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("VAT type")'
+            />
+          </b-col>
+          <b-col cols="2" />
+        </b-row>
+        <b-row v-for="distance in costService.collection" :key="distance.user_id" class="distance_row">
+          <b-col cols="2">
+            {{ getFullname(distance.user_id) }}
+          </b-col>
+          <b-col cols="1">
+            {{ distance.distance_to }}
+          </b-col>
+          <b-col cols="1">
+            {{ distance.distance_back }}
+          </b-col>
+          <b-col cols="1">
+            {{ distance.distance_total }}
+          </b-col>
+          <b-col cols="3">
+            <b-form-radio-group
+              @change="updateTotals"
+              v-model="distance.use_price"
+            >
+              <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                {{ $trans('Settings') }}
+                {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                {{ $trans('Customer') }}
+                {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                <p class="flex">
+                  {{ $trans("Other") }}:&nbsp;&nbsp;
+                  <PriceInput
+                    v-model="distance.price_other"
+                    :currency="distance.price_other_currency"
+                    @priceChanged="(val) => otherPriceChanged(val, distance)"
+                  />
+                </p>
+              </b-form-radio>
+            </b-form-radio-group>
+          </b-col>
+          <b-col cols="1">
+            <MarginInput
+              :margin="distance.margin_perc"
+              @inputChanged="(val) => marginChanged(distance, val)"
+            />
+          </b-col>
+          <b-col cols="1">
+            <VAT @vatChanged="(val) => changeVatType(distance, val)" />
+          </b-col>
+          <b-col cols="2">
+            <Totals
+              :total="distance.total_dinero"
+              :margin="distance.margin_dinero"
+              :vat="distance.vat_dinero"
+            />
+          </b-col>
+        </b-row>
+        <TotalRow
+          :items_total="distance_total"
+          :total="total"
+          :total_vat="totalVAT"
+        />
+
+        <CollectionSaveContainer
+          @buttonClicked="() => { saveCollection() }"
+        />
+
+      </b-container>
+    </Collapse>
+  </b-overlay>
 </template>
 
 <script>
@@ -124,8 +145,12 @@ import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 import {
-  OPTION_DISTANCE_TOTALS, OPTION_NONE,
-  OPTION_USER_TOTALS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER, USE_PRICE_SETTINGS
+  OPTION_DISTANCE_TOTALS,
+  OPTION_NONE,
+  OPTION_USER_TOTALS,
+  USE_PRICE_CUSTOMER,
+  USE_PRICE_OTHER,
+  USE_PRICE_SETTINGS
 } from "./constants";
 import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
@@ -133,9 +158,12 @@ import VAT from "./VAT";
 import MarginInput from "./MarginInput";
 import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
-import CostService, {
+import CostService,{
   COST_TYPE_DISTANCE,
 } from "../../../models/orders/Cost";
+import CollectionSaveContainer from "./CollectionSaveContainer";
+import CollectionEmptyContainer from "./CollectionEmptyContainer";
+import CostsTable from "./CostsTable";
 
 export default {
   name: "DistanceComponent",
@@ -149,6 +177,9 @@ export default {
     VAT,
     MarginInput,
     TotalRow,
+    CollectionSaveContainer,
+    CollectionEmptyContainer,
+    CostsTable,
   },
   props: {
     order_pk: {
@@ -178,6 +209,7 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
       costService: new CostService(),
 
       total: null,
@@ -189,8 +221,6 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
-      created_by: this.$store.getters.getUserPk,
-      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       usePriceOptions: {
         USE_PRICE_SETTINGS,
@@ -205,18 +235,13 @@ export default {
       ],
       useOnInvoiceSelected: null,
 
-      tableFields: [
-        {key: 'user_full_name', label: this.$trans('User')},
-        {key: 'amount_int', label: this.$trans('Amount')},
-        {key: 'use_price', label: this.$trans('Use price')},
-        {key: 'margin_dinero', label: this.$trans('Margin')},
-        {key: 'vat_type', label: this.$trans('VAT type')},
-        {key: 'vat_dinero', label: this.$trans('VAT')},
-        {key: 'total_dinero', label: this.$trans('Total')},
-      ]
+      hasStoredData: false,
+      costType: COST_TYPE_DISTANCE
     }
   },
-  created() {
+  async created() {
+    this.isLoading = true
+
     // set vars in service
     this.costService.invoice_default_margin = this.invoice_default_margin
     this.costService.invoice_default_vat = this.invoice_default_vat
@@ -227,21 +252,38 @@ export default {
       this.default_currency
     )
 
-    // map input to Cost model collection
-    this.costService.collection = this.user_totals.map((activity) => (
-      this.costService.newModelFromDistance(
-        activity,
-        this.getPrice({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-        this.getCurrency({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-        this.getDefaultProps()
-      )))
-    this.updateTotals()
+    this.costService.addListArg(`order=${this.order_pk}`)
+    this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
+
+    await this.loadData()
+
+    this.isLoading = false
   },
   methods: {
+    async loadData() {
+      this.costService.collection = []
+      this.hasStoredData = false
+      // check if we already stored costs
+      const response = await this.costService.list()
+      if (response.results.length > 0) {
+        this.costService.collection = response.results.map((cost) => (
+          new this.costService.model(cost)
+        ))
+        this.hasStoredData = true
+      } else {
+        // map input to Cost model collection
+        this.costService.collection = this.user_totals.map((activity) => (
+          this.costService.newModelFromDistance(
+            activity,
+            this.getPrice({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+            this.getCurrency({...activity, use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
+            this.getDefaultProps()
+          )))
+        this.updateTotals()
+      }
+    },
     getDefaultProps() {
       return {
-        created_by: this.created_by,
-        created_by_is_admin: this.created_by_is_admin,
         order: this.order_pk,
         use_price: this.usePriceOptions.USE_PRICE_SETTINGS
       }

@@ -1,110 +1,132 @@
 <template>
-  <Collapse
-    :title="$trans('Used materials')"
-  >
-    <b-container fluid>
-      <b-row>
-        <b-col cols="2">
-          <HeaderCell
-            :text='$trans("Engineer")'
-          />
-        </b-col>
-        <b-col cols="2">
-          <HeaderCell
-            :text='$trans("Material")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("Amount")'
-          />
-        </b-col>
-        <b-col cols="3">
-          <HeaderCell
-            :text='$trans("Use price")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("Margin")'
-          />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("VAT type")'
-          />
-        </b-col>
-        <b-col cols="2" />
-      </b-row>
-      <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
-        <b-col cols="2">
-          {{ getFullname(material.user_id) }}
-        </b-col>
-        <b-col cols="2">
-          {{ material.name }}
-        </b-col>
-        <b-col cols="1">
-          {{ material.amount }}
-        </b-col>
-        <b-col cols="3">
-          <b-form-radio-group
-            @change="updateTotals"
-            v-model="material.use_price"
-          >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
-              {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-            </b-form-radio>
+  <b-overlay :show="isLoading" rounded="sm">
+    <Collapse
+      :title="$trans('Used materials')"
+    >
+      <div
+        class="costs-table"
+        v-if="!isLoading && hasStoredData"
+      >
+        <CostsTable
+          :collection="costService.collection"
+          :type="costType"
+        />
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
-              {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-            </b-form-radio>
+        <CollectionEmptyContainer
+          @buttonClicked="() => { emptyCollection() }"
+        />
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
-              <p class="flex">
-                {{ $trans("Other") }}:&nbsp;&nbsp;
-                <PriceInput
-                  v-model="material.price_other"
-                  :currency="material.price_other_currency"
-                  @priceChanged="(val) => otherPriceChanged(val, material)"
-                />
-              </p>
-            </b-form-radio>
-          </b-form-radio-group>
-        </b-col>
-        <b-col cols="1">
-          <MarginInput
-            :margin="material.margin_perc"
-            @inputChanged="(val) => marginChanged(material, val)"
-          />
-        </b-col>
-        <b-col cols="1">
-          <VAT @vatChanged="(val) => changeVatType(material, val)" />
-        </b-col>
-        <b-col cols="2">
-          <Totals
-            :total="material.total_dinero"
-            :margin="material.margin_dinero"
-            :vat="material.vat_dinero"
-          />
-        </b-col>
-      </b-row>
-      <TotalRow
-        :items_total="totalAmount"
-        :total="total"
-        :total_vat="totalVAT"
-      />
+        <div class="use-on-invoice-container">
+          <h4>{{ $trans("What to add as invoice lines")}}</h4>
+          <b-form-group>
+            <b-form-radio-group
+              v-model="useOnInvoiceSelected"
+              :options="useOnInvoiceOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+        </div>
 
-      <div class="use-on-invoice-container">
-        <h3>{{ $trans("What to add as invoice lines")}}</h3>
-        <b-form-group>
-          <b-form-radio-group
-            v-model="useOnInvoiceSelected"
-            :options="useOnInvoiceOptions"
-          ></b-form-radio-group>
-        </b-form-group>
       </div>
-    </b-container>
-  </Collapse>
+
+      <b-container fluid v-if="!isLoading && !hasStoredData">
+        <b-row>
+          <b-col cols="2">
+            <HeaderCell
+              :text='$trans("Engineer")'
+            />
+          </b-col>
+          <b-col cols="2">
+            <HeaderCell
+              :text='$trans("Material")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("Amount")'
+            />
+          </b-col>
+          <b-col cols="3">
+            <HeaderCell
+              :text='$trans("Use price")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("Margin")'
+            />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("VAT type")'
+            />
+          </b-col>
+          <b-col cols="2" />
+        </b-row>
+        <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
+          <b-col cols="2">
+            {{ getFullname(material.user_id) }}
+          </b-col>
+          <b-col cols="2">
+            {{ material.name }}
+          </b-col>
+          <b-col cols="1">
+            {{ material.amount }}
+          </b-col>
+          <b-col cols="3">
+            <b-form-radio-group
+              @change="updateTotals"
+              v-model="material.use_price"
+            >
+              <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+                {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+                {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                <p class="flex">
+                  {{ $trans("Other") }}:&nbsp;&nbsp;
+                  <PriceInput
+                    v-model="material.price_other"
+                    :currency="material.price_other_currency"
+                    @priceChanged="(val) => otherPriceChanged(val, material)"
+                  />
+                </p>
+              </b-form-radio>
+            </b-form-radio-group>
+          </b-col>
+          <b-col cols="1">
+            <MarginInput
+              :margin="material.margin_perc"
+              @inputChanged="(val) => marginChanged(material, val)"
+            />
+          </b-col>
+          <b-col cols="1">
+            <VAT @vatChanged="(val) => changeVatType(material, val)" />
+          </b-col>
+          <b-col cols="2">
+            <Totals
+              :total="material.total_dinero"
+              :margin="material.margin_dinero"
+              :vat="material.vat_dinero"
+            />
+          </b-col>
+        </b-row>
+        <TotalRow
+          :items_total="totalAmount"
+          :total="total"
+          :total_vat="totalVAT"
+        />
+
+        <CollectionSaveContainer
+          @buttonClicked="() => { saveCollection() }"
+        />
+
+      </b-container>
+    </Collapse>
+  </b-overlay>
 </template>
 
 <script>
@@ -112,7 +134,7 @@ import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
-import CostService from "../../../models/orders/Cost";
+import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/orders/Cost";
 import {
   OPTION_NONE, OPTION_USED_MATERIALS_TOTALS,
   OPTION_USER_TOTALS, USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING
@@ -123,6 +145,9 @@ import materialService, {MaterialModel} from "../../../models/inventory/Material
 import PriceInput from "../../../components/PriceInput";
 import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
+import CollectionSaveContainer from "./CollectionSaveContainer";
+import CollectionEmptyContainer from "./CollectionEmptyContainer";
+import CostsTable from "./CostsTable";
 
 export default {
   name: "MaterialsComponent",
@@ -136,6 +161,9 @@ export default {
     VAT,
     MarginInput,
     TotalRow,
+    CollectionSaveContainer,
+    CollectionEmptyContainer,
+    CostsTable,
   },
   props: {
     order_pk: {
@@ -161,6 +189,8 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
+
       materialModels: null,
 
       total: null,
@@ -178,8 +208,6 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
-      created_by: this.$store.getters.getUserPk,
-      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       useOnInvoiceOptions: [
         { text: this.$trans('Total'), value: OPTION_USED_MATERIALS_TOTALS },
@@ -187,9 +215,14 @@ export default {
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
+
+      hasStoredData: false,
+      costType: COST_TYPE_USED_MATERIALS
     }
   },
-  created() {
+  async created() {
+    this.isLoading = true
+
     // set vars in service
     this.costService.invoice_default_margin = this.invoice_default_margin
     this.costService.invoice_default_vat = this.invoice_default_vat
@@ -201,32 +234,49 @@ export default {
       0
     )
 
+    this.costService.addListArg(`order=${this.order_pk}`)
+    this.costService.addListArg(`cost_type=${COST_TYPE_USED_MATERIALS}`)
+
     // set material models with margin perc
     this.materialModels = this.material_models.map((m) => new MaterialModel({
       ...m,
       margin_perc: this.invoice_default_margin
     }))
 
-    // map input to Cost model collection
-    this.costService.collection = this.used_materials.map((material) => (
-      this.costService.newModelFromMaterial(
-        material,
-        this.getPrice(
-          {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
-        this.getCurrency(
-          {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
-        this.getDefaultProps()
-      )
-    ))
+    await this.loadData()
 
-    // update totals
-    this.updateTotals()
+    this.isLoading = false
   },
   methods: {
+    async loadData() {
+      this.costService.collection = []
+      this.hasStoredData = false
+      // check if we already stored costs
+      const response = await this.costService.list()
+      if (response.results.length > 0) {
+        this.costService.collection = response.results.map((cost) => (
+          new this.costService.model(cost)
+        ))
+        this.hasStoredData = true
+      } else {
+        // map input to Cost model collection
+        this.costService.collection = this.used_materials.map((material) => (
+          this.costService.newModelFromMaterial(
+            material,
+            this.getPrice(
+              {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
+            this.getCurrency(
+              {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
+            this.getDefaultProps()
+          )
+        ))
+
+        // update totals
+        this.updateTotals()
+      }
+    },
     getDefaultProps() {
       return {
-        created_by: this.created_by,
-        created_by_is_admin: this.created_by_is_admin,
         use_price: this.usePriceOptions.USE_PRICE_PURCHASE,
         order: this.order_pk,
       }

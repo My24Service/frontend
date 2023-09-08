@@ -16,8 +16,14 @@ import invoiceResponse from '../../fixtures/invoiceData'
 import customerResponse from '../../fixtures/customer.js'
 import costsCocResponse from '../../fixtures/order_cost_coc'
 import {CustomerModel} from "../../../../src/models/customer/Customer";
-import {HOURS_TYPE_WORK} from "../../../../src/views/orders/invoice_form/constants";
 import {RateEngineerUserModel} from "../../../../src/models/company/UserEngineer";
+import {
+  COST_TYPE_ACTUAL_WORK, COST_TYPE_CALL_OUT_COSTS, COST_TYPE_DISTANCE,
+  COST_TYPE_EXTRA_WORK,
+  COST_TYPE_TRAVEL_HOURS,
+  COST_TYPE_USED_MATERIALS,
+  COST_TYPE_WORK_HOURS
+} from "../../../../src/models/orders/Cost";
 
 jest.mock('axios')
 
@@ -39,7 +45,19 @@ axios.get.mockImplementation((url) => {
       return Promise.resolve(invoiceResponse)
     case '/customer/customer/424/':
       return Promise.resolve(customerResponse)
-    case '/order/cost/?page=1&order=null&cost_type=call_out_costs':
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_USED_MATERIALS}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_WORK_HOURS}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_TRAVEL_HOURS}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_EXTRA_WORK}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_ACTUAL_WORK}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_DISTANCE}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_CALL_OUT_COSTS}`:
       return Promise.resolve(emptyCosts)
     default:
       console.log(url)
@@ -454,7 +472,7 @@ describe('Hours', () => {
         $trans: (f) => f
       },
       propsData: {
-        type: HOURS_TYPE_WORK,
+        type: COST_TYPE_WORK_HOURS,
         hours_total: invoiceResponse.data.activity_totals.work_total,
         user_totals: invoiceResponse.data.activity_totals.user_totals,
         engineer_models,
@@ -481,7 +499,7 @@ describe('Hours', () => {
         $trans: (f) => f
       },
       propsData: {
-        type: HOURS_TYPE_WORK,
+        type: COST_TYPE_WORK_HOURS,
         hours_total: invoiceResponse.data.activity_totals.work_total,
         user_totals: invoiceResponse.data.activity_totals.user_totals,
         engineer_models,

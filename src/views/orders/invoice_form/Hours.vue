@@ -1,110 +1,131 @@
 <template>
-  <Collapse
-    :title="getTitle()"
-  >
-    <b-container fluid>
-      <b-row>
-        <b-col cols="3">
-          <HeaderCell
-            :text='$trans("Engineer")'
-          />
-        </b-col>
-        <b-col cols="2">
-          <HeaderCell
-            :text='$trans("Hours")'
-          />
-        </b-col>
-        <b-col cols="3">
-          <HeaderCell
-            :text='$trans("Engineer rate")'
-            />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("Margin")'
-            />
-        </b-col>
-        <b-col cols="1">
-          <HeaderCell
-            :text='$trans("VAT type")'
-            />
-        </b-col>
-        <b-col cols="2" />
-      </b-row>
-      <b-row v-for="activity in costService.collection" :key="activity.user_id" class="material_row">
-        <b-col cols="3">
-          {{ getFullname(activity.user_id) }}
-        </b-col>
-        <b-col cols="2">
-          {{ activity.hours_total }}
-        </b-col>
-        <b-col cols="3">
-          <b-form-radio-group
-            @change="updateTotals"
-            v-model="activity.use_price"
-          >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_USER">
-              {{ $trans('Engineer') }}
-              {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_USER).toFormat("$0.00") }}
-            </b-form-radio>
+  <b-overlay :show="isLoading" rounded="sm">
+    <Collapse
+      :title="getTitle()"
+    >
+      <div
+        class="costs-table"
+        v-if="!isLoading && hasStoredData"
+      >
+        <CostsTable
+          :collection="costService.collection"
+          :type="costType"
+        />
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
-              {{ $trans('Settings') }}
-              {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-            </b-form-radio>
+        <CollectionEmptyContainer
+          @buttonClicked="() => { emptyCollection() }"
+        />
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
-              {{ $trans('Customer') }}
-              {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-            </b-form-radio>
+        <div class="use-on-invoice-container">
+          <h4>{{ $trans("What to add as invoice lines")}}</h4>
+          <b-form-group>
+            <b-form-radio-group
+              v-model="useOnInvoiceSelected"
+              :options="useOnInvoiceOptions"
+            ></b-form-radio-group>
+          </b-form-group>
+        </div>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
-              <p class="flex">
-                {{ $trans("Other") }}:&nbsp;&nbsp;
-                <PriceInput
-                  v-model="activity.price_other"
-                  :currency="activity.price_other_currency"
-                  @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
-                />
-              </p>
-            </b-form-radio>
-          </b-form-radio-group>
-        </b-col>
-        <b-col cols="1">
-          <MarginInput
-            :margin="activity.margin_perc"
-            @inputChanged="(val) => marginChanged(activity, val)"
-          />
-        </b-col>
-        <b-col cols="1">
-          <VAT @vatChanged="(val) => changeVatType(activity, val)" />
-        </b-col>
-        <b-col cols="2">
-          <Totals
-            :total="activity.total_dinero"
-            :margin="activity.margin_dinero"
-            :vat="activity.vat_dinero"
-          />
-        </b-col>
-      </b-row>
-      <TotalRow
-        :items_total="hours_total"
-        :total="total"
-        :total_vat="totalVAT"
-      />
-
-      <div class="use-on-invoice-container">
-        <h3>{{ $trans("What to add as invoice lines")}}</h3>
-        <b-form-group>
-          <b-form-radio-group
-            v-model="useOnInvoiceSelected"
-            :options="useOnInvoiceOptions"
-          ></b-form-radio-group>
-        </b-form-group>
       </div>
 
-    </b-container>
-  </Collapse>
+      <b-container fluid v-if="!isLoading && !hasStoredData">
+        <b-row>
+          <b-col cols="3">
+            <HeaderCell
+              :text='$trans("Engineer")'
+            />
+          </b-col>
+          <b-col cols="2">
+            <HeaderCell
+              :text='$trans("Hours")'
+            />
+          </b-col>
+          <b-col cols="3">
+            <HeaderCell
+              :text='$trans("Engineer rate")'
+              />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("Margin")'
+              />
+          </b-col>
+          <b-col cols="1">
+            <HeaderCell
+              :text='$trans("VAT type")'
+              />
+          </b-col>
+          <b-col cols="2" />
+        </b-row>
+        <b-row v-for="activity in costService.collection" :key="activity.user_id" class="material_row">
+          <b-col cols="3">
+            {{ getFullname(activity.user_id) }}
+          </b-col>
+          <b-col cols="2">
+            {{ activity.hours_total }}
+          </b-col>
+          <b-col cols="3">
+            <b-form-radio-group
+              @change="updateTotals"
+              v-model="activity.use_price"
+            >
+              <b-form-radio :value="usePriceOptions.USE_PRICE_USER">
+                {{ $trans('Engineer') }}
+                {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_USER).toFormat("$0.00") }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                {{ $trans('Settings') }}
+                {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                {{ $trans('Customer') }}
+                {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+              </b-form-radio>
+
+              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                <p class="flex">
+                  {{ $trans("Other") }}:&nbsp;&nbsp;
+                  <PriceInput
+                    v-model="activity.price_other"
+                    :currency="activity.price_other_currency"
+                    @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
+                  />
+                </p>
+              </b-form-radio>
+            </b-form-radio-group>
+          </b-col>
+          <b-col cols="1">
+            <MarginInput
+              :margin="activity.margin_perc"
+              @inputChanged="(val) => marginChanged(activity, val)"
+            />
+          </b-col>
+          <b-col cols="1">
+            <VAT @vatChanged="(val) => changeVatType(activity, val)" />
+          </b-col>
+          <b-col cols="2">
+            <Totals
+              :total="activity.total_dinero"
+              :margin="activity.margin_dinero"
+              :vat="activity.vat_dinero"
+            />
+          </b-col>
+        </b-row>
+        <TotalRow
+          :items_total="hours_total"
+          :total="total"
+          :total_vat="totalVAT"
+        />
+
+        <CollectionSaveContainer
+          @buttonClicked="() => { saveCollection() }"
+        />
+
+      </b-container>
+    </Collapse>
+  </b-overlay>
 </template>
 
 <script>
@@ -113,22 +134,31 @@ import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 import {
-  HOURS_TYPE_ACTUAL_WORK,
-  HOURS_TYPE_EXTRA_WORK,
-  HOURS_TYPE_TRAVEL,
-  HOURS_TYPE_WORK,
   INVOICE_LINE_TYPE_ACTIVITY,
-  OPTION_ACTIVITY_ACTIVITY_TOTALS, OPTION_ACTIVITY_ACTUAL_WORK,
+  OPTION_ACTIVITY_ACTIVITY_TOTALS,
+  OPTION_ACTIVITY_ACTUAL_WORK,
   OPTION_NONE,
-  OPTION_USER_TOTALS, USE_PRICE_CUSTOMER, USE_PRICE_OTHER, USE_PRICE_SETTINGS, USE_PRICE_USER
+  OPTION_USER_TOTALS,
+  USE_PRICE_CUSTOMER,
+  USE_PRICE_OTHER,
+  USE_PRICE_SETTINGS,
+  USE_PRICE_USER
 } from "./constants";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
-import CostService from "../../../models/orders/Cost";
+import CostService, {
+  COST_TYPE_ACTUAL_WORK,
+  COST_TYPE_EXTRA_WORK,
+  COST_TYPE_TRAVEL_HOURS,
+  COST_TYPE_WORK_HOURS
+} from "../../../models/orders/Cost";
 import PriceInput from "../../../components/PriceInput";
 import {toDinero} from "../../../utils";
+import CollectionSaveContainer from "./CollectionSaveContainer";
+import CollectionEmptyContainer from "./CollectionEmptyContainer";
+import CostsTable from "./CostsTable";
 
 export default {
   name: "HoursComponent",
@@ -142,6 +172,9 @@ export default {
     MarginInput,
     TotalRow,
     PriceInput,
+    CollectionSaveContainer,
+    CollectionEmptyContainer,
+    CostsTable,
   },
   watch: {
     engineer_models: {
@@ -189,10 +222,10 @@ export default {
     return {
       isLoading: false,
 
-      HOURS_TYPE_WORK,
-      HOURS_TYPE_TRAVEL,
-      HOURS_TYPE_EXTRA_WORK,
-      HOURS_TYPE_ACTUAL_WORK,
+      COST_TYPE_WORK_HOURS,
+      COST_TYPE_TRAVEL_HOURS,
+      COST_TYPE_EXTRA_WORK,
+      COST_TYPE_ACTUAL_WORK,
 
       costService: new CostService(),
 
@@ -200,8 +233,6 @@ export default {
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
-      created_by: this.$store.getters.getUserPk,
-      created_by_is_admin: this.$store.getters.getIsAdmin,
 
       total: null,
       totalVAT: null,
@@ -219,84 +250,106 @@ export default {
         USE_PRICE_CUSTOMER,
         USE_PRICE_OTHER,
       },
+
+      hasStoredData: false,
+      costType: this.type
     }
   },
-  created() {
+  async created() {
+    this.isLoading = true
+
     // set vars in service
     this.costService.invoice_default_margin = this.invoice_default_margin
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
 
-    // map input to Cost model collection
-    let user_totals
-    const use_price = this.usePriceOptions.USE_PRICE_SETTINGS
+    this.costService.addListArg(`order=${this.order_pk}`)
+    this.costService.addListArg(`cost_type=${this.type}`)
 
-    switch (this.type) {
-      case HOURS_TYPE_WORK:
-        // filter out empty values
-        user_totals = this.user_totals.filter((m) => m.work_secs !== null)
-        this.costService.collection = user_totals.map((activity) => (
-          this.costService.newModelFromWorkHours(
-            activity,
-            this.getPrice({...activity, use_price}),
-            this.getCurrency({...activity, use_price}),
-            this.getDefaultProps()
-        )))
-        break
-      case HOURS_TYPE_TRAVEL:
-        user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
-        this.costService.collection = user_totals.map((activity) => (
-          this.costService.newModelFromTravelHours(
-            activity,
-            this.getPrice({...activity, use_price}),
-            this.getCurrency({...activity, use_price}),
-            this.getDefaultProps()
-        )))
-        break
-      case HOURS_TYPE_EXTRA_WORK:
-        user_totals = this.user_totals.filter((m) => m.extra_work_secs !== null)
-        this.costService.collection = user_totals.map((activity) => (
-          this.costService.newModelFromExtraWork(
-            activity,
-            this.getPrice({...activity, use_price}),
-            this.getCurrency({...activity, use_price}),
-            this.getDefaultProps()
-        )))
-        break
-      case HOURS_TYPE_ACTUAL_WORK:
-        user_totals = this.user_totals.filter((m) => m.actual_work_secs !== null)
-        this.costService.collection = user_totals.map((activity) => (
-          this.costService.newModelFromActualWork(
-            activity,
-            this.getPrice({...activity, use_price}),
-            this.getCurrency({...activity, use_price}),
-            this.getDefaultProps()
-        )))
-        break
-      default:
-        throw `created set userTotals, unknown type ${this.type}`
-    }
+    await this.loadData()
 
-    this.updateTotals()
+    this.isLoading = false
   },
   methods: {
+    async loadData() {
+      this.costService.collection = []
+      this.hasStoredData = false
+      // check if we already stored costs
+      const response = await this.costService.list()
+      if (response.results.length > 0) {
+        this.costService.collection = response.results.map((cost) => (
+          new this.costService.model(cost)
+        ))
+        this.hasStoredData = true
+      } else {
+        // map input to Cost model collection
+        let user_totals
+        const use_price = this.usePriceOptions.USE_PRICE_SETTINGS
+
+        switch (this.type) {
+          case COST_TYPE_WORK_HOURS:
+            // filter out empty values
+            user_totals = this.user_totals.filter((m) => m.work_secs !== null)
+            this.costService.collection = user_totals.map((activity) => (
+              this.costService.newModelFromWorkHours(
+                activity,
+                this.getPrice({...activity, use_price}),
+                this.getCurrency({...activity, use_price}),
+                this.getDefaultProps()
+              )))
+            break
+          case COST_TYPE_TRAVEL_HOURS:
+            user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
+            this.costService.collection = user_totals.map((activity) => (
+              this.costService.newModelFromTravelHours(
+                activity,
+                this.getPrice({...activity, use_price}),
+                this.getCurrency({...activity, use_price}),
+                this.getDefaultProps()
+              )))
+            break
+          case COST_TYPE_EXTRA_WORK:
+            user_totals = this.user_totals.filter((m) => m.extra_work_secs !== null)
+            this.costService.collection = user_totals.map((activity) => (
+              this.costService.newModelFromExtraWork(
+                activity,
+                this.getPrice({...activity, use_price}),
+                this.getCurrency({...activity, use_price}),
+                this.getDefaultProps()
+              )))
+            break
+          case COST_TYPE_ACTUAL_WORK:
+            user_totals = this.user_totals.filter((m) => m.actual_work_secs !== null)
+            this.costService.collection = user_totals.map((activity) => (
+              this.costService.newModelFromActualWork(
+                activity,
+                this.getPrice({...activity, use_price}),
+                this.getCurrency({...activity, use_price}),
+                this.getDefaultProps()
+              )))
+            break
+          default:
+            throw `created set userTotals, unknown type ${this.type}`
+        }
+
+        this.updateTotals()
+      }
+    },
     getDefaultProps() {
       return {
-        created_by: this.created_by,
-        created_by_is_admin: this.created_by_is_admin,
         order: this.order_pk,
         use_price: this.usePriceOptions.USE_PRICE_SETTINGS
       }
     },
     getTitle() {
       switch (this.type) {
-        case HOURS_TYPE_WORK:
+        case COST_TYPE_WORK_HOURS:
           return this.$trans("Work hours")
-        case HOURS_TYPE_TRAVEL:
+        case COST_TYPE_TRAVEL_HOURS:
           return this.$trans("Travel hours")
-        case HOURS_TYPE_EXTRA_WORK:
+        case COST_TYPE_EXTRA_WORK:
           return this.$trans("Extra work")
-        case HOURS_TYPE_ACTUAL_WORK:
+        case COST_TYPE_ACTUAL_WORK:
           return this.$trans("Actual work")
         default:
           throw `getTitle(), unknown type ${this.type}`
