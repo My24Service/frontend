@@ -16,7 +16,7 @@
           @buttonClicked="() => { emptyCollection() }"
         />
 
-        <div class="use-on-invoice-container">
+        <div class="use-on-invoice-container" v-if="!parentHasInvoiceLines">
           <h4>{{ $trans("What to add as invoice lines")}}</h4>
           <b-form-group>
             <b-form-radio-group
@@ -24,6 +24,15 @@
               :options="useOnInvoiceOptions"
             ></b-form-radio-group>
           </b-form-group>
+          <b-button
+            @click="() => { createInvoiceLines() }"
+            class="btn btn-primary update-button"
+            type="button"
+            variant="primary"
+          >
+            {{ $trans("Create invoice lines") }}
+          </b-button>
+
         </div>
 
       </div>
@@ -106,9 +115,9 @@
           </b-col>
         </b-row>
         <TotalRow
-          :items_total="coc_item.amount_int"
-          :total="total"
-          :total_vat="totalVAT"
+          :items_total="totalAmount"
+          :total="total_dinero"
+          :total_vat="totalVAT_dinero"
         />
 
         <CollectionSaveContainer
@@ -124,6 +133,8 @@
 <script>
 import {toDinero} from "../../../utils";
 import {
+  INVOICE_LINE_TYPE_CALL_OUT_COSTS,
+  OPTION_CALL_OUT_COSTS_ITEMS,
   OPTION_CALL_OUT_COSTS_TOTALS,
   OPTION_NONE,
   USE_PRICE_CUSTOMER,
@@ -139,6 +150,7 @@ import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
 import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
+import invoiceLineService from "../../../models/orders/InvoiceLine";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
@@ -158,6 +170,14 @@ export default {
     CollectionEmptyContainer,
     CostsTable,
   },
+  watch: {
+    invoiceLinesParent: {
+      handler(newValue) {
+        this.parentHasInvoiceLines = !!newValue.find((line) => line.type === INVOICE_LINE_TYPE_CALL_OUT_COSTS)
+      },
+      deep: true
+    },
+  },
   props: {
     order_pk: {
       type: [Number],
@@ -169,6 +189,10 @@ export default {
     },
     customer: {
       type: [Object],
+      default: null
+    },
+    invoiceLinesParent: {
+      type: [Array],
       default: null
     },
   },
@@ -183,11 +207,13 @@ export default {
       costService: new CostService(),
       coc_item: null,
 
-      total: null,
-      totalVAT: null,
+      total_dinero: null,
+      totalVAT_dinero: null,
+      totalAmount: null,
 
       useOnInvoiceOptions: [
         { text: this.$trans('Total'), value: OPTION_CALL_OUT_COSTS_TOTALS },
+        { text: this.$trans('Items'), value: OPTION_CALL_OUT_COSTS_ITEMS },
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
@@ -199,7 +225,8 @@ export default {
       },
 
       hasStoredData: false,
-      costType: COST_TYPE_CALL_OUT_COSTS
+      costType: COST_TYPE_CALL_OUT_COSTS,
+      parentHasInvoiceLines: false
     }
   },
   async created() {
@@ -231,6 +258,16 @@ export default {
         this.costService.collection = response.results.map((cost) => (
           new this.costService.model(cost)
         ))
+
+        this.total_dinero = this.costService.getItemsTotal()
+        this.totalVAT_dinero = this.costService.getItemsTotalVAT()
+
+        // calc total amount
+        this.totalAmount = this.costService.collection.reduce(
+          (total, m) => (total + m.amount_int),
+          0
+        )
+
         this.hasStoredData = true
       } else {
         // create Cost model and set collection
@@ -296,9 +333,49 @@ export default {
         this.getCurrency
       )
 
-      this.total = this.costService.getItemsTotal()
-      this.totalVAT = this.costService.getItemsTotalVAT()
+      this.total_dinero = this.costService.getItemsTotal()
+      this.totalVAT_dinero = this.costService.getItemsTotalVAT()
+
+      // calc total amount
+      this.totalAmount = this.costService.collection.reduce(
+        (total, m) => (total + m.amount_int),
+        0
+      )
     },
+    createInvoiceLines() {
+      switch (this.useOnInvoiceSelected) {
+        case OPTION_CALL_OUT_COSTS_TOTALS:
+          const invoiceLine = new invoiceLineService.model({
+            type: INVOICE_LINE_TYPE_CALL_OUT_COSTS,
+            description: `${this.$trans("Call out costs")}`,
+            amount: this.totalAmount,
+            vat: this.totalVAT_dinero.toFormat('0.00'),
+            vat_currency: this.totalVAT_dinero.getCurrency(),
+            price: "0.00",
+            price_currency: "EUR",
+            total: this.total_dinero.toFormat('0.00'),
+            total_currency: this.total_dinero.getCurrency(),
+          })
+          this.$emit('invoiceLinesCreated', [invoiceLine])
+          break
+        case OPTION_CALL_OUT_COSTS_ITEMS:
+          const invoiceLines = this.costService.collection.map((cost) =>
+            invoiceLineService.newModelFromCost(
+              cost,
+              `${this.$trans("Call out costs")}`,
+              INVOICE_LINE_TYPE_CALL_OUT_COSTS
+            )
+          )
+          this.$emit('invoiceLinesCreated', invoiceLines)
+          break
+        case OPTION_NONE:
+          console.debug("not adding any activity")
+          break
+        default:
+          throw `createInvoiceLines: unknown option: ${this.useOnInvoiceSelected}`
+      }
+
+    }
   }
 }
 </script>
