@@ -427,7 +427,7 @@ export default {
       }
     },
     createInvoiceLines() {
-      switch (this.useOnInvoiceActivitySelected) {
+      switch (this.useOnInvoiceSelected) {
         case OPTION_USER_TOTALS:
           let invoiceLines = this.userTotals.map((activity) => {
             this.createInvoiceLine(

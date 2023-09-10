@@ -230,7 +230,7 @@ export default {
 
     // calc total amount
     this.totalAmount = this.used_materials.reduce(
-      (total, m) => (total + m.amount),
+      (total, m) => (total + m.amount_decimal),
       0
     )
 

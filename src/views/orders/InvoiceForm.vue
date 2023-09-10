@@ -251,7 +251,7 @@
           :material_models="material_models"
           :engineer_models="engineer_models"
           :used_materials="used_materials"
-          @invoiceLinesCreated="materialsInvoiceLinesCreated"
+          @invoiceLinesCreated="invoiceLinesCreated"
         />
 
         <hr/>
@@ -263,7 +263,7 @@
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
-          @invoiceLinesCreated="workHoursInvoiceLinesCreated"
+          @invoiceLinesCreated="invoiceLinesCreated"
         />
 
         <hr/>
@@ -275,7 +275,7 @@
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
-          @invoiceLinesCreated="travelHoursInvoiceLinesCreated"
+          @invoiceLinesCreated="invoiceLinesCreated"
         />
 
         <hr/>
@@ -287,7 +287,7 @@
           :engineer_models="engineer_models"
           :distance_total="activity_totals.distance_total"
           :invoice_default_price_per_km="invoice_default_price_per_km"
-          @invoiceLinesCreated="distanceInvoiceLinesCreated"
+          @invoiceLinesCreated="invoiceLinesCreated"
         />
 
         <hr/>
@@ -299,7 +299,7 @@
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
-          @invoiceLinesCreated="extraWorkInvoiceLinesCreated"
+          @invoiceLinesCreated="invoiceLinesCreated"
         />
 
         <hr/>
@@ -311,7 +311,7 @@
           :user_totals="activity_totals.user_totals"
           :engineer_models="engineer_models"
           :customer="customer"
-          @invoiceLinesCreated="actualWorkInvoiceLinesCreated"
+          @invoiceLinesCreated="invoiceLinesCreated"
         />
 
         <hr/>
@@ -320,8 +320,11 @@
           :order_pk="order_pk"
           :customer="customer"
           :invoice_default_call_out_costs="invoice_default_call_out_costs"
-          @invoiceLinesCreated="callOutCostsInvoiceLinesCreated"
+          @invoiceLinesCreated="invoiceLinesCreated"
+          :invoiceLinesParent="invoiceLineService.collection"
         />
+
+        <hr/>
 
         <div class="invoice-lines">
           <h3>{{ $trans("Invoice lines") }}</h3>
@@ -339,7 +342,7 @@
               {{ $trans("Price") }}
             </b-col>
           </b-row>
-          <b-row v-for="invoiceLine in invoiceLines" :key="invoiceLine.id">
+          <b-row v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id">
             <b-col cols="6">
               <b-form-textarea
                 v-model="invoiceLine.description"
@@ -470,7 +473,7 @@ export default {
       customerPk: null,
       customer: null,
 
-      invoiceLines: [],
+      invoiceLineService,
       deletedInvoiceLines: [],
 
     }
@@ -519,31 +522,29 @@ export default {
   },
   methods: {
     // invoice lines
-    extraWorkInvoiceLinesCreated(invoiceLines) {
-
-    },
-    workHoursInvoiceLinesCreated(invoiceLines) {
-
-    },
-    travelHoursInvoiceLinesCreated(invoiceLines) {
-
-    },
-    actualWorkInvoiceLinesCreated() {
-
-    },
-    materialsInvoiceLinesCreated() {
-
-    },
-    distanceInvoiceLinesCreated() {
-
-    },
-    callOutCostsInvoiceLinesCreated() {
-
+    invoiceLinesCreated(invoiceLines) {
+      for (let invoiceLine of invoiceLines) {
+        const id = this.getInvoiceLineId()
+        invoiceLine.id = id
+        console.log(`id: ${id}`)
+        this.invoiceLineService.collection.push(invoiceLine)
+      }
     },
     resetInvoiceLines() {
 
     },
     createInvoiceLinesFromConfig() {
+    },
+    getInvoiceLineId() {
+      if (this.invoiceLineService.collection.length === 0) {
+        return 0
+      }
+
+      const maxInvoiceLine = this.invoiceLineService.collection.reduce(function(prev, current) {
+        return (prev.id > current.id) ? prev : current
+      })
+
+      return maxInvoiceLine.id + 1
     },
     // customer
     async getCustomer() {

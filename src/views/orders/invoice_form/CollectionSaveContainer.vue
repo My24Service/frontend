@@ -12,7 +12,7 @@
               variant="danger"
             >
               {{ $trans("Save costs") }}
-            </b-button><br/>
+            </b-button>
           </div>
         </b-col>
       </b-row>

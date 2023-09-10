@@ -6,7 +6,7 @@ export const OPTION_USED_MATERIALS_TOTALS = 'used_materials_totals'
 export const OPTION_ACTUAL_WORK_TOTALS = 'actual_work_totals'
 export const OPTION_DISTANCE_TOTALS = 'distance_totals'
 export const OPTION_CALL_OUT_COSTS_TOTALS = 'coc_totals'
-
+export const OPTION_CALL_OUT_COSTS_ITEMS = 'coc_items'
 export const OPTION_NONE = 'none'
 
 export const INVOICE_LINE_TYPE_ACTIVITY = 'activity'

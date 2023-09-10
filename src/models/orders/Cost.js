@@ -76,6 +76,24 @@ class CostModel {
         throw `unknown cost type: ${this.cost_type}`
     }
   }
+
+  getAmount() {
+    switch (this.cost_type) {
+      case COST_TYPE_USED_MATERIALS:
+        return this.amount_decimal
+      case COST_TYPE_WORK_HOURS:
+      case COST_TYPE_TRAVEL_HOURS:
+      case COST_TYPE_EXTRA_WORK:
+      case COST_TYPE_ACTUAL_WORK:
+        return this.amount_duration ? this.amount_duration : 0
+      case COST_TYPE_DISTANCE:
+        return this.amount_int
+      case COST_TYPE_CALL_OUT_COSTS:
+        return this.amount_int
+      default:
+        throw `unknown cost type: ${this.cost_type}`
+    }
+  }
 }
 
 Object.assign(CostModel.prototype, priceMixin);
