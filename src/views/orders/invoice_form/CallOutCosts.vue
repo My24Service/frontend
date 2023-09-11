@@ -16,24 +16,11 @@
           @buttonClicked="() => { emptyCollection() }"
         />
 
-        <div class="use-on-invoice-container" v-if="!parentHasInvoiceLines">
-          <h4>{{ $trans("What to add as invoice lines")}}</h4>
-          <b-form-group>
-            <b-form-radio-group
-              v-model="useOnInvoiceSelected"
-              :options="useOnInvoiceOptions"
-            ></b-form-radio-group>
-          </b-form-group>
-          <b-button
-            @click="() => { createInvoiceLines() }"
-            class="btn btn-primary update-button"
-            type="button"
-            variant="primary"
-          >
-            {{ $trans("Create invoice lines") }}
-          </b-button>
-
-        </div>
+        <AddToInvoiceLinesDiv
+          v-if="!parentHasInvoiceLines"
+          :useOnInvoiceOptions="useOnInvoiceOptions"
+          @buttonClicked="createInvoiceLinesClicked"
+        />
 
       </div>
 
@@ -154,6 +141,7 @@ import invoiceLineService from "../../../models/orders/InvoiceLine";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
+import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 
 export default {
   name: "CallOutCostsComponent",
@@ -169,6 +157,7 @@ export default {
     CollectionSaveContainer,
     CollectionEmptyContainer,
     CostsTable,
+    AddToInvoiceLinesDiv,
   },
   props: {
     order_pk: {
@@ -203,13 +192,6 @@ export default {
       totalVAT_dinero: null,
       totalAmount: null,
 
-      useOnInvoiceOptions: [
-        { text: this.$trans('Total'), value: OPTION_ONLY_TOTAL },
-        { text: this.$trans('Items'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('None'), value: OPTION_NONE },
-      ],
-      useOnInvoiceSelected: null,
-
       usePriceOptions: {
         USE_PRICE_SETTINGS,
         USE_PRICE_CUSTOMER,
@@ -220,6 +202,7 @@ export default {
       costType: COST_TYPE_CALL_OUT_COSTS,
       parentHasInvoiceLines: false,
       invoiceLineType: INVOICE_LINE_TYPE_CALL_OUT_COSTS,
+      invoiceLineService,
     }
   },
   async created() {

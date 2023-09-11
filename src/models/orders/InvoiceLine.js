@@ -58,6 +58,7 @@ class InvoiceLineService extends BaseModel {
       vat_currency: cost.vat_currency,
       price: cost.price,
       price_currency: cost.price_currency,
+      price_text: cost.price_dinero.toFormat('$0.00'),
       total: cost.total,
       total_currency: cost.total_currency
     })

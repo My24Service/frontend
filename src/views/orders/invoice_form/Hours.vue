@@ -16,23 +16,11 @@
           @buttonClicked="() => { emptyCollection() }"
         />
 
-        <div class="use-on-invoice-container" v-if="!parentHasInvoiceLines">
-          <h4>{{ $trans("What to add as invoice lines")}}</h4>
-          <b-form-group>
-            <b-form-radio-group
-              v-model="useOnInvoiceSelected"
-              :options="useOnInvoiceOptions"
-            ></b-form-radio-group>
-          </b-form-group>
-          <b-button
-            @click="() => { createInvoiceLines() }"
-            class="btn btn-primary update-button"
-            type="button"
-            variant="primary"
-          >
-            {{ $trans("Create invoice lines") }}
-          </b-button>
-        </div>
+        <AddToInvoiceLinesDiv
+          v-if="!parentHasInvoiceLines"
+          :useOnInvoiceOptions="useOnInvoiceOptions"
+          @buttonClicked="createInvoiceLinesClicked"
+        />
 
       </div>
 
@@ -140,17 +128,13 @@
 import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
-import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
+import invoiceLineService from "../../../models/orders/InvoiceLine";
 import {
-  INVOICE_LINE_TYPE_ACTIVITY,
   INVOICE_LINE_TYPE_HOURS_TYPE_ACTUAL_WORK,
   INVOICE_LINE_TYPE_HOURS_TYPE_EXTRA_WORK,
   INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL,
   INVOICE_LINE_TYPE_HOURS_TYPE_WORK,
-  INVOICE_LINE_TYPE_USED_MATERIALS,
-  OPTION_ACTIVITY_ACTIVITY_TOTALS,
-  OPTION_ACTIVITY_ACTUAL_WORK,
-  OPTION_NONE,
+  OPTION_NONE, OPTION_ONLY_TOTAL,
   OPTION_USER_TOTALS,
   USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
@@ -172,6 +156,7 @@ import {toDinero} from "../../../utils";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
+import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 
 export default {
   name: "HoursComponent",
@@ -188,6 +173,7 @@ export default {
     CollectionSaveContainer,
     CollectionEmptyContainer,
     CostsTable,
+    AddToInvoiceLinesDiv,
   },
   watch: {
     engineer_models: {
@@ -254,13 +240,6 @@ export default {
       total_dinero: null,
       totalVAT_dinero: null,
 
-      useOnInvoiceOptions: [
-        { text: this.$trans('Total'), value: OPTION_ACTIVITY_ACTIVITY_TOTALS },
-        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('None'), value: OPTION_NONE },
-      ],
-      useOnInvoiceSelected: null,
-
       usePriceOptions: {
         USE_PRICE_USER,
         USE_PRICE_SETTINGS,
@@ -271,6 +250,7 @@ export default {
       hasStoredData: false,
       costType: this.type,
       parentHasInvoiceLines: false,
+      invoiceLineService,
     }
   },
   computed: {
