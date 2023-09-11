@@ -252,6 +252,7 @@
           :engineer_models="engineer_models"
           :used_materials="used_materials"
           @invoiceLinesCreated="invoiceLinesCreated"
+          :invoiceLinesParent="invoiceLineService.collection"
         />
 
         <hr/>
@@ -264,6 +265,7 @@
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="invoiceLinesCreated"
+          :invoiceLinesParent="invoiceLineService.collection"
         />
 
         <hr/>
@@ -276,6 +278,7 @@
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="invoiceLinesCreated"
+          :invoiceLinesParent="invoiceLineService.collection"
         />
 
         <hr/>
@@ -288,6 +291,7 @@
           :distance_total="activity_totals.distance_total"
           :invoice_default_price_per_km="invoice_default_price_per_km"
           @invoiceLinesCreated="invoiceLinesCreated"
+          :invoiceLinesParent="invoiceLineService.collection"
         />
 
         <hr/>
@@ -300,6 +304,7 @@
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="invoiceLinesCreated"
+          :invoiceLinesParent="invoiceLineService.collection"
         />
 
         <hr/>
@@ -312,6 +317,7 @@
           :engineer_models="engineer_models"
           :customer="customer"
           @invoiceLinesCreated="invoiceLinesCreated"
+          :invoiceLinesParent="invoiceLineService.collection"
         />
 
         <hr/>
@@ -523,11 +529,15 @@ export default {
   methods: {
     // invoice lines
     invoiceLinesCreated(invoiceLines) {
-      for (let invoiceLine of invoiceLines) {
-        const id = this.getInvoiceLineId()
-        invoiceLine.id = id
-        console.log(`id: ${id}`)
-        this.invoiceLineService.collection.push(invoiceLine)
+      if (invoiceLines.length > 0) {
+        for (let invoiceLine of invoiceLines) {
+          const id = this.getInvoiceLineId()
+          invoiceLine.id = id
+          console.log(`id: ${id}`)
+          this.invoiceLineService.collection.push(invoiceLine)
+        }
+        const txt = invoiceLines.length === 1 ? 'invoice line' : 'invoice lines'
+        this.infoToast(this.$trans('Added'), this.$trans(`${invoiceLines.length} ${txt} added`))
       }
     },
     resetInvoiceLines() {

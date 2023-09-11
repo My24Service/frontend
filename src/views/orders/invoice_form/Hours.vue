@@ -16,7 +16,7 @@
           @buttonClicked="() => { emptyCollection() }"
         />
 
-        <div class="use-on-invoice-container">
+        <div class="use-on-invoice-container" v-if="!parentHasInvoiceLines">
           <h4>{{ $trans("What to add as invoice lines")}}</h4>
           <b-form-group>
             <b-form-radio-group
@@ -24,6 +24,14 @@
               :options="useOnInvoiceOptions"
             ></b-form-radio-group>
           </b-form-group>
+          <b-button
+            @click="() => { createInvoiceLines() }"
+            class="btn btn-primary update-button"
+            type="button"
+            variant="primary"
+          >
+            {{ $trans("Create invoice lines") }}
+          </b-button>
         </div>
 
       </div>
@@ -135,6 +143,11 @@ import invoiceMixin from "./mixin.js";
 import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 import {
   INVOICE_LINE_TYPE_ACTIVITY,
+  INVOICE_LINE_TYPE_HOURS_TYPE_ACTUAL_WORK,
+  INVOICE_LINE_TYPE_HOURS_TYPE_EXTRA_WORK,
+  INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL,
+  INVOICE_LINE_TYPE_HOURS_TYPE_WORK,
+  INVOICE_LINE_TYPE_USED_MATERIALS,
   OPTION_ACTIVITY_ACTIVITY_TOTALS,
   OPTION_ACTIVITY_ACTUAL_WORK,
   OPTION_NONE,
@@ -217,6 +230,10 @@ export default {
       type: [Object],
       default: null
     },
+    invoiceLinesParent: {
+      type: [Array],
+      default: null
+    },
   },
   data () {
     return {
@@ -252,7 +269,24 @@ export default {
       },
 
       hasStoredData: false,
-      costType: this.type
+      costType: this.type,
+      parentHasInvoiceLines: false,
+    }
+  },
+  computed: {
+    invoiceLineType() {
+      switch (this.type) {
+        case COST_TYPE_WORK_HOURS:
+          return INVOICE_LINE_TYPE_HOURS_TYPE_WORK
+        case COST_TYPE_TRAVEL_HOURS:
+          return INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL
+        case COST_TYPE_EXTRA_WORK:
+          return INVOICE_LINE_TYPE_HOURS_TYPE_EXTRA_WORK
+        case COST_TYPE_ACTUAL_WORK:
+          return INVOICE_LINE_TYPE_HOURS_TYPE_ACTUAL_WORK
+        default:
+          throw `invoiceLineType(), unknown type ${this.type}`
+      }
     }
   },
   async created() {
@@ -426,41 +460,14 @@ export default {
         console.error("getEngineerRateFor: model not found")
       }
     },
-    createInvoiceLines() {
-      switch (this.useOnInvoiceSelected) {
-        case OPTION_USER_TOTALS:
-          let invoiceLines = this.userTotals.map((activity) => {
-            this.createInvoiceLine(
-              INVOICE_LINE_TYPE_ACTIVITY,
-              `${this.$trans("Work hours")} ${this.getFullname(activity.user_id)}`,
-              activity.total_hours,
-              activity.vat,
-              activity.total
-            )
-          })
-          this.$emit('invoiceLinesCreated', invoiceLines)
-          break
-        case OPTION_ACTIVITY_ACTIVITY_TOTALS:
-          this.createInvoiceLine(
-            INVOICE_LINE_TYPE_ACTIVITY,
-            `${this.$trans("Work hours")}`,
-            this.activity_totals.hours_total,
-            this.totalVAT,
-            this.total
-          )
-          break
-        case OPTION_ACTIVITY_ACTUAL_WORK:
-          this.createInvoiceLine(
-            INVOICE_LINE_TYPE_ACTIVITY,
-            `${this.$trans("Work hours")}`,
-            this.activity_totals.actual_work_totals.actual_work,
-            this.actualWorkTotalVAT,
-            this.actualWorkTotal
-          )
-          break
-        case OPTION_NONE:
-          console.debug("not adding any activity")
-      }
+    getDescriptionUserTotalsInvoiceLine(cost) {
+      return `${this.getTitle()}: ${cost.user_full_name}`
+    },
+    getDescriptionOnlyTotalInvoiceLine() {
+      return this.getTitle()
+    },
+    getTotalAmountInvoiceLine() {
+      return this.distance_total
     },
   }
 }

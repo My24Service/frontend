@@ -16,7 +16,7 @@
           @buttonClicked="() => { emptyCollection() }"
         />
 
-        <div class="use-on-invoice-container">
+        <div class="use-on-invoice-container" v-if="!parentHasInvoiceLines">
           <h4>{{ $trans("What to add as invoice lines")}}</h4>
           <b-form-group>
             <b-form-radio-group
@@ -24,6 +24,14 @@
               :options="useOnInvoiceOptions"
             ></b-form-radio-group>
           </b-form-group>
+          <b-button
+            @click="() => { createInvoiceLines() }"
+            class="btn btn-primary update-button"
+            type="button"
+            variant="primary"
+          >
+            {{ $trans("Create invoice lines") }}
+          </b-button>
         </div>
 
       </div>
@@ -126,8 +134,8 @@
         </b-row>
         <TotalRow
           :items_total="distance_total"
-          :total="total"
-          :total_vat="totalVAT"
+          :total="total_dinero"
+          :total_vat="totalVAT_dinero"
         />
 
         <CollectionSaveContainer
@@ -143,10 +151,11 @@
 import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
-import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
+import invoiceLineService, {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 import {
+  INVOICE_LINE_TYPE_DISTANCE,
   OPTION_DISTANCE_TOTALS,
-  OPTION_NONE,
+  OPTION_NONE, OPTION_ONLY_TOTAL,
   OPTION_USER_TOTALS,
   USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
@@ -205,16 +214,19 @@ export default {
     invoice_default_price_per_km: {
       type: [String],
       default: null
-    }
+    },
+    invoiceLinesParent: {
+      type: [Array],
+      default: null
+    },
   },
   data() {
     return {
       isLoading: false,
       costService: new CostService(),
 
-      total: null,
-      totalVAT: null,
-      totalDistance: null,
+      total_dinero: null,
+      totalVAT_dinero: null,
 
       invoice_default_price_per_km_dinero: null,
 
@@ -236,7 +248,9 @@ export default {
       useOnInvoiceSelected: null,
 
       hasStoredData: false,
-      costType: COST_TYPE_DISTANCE
+      costType: COST_TYPE_DISTANCE,
+      parentHasInvoiceLines: false,
+      invoiceLineType: INVOICE_LINE_TYPE_DISTANCE,
     }
   },
   async created() {
@@ -256,6 +270,7 @@ export default {
     this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
 
     await this.loadData()
+    this.checkParentHasInvoiceLines(this.invoiceLinesParent)
 
     this.isLoading = false
   },
@@ -332,9 +347,19 @@ export default {
         this.getCurrency
       )
 
-      this.total = this.costService.getItemsTotal()
-      this.totalVAT = this.costService.getItemsTotalVAT()
+      this.total_dinero = this.costService.getItemsTotal()
+      this.totalVAT_dinero = this.costService.getItemsTotalVAT()
     },
+    getDescriptionUserTotalsInvoiceLine(cost) {
+      return `${this.$trans("distance")}: ${cost.user_full_name}`
+    },
+    getDescriptionOnlyTotalInvoiceLine() {
+      return `${this.$trans("Call out costs")}`
+    },
+    getTotalAmountInvoiceLine() {
+      return this.distance_total
+    },
+    // createInvoiceLines in mixin
   },
 }
 </script>

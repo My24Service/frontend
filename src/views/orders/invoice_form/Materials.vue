@@ -16,7 +16,7 @@
           @buttonClicked="() => { emptyCollection() }"
         />
 
-        <div class="use-on-invoice-container">
+        <div class="use-on-invoice-container" v-if="!parentHasInvoiceLines">
           <h4>{{ $trans("What to add as invoice lines")}}</h4>
           <b-form-group>
             <b-form-radio-group
@@ -24,6 +24,14 @@
               :options="useOnInvoiceOptions"
             ></b-form-radio-group>
           </b-form-group>
+          <b-button
+            @click="() => { createInvoiceLines() }"
+            class="btn btn-primary update-button"
+            type="button"
+            variant="primary"
+          >
+            {{ $trans("Create invoice lines") }}
+          </b-button>
         </div>
 
       </div>
@@ -116,8 +124,8 @@
         </b-row>
         <TotalRow
           :items_total="totalAmount"
-          :total="total"
-          :total_vat="totalVAT"
+          :total="total_dinero"
+          :total_vat="totalVAT_dinero"
         />
 
         <CollectionSaveContainer
@@ -133,11 +141,16 @@
 import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
-import {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
+import invoiceLineService, {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
 import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/orders/Cost";
 import {
-  OPTION_NONE, OPTION_USED_MATERIALS_TOTALS,
-  OPTION_USER_TOTALS, USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING
+  INVOICE_LINE_TYPE_USED_MATERIALS,
+  OPTION_NONE,
+  OPTION_ONLY_TOTAL,
+  OPTION_USER_TOTALS,
+  USE_PRICE_OTHER,
+  USE_PRICE_PURCHASE,
+  USE_PRICE_SELLING
 } from "./constants";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
@@ -186,6 +199,10 @@ export default {
       type: [Object],
       default: null
     },
+    invoiceLinesParent: {
+      type: [Array],
+      default: null
+    },
   },
   data() {
     return {
@@ -193,8 +210,8 @@ export default {
 
       materialModels: null,
 
-      total: null,
-      totalVAT: null,
+      total_dinero: null,
+      totalVAT_dinero: null,
       totalAmount: null,
 
       costService: new CostService(),
@@ -210,14 +227,16 @@ export default {
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
       useOnInvoiceOptions: [
-        { text: this.$trans('Total'), value: OPTION_USED_MATERIALS_TOTALS },
+        { text: this.$trans('Total'), value: OPTION_ONLY_TOTAL },
         { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
 
       hasStoredData: false,
-      costType: COST_TYPE_USED_MATERIALS
+      costType: COST_TYPE_USED_MATERIALS,
+      parentHasInvoiceLines: false,
+      invoiceLineType: INVOICE_LINE_TYPE_USED_MATERIALS
     }
   },
   async created() {
@@ -230,7 +249,7 @@ export default {
 
     // calc total amount
     this.totalAmount = this.used_materials.reduce(
-      (total, m) => (total + m.amount_decimal),
+      (total, m) => (total + m.amount),
       0
     )
 
@@ -245,9 +264,15 @@ export default {
 
     await this.loadData()
 
+    this.checkParentHasInvoiceLines(this.invoiceLinesParent)
+
     this.isLoading = false
   },
   methods: {
+    getMaterialName(material_id) {
+      const material = this.materialModels.find((m) => m.id === material_id)
+      return material ? material.name : this.$trans("unknown")
+    },
     async loadData() {
       this.costService.collection = []
       this.hasStoredData = false
@@ -257,6 +282,10 @@ export default {
         this.costService.collection = response.results.map((cost) => (
           new this.costService.model(cost)
         ))
+
+        this.total_dinero = this.costService.getItemsTotal()
+        this.totalVAT_dinero = this.costService.getItemsTotalVAT()
+
         this.hasStoredData = true
       } else {
         // map input to Cost model collection
@@ -330,8 +359,17 @@ export default {
         this.getCurrency
       )
 
-      this.total = this.costService.getItemsTotal()
-      this.totalVAT = this.costService.getItemsTotalVAT()
+      this.total_dinero = this.costService.getItemsTotal()
+      this.totalVAT_dinero = this.costService.getItemsTotalVAT()
+    },
+    getDescriptionUserTotalsInvoiceLine(cost) {
+      return `${this.$trans("material")}: ${cost.user_full_name}, ${this.getMaterialName(cost.material)}`
+    },
+    getDescriptionOnlyTotalInvoiceLine() {
+      return `${this.$trans("Call out costs")}`
+    },
+    getTotalAmountInvoiceLine() {
+      return this.totalAmount
     },
   }
 }

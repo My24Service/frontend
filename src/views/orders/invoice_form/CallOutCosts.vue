@@ -134,8 +134,8 @@
 import {toDinero} from "../../../utils";
 import {
   INVOICE_LINE_TYPE_CALL_OUT_COSTS,
-  OPTION_CALL_OUT_COSTS_ITEMS,
-  OPTION_CALL_OUT_COSTS_TOTALS,
+  OPTION_USER_TOTALS,
+  OPTION_ONLY_TOTAL,
   OPTION_NONE,
   USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
@@ -169,14 +169,6 @@ export default {
     CollectionSaveContainer,
     CollectionEmptyContainer,
     CostsTable,
-  },
-  watch: {
-    invoiceLinesParent: {
-      handler(newValue) {
-        this.parentHasInvoiceLines = !!newValue.find((line) => line.type === INVOICE_LINE_TYPE_CALL_OUT_COSTS)
-      },
-      deep: true
-    },
   },
   props: {
     order_pk: {
@@ -212,8 +204,8 @@ export default {
       totalAmount: null,
 
       useOnInvoiceOptions: [
-        { text: this.$trans('Total'), value: OPTION_CALL_OUT_COSTS_TOTALS },
-        { text: this.$trans('Items'), value: OPTION_CALL_OUT_COSTS_ITEMS },
+        { text: this.$trans('Total'), value: OPTION_ONLY_TOTAL },
+        { text: this.$trans('Items'), value: OPTION_USER_TOTALS },
         { text: this.$trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
@@ -226,7 +218,8 @@ export default {
 
       hasStoredData: false,
       costType: COST_TYPE_CALL_OUT_COSTS,
-      parentHasInvoiceLines: false
+      parentHasInvoiceLines: false,
+      invoiceLineType: INVOICE_LINE_TYPE_CALL_OUT_COSTS,
     }
   },
   async created() {
@@ -245,6 +238,7 @@ export default {
     )
 
     await this.loadData()
+    this.checkParentHasInvoiceLines(this.invoiceLinesParent)
 
     this.isLoading = false
   },
@@ -342,40 +336,15 @@ export default {
         0
       )
     },
-    createInvoiceLines() {
-      switch (this.useOnInvoiceSelected) {
-        case OPTION_CALL_OUT_COSTS_TOTALS:
-          const invoiceLine = new invoiceLineService.model({
-            type: INVOICE_LINE_TYPE_CALL_OUT_COSTS,
-            description: `${this.$trans("Call out costs")}`,
-            amount: this.totalAmount,
-            vat: this.totalVAT_dinero.toFormat('0.00'),
-            vat_currency: this.totalVAT_dinero.getCurrency(),
-            price: "0.00",
-            price_currency: "EUR",
-            total: this.total_dinero.toFormat('0.00'),
-            total_currency: this.total_dinero.getCurrency(),
-          })
-          this.$emit('invoiceLinesCreated', [invoiceLine])
-          break
-        case OPTION_CALL_OUT_COSTS_ITEMS:
-          const invoiceLines = this.costService.collection.map((cost) =>
-            invoiceLineService.newModelFromCost(
-              cost,
-              `${this.$trans("Call out costs")}`,
-              INVOICE_LINE_TYPE_CALL_OUT_COSTS
-            )
-          )
-          this.$emit('invoiceLinesCreated', invoiceLines)
-          break
-        case OPTION_NONE:
-          console.debug("not adding any activity")
-          break
-        default:
-          throw `createInvoiceLines: unknown option: ${this.useOnInvoiceSelected}`
-      }
-
-    }
+    getDescriptionUserTotalsInvoiceLine(cost) {
+      return `${this.$trans("Call out costs")}`
+    },
+    getDescriptionOnlyTotalInvoiceLine() {
+      return `${this.$trans("Call out costs")}`
+    },
+    getTotalAmountInvoiceLine() {
+      return this.totalAmount
+    },
   }
 }
 </script>
