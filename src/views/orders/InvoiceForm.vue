@@ -338,7 +338,7 @@
 
         <hr/>
 
-        <div class="invoice-lines">
+        <div class="invoice-lines" v-if="invoiceLineService.collection.length">
           <h3>{{ $trans("Invoice lines") }}</h3>
           <b-row>
             <b-col cols="4" class="header">
@@ -385,6 +385,92 @@
               </div>
             </b-col>
           </b-row>
+        </div>
+
+        <div class="new-invoice-line">
+          <b-container>
+            <b-row>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Description')"
+                  label-for="new-invoice-line-description"
+                >
+                  <b-form-input
+                    id="new-invoice-line-description"
+                    size="sm"
+                    v-model="invoiceLine.description"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Amount')"
+                  label-for="new-invoice-line-amount"
+                >
+                  <b-form-input
+                    @blur="invoiceLineAmountChanged"
+                    id="new-invoice-line-amount"
+                    size="sm"
+                    v-model="invoiceLine.amount"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Price')"
+                  label-for="new-invoice-line-price"
+                >
+                  <PriceInput
+                    id="new-invoice-line-price"
+                    v-model="invoiceLine.price"
+                    :currency="invoiceLine.price_currency"
+                    @priceChanged="(val) => invoiceLine.setPriceField('price', val) && invoiceLine.calcTotal()"
+                  />
+                </b-form-group>
+              </b-col>
+              <b-col cols="1" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('VAT type')"
+                  label-for="new-invoice-line-total"
+                >
+                  <VAT @vatChanged="changeVatTypeInvoiceLine" />
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Total')"
+                  label-for="new-invoice-line-total"
+                >
+                  <b-form-input
+                    id="new-invoice-line-total"
+                    readonly
+                    :value="invoiceLine.total_dinero.toFormat('$0.00')"
+                    size="sm"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('VAT')"
+                  label-for="new-invoice-line-vat"
+                >
+                  <b-form-input
+                    id="new-invoice-line-vat"
+                    readonly
+                    :value="invoiceLine.vat_dinero.toFormat('$0.00')"
+                    size="sm"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+
+          </b-container>
         </div>
 
         <div class="mx-auto">
@@ -462,6 +548,15 @@ export default {
       isLoading: false,
       submitClicked: false,
       invoice: invoiceService.getFields(),
+      invoiceLine: new InvoiceLineModel({
+        price: '0.00',
+        price_currency: this.$store.getters.getDefaultCurrency,
+        total: '0.00',
+        total_currency: this.$store.getters.getDefaultCurrency,
+        vat: '0.00',
+        vat_currency: this.$store.getters.getDefaultCurrency,
+        vat_type: this.$store.getters.getInvoiceDefaultVat,
+      }),
       errorMessage: null,
 
       invoice_id: null,
@@ -542,6 +637,14 @@ export default {
   },
   methods: {
     // invoice lines
+    invoiceLineAmountChanged() {
+      this.invoiceLine.amount = this.invoiceLine.amount.replace(',', '.')
+      this.invoiceLine.calcTotal()
+    },
+    changeVatTypeInvoiceLine(vat_type) {
+      this.invoiceLine.vat_type = vat_type
+      this.invoiceLine.calcTotal()
+    },
     invoiceLinesCreated(invoiceLines) {
       if (invoiceLines.length > 0) {
         for (let invoiceLine of invoiceLines) {

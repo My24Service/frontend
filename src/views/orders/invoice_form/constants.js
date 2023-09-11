@@ -2,8 +2,6 @@ export const OPTION_USER_TOTALS = 'user_totals'
 export const OPTION_ONLY_TOTAL = 'total'
 export const OPTION_NONE = 'none'
 
-export const OPTION_DISTANCE_TOTALS = 'distance_totals'
-
 export const INVOICE_LINE_TYPE_USED_MATERIALS = 'used-materials'
 export const INVOICE_LINE_TYPE_CALL_OUT_COSTS = 'call-out-costs'
 export const INVOICE_LINE_TYPE_DISTANCE = 'distance'

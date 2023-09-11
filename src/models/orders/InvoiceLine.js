@@ -2,7 +2,6 @@ import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
 import {CostModel} from "./Cost";
 
-
 class InvoiceLineModel {
   id
   type
@@ -10,6 +9,7 @@ class InvoiceLineModel {
   description
   amount
 
+  vat_type
   vat
   vat_currency
 
@@ -27,6 +27,14 @@ class InvoiceLineModel {
     }
 
     this.setPriceFields(this)
+  }
+
+  calcTotal() {
+    const total_dinero = this.price_dinero.multiply(this.amount)
+    this.setPriceField('total', total_dinero)
+
+    const vat = total_dinero.multiply(parseInt(this.vat_type)/100)
+    this.setPriceField('vat', vat)
   }
 }
 
