@@ -245,82 +245,88 @@
 
         <hr/>
 
-        <MaterialsComponent
-          :order_pk="order_pk"
-          :customer="customer"
-          :material_models="material_models"
-          :engineer_models="engineer_models"
-          :used_materials="used_materials"
-          @invoiceLinesCreated="invoiceLinesCreated"
-          :invoiceLinesParent="invoiceLineService.collection"
-        />
+        <div v-if="used_materials.length > 0">
+          <MaterialsComponent
+            :order_pk="order_pk"
+            :customer="customer"
+            :material_models="material_models"
+            :engineer_models="engineer_models"
+            :used_materials="used_materials"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
 
-        <hr/>
+        <div v-if="activity_totals.work_total !== '00:00'">
+          <HoursComponent
+            :order_pk="order_pk"
+            :type="COST_TYPE_WORK_HOURS"
+            :hours_total="activity_totals.work_total"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
 
-        <HoursComponent
-          :order_pk="order_pk"
-          :type="COST_TYPE_WORK_HOURS"
-          :hours_total="activity_totals.work_total"
-          :user_totals="activity_totals.user_totals"
-          :engineer_models="engineer_models"
-          :customer="customer"
-          @invoiceLinesCreated="invoiceLinesCreated"
-          :invoiceLinesParent="invoiceLineService.collection"
-        />
+        <div v-if="activity_totals.travel_total !== '00:00'">
+          <HoursComponent
+            :order_pk="order_pk"
+            :type="COST_TYPE_TRAVEL_HOURS"
+            :hours_total="activity_totals.travel_total"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
 
-        <hr/>
+        <div v-if="activity_totals.distance_total > 0">
+          <DistanceComponent
+            :order_pk="order_pk"
+            :customer="customer"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :distance_total="activity_totals.distance_total"
+            :invoice_default_price_per_km="invoice_default_price_per_km"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
 
-        <HoursComponent
-          :order_pk="order_pk"
-          :type="COST_TYPE_TRAVEL_HOURS"
-          :hours_total="activity_totals.travel_total"
-          :user_totals="activity_totals.user_totals"
-          :engineer_models="engineer_models"
-          :customer="customer"
-          @invoiceLinesCreated="invoiceLinesCreated"
-          :invoiceLinesParent="invoiceLineService.collection"
-        />
+        <div v-if="activity_totals.extra_work_total !== '00:00'">
+          <HoursComponent
+            :order_pk="order_pk"
+            :type="COST_TYPE_EXTRA_WORK"
+            :hours_total="activity_totals.extra_work_total"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
 
-        <hr/>
-
-        <DistanceComponent
-          :order_pk="order_pk"
-          :customer="customer"
-          :user_totals="activity_totals.user_totals"
-          :engineer_models="engineer_models"
-          :distance_total="activity_totals.distance_total"
-          :invoice_default_price_per_km="invoice_default_price_per_km"
-          @invoiceLinesCreated="invoiceLinesCreated"
-          :invoiceLinesParent="invoiceLineService.collection"
-        />
-
-        <hr/>
-
-        <HoursComponent
-          :order_pk="order_pk"
-          :type="COST_TYPE_EXTRA_WORK"
-          :hours_total="activity_totals.extra_work_total"
-          :user_totals="activity_totals.user_totals"
-          :engineer_models="engineer_models"
-          :customer="customer"
-          @invoiceLinesCreated="invoiceLinesCreated"
-          :invoiceLinesParent="invoiceLineService.collection"
-        />
-
-        <hr/>
-
-        <HoursComponent
-          :order_pk="order_pk"
-          :type="COST_TYPE_ACTUAL_WORK"
-          :hours_total="activity_totals.actual_work_total"
-          :user_totals="activity_totals.user_totals"
-          :engineer_models="engineer_models"
-          :customer="customer"
-          @invoiceLinesCreated="invoiceLinesCreated"
-          :invoiceLinesParent="invoiceLineService.collection"
-        />
-
-        <hr/>
+        <div v-if="activity_totals.actual_work_total !== '00:00'">
+          <HoursComponent
+            :order_pk="order_pk"
+            :type="COST_TYPE_ACTUAL_WORK"
+            :hours_total="activity_totals.actual_work_total"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
 
         <CallOutCostsComponent
           :order_pk="order_pk"
