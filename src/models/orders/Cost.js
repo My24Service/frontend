@@ -226,7 +226,7 @@ class CostService extends BaseModel {
 
   getItemsTotal() {
     if (!this.collection.length) {
-      return null
+      return  toDinero("0.00", "EUR")
     }
 
     return this.collection.reduce(
@@ -237,7 +237,7 @@ class CostService extends BaseModel {
 
   getItemsTotalVAT() {
     if (!this.collection.length) {
-      return null
+      return toDinero("0.00", "EUR")
     }
 
     return this.collection.reduce(

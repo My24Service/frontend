@@ -123,8 +123,8 @@
         </b-row>
         <TotalRow
           :items_total="hours_total"
-          :total="total"
-          :total_vat="totalVAT"
+          :total="total_dinero"
+          :total_vat="totalVAT_dinero"
         />
 
         <CollectionSaveContainer
@@ -251,8 +251,8 @@ export default {
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
 
-      total: null,
-      totalVAT: null,
+      total_dinero: null,
+      totalVAT_dinero: null,
 
       useOnInvoiceOptions: [
         { text: this.$trans('Total'), value: OPTION_ACTIVITY_ACTIVITY_TOTALS },
@@ -314,6 +314,8 @@ export default {
         this.costService.collection = response.results.map((cost) => (
           new this.costService.model(cost)
         ))
+        this.total_dinero = this.costService.getItemsTotal()
+        this.totalVAT_dinero = this.costService.getItemsTotalVAT()
         this.hasStoredData = true
       } else {
         // map input to Cost model collection
@@ -400,8 +402,8 @@ export default {
         this.getCurrency
       )
 
-      this.total = this.costService.getItemsTotal()
-      this.totalVAT = this.costService.getItemsTotalVAT()
+      this.total_dinero = this.costService.getItemsTotal()
+      this.totalVAT_dinero = this.costService.getItemsTotalVAT()
 
       return true
     },
