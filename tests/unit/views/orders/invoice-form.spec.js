@@ -208,7 +208,8 @@ describe('CallOutCosts', () => {
       },
       propsData: {
         invoice_default_call_out_costs: '0.00',
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: []
       }
     })
 
@@ -227,7 +228,8 @@ describe('CallOutCosts', () => {
       },
       propsData: {
         invoice_default_call_out_costs: '10.50',
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: []
       }
     })
 
@@ -260,7 +262,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total,
-        invoice_default_price_per_km: '1.00'
+        invoice_default_price_per_km: '1.00',
+        invoiceLinesParent: [],
       }
     })
 
@@ -282,7 +285,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total,
-        invoice_default_price_per_km: '1.00'
+        invoice_default_price_per_km: '1.00',
+        invoiceLinesParent: [],
       }
     })
 
@@ -305,7 +309,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total,
-        invoice_default_price_per_km: '1.00'
+        invoice_default_price_per_km: '1.00',
+        invoiceLinesParent: [],
       }
     })
 
@@ -327,7 +332,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total,
-        invoice_default_price_per_km: '1.00'
+        invoice_default_price_per_km: '1.00',
+        invoiceLinesParent: [],
       }
     })
 
@@ -369,7 +375,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total * digit,
-        invoice_default_price_per_km: '1.15'
+        invoice_default_price_per_km: '1.15',
+        invoiceLinesParent: [],
       }
     })
 
@@ -407,7 +414,8 @@ describe('Materials', () => {
         material_models: invoiceResponse.data.material_models,
         used_materials: invoiceResponse.data.used_materials,
         engineer_models: invoiceResponse.data.engineer_models,
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: [],
       }
     })
 
@@ -428,7 +436,8 @@ describe('Materials', () => {
         material_models: invoiceResponse.data.material_models,
         engineer_models: invoiceResponse.data.engineer_models,
         used_materials: invoiceResponse.data.used_materials,
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: [],
       }
     })
 
@@ -476,7 +485,8 @@ describe('Hours', () => {
         hours_total: invoiceResponse.data.activity_totals.work_total,
         user_totals: invoiceResponse.data.activity_totals.user_totals,
         engineer_models,
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: [],
       }
     })
 
@@ -503,7 +513,8 @@ describe('Hours', () => {
         hours_total: invoiceResponse.data.activity_totals.work_total,
         user_totals: invoiceResponse.data.activity_totals.user_totals,
         engineer_models,
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: [],
       }
     })
 
