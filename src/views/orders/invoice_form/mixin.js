@@ -1,7 +1,16 @@
 import {OPTION_NONE, OPTION_ONLY_TOTAL, OPTION_USER_TOTALS} from "./constants";
-import invoiceLineService from "../../../models/orders/InvoiceLine";
 
 let invoiceMixin = {
+  data() {
+    return {
+      useOnInvoiceOptions: [
+        { text: this.$trans('Items'), value: OPTION_USER_TOTALS },
+        { text: this.$trans('Total'), value: OPTION_ONLY_TOTAL },
+        { text: this.$trans('None'), value: OPTION_NONE },
+      ],
+      useOnInvoiceSelected: null,
+    }
+  },
   watch: {
     invoiceLinesParent: {
       handler(newValue) {
@@ -54,10 +63,14 @@ let invoiceMixin = {
       }
       return user.full_name
     },
+    createInvoiceLinesClicked(selected) {
+      this.useOnInvoiceSelected = selected
+      this.createInvoiceLines()
+    },
     createInvoiceLines() {
       switch (this.useOnInvoiceSelected) {
         case OPTION_ONLY_TOTAL:
-          const invoiceLine = new invoiceLineService.model({
+          const invoiceLine = new this.invoiceLineService.model({
             type: this.invoiceLineType,
             description: this.getDescriptionOnlyTotalInvoiceLine(),
             amount: this.getTotalAmountInvoiceLine(),
@@ -65,6 +78,7 @@ let invoiceMixin = {
             vat_currency: this.totalVAT_dinero.getCurrency(),
             price: "0.00",
             price_currency: "EUR",
+            price_text: "*",
             total: this.total_dinero.toFormat('0.00'),
             total_currency: this.total_dinero.getCurrency(),
           })
@@ -72,7 +86,7 @@ let invoiceMixin = {
           break
         case OPTION_USER_TOTALS:
           const invoiceLines = this.costService.collection.map((cost) =>
-            invoiceLineService.newModelFromCost(
+            this.invoiceLineService.newModelFromCost(
               cost,
               this.getDescriptionUserTotalsInvoiceLine(cost),
               this.invoiceLineType

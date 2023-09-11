@@ -16,23 +16,11 @@
           @buttonClicked="() => { emptyCollection() }"
         />
 
-        <div class="use-on-invoice-container" v-if="!parentHasInvoiceLines">
-          <h4>{{ $trans("What to add as invoice lines")}}</h4>
-          <b-form-group>
-            <b-form-radio-group
-              v-model="useOnInvoiceSelected"
-              :options="useOnInvoiceOptions"
-            ></b-form-radio-group>
-          </b-form-group>
-          <b-button
-            @click="() => { createInvoiceLines() }"
-            class="btn btn-primary update-button"
-            type="button"
-            variant="primary"
-          >
-            {{ $trans("Create invoice lines") }}
-          </b-button>
-        </div>
+        <AddToInvoiceLinesDiv
+          v-if="!parentHasInvoiceLines"
+          :useOnInvoiceOptions="useOnInvoiceOptions"
+          @buttonClicked="createInvoiceLinesClicked"
+        />
 
       </div>
 
@@ -141,7 +129,7 @@
 import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
-import invoiceLineService, {InvoiceLineModel} from "../../../models/orders/InvoiceLine";
+import invoiceLineService from "../../../models/orders/InvoiceLine";
 import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/orders/Cost";
 import {
   INVOICE_LINE_TYPE_USED_MATERIALS,
@@ -161,6 +149,7 @@ import TotalRow from "./TotalRow";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
+import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 
 export default {
   name: "MaterialsComponent",
@@ -177,6 +166,7 @@ export default {
     CollectionSaveContainer,
     CollectionEmptyContainer,
     CostsTable,
+    AddToInvoiceLinesDiv,
   },
   props: {
     order_pk: {
@@ -226,17 +216,11 @@ export default {
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
-      useOnInvoiceOptions: [
-        { text: this.$trans('Total'), value: OPTION_ONLY_TOTAL },
-        { text: this.$trans('User totals'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('None'), value: OPTION_NONE },
-      ],
-      useOnInvoiceSelected: null,
-
       hasStoredData: false,
       costType: COST_TYPE_USED_MATERIALS,
       parentHasInvoiceLines: false,
-      invoiceLineType: INVOICE_LINE_TYPE_USED_MATERIALS
+      invoiceLineType: INVOICE_LINE_TYPE_USED_MATERIALS,
+      invoiceLineService
     }
   },
   async created() {

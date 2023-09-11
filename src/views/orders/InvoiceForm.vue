@@ -341,43 +341,48 @@
         <div class="invoice-lines">
           <h3>{{ $trans("Invoice lines") }}</h3>
           <b-row>
-            <b-col cols="6" class="header">
+            <b-col cols="4" class="header">
               {{ $trans("Description") }}
             </b-col>
             <b-col cols="2" class="header">
               {{ $trans("Amount") }}
             </b-col>
             <b-col cols="2" class="header">
-              {{ $trans("VAT") }}
+              {{ $trans("Price") }}
             </b-col>
             <b-col cols="2" class="header">
-              {{ $trans("Price") }}
+              {{ $trans("Total") }}
+            </b-col>
+            <b-col cols="2" class="header">
+              {{ $trans("VAT") }}
             </b-col>
           </b-row>
           <b-row v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id">
-            <b-col cols="6">
+            <b-col cols="4">
               <b-form-textarea
                 v-model="invoiceLine.description"
                 rows="2"
               ></b-form-textarea>
             </b-col>
             <b-col cols="2">
-              <b-form-input
-                v-model="invoiceLine.amount"
-                size="sm"
-              ></b-form-input>
+              {{ invoiceLine.amount }}
             </b-col>
             <b-col cols="2">
-              <b-form-input
-                v-model="invoiceLine.vat"
-                size="sm"
-              ></b-form-input>
+              {{ invoiceLine.price_text }}
             </b-col>
             <b-col cols="2">
-              <b-form-input
-                v-model="invoiceLine.price"
-                size="sm"
-              ></b-form-input>
+              {{ invoiceLine.total_dinero.toFormat('$0.00') }}
+            </b-col>
+            <b-col cols="2">
+              {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
+            </b-col>
+          </b-row>
+
+          <b-row v-if="invoiceLinesHaveTotals">
+            <b-col>
+              <div class="float-right">
+                <i>* {{ $trans("Prices are combined in totals") }}</i>
+              </div>
             </b-col>
           </b-row>
         </div>
@@ -494,6 +499,9 @@ export default {
     isCreate() {
       return !this.pk
     },
+    invoiceLinesHaveTotals() {
+      return this.invoiceLineService.collection.find((line) => line.price_text === '*')
+    }
   },
   async created() {
     if (this.isCreate) {
