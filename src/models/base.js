@@ -26,12 +26,28 @@ class BaseModel {
   isEdit = false
   editPk = null
   editItem = null
+  modelDefaults = {}
 
-  // TODO: finish this for adding items in quotation form
+  // TODO: finish this for managing items in invoice form
   // TODO: also implement this for orderlines/infolines/etc
+  newEditItem(data) {
+    if (!data) {
+      data = this.modelDefaults
+    }
+    this.editItem = new this.model(data)
+  }
   deleteCollectionItem(index) {
     this.deletedItems.push(this.collection[index])
     this.collection.splice(index, 1)
+  }
+  deleteCollectionItemByid(id) {
+    const item = this.collection.find((m) => m.id === id)
+    if (!item) {
+      throw `deleteCollectionItemByid: item with id: ${id} not found`
+    }
+
+    this.deletedItems.push(item)
+    this.collection = this.collection.filter((m) => m.id !== id)
   }
   editCollectionItem(item, index) {
     this.editIndex = index
@@ -40,7 +56,7 @@ class BaseModel {
     this.editItem = item
   }
   emptyCollectionItem() {
-    this.editItem = new this.model({})
+    this.newEditItem()
     this.editPk = null
   }
   doEditCollectionItem() {
@@ -53,9 +69,7 @@ class BaseModel {
     this.emptyCollectionItem()
   }
   addCollectionItem() {
-    this.collection.push(new this.model({
-      ...this.editItem
-    }))
+    this.collection.push(this.editItem)
     this.emptyCollectionItem()
   }
 
