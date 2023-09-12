@@ -53,9 +53,9 @@
           </b-col>
           <b-col cols="2" />
         </b-row>
-        <b-row v-for="activity in costService.collection" :key="activity.user_id" class="material_row">
+        <b-row v-for="activity in costService.collection" :key="activity.user" class="material_row">
           <b-col cols="3">
-            {{ getFullname(activity.user_id) }}
+            {{ getFullname(activity.user) }}
           </b-col>
           <b-col cols="2">
             {{ activity.hours_total }}
@@ -176,6 +176,12 @@ export default {
     AddToInvoiceLinesDiv,
   },
   watch: {
+    user_totals: {
+      handler(newValue) {
+        console.log('user totals changed', newValue)
+      },
+      deep: true
+    },
     engineer_models: {
       handler(newValue) {
         // console.log('engineer_models changed', newValue)
@@ -388,7 +394,8 @@ export default {
       return true
     },
     getPrice(activity) {
-      const user = this.engineer_models.find((m) => m.id === activity.user_id)
+      const user_id = activity.user ? activity.user : activity.user_id
+      const user = this.engineer_models.find((m) => m.id === user_id)
       if (user) {
         switch (activity.use_price) {
           case this.usePriceOptions.USE_PRICE_USER:
@@ -403,11 +410,12 @@ export default {
             throw `getPrice: unknown use_price for engineer: ${activity.use_price}`
         }
       } else {
-        console.error("getPrice: model not found")
+        console.error(`getPrice: user model ${activity.user} not found`, this.engineer_models)
       }
     },
     getCurrency(activity) {
-      const user = this.engineer_models.find((m) => m.id === activity.user_id)
+      const user_id = activity.user ? activity.user : activity.user_id
+      const user = this.engineer_models.find((m) => m.id === user_id)
       if (user) {
         switch (activity.use_price) {
           case this.usePriceOptions.USE_PRICE_USER:
@@ -422,11 +430,12 @@ export default {
             throw `getCurrency: unknown use_price for engineer: ${activity.use_price}`
         }
       } else {
-        console.error("getCurrency: model not found")
+        console.error(`getCurrency: user model ${activity.user} not found`, activity, this.engineer_models)
       }
     },
     getEngineerRateFor(obj, usePrice) {
-      const user = this.engineer_models.find((m) => m.id === obj.user_id)
+      const user_id = obj.user ? obj.user : obj.user_id
+      const user = this.engineer_models.find((m) => m.id === user_id)
       if (user) {
         switch (usePrice) {
           case this.usePriceOptions.USE_PRICE_USER:
@@ -439,7 +448,7 @@ export default {
             throw `getEngineerRateFor: unknown usePrice for engineer: ${usePrice}`
         }
       } else {
-        console.error("getEngineerRateFor: model not found")
+        console.error(`getEngineerRateFor: user model ${obj.user} not found`, this.engineer_models)
       }
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
