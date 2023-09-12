@@ -47,7 +47,7 @@
                       <PriceInput
                         v-model="material.price_purchase_ex"
                         :currency="material.price_purchase_ex_currency"
-                        @priceChanged="(val) => material.setPurchasePrice(val) && updateMaterialTotals()"
+                        @priceChanged="(val) => material.setPurchasePrice(val)"
                       />
                     </b-col>
                     <b-col cols="2">
@@ -56,14 +56,10 @@
                 </b-container>
               </b-col>
               <b-col cols="1">
-                <p class="flex pl-3">
-                  <b-form-input
-                    v-model="material.margin_perc"
-                    size="sm"
-                    class="input-margin"
-                  ></b-form-input>
-                  <span class="percentage-container">%</span>
-                </p>
+                <MarginInput
+                  :margin="material.margin_perc"
+                  @inputChanged="(val) => marginChanged(material, val)"
+                />
               </b-col>
               <b-col cols="3">
                 <b-container>
@@ -73,14 +69,14 @@
                         :ref="`selling_price_${material.id}`"
                         v-model="material.price_selling_ex"
                         :currency="material.price_selling_ex_currency"
-                        @priceChanged="(val) => material.setSellingPrice(val) && updateMaterialTotals()"
+                        @priceChanged="(val) => material.setSellingPrice(val)"
                       />
                     </b-col>
                     <b-col cols="2">
                       <p class="flex">
                         <span class="value-container">
                           <b-link
-                            @click="() => { material.recalcSelling() && updateMaterialTotals() }"
+                            @click="() => { material.recalcSelling() }"
                             :title="`${$trans('Recalculate selling price with margin')}`"
                           >
                             <b-icon-arrow-repeat aria-hidden="true"></b-icon-arrow-repeat>
@@ -129,7 +125,7 @@
                 <PriceInput
                   v-model="user.engineer.hourly_rate"
                   :currency="user.engineer.hourly_rate_currency"
-                  @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateHoursTotals()"
+                  @priceChanged="(val) => user.engineer.setHourlyRate(val)"
                 />
               </b-col>
               <b-col cols="1">
@@ -170,7 +166,7 @@
                 <PriceInput
                   v-model="customer.hourly_rate_engineer"
                   :currency="customer.hourly_rate_engineer_currency"
-                  @priceChanged="(val) => customer.setHourlyRateEngineer(val) && updateHoursTotals()"
+                  @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
                 />
               </b-col>
               <b-col cols="1">
@@ -196,7 +192,7 @@
                 <PriceInput
                   v-model="customer.call_out_costs"
                   :currency="customer.call_out_costs_currency"
-                  @priceChanged="(val) => customer.setCallOutCosts(val) && updateHoursTotals()"
+                  @priceChanged="(val) => customer.setCallOutCosts(val)"
                 />
               </b-col>
               <b-col cols="1">
@@ -524,7 +520,7 @@ import invoiceLineService from '../../models/orders/InvoiceLine.js'
 import { InvoiceLineModel } from '../../models/orders/InvoiceLine.js'
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
-import materialService from "../../models/inventory/Material";
+import materialService, {MaterialModel} from "../../models/inventory/Material";
 import { RateEngineerUserModel } from "../../models/company/UserEngineer";
 import engineerService from "../../models/company/UserEngineer";
 import customerService from "../../models/customer/Customer";
@@ -546,6 +542,7 @@ import {
   COST_TYPE_WORK_HOURS
 } from "../../models/orders/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
+import MarginInput from "./invoice_form/MarginInput";
 
 export default {
   name: 'InvoiceForm',
@@ -560,6 +557,7 @@ export default {
     CallOutCostsComponent,
     VAT,
     CustomerDetail,
+    MarginInput,
   },
   props: {
     uuid: {
@@ -656,7 +654,11 @@ export default {
       this.order_pk = invoiceData.order_pk
 
       this.activity_totals = invoiceData.activity_totals
-      this.material_models = invoiceData.material_models
+      this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
+        ...m,
+        margin_perc: this.invoice_default_margin
+      }))
+
       this.used_materials = invoiceData.used_materials
 
       this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
@@ -746,17 +748,18 @@ export default {
 
       let updatedEngineerUserJson = await engineerService.update(user_id, minimalModel)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
-      this.updateActivityTotals()
 
       this.infoToast(this.$trans('Updated'), this.$trans('Hourly rate engineer has been updated'))
     },
     // materials
+    marginChanged(obj, val) {
+      obj.margin_perc = val
+    },
     async updateMaterial(material_id) {
       let material = this.material_models.find((m) => m.id === material_id)
       delete material.image
       const updatedMaterialJson = await materialService.update(material_id, material)
       material.setPriceFields(updatedMaterialJson)
-      this.updateTotals()
 
       this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
     },
