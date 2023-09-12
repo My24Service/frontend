@@ -9,6 +9,7 @@ export const INVOICE_LINE_TYPE_HOURS_TYPE_WORK = 'work'
 export const INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL = 'travel'
 export const INVOICE_LINE_TYPE_HOURS_TYPE_EXTRA_WORK = 'extra-work'
 export const INVOICE_LINE_TYPE_HOURS_TYPE_ACTUAL_WORK = 'actual-work'
+export const INVOICE_LINE_TYPE_MANUAL = 'manual'
 
 // new from API
 export const USE_PRICE_SETTINGS = 'settings'
