@@ -12,6 +12,7 @@ class CostModel {
   amount_decimal
   amount_duration
   amount_duration_read
+  amount_duration_secs
   use_price
 
   margin_perc
@@ -66,7 +67,7 @@ class CostModel {
       case COST_TYPE_TRAVEL_HOURS:
       case COST_TYPE_EXTRA_WORK:
       case COST_TYPE_ACTUAL_WORK:
-        const seconds = this.amount_duration ? this.amount_duration : 0
+        const seconds = this.amount_duration_secs ? this.amount_duration_secs : 0
         let total = this.price_dinero.multiply(seconds)
         return total.divide(60*60)
       case COST_TYPE_DISTANCE:
