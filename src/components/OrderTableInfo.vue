@@ -23,7 +23,8 @@
         <span v-if="order.order_tel">{{ $trans('Tel.') }}: {{ order.order_tel }}<br/></span>
         <span v-if="order.order_email">{{ $trans('Email') }}: <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/></span>
         {{ $trans('Date') }}: {{ order.order_date }}<br/>
-        {{ $trans('Created') }}: {{ order.created }}
+        {{ $trans('Created') }}: {{ order.created }}<br/>
+        {{ $trans('Remarks') }}: <b>{{ order.remarks }}</b>
 
         <p v-if="memberType === 'temps'">
           {{ $trans('Required users') }}: {{ order.required_users }}<br/>
@@ -33,10 +34,6 @@
         <p v-if="memberType === 'maintenance'">
           {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
         </p>
-        <span v-if="order.remarks">
-            <br/>
-            {{ $trans('Remarks') }}: <b>{{ order.remarks }}</b>
-          </span>
       </b-col>
     </b-row>
     <b-row v-if="order.orderlines.length || hasInfolines" >
