@@ -496,7 +496,7 @@ describe('Hours', () => {
     expect(trs.length).to.equal(5)
   })
 
-  it('has a total of €230.00 and VAT €48.30', async () => {
+  it('has a total of €365.00 and VAT €76.65', async () => {
     const engineer_models = invoiceResponse.data.engineer_models.map((m) => new RateEngineerUserModel({
       ...m,
       margin_perc: 0

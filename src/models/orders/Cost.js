@@ -68,6 +68,7 @@ class CostModel {
       case COST_TYPE_EXTRA_WORK:
       case COST_TYPE_ACTUAL_WORK:
         const seconds = this.amount_duration_secs ? this.amount_duration_secs : 0
+        console.log({seconds})
         let total = this.price_dinero.multiply(seconds)
         return total.divide(60*60)
       case COST_TYPE_DISTANCE:
@@ -143,7 +144,7 @@ class CostService extends BaseModel {
       ...this.getDefaultCostProps(),
       ...defaultPropsView,
       hours_total: activity.work,
-      amount_duration: parseInt(activity.work_secs),
+      amount_duration_secs: parseInt(activity.work_secs),
       user: activity.user_id,
       price,
       price_currency,
@@ -158,7 +159,7 @@ class CostService extends BaseModel {
       ...this.getDefaultCostProps(),
       ...defaultPropsView,
       hours_total: activity.travel_total,
-      amount_duration: parseInt(activity.travel_total_secs),
+      amount_duration_secs: parseInt(activity.travel_total_secs),
       user: activity.user_id,
       price,
       price_currency,
@@ -173,7 +174,7 @@ class CostService extends BaseModel {
       ...this.getDefaultCostProps(),
       ...defaultPropsView,
       hours_total: activity.extra_work,
-      amount_duration: parseInt(activity.extra_work_secs),
+      amount_duration_secs: parseInt(activity.extra_work_secs),
       user: activity.user_id,
       price,
       price_currency,
@@ -188,7 +189,7 @@ class CostService extends BaseModel {
       ...this.getDefaultCostProps(),
       ...defaultPropsView,
       hours_total: activity.actual_work,
-      amount_duration: parseInt(activity.actual_work_secs),
+      amount_duration_secs: parseInt(activity.actual_work_secs),
       user: activity.user_id,
       price,
       price_currency,
