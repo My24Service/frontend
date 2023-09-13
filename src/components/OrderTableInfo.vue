@@ -24,7 +24,6 @@
         <span v-if="order.order_email">{{ $trans('Email') }}: <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/></span>
         {{ $trans('Date') }}: {{ order.order_date }}<br/>
         {{ $trans('Created') }}: {{ order.created }}<br/>
-        {{ $trans('Remarks') }}: <b>{{ order.remarks }}</b>
 
         <p v-if="memberType === 'temps'">
           {{ $trans('Required users') }}: {{ order.required_users }}<br/>
@@ -97,7 +96,12 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="12" v-if="order.customer_remarks && order.customer_remarks != ''">
+      <b-col cols="12" v-if="order.remarks && order.remarks !== ''">
+        {{ $trans('Remarks') }}: {{ order.remarks }}
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="12" v-if="order.customer_remarks && order.customer_remarks !== ''">
         {{ $trans('Customer remarks') }}: {{ order.customer_remarks }}
       </b-col>
     </b-row>
