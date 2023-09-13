@@ -68,7 +68,6 @@ class CostModel {
       case COST_TYPE_EXTRA_WORK:
       case COST_TYPE_ACTUAL_WORK:
         const seconds = this.amount_duration_secs ? this.amount_duration_secs : 0
-        console.log({seconds})
         let total = this.price_dinero.multiply(seconds)
         return total.divide(60*60)
       case COST_TYPE_DISTANCE:
