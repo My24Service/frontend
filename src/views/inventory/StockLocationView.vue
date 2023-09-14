@@ -1,46 +1,56 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-detail">
-      <h3>{{ $trans('Stock location details') }}</h3>
-      <b-row>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
-              <b-td>{{ stockLocation.name }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Identifier') }}:</strong></b-td>
-              <b-td>{{ stockLocation.identifier }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="12">
-          <h4>{{ $trans('Inventory') }}</h4>
-          <b-table
-            dark
-            borderless
-            small
-            id="location-materials-table"
-            :fields="inventoryFields"
-            :items="inventory"
-            responsive="sm"
-          ></b-table>
-        </b-col>
-      </b-row>
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}
-        </b-button>
-      </footer>
-    </div>
-  </b-overlay>
+  <div class='app-page'>
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="box"></b-icon>
+          <span class="backlink" @click="goBack">{{ $trans('Stock Locations') }}</span> / 
+          {{ stockLocation.name }} <small class="dimmed">({{ stockLocation.identifier }})</small>
+        </h3>
+        <router-link :to="{name: 'stock-location-edit', params: {pk: this.pk}}" class="btn">{{ `${$trans('Edit')} ${$trans('stock location')}` }}</router-link>
+      </div>
+    </header>
+    
+      <div class="page-detail">
+        <!--
+        <div class="col-1-3">
+          <b-row>
+            <b-col cols="6">
+              <b-table-simple>
+                <b-tr>
+                  <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
+                  <b-td>{{ stockLocation.name }}</b-td>
+                </b-tr>
+              </b-table-simple>
+            </b-col>
+            <b-col cols="6">
+              <b-table-simple>
+                <b-tr>
+                  <b-td><strong>{{ $trans('Identifier') }}:</strong></b-td>
+                  <b-td>{{ stockLocation.identifier }}</b-td>
+                </b-tr>
+              </b-table-simple>
+            </b-col>
+          </b-row>
+        </div>
+        -->
+        <div class="panel col-2-3">
+          <h6>{{ $trans('Inventory') }} &middot; {{ stockLocation.name }}</h6>
+          <b-row>
+            <b-col cols="12">
+              <b-table
+                small
+                id="location-materials-table"
+                :fields="inventoryFields"
+                :items="inventory"
+                responsive="sm"
+              ></b-table>
+            </b-col>
+          </b-row>
+        </div>
+      </div>
+    
+  </div>
 </template>
 
 <script>
