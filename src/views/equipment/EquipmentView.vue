@@ -4,11 +4,11 @@
 
       <div class='page-title'>
         <h3>
-          <span @click="goBack">
-            <b>Equipment</b>
-          </span>
+          <b-icon icon="tools"></b-icon>
+          <span @click="goBack" class="backlink">Equipment</span>
           / {{ equipment.name }}
         </h3>
+        <router-link :to="{name: editLink, params: {pk: this.pk}}" class="btn primary">Edit equipment</router-link>
       </div>
       <SearchModal
           id="search-modal"
@@ -139,6 +139,15 @@ export default {
         },
       ],
     }
+  },
+  computed: {
+    editLink() {
+      if (this.hasBranches) {
+        return 'equipment-equipment-edit'
+      } else {
+        return 'customers-equipment-edit'
+      }
+    },
   },
   props: {
     pk: {

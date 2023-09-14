@@ -1,259 +1,274 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New location') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit location') }}</h2>
-        <b-row v-if="!hasBranches && !isCustomer">
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              label-class="p-sm-0"
-              v-bind:label="$trans('Search customer')"
-              label-for="location_customer_search"
-            >
-              <multiselect
-                v-if="!isLoading"
-                id="location_customer_search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="customersSearch"
-                :multiple="false"
-                :loading="isLoading"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="true"
-                :hide-selected="true"
-                @search-change="getCustomersDebounced"
-                @select="selectCustomer"
-                :custom-label="customerLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.location.customer.$error : null">
-                {{ $trans('Please select a customer') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row v-if="hasBranches && !isEmployee">
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              label-class="p-sm-0"
-              v-bind:label="$trans('Search branches')"
-              label-for="location_branch_search"
-            >
-              <multiselect
-                v-if="!isLoading"
-                id="location_branch_search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="branchesSearch"
-                :multiple="false"
-                :loading="isLoading"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="true"
-                :hide-selected="true"
-                @search-change="getBranchesDebounced"
-                @select="selectBranch"
-                :custom-label="branchLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.location.branch.$error : null">
-                {{ $trans('Please select a branch') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row v-if="customer && !hasBranches">
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Customer')"
-              label-for="location_customer_name"
-            >
-              <b-form-input
-                id="location_customer_name"
-                size="sm"
-                v-model="customer.name"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Address')"
-              label-for="location_customer_address"
-            >
-              <b-form-input
-                id="location_customer_address"
-                size="sm"
-                v-model="customer.address"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('City')"
-              label-for="location_customer_city"
-            >
-              <b-form-input
-                id="location_customer_city"
-                size="sm"
-                v-model="customer.city"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Country')"
-              label-for="location_customer_country_code"
-            >
-              <b-form-input
-                id="location_customer_country_code"
-                size="sm"
-                v-model="customer.country_code"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row v-if="branch && hasBranches">
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Branch')"
-              label-for="location_branch_name"
-            >
-              <b-form-input
-                id="location_branch_name"
-                size="sm"
-                v-model="branch.name"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Address')"
-              label-for="location_branch_address"
-            >
-              <b-form-input
-                id="location_branch_address"
-                size="sm"
-                v-model="branch.address"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('City')"
-              label-for="location_branch_city"
-            >
-              <b-form-input
-                id="location_branch_city"
-                size="sm"
-                v-model="branch.city"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Country')"
-              label-for="location_branch_country_code"
-            >
-              <b-form-input
-                id="location_branch_country_code"
-                size="sm"
-                v-model="branch.country_code"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="8" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Name')"
-              label-for="location-name"
-            >
-              <b-form-input
-                v-model="location.name"
-                id="location-name"
-                size="sm"
-                ref="name"
-                :state="isSubmitClicked ? !v$.location.name.$error : null"
-              ></b-form-input> 
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.location.name.$error : null">
-                {{ $trans('Please enter a name') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col size="4">
-            <b-form-group
-              v-bind:label="$trans('Building')"
-              label-for="location_building"
-            >
-              <b-form-select
-                id="location_building"
-                v-model="location.building"
-                :options="buildings"
-                size="sm"
-                value-field="id"
-                text-field="name"
-              ></b-form-select>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
-              {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-            <b-button
-              @click="submitFormBulk"
-              :disabled="buttonDisabled"
-              type="button"
-              variant="success"
-              v-if="isCreate"
-            >
-              {{ $trans('Bulk') }}
-            </b-button>
-          </footer>
+  <div class='app-page'>
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="shop-window"></b-icon>
+          <span class="backlink" @click="cancelForm">{{ $trans('Locations') }}</span> /
+          <span v-if="isCreate">{{ $trans('New location') }}</span>
+          <span v-if="!isCreate">{{ location.name }} <span class="dimmed">{{ $trans('edit') }} </span></span>
+        </h3>
+        <div class='flex-columns'>
+          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            {{ $trans('Cancel') }}
+          </b-button>
+          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            {{ $trans('Submit') }}
+          </b-button>
+          <b-button
+            @click="submitFormBulk"
+            :disabled="buttonDisabled"
+            type="button"
+            variant="success"
+            v-if="isCreate"
+          >
+            {{ $trans('Bulk') }}
+          </b-button>
         </div>
-      </b-form>
+      </div>
+    </header>
+
+    <div class="page-detail">
+      <b-overlay :show="isLoading" rounded="sm">
+        <b-form class="flex-columns">
+          <div class="panel col-1-3">
+            <h6>{{ $trans('Customer') }} / {{ $trans('Branch') }}</h6>
+            <b-row v-if="!hasBranches && !isCustomer">
+              <b-col cols="12" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Search customer')"
+                  label-for="location_customer_search"
+                >
+                  <multiselect
+                    v-if="!isLoading"
+                    id="location_customer_search"
+                    track-by="id"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="customersSearch"
+                    :multiple="false"
+                    :loading="isLoading"
+                    :internal-search="false"
+                    :clear-on-select="true"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="true"
+                    :hide-selected="true"
+                    @search-change="getCustomersDebounced"
+                    @select="selectCustomer"
+                    :custom-label="customerLabel"
+                  >
+                    <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  </multiselect>
+                  <b-form-invalid-feedback
+                    :state="isSubmitClicked ? !v$.location.customer.$error : null">
+                    {{ $trans('Please select a customer') }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row v-if="hasBranches && !isEmployee">
+              <b-col cols="12" role="group">
+                <b-form-group
+                  label-size="sm"
+                  label-class="p-sm-0"
+                  v-bind:label="$trans('Search branches')"
+                  label-for="location_branch_search"
+                >
+                  <multiselect
+                    v-if="!isLoading"
+                    id="location_branch_search"
+                    track-by="id"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="branchesSearch"
+                    :multiple="false"
+                    :loading="isLoading"
+                    :internal-search="false"
+                    :clear-on-select="true"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="true"
+                    :hide-selected="true"
+                    @search-change="getBranchesDebounced"
+                    @select="selectBranch"
+                    :custom-label="branchLabel"
+                  >
+                    <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  </multiselect>
+                  <b-form-invalid-feedback
+                    :state="isSubmitClicked ? !v$.location.branch.$error : null">
+                    {{ $trans('Please select a branch') }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row v-if="customer && !hasBranches">
+              <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Customer')"
+                  label-for="location_customer_name"
+                >
+                  <b-form-input
+                    id="location_customer_name"
+                    size="sm"
+                    v-model="customer.name"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Address')"
+                  label-for="location_customer_address"
+                >
+                  <b-form-input
+                    id="location_customer_address"
+                    size="sm"
+                    v-model="customer.address"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('City')"
+                  label-for="location_customer_city"
+                >
+                  <b-form-input
+                    id="location_customer_city"
+                    size="sm"
+                    v-model="customer.city"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Country')"
+                  label-for="location_customer_country_code"
+                >
+                  <b-form-input
+                    id="location_customer_country_code"
+                    size="sm"
+                    v-model="customer.country_code"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row v-if="branch && hasBranches">
+              <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Branch')"
+                  label-for="location_branch_name"
+                >
+                  <b-form-input
+                    id="location_branch_name"
+                    size="sm"
+                    v-model="branch.name"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Address')"
+                  label-for="location_branch_address"
+                >
+                  <b-form-input
+                    id="location_branch_address"
+                    size="sm"
+                    v-model="branch.address"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('City')"
+                  label-for="location_branch_city"
+                >
+                  <b-form-input
+                    id="location_branch_city"
+                    size="sm"
+                    v-model="branch.city"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Country')"
+                  label-for="location_branch_country_code"
+                >
+                  <b-form-input
+                    id="location_branch_country_code"
+                    size="sm"
+                    v-model="branch.country_code"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </div>
+          <div class="panel col-2-3">
+            <h6>{{ $trans('Location') }}</h6>
+            <b-row>
+              <b-col cols="8" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Location name')"
+                  label-for="location-name"
+                >
+                  <b-form-input
+                    v-model="location.name"
+                    id="location-name"
+                    size="sm"
+                    ref="name"
+                    :state="isSubmitClicked ? !v$.location.name.$error : null"
+                  ></b-form-input> 
+                  <b-form-invalid-feedback
+                    :state="isSubmitClicked ? !v$.location.name.$error : null">
+                    {{ $trans('Please enter a name') }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              </b-col>
+              <b-col size="4">
+                <b-form-group
+                  v-bind:label="$trans('Building')"
+                  label-size="sm"
+                  label-for="location_building"
+                >
+                  <b-form-select
+                    id="location_building"
+                    v-model="location.building"
+                    :options="buildings"
+                    size="sm"
+                    value-field="id"
+                    text-field="name"
+                  ></b-form-select>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </div>
+        </b-form>
+      </b-overlay>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
