@@ -3,6 +3,19 @@
     <header>
       <div class="page-title">
         <h3><b-icon icon="shop-window"></b-icon> Locations</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: newLink}" class="btn btn-primary">{{ $trans('Add location') }}</router-link>
+        </b-button-toolbar>
       </div>
     </header>
 
@@ -19,42 +32,28 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :router_name="newLink"
-                  v-bind:title="$trans('New location')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
         <template #cell(name)="data">
-          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
+          <router-link :to="{name: viewLink, params: {pk: parseInt(data.item.id)}}">
             {{ data.item.name }}
           </router-link>
         </template>
         <template #cell(customer)="data">
           <!-- <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}"> -->
-            {{ data.item.customer_branch_view.name }} &middot; {{ data.item.customer_branch_view.city }}
+            {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>
           <!-- </router-link> -->
         </template>
         <template #cell(branch)="data">
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
-            {{ data.item.customer_branch_view.name }} &middot; {{ data.item.customer_branch_view.city }}
+            {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>
           </router-link>
         </template>
         <template #cell(icons)="data">
@@ -71,12 +70,12 @@
           </div>
         </template>
       </b-table>
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Location')"
-      />
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Location')"
+    />
 
     <SearchModal
       id="search-modal"

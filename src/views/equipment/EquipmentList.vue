@@ -2,7 +2,19 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="tools"></b-icon> Equipment</h3>
+        <h3><b-icon icon="tools"></b-icon>Equipment</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link class="btn primary" :to="{name: newLink}">Add equipment</router-link>
+        </b-button-toolbar>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -16,27 +28,8 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :router_name="newLink"
-                  v-bind:title="$trans('New equipment')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
@@ -53,11 +46,11 @@
           </span>
         </template>
         <template #cell(customer)="data">
-            {{ data.item.customer_branch_view.name }} &middot; {{ data.item.customer_branch_view.city }}
+            {{ data.item.customer_branch_view.name }} <span class="dimmed"> &middot; {{ data.item.customer_branch_view.city }}</span>
         </template>
         <template #cell(branch)="data">
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
-            {{ data.item.customer_branch_view.name }} &middot; {{ data.item.customer_branch_view.city }}
+            {{ data.item.customer_branch_view.name }} <span class="dimmed"> &middot; {{ data.item.customer_branch_view.city }}</span>
           </router-link>
         </template>
         <template #cell(icons)="data">
@@ -81,12 +74,12 @@
           </div>
         </template>
       </b-table>
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Equipment')"
-      />
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Equipment')"
+    />
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -170,8 +163,8 @@ export default {
         {key: 'latest_state', label: this.$trans('State')},
         {key: 'brand', label: this.$trans('Brand')},
         {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
-        {key: 'icons'}
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
@@ -181,7 +174,7 @@ export default {
         {key: 'brand', label: this.$trans('Brand')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
-        {key: 'icons'}
+        {key: 'icons', label: ''}
       ],
       equipmentFieldsCustomerNonPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
@@ -189,7 +182,7 @@ export default {
         {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
-        {key: 'icons'}
+        {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchNonPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
@@ -197,7 +190,7 @@ export default {
         {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
-        {key: 'icons'}
+        {key: 'icons', label: ''}
       ],
       equipment_pk: null,
       state: new EquipmentStateModel({}),

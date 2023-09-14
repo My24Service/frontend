@@ -4,11 +4,11 @@
 
       <div class='page-title'>
         <h3>
-          <span @click="goBack">
-            <b>Equipment</b>
-          </span>
+          <b-icon icon="shop-window"></b-icon> 
+          <span @click="goBack" class="backlink">Locations</span>
           / {{ location.name }}
         </h3>
+        <router-link :to="{name: editLink, params: {pk: this.pk}}" class="btn primary">{{$trans('Edit location')}}</router-link>
       </div>
       <SearchModal
           id="search-modal"
@@ -51,7 +51,7 @@
             </div>
           </template>
           <template #table-busy>
-            <div class="text-center text-danger my-2">
+            <div class="text-center my-2">
               <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
               <strong>{{ $trans('Loading...') }}</strong>
             </div>
@@ -141,6 +141,15 @@ export default {
       this.loadData()
     }
   },
+  computed: {
+    editLink() {
+      if (this.hasBranches) {
+        return 'equipment-location-edit'
+      } else {
+        return 'customers-location-edit'
+      }
+    },
+  },
   methods: {
     listLink() {
       if (this.hasBranches) {
@@ -178,7 +187,7 @@ export default {
         this.$refs['order-stats'].render(
           orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
         )
-
+        console.info(this.location)
       } catch(error) {
         console.log('error fetching location detail data', error)
         this.errorToast(this.$trans('Error fetching location detail'))
