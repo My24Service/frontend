@@ -5,46 +5,19 @@
         <div class="page-title">
           <h3>
             <b-icon icon="building"></b-icon>
-            <router-link :to="{name: 'customer-list'}">Customers</router-link>
+            <router-link :to="{name: 'customer-list'}">Customers</router-link> / {{  customer.name }}
           </h3>
-          <div class="flex-columns">
           <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
             <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit customer') }}
           </router-link>
-        </div>
+        
         </div>
       </header>
 
       <div class="page-detail customer-details" v-if="!isCustomer">
         <div class='flex-columns'>
-          <div class="panel sidebar">
-            <h3>{{ customer.name }}</h3>
-            <dl>
-              <dt>Address</dt>
-              <dd>
-                <address>
-                  {{ customer.address }}, {{ customer.city }} {{  customer.country_code }},
-                  {{ customer.postal.toUpperCase() }}
-                </address>
-              </dd>
-              
-              <dt>{{ $trans('Contact') }}</dt>
-              <dd>
-                {{ customer.contact }} <br />
-                {{ customer.email || '(email unknown)' }} <br>
-                <span v-if="customer.tel">{{ customer.tel }} <br></span>
-                <span v-if="customer.mobile">{{ customer.mobile }}</span>
-              </dd>
-
-              <dt>Customer ID</dt>
-              <dd>{{ customer.id }}</dd>
-              
-              <dt v-if="customer.external_identifier">Ext. ID</dt>
-              <dd v-if="customer.external_identifier">{{ customer.external_identifier }}</dd>
-              <dt :v-if="customer.remarks.trim()">{{ $trans('Remarks') }}</dt>
-              <dd v-if="customer.remarks">{{ customer.remarks }}</dd>
-            </dl>
-            
+          <div class="panel col-1-3">
+            <CustomerCard :customer="customer" />
           </div>
             
           <div class="panel col-2-3">
@@ -53,7 +26,7 @@
                 <!-- <h6>Orders</h6> -->
                 <div class="overflow-auto">
                   <ul class="listing order-list">
-                    <li v-for="item in orders">
+                    <li v-for="item in orders" :key="item.id">
                       <OrderTableInfo
                         v-bind:order="item"
                       />
@@ -264,6 +237,9 @@
                   </span>
                 </b-row>
               </b-tab>
+              <b-tab :title="$trans('Documents')">
+                <DocumentList :customerPk="this.pk"/>
+              </b-tab>
               <b-tab title="Insights" key="stats">
                 <OrderStats
                   v-if="!isLoading"
@@ -289,11 +265,11 @@
 import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
 import orderModel from '../../models/orders/Order.js'
 import customerModel from '../../models/customer/Customer.js'
-import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import CustomerCard from '../../components/CustomerCard.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
+import DocumentList from '../customer/DocumentList.vue'
 import {componentMixin} from "../../utils";
 import locationModel from "../../models/equipment/location";
 import equipmentModel from "../../models/equipment/equipment";
@@ -301,11 +277,11 @@ import equipmentModel from "../../models/equipment/equipment";
 export default {
   mixins: [componentMixin],
   components: {
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
+    CustomerCard,
     OrderTableInfo,
     SearchModal,
     OrderStats,
+    DocumentList
   },
   data() {
     return {
@@ -320,21 +296,10 @@ export default {
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
-      breadcrumb: [
-        {
-          text: this.$trans('Customers'),
-          to: {name: 'customer-list'}
-        },
-        {
-          text: this.$trans('Detail'),
-          active: true
-        },
-      ],
       maintenanceContracts: [],
       maintenanceContractFields: [
         {key: 'contract', label: this.$trans('Contract')},
       ],
-
       locations: [],
       locationFieldsCustomer: [
         {key: 'name', label: this.$trans('Name')},
@@ -453,6 +418,7 @@ export default {
 
     async loadMaintenanceContracts() {
       try {
+        maintenanceContractModel.setListArgs(`customer=${this.pk}`)
         const data = await maintenanceContractModel.list()
         this.maintenanceContracts = data.results
       } catch(error) {
@@ -468,6 +434,7 @@ export default {
           orderModel.setListArgs(`customer_relation=${this.pk}`)
           console.log('not Customer', this.pk)
         }
+        
         const results = await orderModel.list()
         this.orders = results.results
         this.isLoading = false
