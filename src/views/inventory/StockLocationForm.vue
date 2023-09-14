@@ -1,65 +1,69 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New stock location') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit stock location') }}</h2>
-        <b-row>
-          <b-col cols="6" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Name')"
-              label-for="stock-location-name"
-            >
-              <b-form-input
-                v-model="stockLocation.name"
-                id="stock-location-name"
-                size="sm"
-                :state="isSubmitClicked ? !v$.stockLocation.name.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.stockLocation.name.$error : null">
-                {{ $trans('Please enter a name') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Identifier')"
-              label-for="stock-location-identifier"
-            >
-              <b-form-input
-                id="stock-location-identifier"
-                size="sm"
-                v-model="stockLocation.identifier"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Show in stats?')"
-              label-for="stock-location-show_in_stats"
-            >
-              <b-form-checkbox
-                v-model="stockLocation.show_in_stats"
-              >
-              </b-form-checkbox>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <div class="mx-auto">
-          <footer class="modal-footer">
+    <div class="app-page">
+      <header>
+        <div class="page-title">
+          <h3>
+
+            <span v-if="isCreate">{{ $trans('New stock location') }}</span>
+            <span v-if="!isCreate">{{ $trans('Edit stock location') }}</span>
+          </h3>  
+          <div class="flex-columns">
             <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
             </b-button>
             <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
             </b-button>
-          </footer>
+          </div>
         </div>
-      </b-form>
+      </header>
+      <div class="page-detail panel">
+        <b-form>
+          <b-row>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Name')"
+                label-for="stock-location-name"
+              >
+                <b-form-input
+                  v-model="stockLocation.name"
+                  id="stock-location-name"
+                  size="sm"
+                  :state="isSubmitClicked ? !v$.stockLocation.name.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.stockLocation.name.$error : null">
+                  {{ $trans('Please enter a name') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Identifier')"
+                label-for="stock-location-identifier"
+              >
+                <b-form-input
+                  id="stock-location-identifier"
+                  size="sm"
+                  v-model="stockLocation.identifier"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                label-for="stock-location-show_in_stats"
+                v-bind:label="$trans('Stats')"
+              >
+                <b-form-checkbox v-model="stockLocation.show_in_stats">{{ $trans('Show in stats') }}</b-form-checkbox>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-form>
+      </div>
     </div>
   </b-overlay>
 </template>
