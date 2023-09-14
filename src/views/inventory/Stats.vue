@@ -1,7 +1,9 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>{{ $trans('Total sales in ' + year ) }}</h3>
+      <div class='page-title'>
+        <h3><b-icon icon="bar-chart-line-fill"></b-icon>{{ $trans('Total sales in ' + year ) }}</h3>
+      </div>
     </header>
     <div class="app-detail panel">
       <b-row align-v="center">
@@ -70,28 +72,29 @@
         class="data-table"
       >
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
         <template #cell(sum_amount)="data">
-          {{ data.item.sum_amount }} ({{ data.item.amount_perc }}%)
+          {{ data.item.sum_amount }} 
+          <span>({{ data.item.amount_perc }}%)</span>
         </template>
         <template #cell(sum_price_selling)="data">
-          {{ data.item.sum_price_selling.toFixed(2) }} EUR ({{ data.item.amount_selling_perc }}%)
+          &euro; {{ data.item.sum_price_selling.toFixed(2) }} 
+          <span>({{ data.item.amount_selling_perc }}%)</span>
         </template>
         <template #cell(sum_price_purchase)="data">
-          {{ data.item.sum_price_purchase.toFixed(2) }} EUR
+          &euro; {{ data.item.sum_price_purchase.toFixed(2) }}
         </template>
         <template #cell(profit)="data">
-          {{ data.item.profit.toFixed(2) }} EUR
+          &euro; {{ data.item.profit.toFixed(2) }}
         </template>
       </b-table>
     </div>
   </div>
 </template>
-
 <script>
 import BarChart from "@/components/BarChart.vue"
 import totalSalesModel from '@/models/inventory/TotalSales.js'

@@ -1,7 +1,9 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>{{ $trans('Stats in ' + year ) }}</h3>
+      <div class='page-title'>
+        <h3><b-icon icon="bar-chart-line-fill"></b-icon>{{ $trans('Stats in ' + year ) }}</h3>
+      </div>
     </header>
 
     <SearchModal
@@ -51,7 +53,7 @@
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
@@ -69,9 +71,9 @@
           {{ data.item.margin_product.toFixed(2) }} %
         </template>
         <template #cell(sum_inventory)="data">
-          <p v-for="(value, key, index) in data.item.sum_inventory" :key="index">
+          <span v-for="(value, key, index) in data.item.sum_inventory" :key="index">
           {{ inventoryHeaders[key] }}: {{ value }}
-          </p>
+          </span>
         </template>
       </b-table>
     </div>
