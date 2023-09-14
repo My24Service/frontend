@@ -2,7 +2,21 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-lock"></b-icon> Maintenance Contracts</h3>
+        <h3><b-icon icon="file-earmark-lock"></b-icon> {{ $trans('Maintenance contracts') }}</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'maintenance-contract-add'}" class="btn primary">
+            {{ $trans('Add contract') }}
+          </router-link> 
+        </b-button-toolbar>
       </div>
     </header>
     <SearchModal
@@ -32,62 +46,35 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="maintenance-contract-add"
-                  v-bind:title="$trans('New maintenance contract')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-<!--        <template #cell(name)="data">-->
-<!--          <router-link :to="{name: 'maintenance-equipment', params: {contractPk: data.item.id}}">-->
-<!--            {{ data.item.name }}-->
-<!--          </router-link>-->
-<!--        </template>-->
+        <template #cell(name)="data">
+          <router-link :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}">
+            {{ data.item.name }} 
+          </router-link>
+        </template>
         <template #cell(totals)="data">
-          <table class="totals">
-            <tr>
-              <td><strong>{{ $trans('Created orders') }}</strong></td>
-              <td>{{ data.item.created_orders}}</td>
-            </tr>
-            <tr>
-              <td><strong>{{ $trans('# contract equipment') }}</strong></td>
-              <td>{{ data.item.num_equipment}}</td>
-            </tr>
-            <tr>
-              <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
-              <td>{{ data.item.num_order_equipment}}</td>
-            </tr>
-          </table>
+          <strong v-if="data.item.created_orders">{{ data.item.created_orders}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('created orders') }}</small>
+          &nbsp;
+          <strong v-if="data.item.num_equipment">{{ data.item.num_equipment}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('contract equipment') }}</small>
+          &nbsp;
+          <strong v-if="data.item.num_order_equipment">{{ data.item.num_order_equipment}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('equipment in orders') }}</small>
         </template>
         <template #cell(customer_view_name)="data">
           {{ data.item.customer_view.name }}
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="maintenance-contract-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -95,13 +82,13 @@
           </div>
         </template>
       </b-table>
-
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Contract')"
-      />
     </div>
+
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Contract')"
+    />
   </div>
 </template>
 
@@ -145,7 +132,7 @@ export default {
         {key: 'contract_value', label: this.$trans('Contract value'), sortable: true},
         {key: 'remarks', label: this.$trans('Remarks'), sortable: true},
         {key: 'totals', label: this.$trans('Totals'), sortable: true},
-        {key: 'icons'}
+        {key: 'icons', label: ''}
       ],
     }
   },
@@ -183,6 +170,7 @@ export default {
       this.isLoading = true
 
       try {
+        this.model.setListArgs('customer=')
         const data = await this.model.list()
         this.maintenanceContracts = data.results
         this.isLoading = false
