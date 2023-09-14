@@ -62,10 +62,10 @@
           {{ data.item.num_sales }}
         </template>
         <template #cell(turnover)="data">
-          {{ data.item.turnover.toFixed(2) }} EUR
+          &euro; {{ data.item.turnover.toFixed(2) }}
         </template>
         <template #cell(profit)="data">
-          {{ data.item.profit.toFixed(2) }} EUR
+          &euro; {{ data.item.profit.toFixed(2) }}
         </template>
         <template #cell(margin_product)="data">
           {{ data.item.margin_product.toFixed(2) }} %
