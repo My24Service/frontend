@@ -12,6 +12,7 @@
           v-model="username"
           :state="usernameState"
           required
+          autocomplete="username"
         ></b-form-input>
       </b-form-group>
       <b-form-group
@@ -23,6 +24,7 @@
         <b-form-input
           id="password-input"
           type="password"
+          autocomplete="current-password"
           v-model="password"
           :state="passwordState"
           required
