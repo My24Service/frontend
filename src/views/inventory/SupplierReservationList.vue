@@ -3,7 +3,19 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3>Reservations</h3>
+        <h3><b-icon icon="file-earmark-lock"></b-icon>Reservations</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'supplier-reservation-add'}" class="btn primary">Add reservation</router-link>
+        </b-button-toolbar>
       </div>
     </header>
 
@@ -35,54 +47,48 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="supplier-reservation-add"
-                  v-bind:title="$trans('New reservation')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
+
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
+            <strong>{{ $trans('Loading reservations...') }}</strong>
           </div>
         </template>
+
         <template #cell(id)="data">
-          <b-row>
-            <b-col cols="3">
-              <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.id}}">
-                {{ data.item.supplier_view.name }}, {{ data.item.supplier_view.city }}
-              </router-link><br/>
-              {{ $trans('Created') }}: {{ data.item.created }}
-            </b-col>
-            <b-col cols="9">
-              <b-table
-                id="supplier-reservation-materials-table"
-                dark borderless small
-                sort-by="supplier"
-                :busy='isLoading'
-                :fields="material_fields"
-                :items="data.item.materials"
-                responsive="sm"
-                class="data-table"
-                sort-icon-left
+          
+          <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.id}}">
+            {{ data.item.id }}. {{ data.item.supplier_view.name }}, {{ data.item.supplier_view.city }}
+          </router-link>
+        
+          <!-- TODO: delete this table probably
+            <b-table
+              id="supplier-reservation-materials-table"
+              dark borderless small
+              sort-by="supplier"
+              :busy='isLoading'
+              :fields="material_fields"
+              :items="data.item.materials"
+              responsive="sm"
+              class="data-table"
+              sort-icon-left
               >
-              </b-table>
-            </b-col>
-          </b-row>
+            </b-table>
+          -->
+        </template>
+
+        <template #cell(materials)="data">
+
+          <span v-if="data.item.materials.length" :title="`${data.item.materials.length} materials`">
+              {{data.item.materials.length}} material{{  data.item.materials.length > 1 ? 's' : ''}}
+              &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
+              <span class="dimmed">
+                {{ data.item.materials[0].amount }} {{ data.item.materials[0].material_view.name }}
+                <small v-if="data.item.materials.length > 1" class="dimmed">
+                  and {{data.item.materials.length - 1 }} more
+                </small>
+              </span>
+            </span>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -98,18 +104,17 @@
           </div>
         </template>
       </b-table>
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Reservation')"
-      />
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Reservation')"
+    />
   </div>
 </template>
 
 <script>
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
@@ -120,7 +125,6 @@ import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
-    IconLinkPlus,
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
@@ -137,8 +141,10 @@ export default {
       isLoading: false,
       reservations: [],
       fields: [
-        {thAttr: {width: '85%'}, key: 'id', label: this.$trans('Reservation')},
-        {thAttr: {width: '15%'}, key: 'icons'}
+        {key: 'id', label: this.$trans('Reservation'), sortable: true},
+        {key: 'materials', label: this.$trans('Materials')},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'icons', label: ''},
       ],
       material_fields: [
         {key: 'material_view.name', label: this.$trans('Product')},

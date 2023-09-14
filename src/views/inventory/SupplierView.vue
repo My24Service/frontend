@@ -1,81 +1,69 @@
 <template>
-  
   <div class="app-page">
     <header>
-      <h3>{{ $trans('Supplier info') }}</h3>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="shop"></b-icon>
+          <span class="backlink" @click="goBack">{{ $trans('Suppliers') }}</span> / {{ supplier.name }}
+        </h3>
+        <div class="flex-columns">
+          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
+            {{ $trans('Back') }}</b-button>
+          <router-link :to="{name: 'supplier-edit', params: {pk: this.pk}}" class="btn"> {{$trans('Edit supplier') }}</router-link>
+          </div>
+      </div>
     </header>
-    <div class="panel app-detail">
-    <b-row>
-      <b-col cols="6">
-        <b-table-simple>
-          <b-tr>
-            <b-td><strong>{{ $trans('Identifier') }}:</strong></b-td>
-            <b-td>{{ supplier.identifier }}</b-td>
-          </b-tr>
-          <b-tr>
-            <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
-            <b-td>{{ supplier.name }}</b-td>
-          </b-tr>
-          <b-tr>
-            <b-td><strong>{{ $trans('Address') }}:</strong></b-td>
-            <b-td>{{ supplier.address }}</b-td>
-          </b-tr>
-          <b-tr>
-            <b-td><strong>{{ $trans('Country/Postal/city') }}:</strong></b-td>
-            <b-td>
-              {{ supplier.country_code }}-
-              {{ supplier.postal }} {{ supplier.city }}
-            </b-td>
-          </b-tr>
-        </b-table-simple>
-      </b-col>
-      <b-col cols="6">
-        <b-table-simple>
-          <b-tr>
-            <b-td><strong>{{ $trans('Contact') }}:</strong></b-td>
-            <b-td>{{ supplier.order_contact }}</b-td>
-          </b-tr>
-          <b-tr>
-            <b-td><strong>{{ $trans('Tel.') }}:</strong></b-td>
-            <b-td>{{ supplier.order_tel }}</b-td>
-          </b-tr>
-          <b-tr>
-            <b-td><strong>{{ $trans('Mobile') }}:</strong></b-td>
-            <b-td>{{ supplier.order_mobile }}</b-td>
-          </b-tr>
-          <b-tr>
-            <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
-            <b-td>
-              <b-link class="px-1" v-bind:href="`mailto:${supplier.order_email}`">
-                {{ supplier.order_email }}
-              </b-link>
-            </b-td>
-          </b-tr>
-          <b-tr>
-            <b-td><strong>{{ $trans('Remarks') }}:</strong></b-td>
-            <b-td>{{ supplier.remarks }}</b-td>
-          </b-tr>
-        </b-table-simple>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="12">
-        <h4>{{ $trans('Materials') }}</h4>
+    <div class="page-detail flex-columns">
+      <div class="panel col-1-3">
+        <h6>{{ $trans('Supplier') }}</h6>
+        <dl>
+          <dt>{{ $trans('Identifier') }}</dt>
+          <dd>{{ supplier.identifier }}</dd>
+        
+          <dt>{{ $trans('Name') }}</dt>
+          <dd>{{ supplier.name }}</dd>
+        
+          <dt>{{ $trans('Address') }}</dt>
+          <dd>{{ supplier.address }}</dd>
+        
+          <dt>{{ $trans('Country/Postal/city') }}</dt>
+          <dd>
+            {{ supplier.country_code }}-
+            {{ supplier.postal }} {{ supplier.city }}
+          </dd>
+          
+        </dl>
+      
+        <dl>
+          
+          <dt>{{ $trans('Contact') }}</dt>
+          <dd>{{ supplier.order_contact }}</dd>
+        
+          <dt>{{ $trans('Tel.') }}</dt>
+          <dd>{{ supplier.order_tel }}</dd>
+        
+          <dt>{{ $trans('Mobile') }}</dt>
+          <dd>{{ supplier.order_mobile }}</dd>
+        
+          <dt>{{ $trans('Email') }}</dt>
+          <dd>
+            <b-link class="px-1" v-bind:href="`mailto:${supplier.order_email}`">
+              {{ supplier.order_email }}
+            </b-link>
+          </dd>
+        
+          <dt>{{ $trans('Remarks') }}</dt>
+          <dd>{{ supplier.remarks }}</dd>
+          
+        </dl>
+      </div>
+      <div class="panel col-2-3">
+        <h6>{{ $trans('Materials') }}</h6>
         <b-table
-          dark
-          borderless
-          small
           id="materials-table"
           :fields="materialFields"
-          :items="materials"
-          responsive="sm"
         ></b-table>
-        </b-col>
-    </b-row>
-    <footer class="modal-footer">
-      <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-        {{ $trans('Back') }}</b-button>
-    </footer>
+      </div>
     </div>
   </div>
   

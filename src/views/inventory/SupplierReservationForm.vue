@@ -1,123 +1,262 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New reservation') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit reservation') }}</h2>
-        <b-row>
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Supplier')"
-              label-for="supplier-reservation-supplier-search"
-            >
-              <multiselect
-                id="supplier-reservation-supplier-search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="suppliers"
-                :multiple="false"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                :hide-selected="true"
-                @search-change="getSuppliers"
-                @select="selectSupplier"
-                :custom-label="supplierLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Supplier')"
-              label-for="supplier-reservation-supplier-name"
-            >
-              <b-form-input
-                v-model="selectedSupplier.name"
-                id="supplier-reservation-supplier-name"
-                readonly
-                size="sm"
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="!v$.supplierReservation.supplier.$error">
-                {{ $trans('Please select a supplier') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Address')"
-              label-for="supplier-reservation-supplier-address"
-            >
-              <b-form-input
-                v-model="selectedSupplier.address"
-                id="supplier-reservation-supplier-address"
-                readonly
-                size="sm"
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
-                {{ chooseErrorText }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('City')"
-              label-for="supplier-reservation-supplier-city"
-            >
-              <b-form-input
-                v-model="selectedSupplier.city"
-                id="supplier-reservation-supplier-city"
-                size="sm"
-                readonly
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
-                {{ chooseErrorText }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Email')"
-              label-for="supplier-reservation-supplier-email"
-            >
-              <b-form-input
-                v-model="selectedSupplier.email"
-                id="supplier-reservation-supplier-email"
-                size="sm"
-                readonly
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
-                {{ chooseErrorText }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-lock"></b-icon>
+          <span class="backlink" @click="cancelForm">{{ $trans('Reservations') }}</span> / 
+          <span v-if="isCreate">{{ $trans('New reservation') }}</span>
+          {{ this.pk }} <span v-if="!isCreate" class="dimmed">{{ $trans('edit') }}</span>
+        </h3>
+        <div class='flex-columns'>
+          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            {{ $trans('Cancel') }}
+          </b-button>
+          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            {{ $trans('Submit') }}
+          </b-button>
+        </div>
+      </div>
+    </header>
+    <div class="page-detail">
+      <b-overlay :show="isLoading" rounded="sm">
+        <b-form>
+          <div class='flex-columns'>
+            <div class='panel col-1-3'>
+              <h6>{{  $trans('Supplier') }}</h6>
+              <fieldset>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="12"
+                  label-cols-md="3"
+                  v-bind:label="$trans('Search supplier')"
+                  label-for="supplier-reservation-supplier-search"
+                >
+                  <multiselect
+                    id="supplier-reservation-supplier-search"
+                    track-by="id"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="suppliers"
+                    :multiple="false"
+                    :internal-search="false"
+                    :clear-on-select="true"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="false"
+                    :hide-selected="true"
+                    @search-change="getSuppliers"
+                    @select="selectSupplier"
+                    :custom-label="supplierLabel"
+                  >
+                    <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  </multiselect>
+                </b-form-group>
+                
+                <b-form-group
+                label-cols="12"
+                  label-cols-md="3"
+                  label-size="sm"
+                  v-bind:label="$trans('Supplier')"
+                  label-for="supplier-reservation-supplier-name"
+                >
+                  <b-form-input
+                    v-model="selectedSupplier.name"
+                    id="supplier-reservation-supplier-name"
+                    readonly
+                    size="sm"
+                    :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
+                  ></b-form-input>
+                  <b-form-invalid-feedback
+                    :state="!v$.supplierReservation.supplier.$error">
+                    {{ $trans('Please select a supplier') }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              
+                <b-form-group
+                  label-size="sm"
+                  label-cols="12"
+                  label-cols-md="3"
+                  v-bind:label="$trans('Address')"
+                  label-for="supplier-reservation-supplier-address"
+                >
+                  <b-form-input
+                    v-model="selectedSupplier.address"
+                    id="supplier-reservation-supplier-address"
+                    readonly
+                    size="sm"
+                    :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
+                  ></b-form-input>
+                  <b-form-invalid-feedback
+                    :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                    {{ chooseErrorText }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              
+                <b-form-group
+                  label-size="sm"
+                  label-cols="12"
+                  label-cols-md="3"
+                  v-bind:label="$trans('City')"
+                  label-for="supplier-reservation-supplier-city"
+                >
+                  <b-form-input
+                    v-model="selectedSupplier.city"
+                    id="supplier-reservation-supplier-city"
+                    size="sm"
+                    readonly
+                    :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
+                  ></b-form-input>
+                  <b-form-invalid-feedback
+                    :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                    {{ chooseErrorText }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              
+                <b-form-group
+                  label-size="sm"
+                  label-cols="12"
+                  label-cols-md="3"
+                  v-bind:label="$trans('Email')"
+                  label-for="supplier-reservation-supplier-email"
+                >
+                  <b-form-input
+                    v-model="selectedSupplier.email"
+                    id="supplier-reservation-supplier-email"
+                    size="sm"
+                    readonly
+                    :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
+                  ></b-form-input>
+                  <b-form-invalid-feedback
+                    :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
+                    {{ chooseErrorText }}
+                  </b-form-invalid-feedback>
+                </b-form-group>
+              </fieldset>
+            </div>
+            <div class='panel col-1-3'>
+              <div class="reservation-materials">
+                <h6>{{$trans('Add product(s)')}}</h6>
+                  
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Search product')"
+                  >
+                    <multiselect
+                      id="reservation-material-name"
+                      track-by="id"
+                      label="name"
+                      :placeholder="$trans('Type to search')"
+                      open-direction="bottom"
+                      :options="materialsSearch"
+                      :multiple="false"
+                      :loading="isLoading"
+                      :internal-search="false"
+                      :clear-on-select="true"
+                      :close-on-select="true"
+                      :options-limit="30"
+                      :limit="10"
+                      :max-height="600"
+                      :show-no-results="false"
+                      :hide-selected="true"
+                      @search-change="getMaterials"
+                      @select="selectMaterial"
+                    >
+                      <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                    </multiselect>
+                    <b-form-invalid-feedback
+                      :state="!v$.material.material.$error">
+                      {{ $trans('Please select a product') }}
+                    </b-form-invalid-feedback>
+                  </b-form-group>
+            
+            
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Name')"
+                    label-for="reservation-material-name"
+                    >
+                  <b-form-input
+                    id="reservation-material-name"
+                    size="sm"
+                    v-model="material.material_view.name"
+                    readonly
+                    :state="!v$.material.material.$error"
+                    ></b-form-input>
+                    
+                  </b-form-group>
+              
+                  <b-form-group
+                    label-size="sm"
+                    label-cols="3"
+                    v-bind:label="$trans('Amount')"
+                    label-for="reservation-material-amount"
+                  >
+                  <b-form-input
+                    id="reservation-material-amount"
+                    size="sm"
+                    v-model="material.amount"
+                    :state="!v$.material.amount.$error"
+                    ref="amount"
+                      ></b-form-input>
+                      <b-form-invalid-feedback
+                      :state="!v$.material.amount.$error">
+                      {{ $trans('Please enter an amount') }}
+                    </b-form-invalid-feedback>
+                  </b-form-group>
+                
+                  <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Remarks')"
+                  label-for="reservation-material-remarks"
+                  >
+                  <b-form-textarea
+                  id="reservation-material-remarks"
+                  v-model="material.remarks"
+                  rows="1"
+                  ></b-form-textarea>
+                </b-form-group>
+                  
+                <footer class="modal-footer">
+                  <b-button
+                    @click="cancelEditMaterial"
+                    class="btn btn-primary"
+                    size="sm"
+                    type="button"
+                    variant="secondary"
+                  >
+                    {{ $trans('Cancel') }}
+                  </b-button>
+                  &nbsp;
+                  <b-button
+                    v-if="isEditMaterial"
+                    @click="doEditMaterial"
+                    class="btn btn-primary"
+                    size="sm"
+                    type="button"
+                    variant="warning">
+                    {{ $trans('Edit product') }}
+                  </b-button>
+                  <b-button
+                    v-if="!isEditMaterial"
+                    @click="addMaterial"
+                    class="btn btn-primary"
+                    size="sm"
+                    type="button"
+                    variant="primary"
+                    :disabled="!isMaterialValid"
+                  >
+                    {{ $trans('Add product') }}
+                  </b-button>
+                </footer>
+              
+              </div>
 
-        <div class="reservation-materials">
-          <h4>{{ $trans('Products') }}</h4>
-          <b-row>
-            <b-col cols="12">
+            </div>
+            <div class="panel col-1-3">
+              <h6>{{ $trans('Products') }}</h6>
               <b-table
                 v-if="supplierReservation.materials.length > 0"
                 small
@@ -135,139 +274,13 @@
                   </div>
                 </template>
               </b-table>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="12" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Search product')"
-              >
-                <multiselect
-                  id="reservation-material-name"
-                  track-by="id"
-                  label="name"
-                  :placeholder="$trans('Type to search')"
-                  open-direction="bottom"
-                  :options="materialsSearch"
-                  :multiple="false"
-                  :loading="isLoading"
-                  :internal-search="false"
-                  :clear-on-select="true"
-                  :close-on-select="true"
-                  :options-limit="30"
-                  :limit="10"
-                  :max-height="600"
-                  :show-no-results="false"
-                  :hide-selected="true"
-                  @search-change="getMaterials"
-                  @select="selectMaterial"
-                >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Name')"
-                label-for="reservation-material-name"
-              >
-                <b-form-input
-                  id="reservation-material-name"
-                  size="sm"
-                  v-model="material.material_view.name"
-                  readonly
-                  :state="!v$.material.material.$error"
-                ></b-form-input>
-                <b-form-invalid-feedback
-                  :state="!v$.material.material.$error">
-                  {{ $trans('Please select a product') }}
-                </b-form-invalid-feedback>
-              </b-form-group>
-            </b-col>
-            <b-col cols="4" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Amount')"
-                label-for="reservation-material-amount"
-              >
-                <b-form-input
-                  id="reservation-material-amount"
-                  size="sm"
-                  v-model="material.amount"
-                  :state="!v$.material.amount.$error"
-                  ref="amount"
-                ></b-form-input>
-                <b-form-invalid-feedback
-                  :state="!v$.material.amount.$error">
-                  {{ $trans('Please enter an amount') }}
-                </b-form-invalid-feedback>
-              </b-form-group>
-            </b-col>
-            <b-col cols="4" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Remarks')"
-                label-for="reservation-material-remarks"
-              >
-                <b-form-textarea
-                  id="reservation-material-remarks"
-                  v-model="material.remarks"
-                  rows="1"
-                ></b-form-textarea>
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <footer class="modal-footer">
-            <b-button
-              @click="cancelEditMaterial"
-              class="btn btn-primary"
-              size="sm"
-              type="button"
-              variant="secondary"
-            >
-              {{ $trans('Cancel') }}
-            </b-button>
-            &nbsp;
-            <b-button
-              v-if="isEditMaterial"
-              @click="doEditMaterial"
-              class="btn btn-primary"
-              size="sm"
-              type="button"
-              variant="warning">
-              {{ $trans('Edit product') }}
-            </b-button>
-            <b-button
-              v-if="!isEditMaterial"
-              @click="addMaterial"
-              class="btn btn-primary"
-              size="sm"
-              type="button"
-              variant="primary"
-              :disabled="!isMaterialValid"
-            >
-              {{ $trans('Add product') }}
-            </b-button>
-          </footer>
-        </div>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
-              {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-          </footer>
-        </div>
-      </b-form>
+              <!-- <b-button v-b-toggle.my-collapse>Add products</b-button> -->
+            </div>
+          </div>
+        </b-form>
+      </b-overlay>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
