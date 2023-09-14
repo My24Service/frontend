@@ -10,7 +10,7 @@
         </div>
       </div>
     </header>
-    <div class="app-detail">
+    <div class="panel">
       <b-row align-v="center">
         <b-col cols="2">
           <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
