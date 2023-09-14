@@ -2,7 +2,19 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3>Mutations</h3>
+        <h3><b-icon icon="arrow-left-right"></b-icon>Mutations</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+            v-bind:method="function() { loadData() }"
+            v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'mutation-add'}" class="btn">{{ $trans('Add mutation') }}</router-link>
+        </b-button-toolbar>
       </div>
     </header>
     <SearchModal
@@ -25,21 +37,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="mutation-add"
-                  v-bind:title="$trans('Add')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+           
           </div>
         </template>
         <template #table-busy>
@@ -53,12 +51,12 @@
         </template>
       </b-table>
 
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Mutation')"
-      />
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Mutation')"
+    />
   </div>
 </template>
 

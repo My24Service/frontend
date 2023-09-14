@@ -2,22 +2,40 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3>{{ $trans('Move material') }}</h3>
+        <h3><b-icon icon="box-arrow-right"></b-icon>{{ $trans('Move materials') }}</h3>
+        <div class="flex-columns" style="z-index:1000">
+          <b-dropdown split :text="$trans('Submit')" class="m-2" variant="primary" @click="submitForm" :disabled="buttonDisabled">
+            <b-dropdown-item-button 
+              @click="submitFormBulk" 
+              :disabled="buttonDisabled"
+              title="Submit and move another material">
+              {{ $trans('Bulk') }}
+            </b-dropdown-item-button>
+          </b-dropdown>
+          <!--
+          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+              {{ $trans('Submit') }}
+            </b-button>
+            <b-button @click="submitFormBulk" :disabled="buttonDisabled" type="button" variant="success">
+              {{ $trans('Bulk') }}
+            </b-button>
+            -->
+        </div>
       </div>
     </header>
-    <div class="app-detail panel">
-      <b-form>
-        <b-row>
-          <b-col cols="8" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Search material')"
-              label-for="move-material-purchase-order-material-search"
+    <div class="page-detail">
+      <b-form class="flex-columns">
+        
+        <div class="panel col-1-3">
+          <h6>Material</h6>
+          <b-form-group
+            label-size="sm"
+            label-for="move-material-purchase-order-material-search"
             >
-              <multiselect
-                id="move-material-purchase-order-material-search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
+            <multiselect
+            id="move-material-purchase-order-material-search"
+            track-by="id"
+                :placeholder="$trans('Select material (type to search)')"
                 open-direction="bottom"
                 :options="materials"
                 :multiple="false"
@@ -33,157 +51,135 @@
                 @select="selectMaterial"
                 :custom-label="materialLabel"
                 ref="searchMaterial"
-              >
+                >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Material')"
-              label-for="move-material-material-name"
-            >
-              <b-form-input
-                v-model="selectedMaterial.material_name"
-                id="move-material-material-name"
-                size="sm"
-                readonly
-              ></b-form-input>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="8" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Search location')"
-              label-for="move-material-from-location-search"
-            >
-              <multiselect
-                id="move-material-from-location-search"
-                track-by="id"
-                open-direction="bottom"
-                :options="fromLocations"
-                :multiple="false"
-                :searchable="false"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                @select="selectFromLocation"
-                :custom-label="fromLocationLabel"
+            <div  v-if="selectedMaterial.material_name">
+              <h3>{{ selectedMaterial.material_name }}</h3>
+              <dl>
+                <dt>In stock</dt>
+                <dd>{{ selectedMaterial.total_amount }}</dd>
+                <dt>Supplier</dt>
+                <dd>{{ selectedMaterial.supplier_name }}</dd>
+                <dt v-if="selectedMaterial.material_identifier">Identifier</dt>
+                <dd v-if="selectedMaterial.material_identifier">{{ selectedMaterial.material_identifier }}</dd>
+              </dl>
+              <h6>{{$trans('Amount')}}</h6>
+              <b-form-group
+                label-size="sm"
+                label-cols="4"
+                v-bind:label="$trans('Number of items to move')"
+                label-for="move-material-amount"
               >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('From location')"
-              label-for="move-material-from-location-name"
-            >
-              <b-form-input
-                v-model="selectedFromLocation.location_name"
-                id="move-material-from-location-name"
-                size="sm"
-                readonly
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.selectedFromLocationPk.$error : null">
-                {{ $trans('Please select from location') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="6" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('To location')"
-              label-for="move-material-to-location-search"
-            >
-              <multiselect
-                id="move-material-to-location-search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="toLocations"
-                :multiple="false"
-                :internal-search="true"
-                :clear-on-select="false"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="true"
-                :hide-selected="true"
-                @select="selectToLocation"
-                :custom-label="toLocationLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('To location')"
-              label-for="move-material-to-location-name"
-            >
-              <b-form-input
-                v-model="selectedToLocation.name"
-                id="move-material-to-location-name"
-                size="sm"
-                readonly
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.selectedToLocationPk.$error : null">
-                {{ $trans('Please select to location') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Amount')"
-              label-for="move-material-amount"
-            >
-              <b-form-input
-                ref="amount"
-                v-model="amount"
-                id="move-material-amount"
-                size="sm"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.amount.$error : null">
-                {{ $trans('Please enter an amount') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
+                <b-form-input
+                  ref="amount"
+                  v-model="amount"
+                  id="move-material-amount"
+                  size="sm"
+                  type="number"
+                  :max="selectedMaterial.total_amount"
+                  min="1"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.amount.$error : null">
+                  {{ $trans('Please enter an amount') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </div>
 
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-            <b-button @click="submitFormBulk" :disabled="buttonDisabled" type="button" variant="success">
-              {{ $trans('Bulk') }}
-            </b-button>
-          </footer>
+        </div>
+
+        <div class="panel col-1-3">
+          <h6>{{$trans('Move from')}}</h6>
+          <b-form-group
+            label-size="sm"
+            v-bind:label="$trans('')"
+            label-for="move-material-from-location-search"
+            >
+            <multiselect
+              id="move-material-from-location-search"
+              track-by="id"
+              open-direction="bottom"
+              placeholder="Select location (type to search)"
+              :options="fromLocations"
+              :multiple="false"
+              :searchable="false"
+              :close-on-select="true"
+              :options-limit="30"
+              :limit="10"
+              :max-height="600"
+              :show-no-results="false"
+              
+              @select="selectFromLocation"
+              :custom-label="fromLocationLabel"
+            >
+              <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+            </multiselect>
+            <b-form-invalid-feedback
+              :state="isSubmitClicked ? !v$.selectedFromLocationPk.$error : null">
+              {{ $trans('Please select from location') }}
+            </b-form-invalid-feedback>
+          </b-form-group>
+          
+          <h3 v-if="selectedFromLocation.location_name">
+            <br><b-icon icon="box-arrow-right"></b-icon><br/><br/>{{ selectedFromLocation.location_name }}
+          </h3>
+          <h3 v-else class="dimmed">
+            <br><b-icon icon="box-arrow-right"></b-icon><br/><br/>{{ $trans('Departure location') }}
+          </h3>
+        </div>
+
+        <div class="panel col-1-3">
+          <h6> {{ $trans('Move to')}}</h6>
+          
+          <b-form-group
+            label-for="move-material-to-location-search"
+            >
+            <multiselect
+              id="move-material-to-location-search"
+              track-by="id"
+              :placeholder="$trans('Type to search')"
+              open-direction="bottom"
+              :options="toLocations"
+              :multiple="false"
+              :internal-search="true"
+              :clear-on-select="false"
+              :close-on-select="true"
+              :options-limit="30"
+              :limit="10"
+              :max-height="600"
+              :show-no-results="true"
+              :hide-selected="true"
+              @select="selectToLocation"
+              :custom-label="toLocationLabel"
+            >
+              <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+            </multiselect>
+            <b-form-invalid-feedback
+              :state="isSubmitClicked ? !v$.selectedToLocationPk.$error : null">
+              {{ $trans('Please select to location') }}
+            </b-form-invalid-feedback>
+          </b-form-group>
+          
+          <h3 v-if="selectedToLocation.name"><br><b-icon icon="box-arrow-in-right"></b-icon><br/><br/>{{ selectedToLocation.name }}</h3>
+          <h3 v-else class="dimmed">
+              <br><b-icon icon="box-arrow-right"></b-icon><br/><br/>{{ $trans('Arrival location') }}
+            </h3>
         </div>
       </b-form>
     </div>
   </div>
 </template>
-
+<style scope>
+header {
+  position: relative !important;
+}
+</style>
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
@@ -205,7 +201,7 @@ export default {
   data() {
     return {
       isLoading: false,
-      buttonDisabled: false,
+      buttonDisabled: true,
       submitClicked: false,
       errorMessage: null,
       materials: [],
