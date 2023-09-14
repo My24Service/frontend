@@ -86,7 +86,7 @@
         </div>
         <h6>{{ $trans('Info lines') }}</h6>
         <ul class='listing' v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
-          <li v-for="item, index of order.infolines">
+          <li v-for="item of order.infolines" :key="item.id">
             {{ item.info }}
           </li>
         </ul>
@@ -166,123 +166,121 @@ import orderModel from '@/models/orders/Order.js'
 import { componentMixin } from '@/utils'
 
 export default {
-  mixins: [componentMixin],
-  data() {
-    return {
-      isLoading: false,
-      isGeneratingPDF: false,
-      buttonDisabled: false,
-      order: orderModel.getFields(),
-      workorderURL: '',
-      iframeLoading: true,
-      orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') }
-      ],
-      infoLineFields: [
-        { key: 'info', label: this.$trans('Infolines') }
-      ],
-      workorderDocumentFields: [
-        { key: 'name', label: this.$trans('Name') },
-        { key: 'url', label: this.$trans('URL') },
-      ],
-      extraDataFields: [
-        { key: 'statuscode', label: this.$trans('Status') },
-        { key: 'extra_data', label: this.$trans('Text') },
-      ]
-    }
-  },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
+    mixins: [componentMixin],
+    data() {
+        return {
+            isLoading: false,
+            isGeneratingPDF: false,
+            buttonDisabled: false,
+            order: orderModel.getFields(),
+            workorderURL: '',
+            iframeLoading: true,
+            orderLineFields: [
+                { key: 'product', label: this.$trans('Product') },
+                { key: 'location', label: this.$trans('Location') },
+                { key: 'remarks', label: this.$trans('Remarks') }
+            ],
+            infoLineFields: [
+                { key: 'info', label: this.$trans('Infolines') }
+            ],
+            workorderDocumentFields: [
+                { key: 'name', label: this.$trans('Name') },
+                { key: 'url', label: this.$trans('URL') },
+            ],
+            extraDataFields: [
+                { key: 'statuscode', label: this.$trans('Status') },
+                { key: 'extra_data', label: this.$trans('Text') },
+            ]
+        };
     },
-    uuid: {
-      type: [String],
-      default: null
+    props: {
+        pk: {
+            type: [String, Number],
+            default: null
+        },
+        uuid: {
+            type: [String],
+            default: null
+        },
+        past: {
+            type: [Boolean],
+            default: false
+        },
     },
-    past: {
-      type: [Boolean],
-      default: false
+    methods: {
+        iframeLoaded() {
+            this.iframeLoading = false;
+        },
+        openWorkorder() {
+            const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } });
+            window.open(`${document.location.origin}/${routeData.href}`, '_blank');
+        },
+        getWorkorderURL() {
+            this.isLoading = true;
+            const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } });
+            return `${document.location.origin}/${routeData.href}`;
+        },
+        showWorkorderDialog() {
+            this.iframeLoading = true;
+            this.workorderURL = this.getWorkorderURL();
+            this.$refs['workorder-viewer'].show();
+        },
+        async recreateWorkorderPdf() {
+            this.isLoading = true;
+            this.buttonDisabled = true;
+            this.isGeneratingPDF = true;
+            try {
+                await orderModel.recreateWorkorderPdf(this.pk);
+                this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
+                this.isLoading = false;
+                this.buttonDisabled = false;
+                this.isGeneratingPDF = false;
+                await this.loadOrder();
+            }
+            catch (err) {
+                console.log('Error recreating workorder', err);
+                this.errorToast(this.$trans('Error recreating workorder'));
+                this.buttonDisabled = false;
+                this.isLoading = false;
+                this.isGeneratingPDF = false;
+            }
+        },
+        async recreateWorkorderPdfGotenberg() {
+            this.isLoading = true;
+            this.buttonDisabled = true;
+            this.isGeneratingPDF = true;
+            try {
+                await orderModel.recreateWorkorderPdfGotenberg(this.pk);
+                this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
+                await this.loadOrder();
+                this.isLoading = false;
+                this.buttonDisabled = false;
+                this.isGeneratingPDF = false;
+            }
+            catch (err) {
+                console.log('Error recreating workorder', err);
+                this.errorToast(this.$trans('Error recreating workorder'));
+                this.buttonDisabled = false;
+                this.isLoading = false;
+                this.isGeneratingPDF = false;
+            }
+        },
+        async loadOrder() {
+            this.isLoading = true;
+            try {
+                this.order = this.pk !== null ? await orderModel.detail(this.pk) : await orderModel.detailUuid(this.uuid);
+                this.isLoading = false;
+            }
+            catch (error) {
+                console.log('error fetching order', error);
+                this.errorToast(this.$trans('Error fetching order'));
+                this.isLoading = false;
+            }
+        }
     },
-  },
-  methods: {
-    iframeLoaded() {
-      this.iframeLoading = false;
+    async created() {
+        this.loadOrder();
     },
-    openWorkorder() {
-      const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
-      window.open(`${document.location.origin}/${routeData.href}`, '_blank')
-    },
-
-    getWorkorderURL() {
-      this.isLoading = true;
-      const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
-      return `${document.location.origin}/${routeData.href}`;
-    },
-    showWorkorderDialog() {
-      this.iframeLoading = true;
-      this.workorderURL = this.getWorkorderURL();
-      this.$refs['workorder-viewer'].show()
-    },
-    async recreateWorkorderPdf() {
-      this.isLoading = true
-      this.buttonDisabled = true
-      this.isGeneratingPDF = true
-
-      try {
-        await orderModel.recreateWorkorderPdf(this.pk)
-        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        this.isGeneratingPDF = false
-        await this.loadOrder()
-      } catch(err) {
-        console.log('Error recreating workorder', err)
-        this.errorToast(this.$trans('Error recreating workorder'))
-        this.buttonDisabled = false
-        this.isLoading = false
-        this.isGeneratingPDF = false
-      }
-    },
-
-    async recreateWorkorderPdfGotenberg() {
-      this.isLoading = true
-      this.buttonDisabled = true
-      this.isGeneratingPDF = true
-
-      try {
-        await orderModel.recreateWorkorderPdfGotenberg(this.pk)
-        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-        await this.loadOrder()
-        this.isLoading = false
-        this.buttonDisabled = false
-        this.isGeneratingPDF = false
-      } catch(err) {
-        console.log('Error recreating workorder', err)
-        this.errorToast(this.$trans('Error recreating workorder'))
-        this.buttonDisabled = false
-        this.isLoading = false
-        this.isGeneratingPDF = false
-      }
-    },
-    async loadOrder() {
-      this.isLoading = true
-
-      try {
-        this.order = this.pk !== null ? await orderModel.detail(this.pk) : await orderModel.detailUuid(this.uuid)
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching order', error)
-        this.errorToast(this.$trans('Error fetching order'))
-        this.isLoading = false
-      }
-    }
-  },
-  async created() {
-    this.loadOrder();
-  }
 }
 </script>
 

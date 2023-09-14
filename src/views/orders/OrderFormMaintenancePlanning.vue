@@ -55,7 +55,7 @@
     </b-modal>
 
     <header>
-      <div class='page-title'>
+      <div class="page-title">
         <h3 v-if="!pk">
           <b-icon icon="file-earmark-plus"></b-icon>
           <router-link :to="{name:'order-list'}">Orders</router-link> /
@@ -102,10 +102,9 @@
       </div>
     </header>
 
-    <div class='page-detail'>
-
-      <div class='flex-columns'>
-        <div class='panel col-1-3'>
+    <div class="page-detail">
+      <div class="flex-columns">
+        <div class="panel col-1-3">
             <h6>Order details</h6>
             <b-form-group
               label-size="sm"
@@ -243,7 +242,7 @@
 
           <div class="info-lines section" v-if="!hasBranches">
             <h6>{{ $trans('Info lines') }}</h6>
-            <ul class='listing'>
+            <ul class="listing">
               <li v-for="item, index of order.infolines">
                 {{ item.info }}
                 <div class="float-right">
@@ -520,10 +519,10 @@
           </div>
 
         </div>
-        <div class='panel col-1-3'>
+        <div class="panel col-1-3">
           <!-- order start/end times -->
             <h6>Planning</h6>
-            <div class='flex-columns'>
+            <div class="flex-columns">
               <b-form-group
                 label-size="sm"
                 label-class="p-sm-0"
@@ -564,7 +563,7 @@
                 ></b-form-timepicker>
               </b-form-group>
             </div>
-            <div class='flex-columns'>
+            <div class="flex-columns">
               <b-form-group
                 label-size="sm"
                 label-class="p-sm-0"
@@ -606,7 +605,7 @@
               </b-form-group>
             </div>
         </div>
-        <div class='panel col-1-3'>
+        <div class="panel col-1-3">
           <h6>contact</h6>
           <b-row>
             <b-col cols="12" role="group" v-if="!hasBranches">
@@ -859,7 +858,6 @@
 
 
       </b-form>
-      <div class="bottom"></div>
     </div>
   </div>
 </template>
