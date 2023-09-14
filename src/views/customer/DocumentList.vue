@@ -1,7 +1,6 @@
 <template>
   <div class="app-grid">
-    <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-
+    
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -18,12 +17,6 @@
     </b-modal>
 
     <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Document')"
-      />
-
       <b-table
         small
         :busy='isLoading'
@@ -73,6 +66,11 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Document')"
+      />
     </div>
   </div>
 </template>
