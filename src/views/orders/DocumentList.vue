@@ -9,13 +9,24 @@
           <router-link :to="{name: 'order-view', params: {pk:orderPk}}">#<strong>{{ orderPk }}</strong></router-link> /
           docs
         </h3>
-        <div class="toolbar">
+        
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
           <router-link
             class="btn button"
             :to="{name: 'order-document-add', params: {orderPk: this.orderPk}}"
             v-bind:title="$trans('Add document')"
             >{{  $trans('Add document') }}</router-link>
-        </div>
+        </b-button-toolbar>
+        
       </div>
     </header>
 
@@ -35,26 +46,7 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #head(icons)="data">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="order-document-add"
-                  v-bind:router_params="{orderPk: data.field.value}"
-                  v-bind:title="$trans('New statuscode')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
+        
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit

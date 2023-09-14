@@ -260,13 +260,90 @@ export default {
       type: [String, Number],
       default: null
     },
-    uuid: {
-      type: [String],
-      default: null
+    props: {
+        pk: {
+            type: [String, Number],
+            default: null
+        },
+        uuid: {
+            type: [String],
+            default: null
+        },
+        past: {
+            type: [Boolean],
+            default: false
+        },
     },
-    past: {
-      type: [Boolean],
-      default: false
+    methods: {
+        iframeLoaded() {
+            this.iframeLoading = false;
+        },
+        openWorkorder() {
+            const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } });
+            window.open(`${document.location.origin}/${routeData.href}`, '_blank');
+        },
+        getWorkorderURL() {
+            this.isLoading = true;
+            const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } });
+            return `${document.location.origin}/${routeData.href}`;
+        },
+        showWorkorderDialog() {
+            this.iframeLoading = true;
+            this.workorderURL = this.getWorkorderURL();
+            this.$refs['workorder-viewer'].show();
+        },
+        async recreateWorkorderPdf() {
+            this.isLoading = true;
+            this.buttonDisabled = true;
+            this.isGeneratingPDF = true;
+            try {
+                await orderModel.recreateWorkorderPdf(this.pk);
+                this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
+                this.isLoading = false;
+                this.buttonDisabled = false;
+                this.isGeneratingPDF = false;
+                await this.loadOrder();
+            }
+            catch (err) {
+                console.log('Error recreating workorder', err);
+                this.errorToast(this.$trans('Error recreating workorder'));
+                this.buttonDisabled = false;
+                this.isLoading = false;
+                this.isGeneratingPDF = false;
+            }
+        },
+        async recreateWorkorderPdfGotenberg() {
+            this.isLoading = true;
+            this.buttonDisabled = true;
+            this.isGeneratingPDF = true;
+            try {
+                await orderModel.recreateWorkorderPdfGotenberg(this.pk);
+                this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
+                await this.loadOrder();
+                this.isLoading = false;
+                this.buttonDisabled = false;
+                this.isGeneratingPDF = false;
+            }
+            catch (err) {
+                console.log('Error recreating workorder', err);
+                this.errorToast(this.$trans('Error recreating workorder'));
+                this.buttonDisabled = false;
+                this.isLoading = false;
+                this.isGeneratingPDF = false;
+            }
+        },
+        async loadOrder() {
+            this.isLoading = true;
+            try {
+                this.order = this.pk !== null ? await orderModel.detail(this.pk) : await orderModel.detailUuid(this.uuid);
+                this.isLoading = false;
+            }
+            catch (error) {
+                console.log('error fetching order', error);
+                this.errorToast(this.$trans('Error fetching order'));
+                this.isLoading = false;
+            }
+        }
     },
   },
   methods: {
