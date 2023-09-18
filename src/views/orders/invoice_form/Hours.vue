@@ -13,7 +13,7 @@
         />
 
         <CollectionEmptyContainer
-          @buttonClicked="() => { emptyCollection() }"
+          @buttonClicked="() => { emptyCollectionClicked() }"
         />
 
         <AddToInvoiceLinesDiv
@@ -291,6 +291,10 @@ export default {
     this.isLoading = false
   },
   methods: {
+    emptyCollectionClicked() {
+      this.emptyCollection()
+      this.$emit('emptyCollectionClicked', this.invoiceLineType)
+    },
     async loadData() {
       this.costService.collection = []
       this.hasStoredData = false

@@ -249,6 +249,7 @@
             :engineer_models="engineer_models"
             :used_materials="used_materials"
             @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
           <hr/>
@@ -263,6 +264,7 @@
             :engineer_models="engineer_models"
             :customer="customer"
             @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
           <hr/>
@@ -277,6 +279,7 @@
             :engineer_models="engineer_models"
             :customer="customer"
             @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
           <hr/>
@@ -291,6 +294,7 @@
             :distance_total="activity_totals.distance_total"
             :invoice_default_price_per_km="invoice_default_price_per_km"
             @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
           <hr/>
@@ -305,6 +309,7 @@
             :engineer_models="engineer_models"
             :customer="customer"
             @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
           <hr/>
@@ -319,6 +324,7 @@
             :engineer_models="engineer_models"
             :customer="customer"
             @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
           <hr/>
@@ -329,6 +335,7 @@
           :customer="customer"
           :invoice_default_call_out_costs="invoice_default_call_out_costs"
           @invoiceLinesCreated="invoiceLinesCreated"
+          @emptyCollectionClicked="emptyCollectionClicked"
           :invoiceLinesParent="invoiceLineService.collection"
         />
 
@@ -703,19 +710,17 @@ export default {
     invoiceLinesCreated(invoiceLines) {
       if (invoiceLines.length > 0) {
         for (let invoiceLine of invoiceLines) {
-          const id = this.getInvoiceLineId()
-          invoiceLine.id = id
-          console.log(`id: ${id}`)
+          invoiceLine.id = this.getInvoiceLineId()
+          // console.log(`id: ${id}`)
           this.invoiceLineService.collection.push(invoiceLine)
         }
         const txt = invoiceLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
         this.infoToast(this.$trans('Added'), this.$trans(`${invoiceLines.length} ${txt} added`))
       }
     },
-    resetInvoiceLines() {
-
-    },
-    createInvoiceLinesFromConfig() {
+    emptyCollectionClicked(type) {
+      this.invoiceLineService.collection = this.invoiceLineService.collection.filter((m) => m.type !== type)
+      this.infoToast(this.$trans('Removed'), this.$trans(`invoice lines removed`))
     },
     getInvoiceLineId() {
       if (this.invoiceLineService.collection.length === 0) {
