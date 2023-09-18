@@ -13,7 +13,7 @@
         />
 
         <CollectionEmptyContainer
-          @buttonClicked="() => { emptyCollection() }"
+          @buttonClicked="() => { emptyCollectionClicked() }"
         />
 
         <AddToInvoiceLinesDiv
@@ -153,7 +153,7 @@ import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 
 export default {
   name: "MaterialsComponent",
-  emits: ['invoiceLinesCreated'],
+  emits: ['invoiceLinesCreated', 'emptyCollectionClicked'],
   mixins: [invoiceMixin],
   components: {
     PriceInput,
@@ -167,6 +167,15 @@ export default {
     CollectionEmptyContainer,
     CostsTable,
     AddToInvoiceLinesDiv,
+  },
+  watch: {
+    material_models: {
+      handler(newValue) {
+        console.log('material_models changed', newValue)
+        this.loadData()
+      },
+      deep: true
+    },
   },
   props: {
     order_pk: {
@@ -240,12 +249,6 @@ export default {
     this.costService.addListArg(`order=${this.order_pk}`)
     this.costService.addListArg(`cost_type=${COST_TYPE_USED_MATERIALS}`)
 
-    // set material models with margin perc
-    this.materialModels = this.material_models.map((m) => new MaterialModel({
-      ...m,
-      margin_perc: this.invoice_default_margin
-    }))
-
     await this.loadData()
 
     this.checkParentHasInvoiceLines(this.invoiceLinesParent)
@@ -253,11 +256,21 @@ export default {
     this.isLoading = false
   },
   methods: {
+    emptyCollectionClicked() {
+      this.emptyCollection()
+      this.$emit('emptyCollectionClicked', this.invoiceLineType)
+    },
     getMaterialName(material_id) {
       const material = this.materialModels.find((m) => m.id === material_id)
       return material ? material.name : this.$trans("unknown")
     },
     async loadData() {
+      // set material models with margin perc
+      this.materialModels = this.material_models.map((m) => new MaterialModel({
+        ...m,
+        margin_perc: this.invoice_default_margin
+      }))
+
       this.costService.collection = []
       this.hasStoredData = false
       // check if we already stored costs
