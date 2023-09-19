@@ -594,6 +594,7 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
+      invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
 
       invoice_default_partner_hourly_rate: null,
       invoice_default_partner_hourly_rate_dinero: null,
