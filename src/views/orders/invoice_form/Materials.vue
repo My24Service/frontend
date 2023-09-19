@@ -133,9 +133,6 @@ import invoiceLineService from "../../../models/orders/InvoiceLine";
 import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/orders/Cost";
 import {
   INVOICE_LINE_TYPE_USED_MATERIALS,
-  OPTION_NONE,
-  OPTION_ONLY_TOTAL,
-  OPTION_USER_TOTALS,
   USE_PRICE_OTHER,
   USE_PRICE_PURCHASE,
   USE_PRICE_SELLING
