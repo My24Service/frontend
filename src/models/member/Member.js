@@ -23,7 +23,9 @@ class Member extends BaseModel {
     'member_type': '',
     'is_public': true,
     'has_api_users': false,
-    'has_branches': false
+    'has_branches': false,
+    'chamber_of_commerce': null,
+    'vat_number': null,
   }
 
   url = '/member/member/'
