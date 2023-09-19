@@ -139,7 +139,7 @@ import {
 } from "./constants";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import materialService, {MaterialModel} from "../../../models/inventory/Material";
+import {MaterialModel} from "../../../models/inventory/Material";
 import PriceInput from "../../../components/PriceInput";
 import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
