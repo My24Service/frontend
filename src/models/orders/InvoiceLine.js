@@ -55,7 +55,7 @@ class InvoiceLineService extends BaseModel {
     price_currency: null,
   }
 
-  url = '/order/invoice/'
+  url = '/order/invoice-line/'
 
   newModelFromCost(cost, description, type) {
     return new this.model({

@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class Invoice extends BaseModel {
+class InvoiceService extends BaseModel {
   fields = {
     id: null,
     order: null,
@@ -18,6 +18,6 @@ class Invoice extends BaseModel {
   }
 }
 
-const invoiceModel = new Invoice()
+const invoiceService = new InvoiceService()
 
-export default invoiceModel
+export default invoiceService
