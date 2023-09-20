@@ -23,7 +23,7 @@ import MonthStats from '../views/orders/MonthStats.vue'
 import {AUTH_LEVELS} from "../constants";
 
 import InvoiceForm from "../views/orders/InvoiceForm";
-
+import InvoiceView from "../views/orders/InvoiceView";
 
 export default [
 // orders
@@ -41,7 +41,17 @@ export default [
         props: {
           'app-content': route => ({...route.params})
         },
-      }
+      },
+      {
+        name: 'order-invoice-view',
+        path: '/orders/invoice/view/:uuid',
+        props: {
+          'app-content': route => ({...route.params}),
+        },
+        components: {
+          'app-content': InvoiceView,
+        },
+      },
   ]
 },
 {

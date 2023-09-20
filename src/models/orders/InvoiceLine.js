@@ -1,6 +1,7 @@
 import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
 import {CostModel} from "./Cost";
+import {toDinero} from "../../utils";
 
 class InvoiceLineModel {
   id
@@ -56,6 +57,28 @@ class InvoiceLineService extends BaseModel {
   }
 
   url = '/order/invoice-line/'
+
+  getItemsTotal() {
+    if (!this.collection.length) {
+      return  toDinero("0.00", "EUR")
+    }
+
+    return this.collection.reduce(
+      (total, m) => (total.add(m.total_dinero)),
+      toDinero("0.00", this.collection[0].total_currency)
+    )
+  }
+
+  getItemsTotalVAT() {
+    if (!this.collection.length) {
+      return toDinero("0.00", "EUR")
+    }
+
+    return this.collection.reduce(
+      (total, m) => (total.add(m.vat_dinero)),
+      toDinero("0.00", this.collection[0].vat_currency)
+    )
+  }
 
   newModelFromCost(cost, description, type) {
     return new this.model({

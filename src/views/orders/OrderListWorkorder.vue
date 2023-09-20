@@ -127,10 +127,10 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-<!--            <router-link class="px-1" v-if="data.item.customer_relation" v-bind:title="`$trans('Create invoice')`"-->
-<!--                         :to="{name: 'order-invoice-create', params: {uuid: data.item.uuid}}">-->
-<!--              <b-icon-currency-dollar></b-icon-currency-dollar>-->
-<!--            </router-link>-->
+            <router-link class="px-1" v-if="data.item.customer_relation" v-bind:title="`$trans('Create invoice')`"
+                         :to="{name: 'order-invoice-create', params: {uuid: data.item.uuid}}">
+              <b-icon-currency-dollar></b-icon-currency-dollar>
+            </router-link>
             <IconLinkPlus
               type="tr"
               v-bind:title="$trans('Change status')"

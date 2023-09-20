@@ -2,13 +2,7 @@
   <b-overlay :show="isLoading" rounded="sm">
     <div class="container app-form">
       <b-form v-if="!isLoading">
-        <div v-if="isCreate">
-          <h2>{{ $trans('New invoice') }}</h2>
-        </div>
-
-        <CustomerDetail
-          :customer="customer"
-        />
+        <h2>{{ $trans('New invoice') }}</h2>
 
         <Collapse
           :title="$trans('Manage prices')"
@@ -341,174 +335,245 @@
 
         <hr/>
 
-        <div class="invoice-lines" v-if="invoiceLineService.collection.length">
-          <h3>{{ $trans("Invoice lines") }}</h3>
+        <div class="invoice-form-main">
+
+          <CustomerDetail
+            :customer="customer"
+          />
+
+          <h4>{{ $trans('Invoice data')}} </h4>
+
           <b-row>
-            <b-col cols="3" class="header">
-              {{ $trans("Description") }}
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Reference')"
+                label-for="invoice_reference"
+              >
+                <b-form-input
+                  v-model="invoice.reference"
+                  id="invoice_reference"
+                  size="sm"
+                ></b-form-input>
+              </b-form-group>
             </b-col>
-            <b-col cols="2" class="header">
-              {{ $trans("Amount") }}
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Term of payment (days)')"
+                label-for="invoice_term_of_payment_days"
+              >
+                <b-form-input
+                  id="invoice_term_of_payment_days"
+                  size="sm"
+                  v-model="invoice.term_of_payment_days"
+                ></b-form-input>
+              </b-form-group>
             </b-col>
-            <b-col cols="2" class="header">
-              {{ $trans("Price") }}
-            </b-col>
-            <b-col cols="2" class="header">
-              {{ $trans("Total") }}
-            </b-col>
-            <b-col cols="2" class="header">
-              {{ $trans("VAT") }}
-            </b-col>
-            <b-col cols="1">
-
-            </b-col>
-          </b-row>
-          <b-row v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id">
-            <b-col cols="3">
-              <b-form-textarea
-                v-model="invoiceLine.description"
-                rows="2"
-              ></b-form-textarea>
-            </b-col>
-            <b-col cols="2">
-              {{ invoiceLine.amount }}
-            </b-col>
-            <b-col cols="2">
-              {{ invoiceLine.price_text }}
-            </b-col>
-            <b-col cols="2">
-              {{ invoiceLine.total_dinero.toFormat('$0.00') }}
-            </b-col>
-            <b-col cols="2">
-              {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
-            </b-col>
-            <b-col cols="1" v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL">
-              <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
-                <b-icon-trash></b-icon-trash>
-              </b-link>
+            <b-col cols="8" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Description')"
+                label-for="invoice_description"
+              >
+                <b-form-textarea
+                  id="invoice_description"
+                  v-model="invoice.description"
+                  rows="1"
+                ></b-form-textarea>
+              </b-form-group>
             </b-col>
           </b-row>
 
-          <b-row v-if="invoiceLinesHaveTotals">
-            <b-col>
-              <div class="float-right">
-                <i>* {{ $trans("Prices are combined in totals") }}</i>
-              </div>
-            </b-col>
-          </b-row>
-        </div>
+          <h4>{{ $trans('Invoice lines')}} </h4>
 
-        <div class="new-invoice-line">
-          <b-container>
+          <div class="invoice-lines" v-if="invoiceLineService.collection.length">
             <b-row>
-              <b-col cols="3" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Description')"
-                  label-for="new-invoice-line-description"
-                >
-                  <b-form-input
-                    id="new-invoice-line-description"
-                    size="sm"
-                    v-model="invoiceLineService.editItem.description"
-                  ></b-form-input>
-                </b-form-group>
+              <b-col cols="3" class="header">
+                {{ $trans("Description") }}
               </b-col>
-              <b-col cols="2" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Amount')"
-                  label-for="new-invoice-line-amount"
-                >
-                  <b-form-input
-                    @blur="invoiceLineAmountChanged"
-                    id="new-invoice-line-amount"
-                    size="sm"
-                    v-model="invoiceLineService.editItem.amount"
-                  ></b-form-input>
-                </b-form-group>
+              <b-col cols="2" class="header">
+                {{ $trans("Amount") }}
               </b-col>
-              <b-col cols="2" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Price')"
-                  label-for="new-invoice-line-price"
-                >
-                  <PriceInput
-                    id="new-invoice-line-price"
-                    v-model="invoiceLineService.editItem.price"
-                    :currency="invoiceLineService.editItem.price_currency"
-                    @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
-                  />
-                </b-form-group>
+              <b-col cols="2" class="header">
+                {{ $trans("Price") }}
               </b-col>
-              <b-col cols="1" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('VAT type')"
-                  label-for="new-invoice-line-total"
-                >
-                  <VAT @vatChanged="changeVatTypeInvoiceLine" />
-                </b-form-group>
+              <b-col cols="2" class="header">
+                {{ $trans("Total") }}
               </b-col>
-              <b-col cols="2" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Total')"
-                  label-for="new-invoice-line-total"
-                >
-                  <b-form-input
-                    id="new-invoice-line-total"
-                    readonly
-                    :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
-                    size="sm"
-                  ></b-form-input>
-                </b-form-group>
+              <b-col cols="2" class="header">
+                {{ $trans("VAT") }}
               </b-col>
-              <b-col cols="2" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('VAT')"
-                  label-for="new-invoice-line-vat"
-                >
-                  <b-form-input
-                    id="new-invoice-line-vat"
-                    readonly
-                    :value="invoiceLineService.editItem.vat_dinero.toFormat('$0.00')"
-                    size="sm"
-                  ></b-form-input>
-                </b-form-group>
+              <b-col cols="1">
+
               </b-col>
             </b-row>
-          </b-container>
 
-          <footer class="modal-footer">
-            <b-button
-              v-if="invoiceLineService.isEdit"
-              @click="invoiceLineService.doEditCollectionItem"
-              class="btn btn-primary"
-              size="sm" type="button"
-              variant="warning"
-              :disabled="!isInvoiceLineValid"
-            >
-              {{ $trans('Edit invoice line') }}
-            </b-button>
-            <b-button
-              v-if="!invoiceLineService.isEdit"
-              @click="addInvoiceLine"
-              class="btn btn-primary"
-              size="sm"
-              type="button"
-              variant="primary"
-              :disabled="!isInvoiceLineValid"
-            >
-              {{ $trans('Add invoice line') }}
-            </b-button>
-          </footer>
+            <b-row v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id">
+              <b-col cols="3">
+                <b-form-textarea
+                  v-model="invoiceLine.description"
+                  rows="2"
+                ></b-form-textarea>
+              </b-col>
+              <b-col cols="2">
+                {{ invoiceLine.amount }}
+              </b-col>
+              <b-col cols="2">
+                {{ invoiceLine.price_text }}
+              </b-col>
+              <b-col cols="2">
+                {{ invoiceLine.total_dinero.toFormat('$0.00') }}
+              </b-col>
+              <b-col cols="2">
+                {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
+              </b-col>
+              <b-col cols="1" v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL">
+                <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
+                  <b-icon-trash></b-icon-trash>
+                </b-link>
+              </b-col>
+            </b-row>
+
+            <b-row v-if="invoiceLinesHaveTotals">
+              <b-col>
+                <div class="float-right">
+                  <i>* {{ $trans("Prices are combined in totals") }}</i>
+                </div>
+              </b-col>
+            </b-row>
+          </div>
+
+          <div class="new-invoice-line" v-if="invoiceLineService.editItem">
+            <b-container>
+              <b-row>
+                <b-col cols="3" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Description')"
+                    label-for="new-invoice-line-description"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-description"
+                      size="sm"
+                      v-model="invoiceLineService.editItem.description"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Amount')"
+                    label-for="new-invoice-line-amount"
+                  >
+                    <b-form-input
+                      @blur="invoiceLineAmountChanged"
+                      id="new-invoice-line-amount"
+                      size="sm"
+                      v-model="invoiceLineService.editItem.amount"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Price')"
+                    label-for="new-invoice-line-price"
+                  >
+                    <PriceInput
+                      id="new-invoice-line-price"
+                      v-model="invoiceLineService.editItem.price"
+                      :currency="invoiceLineService.editItem.price_currency"
+                      @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
+                    />
+                  </b-form-group>
+                </b-col>
+                <b-col cols="1" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('VAT type')"
+                    label-for="new-invoice-line-total"
+                  >
+                    <VAT @vatChanged="changeVatTypeInvoiceLine" />
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Total')"
+                    label-for="new-invoice-line-total"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-total"
+                      readonly
+                      :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
+                      size="sm"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('VAT')"
+                    label-for="new-invoice-line-vat"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-vat"
+                      readonly
+                      :value="invoiceLineService.editItem.vat_dinero.toFormat('$0.00')"
+                      size="sm"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+            </b-container>
+
+            <footer class="modal-footer">
+              <b-button
+                v-if="invoiceLineService.isEdit"
+                @click="invoiceService.doEditCollectionItem"
+                class="btn btn-primary"
+                size="sm" type="button"
+                variant="warning"
+                :disabled="!isInvoiceLineValid"
+              >
+                {{ $trans('Edit invoice line') }}
+              </b-button>
+              <b-button
+                v-if="!invoiceLineService.isEdit"
+                @click="addInvoiceLine"
+                class="btn btn-primary"
+                size="sm"
+                type="button"
+                variant="primary"
+                :disabled="!isInvoiceLineValid"
+              >
+                {{ $trans('Add invoice line') }}
+              </b-button>
+            </footer>
+
+          </div>
+
+          <hr/>
+
+          <b-row>
+            <b-col cols="10">
+              <span class="total-text">{{ $trans('Invoice total') }}</span>
+            </b-col>
+            <b-col cols="2">
+              <Totals
+                :total="invoice.total_dinero"
+                :is-final-total="true"
+                :vat="invoice.vat_dinero"
+              />
+            </b-col>
+          </b-row>
 
         </div>
 
-        <div class="mx-auto" v-if="false">
+        <hr/>
+
+        <div class="mx-auto">
           <footer class="modal-footer">
             <b-button @click="cancelForm" type="button" variant="secondary">
               {{ $trans('Cancel') }}</b-button>
@@ -524,14 +589,11 @@
 <script>
 import invoiceService from '../../models/orders/Invoice.js'
 import invoiceLineService from '../../models/orders/InvoiceLine.js'
-import { InvoiceLineModel } from '../../models/orders/InvoiceLine.js'
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
 import materialService, {MaterialModel} from "../../models/inventory/Material";
-import { RateEngineerUserModel } from "../../models/company/UserEngineer";
-import engineerService from "../../models/company/UserEngineer";
-import customerService from "../../models/customer/Customer";
-import { CustomerModel, CustomerPriceModel } from "../../models/customer/Customer";
+import engineerService, {RateEngineerUserModel} from "../../models/company/UserEngineer";
+import customerService, {CustomerModel, CustomerPriceModel} from "../../models/customer/Customer";
 import InvoiceFormTotals from './invoice_form/Totals';
 import Collapse from "../../components/Collapse";
 import invoiceMixin from "./invoice_form/mixin";
@@ -550,6 +612,8 @@ import {
 } from "../../models/orders/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import MarginInput from "./invoice_form/MarginInput";
+import {useVuelidate} from "@vuelidate/core";
+import Totals from "./invoice_form/Totals";
 
 export default {
   name: 'InvoiceForm',
@@ -565,16 +629,21 @@ export default {
     VAT,
     CustomerDetail,
     MarginInput,
+    Totals,
+  },
+  setup() {
+    return { v$: useVuelidate() }
+  },
+  validations() {
+    return {
+      invoice: {}
+    }
   },
   props: {
     uuid: {
       type: [String],
       default: null
     },
-    pk: {
-      type: [String, Number],
-      default: null
-    }
   },
   data () {
     return {
@@ -585,7 +654,13 @@ export default {
 
       isLoading: false,
       submitClicked: false,
-      invoice: invoiceService.getFields(),
+      invoice: new invoiceService.model({
+        total: "0.00",
+        total_currency: this.$store.getters.getDefaultCurrency,
+        vat: "0.00",
+        vat_currency: this.$store.getters.getDefaultCurrency,
+        term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+      }),
       errorMessage: null,
 
       invoice_id: null,
@@ -615,15 +690,13 @@ export default {
       customerPk: null,
       customer: null,
 
+      invoiceService,
       invoiceLineService,
       deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
     }
   },
   computed: {
-    isCreate() {
-      return !this.pk
-    },
     invoiceLinesHaveTotals() {
       return this.invoiceLineService.collection.find((line) => line.price_text === '*')
     },
@@ -635,67 +708,72 @@ export default {
     }
   },
   async created() {
-    if (this.isCreate) {
-      this.isLoading = true
+    this.isLoading = true
 
-      // init new model for manual entry
-      this.invoiceLineService.modelDefaults = {
-        price: '0.00',
-        price_currency: this.$store.getters.getDefaultCurrency,
-        total: '0.00',
-        total_currency: this.$store.getters.getDefaultCurrency,
-        vat: '0.00',
-        vat_currency: this.$store.getters.getDefaultCurrency,
-        vat_type: this.$store.getters.getInvoiceDefaultVat,
-      }
-      this.invoiceLineService.newEditItem()
-
-      // get invoice data
-      const invoiceData = await invoiceService.getData(this.uuid)
-
-      // get customer
-      this.customerPk = invoiceData.customer_pk
-      await this.getCustomer()
-
-      // set data in component
-      this.invoice_id = invoiceData.invoice_id
-      this.order_pk = invoiceData.order_pk
-
-      this.activity_totals = invoiceData.activity_totals
-      this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
-        ...m,
-        margin_perc: this.invoice_default_margin
-      }))
-
-      this.used_materials = invoiceData.used_materials
-
-      this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
-      this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
-
-      this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
-      this.invoice_default_partner_hourly_rate_dinero = toDinero(
-        this.invoice_default_partner_hourly_rate,
-        this.default_currency
-      )
-
-      // create engineer models
-      this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
-        ...m,
-        margin_perc: this.invoice_default_margin
-      }))
-
-      this.isLoading = false
-    } else {
-      await this.loadInvoice()
+    // init new model for manual entry
+    this.invoiceLineService.modelDefaults = {
+      price: '0.00',
+      price_currency: this.$store.getters.getDefaultCurrency,
+      total: '0.00',
+      total_currency: this.$store.getters.getDefaultCurrency,
+      vat: '0.00',
+      vat_currency: this.$store.getters.getDefaultCurrency,
+      vat_type: this.$store.getters.getInvoiceDefaultVat,
     }
+    this.invoiceLineService.newEditItem()
+
+    // get invoice data
+    const invoiceData = await invoiceService.getData(this.uuid)
+
+    // get customer
+    this.customerPk = invoiceData.customer_pk
+    await this.getCustomer()
+
+    // set data in component
+    this.invoice_id = invoiceData.invoice_id
+    this.order_pk = invoiceData.order_pk
+    this.invoice.order = this.order_pk
+
+    this.activity_totals = invoiceData.activity_totals
+    this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
+      ...m,
+      margin_perc: this.invoice_default_margin
+    }))
+
+    this.used_materials = invoiceData.used_materials
+
+    this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
+    this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
+
+    this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
+    this.invoice_default_partner_hourly_rate_dinero = toDinero(
+      this.invoice_default_partner_hourly_rate,
+      this.default_currency
+    )
+
+    // create engineer models
+    this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
+      ...m,
+      margin_perc: this.invoice_default_margin
+    }))
+
+    this.isLoading = false
   },
   methods: {
     // invoice lines
+    updateInvoiceTotals() {
+      const total = this.invoiceLineService.getItemsTotal()
+      const vat = this.invoiceLineService.getItemsTotalVAT()
+
+      this.invoice.setPriceField('total', total)
+      this.invoice.setPriceField('vat', vat)
+    },
     addInvoiceLine() {
       this.invoiceLineService.editItem.id = this.getInvoiceLineId()
       this.invoiceLineService.editItem.type = this.INVOICE_LINE_TYPE_MANUAL
       this.invoiceLineService.editItem.price_text = this.invoiceLineService.editItem.price_dinero.toFormat('$0.00')
       this.invoiceLineService.addCollectionItem()
+      this.updateInvoiceTotals()
     },
     deleteInvoiceLine(id) {
       this.invoiceLineService.deleteCollectionItemByid(id)
@@ -715,6 +793,7 @@ export default {
           // console.log(`id: ${id}`)
           this.invoiceLineService.collection.push(invoiceLine)
         }
+        this.updateInvoiceTotals()
         const txt = invoiceLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
         this.infoToast(this.$trans('Added'), this.$trans(`${invoiceLines.length} ${txt} added`))
       }
@@ -772,51 +851,18 @@ export default {
     async submitForm() {
       this.isLoading = true
 
-      if (this.isCreate) {
-        try {
-          const invoice = await invoiceService.insert(this.invoice)
-          for (let invoiceLine of this.invoiceLines) {
-            invoiceLine.invoice = invoice.id
-            await invoiceLineModel.insert(invoiceLine)
-          }
-        } catch(error) {
-          this.errorToast(this.$trans('Error creating invoice lines'))
-          this.isLoading = false
+      try {
+        const invoice = await this.invoiceService.insert(this.invoice)
+        for (let invoiceLine of this.invoiceLineService.collection) {
+          invoiceLine.invoice = invoice.id
+          await this.invoiceLineService.insert(invoiceLine)
         }
 
         this.infoToast(this.$trans('Created'), this.$trans('Invoice has been created'))
         this.isLoading = false
-        await this.$router.push({name: 'order-invoice-view', params: {pk: this.pk}})
-
-        return
-      }
-
-      try {
-        await invoiceModel.update(this.pk, this.invoice)
-
-        // invoiceLine create/update
-        for (let invoiceLine of this.invoiceLines) {
-          invoiceLine.order = this.pk
-          if (invoiceLine.id) {
-            await invoiceLineModel.update(invoiceLine.id, invoiceLine)
-          } else {
-            await invoiceLineModel.insert(invoiceLine)
-          }
-        }
-
-        // invoiceLine delete
-        for (const invoiceLine of this.deletedInvoiceLines) {
-          if (invoiceLine.id) {
-            await invoiceLineModel.delete(invoiceLine.id)
-          }
-        }
-
-        this.infoToast(this.$trans('Updated'), this.$trans('Invoice has been updated'))
-        this.isLoading = false
-        await this.$router.push({name: 'order-invoice-view', params: {pk: this.pk}})
+        await this.$router.push({name: 'order-invoice-view', params: {uuid: invoice.uuid}})
       } catch(error) {
-        console.log('Error updating invoice', error)
-        this.errorToast(this.$trans('Error updating invoice'))
+        this.errorToast(this.$trans('Error creating invoice'))
         this.isLoading = false
       }
     },
@@ -839,35 +885,14 @@ export default {
 }
 </script>
 <style scoped>
-.material_row {
-  padding-bottom: 10px;
-  padding-top: 5px;
-  border-bottom: 1px silver solid;
-}
 .flex {
   display : flex;
   margin-top: auto;
-}
-.input-margin {
-  width: 40px;
-  padding: 1px;
-  margin: 1px;
-  text-align: center;
 }
 .value-container {
   padding-top: 4px;
   padding-right: 4px;
   padding-left: 4px;
-}
-.percentage-container {
-  padding-top: 4px;
-  padding-left: 4px;
-}
-.input-total-used {
-  width: 90px;
-  padding: 1px;
-  margin: 1px;
-  text-align: right;
 }
 .update-button {
   margin-bottom: 8px;
@@ -877,7 +902,6 @@ export default {
   font-weight: bold;
 }
 .total-text {
-  font-size: 14px;
   font-weight: bold;
 }
 </style>
