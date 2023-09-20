@@ -85,7 +85,36 @@
                 v-model="member.companycode"
               ></b-form-input>
             </b-form-group>
-
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Chamber of commerce')"
+              label-for="member_chamber_of_commerce"
+            >
+              <b-form-input
+                id="member_chamber_of_commerce"
+                size="sm"
+                v-model="member.chamber_of_commerce"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('VAT number')"
+              label-for="member_vat_number"
+            >
+              <b-form-input
+                id="member_vat_number"
+                size="sm"
+                v-model="member.vat_number"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Address')"

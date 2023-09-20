@@ -40,6 +40,7 @@
         v-bind:title="$trans('Sort')"
         @ok="doSort"
       >
+
         <form ref="sort-form">
           <b-container fluid>
             <b-row role="group">
@@ -135,6 +136,11 @@
           <li v-for="order in orders" :key="order.id">
             <OrderTableInfo
             v-bind:order="order"/>
+            <!-- FIXME -->
+            <router-link class="px-1" v-if="data.item.customer_relation" v-bind:title="`$trans('Create invoice')`"
+              :to="{name: 'order-invoice-create', params: {uuid: data.item.uuid}}">
+              <b-icon-currency-dollar></b-icon-currency-dollar>
+            </router-link>
           </li>
         </ul>
 

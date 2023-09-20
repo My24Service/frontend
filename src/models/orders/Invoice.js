@@ -1,5 +1,7 @@
 import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
+import {toDinero} from "../../utils";
+import {InvoiceLineModel} from "./InvoiceLine";
 
 class InvoiceModel {
   id
@@ -19,7 +21,11 @@ class InvoiceModel {
 
   constructor(invoiceData) {
     for (const [k, v] of Object.entries(invoiceData)) {
-      this[k] = v
+      if (k === 'invoicelines') {
+        this[k] = v.map((m) => new InvoiceLineModel(m))
+      } else {
+        this[k] = v
+      }
     }
 
     this.setPriceFields(this)
@@ -30,6 +36,8 @@ Object.assign(InvoiceModel.prototype, priceMixin);
 
 class InvoiceService extends BaseModel {
   model = InvoiceModel
+  collection = []
+
   fields = {
     id: null,
     order: null,
