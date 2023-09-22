@@ -199,7 +199,7 @@ describe('CallOutCosts', () => {
     })
   })
 
-  it('has 4 HeaderCells', async () => {
+  it('has 3 HeaderCells', async () => {
     const wrapper = shallowMount(CallOutCosts, {
       localVue,
       store,
@@ -216,7 +216,7 @@ describe('CallOutCosts', () => {
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(4)
+    expect(trs.length).to.equal(3)
   })
 
   it('has a total of €10.50', async () => {
@@ -250,7 +250,7 @@ describe('Distance', () => {
     })
   })
 
-  it('has 7 HeaderCells', async () => {
+  it('has 6 HeaderCells', async () => {
     const wrapper = shallowMount(Distance, {
       localVue,
       store,
@@ -270,7 +270,7 @@ describe('Distance', () => {
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(7)
+    expect(trs.length).to.equal(6)
   })
 
   it('has a total of €325.00', async () => {
@@ -403,7 +403,7 @@ describe('Materials', () => {
     })
   })
 
-  it('has 6 HeaderCells', async () => {
+  it('has 5 HeaderCells', async () => {
     const wrapper = shallowMount(Materials, {
       localVue,
       store,
@@ -422,7 +422,7 @@ describe('Materials', () => {
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(6)
+    expect(trs.length).to.equal(5)
   })
 
   it('has a total of €20.50 and VAT €4.30', async () => {
@@ -468,7 +468,7 @@ describe('Hours', () => {
     })
   })
 
-  it('has 6 HeaderCells', async () => {
+  it('has 4 HeaderCells', async () => {
     const engineer_models = invoiceResponse.data.engineer_models.map((m) => new RateEngineerUserModel({
       ...m,
       margin_perc: 0
@@ -493,7 +493,7 @@ describe('Hours', () => {
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(5)
+    expect(trs.length).to.equal(4)
   })
 
   it('has a total of €365.00 and VAT €76.65', async () => {

@@ -46,14 +46,9 @@
               :text='$trans("Total")'
             />
           </b-col>
-          <b-col cols="3">
+          <b-col cols="4">
             <HeaderCell
               :text='$trans("Rate")'
-            />
-          </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("Margin")'
             />
           </b-col>
           <b-col cols="1">
@@ -76,7 +71,7 @@
           <b-col cols="1">
             {{ distance.distance_total }}
           </b-col>
-          <b-col cols="3">
+          <b-col cols="4">
             <b-form-radio-group
               @change="updateTotals"
               v-model="distance.use_price"
@@ -104,18 +99,11 @@
             </b-form-radio-group>
           </b-col>
           <b-col cols="1">
-            <MarginInput
-              :margin="distance.margin_perc"
-              @inputChanged="(val) => marginChanged(distance, val)"
-            />
-          </b-col>
-          <b-col cols="1">
             <VAT @vatChanged="(val) => changeVatType(distance, val)" />
           </b-col>
           <b-col cols="2">
-            <Totals
+            <TotalsInputs
               :total="distance.total_dinero"
-              :margin="distance.margin_dinero"
               :vat="distance.vat_dinero"
             />
           </b-col>
@@ -136,15 +124,11 @@
 </template>
 
 <script>
-import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import invoiceLineService from "../../../models/orders/InvoiceLine";
 import {
   INVOICE_LINE_TYPE_DISTANCE,
-  OPTION_NONE,
-  OPTION_ONLY_TOTAL,
-  OPTION_USER_TOTALS,
   USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS
@@ -152,7 +136,6 @@ import {
 import {toDinero} from "../../../utils";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import MarginInput from "./MarginInput";
 import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
 import CostService,{
@@ -162,6 +145,7 @@ import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
+import TotalsInputs from "../../../components/TotalsInputs";
 
 export default {
   name: "DistanceComponent",
@@ -169,16 +153,15 @@ export default {
   mixins: [invoiceMixin],
   components: {
     PriceInput,
-    Totals,
     Collapse,
     HeaderCell,
     VAT,
-    MarginInput,
     TotalRow,
     CollectionSaveContainer,
     CollectionEmptyContainer,
     CostsTable,
     AddToInvoiceLinesDiv,
+    TotalsInputs,
   },
   props: {
     order_pk: {
@@ -222,7 +205,6 @@ export default {
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
       usePriceOptions: {
         USE_PRICE_SETTINGS,
@@ -241,7 +223,6 @@ export default {
     this.isLoading = true
 
     // set vars in service
-    this.costService.invoice_default_margin = this.invoice_default_margin
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
 

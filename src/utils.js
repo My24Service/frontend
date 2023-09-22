@@ -220,7 +220,7 @@ let componentMixin = {
 }
 
 function toDinero(priceDecimal, currency) {
-  if (currency === 'EUR' || currency === 'USD') {
+  if (currency === 'EUR' || currency === 'USD' || currency === 'GBP') {
     let amount = priceDecimal * 100
     amount = parseInt(amount.toFixed(0))
     // console.log({ priceDecimal, amount, currency })

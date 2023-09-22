@@ -40,7 +40,7 @@
                     <b-col cols="10">
                       <PriceInput
                         v-model="material.price_purchase_ex"
-                        :currency="material.price_purchase_ex_currency"
+                        :currency="default_currency"
                         @priceChanged="(val) => material.setPurchasePrice(val)"
                       />
                     </b-col>
@@ -62,7 +62,7 @@
                       <PriceInput
                         :ref="`selling_price_${material.id}`"
                         v-model="material.price_selling_ex"
-                        :currency="material.price_selling_ex_currency"
+                        :currency="default_currency"
                         @priceChanged="(val) => material.setSellingPrice(val)"
                       />
                     </b-col>
@@ -118,7 +118,7 @@
               <b-col cols="2">
                 <PriceInput
                   v-model="user.engineer.hourly_rate"
-                  :currency="user.engineer.hourly_rate_currency"
+                  :currency="default_currency"
                   @priceChanged="(val) => user.engineer.setHourlyRate(val)"
                 />
               </b-col>
@@ -159,7 +159,7 @@
               <b-col cols="2">
                 <PriceInput
                   v-model="customer.hourly_rate_engineer"
-                  :currency="customer.hourly_rate_engineer_currency"
+                  :currency="default_currency"
                   @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
                 />
               </b-col>
@@ -185,7 +185,7 @@
               <b-col cols="2">
                 <PriceInput
                   v-model="customer.call_out_costs"
-                  :currency="customer.call_out_costs_currency"
+                  :currency="default_currency"
                   @priceChanged="(val) => customer.setCallOutCosts(val)"
                 />
               </b-col>
@@ -211,7 +211,7 @@
               <b-col cols="2">
                 <PriceInput
                   v-model="customer.price_per_km"
-                  :currency="customer.price_per_km_currency"
+                  :currency="default_currency"
                   @priceChanged="(val) => customer.setPricePerKm(val)"
                 />
               </b-col>
@@ -561,7 +561,7 @@
               <span class="total-text">{{ $trans('Invoice total') }}</span>
             </b-col>
             <b-col cols="2">
-              <Totals
+              <TotalsInputs
                 :total="invoice.total_dinero"
                 :is-final-total="true"
                 :vat="invoice.vat_dinero"
@@ -594,7 +594,6 @@ import PriceInput from "../../components/PriceInput";
 import materialService, {MaterialModel} from "../../models/inventory/Material";
 import engineerService, {RateEngineerUserModel} from "../../models/company/UserEngineer";
 import customerService, {CustomerModel, CustomerPriceModel} from "../../models/customer/Customer";
-import InvoiceFormTotals from './invoice_form/Totals';
 import Collapse from "../../components/Collapse";
 import invoiceMixin from "./invoice_form/mixin";
 import HoursComponent from "./invoice_form/Hours";
@@ -613,14 +612,13 @@ import {
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import MarginInput from "./invoice_form/MarginInput";
 import {useVuelidate} from "@vuelidate/core";
-import Totals from "./invoice_form/Totals";
+import TotalsInputs from "../../components/TotalsInputs";
 
 export default {
   name: 'InvoiceForm',
   mixins: [invoiceMixin],
   components: {
     PriceInput,
-    InvoiceFormTotals,
     Collapse,
     HoursComponent,
     MaterialsComponent,
@@ -629,7 +627,7 @@ export default {
     VAT,
     CustomerDetail,
     MarginInput,
-    Totals,
+    TotalsInputs,
   },
   setup() {
     return { v$: useVuelidate() }
@@ -737,7 +735,7 @@ export default {
     this.activity_totals = invoiceData.activity_totals
     this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
       ...m,
-      margin_perc: this.invoice_default_margin
+      default_currency: this.default_currency,
     }))
 
     this.used_materials = invoiceData.used_materials
@@ -754,7 +752,7 @@ export default {
     // create engineer models
     this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
       ...m,
-      margin_perc: this.invoice_default_margin
+      engineer: {...m.engineer, default_currency: this.default_currency}
     }))
 
     this.isLoading = false
@@ -816,7 +814,9 @@ export default {
     // customer
     async getCustomer() {
       const customerData = await customerService.detail(this.customerPk)
-      this.customer = new CustomerModel(customerData)
+      this.customer = new CustomerModel(
+        {...customerData, default_currency: this.default_currency}
+      )
     },
     async updateCustomer() {
       // use minimal model for patch
@@ -829,7 +829,9 @@ export default {
     // activity
     async updateEngineer(user_id) {
       let engineer_user = this.engineer_models.find((m) => m.id === user_id)
-      const minimalModel = new RateEngineerUserModel(engineer_user)
+      const minimalModel = new RateEngineerUserModel(
+        {...engineer_user, default_currency: this.default_currency}
+      )
 
       let updatedEngineerUserJson = await engineerService.update(user_id, minimalModel)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)

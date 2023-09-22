@@ -36,12 +36,7 @@
               :text='$trans("Rate")'
             />
           </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("Margin")'
-            />
-          </b-col>
-          <b-col cols="1">
+          <b-col cols="2">
             <HeaderCell
               :text='$trans("VAT type")'
             />
@@ -54,10 +49,9 @@
               @blur="updateTotals"
               v-model="coc_item.amount_int"
               size="sm"
-              class="input-margin"
             ></b-form-input>
           </b-col>
-          <b-col cols="6">
+          <b-col cols=6>
             <b-form-radio-group
               @change="updateTotals"
               v-model="coc_item.use_price"
@@ -70,7 +64,7 @@
               <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
                 {{ $trans('Customer') }}
                 {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-              </b-form-radio>
+              </b-form-radio><br/>
 
               <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
                 <p class="flex">
@@ -84,19 +78,12 @@
               </b-form-radio>
             </b-form-radio-group>
           </b-col>
-          <b-col cols="1">
-            <MarginInput
-              :margin="coc_item.margin_perc"
-              @inputChanged="(val) => marginChanged(coc_item, val)"
-            />
-          </b-col>
-          <b-col cols="1">
+          <b-col cols="2">
             <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />
           </b-col>
           <b-col cols="2">
-            <Totals
+            <TotalsInputs
               :total="coc_item.total_dinero"
-              :margin="coc_item.margin_dinero"
               :vat="coc_item.vat_dinero"
             />
           </b-col>
@@ -121,19 +108,14 @@
 import {toDinero} from "../../../utils";
 import {
   INVOICE_LINE_TYPE_CALL_OUT_COSTS,
-  OPTION_USER_TOTALS,
-  OPTION_ONLY_TOTAL,
-  OPTION_NONE,
   USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS
 } from "./constants";
 import PriceInput from "../../../components/PriceInput";
-import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
 import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
@@ -142,22 +124,22 @@ import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
+import TotalsInputs from "../../../components/TotalsInputs";
 
 export default {
   name: "CallOutCostsComponent",
   mixins: [invoiceMixin],
   components: {
     PriceInput,
-    Totals,
     Collapse,
     HeaderCell,
     VAT,
-    MarginInput,
     TotalRow,
     CollectionSaveContainer,
     CollectionEmptyContainer,
     CostsTable,
     AddToInvoiceLinesDiv,
+    TotalsInputs,
   },
   props: {
     order_pk: {
@@ -183,7 +165,6 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_call_out_costs_dinero: null,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
       costService: new CostService(),
       coc_item: null,
@@ -208,7 +189,6 @@ export default {
   async created() {
     this.isLoading = true
     // set vars in service
-    this.costService.invoice_default_margin = this.invoice_default_margin
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
 
@@ -337,7 +317,8 @@ export default {
 </script>
 
 <style scoped>
-.save-collection {
-  padding-top: 10px;
+.flex {
+  display : flex;
+  margin-top: auto;
 }
 </style>

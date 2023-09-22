@@ -10,9 +10,6 @@
     <template #cell(price)="data">
       {{ data.item.price_dinero.toFormat('$0.00') }} ({{ data.item.use_price }})
     </template>
-    <template #cell(margin)="data">
-      {{ data.item.margin_dinero.toFormat('$0.00') }} ({{ data.item.margin_perc }}%)
-    </template>
     <template #cell(vat)="data">
       {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ data.item.vat_type }}%)
     </template>
@@ -53,7 +50,6 @@ export default {
         {key: 'material_name', label: this.$trans('Name')},
         {key: 'amount_decimal', label: this.$trans('Amount')},
         {key: 'price', label: this.$trans('Price')},
-        {key: 'margin', label: this.$trans('Margin')},
         {key: 'vat', label: this.$trans('VAT')},
         {key: 'total', label: this.$trans('Total')},
       ],
@@ -61,14 +57,12 @@ export default {
         {key: 'user_full_name', label: this.$trans('User')},
         {key: 'amount_duration_read', label: this.$trans('Amount')},
         {key: 'price', label: this.$trans('Price')},
-        {key: 'margin', label: this.$trans('Margin')},
         {key: 'vat', label: this.$trans('VAT')},
         {key: 'total', label: this.$trans('Total')},
       ],
       tableFieldsDistance: [
         {key: 'amount_int', label: this.$trans('Amount')},
         {key: 'price', label: this.$trans('Price')},
-        {key: 'margin', label: this.$trans('Margin')},
         {key: 'vat', label: this.$trans('VAT')},
         {key: 'total', label: this.$trans('Total')},
       ],
@@ -76,7 +70,6 @@ export default {
       tableFieldsCallOutCosts: [
         {key: 'amount_int', label: this.$trans('Amount')},
         {key: 'price', label: this.$trans('Price')},
-        {key: 'margin', label: this.$trans('Margin')},
         {key: 'vat', label: this.$trans('VAT')},
         {key: 'total', label: this.$trans('Total')},
       ],

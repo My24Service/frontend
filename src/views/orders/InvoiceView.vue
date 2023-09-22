@@ -96,7 +96,7 @@
           <span class="total-text">{{ $trans('Invoice total') }}</span>
         </b-col>
         <b-col cols="2">
-          <Totals
+          <TotalsInputs
             :total="data.total_dinero"
             :is-final-total="true"
             :vat="data.vat_dinero"
@@ -112,12 +112,12 @@
 </template>
 <script>
 import invoiceService from '../../models/orders/Invoice'
-import Totals from "./invoice_form/Totals";
+import TotalsInputs from "../../components/TotalsInputs";
 
 export default {
   name: "InvoiceView",
   components: {
-    Totals,
+    TotalsInputs,
   },
   data() {
     return {
