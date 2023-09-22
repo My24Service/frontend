@@ -36,6 +36,10 @@ class BaseModel {
     }
     this.editItem = new this.model(data)
   }
+  cancelEdit() {
+    this.isEdit = false
+    this.emptyCollectionItem()
+  }
   deleteCollectionItem(index) {
     this.deletedItems.push(this.collection[index])
     this.collection.splice(index, 1)
