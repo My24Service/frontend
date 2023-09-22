@@ -10,7 +10,9 @@ let priceMixin = {
         const dinero = toDinero(obj[field], obj[currency_field])
         this.setPriceField(field, dinero)
       } else {
-        console.debug(`not all fields here for field: ${field}`)
+        console.debug(
+          `not all fields here for field: ${field} (val: ${obj[field]}, currency: ${obj[currency_field]})`, obj
+        )
       }
     }
   },
