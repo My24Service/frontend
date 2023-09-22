@@ -80,6 +80,9 @@ export default {
       if (this.dinero.getCurrency() === 'USD') {
         return '$'
       }
+      if (this.dinero.getCurrency() === 'GBP') {
+        return '£'
+      }
       throw `Unknown currency: ${this.dinero.getCurrency()}`
     }
   },

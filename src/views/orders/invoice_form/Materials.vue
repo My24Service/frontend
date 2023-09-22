@@ -41,14 +41,9 @@
               :text='$trans("Amount")'
             />
           </b-col>
-          <b-col cols="3">
+          <b-col cols="4">
             <HeaderCell
               :text='$trans("Use price")'
-            />
-          </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("Margin")'
             />
           </b-col>
           <b-col cols="1">
@@ -68,7 +63,7 @@
           <b-col cols="1">
             {{ material.amount }}
           </b-col>
-          <b-col cols="3">
+          <b-col cols="4">
             <b-form-radio-group
               @change="updateTotals"
               v-model="material.use_price"
@@ -94,18 +89,11 @@
             </b-form-radio-group>
           </b-col>
           <b-col cols="1">
-            <MarginInput
-              :margin="material.margin_perc"
-              @inputChanged="(val) => marginChanged(material, val)"
-            />
-          </b-col>
-          <b-col cols="1">
             <VAT @vatChanged="(val) => changeVatType(material, val)" />
           </b-col>
           <b-col cols="2">
-            <Totals
+            <TotalsInputs
               :total="material.total_dinero"
-              :margin="material.margin_dinero"
               :vat="material.vat_dinero"
             />
           </b-col>
@@ -126,7 +114,6 @@
 </template>
 
 <script>
-import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import invoiceLineService from "../../../models/orders/InvoiceLine";
@@ -141,12 +128,12 @@ import HeaderCell from "./Header";
 import VAT from "./VAT";
 import {MaterialModel} from "../../../models/inventory/Material";
 import PriceInput from "../../../components/PriceInput";
-import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
+import TotalsInputs from "../../../components/TotalsInputs";
 
 export default {
   name: "MaterialsComponent",
@@ -154,11 +141,10 @@ export default {
   mixins: [invoiceMixin],
   components: {
     PriceInput,
-    Totals,
+    TotalsInputs,
     Collapse,
     HeaderCell,
     VAT,
-    MarginInput,
     TotalRow,
     CollectionSaveContainer,
     CollectionEmptyContainer,
@@ -220,7 +206,6 @@ export default {
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
 
       hasStoredData: false,
       costType: COST_TYPE_USED_MATERIALS,
@@ -233,7 +218,6 @@ export default {
     this.isLoading = true
 
     // set vars in service
-    this.costService.invoice_default_margin = this.invoice_default_margin
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
 
@@ -262,11 +246,8 @@ export default {
       return material ? material.name : this.$trans("unknown")
     },
     async loadData() {
-      // set material models with margin perc
-      this.materialModels = this.material_models.map((m) => new MaterialModel({
-        ...m,
-        margin_perc: this.invoice_default_margin
-      }))
+      // create material models
+      this.materialModels = this.material_models.map((m) => new MaterialModel(m))
 
       this.costService.collection = []
       this.hasStoredData = false
@@ -288,8 +269,7 @@ export default {
             material,
             this.getPrice(
               {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
-            this.getCurrency(
-              {...material, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
+            this.default_currency,
             this.getDefaultProps()
           )
         ))
@@ -324,19 +304,7 @@ export default {
       }
     },
     getCurrency(used_material) {
-      let model
-      switch (used_material.use_price) {
-        case this.usePriceOptions.USE_PRICE_PURCHASE:
-          model = this.materialModels.find((m) => m.id === used_material.material_id)
-          return model.price_purchase_ex_currency
-        case this.usePriceOptions.USE_PRICE_SELLING:
-          model = this.materialModels.find((m) => m.id === used_material.material_id)
-          return model.price_selling_ex_currency
-        case this.usePriceOptions.USE_PRICE_OTHER:
-          return used_material.price_other_currency
-        default:
-          throw `unknown use price: ${used_material.use_price}`
-      }
+      return this.default_currency
     },
     getMaterialPriceFor(used_material, use_price) {
       const model = this.materialModels.find((m) => m.id === used_material.material_id)

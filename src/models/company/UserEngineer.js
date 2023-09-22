@@ -44,6 +44,7 @@ class RateEngineerUserModel {
 }
 
 class RateEngineerModel {
+  default_currency
   hourly_rate
   hourly_rate_currency
 

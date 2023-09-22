@@ -36,14 +36,9 @@
               :text='$trans("Hours")'
             />
           </b-col>
-          <b-col cols="3">
+          <b-col cols="4">
             <HeaderCell
               :text='$trans("Engineer rate")'
-              />
-          </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("Margin")'
               />
           </b-col>
           <b-col cols="1">
@@ -60,7 +55,7 @@
           <b-col cols="2">
             {{ activity.hours_total }}
           </b-col>
-          <b-col cols="3">
+          <b-col cols="4">
             <b-form-radio-group
               @change="updateTotals"
               v-model="activity.use_price"
@@ -93,18 +88,11 @@
             </b-form-radio-group>
           </b-col>
           <b-col cols="1">
-            <MarginInput
-              :margin="activity.margin_perc"
-              @inputChanged="(val) => marginChanged(activity, val)"
-            />
-          </b-col>
-          <b-col cols="1">
             <VAT @vatChanged="(val) => changeVatType(activity, val)" />
           </b-col>
           <b-col cols="2">
-            <Totals
+            <TotalsInputs
               :total="activity.total_dinero"
-              :margin="activity.margin_dinero"
               :vat="activity.vat_dinero"
             />
           </b-col>
@@ -125,7 +113,6 @@
 </template>
 
 <script>
-import Totals from "./Totals";
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import invoiceLineService from "../../../models/orders/InvoiceLine";
@@ -134,8 +121,6 @@ import {
   INVOICE_LINE_TYPE_HOURS_TYPE_EXTRA_WORK,
   INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL,
   INVOICE_LINE_TYPE_HOURS_TYPE_WORK,
-  OPTION_NONE, OPTION_ONLY_TOTAL,
-  OPTION_USER_TOTALS,
   USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS,
@@ -143,7 +128,6 @@ import {
 } from "./constants";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import MarginInput from "./MarginInput";
 import TotalRow from "./TotalRow";
 import CostService, {
   COST_TYPE_ACTUAL_WORK,
@@ -157,17 +141,17 @@ import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
+import TotalsInputs from "../../../components/TotalsInputs";
 
 export default {
   name: "HoursComponent",
   emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
   components: {
-    Totals,
+    TotalsInputs,
     Collapse,
     HeaderCell,
     VAT,
-    MarginInput,
     TotalRow,
     PriceInput,
     CollectionSaveContainer,
@@ -240,7 +224,6 @@ export default {
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
 
       total_dinero: null,
@@ -279,7 +262,6 @@ export default {
     this.isLoading = true
 
     // set vars in service
-    this.costService.invoice_default_margin = this.invoice_default_margin
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
 
@@ -320,7 +302,7 @@ export default {
               this.costService.newModelFromWorkHours(
                 activity,
                 this.getPrice({...activity, use_price}),
-                this.getCurrency({...activity, use_price}),
+                this.default_currency,
                 this.getDefaultProps()
               )))
             break
@@ -330,7 +312,7 @@ export default {
               this.costService.newModelFromTravelHours(
                 activity,
                 this.getPrice({...activity, use_price}),
-                this.getCurrency({...activity, use_price}),
+                this.default_currency,
                 this.getDefaultProps()
               )))
             break
@@ -340,7 +322,7 @@ export default {
               this.costService.newModelFromExtraWork(
                 activity,
                 this.getPrice({...activity, use_price}),
-                this.getCurrency({...activity, use_price}),
+                this.default_currency,
                 this.getDefaultProps()
               )))
             break
@@ -350,7 +332,7 @@ export default {
               this.costService.newModelFromActualWork(
                 activity,
                 this.getPrice({...activity, use_price}),
-                this.getCurrency({...activity, use_price}),
+                this.default_currency,
                 this.getDefaultProps()
               )))
             break
@@ -364,7 +346,8 @@ export default {
     getDefaultProps() {
       return {
         order: this.order_pk,
-        use_price: this.usePriceOptions.USE_PRICE_SETTINGS
+        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
+        default_currency: this.default_currency,
       }
     },
     getTitle() {
@@ -418,24 +401,7 @@ export default {
       }
     },
     getCurrency(activity) {
-      const user_id = activity.user ? activity.user : activity.user_id
-      const user = this.engineer_models.find((m) => m.id === user_id)
-      if (user) {
-        switch (activity.use_price) {
-          case this.usePriceOptions.USE_PRICE_USER:
-            return user.engineer.hourly_rate_currency
-          case this.usePriceOptions.USE_PRICE_CUSTOMER:
-            return this.customer.hourly_rate_engineer_currency
-          case this.usePriceOptions.USE_PRICE_SETTINGS:
-            return this.default_currency
-          case this.usePriceOptions.USE_PRICE_OTHER:
-            return this.default_currency
-          default:
-            throw `getCurrency: unknown use_price for engineer: ${activity.use_price}`
-        }
-      } else {
-        console.error(`getCurrency: user model ${activity.user} not found`, activity, this.engineer_models)
-      }
+      return this.default_currency
     },
     getEngineerRateFor(obj, usePrice) {
       const user_id = obj.user ? obj.user : obj.user_id

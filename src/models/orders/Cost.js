@@ -3,6 +3,7 @@ import priceMixin from "../../mixins/price";
 import {toDinero} from "../../utils";
 
 class CostModel {
+  default_currency
   order
   cost_type
   user
@@ -14,10 +15,6 @@ class CostModel {
   amount_duration_read
   amount_duration_secs
   use_price
-
-  margin_perc
-  margin = "0.00"
-  margin_currency
 
   price = "0.00"
   price_dinero = null
@@ -31,7 +28,7 @@ class CostModel {
   total = "0.00"
   total_currency
 
-  priceFields = ['margin', 'price', 'vat', 'total']
+  priceFields = ['price', 'vat', 'total']
 
   constructor(cost) {
     for (const [k, v] of Object.entries(cost)) {
@@ -45,16 +42,9 @@ class CostModel {
     this.setPriceField('price', toDinero(priceDecimal, currency))
     const total = this.getTotal()
     // console.log({total, vat_type: this.vat_type})
-    let total_with_margin = total
-    let margin = toDinero("0.00", currency)
-    if (this.margin_perc > 0) {
-      margin = total.multiply(this.margin_perc/100)
-      total_with_margin = total.add(margin)
-    }
-    const vat = total_with_margin.multiply(parseInt(this.vat_type)/100)
+    const vat = total.multiply(parseInt(this.vat_type)/100)
     this.currency = currency
 
-    this.setPriceField('margin', margin)
     this.setPriceField('total', total)
     this.setPriceField('vat', vat)
   }
@@ -103,17 +93,14 @@ Object.assign(CostModel.prototype, priceMixin);
 class CostService extends BaseModel {
   model = CostModel
   url = '/order/cost/'
-  invoice_default_margin = null
   invoice_default_vat = null
   default_currency = null
 
   getDefaultCostProps() {
     // default props for cost model
     return {
-      margin_perc:  this.invoice_default_margin,
       vat_type: this.invoice_default_vat,
       vat_currency: this.default_currency,
-      margin_currency: this.default_currency,
       price_currency: this.default_currency,
       total_currency: this.default_currency,
       price_other_currency: this.default_currency,
