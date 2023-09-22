@@ -1,12 +1,6 @@
 <template>
   <div v-if="isLoaded">
     <b-nav>
-      <b-nav-item
-        :active="isActive('dispatch')"
-        v-if="hasDispatch"
-        :to="{name: 'mobile-dispatch'}">
-        {{ $trans('Dispatch') }}
-      </b-nav-item>
 
       <b-nav-item
         :active="isActive('orders')"

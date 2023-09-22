@@ -86,12 +86,12 @@
     <!-- mobile -->
     <b-nav-item
       :active="isActive('mobile')"
-      v-if="showMobile"
+      v-if="showMobile || hasDispatch"
       to="/mobile/dispatch"
       class="has-children">
-      <b-icon icon="person-badge" v-if="!isActive('mobile')"></b-icon>
-      <b-icon icon="person-badge-fill" v-else></b-icon>
-      {{ $trans('Mobile') }}
+      <b-icon icon="calendar2-week" v-if="!isActive('mobile')"></b-icon>
+      <b-icon icon="calendar2-week-fill" v-else></b-icon>
+      {{ $trans('Dispatch') }}
     </b-nav-item>
     <SubNav v-if="isActive('mobile')">
       <router-view name="app-subnav"></router-view>
