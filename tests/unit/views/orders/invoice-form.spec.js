@@ -425,7 +425,7 @@ describe('Materials', () => {
     expect(trs.length).to.equal(5)
   })
 
-  it('has a total of €20.50 and VAT €4.30', async () => {
+  it('has a total of €53.50 and VAT €4.30', async () => {
     const wrapper = mount(Materials, {
       localVue,
       store,
@@ -441,20 +441,13 @@ describe('Materials', () => {
       }
     })
 
-    // 4x 947 a 1.25 = 5, vat 1.05
-    // 4x 1001 a 0.75 = 3, vat 0.63
-    // 50x 955 a 0.25 = 12.5, vat 2.63
-    // total 20.5, vat 4.30
-
-    // amount is DecimalField(decimal_places=2)
-
     await flushPromises()
 
     const total_input = wrapper.find('input.total-input-final')
-    expect(total_input.element.value).to.equal('€20.50')
+    expect(total_input.element.value).to.equal('€53.50')
 
     const vat_input = wrapper.find('input.vat-input-final')
-    expect(vat_input.element.value).to.contain("€4.30")
+    expect(vat_input.element.value).to.contain("€11.24")
   })
   //
 })

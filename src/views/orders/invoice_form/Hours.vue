@@ -53,7 +53,7 @@
             {{ getFullname(activity.user) }}
           </b-col>
           <b-col cols="2">
-            {{ activity.hours_total }}
+            {{ activity.amount_duration_read }}
           </b-col>
           <b-col cols="4">
             <b-form-radio-group
@@ -162,7 +162,7 @@ export default {
   watch: {
     user_totals: {
       handler(newValue) {
-        console.log('user totals changed', newValue)
+        // console.log('user totals changed', newValue)
       },
       deep: true
     },
@@ -428,7 +428,7 @@ export default {
       return this.getTitle()
     },
     getTotalAmountInvoiceLine() {
-      return this.distance_total
+      return this.hours_total
     },
   }
 }

@@ -798,6 +798,7 @@ export default {
     },
     emptyCollectionClicked(type) {
       this.invoiceLineService.collection = this.invoiceLineService.collection.filter((m) => m.type !== type)
+      this.updateInvoiceTotals()
       this.infoToast(this.$trans('Removed'), this.$trans(`invoice lines removed`))
     },
     getInvoiceLineId() {
