@@ -154,7 +154,7 @@ export default {
   watch: {
     material_models: {
       handler(newValue) {
-        console.log('material_models changed', newValue)
+        // console.log('material_models changed', newValue)
         this.loadData()
       },
       deep: true
@@ -280,7 +280,7 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.USE_PRICE_PURCHASE,
+        use_price: this.usePriceOptions.USE_PRICE_SELLING,
         order: this.order_pk,
       }
     },
@@ -328,7 +328,7 @@ export default {
       return `${this.$trans("material")}: ${cost.user_full_name}, ${this.getMaterialName(cost.material)}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Call out costs")}`
+      return `${this.$trans("Used materials")}`
     },
     getTotalAmountInvoiceLine() {
       return this.totalAmount

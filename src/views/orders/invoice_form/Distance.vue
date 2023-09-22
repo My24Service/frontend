@@ -323,7 +323,7 @@ export default {
       return `${this.$trans("distance")}: ${cost.user_full_name}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Call out costs")}`
+      return `${this.$trans("Distance")}`
     },
     getTotalAmountInvoiceLine() {
       return this.distance_total
