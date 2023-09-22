@@ -80,8 +80,8 @@ class Dispatch {
     this.tipCanvas = tipCanvas
     this.component = component
     this.monday = monday
-    this.tipCtx = tipCanvas.getContext("2d")
-    this.ctx = canvas.getContext('2d')
+    this.tipCtx = tipCanvas.getContext("2d", {willReadFrequently: true})
+    this.ctx = canvas.getContext("2d",  {willReadFrequently: true})
 
 	  this.width = canvas.clientWidth
 	  this.slotWidth = this.width/this.numSlots
