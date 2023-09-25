@@ -70,7 +70,7 @@
           <dt v-if="order.customer_remarks">Remarks</dt>
           <dd v-if="order.customer_remarks">{{ order.remarks }}</dd>
         </dl>
-        
+
         <h6 class="flex-columns">
           <span>{{ $trans('Documents') }}</span>
           <router-link :to="{name: 'order-documents', params : {'orderPk': pk}}">edit documents</router-link>
@@ -98,7 +98,7 @@
               <div>{{ line.remarks  }}</div>
               <div>{{ line.location  }}</div>
             </div>
-          </li> 
+          </li>
         </ul>
       </div>
 
@@ -108,7 +108,7 @@
           <li v-for="status in order.statuses.slice().reverse()" :key="status.id">
             <div class="listing-item">
               <span>{{ status.status }}</span>
-              <span class="dimmed">{{ status.created }}</span> 
+              <span class="dimmed">{{ status.created }}</span>
             </div>
           </li>
         </ul>
@@ -129,7 +129,7 @@
           {{ order.order_city }}, {{ order.order_country_code }}
         </address>
         <hr>
-        
+
         <b-row class="my-2" v-if="order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
           <b-col cols="12">
             <h6>{{ $trans('Workorder documents partner') }}</h6>
@@ -172,7 +172,7 @@ export default {
             isLoading: false,
             isGeneratingPDF: false,
             buttonDisabled: false,
-            order: orderModel.getFields(),
+            order: null,
             workorderURL: '',
             iframeLoading: true,
             orderLineFields: [
@@ -279,7 +279,7 @@ export default {
         }
     },
     async created() {
-        this.loadOrder();
+        await this.loadOrder();
     },
 }
 </script>
