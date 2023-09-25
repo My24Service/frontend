@@ -70,7 +70,7 @@
           <small 
             class="statuscode-preview" 
             :style="`--bg-color: ${statuscode.color}; --text-color: ${statuscode.text_color}`">
-            {{  statuscode.statuscode }}
+            {{  statuscode.statuscode || 'statuscode text'}}
           </small>
 
           </b-form-group>
