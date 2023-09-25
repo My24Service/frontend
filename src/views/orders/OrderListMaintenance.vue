@@ -9,7 +9,6 @@
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
           <span>Orders</span>
-          {{ /* this.queryMode */ }}
         </h3>
 
         <b-button-toolbar>
@@ -127,16 +126,14 @@
       </b-row>
 
       <div>
-        <div class="flex-columns">
+        <div class="flex-columns" v-if="isActive('orders')">
           <div>
             <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
-            <router-link class="filter-item" :to="{name:'orders-not-accepted', params: {queryMode:'notaccepted'}}">{{ $trans('Not accepted') }}</router-link>
+            <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
             <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
             <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
             <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
           </div>
-
-
         </div>
         <br>
         <div class="overflow-auto">
@@ -457,6 +454,14 @@ export default {
         (data.data_type === NEW_DATA_EVENTS_TYPES.NEW_DATA_ORDER_ACCEPTED ||
         data.data_type === NEW_DATA_EVENTS_TYPES.NEW_DATA_ORDER_REJECTED)) {
         this.loadData()
+      }
+    },
+    isActive(item, subsection) {
+      const parts = this.$route.path.split('/')
+      if(!subsection) {
+        return parts[1] === item
+      } else {
+        return parts[parts.length] === item
       }
     }
   },
