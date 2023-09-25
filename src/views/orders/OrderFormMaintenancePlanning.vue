@@ -149,7 +149,7 @@
               </b-form-group>
             </b-col>
           </b-row>
-          <div class="assign-engineer section" v-if="!hasBranches && (isCreate || (!isCreate && (unaccepted || !order.customer_order_accepted)))">
+          <div class="assign-engineer section" v-if="!hasBranches">
             <b-row>
               <b-col cols="12" role="group" v-if="recommendedUsers.length > 0">
                 <h4>{{ $trans('Recommended engineers') }}</h4>
@@ -200,9 +200,11 @@
 
           <h6>
             {{ $trans('Documents') }}
-            <router-link v-if="!isCreate" :to="{name: 'order-documents', params : {'orderPk': pk}}">edit documents</router-link>
+            <router-link v-if="!isCreate" :to="{name: 'order-documents', params : {'orderPk': pk}}">
+              {{ $trans('edit documents') }}
+            </router-link>
           </h6>
-          <div class="order-documents section">
+          <div class="order-documents section" v-if="order.documents">
             <div class="my-2" v-if="!isCreate && order.documents.length > 0">
               <ul class="listing">
                 <li v-for="doc in order.documents" :key="doc.url">
@@ -1547,6 +1549,23 @@ export default {
           }
         }
 
+        // assign engineers
+        try {
+          for (const engineer of this.selectedEngineers) {
+            await Assign.assignToUser(engineer.id, [this.order.order_id], true)
+          }
+
+          if (this.selectedEngineers.length) {
+            this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
+          }
+        } catch (error) {
+          console.log('error assigning to users', error)
+          this.errorToast(this.$trans('Error assigning to users'))
+          this.isLoading = false
+          this.buttonDisabled = false
+          return
+        }
+
         this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
@@ -1561,23 +1580,6 @@ export default {
       if (this.acceptOrder) {
         try {
           await orderNotAcceptedModel.setAccepted(this.pk)
-
-          // assign engineers
-          try {
-            for (const engineer of this.selectedEngineers) {
-              await Assign.assignToUser(engineer.id, [this.order.order_id], true)
-            }
-
-            if (this.selectedEngineers.length) {
-              this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
-            }
-          } catch (error) {
-            console.log('error assigning to users', error)
-            this.errorToast(this.$trans('Error assigning to users'))
-            this.isLoading = false
-            this.buttonDisabled = false
-            return
-          }
 
           this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
         } catch(error) {
@@ -1619,8 +1621,13 @@ export default {
 
       try {
         this.order = await orderModel.detail(this.pk)
-        this.order.start_date = this.$moment(this.order.start_date).format('YYYY-MM-DD')
-        this.order.end_date = this.$moment(this.order.end_date).format('YYYY-MM-DD')
+
+        // keep this, all members have this date notation in their settings
+        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
+
+        // this.order.start_date = this.$moment(this.order.start_date).format('YYYY-MM-DD')
+        // this.order.end_date = this.$moment(this.order.end_date).format('YYYY-MM-DD')
         this.isLoading = false
       } catch(error) {
         console.warn('error fetching order', error)

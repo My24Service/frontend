@@ -1,5 +1,5 @@
 <template>
-  <div class="listing-item">
+  <div class="listing-item" v-if="statuscodes.length > 0">
     <!-- delete order modal -->
     <b-modal
       v-if="!isCustomer && !isBranchEmployee"
@@ -40,7 +40,7 @@
         <span v-if="order.documents.length" >
           <b-icon icon="paperclip"></b-icon>
         </span>
-        <router-link 
+        <router-link
           v-if="isLoaded && order.documents.length"
           :to="{name: 'order-documents', params: {orderPk: order.id}}"
           class="order-type">{{ order.documents.length && order.documents.length }} document{{ order.documents.length == 1 ? '' : 's' }}</router-link>
@@ -103,7 +103,10 @@ export default {
     },
     orderStatusCode() {
       let statusCode = my24.getStatuscode(this.statuscodes, this.order.last_status);
-      return statusCode.statuscode;
+      if (statusCode) {
+        return statusCode.statuscode;
+      }
+      return {}
     },
 
   },
@@ -113,6 +116,7 @@ export default {
       memberType: null,
       orderStatus: this.order.last_status,
       orderStatusColorCode: '#666',
+      statuscodes: [],
       orderLineFields: [
         { key: 'product', label: this.$trans('Product'), thAttr: {width: '25%'} },
         { key: 'location', label: this.$trans('Location'), thAttr: {width: '25%'} },
@@ -171,4 +175,3 @@ export default {
   }
 }
 </script>
-
