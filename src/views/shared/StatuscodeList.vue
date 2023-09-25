@@ -3,11 +3,11 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>Order statuscodes
+          <b-icon icon="file-earmark-check-fill"></b-icon>Statuscodes
         </h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="'/orders/statuscodes/form'">
-            <b-icon icon="plus"></b-icon>add code
+            <b-icon icon="file-earmark-plus"></b-icon> Add statuscode
           </router-link>
         </div>
       </div>
@@ -44,15 +44,25 @@
               </b-button-toolbar>
             </div>
           </template>
+          <template #cell(statuscode)="data">
+            <router-link :to="{name: linkEdit, params: {pk: data.item.id}}">{{ data.item.statuscode }} </router-link>
+          </template>
+          <template #cell(preview)="data">
+            <small class="statuscode-preview" :style="`--bg-color: ${data.item.color}; --text-color: ${data.item.text_color || 'black'}`">
+              {{  data.item.statuscode }}
+            </small>
+          </template>
           <template #cell(color)="data">
             <span v-bind:style="{ backgroundColor: data.item.color }">
-              <img width="12" :src="PIXEL_URL" />
+              <input type="color" name="" id="" :value="data.item.color" disabled/>
             </span>
             <div class="color_text">{{data.item.color }}</div>
           </template>
           <template #cell(text_color)="data">
             <span v-bind:style="{ width: '10px', backgroundColor: data.item.text_color }">
-              <img width="10" :src="PIXEL_URL" />
+              <span v-if="data.item.text_color">
+                <input type="color" name="" id="" :value="data.item.text_color" disabled/>
+              </span>
             </span>
             <div class="color_text">{{data.item.text_color }}</div>
           </template>
@@ -92,11 +102,6 @@
                 v-bind:router_name="`${linkAddAction}`"
                 v-bind:router_params="{statuscode_pk: data.item.id}"
               />
-              <IconLinkEdit
-                v-bind:router_name="`${linkEdit}`"
-                v-bind:router_params="{pk: data.item.id}"
-                v-bind:title="$trans('Edit')"
-              />
               <IconLinkDelete
                 v-bind:title="$trans('Delete')"
                 v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -133,7 +138,6 @@
 <script>
 import statuscodeOrderModel from '../../models/orders/Statuscode.js'
 import statuscodeTripModel from '../../models/mobile/TripStatuscode.js'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkPlus from '../../components/IconLinkPlus.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -151,7 +155,6 @@ export default {
     },
   },
   components: {
-    IconLinkEdit,
     IconLinkPlus,
     IconLinkDelete,
     ButtonLinkRefresh,
@@ -180,19 +183,18 @@ export default {
       fields: [],
       fieldsOrder: [
         {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '15%'}},
-        {key: 'color', label: this.$trans('Color'), thAttr: {width: '5%'}},
-        {key: 'text_color', label: this.$trans('Text color'), thAttr: {width: '10%'}},
-        {key: 'type', label: this.$trans('Type'), thAttr: {width: '10%'}},
-        {key: 'description', label: this.$trans('Description'), thAttr: {width: '25%'}},
+        {key: 'preview', label: this.$trans('Preview')},
+        {key: 'type', label: this.$trans('Type')},
+        {key: 'description', label: this.$trans('Description')},
         {key: 'actions', label: this.$trans('Actions'), thAttr: {width: '20%'}},
         {key: 'icons', thAttr: {width: '15%'}},
       ],
       fieldsTrip: [
-        {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '20%'}},
-        {key: 'color', label: this.$trans('Color'), thAttr: {width: '5%'}},
+        {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '15%'}},
+        {key: 'preview', label: this.$trans('Preview')},
         {key: 'start_trip', label: this.$trans('Start trip?'), thAttr: {width: '10%'}},
         {key: 'end_trip', label: this.$trans('End trip?'), thAttr: {width: '10%'}},
-        {key: 'description', label: this.$trans('Description'), thAttr: {width: '20%'}},
+        {key: 'description', label: this.$trans('Description')},
         {key: 'actions', label: this.$trans('Actions'), thAttr: {width: '20%'}},
         {key: 'icons', thAttr: {width: '15%'}},
       ],
