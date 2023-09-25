@@ -13,6 +13,7 @@ import member from './member'
 import account from './account'
 import budget from './budget'
 import catchall from './catchall'
+import webshop from './webshop'
 import docks from './docks'
 import {AUTH_LEVELS} from "../constants";
 import {getIsLoggedIn, getUserAuthLevel, hasAccessRouteAuthLevel} from "../utils";
@@ -34,6 +35,7 @@ const routes = [
   ...budget,
   ...catchall,
   ...docks,
+  ...webshop
 ]
 
 const router = new VueRouter({

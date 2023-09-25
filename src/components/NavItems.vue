@@ -177,7 +177,7 @@
     <!-- webshop -->
     <b-nav-item
       v-if="isPlanning"
-      to="/comingsoon"
+      :to="{name:'webshop'}"
       :active="isActive('webshop')"
       >
       <b-icon icon="basket" v-if="!isActive('webshop')"></b-icon>
