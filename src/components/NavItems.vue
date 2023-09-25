@@ -9,7 +9,10 @@
       <b-icon icon="file-earmark-text" v-if="!isActive('orders')"></b-icon>
       <b-icon icon="file-earmark-text-fill" v-else></b-icon>
       {{ $trans('Orders') }}
-      <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
+      <b-badge 
+        v-if="unacceptedCount && unacceptedCount > 0" 
+        variant="light"
+        :title="`${unacceptedCount} ${$trans('Unaccepted orders')}`">{{ unacceptedCount }}</b-badge>
     </b-nav-item>
 
     <!-- Orders submenu -->
