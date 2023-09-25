@@ -12,15 +12,29 @@
           {{ /* this.queryMode */ }}
         </h3>
 
-        <div class="flex-columns">
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSort
+              v-bind:method="function() { showSortModal() }"
+            />
+          </b-button-group>
           <router-link class="btn button" :to="{name:'order-add'}">
             <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add order') }}
           </router-link>
-        </div>
+        </b-button-toolbar>
       </div>
 
     </header>
     <div class="panel app-detail" ref="order-list-maintenance">
+      <OrderFilters
+        :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+        @set-filter="setStatusFilter"
+        @remove-filter="removeStatusFilter"
+      />
       <!-- FIXME sorting modal -->
       <b-modal
         id="sort-modal"
@@ -98,11 +112,6 @@
         </form>
       </b-modal>
 
-      <OrderFilters
-        :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
-        @set-filter="setStatusFilter"
-        @remove-filter="removeStatusFilter"
-      />
 
       <b-row v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
         <b-col cols="12">
@@ -121,24 +130,12 @@
         <div class="flex-columns">
           <div>
             <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
-            <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+            <router-link class="filter-item" :to="{name:'orders-not-accepted', params: {queryMode:'notaccepted'}}">{{ $trans('Not accepted') }}</router-link>
             <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
             <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
             <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
           </div>
 
-          <!-- INSERT BUTTONS -->
-          <b-button-toolbar>
-            <b-button-group>
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSort
-                v-bind:method="function() { showSortModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
 
         </div>
         <br>
@@ -279,6 +276,7 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import SearchForm from '../../components/SearchForm.vue'
+import SubNavOrders from '../../components/SubNavOrders.vue'
 import OrderFilters from "../../components/OrderFilters.vue"
 import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '../../utils'
@@ -301,7 +299,8 @@ export default {
     SearchModal,
     OrderFilters,
     Pagination,
-    SearchForm
+    SearchForm,
+    SubNavOrders
 },
   props: {
     dispatch: {

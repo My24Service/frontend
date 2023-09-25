@@ -7,25 +7,23 @@
           <span>Orders</span>
         </h3>
 
-        <div class="flex-columns">
-          <b-button-toolbar>
-            <b-button-group>
-              <ButtonLinkRefresh
-                v-bind:method="function() { loadData() }"
-                v-bind:title="$trans('Refresh')"
-              />
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-              <ButtonLinkSort
-                v-bind:method="function() { showSortModal() }"
-              />
-            </b-button-group>
-          </b-button-toolbar>
+      <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+            <ButtonLinkSort
+              v-bind:method="function() { showSortModal() }"
+            />
+          </b-button-group>
           <router-link class="btn button" :to="{name:'order-add'}">
             <b-icon icon="clipboard-plus"></b-icon>  {{ $trans('Add Order') }}
           </router-link>
-        </div>
+        </b-button-toolbar>
       </div>
     </header>
 
@@ -106,10 +104,6 @@
             <OrderTableInfo
             v-bind:order="order"
             />
-            <IconLinkDelete
-                v-bind:title="$trans('Delete')"
-                v-bind:method="function() { showDeleteModal(data.item.id) }"
-              />
           </li>
         </ul>
 
