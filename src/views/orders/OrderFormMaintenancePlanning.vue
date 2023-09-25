@@ -204,8 +204,8 @@
               {{ $trans('edit documents') }}
             </router-link>
           </h6>
-          <div class="order-documents section" v-if="order.documents">
-            <div class="my-2" v-if="!isCreate && order.documents.length > 0">
+          <div class="order-documents section">
+            <div class="my-2" v-if="!isCreate && order.documents && order.documents.length > 0">
               <ul class="listing">
                 <li v-for="doc in order.documents" :key="doc.url">
                   <a class="listing-item" :href="doc.url" target="_blank">
