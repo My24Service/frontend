@@ -4,7 +4,7 @@
       <header>
         <div class="page-title">
             <h3>
-              <b-icon icon="tools"></b-icon> 
+              <b-icon icon="tools"></b-icon>
               <span class="backlink" @click=cancelForm>Equipment</span> /
               <span v-if="isCreate">{{ $trans('New') }}</span>
               <span v-if="!isCreate">{{ equipment.name }} <span class="dimmed">{{ $trans('edit') }}</span></span>
@@ -66,7 +66,7 @@
               </b-form-group>
             </b-col>
           </b-row>
-          
+
           <b-row v-if="hasBranches && !isEmployee">
             <b-col cols="12" role="group">
               <b-form-group
@@ -133,8 +133,8 @@
                 readonly
               ></b-form-input>
             </b-form-group>
-          
-          
+
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -148,8 +148,8 @@
                 readonly
               ></b-form-input>
             </b-form-group>
-          
-          
+
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -246,7 +246,7 @@
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -259,7 +259,7 @@
                 v-model="equipment.brand"
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -272,7 +272,7 @@
                 v-model="equipment.identifier"
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -300,7 +300,7 @@
         </div>
         <div class="panel col-1-3">
           <h6>Usage</h6>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -318,7 +318,7 @@
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
               ></b-form-datepicker>
             </b-form-group>
-        
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -336,7 +336,7 @@
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
               ></b-form-datepicker>
             </b-form-group>
-          
+
           <b-form-group
             label-size="sm"
             label-cols="4"
@@ -470,7 +470,6 @@ export default {
   async created() {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
-    this.locations = [] // await locationModel.listForSelect()
 
     if (this.isCreate) {
       this.equipment = equipmentModel.getFields()
@@ -491,9 +490,10 @@ export default {
     customerLabel({ name, city}) {
       return `${name} - ${city}`
     },
-    selectCustomer(option) {
+    async selectCustomer(option) {
       this.equipment.customer = option.id
       this.customer = option
+      this.locations = await locationModel.listForSelectCustomer(option.id)
       this.$refs.name.focus()
     },
     // branches
@@ -508,9 +508,10 @@ export default {
     branchLabel({ name, city}) {
       return `${name} - ${city}`
     },
-    selectBranch(option) {
+    async selectBranch(option) {
       this.equipment.branch = option.id
       this.branch = option
+      this.locations = await locationModel.listForSelectBranch(option.id)
       this.$refs.name.focus()
     },
 
@@ -573,11 +574,13 @@ export default {
         this.equipment = await equipmentModel.detail(this.pk)
         if (this.hasBranches && !this.isEmployee) {
           this.branch = await branchModel.detail(this.equipment.branch)
+          this.locations = await locationModel.listForSelectBranch(this.branch.id)
         }
         if (!this.hasBranches && !this.isCustomer) {
           this.customer = await customerModel.detail(this.equipment.customer)
+          this.locations = await locationModel.listForSelectCustomer(this.customer.id)
         }
-        console.log(this.equipment)
+
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)

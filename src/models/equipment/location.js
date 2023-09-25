@@ -63,8 +63,13 @@ class Location extends BaseModel {
     return this.axios.post(`${this.url}create_quick/`, data).then(response => response.data)
   }
 
-  listForSelect() {
-    return this.axios.get(`${this.url}list_for_select/`)
+  listForSelectBranch(branch) {
+    return this.axios.get(`${this.url}list_for_select/?branch=${branch}`)
+      .then((response) => response.data)
+  }
+
+  listForSelectCustomer(customer) {
+    return this.axios.get(`${this.url}list_for_select/?customer=${customer}`)
       .then((response) => response.data)
   }
 }
