@@ -109,13 +109,12 @@
             </div>
           </template>
         </b-table>
-
-        <Pagination
-          v-if="!isLoading"
-          :model="this.statuscodeModel"
-          :model_name="$trans('Statuscode')"
-        />
-    </div>
+      </div>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.statuscodeModel"
+        :model_name="$trans('Statuscode')"
+      />
 
     <SearchModal
       id="search-modal"
