@@ -13,7 +13,7 @@
             v-bind:method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <router-link to="supplier-add" class="btn primary">{{$trans('Add supplier')}}</router-link>
+          <router-link :to="{name: 'supplier-add' }" class="btn primary">{{$trans('Add supplier')}}</router-link>
         </b-button-toolbar>
       </div>
     </header>
@@ -45,6 +45,7 @@
         sort-icon-left
       >
         <template #head(icons)="">
+
         </template>
         <template #table-busy>
           <div class="text-center my-2">
