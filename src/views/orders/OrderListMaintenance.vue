@@ -126,7 +126,7 @@
       </b-row>
 
       <div>
-        <div class="flex-columns" v-if="isActive('orders')">
+        <div class="flex-columns order-filter-links" v-if="isActive('orders')">
           <div>
             <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
             <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
@@ -135,7 +135,7 @@
             <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
           </div>
         </div>
-        <br>
+        
         <div class="overflow-auto">
           <ul class="listing order-list">
             <li><!-- FIXME -->
