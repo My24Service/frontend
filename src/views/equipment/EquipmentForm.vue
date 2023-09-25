@@ -500,7 +500,6 @@ export default {
   async created() {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
-    this.locations = [] // await locationModel.listForSelect()
 
     if (!this.isCreate) {
       await this.loadData()
@@ -620,7 +619,7 @@ export default {
           this.customer = await customerModel.detail(this.equipment.customer)
           this.locations = await locationModel.listForSelectCustomer(this.customer.id)
         }
-        console.log(this.equipment)
+
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)

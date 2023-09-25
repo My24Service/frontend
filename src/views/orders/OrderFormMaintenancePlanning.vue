@@ -295,28 +295,8 @@
                 </b-table>
               </b-col>
             </b-row>
-            <b-row v-if="maintenance">
-              <b-col cols="12">
-                <b-table v-if="order.orderlines.length > 0" small :fields="orderLineFieldsMaintenance" :items="order.orderlines" responsive="md">
-                  <template #cell()="data">
-                    {{ data.value }}
-                  </template>
-                  <template #cell(icons)="data">
-                    <div class="float-right">
-                      <b-link class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
-                        <b-icon-pencil></b-icon-pencil>
-                      </b-link>
-                      <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
-                        <b-icon-trash></b-icon-trash>
-                      </b-link>
-                    </div>
-                  </template>
-                </b-table>
-              </b-col>
-            </b-row>
-            <b-row>
-              <!-- equipment -->
-              <b-col cols="4" role="group" v-if="usesEquipment">
+            <b-row v-if="usesEquipment">
+              <b-col cols="8" role="group">
                 <b-form-group
                   label-size="sm"
                   label-class="p-sm-2"
@@ -361,7 +341,7 @@
                   </multiselect>
                 </b-form-group>
               </b-col>
-              <b-col cols="2" role="group" v-if="usesEquipment">
+              <b-col cols="4" role="group">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Equipment')"
@@ -382,26 +362,10 @@
                   </b-input-group>
                 </b-form-group>
               </b-col>
-              <!-- end equipment -->
-
-              <!-- normal product -->
-              <b-col cols="4" role="group" v-if="!usesEquipment">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Equipment')"
-                  label-for="order-orderline-product"
-                >
-                  <b-form-input
-                    id="order-orderline-product"
-                    size="sm"
-                    v-model="product"
-                  ></b-form-input>
-                </b-form-group>
-              </b-col>
-              <!-- end normal product -->
-
+            </b-row>
+            <b-row v-if="usesEquipment">
               <!-- equipment locations -->
-              <b-col cols="4" role="group" v-if="usesEquipment">
+              <b-col cols="8" role="group">
                 <b-form-group
                   label-size="sm"
                   label-class="p-sm-2"
@@ -446,8 +410,7 @@
                   </multiselect>
                 </b-form-group>
               </b-col>
-
-              <b-col cols="2" role="group" v-if="usesEquipment">
+              <b-col cols="4" role="group">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Location')"
@@ -468,10 +431,41 @@
                   </b-input-group>
                 </b-form-group>
               </b-col>
-              <!-- end equipment locations -->
+            </b-row>
+            <b-row v-if="usesEquipment">
+              <b-col cols="12" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Remarks')"
+                  label-for="order-orderline-remarks"
+                >
+                  <b-form-textarea
+                    id="order-orderline-remarks"
+                    v-model="remarks"
+                    rows="1"
+                  ></b-form-textarea>
+                </b-form-group>
+              </b-col>
+            </b-row>
+
+            <b-row v-if="!usesEquipment">
+              <!-- normal product -->
+              <b-col cols="4" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Equipment')"
+                  label-for="order-orderline-product"
+                >
+                  <b-form-input
+                    id="order-orderline-product"
+                    size="sm"
+                    v-model="product"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
 
               <!-- normal location -->
-              <b-col cols="4" role="group" v-if="!usesEquipment">
+              <b-col cols="4" role="group">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Location')"
@@ -486,7 +480,7 @@
               </b-col>
               <!-- end normal location -->
 
-              <b-col cols="4" role="group" v-if="!usesEquipment">
+              <b-col cols="4" role="group">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
@@ -539,6 +533,7 @@
                 </b-form-group>
               </b-col>
             </b-row>
+
             <footer class="modal-footer">
               <b-button
                 v-if="isEditOrderLine"
@@ -563,9 +558,6 @@
               </b-button>
             </footer>
 
-          </div>
-
-        </div>
         <div class="panel col-1-3">
           <!-- order start/end times -->
             <h6>Planning</h6>
@@ -906,6 +898,8 @@
 
       </b-form>
     </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1120,7 +1114,13 @@ export default {
       }
     },
     usesEquipment() {
-      return this.hasBranches || this.isEditEquipment || this.maintenance
+      const companyCodesUseEquipments = [
+        'demo',
+        'stormy',
+        'shltr-installation'
+      ]
+      return this.hasBranches || this.isEditEquipment ||
+        companyCodesUseEquipments.indexOf(this.$store.getters.getMemberCompanycode) !== -1
     },
     startDate() {
       console.info("COMPUTED: startDate", this.order.start_date)
