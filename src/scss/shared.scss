@@ -641,3 +641,11 @@ canvas {
 .progress {
   height: .25rem;
 }
+
+.badge.badge-light {
+  color: $primary;
+}
+
+.active .badge.badge-light {
+  background-color: white;
+}
