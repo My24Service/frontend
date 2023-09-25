@@ -360,6 +360,10 @@
       margin: 1.5rem;
     }
   }
+  button.primary,
+  .btn-primary {
+    color: $normal-link!important;
+  }
   h6 {
     text-transform: uppercase;
     color: #232c2f;
@@ -606,6 +610,20 @@ canvas {
 
 .data-table table thead tr:first-child {
   border-top-style: hidden;
+}
+
+.statuscode-preview {
+  padding: .5ex 1ex;
+  border-radius: .5ex;
+  display: inline-block;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 20ch;
+  line-height: 1.4;
+  font-weight: 500;
 }
 
 /* (bootstrap) overrides */
