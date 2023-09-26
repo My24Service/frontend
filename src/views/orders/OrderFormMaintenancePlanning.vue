@@ -276,9 +276,28 @@
 
           <h6>{{$trans('Order lines')}}</h6>
           <div class="order-lines section">
-            <b-row>
+            <b-row v-if="!maintenance">
               <b-col cols="12">
                 <b-table v-if="order.orderlines.length > 0" small :fields="orderLineFields" :items="order.orderlines" responsive="md">
+                  <template #cell()="data">
+                    {{ data.value }}
+                  </template>
+                  <template #cell(icons)="data">
+                    <div class="float-right">
+                      <b-link class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
+                        <b-icon-pencil></b-icon-pencil>
+                      </b-link>
+                      <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
+                        <b-icon-trash></b-icon-trash>
+                      </b-link>
+                    </div>
+                  </template>
+                </b-table>
+              </b-col>
+            </b-row>
+            <b-row v-if="maintenance">
+              <b-col cols="12">
+                <b-table v-if="order.orderlines.length > 0" small :fields="orderLineFieldsMaintenance" :items="order.orderlines" responsive="md">
                   <template #cell()="data">
                     {{ data.value }}
                   </template>
@@ -490,7 +509,47 @@
                     id="order-orderline-remarks"
                     size="sm"
                     v-model="remarks"
+                    rows="1"
+                  ></b-form-textarea>
+                </b-form-group>
+              </b-col>
+              <b-col cols="12" role="group" v-if="usesEquipment && !maintenance">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Remarks')"
+                  label-for="order-orderline-remarks"
+                >
+                  <b-form-textarea
+                    id="order-orderline-remarks"
+                    v-model="remarks"
+                    rows="1"
+                  ></b-form-textarea>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group" v-if="usesEquipment && maintenance">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Amount')"
+                  label-for="order-orderline-amount"
+                >
+                  <b-form-input
+                    id="order-orderline-amount"
+                    size="sm"
+                    v-model="amount"
                   ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="10" role="group" v-if="usesEquipment && maintenance">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Remarks')"
+                  label-for="order-orderline-remarks"
+                >
+                  <b-form-textarea
+                    id="order-orderline-remarks"
+                    v-model="remarks"
+                    rows="1"
+                  ></b-form-textarea>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -883,7 +942,7 @@ import Collapse from '../../components/Collapse.vue'
 import {componentMixin} from "../../utils";
 import branchModel from "../../models/company/Branch";
 import timeRegistrationModel from "../../models/company/TimeRegistration";
-import equipmentModel from "../../models/equipment/equipment";
+import equipmentService from "../../models/equipment/equipment";
 import locationModel from "../../models/equipment/location";
 import orderlineModel from "../../models/orders/Orderline";
 import infolineModel from "../../models/orders/Infoline";
@@ -939,6 +998,7 @@ export default {
       location: '',
       equipment_location: null,
       remarks: '',
+      amount: 0,
 
       isEditOrderLine: false,
 
@@ -949,6 +1009,13 @@ export default {
       orderLineFields: [
         { key: 'product', label: this.$trans('Product') },
         { key: 'location', label: this.$trans('Location') },
+        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'icons', label: '' }
+      ],
+      orderLineFieldsMaintenance: [
+        { key: 'product', label: this.$trans('Product') },
+        { key: 'location', label: this.$trans('Location') },
+        { key: 'amount', label: this.$trans('Amount') },
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
@@ -998,6 +1065,7 @@ export default {
 
       deletedOrderlines: [],
       deletedInfolines: [],
+      equipmentService,
     }
   },
   validations() {
@@ -1108,6 +1176,33 @@ export default {
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
+
+      if (this.maintenance) {
+        this.isLoading = true
+        const data = this.$store.getters.getMaintenanceEquipment
+
+        if (data) {
+          const {maintenanceEquipment, customer_pk, contract_pk} = data
+
+          const customer = await customerModel.detail(customer_pk)
+          this.fillCustomer(customer)
+
+          for (const equipmentData of maintenanceEquipment) {
+            const equipment = await this.equipmentService.detail(equipmentData.equipment_pk)
+
+            this.order.orderlines.push({
+              product: equipment.name,
+              location: equipment.location_name,
+              remarks: "",
+              equipment_location: equipment.location,
+              equipment: equipment.id,
+              amount: equipmentData.amount,
+              maintenance_contract: contract_pk
+            })
+          }
+        }
+        this.isLoading = false
+      }
     } else {
       await this.loadOrder()
     }
@@ -1128,13 +1223,13 @@ export default {
       try {
         if (!this.hasBranches) {
           const response = this.isPlanning || this.isStaff || this.isSuperuser ?
-            await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
-            await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
+            await equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
+            await equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
           this.equipment = response.id
           this.product = response.name
         } else {
-          const response = await equipmentModel.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
+          const response = await equipmentService.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
 
           this.equipment = response.id
           this.product = response.name
@@ -1147,9 +1242,9 @@ export default {
     async getEquipment(query) {
       try {
         if (this.hasBranches) {
-          this.equipmentSearch = await equipmentModel.searchBranch(query, this.order.branch)
+          this.equipmentSearch = await equipmentService.searchBranch(query, this.order.branch)
         } else {
-          this.equipmentSearch = await equipmentModel.searchCustomer(query, this.order.customer_relation)
+          this.equipmentSearch = await equipmentService.searchCustomer(query, this.order.customer_relation)
         }
 
       } catch(error) {
@@ -1260,7 +1355,7 @@ export default {
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
-      console.log(this.orderline_pk)
+      this.amount = item.amount
 
       if (item.equipment && item.equipment_location) {
         this.equipment_location = item.equipment_location
@@ -1275,6 +1370,7 @@ export default {
       this.remarks = ''
       this.equipment_location = null
       this.equipment = null
+      this.amount = 0
     },
     doEditOrderLine() {
       const orderLine = {
@@ -1284,6 +1380,7 @@ export default {
         remarks: this.remarks,
         equipment_location: this.equipment_location,
         equipment: this.equipment,
+        amount: this.amount
       }
       this.order.orderlines.splice(this.editIndex, 1, orderLine)
       this.editIndex = null
@@ -1298,6 +1395,7 @@ export default {
         remarks: this.remarks,
         equipment_location: this.equipment_location,
         equipment: this.equipment,
+        amount: this.amount,
       })
       this.emptyOrderLine()
     },
@@ -1452,6 +1550,7 @@ export default {
             console.log('Error creating infolines', error)
           }
 
+          await this.$store.dispatch('setMaintenanceEquipment', [])
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
