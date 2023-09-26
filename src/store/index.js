@@ -23,7 +23,8 @@ let store = new Vuex.Store({
     statuscodes: [],
     token: undefined,
     unacceptedCount: null,
-    streamInfo: null
+    streamInfo: null,
+    maintenanceEquipment: []
   },
   actions,
   getters,

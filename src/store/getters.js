@@ -82,4 +82,7 @@ export const getters = {
   getInvoiceDefaultTermOfPaymentDays(state) {
     return state.memberInfo.settings.invoice_default_term_of_payment_days
   },
+  getMaintenanceEquipment(state) {
+    return state.maintenanceEquipment
+  }
 }

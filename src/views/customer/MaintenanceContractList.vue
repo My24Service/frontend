@@ -59,7 +59,16 @@
           </div>
         </template>
         <template #cell(sum_tariffs)="data">
-          {{ data.item.sum_tariffs_dinero.toFormat('$0.00') }}
+          <span v-if="data.item.sum_tariffs_dinero">
+            {{ data.item.sum_tariffs_dinero.toFormat('$0.00') }}
+          </span>
+        </template>
+        <template #cell(name)="data">
+          <router-link :to="{name: 'maintenance-contract-view', params: {pk: data.item.id}}">
+            <span v-if="data.item.name">
+              {{ data.item.name }}
+            </span>
+          </router-link>
         </template>
         <template #cell(totals)="data">
           <table class="totals">

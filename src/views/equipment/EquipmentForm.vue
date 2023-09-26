@@ -450,7 +450,6 @@ export default {
   async created() {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
-    this.locations = await locationModel.listForSelect()
 
     if (this.isCreate) {
       this.equipment = equipmentModel.getFields()
@@ -471,9 +470,10 @@ export default {
     customerLabel({ name, city}) {
       return `${name} - ${city}`
     },
-    selectCustomer(option) {
+    async selectCustomer(option) {
       this.equipment.customer = option.id
       this.customer = option
+      this.locations = await locationModel.listForSelectCustomer(option.id)
       this.$refs.name.focus()
     },
     // branches
@@ -488,9 +488,10 @@ export default {
     branchLabel({ name, city}) {
       return `${name} - ${city}`
     },
-    selectBranch(option) {
+    async selectBranch(option) {
       this.equipment.branch = option.id
       this.branch = option
+      this.locations = await locationModel.listForSelectBranch(option.id)
       this.$refs.name.focus()
     },
 
@@ -553,9 +554,11 @@ export default {
         this.equipment = await equipmentModel.detail(this.pk)
         if (this.hasBranches && !this.isEmployee) {
           this.branch = await branchModel.detail(this.equipment.branch)
+          this.locations = await locationModel.listForSelectBranch(this.branch.id)
         }
         if (!this.hasBranches && !this.isCustomer) {
           this.customer = await customerModel.detail(this.equipment.customer)
+          this.locations = await locationModel.listForSelectCustomer(this.customer.id)
         }
 
         this.isLoading = false
