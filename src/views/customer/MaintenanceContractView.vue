@@ -40,6 +40,9 @@
           :fields="equipmentFields"
           :items="maintenanceEquipmentService.collection" responsive="md"
         >
+          <template #cell(amount)="data">
+            {{ data.item.amount }} ({{ $trans('in orders') }}: {{ data.item.num_order_equipment }})
+          </template>
           <template #cell(tariff)="data">
             {{ data.item.tariff_dinero.toFormat('$0.00')}}
           </template>
@@ -52,14 +55,6 @@
       <div
         v-if="isCreate"
       >
-
-        {{ orderLinesData }}
-
-        <p>
-          selectedData {{ selectedData }}
-        </p>
-
-
         <b-table
           small
           :fields="equipmentFieldsCreate"
@@ -67,7 +62,7 @@
         >
           <template #cell(id)="data">
             <b-form-checkbox
-              :id="`equipment${data.item.id}`"
+              :id="`equipment${data.item.equipment_pk}`"
               v-model="data.item.useAsOrderLine"
             >
               {{ data.item.id }}
@@ -79,7 +74,8 @@
               v-model="data.item.amount"
             >
             </b-form-input>
-            {{ $trans('done so far') }}: <b>{{ data.item.num_order_equipment }}</b>
+            {{ $trans('done so far') }}: <b>{{ data.item.num_order_equipment }}</b><br/>
+            {{ $trans('contract amount') }}: <b>{{ data.item.contract_amount }}</b>
           </template>
         </b-table>
 
@@ -141,9 +137,9 @@ export default {
       ],
       equipmentFieldsCreate: [
         { key: 'id', label: this.$trans('id'), thAttr: {width: '5%'} },
-        { key: 'name', label: this.$trans('Name'), thAttr: {width: '75%'} },
+        { key: 'name', label: this.$trans('Name'), thAttr: {width: '70%'} },
         { key: 'times_per_year', label: this.$trans('Times / year'), thAttr: {width: '10%'} },
-        { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '10%'} },
+        { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '15%'} },
       ],
       orderLinesData: [],
       selectedData: []
@@ -181,6 +177,7 @@ export default {
         times_per_year: m.times_per_year,
         num_order_equipment: m.num_order_equipment ? m.num_order_equipment : 0,
         amount: 0,
+        contract_amount: m.amount,
         useAsOrderLine: false
       }))
       this.isCreate = true
@@ -198,7 +195,9 @@ export default {
         this.maintenanceEquipmentService.setListArgs(`contract=${this.pk}`)
         const equipmentData = await this.maintenanceEquipmentService.list()
         this.maintenanceEquipmentService.collection = equipmentData.results.map(
-          (m) => new this.maintenanceEquipmentService.model(m)
+          (m) => new this.maintenanceEquipmentService.model({
+            ...m, default_currency: this.$store.getters.getDefaultCurrency
+          })
         )
         this.isLoading = false
       } catch(error) {

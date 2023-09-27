@@ -421,6 +421,7 @@
 
         <div class="order-lines section">
           <Collapse
+            ref="orderlines-collapse"
             :title="$trans('Order lines')"
           >
             <b-row v-if="!maintenance">
@@ -1173,6 +1174,8 @@ export default {
               maintenance_contract: contract_pk
             })
           }
+
+          this.$refs['orderlines-collapse'].toggleOpen()
         }
         this.isLoading = false
       }

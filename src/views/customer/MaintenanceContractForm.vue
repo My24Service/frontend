@@ -683,8 +683,13 @@ export default {
           {...data, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
         )
         this.customer = await customerModel.detail(this.maintenanceContractService.editItem.customer)
-        this.maintenanceEquipmentService.collection = data.equipment.map(
-          (m) => new this.maintenanceEquipmentService.model(m)
+
+        this.maintenanceEquipmentService.setListArgs(`contract=${this.pk}`)
+        const equipmentData = await this.maintenanceEquipmentService.list()
+        this.maintenanceEquipmentService.collection = equipmentData.results.map(
+          (m) => new this.maintenanceEquipmentService.model({
+            ...m, default_currency: this.$store.getters.getDefaultCurrency
+          })
         )
         this.updateTotals()
         this.isLoading = false

@@ -63,7 +63,7 @@ class MaintenanceEquipmentService extends BaseModel {
 
   getItemsTotal() {
     if (!this.collection.length) {
-      return  toDinero("0.00", "EUR")
+      return  toDinero("0.00", this.modelDefaults.tariff_currency)
     }
 
     return this.collection.reduce(
