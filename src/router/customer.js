@@ -12,9 +12,6 @@ import MaintenanceContractList from '../views/customer/MaintenanceContractList.v
 import MaintenanceContractForm from '../views/customer/MaintenanceContractForm.vue'
 import MaintenanceContractView from '../views/customer/MaintenanceContractView.vue'
 
-import MaintenanceEquipmentList from '../views/customer/MaintenanceEquipmentList.vue'
-import MaintenanceEquipmentForm from '../views/customer/MaintenanceEquipmentForm.vue'
-
 import EquipmentList from '../views/equipment/EquipmentList.vue'
 import EquipmentForm from '../views/equipment/EquipmentForm.vue'
 

@@ -1200,6 +1200,8 @@ export default {
               maintenance_contract: contract_pk
             })
           }
+
+          this.$refs['orderlines-collapse'].toggleOpen()
         }
         this.isLoading = false
       }
