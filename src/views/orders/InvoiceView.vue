@@ -15,23 +15,35 @@
             </div>
             <div class="col-sm-6 panel panel-default">
               <div class="panel-body">
-                  <div class="row">
-                    <span class="pull-left col-sm-4"><b>{{ $trans('Invoice number') }}</b></span>
-                    <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.invoice_id }}</span>
-                    </span>
-                  </div>
-                  <div class="row">
-                    <span class="pull-left col-sm-4"><b>{{ $trans('Reference') }}</b></span>
-                    <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.reference }}&nbsp;</span>
-                    </span>
-                  </div>
+                <div class="row">
+                  <span class="pull-left col-sm-4"><b>{{ $trans('Invoice number') }}</b></span>
+                  <span class="col-sm-6 underline">
+                    <span class="pull-right">{{ data.invoice_id }}</span>
+                  </span>
+                </div>
+                <div class="row">
+                  <span class="pull-left col-sm-4"><b>{{ $trans('Reference') }}</b></span>
+                  <span class="col-sm-6 underline">
+                    <span class="pull-right">{{ data.reference }}&nbsp;</span>
+                  </span>
+                </div>
                 <div class="row">
                   <span class="pull-left col-sm-4"><b>{{ $trans('Description') }}</b></span>
                   <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.description }}&nbsp;</span>
-                    </span>
+                    <span class="pull-right">{{ data.description }}&nbsp;</span>
+                  </span>
+                </div>
+                <div class="row">
+                  <span class="pull-left col-sm-4"><b>{{ $trans('Order ID') }}</b></span>
+                  <span class="col-sm-6 underline">
+                    <span class="pull-right">{{ data.order_id }}</span>
+                  </span>
+                </div>
+                <div class="row">
+                  <span class="pull-left col-sm-4"><b>{{ $trans('Order reference') }}</b></span>
+                  <span class="col-sm-6 underline">
+                    <span class="pull-right">{{ data.order_reference }}</span>
+                  </span>
                 </div>
               </div>
             </div>
