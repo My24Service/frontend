@@ -160,6 +160,21 @@
           ></b-table>
         </b-col>
       </b-row>
+      <b-row v-if="order.invoices.length">
+        <hr/>
+        <b-col cols="12">
+          <h4>{{ $trans('Invoices') }}</h4>
+          <b-container>
+            <b-row v-for="invoice of order.invoices" :key="invoice.uuid">
+              <b-col cols="12">
+                <router-link :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}">
+                  {{ $trans('Invoice') }} {{ invoice.invoice_id }}
+                </router-link><br/>
+              </b-col>
+            </b-row>
+          </b-container>
+        </b-col>
+      </b-row>
       <footer class="modal-footer">
         <b-button
           v-if="!past && !isCustomer && !isBranchEmployee"
@@ -189,7 +204,7 @@ export default {
     return {
       isLoading: false,
       buttonDisabled: false,
-      order: orderModel.getFields(),
+      order: null,
       orderLineFields: [
         { key: 'product', label: this.$trans('Product') },
         { key: 'location', label: this.$trans('Location') },
@@ -205,7 +220,7 @@ export default {
       extraDataFields: [
         { key: 'statuscode', label: this.$trans('Status') },
         { key: 'extra_data', label: this.$trans('Text') },
-      ]
+      ],
     }
   },
   props: {

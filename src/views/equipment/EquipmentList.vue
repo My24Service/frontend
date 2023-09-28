@@ -1,6 +1,44 @@
 <template>
   <div class="app-grid" v-if="!isLoading">
 
+    <b-modal
+      id="add-state-modal"
+      ref="add-state-modal"
+      v-bind:title="$trans('Add state')"
+      @ok="addState"
+    >
+      <form ref="add-state-form">
+        <b-container>
+          <b-row>
+            <b-col cols="7">
+              <b-form-group
+                v-bind:label="$trans('State')"
+                label-for="add-state-state"
+              >
+                <b-form-input
+                  size="sm"
+                  id="add-state-state"
+                  v-model="state.state"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="5">
+              <b-form-group
+                v-bind:label="$trans('Replace after months')"
+                label-for="add-state-replace_months"
+              >
+                <b-form-input
+                  size="sm"
+                  id="add-state-replace_months"
+                  v-model="state.replace_months"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -63,6 +101,12 @@
             {{ data.item.name }}
           </router-link><br/>
         </template>
+        <template #cell(latest_state)="data">
+          <span v-if="data.item.latest_state">
+            {{ data.item.latest_state.state }}
+            ({{ $trans('replace in ') }} {{ data.item.latest_state.replace_months }} {{ $trans('months') }})
+          </span>
+        </template>
         <template #cell(customer)="data">
           <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
@@ -75,6 +119,11 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
+            <IconLinkPlus
+              type="tr"
+              v-bind:title="$trans('Add state')"
+              v-bind:method="function() { showAddStateModal(data.item.id) }"
+            />
             <IconLinkEdit
               :router_name="editLink"
               v-bind:router_params="{pk: data.item.id}"
@@ -103,6 +152,9 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {componentMixin} from "../../utils";
 import locationModel from "../../models/equipment/location";
+import statusModel from "../../models/orders/Status";
+import equipmentStateService, {EquipmentStateModel} from "../../models/equipment/EquipmentState";
+import IconLinkPlus from "../../components/IconLinkPlus";
 
 export default {
   mixins: [componentMixin],
@@ -115,6 +167,7 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
+    IconLinkPlus,
   },
   computed: {
     editLink() {
@@ -149,8 +202,8 @@ export default {
       equipmentFieldsCustomerPlanning: [
         {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
         {key: 'location_name', label: this.$trans('Location')},
+        {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
@@ -158,28 +211,30 @@ export default {
       equipmentFieldsBranchPlanning: [
         {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
         {key: 'location_name', label: this.$trans('Location')},
+        {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
       ],
       equipmentFieldsCustomerNonPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
         {key: 'location_name', label: this.$trans('Location')},
+        {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
       ],
       equipmentFieldsBranchNonPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
         {key: 'location_name', label: this.$trans('Location')},
+        {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
       ],
+      equipment_pk: null,
+      state: new EquipmentStateModel({}),
     }
   },
   async created() {
@@ -205,6 +260,21 @@ export default {
     this.isLoading = false
   },
   methods: {
+    showAddStateModal(id) {
+      this.state.equipment = id
+      this.$refs['add-state-modal'].show()
+    },
+    async addState() {
+      try {
+        await equipmentStateService.insert(this.state)
+        this.state = new EquipmentStateModel({})
+        this.infoToast(this.$trans('Created'), this.$trans('State added'))
+        await this.loadData()
+      } catch(error) {
+        console.log('Error adding state', error)
+        this.errorToast(this.$trans('Error adding state'))
+      }
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
