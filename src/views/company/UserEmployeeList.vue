@@ -40,11 +40,6 @@
     <div class="page-details panel">
       <PillsCompanyUsers />
       <br>
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Employee')"
-      />
       <b-table
         id="employee-table"
         small
@@ -62,13 +57,13 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(full_name)="data">
+          <router-link :to="{name: 'employee-edit', params : {pk: data.item.id}}">
+          {{  data.item.full_name }}asd
+          </router-link>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="employee-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -77,13 +72,17 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Employee')"
+      />
   </div>
 </template>
 
 <script>
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import employeeModel from '../../models/company/UserEmployee.js'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -96,7 +95,6 @@ export default {
   name: 'UserEmployeeList',
   components: {
     PillsCompanyUsers,
-    IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
@@ -116,7 +114,7 @@ export default {
         {key: 'email', label: this.$trans('Email'), sortable: true},
         {key: 'last_login', label: this.$trans('Last login'), sortable: true},
         {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
-        {key: 'icons'}
+        {key: 'icons', label: ''}
       ],
     }
   },

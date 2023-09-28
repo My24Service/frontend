@@ -61,13 +61,11 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(full_name)="data">
+          <router-link :to="{name:'salesuser-edit', params : {pk: data.item.id} }">{{ data.item.full_name }}</router-link>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="salesuser-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -87,7 +85,6 @@
 <script>
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import salesUserModel from '../../models/company/UserSales.js'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -100,7 +97,6 @@ export default {
   name: 'UserSalesList',
   components: {
     PillsCompanyUsers,
-    IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
