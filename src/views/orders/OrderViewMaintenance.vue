@@ -155,6 +155,21 @@
             ></b-table>
           </b-col>
       </b-row>
+      <b-row v-if="order.invoices.length">
+        <hr/>
+        <b-col cols="12">
+          <h4>{{ $trans('Invoices') }}</h4>
+          <b-container>
+            <b-row v-for="invoice of order.invoices" :key="invoice.uuid">
+              <b-col cols="12">
+                <router-link :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}">
+                  {{ $trans('Invoice') }} {{ invoice.invoice_id }}
+                </router-link><br/>
+              </b-col>
+            </b-row>
+          </b-container>
+        </b-col>
+      </b-row>
       </div>
     </div>
   </div>
