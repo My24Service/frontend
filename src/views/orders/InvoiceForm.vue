@@ -822,7 +822,7 @@ export default {
 
         this.infoToast(this.$trans('Created'), this.$trans('Invoice has been created'))
         this.isLoading = false
-        await this.$router.push({name: 'order-invoice-view', params: {uuid: invoice.uuid}})
+        await this.$router.push({name: 'order-view', params: {pk: invoice.order}})
       } catch(error) {
         this.errorToast(this.$trans('Error creating invoice'))
         this.isLoading = false
