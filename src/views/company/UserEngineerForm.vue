@@ -3,16 +3,22 @@
     <div class="app-page">
       <header>
         <div class='page-title'>
-          <h3 v-if="isCreate">{{ $trans('New engineer') }}</h3>
-          <h3 v-if="!isCreate">{{ $trans('Edit engineer') }}</h3>
+          <h3>
+          <b-icon icon="people"></b-icon>
+          <span class="backlink" @click="cancelForm">People</span> /
+          {{  engineer.username }}
+          <span class="dimmed" v-if="isCreate && !engineer.username">{{ $trans('(new)') }}</span>
+          <span class="dimmed" v-if="!isCreate && !engineer.username">{{ $trans('(edit)') }}</span>
+          </h3>
           <div class='flex-columns'>
             <b-button @click="cancelForm" type="button" variant="secondary" class="outline">
-                {{ $trans('Cancel') }}</b-button>
-              <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-                {{ $trans('Submit') }}</b-button>
+              {{ $trans('Cancel') }}</b-button>
+            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+              {{ $trans('Submit') }}</b-button>
           </div>
         </div>
       </header>
+
       <div class='page-detail'>
         <div class='flex-columns'>
           <div class='panel'>
