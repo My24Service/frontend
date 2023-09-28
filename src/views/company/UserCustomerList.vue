@@ -55,6 +55,9 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(full_name)="data">
+          <router-link :to="{name:'customeruser-edit', params : {pk: data.item.id} }">{{ data.item.full_name }}</router-link>
+        </template>
         <template #cell(customer)="data">
           <div v-if="data.item.customer_user.customer">
             {{ data.item.customer_details.name }}, {{ data.item.customer_details.city }}
