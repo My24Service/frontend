@@ -113,7 +113,7 @@ export default {
         {key: 'email', label: this.$trans('Email'), sortable: true},
         {key: 'last_login', label: this.$trans('Last login'), sortable: true},
         {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
-        {key: 'icons'}
+        {key: 'icons', label: ''}
       ],
     }
   },
