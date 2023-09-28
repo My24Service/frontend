@@ -68,6 +68,10 @@
               <b-td><strong>{{ $trans('Order type') }}:</strong></b-td>
               <b-td>{{ order.order_type }}</b-td>
             </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Remarks') }}:</strong></b-td>
+              <b-td>{{ order.remarks }}</b-td>
+            </b-tr>
           </b-table-simple>
         </b-col>
       </b-row>

@@ -150,6 +150,7 @@ export default {
         {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'brand', label: this.$trans('Brand')},
+        {key: 'location_name', label: this.$trans('Location')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
@@ -158,6 +159,7 @@ export default {
         {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'brand', label: this.$trans('Brand')},
+        {key: 'location_name', label: this.$trans('Location')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
@@ -165,6 +167,7 @@ export default {
       equipmentFieldsCustomerNonPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'brand', label: this.$trans('Brand')},
+        {key: 'location_name', label: this.$trans('Location')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
@@ -172,6 +175,7 @@ export default {
       equipmentFieldsBranchNonPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'brand', label: this.$trans('Brand')},
+        {key: 'location_name', label: this.$trans('Location')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'}
