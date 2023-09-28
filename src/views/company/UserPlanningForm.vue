@@ -1,13 +1,32 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New planning user') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit planning user') }}</h2>
-        <b-row>
-          <b-col cols="4" role="group">
+  
+    <div class="app-page">
+      <header>
+        <div class="page-title">
+          <h3>
+            <b-icon icon="person"></b-icon>
+            <span class="backlink" @click="cancelForm">People</span> /
+            <strong>{{ planninguser.username }}</strong>
+            <span class="dimmed" v-if="isCreate && !planninguser.username">{{ $trans('(new)') }}</span>
+            <span class="dimmed" v-if="!isCreate && !planninguser.username">{{ $trans('(edit)') }}</span>
+          </h3>
+
+
+          <b-button-toolbar>
+            <b-button @click="cancelForm" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</b-button>
+            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+              {{ $trans('Submit') }}</b-button>
+            </b-button-toolbar>
+        </div>
+      </header>
+      <b-form class="page-detail flex-columns">
+        <div class="panel col-1-3">
+          <h6>{{ $trans('user info') }}</h6>
+          
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Username')"
               label-for="planninguser_username"
             >
@@ -28,10 +47,11 @@
                 {{ $trans('Username is already in use') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
+        
+          
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Password')"
               label-for="planninguser_password"
             >
@@ -48,10 +68,12 @@
                 {{ $trans('Please enter a password') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
+          
+
+          
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Password again')"
               label-for="planninguser_password_again"
             >
@@ -69,12 +91,16 @@
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="4" role="group">
+          
+        </div>
+
+        
+        <div class="panel col-1-3">
+          <h6> {{ $trans('personal details') }} </h6>
+          
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('First name')"
               label-for="planninguser_first_name"
             >
@@ -89,10 +115,11 @@
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
+          
+          
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Last name')"
               label-for="planninguser_last_name"
             >
@@ -107,10 +134,11 @@
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
+          
+          
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Email')"
               label-for="planninguser_email"
             >
@@ -125,13 +153,14 @@
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-        </b-row>
-
-        <b-row>
-          <b-col cols="2" role="group">
+          
+        </div>
+        <div class="panel col-1-3">
+          <h6> {{ $trans('Contract')}} &amp; {{ $trans('time') }}</h6>
+          
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Contract hours per week')"
               label-for="planning_user_contract_hours_week"
             >
@@ -141,11 +170,12 @@
                 v-model="planninguser.planning_user.contract_hours_week"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
+          
+          
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Uses time registration?')"
+              label-cols="4"
+              v-bind:label="$trans('Uses time registration')"
               label-for="planning_user_uses_time_registration"
             >
               <b-form-checkbox
@@ -155,20 +185,12 @@
               >
               </b-form-checkbox>
             </b-form-group>
-          </b-col>
-        </b-row>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
-          </footer>
+          
         </div>
+
       </b-form>
     </div>
-  </b-overlay>
+  
 </template>
 
 <script>
