@@ -1,9 +1,25 @@
 <template>
-  <div class="app-grid">
-
-    <div class="subnav-pills">
-      <PillsCompanyUsers />
-    </div>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3><b-icon icon="people"></b-icon>People</h3>
+        <div>
+          <b-button-toolbar class="flex-columns">
+            <b-button-group>
+              <ButtonLinkRefresh
+                v-bind:method="function() { loadData() }"
+                v-bind:title="$trans('Refresh')"
+              />
+              <ButtonLinkSearch
+                v-bind:method="function() { showSearchModal() }"
+              />
+            </b-button-group>
+            <b-link :to="{name: 'employee-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add employee</b-link>
+          </b-button-toolbar>
+        </div>
+      </div>
+    
+    </header>
 
     <SearchModal
       id="search-modal"
@@ -19,8 +35,11 @@
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this employee?') }}</p>
     </b-modal>
+    
 
-    <div class="overflow-auto">
+    <div class="page-details panel">
+      <PillsCompanyUsers />
+      <br>
       <Pagination
         v-if="!isLoading"
         :model="this.model"
@@ -36,27 +55,9 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="employee-add"
-                  v-bind:title="$trans('New employee')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
+        
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
@@ -84,7 +85,6 @@ import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import employeeModel from '../../models/company/UserEmployee.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
@@ -98,7 +98,6 @@ export default {
     PillsCompanyUsers,
     IconLinkEdit,
     IconLinkDelete,
-    ButtonLinkAdd,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
