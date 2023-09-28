@@ -3,7 +3,21 @@
     <header>
       <div class='page-title'>
         <h3><b-icon icon="people"></b-icon>People</h3>
-        <b-link :to="{name: 'engineer-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add engineer</b-link>
+        <b-button-toolbar class="flex-columns">
+          <b-button-group class="mr-1">
+            
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+            
+          </b-button-group>
+          <b-button @click="()=>{ downloadList()}" class="btn primary mr-1"><b-icon icon="save"></b-icon> {{$trans('Download')}}</b-button>
+          <b-link :to="{name: 'engineer-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add engineer</b-link>
+        </b-button-toolbar>
       </div>
     </header>
     
@@ -29,7 +43,8 @@
       </div>
 
       <PillsEngineer v-if="companycode === 'grm'" />
-      <hr>  
+      <br>
+
       <b-table
         id="engineer-table"
         small
@@ -40,29 +55,7 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="engineer-add"
-                  v-bind:title="$trans('New engineer')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-                <ButtonLinkDownload
-                  v-bind:method="function() { downloadList() }"
-                  v-bind:title="$trans('Download')"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
+        
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;

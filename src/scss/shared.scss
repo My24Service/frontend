@@ -242,6 +242,10 @@
     }
     .btn-toolbar {
       gap: 1ex;
+      
+      button {
+        font-size: 0.9rem;
+      }
     }
 
     .backlink {
