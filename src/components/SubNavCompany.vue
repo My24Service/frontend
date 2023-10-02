@@ -1,23 +1,25 @@
 <template>
   <div v-if="isLoaded">
-    <b-nav>
+      <!--
       <b-nav-item
         :active="isActive('dashboard')"
         v-if="hasDashBoard"
         :to="{ name: 'company-dashboard' }">
         {{ $trans('Dashboard') }}
       </b-nav-item>
+    -->
+
       <b-nav-item
         :active="isActive('company')"
         v-if="hasCompany"
         :to="{ name: 'company-info' }">
-        {{ $trans('Company') }}
+        {{ $trans('Info') }}
       </b-nav-item>
       <b-nav-item
-        v-if="memberType === 'maintenance'"
-        :active="isActive('settings')"
-        :to="{ name: 'company-settings' }">
-        {{ $trans('Settings') }}
+        :active="isActive('activity')"
+        v-if="hasActivity"
+        :to="{ name: 'company-activity' }">
+        {{ $trans('Activity') }}
       </b-nav-item>
       <b-nav-item
         v-if="memberType === 'maintenance'"
@@ -36,12 +38,6 @@
         v-if="hasPartners"
         :to="{ name: 'company-partners-active' }">
         {{ $trans('Partners') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('activity')"
-        v-if="hasActivity"
-        :to="{ name: 'company-activity' }">
-        {{ $trans('Activity') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('pictures')"
@@ -73,7 +69,13 @@
         :to="{ name: 'company-budgets' }">
         {{ $trans('Budgets') }}
       </b-nav-item>
-    </b-nav>
+
+      <b-nav-item
+          v-if="memberType === 'maintenance'"
+          :active="isActive('settings')"
+          :to="{ name: 'company-settings' }">
+          {{ $trans('Settings') }}
+        </b-nav-item>
   </div>
 </template>
 
