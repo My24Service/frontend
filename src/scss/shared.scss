@@ -101,7 +101,20 @@
       flex-direction: column;
     }
 
-
+    ul:last-of-type {
+      margin-block: 2ex;
+      a {
+        border-left: 1px solid #232c2f30;
+        border-radius: 0;
+        transition: all .2s, padding-inline-start .3s .2s;
+        &:hover,&:focus,&:active,&.router-link-active {
+          border-color: currentColor;
+        }
+        &.router-link-active {
+          padding-inline-start: 3ex;
+        }
+      }
+    }
 
   }
 
@@ -116,7 +129,8 @@
       align-items: center;
       position: relative;
       transition: all .2s;
-      &.active {
+
+      &.router-link-active {
         font-weight: bold;
       }
 
@@ -606,6 +620,9 @@ canvas {
 .dimmed {
   opacity: .5;
 }
+.hidden {
+  display: none;
+}
 
 .carousel-item img {
   width: 640px !important;
@@ -632,6 +649,74 @@ canvas {
 
 .order-filter-links {
   margin-bottom: 1rem;
+}
+
+/* Company section */
+.company-image {
+  position: relative;
+  display: block;
+  margin: 1rem auto;
+  overflow: hidden;
+  border: 8px solid white;
+  box-shadow: 0 0.5ex 3ex -2ex;
+  height: auto;
+  
+  &.profile-picture {
+    aspect-ratio: 1;
+    width: 256px;
+    border-radius: 50%;
+  }
+
+  img {
+    min-width: 100%;
+    min-height: 100%;
+    object-fit: contain;
+  }
+
+  .button-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    fill: white;
+    cursor: pointer;
+    filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.164));
+    opacity: .75;
+    transition: all .1s;
+    &:hover, :focus {
+      opacity: 1;
+      scale: 1.1;
+    }
+  }
+
+  &.isEditing {
+    background-color: #f6f9fc;
+    
+    img[src=""] {
+      background-color: #ddd;
+      background-image:
+      linear-gradient(45deg, #ccc 25%, transparent 25%), 
+      linear-gradient(135deg, #ccc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #ccc 75%),
+      linear-gradient(135deg, transparent 75%, #ccc 75%);
+      background-size:25px 25px; /* Must be a square */
+      background-position:0 0, 12.5px 0, 12.5px -12.5px, 0px 12.5px; /* Must be half of one side of the square */
+    }
+    
+  }
+  .form-group {
+    position: absolute;
+    bottom: 0;
+    left: 1rem;
+    right: 1rem;
+  }
+}
+
+
+input:disabled,
+fieldset:disabled textarea {
+  border-color: transparent !important;
+  background-color: transparent !important;
 }
 
 /* (bootstrap) overrides */
