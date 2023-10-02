@@ -1,6 +1,5 @@
 <template>
   <div>
-    <b-nav>
       <!--
       <b-nav-item
         :active="isActive('orders')"
@@ -52,7 +51,6 @@
         to="/orders/month-stats">
         {{ $trans('Month') }}
       </b-nav-item>
-    </b-nav>
   </div>
 </template>
 

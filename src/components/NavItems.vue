@@ -17,18 +17,20 @@
 
     <!-- Orders submenu -->
     <div class="page-subnav" v-if="isActive('orders')">
-      <b-nav-item
-        v-if="isActive('orders')"
-        :active="isActive('orders','statuscodes')"
-        to="/orders/statuscodes">
-        {{ $trans('Statuscodes') }}
-      </b-nav-item>
-      <b-nav-item
-        v-if="isActive('orders')"
-        :active="isActive('orders','year-stats') || isActive('orders','month-stats')"
-        to="/orders/year-stats">
-        {{ $trans('Stats') }}
-      </b-nav-item>
+      <b-nav>
+        <b-nav-item
+          v-if="isActive('orders')"
+          :active="isActive('orders','statuscodes')"
+          to="/orders/statuscodes">
+          {{ $trans('Statuscodes') }}
+        </b-nav-item>
+        <b-nav-item
+          v-if="isActive('orders')"
+          :active="isActive('orders','year-stats') || isActive('orders','month-stats')"
+          to="/orders/year-stats">
+          {{ $trans('Stats') }}
+        </b-nav-item>
+      </b-nav>
     </div>
  
     <!-- equipment -->
@@ -112,9 +114,9 @@
       v-if="showCompany"
       to="/company/dashboard"
       class="has-children">
-      <b-icon icon="pie-chart" v-if="!isActive('company')"></b-icon>
-      <b-icon icon="pie-chart-fill" v-if="isActive('company')"></b-icon>
-      {{ $trans('Company') }}
+      <b-icon icon="bookmark-star" v-if="!isActive('company')"></b-icon>
+      <b-icon icon="bookmark-star-fill" v-if="isActive('company')"></b-icon>
+      {{ $trans('My company') }}
     </b-nav-item>
     <SubNav v-if="isActive('company')">
       <router-view name="app-subnav"></router-view>
