@@ -1,7 +1,17 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>{{ $trans('Settings') }}</h3>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="terminal"></b-icon>
+          {{ $trans('Settings') }}
+        </h3>
+      
+        <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            {{ $trans('Submit') }}
+        </b-button>
+      </div>
+
     </header>
     <div class='app-detail panel'>
       <b-form>
@@ -14,7 +24,7 @@
             <template v-for = "(value, key, index) in settings">
               <b-tr :key="key">
                 <b-td>
-                  {{ index+1 }}: {{ key }}
+                  {{ index+1 }}: {{ key.split('_').join(' ') }}
                 </b-td>
                 <b-td class="border px-4 py-2">
                   <b-form-checkbox
@@ -29,20 +39,13 @@
                     v-model="settings[key]"
                   ></b-form-input>
                 </b-td>
-                <b-td>
-                </b-td>
+                
               </b-tr>
             </template>
           </tbody>
         </b-table-simple>
 
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-          </footer>
-        </div>
+        
       </b-form>
     </div>
   </div>
