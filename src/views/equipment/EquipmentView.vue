@@ -122,7 +122,7 @@ export default {
       isLoading: false,
       orderPastModel,
       buttonDisabled: false,
-      equipment: equipmentModel.getFields(),
+      equipment: null,
       orders: [],
       orderPastFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -187,8 +187,8 @@ export default {
 
       await this.loadHistory()
 
-      this.equipment = await equipmentModel.detail(this.pk)
-
+      const equipmentData = await equipmentModel.detail(this.pk)
+      this.equipment = new equipmentModel.model(equipmentData)
       try {
         const orderTypeStatsData = await orderModel.getOrderTypesStatsEquipment(this.pk)
         const monthsStatsData = await orderModel.getMonthsStatsEquipment(this.pk)
