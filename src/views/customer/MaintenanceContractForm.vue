@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="!isLoading">
     <b-modal
       id="new-equipment-modal"
       ref="new-equipment-modal"
@@ -63,7 +63,7 @@
                 <span slot="noResult">{{ $trans('No customers found. Consider changing the search query.') }}</span>
               </multiselect>
               <b-form-invalid-feedback
-                :state="!v$.maintenanceContract.customer.$error">
+                :state="!v$.maintenanceContractService.editItem.customer.$error">
                 {{ $trans('Please select a customer') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -495,6 +495,7 @@ export default {
     }
   },
   async created() {
+    this.isLoading = true
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.maintenanceEquipmentService.modelDefaults = {
       tariff: '0.00',
@@ -503,14 +504,14 @@ export default {
     }
     this.maintenanceEquipmentService.newEditItem()
     if (this.isCreate) {
-      this.isLoading = true
 
       this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
-      this.isLoading = false
+      this.customer = new customerModel.model({})
     } else {
       await this.loadData()
     }
     this.updateTotals()
+    this.isLoading = false
   },
   methods: {
     tariffChanged(priceDinero) {
