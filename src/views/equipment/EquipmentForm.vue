@@ -258,7 +258,7 @@
           <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Replace after months')"
+              v-bind:label="$trans('Lifespan (months)')"
               label-for="equipment_default_replace_months"
             >
               <b-form-input
@@ -493,7 +493,7 @@ export default {
       })
     },
     priceChanged(priceDinero) {
-      this.coc_item.setPriceField('price', priceDinero)
+      this.equipment.setPriceField('price', priceDinero)
     },
     // customers
     async getCustomers(query) {
@@ -588,7 +588,8 @@ export default {
       this.isLoading = true
 
       try {
-        this.equipment = await equipmentService.detail(this.pk)
+        const equipmentData = await equipmentService.detail(this.pk)
+        this.equipment = new EquipmentModel(equipmentData)
         if (this.hasBranches && !this.isEmployee) {
           this.branch = await branchModel.detail(this.equipment.branch)
           this.locations = await locationModel.listForSelectBranch(this.branch.id)

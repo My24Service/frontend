@@ -22,8 +22,8 @@ class EquipmentModel {
 
   priceFields = ['price']
 
-  constructor(material) {
-    for (const [k, v] of Object.entries(material)) {
+  constructor(equipment) {
+    for (const [k, v] of Object.entries(equipment)) {
       this[k] = v
     }
     this.setPriceFields(this)
@@ -33,6 +33,7 @@ class EquipmentModel {
 Object.assign(EquipmentModel.prototype, priceMixin);
 
 class EquipmentService extends BaseModel {
+  model = EquipmentModel
   fields = {
     'customer': null,
     'branch': null,

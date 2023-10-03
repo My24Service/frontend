@@ -24,7 +24,7 @@
             </b-col>
             <b-col cols="5">
               <b-form-group
-                v-bind:label="$trans('Replace after months')"
+                v-bind:label="$trans('Lifespan')"
                 label-for="add-state-replace_months"
               >
                 <b-form-input
@@ -200,8 +200,8 @@ export default {
       equipmentObjects: [],
       equipmentFields: [],
       equipmentFieldsCustomerPlanning: [
-        {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Equipment')},
+        {key: 'customer', label: this.$trans('Customer')},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
@@ -209,8 +209,8 @@ export default {
         {key: 'icons'}
       ],
       equipmentFieldsBranchPlanning: [
-        {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Equipment')},
+        {key: 'branch', label: this.$trans('Branch')},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},

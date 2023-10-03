@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="equipment">
 
     <div class="app-detail">
       <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
@@ -44,6 +44,14 @@
             <b-tr>
               <b-td><strong>{{ $trans('Standard hours') }}:</strong></b-td>
               <b-td>{{ equipment.standard_hours }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Lifespan (months)') }}:</strong></b-td>
+              <b-td>{{ equipment.default_replace_months }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Price') }}:</strong></b-td>
+              <b-td>{{ equipment.price_dinero.toFormat('$0.00') }}</b-td>
             </b-tr>
           </b-table-simple>
         </b-col>
@@ -148,7 +156,7 @@ export default {
       isLoading: false,
       orderPastModel,
       buttonDisabled: false,
-      equipment: equipmentModel.getFields(),
+      equipment: null,
       orders: [],
       orderPastFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -204,8 +212,8 @@ export default {
 
       await this.loadHistory()
 
-      this.equipment = await equipmentModel.detail(this.pk)
-
+      const equipmentData = await equipmentModel.detail(this.pk)
+      this.equipment = new equipmentModel.model(equipmentData)
       try {
         const orderTypeStatsData = await orderModel.getOrderTypesStatsEquipment(this.pk)
         const monthsStatsData = await orderModel.getMonthsStatsEquipment(this.pk)
