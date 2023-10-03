@@ -181,21 +181,21 @@
 </template>
 
 <script>
-import orderModel from '@/models/orders/Order.js'
-import statusModel from '@/models/orders/Status.js'
-import OrderTableInfo from '@/components/OrderTableInfo.vue'
-import my24 from '@/services/my24.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
-import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
-import IconLinkAssign from '@/components/IconLinkAssign.vue'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
-import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
-import Pagination from "@/components/Pagination.vue"
-import SearchModal from '@/components/SearchModal.vue'
+import { OrderService } from '../../models/orders/Order.js'
+import statusModel from '../../models/orders/Status.js'
+import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import my24 from '../../services/my24.js'
+import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import IconLinkPlus from '../../components/IconLinkPlus.vue'
+import IconLinkDocuments from '../../components/IconLinkDocuments.vue'
+import IconLinkAssign from '../../components/IconLinkAssign.vue'
+import IconLinkDelete from '../../components/IconLinkDelete.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
+import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
+import Pagination from "../../components/Pagination.vue"
+import SearchModal from '../../components/SearchModal.vue'
 
 export default {
   components: {
@@ -226,7 +226,7 @@ export default {
     return {
       sortMode: 'default',
       searchQuery: null,
-      model: orderModel,
+      model: new OrderService(),
       selectedOrders: [],
       status: {
         statuscode: '',

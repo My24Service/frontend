@@ -118,7 +118,7 @@
 </template>
 
 <script>
-import orderNotAcceptedModel from '../../models/orders/OrderNotAccepted.js'
+import { OrderNotAcceptedService } from '../../models/orders/OrderNotAccepted.js'
 import orderModel from '../../models/orders/Order.js'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -165,7 +165,7 @@ export default {
       sortMode: 'default',
       sort: null,
       searchQuery: null,
-      model: orderNotAcceptedModel,
+      model: new OrderNotAcceptedService(),
       statuscodes: [],
       orderPk: null,
       isLoading: false,

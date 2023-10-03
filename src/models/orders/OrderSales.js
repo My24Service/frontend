@@ -2,13 +2,14 @@ import BaseModel from '@/models/base'
 import orderModel from './Order'
 
 
-class OrderSales extends BaseModel {
+class OrderSalesService extends BaseModel {
   fields = orderModel.getFields()
 
   url = '/order/order/sales_orders/'
 
 }
 
-let orderSalesModel = new OrderSales()
+let orderSalesService = new OrderSalesService()
 
-export default orderSalesModel
+export default orderSalesService
+export { OrderSalesService }

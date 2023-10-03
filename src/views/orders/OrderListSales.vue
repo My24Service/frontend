@@ -87,15 +87,14 @@
 </template>
 
 <script>
-import my24 from '@/services/my24.js'
-import orderSalesModel from '@/models/orders/OrderSales.js'
-import OrderTableInfo from '@/components/OrderTableInfo.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import OrderFilters from "@/components/OrderFilters";
-import Pagination from "@/components/Pagination.vue"
+import my24 from '../../services/my24.js'
+import { OrderSalesService } from '../../models/orders/OrderSales.js'
+import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import OrderFilters from "../../components/OrderFilters";
+import Pagination from "../../components/Pagination.vue"
 
 export default {
   components: {
@@ -110,7 +109,7 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: orderSalesModel,
+      model: new OrderSalesService(),
       statuscodes: [],
       isLoading: false,
       orders: [],
