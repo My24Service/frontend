@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="orderService">
     <div class="app-detail">
       <div v-if="!isCustomer">
         <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
@@ -245,6 +245,7 @@
         <b-row align-h="center">
           <h3>{{ $trans("Orders") }}</h3>
         </b-row>
+
         <SearchModal
           id="search-modal"
           ref="search-modal"
@@ -252,11 +253,11 @@
         />
 
         <b-pagination
-          v-if="this.orderModel.count > 20"
+          v-if="orderService.count > 20"
           class="pt-4"
           v-model="currentPage"
-          :total-rows="this.orderModel.count"
-          :per-page="this.orderModel.perPage"
+          :total-rows="orderService.count"
+          :per-page="orderService.perPage"
           aria-controls="customer-orders-table"
         ></b-pagination>
 
@@ -308,7 +309,7 @@
 
 <script>
 import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
-import orderModel from '../../models/orders/Order.js'
+import { OrderService } from '../../models/orders/Order.js'
 import customerModel from '../../models/customer/Customer.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -336,7 +337,7 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderModel,
+      orderService: new OrderService(),
       buttonDisabled: false,
       customer: customerModel.fields,
       orders: [],
@@ -398,7 +399,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderModel.currentPage = val
+      this.orderService.currentPage = val
       this.loadData()
     }
   },
@@ -406,7 +407,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderModel.setSearchQuery(val)
+      this.orderService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -426,10 +427,10 @@ export default {
           await this.loadMaintenanceContracts()
           this.customer = await customerModel.detail(this.pk)
 
-          const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer(this.pk)
-          const monthsStatsData = await orderModel.getMonthsStatsCustomer(this.pk)
-          const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsCustomer(this.pk)
-          const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsCustomer(this.pk)
+          const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer(this.pk)
+          const monthsStatsData = await this.orderService.getMonthsStatsCustomer(this.pk)
+          const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer(this.pk)
+          const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer(this.pk)
 
           this.$refs['order-stats'].render(
             orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
@@ -448,10 +449,10 @@ export default {
           return
         }
 
-        const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer()
-        const monthsStatsData = await orderModel.getMonthsStatsCustomer()
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsCustomer()
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsCustomer()
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer()
+        const monthsStatsData = await this.orderService.getMonthsStatsCustomer()
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer()
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer()
 
         this.$refs['order-stats'].render(
           orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
@@ -466,7 +467,7 @@ export default {
         this.isLoading = false
 
         // use this in customer dashboard
-        // const bla = await orderModel.getTopXCustomers()
+        // const bla = await orderService.getTopXCustomers()
 
       } catch(error) {
         console.log('error fetching orders or customer detail', error)
@@ -488,7 +489,7 @@ export default {
 
     async loadHistory() {
       try {
-        const results = await orderModel.getAllForCustomer(this.pk)
+        const results = await this.orderService.getAllForCustomer(this.pk)
         this.orders = results.results
         this.isLoading = false
       } catch(error) {

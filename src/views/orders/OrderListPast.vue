@@ -120,18 +120,18 @@
 </template>
 
 <script>
-import my24 from '@/services/my24.js'
-import statusModel from '@/models/orders/Status.js'
-import orderPastModel from '@/models/orders/OrderPast.js'
-import OrderTableInfo from '@/components/OrderTableInfo.vue'
-import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkSort from '@/components/ButtonLinkSort.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import OrderFilters from "@/components/OrderFilters"
-import Pagination from "@/components/Pagination.vue"
-import { componentMixin } from '@/utils'
+import my24 from '../../services/my24.js'
+import statusModel from '../../models/orders/Status.js'
+import { OrderPastService } from '../../models/orders/OrderPast.js'
+import OrderTableInfo from '../../components/OrderTableInfo.vue'
+import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
+import IconLinkPlus from '../../components/IconLinkPlus.vue'
+import SearchModal from '../../components/SearchModal.vue'
+import OrderFilters from "../../components/OrderFilters"
+import Pagination from "../../components/Pagination.vue"
+import { componentMixin } from '../../utils'
 
 export default {
   mixins: [componentMixin],
@@ -148,7 +148,7 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: orderPastModel,
+      model: new OrderPastService(),
       statuscodes: [],
       isLoading: false,
       orders: [],

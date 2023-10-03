@@ -189,7 +189,7 @@
 </template>
 
 <script>
-import orderModel from '../../models/orders/Order.js'
+import { OrderService } from '../../models/orders/Order.js'
 import statusModel from '../../models/orders/Status.js'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -241,7 +241,7 @@ export default {
       memberNewDataSocket: new MemberNewDataSocket(),
       sortMode: 'default',
       searchQuery: null,
-      model: orderModel,
+      model: new OrderService(),
       selectedOrders: [],
       status: {
         statuscode: '',

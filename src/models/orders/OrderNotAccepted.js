@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class OrderNotAccepted extends BaseModel {
+class OrderNotAcceptedService extends BaseModel {
   url = '/order/order/all_for_customer_not_accepted/'
 
   async setAccepted(order_pk) {
@@ -26,6 +26,7 @@ class OrderNotAccepted extends BaseModel {
   }
 }
 
-let orderNotAcceptedModel = new OrderNotAccepted()
+let orderNotAcceptedService = new OrderNotAcceptedService()
 
-export default orderNotAcceptedModel
+export default orderNotAcceptedService
+export { OrderNotAcceptedService }
