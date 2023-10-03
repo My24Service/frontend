@@ -542,6 +542,7 @@ export default {
     }
   },
   async created() {
+    this.isLoading = true
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.maintenanceEquipmentService.modelDefaults = {
       tariff: '0.00',
@@ -550,14 +551,14 @@ export default {
     }
     this.maintenanceEquipmentService.newEditItem()
     if (this.isCreate) {
-      this.isLoading = true
 
       this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
-      this.isLoading = false
+      this.customer = new customerModel.model({})
     } else {
       await this.loadData()
     }
     this.updateTotals()
+    this.isLoading = false
   },
   methods: {
     tariffChanged(priceDinero) {
