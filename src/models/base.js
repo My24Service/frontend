@@ -59,6 +59,13 @@ class BaseModel {
 
     this.editItem = item
   }
+  getIndexById(id, idField) {
+    for (let i=0; i<this.collection.length; i++) {
+      if (this.collection[i][idField] === id) {
+        return i
+      }
+    }
+  }
   emptyCollectionItem() {
     this.newEditItem()
     this.editPk = null
@@ -209,8 +216,12 @@ class BaseModel {
   }
 
   preInsert(obj) {
-    delete obj.created
-    delete obj.modified
+    if (obj.hasOwnProperty('created')) {
+      delete obj.created
+    }
+    if (obj.hasOwnProperty('modified')) {
+      delete obj.modified
+    }
     return obj
   }
 

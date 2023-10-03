@@ -77,7 +77,7 @@
               <td>{{ data.item.created_orders}}</td>
             </tr>
             <tr>
-              <td><strong>{{ $trans('# contract equipment') }}</strong></td>
+              <td><strong>{{ $trans('# equipment') }}</strong></td>
               <td>{{ data.item.num_equipment}}</td>
             </tr>
             <tr>

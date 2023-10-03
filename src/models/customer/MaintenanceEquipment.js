@@ -8,15 +8,11 @@ class MaintenanceEquipmentModel {
   contract
   equipment
   equipment_name
-  amount
   times_per_year
   remarks
 
   tariff
   tariff_currency
-
-  tariff_total
-  tariff_total_currency
 
   num_order_equipment
   created_orders
@@ -28,12 +24,6 @@ class MaintenanceEquipmentModel {
       this[k] = v
     }
     this.setPriceFields(this)
-    this.setTariffTotal()
-  }
-
-  setTariffTotal() {
-    const tariff_total_dinero = this.tariff_dinero.multiply(this.amount)
-    this.setPriceField('tariff_total', tariff_total_dinero)
   }
 }
 
@@ -47,7 +37,6 @@ class MaintenanceEquipmentService extends BaseModel {
     'customer': null,
     'equipment': null,
     'equipment_name': '',
-    'amount': 1,
     'times_per_year': 1,
     'remarks': '',
     'contract_value': 0.00,
@@ -67,7 +56,7 @@ class MaintenanceEquipmentService extends BaseModel {
     }
 
     return this.collection.reduce(
-      (total, m) => (total.add(m.tariff_dinero.multiply(m.amount))),
+      (total, m) => (total.add(m.tariff_dinero)),
       toDinero("0.00", this.collection[0].tariff_currency)
     )
   }

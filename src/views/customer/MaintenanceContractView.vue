@@ -40,8 +40,8 @@
           :fields="equipmentFields"
           :items="maintenanceEquipmentService.collection" responsive="md"
         >
-          <template #cell(amount)="data">
-            {{ data.item.amount }} ({{ $trans('in orders') }}: {{ data.item.num_order_equipment }})
+          <template #cell(times_per_year)="data">
+            {{ data.item.times_per_year }} ({{ $trans('in orders') }}: {{ data.item.num_order_equipment }})
           </template>
           <template #cell(tariff)="data">
             {{ data.item.tariff_dinero.toFormat('$0.00')}}
@@ -74,8 +74,8 @@
               v-model="data.item.amount"
             >
             </b-form-input>
+            {{ $trans('Times / year') }}: <b>{{ data.item.times_per_year }}</b><br/>
             {{ $trans('done so far') }}: <b>{{ data.item.num_order_equipment }}</b><br/>
-            {{ $trans('contract amount') }}: <b>{{ data.item.contract_amount }}</b>
           </template>
         </b-table>
 
@@ -128,7 +128,6 @@ export default {
 
       equipmentFields: [
         { key: 'equipment_name', label: this.$trans('Name') },
-        { key: 'amount', label: this.$trans('Amount') },
         { key: 'times_per_year', label: this.$trans('Times / year') },
         { key: 'tariff', label: this.$trans('Tariff') },
         { key: 'tariff_total', label: this.$trans('Tariff total') },
@@ -137,9 +136,8 @@ export default {
       ],
       equipmentFieldsCreate: [
         { key: 'id', label: this.$trans('id'), thAttr: {width: '5%'} },
-        { key: 'name', label: this.$trans('Name'), thAttr: {width: '70%'} },
-        { key: 'times_per_year', label: this.$trans('Times / year'), thAttr: {width: '10%'} },
-        { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '15%'} },
+        { key: 'name', label: this.$trans('Name'), thAttr: {width: '85%'} },
+        { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '10%'} },
       ],
       orderLinesData: [],
       selectedData: []
@@ -176,8 +174,8 @@ export default {
         name: m.equipment_name,
         times_per_year: m.times_per_year,
         num_order_equipment: m.num_order_equipment ? m.num_order_equipment : 0,
-        amount: 0,
-        contract_amount: m.amount,
+        amount: 1,
+        contract_amount: 1,
         useAsOrderLine: false
       }))
       this.isCreate = true

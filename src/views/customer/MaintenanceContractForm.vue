@@ -205,9 +205,6 @@
                 <template #cell(tariff)="data">
                   {{ data.item.tariff_dinero.toFormat('$0.00')}}
                 </template>
-                <template #cell(tariff_total)="data">
-                  {{ data.item.tariff_total_dinero.toFormat('$0.00')}}
-                </template>
                 <template #cell(icons)="data">
                   <div class="float-right">
                     <b-link class="h5 mx-2" @click="editEquipment(data.item, data.index)">
@@ -269,7 +266,7 @@
             </b-col>
           </b-row>
           <b-row>
-            <b-col cols="3" role="group">
+            <b-col cols="4" role="group">
               <b-form-group
                 label-size="sm"
                 v-bind:label="$trans('Name')"
@@ -287,24 +284,6 @@
                 </b-form-invalid-feedback>
               </b-form-group>
             </b-col>
-            <b-col cols="1" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Amount')"
-                label-for="maintenance-contract-equipment-amount"
-              >
-                <b-form-input
-                  ref="amount"
-                  id="maintenance-contract-equipment-amount"
-                  size="sm"
-                  v-model="maintenanceEquipmentService.editItem.amount"
-                ></b-form-input>
-                <b-form-invalid-feedback
-                  :state="!v$.maintenanceEquipment.amount.$error">
-                  {{ $trans('Please enter an amount') }}
-                </b-form-invalid-feedback>
-              </b-form-group>
-            </b-col>
             <b-col cols="2" role="group">
               <b-form-group
                 label-size="sm"
@@ -314,11 +293,12 @@
                 <b-form-input
                   id="maintenance-contract-equipment-times_per_year"
                   size="sm"
+                  ref="times_per_year"
                   v-model="maintenanceEquipmentService.editItem.times_per_year"
                 ></b-form-input>
                 <b-form-invalid-feedback
                   :state="!v$.maintenanceEquipment.times_per_year.$error">
-                  {{ $trans('Please enter an amount') }}
+                  {{ $trans('Please enter a number') }}
                 </b-form-invalid-feedback>
               </b-form-group>
             </b-col>
@@ -445,10 +425,6 @@ export default {
       equipment_name: {
         required
       },
-      amount: {
-        required,
-        greaterThanZero
-      },
 
       times_per_year: {
         required,
@@ -471,10 +447,8 @@ export default {
 
       equipmentFields: [
         { key: 'equipment_name', label: this.$trans('Name') },
-        { key: 'amount', label: this.$trans('Amount') },
         { key: 'times_per_year', label: this.$trans('Times / year') },
         { key: 'tariff', label: this.$trans('Tariff') },
-        { key: 'tariff_total', label: this.$trans('Tariff total') },
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
@@ -490,8 +464,7 @@ export default {
       return this.submitClicked
     },
     isEquipmentValid() {
-      return this.maintenanceEquipmentService.editItem.equipment !== null &&
-        greaterThanZero(this.maintenanceEquipmentService.editItem.amount)
+      return this.maintenanceEquipmentService.editItem.equipment !== null
     }
   },
   async created() {
@@ -500,12 +473,12 @@ export default {
     this.maintenanceEquipmentService.modelDefaults = {
       tariff: '0.00',
       tariff_currency: this.$store.getters.getDefaultCurrency,
-      amount: 0
     }
     this.maintenanceEquipmentService.newEditItem()
+    this.maintenanceEquipmentService.deletedItems = []
     if (this.isCreate) {
-
       this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
+      this.maintenanceContractService.newEditItem()
       this.customer = new customerModel.model({})
     } else {
       await this.loadData()
@@ -574,7 +547,7 @@ export default {
         this.maintenanceEquipment.equipment = response.id
         this.maintenanceEquipment.equipment_name = response.name
         this.v$.maintenanceEquipment.$reset()
-        this.$refs.amount.focus()
+        this.$refs.times_per_year.focus()
       }  catch(error) {
         console.log('Error adding equipment', error)
         this.errorToast(this.$trans('Error adding equipment'))
@@ -592,10 +565,22 @@ export default {
       return `${name} - ${city}`
     },
     selectEquipment(option) {
+      // check if already there
+      const equipment = this.maintenanceEquipmentService.collection.find((m) => m.equipment === option.id)
+      if (equipment) {
+        const index = this.maintenanceEquipmentService.getIndexById(option.id, 'equipment')
+        if (index === undefined) {
+          throw `selectEquipment: index for id: ${option.id} not found`
+        }
+
+        this.maintenanceEquipmentService.editCollectionItem(equipment, index)
+        return
+      }
+
       this.maintenanceEquipmentService.editItem.equipment = option.id
       this.maintenanceEquipmentService.editItem.equipment_name = option.name
       this.v$.maintenanceEquipment.$reset()
-      this.$refs.amount.focus()
+      this.$refs.times_per_year.focus()
     },
     deleteEquipment(index) {
       this.maintenanceEquipmentService.deleteCollectionItem(index)
@@ -618,7 +603,6 @@ export default {
         return
       }
 
-      this.maintenanceEquipmentService.editItem.setTariffTotal()
       this.maintenanceEquipmentService.addCollectionItem()
       this.updateTotals()
       this.v$.$reset()
@@ -636,7 +620,7 @@ export default {
 
       if (this.isCreate) {
         try {
-          const contract = await this.maintenanceContractService.insert(this.maintenanceContract)
+          const contract = await this.maintenanceContractService.insert(this.maintenanceContractService.editItem)
           this.maintenanceEquipmentService.collection = this.maintenanceEquipmentService.collection.map(
             (m) => new this.maintenanceEquipmentService.model(
               {...m, contract: contract.id}
