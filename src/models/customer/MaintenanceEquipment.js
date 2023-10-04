@@ -66,4 +66,4 @@ class MaintenanceEquipmentService extends BaseModel {
 const maintenanceEquipmentService = new MaintenanceEquipmentService()
 
 export default maintenanceEquipmentService
-export {MaintenanceEquipmentModel}
+export {MaintenanceEquipmentModel, MaintenanceEquipmentService }

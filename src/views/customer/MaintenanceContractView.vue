@@ -52,6 +52,58 @@
         </b-table>
       </div>
 
+      <div v-if="!isCreate">
+        <b-row align-h="center">
+          <h3>{{ $trans("Orders") }}</h3>
+        </b-row>
+
+        <SearchModal
+          id="search-modal"
+          ref="search-modal"
+          @do-search="handleSearchOk"
+        />
+
+        <b-pagination
+          v-if="ordersMaintenanceService.count > 20"
+          class="pt-4"
+          v-model="currentPage"
+          :total-rows="ordersMaintenanceService.count"
+          :per-page="ordersMaintenanceService.perPage"
+          aria-controls="maintenance-orders-table"
+        ></b-pagination>
+
+        <b-table
+          id="maintenance-orders-table"
+          small
+          :busy='isLoading'
+          :fields="maintenanceOrdersFields"
+          :items="maintenanceOrders"
+          responsive="md"
+          class="data-table"
+        >
+          <template #head(icons)="">
+            <div class="float-right">
+              <b-button-toolbar>
+                <b-button-group class="mr-1">
+                  <ButtonLinkRefresh
+                    v-bind:method="function() { loadData() }"
+                    v-bind:title="$trans('Refresh')"
+                  />
+                  <ButtonLinkSearch
+                    v-bind:method="function() { showSearchModal() }"
+                  />
+                </b-button-group>
+              </b-button-toolbar>
+            </div>
+          </template>
+          <template #cell(id)="data">
+            <OrderTableInfo
+              v-bind:order="data.item"
+            />
+          </template>
+        </b-table>
+      </div>
+
       <div
         v-if="isCreate"
       >
@@ -100,15 +152,24 @@
 </template>
 
 <script>
-import maintenanceContractService from '../../models/customer/MaintenanceContract.js'
-import maintenanceEquipmentService from "../../models/customer/MaintenanceEquipment";
+import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
+import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
 import {componentMixin} from "../../utils";
 import CustomerDetail from "../../components/CustomerDetail";
+import {OrdersMaintenanceService} from '../../models/orders/OrdersMaintenance'
+import ButtonLinkRefresh from "../../components/ButtonLinkRefresh";
+import ButtonLinkSearch from "../../components/ButtonLinkSearch";
+import OrderTableInfo from "../../components/OrderTableInfo";
+import SearchModal from "../../components/SearchModal";
 
 export default {
   mixins: [componentMixin],
   components: {
-    CustomerDetail
+    CustomerDetail,
+    ButtonLinkRefresh,
+    ButtonLinkSearch,
+    OrderTableInfo,
+    SearchModal,
   },
   props: {
     pk: {
@@ -118,10 +179,12 @@ export default {
   },
   data () {
     return {
+      currentPage: 1,
       isLoading: false,
       maintenanceContract: null,
-      maintenanceContractService,
-      maintenanceEquipmentService,
+      maintenanceContractService: new MaintenanceContractService(),
+      maintenanceEquipmentService: new MaintenanceEquipmentService(),
+      ordersMaintenanceService: new OrdersMaintenanceService(),
       errorMessage: null,
       customer: null,
       isCreate: false,
@@ -130,7 +193,7 @@ export default {
         { key: 'equipment_name', label: this.$trans('Name') },
         { key: 'times_per_year', label: this.$trans('Times / year') },
         { key: 'tariff', label: this.$trans('Tariff') },
-        { key: 'tariff_total', label: this.$trans('Tariff total') },
+        { key: 'sum_tariffs', label: this.$trans('Tariff total') },
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
@@ -140,7 +203,18 @@ export default {
         { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '10%'} },
       ],
       orderLinesData: [],
-      selectedData: []
+      selectedData: [],
+      maintenanceOrdersFields: [
+        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
+        { key: 'icons', thAttr: {width: '5%'} },
+      ],
+      maintenanceOrders: []
+    }
+  },
+  watch: {
+    currentPage: function(val) {
+      this.ordersMaintenanceService.currentPage = val
+      this.loadData()
     }
   },
   computed: {
@@ -153,6 +227,15 @@ export default {
     await this.loadData()
   },
   methods: {
+    // search
+    handleSearchOk(val) {
+      this.$refs['search-modal'].hide()
+      this.orderService.setSearchQuery(val)
+      this.loadData()
+    },
+    showSearchModal() {
+      this.$refs['search-modal'].show()
+    },
     async createOrder() {
       // set in store
       const orderlines = this.orderLinesData.filter((m) => m.useAsOrderLine === true)
@@ -197,6 +280,11 @@ export default {
             ...m, default_currency: this.$store.getters.getDefaultCurrency
           })
         )
+
+        this.ordersMaintenanceService.setListArgs(`contract=${this.pk}`)
+        const maintenanceOrdersData = await this.ordersMaintenanceService.list()
+        this.maintenanceOrders = maintenanceOrdersData.results
+
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)

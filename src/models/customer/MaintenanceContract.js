@@ -45,4 +45,4 @@ class MaintenanceContractService extends BaseModel {
 const maintenanceContractService = new MaintenanceContractService()
 
 export default maintenanceContractService
-export {MaintenanceContractModel}
+export {MaintenanceContractModel, MaintenanceContractService}
