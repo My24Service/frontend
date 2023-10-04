@@ -92,6 +92,7 @@ import { OrderSalesService } from '../../models/orders/OrderSales.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
+import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderFilters from "../../components/OrderFilters";
 import Pagination from "../../components/Pagination.vue"

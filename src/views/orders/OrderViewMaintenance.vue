@@ -191,6 +191,165 @@
             <b-link class="px-1" @click="openWorkorder()" target="_blank">
               {{ $trans('Order') }} {{ order.order_id }}
             </b-link>
+          </b-col>
+      </b-row>
+      <b-row class="my-2" v-if="order.workorder_pdf_url">
+          <b-col cols="2"><strong>{{ $trans('Download PDF') }}</strong></b-col>
+          <b-col cols="9">
+            <b-link class="px-1" :href="order.workorder_pdf_url" target="_blank">
+              {{ $trans('Order') }} {{ order.order_id }} |{{ order.workorder_pdf_url }}|
+            </b-link>
+          </b-col>
+      </b-row>
+      <b-row class="my-2" v-if="order.workorder_documents.length > 0">
+        <b-col cols="12">
+          <h4>{{ $trans('Workorder documents') }}</h4>
+          <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents" responsive="sm">
+            <template #cell(url)="data">
+              <b-link class="px-1" :href="data.item.url" target="_blank">
+                {{ $trans('Order') }} {{ order.order_id }}
+              </b-link>
+            </template>
+          </b-table>
+        </b-col>
+      </b-row>
+      <b-row class="my-2" v-if="order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
+        <b-col cols="12">
+          <h4>{{ $trans('Workorder documents partner') }}</h4>
+          <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents_partners" responsive="sm">
+            <template #cell(url)="data">
+              <b-link class="px-1" :href="data.item.url" target="_blank">
+                {{ $trans('Order') }} {{ order.order_id }}
+              </b-link>
+            </template>
+          </b-table>
+        </b-col>
+      </b-row>
+      <b-row v-if="order.reported_codes_extra_data.length">
+        <b-col cols="12">
+          <h4>{{ $trans('Reported extra text') }}</h4>
+          <b-table
+            borderless
+            small
+            id="extra-data-table"
+            :fields="extraDataFields"
+            :items="order.reported_codes_extra_data"
+            responsive="sm"
+          ></b-table>
+        </b-col>
+      </b-row>
+      <b-row v-if="order.invoices.length">
+        <hr/>
+        <b-col cols="12">
+          <h4>{{ $trans('Invoices') }}</h4>
+          <b-container>
+            <b-row v-for="invoice of order.invoices" :key="invoice.uuid">
+              <b-col cols="12">
+                <router-link :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}">
+                  {{ $trans('Invoice') }} {{ invoice.invoice_id }}
+                </router-link><br/>
+              </b-col>
+            </b-row>
+          </b-container>
+        </b-col>
+      </b-row>
+      <b-row v-if="hasBranches">
+        <hr/>
+        <b-col cols="12">
+          <div class="purchase-invoices-table">
+            <h4>{{ $trans('Purchase invoices') }}</h4>
+            <b-table
+              id="purchase-invoices-table"
+              small
+              :busy='isLoading'
+              :fields="purchaseInvoiceFields"
+              :items="order.purchaseInvoices"
+              responsive="md"
+              class="data-table"
+              sort-icon-left
+            >
+              <template #head(icons)="">
+                <div class="float-right">
+                  <b-button-toolbar>
+                    <b-button-group class="mr-1">
+                      <IconLinkPlus
+                        type="th"
+                        :method="addPurchaseInvoice"
+                        :title="$trans('New purchase invoice')"
+                      />
+                    </b-button-group>
+                  </b-button-toolbar>
+                </div>
+              </template>
+              <template #cell(vat)="data">
+                {{ data.item.vat_dinero.toFormat('$0.00') }}
+              </template>
+              <template #cell(total)="data">
+                {{ data.item.total_dinero.toFormat('$0.00') }}
+              </template>
+              <template #cell(icons)="data">
+                <div class="h2 float-right">
+                  <IconLinkDelete
+                    v-bind:title="$trans('Delete')"
+                    v-bind:method="function() { showDeletePurchaseInvoiceModal(data.item.id) }"
+                  />
+                </div>
+              </template>
+            </b-table>
+
+          </div>
+        </b-col>
+      </b-row>
+      <footer class="modal-footer">
+        <b-button
+          v-if="!past && !isCustomer && !isBranchEmployee"
+          id="recreateWorkorderPdfButtonGotenberg"
+          @click="recreateWorkorderPdfGotenberg"
+          :disabled="buttonDisabled"
+          class="btn btn-secondary"
+          type="button"
+          variant="secondary"
+        >
+          <b-spinner small v-if="isGeneratingPDF"></b-spinner>
+          {{ $trans('re-generate PDF (new)') }}
+
+          </b-button>
+          <b-link class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+            <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+          </b-link>
+        </footer>
+      </div>
+      <hr>
+      <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
+        <b-spinner medium></b-spinner>
+      </div>
+      <iframe :src="this.workorderURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
+      <template #modal-footer="{ ok }">
+          <!-- Emulate built in modal footer ok and cancel button actions -->
+          <b-button size="sm" @click="ok()" variant="primary">
+            close
+          </b-button>
+      </template>
+    
+    <div class="flex-columns wrap">
+      <div class="panel col-1-3">
+        <h3>
+          <span><strong>{{ order.order_type }}</strong> <br><small>{{ order.order_name }}</small></span>
+        </h3>
+        <dl>
+          <dt>Status</dt>
+          <dd>{{ order.last_status }}</dd>
+          <dt>Dates</dt>
+          <dd>{{ order.order_date }}</dd>
+          <dt>Service &numero;</dt>
+          <dd>{{ order.service_number }}</dd>
+          <dt>Reference</dt>
+          <dd>{{ order.order_reference }}</dd>
+          <dt>Workorder {{  order.order_id }}</dt>
+          <dd>
+            <b-link class="" @click.prevent="showWorkorderDialog()" target="_blank">
+              <b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}
+            </b-link>
             &nbsp;&nbsp;
             <b-link class="" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
               <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
