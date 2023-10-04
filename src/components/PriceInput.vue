@@ -70,11 +70,18 @@ export default {
       return this.v$.$invalid
     },
     currencyCode() {
+      if (!this.dinero) {
+        return
+      }
+
       if (this.dinero.getCurrency() === 'EUR') {
         return '€'
       }
       if (this.dinero.getCurrency() === 'USD') {
         return '$'
+      }
+      if (this.dinero.getCurrency() === 'GBP') {
+        return '£'
       }
       throw `Unknown currency: ${this.dinero.getCurrency()}`
     }
@@ -86,6 +93,10 @@ export default {
   },
   methods: {
     setPrice(priceDecimal) {
+      if (!this.currency) {
+        return
+      }
+
       this.dinero = toDinero(priceDecimal, this.currency)
       const parts = this.dinero.toFormat('0.00').split('.')
       this.number = parts[0]

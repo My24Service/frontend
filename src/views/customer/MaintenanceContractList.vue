@@ -52,9 +52,16 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(sum_tariffs)="data">
+          <span v-if="data.item.sum_tariffs_dinero">
+            {{ data.item.sum_tariffs_dinero.toFormat('$0.00') }}
+          </span>
+        </template>
         <template #cell(name)="data">
-          <router-link :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}">
-            {{ data.item.name }} 
+          <router-link :to="{name: 'maintenance-contract-view', params: {pk: data.item.id}}">
+            <span v-if="data.item.name">
+              {{ data.item.name }}
+            </span>
           </router-link>
         </template>
         <template #cell(totals)="data">
@@ -82,18 +89,18 @@
           </div>
         </template>
       </b-table>
+    
+      <Pagination
+        v-if="!isLoading"
+        :model="this.maintenanceContractService"
+        :model_name="$trans('Contract')"
+      />
     </div>
-
-    <Pagination
-      v-if="!isLoading"
-      :model="this.model"
-      :model_name="$trans('Contract')"
-    />
   </div>
 </template>
 
 <script>
-import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
+import maintenanceContractService from '../../models/customer/MaintenanceContract.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -123,28 +130,29 @@ export default {
     return {
       customer: null,
       searchQuery: null,
-      model: maintenanceContractModel,
       isLoading: false,
       maintenanceContracts: [],
       maintenanceContractFields: [
         {key: 'name', label: this.$trans('Contract name'), sortable: true},
         {key: 'customer_view_name', label: this.$trans('Customer'), sortable: true},
-        {key: 'contract_value', label: this.$trans('Contract value'), sortable: true},
+        {key: 'sum_tariffs', label: this.$trans('Contract value'), sortable: true},
         {key: 'remarks', label: this.$trans('Remarks'), sortable: true},
         {key: 'totals', label: this.$trans('Totals'), sortable: true},
-        {key: 'icons', label: ''}
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'icons'}
       ],
+      maintenanceContractService,
     }
   },
-  created() {
-    this.model.currentPage = this.$route.query.page || 1
-    this.loadData()
+  async created() {
+    this.maintenanceContractService.currentPage = this.$route.query.page || 1
+    await this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.maintenanceContractService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -157,7 +165,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.pk)
+        await this.maintenanceContractService.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -170,9 +178,11 @@ export default {
       this.isLoading = true
 
       try {
-        this.model.setListArgs('customer=')
-        const data = await this.model.list()
-        this.maintenanceContracts = data.results
+        const data = await this.maintenanceContractService.list()
+        this.maintenanceContracts = data.results.map(
+          (m) => new this.maintenanceContractService.model(
+            {...m, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
+          ))
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)

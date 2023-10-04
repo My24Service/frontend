@@ -230,30 +230,45 @@
                 size="sm"
                 v-model="engineer.engineer.cost_price"></b-form-input>
             </b-form-group>
+          
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Prefered location')"
-              label-for="engineer_prefered_location">
+              v-bind:label="$trans('Hourly rate')"
+              label-for="engineer_hourly_rate"
+            >
+              <PriceInput
+                v-model="engineer.engineer.hourly_rate"
+                :currency="engineer.engineer.hourly_rate_currency"
+                @priceChanged="(val) => engineer.engineer.setHourlyRate(val)"
+              />
+            </b-form-group>
+          
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Preferred location')"
+              label-for="engineer_preferred_location"
+            >
               <b-form-select
-                id="engineer_prefered_location"
-                v-model="engineer.engineer.prefered_location"
+                id="engineer_preferred_location"
+                v-model="engineer.engineer.preferred_location"
                 :options="locations"
                 size="sm"
                 value-field="id"
                 text-field="name"></b-form-select>
               <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.engineer.engineer.prefered_location.$error : null">
-                {{ $trans('Please select a prefered location') }}
+                :state="isSubmitClicked ? !v$.engineer.engineer.preferred_location.$error : null">
+                {{ $trans('Please select a preferred location') }}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Or create new location')"
-              label-for="engineer_prefered_location_new">
+              label-for="engineer_preferred_location_new"
+            >
               <div>
                 <b-form-input
                   style="width: 140px !important; float:left !important;"
-                  id="engineer_prefered_location_new"
+                  id="engineer_preferred_location_new"
                   size="sm"
                   v-model="newLocationName"></b-form-input>
                 <span style="float:left !important;">&nbsp;</span>
@@ -280,12 +295,16 @@ import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
 import { usernameExists } from '../../models/helpers.js'
-import engineerModel from '../../models/company/UserEngineer.js'
+import engineerModel, {EngineerUserModel} from '../../models/company/UserEngineer.js'
 import stockLocationModel from '../../models/inventory/StockLocation.js'
+import PriceInput from "../../components/PriceInput";
 
 export default {
   setup() {
     return { v$: useVuelidate() }
+  },
+  components: {
+    PriceInput,
   },
   props: {
     pk: {
@@ -310,7 +329,7 @@ export default {
           email
         },
         engineer: {
-          prefered_location: {
+          preferred_location: {
             required,
           }
         }
@@ -386,6 +405,7 @@ export default {
     }
   },
   async created() {
+    this.isLoading = true
     this.countries = await this.$store.dispatch('getCountries')
 
     await this.getLocations()
@@ -393,7 +413,9 @@ export default {
     if (!this.isCreate) {
       await this.loadData()
     } else {
-      this.engineer = engineerModel.getFields()
+      const engineerData = engineerModel.getFields()
+      this.engineer = new EngineerUserModel(engineerData)
+
     }
     this.isLoading = false
   },
@@ -417,7 +439,7 @@ export default {
         stockLocation.name = this.newLocationName
         const newLocation = await stockLocationModel.insert(stockLocation)
         await this.getLocations()
-        this.engineer.engineer.prefered_location = newLocation.id
+        this.engineer.engineer.preferred_location = newLocation.id
         this.newLocationName = ""
         this.isLoading = false
       } catch(error) {
@@ -500,7 +522,8 @@ export default {
       this.isLoading = true
 
       try {
-        this.engineer = await engineerModel.detail(this.pk)
+        const engineerData = await engineerModel.detail(this.pk)
+        this.engineer = new EngineerUserModel(engineerData)
         this.orgUsername = this.engineer.username
         this.isLoading = false
       } catch(error) {

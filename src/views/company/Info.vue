@@ -21,6 +21,7 @@
         </b-button-toolbar>
       </div>
     </header>
+
     <div class="page-detail">
       <b-form class="flex-columns">
         <div class="panel col-1-3">  
@@ -83,6 +84,31 @@
                 readonly
                 size="sm"
                 v-model="member.companycode"
+              ></b-form-input>
+            </b-form-group>
+          
+            <b-form-group
+              label-size="sm"
+              label-cols="3"
+              v-bind:label="$trans('Chamber of commerce')"
+              label-for="member_chamber_of_commerce"
+            >
+              <b-form-input
+                id="member_chamber_of_commerce"
+                size="sm"
+                v-model="member.chamber_of_commerce"
+              ></b-form-input>
+            </b-form-group>
+            <b-form-group
+              label-size="sm"
+              label-cols="3"
+              v-bind:label="$trans('VAT number')"
+              label-for="member_vat_number"
+            >
+              <b-form-input
+                id="member_vat_number"
+                size="sm"
+                v-model="member.vat_number"
               ></b-form-input>
             </b-form-group>
 

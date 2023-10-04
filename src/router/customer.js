@@ -10,9 +10,7 @@ import DocumentForm from '../views/customer/DocumentForm.vue'
 
 import MaintenanceContractList from '../views/customer/MaintenanceContractList.vue'
 import MaintenanceContractForm from '../views/customer/MaintenanceContractForm.vue'
-
-import MaintenanceEquipmentList from '../views/customer/MaintenanceEquipmentList.vue'
-import MaintenanceEquipmentForm from '../views/customer/MaintenanceEquipmentForm.vue'
+import MaintenanceContractView from '../views/customer/MaintenanceContractView.vue'
 
 import EquipmentList from '../views/equipment/EquipmentList.vue'
 import EquipmentForm from '../views/equipment/EquipmentForm.vue'
@@ -165,36 +163,11 @@ export default [
         'app-subnav': true
       },
     },
-    // maintenance equipment
     {
-      name: 'maintenance-equipment',
-      path: '/customers/maintenance-equipment/:contractPk',
+      name: 'maintenance-contract-view',
+      path: '/customers/maintenance-contracts/view/:pk',
       components: {
-        'app-content': MaintenanceEquipmentList,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'maintenance-equipment-add',
-      path: '/customers/maintenance-equipment/form',
-      components: {
-        'app-content': MaintenanceEquipmentForm,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'maintenance-equipment-edit',
-      path: '/customers/maintenance-equipment/form/:pk',
-      components: {
-        'app-content': MaintenanceEquipmentForm,
+        'app-content': MaintenanceContractView,
         'app-subnav': SubNavCustomers
       },
       props: {

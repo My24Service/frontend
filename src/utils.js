@@ -220,9 +220,10 @@ let componentMixin = {
 }
 
 function toDinero(priceDecimal, currency) {
-  if (currency === 'EUR' || currency === 'USD') {
-    const amount = priceDecimal * 100
-    // console.log('toDinero amount=', amount)
+  if (currency === 'EUR' || currency === 'USD' || currency === 'GBP') {
+    let amount = priceDecimal * 100
+    amount = parseInt(amount.toFixed(0))
+    // console.log({ priceDecimal, amount, currency })
     if (isNaN(amount)) {
       throw `invalid input: ${priceDecimal}`
     }

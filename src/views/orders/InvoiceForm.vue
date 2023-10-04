@@ -2,412 +2,543 @@
   <b-overlay :show="isLoading" rounded="sm">
     <div class="container app-form">
       <b-form v-if="!isLoading">
-        <div v-if="isCreate">
-          <h2>{{ $trans('New invoice') }}</h2>
+        <h2>{{ $trans('New invoice') }}</h2>
+
+        <Collapse
+          :title="$trans('Manage prices')"
+        >
+          <b-container fluid>
+            <h3>{{ $trans("Materials") }}</h3>
+            <b-row>
+              <b-col cols="4" class="header">
+                {{ $trans("Name") }}
+              </b-col>
+              <b-col cols="3" class="header">
+                {{ $trans("Identifier") }}
+              </b-col>
+              <b-col cols="2" class="header ml-3">
+                {{ $trans("Purchase price ex.") }}
+              </b-col>
+              <b-col cols="2" class="header">
+                {{ $trans("Selling price ex.") }}
+              </b-col>
+              <b-col cols="1" />
+            </b-row>
+            <b-row v-for="material in material_models" :key="material.id">
+              <b-col cols="4">
+                {{ material.name }}
+              </b-col>
+              <b-col cols="3">
+                {{ material.identifier }}
+              </b-col>
+              <b-col cols="2">
+                <PriceInput
+                  v-model="material.price_purchase_ex"
+                  :currency="default_currency"
+                  @priceChanged="(val) => material.setPurchasePrice(val)"
+                />
+              </b-col>
+              <b-col cols="2">
+                <PriceInput
+                  :ref="`selling_price_${material.id}`"
+                  v-model="material.price_selling_ex"
+                  :currency="default_currency"
+                  @priceChanged="(val) => material.setSellingPrice(val)"
+                />
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-button
+                    @click="() => { updateMaterial(material.id) }"
+                    class="btn btn-danger update-button"
+                    size="sm"
+                    type="button"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
+                  >
+                    {{ $trans("Update") }}
+                  </b-button>
+                </p>
+              </b-col>
+            </b-row>
+          </b-container>
+
+          <hr/>
+
+          <b-container fluid>
+            <h3>{{ $trans("Engineers") }}</h3>
+            <b-row>
+              <b-col cols="9" class="header">
+                {{ $trans("Name") }}
+              </b-col>
+              <b-col cols="2" class="header ml-3">
+                {{ $trans("Hourly price") }}
+              </b-col>
+              <b-col cols="1" />
+            </b-row>
+            <b-row v-for="user in engineer_models" :key="user.id">
+              <b-col cols="9">
+                {{ user.full_name }}
+              </b-col>
+              <b-col cols="2">
+                <PriceInput
+                  v-model="user.engineer.hourly_rate"
+                  :currency="default_currency"
+                  @priceChanged="(val) => user.engineer.setHourlyRate(val)"
+                />
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-button
+                    @click="() => { updateEngineer(user.id) }"
+                    class="btn btn-danger update-button"
+                    size="sm"
+                    type="button"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
+                  >
+                    {{ $trans("Update") }}
+                  </b-button>
+                </p>
+              </b-col>
+            </b-row>
+          </b-container>
+
+          <hr/>
+
+          <b-container fluid>
+            <h3>{{ $trans("Prices for customer") }}</h3>
+            <b-row>
+              <b-col cols="9" class="header">
+                {{ $trans("Name") }}
+              </b-col>
+              <b-col cols="2" class="header ml-3">
+                {{ $trans("Price") }}
+              </b-col>
+              <b-col cols="1" />
+            </b-row>
+            <b-row>
+              <b-col cols="9">
+                {{ $trans("Hourly rate engineer") }}
+              </b-col>
+              <b-col cols="2">
+                <PriceInput
+                  v-model="customer.hourly_rate_engineer"
+                  :currency="default_currency"
+                  @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
+                />
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-button
+                    @click="() => { updateCustomer() }"
+                    class="btn btn-danger update-button"
+                    size="sm"
+                    type="button"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
+                  >
+                    {{ $trans("Update") }}
+                  </b-button>
+                </p>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="9">
+                {{ $trans("Call out costs") }}
+              </b-col>
+              <b-col cols="2">
+                <PriceInput
+                  v-model="customer.call_out_costs"
+                  :currency="default_currency"
+                  @priceChanged="(val) => customer.setCallOutCosts(val)"
+                />
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-button
+                    @click="() => { updateCustomer() }"
+                    class="btn btn-danger update-button"
+                    size="sm"
+                    type="button"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
+                  >
+                    {{ $trans("Update") }}
+                  </b-button>
+                </p>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="9">
+                {{ $trans("Price/KM") }}
+              </b-col>
+              <b-col cols="2">
+                <PriceInput
+                  v-model="customer.price_per_km"
+                  :currency="default_currency"
+                  @priceChanged="(val) => customer.setPricePerKm(val)"
+                />
+              </b-col>
+              <b-col cols="1">
+                <p class="flex">
+                  <b-button
+                    @click="() => { updateCustomer() }"
+                    class="btn btn-danger update-button"
+                    size="sm"
+                    type="button"
+                    variant="danger"
+                    :title="$trans('This will update the API')"
+                  >
+                    {{ $trans("Update") }}
+                  </b-button>
+                </p>
+              </b-col>
+            </b-row>
+          </b-container>
+        </Collapse>
+
+        <hr/>
+
+        <div v-if="used_materials.length > 0">
+          <MaterialsComponent
+            :order_pk="order_pk"
+            :customer="customer"
+            :material_models="material_models"
+            :engineer_models="engineer_models"
+            :used_materials="used_materials"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
         </div>
 
-        <b-container fluid>
-          <h3>{{ $trans("Materials") }}</h3>
-          <b-row>
-            <b-col cols="2" class="header">
-              {{ $trans("Name") }}
-            </b-col>
-            <b-col cols="2" class="header">
-              {{ $trans("Identifier") }}
-            </b-col>
-            <b-col cols="3" class="header ml-3">
-              {{ $trans("Purchase price ex.") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Margin") }}
-            </b-col>
-            <b-col cols="3" class="header">
-              {{ $trans("Selling price ex.") }}
-            </b-col>
-            <b-col cols="1" />
-          </b-row>
-          <b-row v-for="material in material_models" :key="material.id">
-            <b-col cols="2">
-              {{ material.name }}
-            </b-col>
-            <b-col cols="2">
-              {{ material.identifier }}
-            </b-col>
-            <b-col cols="3">
-              <b-container>
-                <b-row>
-                  <b-col cols="10">
-                    <PriceInput
-                      v-model="material.price_purchase_ex"
-                      :currency="material.price_purchase_ex_currency"
-                      @priceChanged="(val) => material.setPurchasePrice(val) && updateMaterialTotals()"
-                    />
-                  </b-col>
-                  <b-col cols="2">
-                  </b-col>
-                </b-row>
-              </b-container>
-            </b-col>
-            <b-col cols="1">
-              <p class="flex pl-3">
-                <b-form-input
-                  v-model="material.margin_perc"
-                  size="sm"
-                  class="input-margin"
-                ></b-form-input>
-                <span class="percentage-container">%</span>
-              </p>
-            </b-col>
-            <b-col cols="3">
-              <b-container>
-                <b-row>
-                  <b-col cols="10">
-                    <PriceInput
-                      :ref="`selling_price_${material.id}`"
-                      v-model="material.price_selling_ex"
-                      :currency="material.price_selling_ex_currency"
-                      @priceChanged="(val) => material.setSellingPrice(val) && updateMaterialTotals()"
-                    />
-                  </b-col>
-                  <b-col cols="2">
-                    <p class="flex">
-                      <span class="value-container">
-                        <b-link
-                          @click="() => { material.recalcSelling() && updateMaterialTotals() }"
-                          :title="`${$trans('Recalculate selling price with margin')}`"
-                        >
-                          <b-icon-arrow-repeat aria-hidden="true"></b-icon-arrow-repeat>
-                        </b-link>
-                      </span>
-                    </p>
-                  </b-col>
-                </b-row>
-              </b-container>
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
-                <b-button
-                  @click="() => { updateMaterial(material.id) }"
-                  class="btn btn-primary update-button"
-                  size="sm"
-                  type="button"
-                  variant="primary"
-                >
-                  {{ $trans("Update") }}
-                </b-button>
-              </p>
-            </b-col>
-          </b-row>
-        </b-container>
+        <div v-if="activity_totals.work_total !== '00:00'">
+          <HoursComponent
+            :order_pk="order_pk"
+            :type="COST_TYPE_WORK_HOURS"
+            :hours_total="activity_totals.work_total"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
+
+        <div v-if="activity_totals.travel_total !== '00:00'">
+          <HoursComponent
+            :order_pk="order_pk"
+            :type="COST_TYPE_TRAVEL_HOURS"
+            :hours_total="activity_totals.travel_total"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
+
+        <div v-if="activity_totals.distance_total > 0">
+          <DistanceComponent
+            :order_pk="order_pk"
+            :customer="customer"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :distance_total="activity_totals.distance_total"
+            :invoice_default_price_per_km="invoice_default_price_per_km"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
+
+        <div v-if="activity_totals.extra_work_total !== '00:00'">
+          <HoursComponent
+            :order_pk="order_pk"
+            :type="COST_TYPE_EXTRA_WORK"
+            :hours_total="activity_totals.extra_work_total"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
+
+        <div v-if="activity_totals.actual_work_total !== '00:00'">
+          <HoursComponent
+            :order_pk="order_pk"
+            :type="COST_TYPE_ACTUAL_WORK"
+            :hours_total="activity_totals.actual_work_total"
+            :user_totals="activity_totals.user_totals"
+            :engineer_models="engineer_models"
+            :customer="customer"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
+            :invoiceLinesParent="invoiceLineService.collection"
+          />
+          <hr/>
+        </div>
+
+        <CallOutCostsComponent
+          :order_pk="order_pk"
+          :customer="customer"
+          :invoice_default_call_out_costs="invoice_default_call_out_costs"
+          @invoiceLinesCreated="invoiceLinesCreated"
+          @emptyCollectionClicked="emptyCollectionClicked"
+          :invoiceLinesParent="invoiceLineService.collection"
+        />
 
         <hr/>
 
-        <b-container fluid>
-          <h3>{{ $trans("Engineers") }}</h3>
-          <b-row>
-            <b-col cols="9" class="header">
-              {{ $trans("Name") }}
-            </b-col>
-            <b-col cols="2" class="header ml-3">
-              {{ $trans("Hourly price") }}
-            </b-col>
-            <b-col cols="1" />
-          </b-row>
-          <b-row v-for="user in engineer_models" :key="user.id">
-            <b-col cols="9">
-              {{ user.full_name }}
-            </b-col>
-            <b-col cols="2">
-              <PriceInput
-                v-model="user.engineer.hourly_rate"
-                :currency="user.engineer.hourly_rate_currency"
-                @priceChanged="(val) => user.engineer.setHourlyRate(val) && updateActivityTotals()"
-              />
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
-                <b-button
-                  @click="() => { updateEngineer(user.id) }"
-                  class="btn btn-primary update-button"
-                  size="sm"
-                  type="button"
-                  variant="primary"
-                >
-                  {{ $trans("Update") }}
-                </b-button>
-              </p>
-            </b-col>
-          </b-row>
-        </b-container>
+        <div class="invoice-form-main">
 
-        <hr/>
+          <CustomerDetail
+            :customer="customer"
+          />
 
-        <b-container fluid>
-          <h3>{{ $trans("Prices for customer") }}</h3>
-          <b-row>
-            <b-col cols="9" class="header">
-              {{ $trans("Name") }}
-            </b-col>
-            <b-col cols="2" class="header ml-3">
-              {{ $trans("Price") }}
-            </b-col>
-            <b-col cols="1" />
-          </b-row>
-          <b-row>
-            <b-col cols="9">
-              {{ $trans("Hourly price engineer") }}
-            </b-col>
-            <b-col cols="2">
-              <PriceInput
-                v-model="customer.hourly_rate_engineer"
-                :currency="customer.hourly_rate_engineer_currency"
-                @priceChanged="(val) => customer.setHourlyRateEngineer(val) && updateActivityTotals()"
-              />
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
-                <b-button
-                  @click="() => { updateCustomer() }"
-                  class="btn btn-primary update-button"
-                  size="sm"
-                  type="button"
-                  variant="primary"
-                >
-                  {{ $trans("Update") }}
-                </b-button>
-              </p>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="9">
-              {{ $trans("Call out costs") }}
-            </b-col>
-            <b-col cols="2">
-              <PriceInput
-                v-model="customer.call_out_costs"
-                :currency="customer.call_out_costs_currency"
-                @priceChanged="(val) => customer.setCallOutCosts(val) && updateActivityTotals()"
-              />
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
-                <b-button
-                  @click="() => { updateCustomer() }"
-                  class="btn btn-primary update-button"
-                  size="sm"
-                  type="button"
-                  variant="primary"
-                >
-                  {{ $trans("Update") }}
-                </b-button>
-              </p>
-            </b-col>
-          </b-row>
-        </b-container>
+          <h4>{{ $trans('Invoice data')}} </h4>
 
-        <hr/>
-
-        <b-container fluid>
-          <h3>{{ $trans("Used materials") }}</h3>
           <b-row>
-            <b-col cols="2" class="header">
-              {{ $trans("Engineer") }}
-            </b-col>
-            <b-col cols="2" class="header">
-              {{ $trans("Material") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Amount") }}
-            </b-col>
-            <b-col cols="3" class="header">
-              {{ $trans("Use price") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Margin") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("VAT type") }}
-            </b-col>
-            <b-col cols="2" />
-          </b-row>
-          <b-row v-for="material in used_materials" :key="material.id" class="material_row">
-            <b-col cols="2">
-              {{ material.full_name }}
-            </b-col>
-            <b-col cols="2">
-              {{ material.name }}
-            </b-col>
-            <b-col cols="1">
-              {{ material.amount }}
-            </b-col>
-            <b-col cols="3">
-              <b-form-radio-group
-                @change="updateMaterialTotals()"
-                v-model="material.usePrice"
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Reference')"
+                label-for="invoice_reference"
               >
-                <b-form-radio value="purchase">
-                  Pur. {{ getMaterialPriceFor(material, "purchase").toFormat('$0.00') }}
-                </b-form-radio>
-
-                <b-form-radio value="selling">
-                  Sel. {{ getMaterialPriceFor(material, "selling").toFormat('$0.00') }}
-                </b-form-radio>
-
-                <b-form-radio value="other">
-                  <p class="flex">
-                    {{ $trans("Other") }}:&nbsp;&nbsp;
-                    <PriceInput
-                      v-model="material.price_purchase_ex_other"
-                      :currency="material.price_purchase_ex_other_currency"
-                      @priceChanged="(val) => setPurchasePriceOther(val, material.material_id) && updateMaterialTotals()"
-                    />
-                  </p>
-                </b-form-radio>
-              </b-form-radio-group>
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
                 <b-form-input
-                  @blur="updateMaterialTotals()"
-                  v-model="material.margin_perc"
+                  v-model="invoice.reference"
+                  id="invoice_reference"
                   size="sm"
-                  class="input-margin"
                 ></b-form-input>
-                <span class="percentage-container">%</span>
-              </p>
+              </b-form-group>
             </b-col>
-            <b-col cols="1">
-              <b-form-select
-                @change="updateMaterialTotals"
-                :value="invoice_default_vat"
-                v-model="material.vat_type"
-                :options="vat_types" size="sm"
-              ></b-form-select>
-            </b-col>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="material.total"
-                :margin="material.margin"
-                :vat="material.vat"
-              />
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="10"/>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="materialsTotal"
-                :show-margin="false"
-                :vat="materialsTotalVAT"
-              />
-            </b-col>
-          </b-row>
-        </b-container>
-
-        <b-container fluid>
-          <h3>{{ $trans("Activity") }}</h3>
-          <b-row>
-            <b-col cols="3" class="header">
-              {{ $trans("Engineer") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Work hours") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Travel hours") }}
-            </b-col>
-            <b-col cols="3" class="header">
-              {{ $trans("Engineer rate") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("Margin") }}
-            </b-col>
-            <b-col cols="1" class="header">
-              {{ $trans("VAT type") }}
-            </b-col>
-            <b-col cols="2" />
-          </b-row>
-          <b-row v-for="activity in activity_user_totals" :key="activity.user_id" class="material_row">
-            <b-col cols="3">
-              {{ getFullname(activity.user_id) }}
-            </b-col>
-            <b-col cols="1">
-              {{ activity.work_total }}
-            </b-col>
-            <b-col cols="1">
-              {{ activity.travel_total }}
-            </b-col>
-            <b-col cols="3">
-              <b-form-radio-group
-                @change="updateActivityTotals()"
-                v-model="activity.usePrice"
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Term of payment (days)')"
+                label-for="invoice_term_of_payment_days"
               >
-                <b-form-radio value="engineer">
-                  Engineer {{ getEngineerRateDinero(activity.user_id).toFormat("$0.00") }}
-                </b-form-radio>
-
-                <b-form-radio value="customer">
-                  Customer
-                  <span v-if="customer.hourly_rate_engineer_dinero">
-                    {{ customer.hourly_rate_engineer_dinero.toFormat("$0.00") }}
-                  </span>
-                  <span v-if="!customer.hourly_rate_engineer_dinero">
-                    {{ $trans('not set') }}
-                  </span>
-                </b-form-radio>
-
-                <b-form-radio value="other">
-                  <p class="flex">
-                    {{ $trans("Other") }}:&nbsp;&nbsp;
-                    <PriceInput
-                      v-model="activity.engineer_rate_other"
-                      :currency="activity.engineer_rate_other_currency"
-                      @priceChanged="(val) => setEngineerPriceOther(val, activity.user_id) && updateActivityTotals()"
-                    />
-                  </p>
-                </b-form-radio>
-              </b-form-radio-group>
-            </b-col>
-            <b-col cols="1">
-              <p class="flex">
                 <b-form-input
-                  @blur="updateActivityTotals()"
-                  v-model="activity.margin_perc"
+                  id="invoice_term_of_payment_days"
                   size="sm"
-                  class="input-margin"
+                  v-model="invoice.term_of_payment_days"
                 ></b-form-input>
-                <span class="percentage-container">%</span>
-              </p>
+              </b-form-group>
             </b-col>
-            <b-col cols="1">
-              <b-form-select
-                @change="updateActivityTotals"
-                :value="invoice_default_vat"
-                v-model="activity.vat_type"
-                :options="vat_types" size="sm"
-              ></b-form-select>
-            </b-col>
-            <b-col cols="2">
-              <InvoiceFormTotals
-                :total="activity.total"
-                :margin="activity.margin"
-                :vat="activity.vat"
-                />
+            <b-col cols="8" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Description')"
+                label-for="invoice_description"
+              >
+                <b-form-textarea
+                  id="invoice_description"
+                  v-model="invoice.description"
+                  rows="1"
+                ></b-form-textarea>
+              </b-form-group>
             </b-col>
           </b-row>
+
+          <h4>{{ $trans('Invoice lines')}} </h4>
+
+          <div class="invoice-lines" v-if="invoiceLineService.collection.length">
+            <b-row>
+              <b-col cols="3" class="header">
+                {{ $trans("Description") }}
+              </b-col>
+              <b-col cols="2" class="header">
+                {{ $trans("Amount") }}
+              </b-col>
+              <b-col cols="2" class="header">
+                {{ $trans("Price") }}
+              </b-col>
+              <b-col cols="2" class="header">
+                {{ $trans("Total") }}
+              </b-col>
+              <b-col cols="2" class="header">
+                {{ $trans("VAT") }}
+              </b-col>
+              <b-col cols="1">
+
+              </b-col>
+            </b-row>
+
+            <b-row v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id">
+              <b-col cols="3">
+                <b-form-textarea
+                  v-model="invoiceLine.description"
+                  rows="2"
+                ></b-form-textarea>
+              </b-col>
+              <b-col cols="2">
+                {{ invoiceLine.amount }}
+              </b-col>
+              <b-col cols="2">
+                {{ invoiceLine.price_text }}
+              </b-col>
+              <b-col cols="2">
+                {{ invoiceLine.total_dinero.toFormat('$0.00') }}
+              </b-col>
+              <b-col cols="2">
+                {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
+              </b-col>
+              <b-col cols="1" v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL">
+                <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
+                  <b-icon-trash></b-icon-trash>
+                </b-link>
+              </b-col>
+            </b-row>
+
+            <b-row v-if="invoiceLinesHaveTotals">
+              <b-col>
+                <div class="float-right">
+                  <i>* {{ $trans("Prices are combined in totals") }}</i>
+                </div>
+              </b-col>
+            </b-row>
+          </div>
+
+          <div class="new-invoice-line" v-if="invoiceLineService.editItem">
+            <b-container>
+              <b-row>
+                <b-col cols="3" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Description')"
+                    label-for="new-invoice-line-description"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-description"
+                      size="sm"
+                      v-model="invoiceLineService.editItem.description"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Amount')"
+                    label-for="new-invoice-line-amount"
+                  >
+                    <b-form-input
+                      @blur="invoiceLineAmountChanged"
+                      id="new-invoice-line-amount"
+                      size="sm"
+                      v-model="invoiceLineService.editItem.amount"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Price')"
+                    label-for="new-invoice-line-price"
+                  >
+                    <PriceInput
+                      id="new-invoice-line-price"
+                      v-model="invoiceLineService.editItem.price"
+                      :currency="invoiceLineService.editItem.price_currency"
+                      @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
+                    />
+                  </b-form-group>
+                </b-col>
+                <b-col cols="1" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('VAT type')"
+                    label-for="new-invoice-line-total"
+                  >
+                    <VAT @vatChanged="changeVatTypeInvoiceLine" />
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Total')"
+                    label-for="new-invoice-line-total"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-total"
+                      readonly
+                      :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
+                      size="sm"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('VAT')"
+                    label-for="new-invoice-line-vat"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-vat"
+                      readonly
+                      :value="invoiceLineService.editItem.vat_dinero.toFormat('$0.00')"
+                      size="sm"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+            </b-container>
+
+            <footer class="modal-footer">
+              <b-button
+                v-if="invoiceLineService.isEdit"
+                @click="invoiceService.doEditCollectionItem"
+                class="btn btn-primary"
+                size="sm" type="button"
+                variant="warning"
+                :disabled="!isInvoiceLineValid"
+              >
+                {{ $trans('Edit invoice line') }}
+              </b-button>
+              <b-button
+                v-if="!invoiceLineService.isEdit"
+                @click="addInvoiceLine"
+                class="btn btn-primary"
+                size="sm"
+                type="button"
+                variant="primary"
+                :disabled="!isInvoiceLineValid"
+              >
+                {{ $trans('Add invoice line') }}
+              </b-button>
+            </footer>
+
+          </div>
+
+          <hr/>
+
           <b-row>
-            <b-col cols="10"/>
+            <b-col cols="10">
+              <span class="total-text">{{ $trans('Invoice total') }}</span>
+            </b-col>
             <b-col cols="2">
-              <InvoiceFormTotals
-                :total="activityTotal"
-                :show-margin="false"
-                :vat="activityTotalVAT"
+              <TotalsInputs
+                :total="invoice.total_dinero"
+                :is-final-total="true"
+                :vat="invoice.vat_dinero"
               />
             </b-col>
           </b-row>
-        </b-container>
 
-          <div class="mx-auto">
+        </div>
+
+        <hr/>
+
+        <div class="mx-auto">
           <footer class="modal-footer">
             <b-button @click="cancelForm" type="button" variant="secondary">
               {{ $trans('Cancel') }}</b-button>
@@ -421,184 +552,234 @@
 </template>
 
 <script>
-import invoiceModel from '../../models/orders/Invoice.js'
-import invoiceLineModel from '../../models/orders/InvoiceLine.js'
-import memberModel from "../../models/member/Member";
+import { InvoiceService, InvoiceModel } from '../../models/orders/Invoice.js'
+import { InvoiceLineService } from '../../models/orders/InvoiceLine.js'
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
-import { MaterialModel } from "../../models/inventory/Material";
-import materialService from "../../models/inventory/Material";
-import { RateEngineerUserModel } from "../../models/company/UserEngineer";
-import engineerService from "../../models/company/UserEngineer";
-import customerService from "../../models/customer/Customer";
-import { CustomerModel, CustomerPriceModel } from "../../models/customer/Customer";
-import InvoiceFormTotals from './InvoiceFormTotals';
+import materialService, {MaterialModel} from "../../models/inventory/Material";
+import engineerService, {RateEngineerUserModel} from "../../models/company/UserEngineer";
+import customerService, {CustomerModel, CustomerPriceModel} from "../../models/customer/Customer";
+import Collapse from "../../components/Collapse";
+import invoiceMixin from "./invoice_form/mixin";
+import HoursComponent from "./invoice_form/Hours";
+import DistanceComponent from "./invoice_form/Distance";
+import MaterialsComponent from "./invoice_form/Materials";
+import CallOutCostsComponent from "./invoice_form/CallOutCosts";
+
+import VAT from "./invoice_form/VAT";
+import CustomerDetail from "../../components/CustomerDetail";
+import {
+  COST_TYPE_ACTUAL_WORK,
+  COST_TYPE_EXTRA_WORK,
+  COST_TYPE_TRAVEL_HOURS,
+  COST_TYPE_WORK_HOURS
+} from "../../models/orders/Cost";
+import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
+import {useVuelidate} from "@vuelidate/core";
+import TotalsInputs from "../../components/TotalsInputs";
 
 export default {
   name: 'InvoiceForm',
+  mixins: [invoiceMixin],
   components: {
     PriceInput,
-    InvoiceFormTotals
+    Collapse,
+    HoursComponent,
+    MaterialsComponent,
+    DistanceComponent,
+    CallOutCostsComponent,
+    VAT,
+    CustomerDetail,
+    TotalsInputs,
+  },
+  setup() {
+    return { v$: useVuelidate() }
+  },
+  validations() {
+    return {
+      invoice: {}
+    }
   },
   props: {
     uuid: {
       type: [String],
       default: null
     },
-    pk: {
-      type: [String, Number],
-      default: null
-    }
   },
   data () {
     return {
+      COST_TYPE_WORK_HOURS,
+      COST_TYPE_TRAVEL_HOURS,
+      COST_TYPE_EXTRA_WORK,
+      COST_TYPE_ACTUAL_WORK,
+
       isLoading: false,
-      invoiceLines: [],
-      deletedInvoiceLines: [],
       submitClicked: false,
-      invoice: invoiceModel.getFields(),
+      invoice: new InvoiceModel({
+        total: "0.00",
+        total_currency: this.$store.getters.getDefaultCurrency,
+        vat: "0.00",
+        vat_currency: this.$store.getters.getDefaultCurrency,
+        term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+      }),
       errorMessage: null,
 
-      order: null,
-      member: null,
       invoice_id: null,
-      vat_types: [],
-      default_currency: null,
-      invoice_default_margin: null,
-      invoice_default_hourly_rate: null,
-      invoice_default_vat: null,
+      order_pk: null,
+
+      default_currency: this.$store.getters.getDefaultCurrency,
+      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+
+      invoice_default_partner_hourly_rate: null,
+      invoice_default_partner_hourly_rate_dinero: null,
+
       invoice_default_call_out_costs: null,
 
-      used_materials: [],
-      material_models: [],
-      materialsTotal: null,
-      materialsTotalVAT: null,
-      usePriceOptionsMaterial: [
-        { text: 'Purchase', value: 'purchase' },
-        { text: 'Selling', value: 'selling' },
-      ],
+      invoice_default_price_per_km: null,
 
       engineer_models: [],
 
-      activity: [],
-      activity_user_totals: [],
-      activityTotal: null,
-      activityTotalVAT: null,
-      usePriceOptionsActivity: [
-        { text: 'Customer', value: 'customer' },
-        { text: 'Engineer', value: 'engineer' },
-      ],
+      activity_totals: null,
+      extra_work_totals: null,
+      actual_work_totals: null,
 
-      extra_work: [],
-      extra_work_user_totals: [],
-
-      actual_work: [],
-      actual_work_user_totals: [],
+      material_models: null,
+      used_materials: null,
 
       customerPk: null,
       customer: null,
+
+      invoiceService: new InvoiceService(),
+      invoiceLineService: new InvoiceLineService(),
+      deletedInvoiceLines: [],
+      INVOICE_LINE_TYPE_MANUAL,
     }
   },
   computed: {
-    isCreate() {
-      return !this.pk
+    invoiceLinesHaveTotals() {
+      return this.invoiceLineService.collection.find((line) => line.price_text === '*')
     },
-  },
-  async created() {
-    if (this.isCreate) {
-      this.isLoading = true
-      this.vat_types = await memberModel.getVATTypes()
-      this.invoice = invoiceModel.getFields()
-      const invoiceData = await invoiceModel.getData(this.uuid)
-
-      this.customerPk = invoiceData.customer_pk
-      await this.getCustomer()
-
-      this.order = invoiceData.order
-      this.member = invoiceData.member
-      this.invoice_id = invoiceData.invoice_id
-      this.default_currency = invoiceData.default_currency
-      this.invoice_default_margin = invoiceData.invoice_default_margin
-      this.invoice_default_hourly_rate = invoiceData.invoice_default_hourly_rate
-      this.invoice_default_vat = invoiceData.invoice_default_vat
-      this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
-
-      // materials
-      this.used_materials = invoiceData.used_materials.map((m) => ({
-        ...m,
-        vat_type: this.invoice_default_vat,
-        margin_perc:  this.invoice_default_margin,
-        price_purchase_ex_other: "0.00",
-        price_purchase_ex_other_currency: this.default_currency,
-        price_purchase_ex_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: 'purchase',
-      }))
-
-      this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
-          ...m,
-        margin_perc: this.invoice_default_margin
-      }))
-      this.updateMaterialTotals()
-
-      // activity
-      this.activity = invoiceData.activity
-      this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
-        ...m,
-        margin_perc: this.invoice_default_margin
-      }))
-
-      this.activity_user_totals = invoiceData.activity_totals.map((a) => ({
-        ...a,
-        vat_type: this.invoice_default_vat,
-        margin_perc: this.invoice_default_margin,
-        engineer_rate: this.getEngineerRate(a.user_id),
-        engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
-        engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
-        engineer_rate_other: "0.00",
-        engineer_rate_other_currency: this.default_currency,
-        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: 'engineer',
-      }))
-      this.updateActivityTotals()
-
-      // extra work
-      this.extra_work_user_totals = invoiceData.extra_work_totals.map((a) => ({
-        ...a,
-        vat_type: this.invoice_default_vat,
-        margin_perc: this.invoice_default_margin,
-        engineer_rate: this.getEngineerRate(a.user_id),
-        engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
-        engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
-        engineer_rate_other: "0.00",
-        engineer_rate_other_currency: this.default_currency,
-        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: 'engineer',
-      }))
-
-      // extra work
-      this.actual_work_user_totals = invoiceData.actual_work_totals.map((a) => ({
-        ...a,
-        vat_type: this.invoice_default_vat,
-        margin_perc: this.invoice_default_margin,
-        engineer_rate: this.getEngineerRate(a.user_id),
-        engineer_rate_currency: this.getEngineerRateCurrency(a.user_id),
-        engineer_rate_dinero: this.getEngineerRateDinero(a.user_id),
-        engineer_rate_other: "0.00",
-        engineer_rate_other_currency: this.default_currency,
-        engineer_rate_other_dinero: toDinero("0.00", this.default_currency),
-        usePrice: 'engineer',
-      }))
-
-      this.isLoading = false
-    } else {
-      await this.loadInvoice()
+    isInvoiceLineValid() {
+      return this.invoiceLineService.editItem.description !== null
+        && this.invoiceLineService.editItem.description !== ""
+        && this.invoiceLineService.editItem.amount !== null
+        && this.invoiceLineService.editItem.amount !== ""
     }
   },
+  async created() {
+    this.isLoading = true
+
+    // init new model for manual entry
+    this.invoiceLineService.modelDefaults = {
+      price: '0.00',
+      price_currency: this.$store.getters.getDefaultCurrency,
+      total: '0.00',
+      total_currency: this.$store.getters.getDefaultCurrency,
+      vat: '0.00',
+      vat_currency: this.$store.getters.getDefaultCurrency,
+      vat_type: this.$store.getters.getInvoiceDefaultVat,
+    }
+    this.invoiceLineService.newEditItem()
+
+    // get invoice data
+    const invoiceData = await this.invoiceService.getData(this.uuid)
+
+    // get customer
+    this.customerPk = invoiceData.customer_pk
+    await this.getCustomer()
+
+    // set data in component
+    this.invoice_id = invoiceData.invoice_id
+    this.order_pk = invoiceData.order_pk
+    this.invoice.order = this.order_pk
+
+    this.activity_totals = invoiceData.activity_totals
+    this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
+      ...m,
+      default_currency: this.default_currency,
+    }))
+
+    this.used_materials = invoiceData.used_materials
+
+    this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
+    this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
+
+    this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
+    this.invoice_default_partner_hourly_rate_dinero = toDinero(
+      this.invoice_default_partner_hourly_rate,
+      this.default_currency
+    )
+
+    // create engineer models
+    this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
+      ...m,
+      engineer: {...m.engineer, default_currency: this.default_currency}
+    }))
+
+    this.isLoading = false
+  },
   methods: {
+    // invoice lines
+    updateInvoiceTotals() {
+      const total = this.invoiceLineService.getItemsTotal()
+      const vat = this.invoiceLineService.getItemsTotalVAT()
+
+      this.invoice.setPriceField('total', total)
+      this.invoice.setPriceField('vat', vat)
+    },
+    addInvoiceLine() {
+      this.invoiceLineService.editItem.id = this.getInvoiceLineId()
+      this.invoiceLineService.editItem.type = this.INVOICE_LINE_TYPE_MANUAL
+      this.invoiceLineService.editItem.price_text = this.invoiceLineService.editItem.price_dinero.toFormat('$0.00')
+      this.invoiceLineService.addCollectionItem()
+      this.updateInvoiceTotals()
+    },
+    deleteInvoiceLine(id) {
+      this.invoiceLineService.deleteCollectionItemByid(id)
+    },
+    invoiceLineAmountChanged() {
+      this.invoiceLineService.editItem.amount = this.invoiceLineService.editItem.amount.replace(',', '.')
+      this.invoiceLineService.editItem.calcTotal()
+    },
+    changeVatTypeInvoiceLine(vat_type) {
+      this.invoiceLineService.editItem.vat_type = vat_type
+      this.invoiceLineService.editItem.calcTotal()
+    },
+    invoiceLinesCreated(invoiceLines) {
+      if (invoiceLines.length > 0) {
+        for (let invoiceLine of invoiceLines) {
+          invoiceLine.id = this.getInvoiceLineId()
+          // console.log(`id: ${id}`)
+          this.invoiceLineService.collection.push(invoiceLine)
+        }
+        this.updateInvoiceTotals()
+        const txt = invoiceLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
+        this.infoToast(this.$trans('Added'), this.$trans(`${invoiceLines.length} ${txt} added`))
+      }
+    },
+    emptyCollectionClicked(type) {
+      this.invoiceLineService.collection = this.invoiceLineService.collection.filter((m) => m.type !== type)
+      this.updateInvoiceTotals()
+      this.infoToast(this.$trans('Removed'), this.$trans(`invoice lines removed`))
+    },
+    getInvoiceLineId() {
+      if (this.invoiceLineService.collection.length === 0) {
+        return 0
+      }
+
+      const maxInvoiceLine = this.invoiceLineService.collection.reduce(function(prev, current) {
+        return (prev.id > current.id) ? prev : current
+      })
+
+      return maxInvoiceLine.id + 1
+    },
     // customer
     async getCustomer() {
       const customerData = await customerService.detail(this.customerPk)
-      this.customer = new CustomerModel(customerData)
+      this.customer = new CustomerModel(
+        {...customerData, default_currency: this.default_currency}
+      )
     },
     async updateCustomer() {
       // use minimal model for patch
@@ -611,200 +792,39 @@ export default {
     // activity
     async updateEngineer(user_id) {
       let engineer_user = this.engineer_models.find((m) => m.id === user_id)
-      const minimalModel = new RateEngineerUserModel(engineer_user)
+      const minimalModel = new RateEngineerUserModel(
+        {...engineer_user, default_currency: this.default_currency}
+      )
 
       let updatedEngineerUserJson = await engineerService.update(user_id, minimalModel)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
-      this.updateActivityTotals()
 
       this.infoToast(this.$trans('Updated'), this.$trans('Hourly rate engineer has been updated'))
     },
-    getFullname(user_id) {
-      const user = this.engineer_models.find((m) => m.id === user_id)
-      return user.full_name
-    },
-    getEngineerRateDinero(user_id) {
-      const user = this.engineer_models.find((m) => m.id === user_id)
-      return toDinero(user.engineer.hourly_rate, user.engineer.hourly_rate_currency)
-    },
-    getEngineerRate(user_id) {
-      const user = this.engineer_models.find((m) => m.id === user_id)
-      return user.engineer.hourly_rate
-    },
-    getEngineerRateCurrency(user_id) {
-      const user = this.engineer_models.find((m) => m.id === user_id)
-      return user.engineer.hourly_rate_currency
-    },
-    updateActivityTotals() {
-      this.activity_user_totals = this.activity_user_totals.map((m) => this.updateUserActivityTotals(m))
-      this.activityTotal = this.getItemsTotal(this.activity_user_totals)
-      this.activityTotalVAT = this.getItemsTotalVAT(this.activity_user_totals)
-    },
-    updateUserActivityTotals(activity) {
-      const price = this.getEngineerRateDinero(activity.user_id)
-      const currency = this.getEngineerRateCurrency(activity.user_id)
-      const hours_parts = activity.hours_total.split(':')
-      let total = price.multiply(hours_parts[0])
-      total = total.add(price.multiply(hours_parts[1]/60))
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (activity.margin_perc > 0) {
-        margin = total.multiply(activity.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(activity.vat_type)/100)
-      activity.currency = currency
-      activity.total = total_with_margin
-      activity.vat = vat
-      activity.margin = margin
-
-      return activity
-
-    },
-    setEngineerPriceOther(priceDinero, user_id) {
-      let model = this.activity_user_totals.find((a) => a.user_id === user_id)
-      model.engineer_rate_other_dinero = priceDinero
-      model.engineer_rate_other = model.engineer_rate_other_dinero.toFormat('0.00')
-      model.engineer_rate_other_currency = model.engineer_rate_other_dinero.getCurrency()
-      return true
-    },
-
     // materials
     async updateMaterial(material_id) {
       let material = this.material_models.find((m) => m.id === material_id)
       delete material.image
       const updatedMaterialJson = await materialService.update(material_id, material)
       material.setPriceFields(updatedMaterialJson)
-      this.updateMaterialTotals()
 
       this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
-    },
-    getMaterialPrice(used_material) {
-      if (used_material.usePrice === 'purchase') {
-        const model = this.material_models.find((m) => m.id === used_material.material_id)
-        return model.price_purchase_ex_dinero
-      } else if (used_material.usePrice === 'selling') {
-        const model = this.material_models.find((m) => m.id === used_material.material_id)
-        return model.price_selling_ex_dinero
-      } else if (used_material.usePrice === 'other') {
-        const model = this.used_materials.find((m) => m.material_id === used_material.material_id)
-        return model.price_purchase_ex_other_dinero
-      } else {
-        throw `unknown use price: ${used_material.usePrice}`
-      }
-    },
-    getMaterialCurrency(used_material) {
-      if (used_material.usePrice === 'purchase') {
-        const model = this.material_models.find((m) => m.id === used_material.material_id)
-        return model.price_purchase_ex_currency
-      } else if (used_material.usePrice === 'selling') {
-        const model = this.material_models.find((m) => m.id === used_material.material_id)
-        return model.price_selling_ex_currency
-      } else if (used_material.usePrice === 'other') {
-        const model = this.used_materials.find((m) => m.material_id === used_material.material_id)
-        return model.price_purchase_ex_other_currency
-      } else {
-        throw `unknown use price: ${used_material.usePrice}`
-      }
-    },
-    getMaterialPriceFor(used_material, usePrice) {
-      const model = this.material_models.find((m) => m.id === used_material.material_id)
-      if (model) {
-        return usePrice === 'purchase' ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
-      } else {
-        console.error('MODEL NOT FOUND for ', used_material)
-      }
-    },
-    setPurchasePriceOther(priceDinero, material_id) {
-      let model = this.used_materials.find((m) => m.material_id === material_id)
-      model.price_purchase_ex_other_dinero = priceDinero
-      model.price_purchase_ex_other = model.price_purchase_ex_other_dinero.toFormat('0.00')
-      model.price_purchase_ex_other_currency = model.price_purchase_ex_other_dinero.getCurrency()
-      return true
-    },
-    updateMaterialTotals() {
-      this.used_materials = this.used_materials.map((m) => this.updateUsedMaterialTotals(m))
-      this.materialsTotal = this.getItemsTotal(this.used_materials)
-      this.materialsTotalVAT = this.getItemsTotalVAT(this.used_materials)
-    },
-    updateUsedMaterialTotals(material) {
-      const price = this.getMaterialPrice(material)
-      const currency = this.getMaterialCurrency(material)
-      const total = price.multiply(material.amount)
-      let total_with_margin = total
-      let margin = toDinero("0.00", currency)
-      if (material.margin_perc > 0) {
-        margin = total.multiply(material.margin_perc/100)
-        total_with_margin = total.add(margin)
-      }
-      const vat = total_with_margin.multiply(parseInt(material.vat_type)/100)
-      material.currency = currency
-      material.total = total_with_margin
-      material.vat = vat
-      material.margin = margin
-
-      return material
-    },
-    getItemsTotal(items) {
-      return items.reduce(
-        (total, m) => (total.add(m.total)),
-        toDinero("0.00", items[0].currency)
-      )
-    },
-    getItemsTotalVAT(items) {
-      return items.reduce(
-        (total, m) => (total.add(m.vat)),
-        toDinero("0.00", items[0].currency)
-      )
     },
     async submitForm() {
       this.isLoading = true
 
-      if (this.isCreate) {
-        try {
-          const invoice = invoiceModel.insert(this.invoice)
-          for (let invoiceLine of this.invoiceLines) {
-            invoiceLine.invoice = invoice.id
-            await invoiceLineModel.insert(invoiceLine)
-          }
-        } catch(error) {
-          this.errorToast(this.$trans('Error creating invoice lines'))
-          this.isLoading = false
+      try {
+        const invoice = await this.invoiceService.insert(this.invoice)
+        for (let invoiceLine of this.invoiceLineService.collection) {
+          invoiceLine.invoice = invoice.id
+          await this.invoiceLineService.insert(invoiceLine)
         }
 
         this.infoToast(this.$trans('Created'), this.$trans('Invoice has been created'))
         this.isLoading = false
-        await this.$router.push({name: 'order-invoice-view', params: {pk: this.pk}})
-
-        return
-      }
-
-      try {
-        await invoiceModel.update(this.pk, this.invoice)
-
-        // invoiceLine create/update
-        for (let invoiceLine of this.invoiceLines) {
-          invoiceLine.order = this.pk
-          if (invoiceLine.id) {
-            await invoiceLineModel.update(invoiceLine.id, invoiceLine)
-          } else {
-            await invoiceLineModel.insert(invoiceLine)
-          }
-        }
-
-        // invoiceLine delete
-        for (const invoiceLine of this.deletedInvoiceLines) {
-          if (invoiceLine.id) {
-            await invoiceLineModel.delete(invoiceLine.id)
-          }
-        }
-
-        this.infoToast(this.$trans('Updated'), this.$trans('Invoice has been updated'))
-        this.isLoading = false
-        await this.$router.push({name: 'order-invoice-view', params: {pk: this.pk}})
+        await this.$router.push({name: 'order-view', params: {pk: invoice.order}})
       } catch(error) {
-        console.log('Error updating invoice', error)
-        this.errorToast(this.$trans('Error updating invoice'))
+        this.errorToast(this.$trans('Error creating invoice'))
         this.isLoading = false
       }
     },
@@ -812,7 +832,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.invoice = await invoiceModel.detail(this.pk)
+        this.invoice = await this.invoiceService.detail(this.pk)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoice', error)
@@ -827,41 +847,23 @@ export default {
 }
 </script>
 <style scoped>
-.material_row {
-  padding-bottom: 10px;
-  padding-top: 5px;
-  border-bottom: 1px silver solid;
-}
 .flex {
   display : flex;
   margin-top: auto;
-}
-.input-margin {
-  width: 40px;
-  padding: 1px;
-  margin: 1px;
-  text-align: center;
 }
 .value-container {
   padding-top: 4px;
   padding-right: 4px;
   padding-left: 4px;
 }
-.percentage-container {
-  padding-top: 4px;
-  padding-left: 4px;
-}
-.input-total-used {
-  width: 90px;
-  padding: 1px;
-  margin: 1px;
-  text-align: right;
-}
 .update-button {
   margin-bottom: 8px;
 }
 .header {
   font-size: 14px;
+  font-weight: bold;
+}
+.total-text {
   font-weight: bold;
 }
 </style>

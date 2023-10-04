@@ -1,5 +1,9 @@
 import client from '@/services/api'
 
+class VoidModel {
+  constructor(data) {}
+}
+
 class BaseModel {
   axios = client
   component = null
@@ -14,6 +18,98 @@ class BaseModel {
   count = 0
   numPages = 0
   perPage = 20
+
+  model = VoidModel
+  collection = []
+  deletedItems = []
+  editIndex = null
+  isEdit = false
+  editPk = null
+  editItem = null
+  modelDefaults = {}
+
+  // TODO: finish this for managing items in invoice form
+  // TODO: also implement this for orderlines/infolines/etc
+  newEditItem(data) {
+    if (!data) {
+      data = this.modelDefaults
+    }
+    this.editItem = new this.model(data)
+  }
+  cancelEdit() {
+    this.isEdit = false
+    this.emptyCollectionItem()
+  }
+  deleteCollectionItem(index) {
+    this.deletedItems.push(this.collection[index])
+    this.collection.splice(index, 1)
+  }
+  deleteCollectionItemByid(id) {
+    const item = this.collection.find((m) => m.id === id)
+    if (!item) {
+      throw `deleteCollectionItemByid: item with id: ${id} not found`
+    }
+
+    this.deletedItems.push(item)
+    this.collection = this.collection.filter((m) => m.id !== id)
+  }
+  editCollectionItem(item, index) {
+    this.editIndex = index
+    this.isEdit = true
+
+    this.editItem = item
+  }
+  getIndexById(id, idField) {
+    for (let i=0; i<this.collection.length; i++) {
+      if (this.collection[i][idField] === id) {
+        return i
+      }
+    }
+  }
+  emptyCollectionItem() {
+    this.newEditItem()
+    this.editPk = null
+  }
+  doEditCollectionItem() {
+    const newItem = new this.model({
+      ...this.editItem
+    })
+    this.collection.splice(this.editIndex, 1, newItem)
+    this.editIndex = null
+    this.isEdit = false
+    this.emptyCollectionItem()
+  }
+  addCollectionItem() {
+    this.collection.push(this.editItem)
+    this.emptyCollectionItem()
+  }
+
+  async emptyCollection() {
+    for (let item of this.collection) {
+      if (item.id) {
+        await this.delete(item.id)
+      }
+    }
+  }
+
+  async updateCollection() {
+    // create/update
+    for (let item of this.collection) {
+      if (item.id) {
+        await this.update(item.id, item)
+      } else {
+        await this.insert(item)
+      }
+    }
+
+    // deleted items
+    for (const item of this.deletedItems) {
+      if (item.id) {
+        await this.delete(item.id)
+      }
+    }
+  }
+  // end TODO
 
   getFields() {
     return this.postCopyFields(JSON.parse(JSON.stringify(this.fields)))
@@ -120,8 +216,12 @@ class BaseModel {
   }
 
   preInsert(obj) {
-    delete obj.created
-    delete obj.modified
+    if (obj.hasOwnProperty('created')) {
+      delete obj.created
+    }
+    if (obj.hasOwnProperty('modified')) {
+      delete obj.modified
+    }
     return obj
   }
 

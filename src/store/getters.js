@@ -22,6 +22,9 @@ export const getters = {
   getMemberHasBranches: state => {
     return state.memberInfo.has_branches
   },
+  getIsAdmin: state => {
+    return state.userInfo.user.is_superuser || state.userInfo.user.is_staff
+  },
   getUserName: state => {
     if (state.userInfo.is_superuser) {
       return 'superuser'
@@ -61,4 +64,25 @@ export const getters = {
   getSettingEquipmentLocationQuickCreate(state) {
     return state.memberInfo.settings.equipment_location_quick_create
   },
+  getVATTypes(state) {
+    return state.memberInfo.vat_types
+  },
+  getInvoiceDefaultVat(state) {
+    return state.memberInfo.settings.invoice_default_vat
+  },
+  getInvoiceDefaultMargin(state) {
+    return state.memberInfo.settings.invoice_default_margin
+  },
+  getInvoiceDefaultHourlyRate(state) {
+    return state.memberInfo.settings.invoice_default_hourly_rate
+  },
+  getDefaultCurrency(state) {
+    return state.memberInfo.settings.default_currency
+  },
+  getInvoiceDefaultTermOfPaymentDays(state) {
+    return state.memberInfo.settings.invoice_default_term_of_payment_days
+  },
+  getMaintenanceEquipment(state) {
+    return state.maintenanceEquipment
+  }
 }

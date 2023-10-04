@@ -149,7 +149,7 @@
 </template>
 
 <script>
-import orderWorkorderModel from '../../models/orders/OrderWorkorder.js'
+import { OrderWorkorderService } from '../../models/orders/OrderWorkorder.js'
 import statusModel from '../../models/orders/Status.js'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -182,7 +182,7 @@ export default {
     return {
       sortMode: 'default',
       searchQuery: null,
-      model: orderWorkorderModel,
+      model: new OrderWorkorderService(),
       status: {
         statuscode: '',
         extra_text: ''

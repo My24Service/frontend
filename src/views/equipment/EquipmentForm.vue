@@ -163,7 +163,6 @@
                 readonly
               ></b-form-input>
             </b-form-group>
-
           </div>
           <div v-if="branch && hasBranches">
             <b-col cols="4" role="group">
@@ -228,6 +227,65 @@
         <div class="panel col-1-3">
           <h6>{{  $trans('Equipment details') }}</h6>
 
+        <b-row v-if="branch && hasBranches">
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Branch')"
+              label-for="equipment_branch_name"
+            >
+              <b-form-input
+                id="equipment_branch_name"
+                size="sm"
+                v-model="branch.name"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Address')"
+              label-for="equipment_branch_address"
+            >
+              <b-form-input
+                id="equipment_branch_address"
+                size="sm"
+                v-model="branch.address"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('City')"
+              label-for="equipment_branch_city"
+            >
+              <b-form-input
+                id="equipment_branch_city"
+                size="sm"
+                v-model="branch.city"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Country')"
+              label-for="equipment_branch_country_code"
+            >
+              <b-form-input
+                id="equipment_branch_country_code"
+                size="sm"
+                v-model="branch.country_code"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -285,6 +343,32 @@
                 v-model="equipment.serialnumber"
               ></b-form-input>
             </b-form-group>
+
+
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Lifespan (months)')"
+              label-for="equipment_default_replace_months"
+            >
+              <b-form-input
+                id="equipment_default_replace_months"
+                size="sm"
+                v-model="equipment.default_replace_months"
+              ></b-form-input>
+            </b-form-group>
+          
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Price')"
+              label-for="equipment_serialnumber"
+            >
+              <PriceInput
+                v-model="equipment.price"
+                :currency="equipment.price_currency"
+                @priceChanged="(val) => priceChanged(val)"
+              />
+            </b-form-group>
+        
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -382,12 +466,14 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-
 import customerModel from '../../models/customer/Customer.js'
-import equipmentModel from '../../models/equipment/equipment.js'
+import equipmentService, {
+  EquipmentModel
+} from '../../models/equipment/equipment.js'
 import branchModel from "../../models/company/Branch";
 import {componentMixin} from "../../utils";
 import locationModel from "../../models/equipment/location";
+import PriceInput from "../../components/PriceInput";
 
 export default {
   mixins: [componentMixin],
@@ -396,6 +482,7 @@ export default {
   },
   components: {
     Multiselect,
+    PriceInput,
   },
   props: {
     pk: {
@@ -444,7 +531,7 @@ export default {
     return {
       isLoading: false,
       submitClicked: false,
-      equipment: equipmentModel.getFields(),
+      equipment: this.newModel(),
       errorMessage: null,
       equipmentObjects: [],
 
@@ -471,13 +558,21 @@ export default {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
 
-    if (this.isCreate) {
-      this.equipment = equipmentModel.getFields()
-    } else {
+    if (!this.isCreate) {
       await this.loadData()
     }
   },
   methods: {
+    newModel() {
+      return new EquipmentModel({
+        default_currency: this.$store.getters.getDefaultCurrency,
+        price: '0.00',
+        price_currency: this.$store.getters.getDefaultCurrency,
+      })
+    },
+    priceChanged(priceDinero) {
+      this.equipment.setPriceField('price', priceDinero)
+    },
     // customers
     async getCustomers(query) {
       try {
@@ -533,15 +628,15 @@ export default {
 
       if (this.isCreate) {
         try {
-          await equipmentModel.insert(this.equipment)
+          await equipmentService.insert(this.equipment)
           this.infoToast(this.$trans('Created'), this.$trans('Equipment has been created'))
           this.isLoading = false
 
           if (isBulk) {
-            let empty = equipmentModel.getFields()
+            let empty = this.newModel()
             empty.branch = this.equipment.branch
             empty.customer = this.equipment.customer
-            this.location = empty
+            this.equipment = empty
             this.v$.$reset()
             this.$refs.name.$el.focus()
           } else {
@@ -557,7 +652,7 @@ export default {
       }
 
       try {
-        await equipmentModel.update(this.pk, this.equipment)
+        await equipmentService.update(this.pk, this.equipment)
         this.infoToast(this.$trans('Updated'), this.$trans('Equipment has been updated'))
         this.isLoading = false
         this.cancelForm()
@@ -571,7 +666,8 @@ export default {
       this.isLoading = true
 
       try {
-        this.equipment = await equipmentModel.detail(this.pk)
+        const equipmentData = await equipmentService.detail(this.pk)
+        this.equipment = new EquipmentModel(equipmentData)
         if (this.hasBranches && !this.isEmployee) {
           this.branch = await branchModel.detail(this.equipment.branch)
           this.locations = await locationModel.listForSelectBranch(this.branch.id)

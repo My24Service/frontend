@@ -1,21 +1,79 @@
 <template>
-  <div class="app-page">
-    <header>
+  <b-overlay :show="isLoading" rounded="sm" v-if="equipment">
 
-      <div class='page-title'>
-        <h3>
-          <b-icon icon="tools"></b-icon>
-          <span @click="goBack" class="backlink">Equipment</span>
-          / {{ equipment.name }}
-        </h3>
-        <router-link :to="{name: editLink, params: {pk: this.pk}}" class="btn primary">Edit equipment</router-link>
-      </div>
-      <SearchModal
+    <div class="app-detail">
+      <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
+      <b-row align-h="center">
+        <h2>{{ equipment.name }}</h2>
+      </b-row>
+      <b-row>
+        <b-col cols="6">
+          <b-table-simple>
+            <b-tr>
+              <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
+              <b-td>{{ equipment.name }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Brand') }}:</strong></b-td>
+              <b-td>{{ equipment.brand }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Identifier') }}:</strong></b-td>
+              <b-td>{{ equipment.identifier }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Description') }}:</strong></b-td>
+              <b-td>{{ equipment.description }}</b-td>
+            </b-tr>
+          </b-table-simple>
+        </b-col>
+        <b-col cols="6">
+          <b-table-simple>
+            <b-tr>
+              <b-td><strong>{{ $trans('Installation date') }}:</strong></b-td>
+              <b-td>{{ equipment.installation_date }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Production date') }}:</strong></b-td>
+              <b-td>{{ equipment.production_date }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Serial number') }}:</strong></b-td>
+              <b-td>{{ equipment.serialnumber }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Standard hours') }}:</strong></b-td>
+              <b-td>{{ equipment.standard_hours }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Lifespan (months)') }}:</strong></b-td>
+              <b-td>{{ equipment.default_replace_months }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Price') }}:</strong></b-td>
+              <b-td>{{ equipment.price_dinero.toFormat('$0.00') }}</b-td>
+            </b-tr>
+          </b-table-simple>
+        </b-col>
+      </b-row>
+
+      <OrderStats
+        v-if="!isLoading"
+        ref="order-stats"
+      />
+
+      <div class="spacer"></div>
+
+      <div>
+        <b-row align-h="center">
+          <h3>{{ $trans("Past orders") }}</h3>
+        </b-row>
+        <SearchModal
           id="search-modal"
           ref="search-modal"
           @do-search="handleSearchOk"
         />
-    </header>
+      </div>
     <div class='page-detail flex-columns'>
       <div class='panel'>
         <h6>Equipment details</h6>
@@ -92,7 +150,8 @@
         />
       </div>
     </div>
-  </div>
+    </div>
+  </b-overlay>
 </template>
 
 <script>
@@ -122,7 +181,7 @@ export default {
       isLoading: false,
       orderPastModel,
       buttonDisabled: false,
-      equipment: equipmentModel.getFields(),
+      equipment: null,
       orders: [],
       orderPastFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -187,8 +246,8 @@ export default {
 
       await this.loadHistory()
 
-      this.equipment = await equipmentModel.detail(this.pk)
-
+      const equipmentData = await equipmentModel.detail(this.pk)
+      this.equipment = new equipmentModel.model(equipmentData)
       try {
         const orderTypeStatsData = await orderModel.getOrderTypesStatsEquipment(this.pk)
         const monthsStatsData = await orderModel.getMonthsStatsEquipment(this.pk)

@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="!isLoading">
     <div class="app-page">
       <b-modal
         id="new-equipment-modal"
@@ -76,53 +76,40 @@
             </b-form-group>
 
             <b-form-group
-              label-cols="4"
               label-size="sm"
-              v-bind:label="$trans('Remarks')"
-              label-for="maintenance_contract_remarks">
-              <b-form-textarea
-                id="maintenance_contract_remarks"
-                v-model="maintenanceContract.remarks"
-                rows="1"
-              ></b-form-textarea>
-            </b-form-group>
-            <hr>
-              <b-form-group
-                v-if="isCreate"
-                label-cols="4"
-                label-size="sm"
-                label-class="p-sm-0"
-                v-bind:label="$trans('Search customer')"
-                label-for="maintenance_contract_customer_search"
+              label-class="p-sm-0"
+              v-bind:label="$trans('Search customer')"
+              label-for="maintenance_contract_customer_search"
+            >
+              <multiselect
+                v-if="!isLoading"
+                id="maintenance_contract_customer_search"
+                track-by="id"
+                :placeholder="$trans('Type to search')"
+                open-direction="bottom"
+                :options="customers"
+                :multiple="false"
+                :loading="isLoading"
+                :internal-search="false"
+                :clear-on-select="true"
+                :close-on-select="true"
+                :options-limit="30"
+                :limit="10"
+                :max-height="600"
+                :show-no-results="false"
+                :hide-selected="true"
+                @search-change="getCustomersDebounced"
+                @select="selectCustomer"
+                :custom-label="customerLabel"
               >
-                <multiselect
-                  v-if="!isLoading"
-                  id="maintenance_contract_customer_search"
-                  track-by="id"
-                  :placeholder="$trans('Type to search')"
-                  open-direction="bottom"
-                  :options="customers"
-                  :multiple="false"
-                  :loading="isLoading"
-                  :internal-search="false"
-                  :clear-on-select="true"
-                  :close-on-select="true"
-                  :options-limit="30"
-                  :limit="10"
-                  :max-height="600"
-                  :show-no-results="false"
-                  :hide-selected="true"
-                  @search-change="getCustomersDebounced"
-                  @select="selectCustomer"
-                  :custom-label="customerLabel"
-                >
-                  <span slot="noResult">{{ $trans('No customers found. Consider changing the search query.') }}</span>
-                </multiselect>
-                <b-form-invalid-feedback
-                  :state="!v$.maintenanceContract.customer.$error">
-                  {{ $trans('Please select a customer') }}
-                </b-form-invalid-feedback>
-              </b-form-group>
+                <span slot="noResult">{{ $trans('No customers found. Consider changing the search query.') }}</span>
+              </multiselect>
+              <b-form-invalid-feedback
+                :state="!v$.maintenanceContract.customer.$error">
+                {{ $trans('Please select a customer') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          
             <b-form-group
               label-cols="4"
               label-size="sm"
@@ -192,12 +179,51 @@
                 readonly
               ></b-form-input>
             </b-form-group>
-          </div>
-
-          <div class='panel col-2-3'>
-
-            <h6>{{ $trans('Equipment') }}</h6>
+          
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Contract name')"
+              label-for="maintenance_contract_name"
+            >
+              <b-form-input
+                ref="contractName"
+                id="maintenance_contract_name"
+                size="sm"
+                v-model="maintenanceContract.name"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="!v$.maintenanceContract.name.$error">
+                {{ $trans('Please enter a contract name') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Contract value')"
+              label-for="maintenance_contract_contract_value"
+            >
+              <b-form-input
+                ref="contract_value"
+                id="maintenance_contract_contract_value"
+                size="sm"
+                v-model="maintenanceContract.contract_value"
+              ></b-form-input>
+            </b-form-group>
+          
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Remarks')"
+              label-for="maintenance_contract_remarks"
+            >
+                <b-form-textarea
+                  id="maintenance_contract_remarks"
+                  v-model="maintenanceContract.remarks"
+                  rows="1"
+                ></b-form-textarea>
+            </b-form-group>
+          
             <div class="maintenance-contract-equipment" v-if="customer.id !== null && customer.id !== ''">
+              <h4>{{ $trans('Equipment') }}</h4>
               <b-row>
                 <b-col cols="12">
                   <b-table
@@ -220,47 +246,47 @@
                 </b-col>
               </b-row>
 
-              <h6>{{ $trans('Add Equipment')}}</h6>
-              <b-row>
-                <b-col cols="12" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Search equipment')"
-                  >
-                    <multiselect
-                      id="maintenance-contract-equipment-name"
-                      ref="multiselect_equipment"
-                      track-by="id"
-                      label="name"
-                      :placeholder="$trans('Type to search')"
-                      open-direction="bottom"
-                      :options="equipmentSearch"
-                      :multiple="false"
-                      :loading="isLoading"
-                      :internal-search="false"
-                      :clear-on-select="true"
-                      :close-on-select="true"
-                      :options-limit="30"
-                      :limit="10"
-                      :max-height="600"
-                      :show-no-results="true"
-                      :hide-selected="true"
-                      @search-change="getEquipmentDebounced"
-                      @select="selectEquipment"
-                    >
-                      <span slot="noResult">
-                        <h3>{{ $trans('No equipment found. Consider changing the search query, or add a new equipment:')}}</h3>
-                        <p>
-                          <b-button
-                            @click="showAddEquipmentModal"
-                            class="btn btn-primary"
-                            size="sm"
-                            type="button"
-                            variant="primary"
-                          >
-                            {{ $trans("Add equipment") }}
-                          </b-button>
-                        </p>
+                  <h6>{{ $trans('Add Equipment')}}</h6>
+                  <b-row>
+                    <b-col cols="12" role="group">
+                      <b-form-group
+                        label-size="sm"
+                        v-bind:label="$trans('Search equipment')"
+                      >
+                        <multiselect
+                          id="maintenance-contract-equipment-name"
+                          ref="multiselect_equipment"
+                          track-by="id"
+                          label="name"
+                          :placeholder="$trans('Type to search')"
+                          open-direction="bottom"
+                          :options="equipmentSearch"
+                          :multiple="false"
+                          :loading="isLoading"
+                          :internal-search="false"
+                          :clear-on-select="true"
+                          :close-on-select="true"
+                          :options-limit="30"
+                          :limit="10"
+                          :max-height="600"
+                          :show-no-results="true"
+                          :hide-selected="true"
+                          @search-change="getEquipmentDebounced"
+                          @select="selectEquipment"
+                        >
+                          <span slot="noResult">
+                            <h3>{{ $trans('No equipment found. Consider changing the search query, or add a new equipment:')}}</h3>
+                            <p>
+                              <b-button
+                                @click="showAddEquipmentModal"
+                                class="btn btn-primary"
+                                size="sm"
+                                type="button"
+                                variant="primary"
+                              >
+                                {{ $trans("Add equipment") }}
+                              </b-button>
+                            </p>
 
                       </span>
                     </multiselect>
@@ -381,8 +407,14 @@
                 </b-button>
               </footer>
             </div>
-            <div v-else>
-              <h3>{{ $trans('Select a customer') }}</h3>
+
+            <div class="mx-auto">
+              <footer class="modal-footer">
+                <b-button @click="cancelForm" type="button" variant="secondary">
+                  {{ $trans('Cancel') }}</b-button>
+                <b-button @click="submitForm" type="button" variant="primary">
+                  {{ $trans('Submit') }}</b-button>
+              </footer>
             </div>
           </div>
         </b-form>
@@ -397,11 +429,12 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import customerModel from '../../models/customer/Customer.js'
-import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
-import maintenanceEquipmentModel from "../../models/customer/MaintenanceEquipment";
-import equipmentModel from "../../models/equipment/equipment";
+import { CustomerService } from '../../models/customer/Customer.js'
+import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
+import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
+import { EquipmentService } from "../../models/equipment/equipment";
 import {componentMixin} from "../../utils";
+import PriceInput from "../../components/PriceInput";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
@@ -412,6 +445,7 @@ export default {
   },
   components: {
     Multiselect,
+    PriceInput,
   },
   props: {
     pk: {
@@ -420,16 +454,15 @@ export default {
     },
   },
   validations: {
-    maintenanceContract: {
-      customer: {
-        required
-      },
-      name: {
-        required
-      },
-      contract_value: {
-        required,
-      },
+    maintenanceContractService: {
+      editItem: {
+        customer: {
+          required
+        },
+        name: {
+          required
+        },
+      }
     },
     maintenanceEquipment: {
       equipment: {
@@ -438,10 +471,6 @@ export default {
 
       equipment_name: {
         required
-      },
-      amount: {
-        required,
-        greaterThanZero
       },
 
       times_per_year: {
@@ -454,27 +483,26 @@ export default {
     return {
       isLoading: false,
       submitClicked: false,
-      maintenanceContract: maintenanceContractModel.getFields(),
-      maintenanceEquipment: maintenanceEquipmentModel.getFields(),
+      maintenanceContractService: new MaintenanceContractService(),
+      maintenanceEquipmentService: new MaintenanceEquipmentService(),
+      customerService: new CustomerService(),
+      equipmentService: new EquipmentService(),
       errorMessage: null,
-      customer: customerModel.getFields(),
+      customer: null,
       customers: [],
       getCustomersDebounced: null,
       getEquipmentDebounced: null,
       newEquipmentName: null,
 
-      editIndex: null,
-      isEditEquipment: false,
       equipmentFields: [
         { key: 'equipment_name', label: this.$trans('Name') },
-        { key: 'amount', label: this.$trans('Amount') },
         { key: 'times_per_year', label: this.$trans('Times / year') },
-        { key: 'contract_value', label: this.$trans('Contract value') },
+        { key: 'tariff', label: this.$trans('Tariff') },
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       equipmentSearch: [],
-      deletedEquipment: []
+      total_dinero: null
     }
   },
   computed: {
@@ -485,28 +513,44 @@ export default {
       return this.submitClicked
     },
     isEquipmentValid() {
-      return this.maintenanceEquipment.equipment !== null && greaterThanZero(this.maintenanceEquipment.amount)
+      return this.maintenanceEquipmentService.editItem.equipment !== null
     }
   },
   async created() {
+    this.isLoading = true
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
+    this.maintenanceEquipmentService.modelDefaults = {
+      tariff: '0.00',
+      tariff_currency: this.$store.getters.getDefaultCurrency,
+    }
+    this.maintenanceEquipmentService.newEditItem()
+    this.maintenanceEquipmentService.deletedItems = []
     if (this.isCreate) {
-      this.isLoading = true
-      this.maintenanceContract = maintenanceContractModel.getFields()
       this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
-      this.isLoading = false
+      this.maintenanceContractService.newEditItem()
+      this.customer = new this.customerService.model({})
     } else {
       await this.loadData()
     }
+    this.updateTotals()
+    this.isLoading = false
   },
   methods: {
+    tariffChanged(priceDinero) {
+      this.maintenanceEquipmentService.editItem.setPriceField('tariff', priceDinero)
+      this.updateTotals()
+    },
+    updateTotals() {
+      this.total_dinero = this.maintenanceEquipmentService.getItemsTotal()
+    },
+
     // customer
     clearCustomer() {
       this.maintenanceContract.customer = null
     },
     async getCustomers(query) {
       try {
-        this.customers = await customerModel.search(query)
+        this.customers = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
@@ -517,8 +561,7 @@ export default {
     },
     selectCustomer(option) {
       this.customer.id = option.id
-      this.maintenanceContract.customer = option.id
-      this.maintenanceEquipment.customer = option.id
+      this.maintenanceContractService.editItem.customer = option.id
       this.customer.name = option.name
       this.customer.address = option.address
       this.customer.city = option.city
@@ -547,13 +590,13 @@ export default {
 
       try {
         const response = this.isPlanning || this.isStaff || this.isSuperuser ?
-          await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.customer.id) :
-          await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
+          await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.customer.id) :
+          await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
         this.maintenanceEquipment.equipment = response.id
         this.maintenanceEquipment.equipment_name = response.name
         this.v$.maintenanceEquipment.$reset()
-        this.$refs.amount.focus()
+        this.$refs.times_per_year.focus()
       }  catch(error) {
         console.log('Error adding equipment', error)
         this.errorToast(this.$trans('Error adding equipment'))
@@ -561,7 +604,7 @@ export default {
     },
     async getEquipment(query) {
       try {
-        this.equipmentSearch = await equipmentModel.searchCustomer(query, this.customer.id)
+        this.equipmentSearch = await this.equipmentService.searchCustomer(query, this.customer.id)
       } catch(error) {
         console.log('Error searching equipment', error)
         this.errorToast(this.$trans('Error searching equipment'))
@@ -571,48 +614,54 @@ export default {
       return `${name} - ${city}`
     },
     selectEquipment(option) {
-      this.maintenanceEquipment.equipment = option.id
-      this.maintenanceEquipment.equipment_name = option.name
+      // check if already there
+      const equipment = this.maintenanceEquipmentService.collection.find((m) => m.equipment === option.id)
+      if (equipment) {
+        const index = this.maintenanceEquipmentService.getIndexById(option.id, 'equipment')
+        if (index === undefined) {
+          throw `selectEquipment: index for id: ${option.id} not found`
+        }
+
+        this.maintenanceEquipmentService.editCollectionItem(equipment, index)
+        return
+      }
+
+      this.maintenanceEquipmentService.editItem.equipment = option.id
+      this.maintenanceEquipmentService.editItem.equipment_name = option.name
       this.v$.maintenanceEquipment.$reset()
-      this.$refs.amount.focus()
+      this.$refs.times_per_year.focus()
     },
     deleteEquipment(index) {
-      this.deletedEquipment.push(this.maintenanceContract.equipment[index])
-      this.maintenanceContract.equipment.splice(index, 1)
+      this.maintenanceEquipmentService.deleteCollectionItem(index)
     },
     editEquipment(item, index) {
-      this.editIndex = index
-      this.isEditEquipment = true
-
-      this.maintenanceEquipment = item
+      this.maintenanceEquipmentService.editCollectionItem(item, index)
     },
     emptyEquipment() {
-      this.maintenanceEquipment = maintenanceEquipmentModel.getFields()
+      this.maintenanceEquipmentService.emptyCollectionItem()
     },
     cancelEditEquipment() {
-      this.isEditEquipment = false
-      this.emptyEquipment()
+      this.maintenanceEquipmentService.cancelEdit()
     },
     doEditEquipment() {
-      this.maintenanceContract.equipment.splice(this.editIndex, 1, this.maintenanceEquipment)
-      this.editIndex = null
-      this.isEditEquipment = false
-      this.emptyEquipment()
+      this.maintenanceEquipmentService.doEditCollectionItem()
     },
     addEquipment() {
       if (!this.isEquipmentValid) {
+        console.log('invalid', this.v$.$errors)
         return
       }
-      this.maintenanceContract.equipment.push(this.maintenanceEquipment)
-      this.emptyEquipment()
+
+      this.maintenanceEquipmentService.addCollectionItem()
+      this.updateTotals()
       this.v$.$reset()
     },
 
     async submitForm() {
       this.submitClicked = true
-      this.v$.maintenanceContract.$touch()
-      if (this.v$.maintenanceContract.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
+      this.v$.maintenanceContractService.editItem.$touch()
+      if (this.v$.maintenanceContractService.editItem.$invalid) {
+        console.log('invalid?', this.v$.$invalid, this.v$.$errors)
         return
       }
 
@@ -620,12 +669,13 @@ export default {
 
       if (this.isCreate) {
         try {
-          const contract = await maintenanceContractModel.insert(this.maintenanceContract)
-
-          for (let equipment of this.maintenanceContract.equipment) {
-            equipment.contract = contract.id
-            await maintenanceEquipmentModel.insert(equipment)
-          }
+          const contract = await this.maintenanceContractService.insert(this.maintenanceContractService.editItem)
+          this.maintenanceEquipmentService.collection = this.maintenanceEquipmentService.collection.map(
+            (m) => new this.maintenanceEquipmentService.model(
+              {...m, contract: contract.id}
+            )
+          )
+          await this.maintenanceEquipmentService.updateCollection()
 
           this.infoToast(this.$trans('Created'), this.$trans('Maintenance contract has been created'))
           this.isLoading = false
@@ -640,26 +690,14 @@ export default {
       }
 
       try {
-        await maintenanceContractModel.update(this.pk, this.maintenanceContract)
+        await this.maintenanceContractService.update(this.pk, this.maintenanceContractService.editItem)
 
-        for (let equipment of this.maintenanceContract.equipment) {
-          equipment.contract = this.pk
-          equipment.customer = this.customer.id
-          if (equipment.id) {
-            await maintenanceEquipmentModel.update(equipment.id, equipment)
-            this.infoToast(this.$trans('Equipment updated'), this.$trans('Equipment has been updated'))
-          } else {
-            await maintenanceEquipmentModel.insert(equipment)
-            this.infoToast(this.$trans('Equipment created'), this.$trans('Equipment has been created'))
-          }
-        }
-
-        for (const equipment of this.deletedEquipment) {
-          if (equipment.id) {
-            await maintenanceEquipmentModel.delete(equipment.id)
-            this.infoToast(this.$trans('Equipment removed'), this.$trans('Equipment has been removed'))
-          }
-        }
+        this.maintenanceEquipmentService.collection = this.maintenanceEquipmentService.collection.map(
+          (m) => new this.maintenanceEquipmentService.model(
+            {...m, contract: this.pk}
+          )
+        )
+        await this.maintenanceEquipmentService.updateCollection()
 
         this.infoToast(this.$trans('Updated'), this.$trans('Maintenance contract has been updated'))
         this.isLoading = false
@@ -674,8 +712,20 @@ export default {
       this.isLoading = true
 
       try {
-        this.maintenanceContract = await maintenanceContractModel.detail(this.pk)
-        this.customer = await customerModel.detail(this.maintenanceContract.customer)
+        const data = await this.maintenanceContractService.detail(this.pk)
+        this.maintenanceContractService.editItem = new this.maintenanceContractService.model(
+          {...data, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
+        )
+        this.customer = await this.customerService.detail(this.maintenanceContractService.editItem.customer)
+
+        this.maintenanceEquipmentService.setListArgs(`contract=${this.pk}`)
+        const equipmentData = await this.maintenanceEquipmentService.list()
+        this.maintenanceEquipmentService.collection = equipmentData.results.map(
+          (m) => new this.maintenanceEquipmentService.model({
+            ...m, default_currency: this.$store.getters.getDefaultCurrency
+          })
+        )
+        this.updateTotals()
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)

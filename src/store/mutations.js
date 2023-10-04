@@ -11,7 +11,7 @@ import {
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
   SET_UNACCEPTED_COUNT,
-  SET_MAINTENANCE_PRODUCTS,
+  SET_MAINTENANCE_EQUIPMENT,
   SET_STREAM_INFO,
 } from './mutation-types'
 
@@ -22,8 +22,8 @@ export const mutations = {
   [SET_UNACCEPTED_COUNT](state, count) {
     state.unacceptedCount = count
   },
-  [SET_MAINTENANCE_PRODUCTS](state, maintenanceProducts) {
-    state.maintenanceProducts = maintenanceProducts
+  [SET_MAINTENANCE_EQUIPMENT](state, maintenanceEquipment) {
+    state.maintenanceEquipment = maintenanceEquipment
   },
   [SET_ASSIGN_ORDERS](state, orders) {
     state.assignOrders = orders
@@ -52,5 +52,5 @@ export const mutations = {
   },
   [SET_STATUSCODES](state, statuscodes) {
     state.statuscodes = statuscodes
-  }
+  },
 };

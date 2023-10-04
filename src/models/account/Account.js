@@ -12,7 +12,7 @@ class Account extends BaseModel {
     let bodyFormData = new FormData()
     bodyFormData.append('language', language)
 
-    return this.axios.post('/set-language/', bodyFormData)
+    return this.axios.post('/set-language/', bodyFormData, {withCredentials:true})
   }
 
   async login(username, password) {

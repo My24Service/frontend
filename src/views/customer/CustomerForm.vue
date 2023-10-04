@@ -15,193 +15,273 @@
         </div>
       </div>
     </header>
-
     <div class="page-detail">
       <div class='flex-columns'>
         <div class='panel col-1-3'>
-        
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Name')"
-            label-for="customer_name"
-          >
-            <b-form-input
-              autofocus
-              id="customer_name"
-              size="sm"
-              v-model="customer.name"
-              :state="isSubmitClicked ? !v$.customer.name.$error : null"
-            ></b-form-input>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.customer.name.$error : null">
-              {{ $trans('Please enter a name') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
 
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Address')"
-            label-for="customer_address">
-            <b-form-input
-              id="customer_address"
-              size="sm"
-              :disabled="useBranchAddress"
-              v-model="customer.address"
-              :state="isSubmitClicked ? !v$.customer.address.$error : null"
-            ></b-form-input>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.customer.address.$error : null">
-              {{ $trans('Please enter an address') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Postal')"
-            label-for="customer_postal">
-            <b-form-input
-              id="customer_postal"
-              size="sm"
-              :disabled="useBranchAddress"
-              v-model="customer.postal"
-              :state="isSubmitClicked ? !v$.customer.postal.$error : null"
-            ></b-form-input>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.customer.postal.$error : null">
-              {{ $trans('Please enter a postal') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-          
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('City')"
-            label-for="customer_city"
-          >
-            <b-form-input
-              id="customer_city"
-              size="sm"
-              :disabled="useBranchAddress"
-              v-model="customer.city"
-              :state="isSubmitClicked ? !v$.customer.city.$error : null"
-            ></b-form-input>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.customer.city.$error : null">
-              {{ $trans('Please enter a city') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-            
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Country')"
-            label-for="customer_country">
-            <b-form-select
-              :disabled="useBranchAddress"
-              v-model="customer.country_code"
-              :options="countries"
-              size="sm"></b-form-select>
-          </b-form-group>
-          <hr>
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Contact')"
-            label-for="customer_contact"
-          >
-            <b-form-input
-              id="customer_contact"
-              v-model="customer.contact"
-              rows="5">
-            </b-form-input>
-          </b-form-group>
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Email')"
-            label-for="customer_email">
-            <b-form-input
-              id="customer_email"
-              size="sm"
-              v-model="customer.email"
-            ></b-form-input>
-          </b-form-group>
-            
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Tel.')"
-            label-for="customer_tel"
-          >
-            <b-form-input
-              id="customer_tel"
-              size="sm"
-              v-model="customer.tel"
-            ></b-form-input>
-          </b-form-group>
-        
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Mobile')"
-            label-for="customer_mobile"
-          >
-            <b-form-input
-              id="customer_mobile"
-              size="sm"
-              v-model="customer.mobile"
-            ></b-form-input>
-          </b-form-group>
-          <hr>
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Customer ID')"
-            label-for="customer_customer_id">
-            <b-form-input
-              id="customer_customer_id"
-              size="sm"
-              v-model="customer.customer_id"
-              :readonly="customerIdCreated"
-              :state="isSubmitClicked ? !v$.customer.customer_id.$error : null"
-            ></b-form-input>
-            <p v-if="!customer.customer_id"><b-link @click="getNewCustomerIdFromLatest">{{ $trans('generate new') }}</b-link></p>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.customer.customer_id.$error : null">
-              {{ $trans('Please enter a customer ID') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-
-          <b-form-group
-            label-cols="4"
-            label-size="sm"
-            v-bind:label="$trans('Ext. identifier')"
-            label-for="customer_external_identifier"
-          >
-            <b-form-input
-              id="customer_external_identifier"
-              size="sm"
-              v-model="customer.external_identifier"
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-              label-cols="4"
-              label-size="sm"
-              v-bind:label="$trans('Remarks')"
-              label-for="customer_remarks"
-            >
-              <b-form-textarea
-                id="customer_remarks"
-                v-model="customer.remarks"
-                rows="5"
-              ></b-form-textarea>
-            </b-form-group>
-          
-          
+          <b-row>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Customer ID')"
+                label-for="customer_customer_id"
+              >
+                <b-form-input
+                  id="customer_customer_id"
+                  size="sm"
+                  v-model="customer.customer_id"
+                  :readonly="customerIdCreated"
+                  :state="isSubmitClicked ? !v$.customer.customer_id.$error : null"
+                ></b-form-input>
+                <p v-if="!customer.customer_id"><b-link @click="getNewCustomerIdFromLatest">{{ $trans('generate new') }}</b-link></p>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.customer.customer_id.$error : null">
+                  {{ $trans('Please enter a customer ID') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Ext. identifier')"
+                label-for="customer_external_identifier"
+              >
+                <b-form-input
+                  id="customer_external_identifier"
+                  size="sm"
+                  v-model="customer.external_identifier"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="3" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Name')"
+                label-for="customer_name"
+              >
+                <b-form-input
+                  autofocus
+                  id="customer_name"
+                  size="sm"
+                  v-model="customer.name"
+                  :state="isSubmitClicked ? !v$.customer.name.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.customer.name.$error : null">
+                  {{ $trans('Please enter a name') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+            <b-col cols="3" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Address')"
+                label-for="customer_address"
+              >
+                <b-form-input
+                  id="customer_address"
+                  size="sm"
+                  :disabled="useBranchAddress"
+                  v-model="customer.address"
+                  :state="isSubmitClicked ? !v$.customer.address.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.customer.address.$error : null">
+                  {{ $trans('Please enter an address') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Postal')"
+                label-for="customer_postal"
+              >
+                <b-form-input
+                  id="customer_postal"
+                  size="sm"
+                  :disabled="useBranchAddress"
+                  v-model="customer.postal"
+                  :state="isSubmitClicked ? !v$.customer.postal.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.customer.postal.$error : null">
+                  {{ $trans('Please enter a postal') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('City')"
+                label-for="customer_city"
+              >
+                <b-form-input
+                  id="customer_city"
+                  size="sm"
+                  :disabled="useBranchAddress"
+                  v-model="customer.city"
+                  :state="isSubmitClicked ? !v$.customer.city.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.customer.city.$error : null">
+                  {{ $trans('Please enter a city') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Country')"
+                label-for="customer_country"
+              >
+                <b-form-select
+                  :disabled="useBranchAddress"
+                  v-model="customer.country_code"
+                  :options="countries"
+                  size="sm"></b-form-select>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Email')"
+                label-for="customer_email"
+              >
+                <b-form-input
+                  id="customer_email"
+                  size="sm"
+                  v-model="customer.email"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Tel.')"
+                label-for="customer_tel"
+              >
+                <b-form-input
+                  id="customer_tel"
+                  size="sm"
+                  v-model="customer.tel"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Mobile')"
+                label-for="customer_mobile"
+              >
+                <b-form-input
+                  id="customer_mobile"
+                  size="sm"
+                  v-model="customer.mobile"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Contact')"
+                label-for="customer_contact"
+              >
+                <b-form-textarea
+                  id="customer_contact"
+                  v-model="customer.contact"
+                  rows="5"
+                ></b-form-textarea>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Remarks')"
+                label-for="customer_remarks"
+              >
+                <b-form-textarea
+                  id="customer_remarks"
+                  v-model="customer.remarks"
+                  rows="5"
+                ></b-form-textarea>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Maintenance contract')"
+                label-for="customer_maintenance_contract"
+              >
+                <b-form-textarea
+                  id="customer_maintenance_contract"
+                  v-model="customer.maintenance_contract"
+                  rows="5"
+                ></b-form-textarea>
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Standard hours/mins.')"
+                label-for="customer_standard_hours_hour"
+              >
+                <b-form-input
+                  id="customer_standard_hours_hour"
+                  size="sm"
+                  v-model="customer.standard_hours_hour"
+                ></b-form-input>
+                <b-form-select v-model="customer.standard_hours_minute" :options="minutes" size="sm"></b-form-select>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Products without tax?')"
+                label-for="customer_products_without_tax"
+              >
+                <b-form-checkbox
+                  id="customer_products_without_tax"
+                  v-model="customer.products_without_tax"
+                >
+                </b-form-checkbox>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Hourly rate engineer')"
+                label-for="customer_hourly_rate_engineer"
+              >
+                <PriceInput
+                  v-model="customer.hourly_rate_engineer"
+                  :currency="customer.hourly_rate_engineer_currency"
+                  @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
+                />
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Call out costs')"
+                label-for="customer_hourly_rate_engineer"
+              >
+                <PriceInput
+                  v-model="customer.call_out_costs"
+                  :currency="customer.call_out_costs_currency"
+                  @priceChanged="(val) => customer.setCallOutCosts(val)"
+                />
+              </b-form-group>
+            </b-col>
+          </b-row>
         </div>
+
         <div class='panel col-2-3'>
           <div class="branch-section section" v-if="!isCreate && hasBranchPartners">
               <Collapse
@@ -273,64 +353,65 @@
                 </b-row>
                 <hr/>
               </Collapse>
-            </div>
+          </div>
     
             
-            <b-row>
-              <b-col cols="7" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Maintenance contract')"
-                  label-for="customer_maintenance_contract"
+          <b-row>
+            <b-col cols="7" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Maintenance contract')"
+                label-for="customer_maintenance_contract"
+              >
+                <b-form-textarea
+                  id="customer_maintenance_contract"
+                  v-model="customer.maintenance_contract"
+                  rows="5"
+                ></b-form-textarea>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Standard hours/mins.')"
+                label-for="customer_standard_hours_hour"
+              >
+                <b-form-input
+                  id="customer_standard_hours_hour"
+                  size="sm"
+                  v-model="customer.standard_hours_hour"
+                ></b-form-input>
+                <b-form-select v-model="customer.standard_hours_minute" :options="minutes" size="sm"></b-form-select>
+              </b-form-group>
+            </b-col>
+            <b-col cols="3" role="group">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Products without tax?')"
+                label-for="customer_products_without_tax"
+              >
+                <b-form-checkbox
+                  id="customer_products_without_tax"
+                  v-model="customer.products_without_tax"
                 >
-                  <b-form-textarea
-                    id="customer_maintenance_contract"
-                    v-model="customer.maintenance_contract"
-                    rows="5"
-                  ></b-form-textarea>
-                </b-form-group>
-              </b-col>
-              <b-col cols="2" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Standard hours/mins.')"
-                  label-for="customer_standard_hours_hour"
-                >
-                  <b-form-input
-                    id="customer_standard_hours_hour"
-                    size="sm"
-                    v-model="customer.standard_hours_hour"
-                  ></b-form-input>
-                  <b-form-select v-model="customer.standard_hours_minute" :options="minutes" size="sm"></b-form-select>
-                </b-form-group>
-              </b-col>
-              <b-col cols="3" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Products without tax?')"
-                  label-for="customer_products_without_tax"
-                >
-                  <b-form-checkbox
-                    id="customer_products_without_tax"
-                    v-model="customer.products_without_tax"
-                  >
-                  </b-form-checkbox>
-                </b-form-group>
-              </b-col>
-            </b-row>
-        </div>
-      </div>
-    </div>
-  </div>
+                </b-form-checkbox>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </div> <!-- .panel -->
+      </div> <!-- .flex-columns -->
+    </div> <!-- .page-detail-->
+  </div><!-- .app-page -->
 </template>
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import customerModel from '../../models/customer/Customer.js'
+import customerService, {CustomerModel} from '../../models/customer/Customer.js'
 import partnerModel from '../../models/company/Partner.js'
 import Collapse from '../../components/Collapse.vue'
+import PriceInput from "../../components/PriceInput";
 
 export default {
   setup() {
@@ -343,7 +424,8 @@ export default {
     },
   },
   components: {
-    Collapse
+    Collapse,
+    PriceInput,
   },
   validations() {
     return {
@@ -374,7 +456,7 @@ export default {
       customerId: null,
       minutes: ['00', '15', '30', '45'],
       submitClicked: false,
-      customer: customerModel.getFields(),
+      customer: customerService.getFields(),
       errorMessage: null,
       branchPartners: [],
       branches: [],
@@ -430,8 +512,9 @@ export default {
     }
 
     if (this.isCreate) {
-      this.customer = customerModel.getFields()
-      const result = await customerModel.getCustomerId()
+      const customerData = customerService.getFields()
+      this.customer = new CustomerModel(customerData)
+      const result = await customerService.getCustomerId()
       if (result.created) {
         this.customerIdCreated = true
         this.customer.customer_id = result.customer_id
@@ -469,7 +552,7 @@ export default {
       this.selectedBranch = this.branches.find((branch) => branch.id === this.customer.branch_id)
     },
     async getNewCustomerIdFromLatest() {
-      const data = await customerModel.getNewCustomerIdFromLatest()
+      const data = await customerService.getNewCustomerIdFromLatest()
       this.customer.customer_id = data.result.last_customer_id
     },
     async submitForm() {
@@ -492,7 +575,7 @@ export default {
 
       if (this.isCreate) {
         try {
-          await customerModel.insert(this.customer)
+          await customerService.insert(this.customer)
           this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
           this.isLoading = false
           this.cancelForm()
@@ -509,7 +592,7 @@ export default {
         if (this.customer.branch_partner === null) {
           this.customer.branch_id = null
         }
-        await customerModel.update(this.pk, this.customer)
+        await customerService.update(this.pk, this.customer)
         this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
         this.isLoading = false
         this.cancelForm()
@@ -523,7 +606,9 @@ export default {
       this.isLoading = true
 
       try {
-        this.customer = await customerModel.detail(this.pk)
+        const customerData = await customerService.detail(this.pk)
+        this.customer = new CustomerModel(customerData)
+
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer', error)

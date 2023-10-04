@@ -167,7 +167,7 @@
                     </tr>
                     <tr>
                         <td colspan="2"><b>{{ $trans('Total') }}</b></td>
-                        <td><b>{{ data.assigned_order_extra_work_totals.extra_work }}</b></td>
+                        <td><b>{{ data.assigned_order_activity_totals.extra_work_total }}</b></td>
                     </tr>
                 </tbody>
             </table>

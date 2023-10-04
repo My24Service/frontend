@@ -33,6 +33,11 @@ export default {
   	return {
   		isOpen: false
   	}
+  },
+  methods: {
+    toggleOpen() {
+      this.isOpen = !this.isOpen
+    }
   }
 }
 </script>

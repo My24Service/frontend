@@ -1,68 +1,44 @@
 <template>
-  <div class="app-page">
-    <header>
-      <div class="page-title">
-        <h3><b-icon icon="tools"></b-icon>Equipment</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
-            <ButtonLinkRefresh
-              v-bind:method="function() { loadData() }"
-              v-bind:title="$trans('Refresh')"
-            />
-            <ButtonLinkSearch
-              v-bind:method="function() { showSearchModal() }"
-            />
-          </b-button-group>
-          <router-link class="btn primary" :to="{name: newLink}">Add equipment</router-link>
-        </b-button-toolbar>
-      </div>
-    </header>
-    <div class="panel overflow-auto">
-      <b-table
-        id="equipment-table"
-        small
-        :busy='isLoading'
-        :fields="equipmentFields"
-        :items="equipmentObjects"
-        responsive="md"
-        class="data-table"
-        sort-icon-left
-      >
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(name)="data">
-          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
-            {{ data.item.name }}
-          </router-link>
-        </template>
-        <template #cell(customer)="data">
-            {{ data.item.customer_branch_view.name }} <span class="dimmed"> &middot; {{ data.item.customer_branch_view.city }}</span>
-        </template>
-        <template #cell(branch)="data">
-          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
-            {{ data.item.customer_branch_view.name }} <span class="dimmed"> &middot; {{ data.item.customer_branch_view.city }}</span>
-          </router-link>
-        </template>
-        <template #cell(icons)="data">
-          <div class="float-right">
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-              class="h2"
-            />
-          </div>
-        </template>
-      </b-table>
-    </div>
-    <Pagination
-      v-if="!isLoading"
-      :model="this.model"
-      :model_name="$trans('Equipment')"
-    />
+  <div class="app-grid" v-if="!isLoading">
+
+    <b-modal
+      id="add-state-modal"
+      ref="add-state-modal"
+      v-bind:title="$trans('Add state')"
+      @ok="addState"
+    >
+      <form ref="add-state-form">
+        <b-container>
+          <b-row>
+            <b-col cols="7">
+              <b-form-group
+                v-bind:label="$trans('State')"
+                label-for="add-state-state"
+              >
+                <b-form-input
+                  size="sm"
+                  id="add-state-state"
+                  v-model="state.state"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="5">
+              <b-form-group
+                v-bind:label="$trans('Lifespan')"
+                label-for="add-state-replace_months"
+              >
+                <b-form-input
+                  size="sm"
+                  id="add-state-replace_months"
+                  v-model="state.replace_months"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -77,6 +53,90 @@
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
     </b-modal>
+
+    <div class="overflow-auto">
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Equipment')"
+      />
+
+      <b-table
+        id="equipment-table"
+        small
+        :busy='isLoading'
+        :fields="equipmentFields"
+        :items="equipmentObjects"
+        responsive="md"
+        class="data-table"
+        sort-icon-left
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkAdd
+                  :router_name="newLink"
+                  v-bind:title="$trans('New equipment')"
+                />
+                <ButtonLinkRefresh
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
+                />
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(name)="data">
+          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
+            {{ data.item.name }}
+          </router-link><br/>
+        </template>
+        <template #cell(latest_state)="data">
+          <span v-if="data.item.latest_state">
+            {{ data.item.latest_state.state }}
+            ({{ $trans('replace in ') }} {{ data.item.latest_state.replace_months }} {{ $trans('months') }})
+          </span>
+        </template>
+        <template #cell(customer)="data">
+          <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}">
+            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          </router-link><br/>
+        </template>
+        <template #cell(branch)="data">
+          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
+            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+          </router-link><br/>
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkPlus
+              type="tr"
+              v-bind:title="$trans('Add state')"
+              v-bind:method="function() { showAddStateModal(data.item.id) }"
+            />
+            <IconLinkEdit
+              :router_name="editLink"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 
@@ -92,6 +152,9 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {componentMixin} from "../../utils";
 import locationModel from "../../models/equipment/location";
+import statusModel from "../../models/orders/Status";
+import equipmentStateService, {EquipmentStateModel} from "../../models/equipment/EquipmentState";
+import IconLinkPlus from "../../components/IconLinkPlus";
 
 export default {
   mixins: [componentMixin],
@@ -104,6 +167,7 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
+    IconLinkPlus,
   },
   computed: {
     editLink() {
@@ -136,9 +200,14 @@ export default {
       equipmentObjects: [],
       equipmentFields: [],
       equipmentFieldsCustomerPlanning: [
+
         {key: 'name', label: this.$trans('Equipment'), sortable: true},
         {key: 'customer', label: this.$trans('Customer'), sortable: true},
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
+        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'customer', label: this.$trans('Customer')},
+        {key: 'location_name', label: this.$trans('Location')},
+        {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
@@ -147,24 +216,30 @@ export default {
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'branch', label: this.$trans('Branch')},
         {key: 'brand', label: this.$trans('Brand')},
+        {key: 'location_name', label: this.$trans('Location')},
+        {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsCustomerNonPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'location_name', label: this.$trans('Location')},
+        {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchNonPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'location_name', label: this.$trans('Location')},
+        {key: 'latest_state', label: this.$trans('State')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons', label: ''}
       ],
+      equipment_pk: null,
+      state: new EquipmentStateModel({}),
     }
   },
   async created() {
@@ -190,6 +265,21 @@ export default {
     this.isLoading = false
   },
   methods: {
+    showAddStateModal(id) {
+      this.state.equipment = id
+      this.$refs['add-state-modal'].show()
+    },
+    async addState() {
+      try {
+        await equipmentStateService.insert(this.state)
+        this.state = new EquipmentStateModel({})
+        this.infoToast(this.$trans('Created'), this.$trans('State added'))
+        await this.loadData()
+      } catch(error) {
+        console.log('Error adding state', error)
+        this.errorToast(this.$trans('Error adding state'))
+      }
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

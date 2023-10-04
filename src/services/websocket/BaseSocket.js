@@ -45,13 +45,18 @@ class BaseSocket {
   }
 
   _storeRoom(url, room) {
-    const key = this._getStorageKey(url)
-    localStorage.setItem(key, JSON.stringify(room))
+    if (room) {
+      const key = this._getStorageKey(url)
+      localStorage.setItem(key, JSON.stringify(room))
+    }
   }
 
   _getRoomFromStorage(url, room) {
     const key = this._getStorageKey(url)
-    return JSON.parse(localStorage.getItem(key))
+    const val = localStorage.getItem(key)
+    if (typeof val === "string" && val !== "undefined") {
+      return JSON.parse(val)
+    }
   }
 
   async _getRoom(url) {

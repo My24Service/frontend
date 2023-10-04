@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="orderService">
     <div class="app-page">
       <header>
         <div class="page-title">
@@ -15,6 +15,15 @@
       </header>
 
       <div class="page-detail customer-details" v-if="!isCustomer">
+        <div v-if="!isCustomer">
+        <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
+
+        <CustomerDetail
+          :customer="customer"
+        />
+
+        </div>
+
         <div class='flex-columns'>
           <div class="panel col-1-3">
             <CustomerCard :customer="customer" />
@@ -257,13 +266,79 @@
         -->
       </div>
 
+
+      <div class="spacer"></div>
+
+      <div>
+        <b-row align-h="center">
+          <h3>{{ $trans("Orders") }}</h3>
+        </b-row>
+
+        <SearchModal
+          id="search-modal"
+          ref="search-modal"
+          @do-search="handleSearchOk"
+        />
+
+        <b-pagination
+          v-if="orderService.count > 20"
+          class="pt-4"
+          v-model="currentPage"
+          :total-rows="orderService.count"
+          :per-page="orderService.perPage"
+          aria-controls="customer-orders-table"
+        ></b-pagination>
+
+        <b-table
+          id="customer-orders-table"
+          small
+          :busy='isLoading'
+          :fields="orderFields"
+          :items="orders"
+          responsive="md"
+          class="data-table"
+        >
+          <template #head(icons)="">
+            <div class="float-right">
+              <b-button-toolbar>
+                <b-button-group class="mr-1">
+                  <ButtonLinkRefresh
+                    v-bind:method="function() { loadData() }"
+                    v-bind:title="$trans('Refresh')"
+                  />
+                  <ButtonLinkSearch
+                    v-bind:method="function() { showSearchModal() }"
+                  />
+                </b-button-group>
+              </b-button-toolbar>
+            </div>
+          </template>
+          <template #table-busy>
+            <div class="text-center text-danger my-2">
+              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+              <strong>{{ $trans('Loading...') }}</strong>
+            </div>
+          </template>
+          <template #cell(id)="data">
+            <OrderTableInfo
+              v-bind:order="data.item"
+            />
+          </template>
+        </b-table>
+      </div>
+
+      <footer class="modal-footer">
+        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
+          {{ $trans('Back') }}</b-button>
+      </footer>
+>>>>>>> develop
     </div>
   </b-overlay>
 </template>
 
 <script>
 import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
-import orderModel from '../../models/orders/Order.js'
+import { OrderService } from '../../models/orders/Order.js'
 import customerModel from '../../models/customer/Customer.js'
 import CustomerCard from '../../components/CustomerCard.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -273,6 +348,7 @@ import DocumentList from '../customer/DocumentList.vue'
 import {componentMixin} from "../../utils";
 import locationModel from "../../models/equipment/location";
 import equipmentModel from "../../models/equipment/equipment";
+import CustomerDetail from "../../components/CustomerDetail";
 
 export default {
   mixins: [componentMixin],
@@ -281,14 +357,17 @@ export default {
     OrderTableInfo,
     SearchModal,
     OrderStats,
-    DocumentList
+    DocumentList,
+    CustomerDetail,
+
+
   },
   data() {
     return {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderModel,
+      orderService: new OrderService(),
       buttonDisabled: false,
       customer: customerModel.fields,
       orders: [],
@@ -339,7 +418,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderModel.currentPage = val
+      this.orderService.currentPage = val
       this.loadData()
     }
   },
@@ -347,7 +426,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderModel.setSearchQuery(val)
+      this.orderService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -367,10 +446,10 @@ export default {
           await this.loadMaintenanceContracts()
           this.customer = await customerModel.detail(this.pk)
 
-          const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer(this.pk)
-          const monthsStatsData = await orderModel.getMonthsStatsCustomer(this.pk)
-          const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsCustomer(this.pk)
-          const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsCustomer(this.pk)
+          const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer(this.pk)
+          const monthsStatsData = await this.orderService.getMonthsStatsCustomer(this.pk)
+          const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer(this.pk)
+          const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer(this.pk)
 
           this.$refs['order-stats'].render(
             orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
@@ -389,10 +468,10 @@ export default {
           return
         }
 
-        const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer()
-        const monthsStatsData = await orderModel.getMonthsStatsCustomer()
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsCustomer()
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsCustomer()
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer()
+        const monthsStatsData = await this.orderService.getMonthsStatsCustomer()
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer()
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer()
 
         this.$refs['order-stats'].render(
           orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
@@ -407,7 +486,7 @@ export default {
         this.isLoading = false
 
         // use this in customer dashboard
-        // const bla = await orderModel.getTopXCustomers()
+        // const bla = await orderService.getTopXCustomers()
 
       } catch(error) {
         console.log('error fetching orders or customer detail', error)
@@ -430,17 +509,12 @@ export default {
 
     async loadHistory() {
       try {
-        if (!this.isCustomer) {
-          orderModel.setListArgs(`customer_relation=${this.pk}`)
-          console.log('not Customer', this.pk)
-        }
-        
-        const results = await orderModel.list()
+        const results = await this.orderService.getAllForCustomer(this.pk)
         this.orders = results.results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        console.log('error fetching customer orders', error)
+        this.errorToast(this.$trans('Error fetching customer orders'))
         this.isLoading = false
       }
     }
