@@ -60,7 +60,9 @@
           </div>
         </template>
         <template #cell(picture)="data">
-          <img :src="data.item.picture || NO_IMAGE_URL" height="100" alt=""/>
+          <router-link :to="{name: 'company-picture-edit', params: {pk: data.item.id}}">
+            <img :src="data.item.picture || NO_IMAGE_URL" height="100" alt=""/>
+          </router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -85,7 +87,9 @@
     </div>
   </div>
 </template>
-
+<style scoped>
+img {margin-inline: 0; height: 100%}
+</style>
 <script>
 import pictureModel from '@/models/company/Picture.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
