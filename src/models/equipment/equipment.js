@@ -107,4 +107,4 @@ class EquipmentService extends BaseModel {
 const equipmentService = new EquipmentService()
 
 export default equipmentService
-export  {EquipmentModel}
+export  {EquipmentModel, EquipmentService}

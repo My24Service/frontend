@@ -1,6 +1,5 @@
 import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
-import {toDinero} from "../../utils";
 import {InvoiceLineModel} from "./InvoiceLine";
 
 class InvoiceModel {
@@ -63,3 +62,4 @@ class InvoiceService extends BaseModel {
 const invoiceService = new InvoiceService()
 
 export default invoiceService
+export { InvoiceModel, InvoiceService }
