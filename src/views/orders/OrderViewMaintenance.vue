@@ -25,7 +25,7 @@
           variant="secondary"
         >
           <b-spinner small v-if="isGeneratingPDF"></b-spinner>
-          {{ $trans('re-generate PDF (new)') }}
+          {{ $trans('re-generate PDF') }}
         </b-button>
         <b-link class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
           <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
