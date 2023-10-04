@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import accountModel from '@/models/account/Account.js'
+import accountModel from '../models/account/Account.js'
 
 export default {
   name: "TheLanguageChooser",
@@ -20,7 +20,7 @@ export default {
     async setLanguage(event) {
       try {
         await accountModel.setLanguage(this.selected)
-        this.$store.dispatch('setLanguage')
+        await this.$store.dispatch('setLanguage', this.selected)
         window.location.reload()
       } catch (error) {
         console.log(error)

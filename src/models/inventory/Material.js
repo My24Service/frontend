@@ -2,6 +2,7 @@ import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
 
 class MaterialModel {
+  default_currency
   name_short
   name
   identifier

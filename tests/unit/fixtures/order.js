@@ -28,6 +28,7 @@ export default {
         "documents": [],
         "materials": [],
         'maintenance_product_lines': [],
+        "invoices": [],
         "statusses": [
             {
                 "id": 4985,

@@ -5,12 +5,15 @@ let priceMixin = {
     for (let i=0; i<this.priceFields.length; i++) {
       const field = this.priceFields[i]
       const currency_field = `${field}_currency`
+      const currency = obj['default_currency'] ? obj['default_currency'] : obj[currency_field]
 
-      if (obj[field] && obj[currency_field]) {
-        const dinero = toDinero(obj[field], obj[currency_field])
+      if (obj[field] && currency) {
+        const dinero = toDinero(obj[field], currency)
         this.setPriceField(field, dinero)
       } else {
-        console.debug(`not all fields here for field: ${field}`)
+        console.debug(
+          `not all fields here for field: ${field} (val: ${obj[field]}, currency: ${obj[currency_field]})`, obj
+        )
       }
     }
   },

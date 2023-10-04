@@ -11,7 +11,7 @@ import {
   SET_STATUSCODES,
   SET_ASSIGN_ORDERS,
   SET_UNACCEPTED_COUNT,
-  SET_MAINTENANCE_PRODUCTS,
+  SET_MAINTENANCE_EQUIPMENT,
   SET_STREAM_INFO,
 } from './mutation-types'
 
@@ -25,8 +25,8 @@ export const actions = {
   setAssignOrders({commit}, orders) {
     commit(SET_ASSIGN_ORDERS, orders)
   },
-  setMaintenanceProducts({commit}, maintenanceProducts) {
-    commit(SET_MAINTENANCE_PRODUCTS, maintenanceProducts)
+  setMaintenanceEquipment({commit}, maintenanceEquipment) {
+    commit(SET_MAINTENANCE_EQUIPMENT, maintenanceEquipment)
   },
   setLanguage({commit}, language) {
     commit(SET_LANGUAGE, language)

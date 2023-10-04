@@ -14,7 +14,7 @@ if (tomorrow.day() === 6) {
 }
 
 
-class Order extends BaseModel {
+class OrderService extends BaseModel {
   fields = {
     'customer_id': '',
     'order_name': '',
@@ -278,11 +278,43 @@ class Order extends BaseModel {
   }
 
   async getAllForCustomer(customer_pk) {
-    const url = `${this.url}all_for_customer_web/?customer_id=${customer_pk}`
-    return this.axios.get(url).then((response) => response.data)
+    const baseUrl = `${this.url}all_for_customer_web/?customer_id=${customer_pk}`
+
+    const listArgs = []
+
+    listArgs.push(`page=${this.currentPage}`)
+
+    if (this.searchQuery) {
+      listArgs.push(`q=${this.searchQuery}`)
+    }
+
+    if (this.sort) {
+      listArgs.push(`order_by=${this.sort}`)
+    }
+
+    if (this.listArgs.length) {
+      for (const arg of this.listArgs) {
+        listArgs.push(arg)
+      }
+    }
+
+    const url = `${baseUrl}&${listArgs.join('&')}`
+
+    const response = await this.axios.get(url)
+
+    if ('count' in response.data) {
+      this.count = response.data.count
+    }
+
+    if ('num_pages' in response.data) {
+      this.numPages = response.data.num_pages
+    }
+
+    return response.data
   }
 }
 
-let orderModel = new Order()
+let orderService = new OrderService()
 
-export default orderModel
+export default orderService
+export { OrderService }

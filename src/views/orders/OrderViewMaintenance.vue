@@ -1,5 +1,83 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
+
+    <b-modal
+      v-if="purchaseInvoice && hasBranches"
+      id="delete-purchase-invoice-modal"
+      ref="delete-purchase-invoice-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDeletePurchaseInvoice"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this purchase invoice?') }}</p>
+    </b-modal>
+
+    <b-modal
+      v-if="purchaseInvoice && hasBranches"
+      id="add-purchase-invoice-modal"
+      ref="add-purchase-invoice-modal"
+      v-bind:title="$trans('Add purchase invoice')"
+      @ok="doAddPurchaseInvoice"
+    >
+      <form ref="add-purchase-invoice-form">
+        <b-container>
+          <b-row>
+            <b-col cols="6">
+              <b-form-group
+                v-bind:label="$trans('VAT')"
+                label-for="add-purchase-invoice-vat"
+              >
+                <PriceInput
+                  id="add-purchase-invoice-vat"
+                  v-model="purchaseInvoice.vat"
+                  :currency="purchaseInvoice.vat_currency"
+                  @priceChanged="(val) => vatChanged(val)"
+                />
+              </b-form-group>
+            </b-col>
+            <b-col cols="6">
+              <b-form-group
+                v-bind:label="$trans('Total')"
+                label-for="add-purchase-invoice-total"
+              >
+                <PriceInput
+                  id="add-purchase-invoice-total"
+                  v-model="purchaseInvoice.total"
+                  :currency="purchaseInvoice.total_currency"
+                  @priceChanged="(val) => totalChanged(val)"
+                />
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="4">
+              <b-form-group
+                v-bind:label="$trans('Reference')"
+                label-for="add-purchase-invoice-reference"
+              >
+                <b-form-input
+                  size="sm"
+                  id="add-purchase-invoice-reference"
+                  v-model="purchaseInvoice.reference"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="8">
+              <b-form-group
+                v-bind:label="$trans('Description')"
+                label-for="add-purchase-invoice-description"
+              >
+                <b-form-textarea
+                  id="add-purchase-invoice-description"
+                  v-model="purchaseInvoice.description"
+                  rows="1"
+                ></b-form-textarea>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
     <div class="app-detail" v-if="order">
       <h3>{{ $trans('Order info') }}</h3>
       <b-row>
@@ -67,6 +145,10 @@
             <b-tr>
               <b-td><strong>{{ $trans('Order type') }}:</strong></b-td>
               <b-td>{{ order.order_type }}</b-td>
+            </b-tr>
+            <b-tr>
+              <b-td><strong>{{ $trans('Remarks') }}:</strong></b-td>
+              <b-td>{{ order.remarks }}</b-td>
             </b-tr>
           </b-table-simple>
         </b-col>
@@ -156,6 +238,68 @@
           ></b-table>
         </b-col>
       </b-row>
+      <b-row v-if="order.invoices.length">
+        <hr/>
+        <b-col cols="12">
+          <h4>{{ $trans('Invoices') }}</h4>
+          <b-container>
+            <b-row v-for="invoice of order.invoices" :key="invoice.uuid">
+              <b-col cols="12">
+                <router-link :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}">
+                  {{ $trans('Invoice') }} {{ invoice.invoice_id }}
+                </router-link><br/>
+              </b-col>
+            </b-row>
+          </b-container>
+        </b-col>
+      </b-row>
+      <b-row v-if="hasBranches">
+        <hr/>
+        <b-col cols="12">
+          <div class="purchase-invoices-table">
+            <h4>{{ $trans('Purchase invoices') }}</h4>
+            <b-table
+              id="purchase-invoices-table"
+              small
+              :busy='isLoading'
+              :fields="purchaseInvoiceFields"
+              :items="order.purchaseInvoices"
+              responsive="md"
+              class="data-table"
+              sort-icon-left
+            >
+              <template #head(icons)="">
+                <div class="float-right">
+                  <b-button-toolbar>
+                    <b-button-group class="mr-1">
+                      <IconLinkPlus
+                        type="th"
+                        :method="addPurchaseInvoice"
+                        :title="$trans('New purchase invoice')"
+                      />
+                    </b-button-group>
+                  </b-button-toolbar>
+                </div>
+              </template>
+              <template #cell(vat)="data">
+                {{ data.item.vat_dinero.toFormat('$0.00') }}
+              </template>
+              <template #cell(total)="data">
+                {{ data.item.total_dinero.toFormat('$0.00') }}
+              </template>
+              <template #cell(icons)="data">
+                <div class="h2 float-right">
+                  <IconLinkDelete
+                    v-bind:title="$trans('Delete')"
+                    v-bind:method="function() { showDeletePurchaseInvoiceModal(data.item.id) }"
+                  />
+                </div>
+              </template>
+            </b-table>
+
+          </div>
+        </b-col>
+      </b-row>
       <footer class="modal-footer">
         <b-button
           v-if="!past && !isCustomer && !isBranchEmployee"
@@ -176,16 +320,25 @@
 </template>
 
 <script>
-import orderModel from '@/models/orders/Order.js'
-import { componentMixin } from '@/utils'
+import orderModel from '../../models/orders/Order.js'
+import { componentMixin } from '../../utils'
+import purchaseInvoiceService from "../../models/orders/PurchaseInvoice";
+import IconLinkPlus from "../../components/IconLinkPlus";
+import PriceInput from "../../components/PriceInput";
+import IconLinkDelete from "../../components/IconLinkDelete";
 
 export default {
   mixins: [componentMixin],
+  components: {
+    IconLinkPlus,
+    PriceInput,
+    IconLinkDelete,
+  },
   data() {
     return {
       isLoading: false,
       buttonDisabled: false,
-      order: orderModel.getFields(),
+      order: null,
       orderLineFields: [
         { key: 'product', label: this.$trans('Product') },
         { key: 'location', label: this.$trans('Location') },
@@ -201,7 +354,16 @@ export default {
       extraDataFields: [
         { key: 'statuscode', label: this.$trans('Status') },
         { key: 'extra_data', label: this.$trans('Text') },
-      ]
+      ],
+      purchaseInvoiceFields: [
+        { key: 'reference', label: this.$trans('Reference') },
+        { key: 'description', label: this.$trans('Description') },
+        { key: 'vat', label: this.$trans('VAT') },
+        { key: 'total', label: this.$trans('Total') },
+        { key: 'icons' },
+      ],
+      purchaseInvoice: null,
+      deletePurchaseInvoicePk: null,
     }
   },
   props: {
@@ -219,6 +381,39 @@ export default {
     },
   },
   methods: {
+    // purchase invoices
+    async doDeletePurchaseInvoice() {
+      await purchaseInvoiceService.delete(this.deletePurchaseInvoicePk)
+      await this.loadOrder()
+    },
+    showDeletePurchaseInvoiceModal(id) {
+      this.deletePurchaseInvoicePk = id
+      this.$refs['delete-purchase-invoice-modal'].show()
+    },
+    async doAddPurchaseInvoice() {
+      await purchaseInvoiceService.insert(this.purchaseInvoice)
+      this.purchaseInvoice = this.newPurchaseInvoiceModel()
+      await this.loadOrder()
+    },
+    vatChanged(priceDinero) {
+      this.purchaseInvoice.setPriceField('vat', priceDinero)
+    },
+    totalChanged(priceDinero) {
+      this.purchaseInvoice.setPriceField('total', priceDinero)
+    },
+    newPurchaseInvoiceModel() {
+      return new purchaseInvoiceService.model({
+        order: this.order.id,
+        vat: '0.00',
+        total: '0.00',
+        default_currency: this.$store.getters.getDefaultCurrency
+      })
+    },
+    addPurchaseInvoice() {
+      this.$refs['add-purchase-invoice-modal'].show()
+    },
+
+    // the rest
     openWorkorder() {
       const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
       window.open(`${document.location.origin}/${routeData.href}`, '_blank')
@@ -248,6 +443,17 @@ export default {
 
       try {
         this.order = this.pk !== null ? await orderModel.detail(this.pk) : await orderModel.detailUuid(this.uuid)
+
+        if (this.hasBranches) {
+          purchaseInvoiceService.setListArgs(`order=${this.order.id}`)
+          const purchaseInvoiceData = await purchaseInvoiceService.list()
+          this.order.purchaseInvoices = purchaseInvoiceData.results.map(
+            (m) => new purchaseInvoiceService.model({
+              ...m, default_currency: this.$store.getters.getDefaultCurrency
+            })
+          )
+          this.purchaseInvoice = this.newPurchaseInvoiceModel()
+        }
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
@@ -263,4 +469,7 @@ export default {
 </script>
 
 <style scoped>
+.purchase-invoices-table {
+  padding-top: 10px;
+}
 </style>

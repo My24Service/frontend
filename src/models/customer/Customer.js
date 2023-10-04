@@ -2,6 +2,7 @@ import BaseModel from '../base'
 import priceMixin from "../../mixins/price";
 
 class CustomerModel {
+  default_currency
   id
   name
   address

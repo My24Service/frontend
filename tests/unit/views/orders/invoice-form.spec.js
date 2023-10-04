@@ -16,8 +16,14 @@ import invoiceResponse from '../../fixtures/invoiceData'
 import customerResponse from '../../fixtures/customer.js'
 import costsCocResponse from '../../fixtures/order_cost_coc'
 import {CustomerModel} from "../../../../src/models/customer/Customer";
-import {HOURS_TYPE_WORK} from "../../../../src/views/orders/invoice_form/constants";
 import {RateEngineerUserModel} from "../../../../src/models/company/UserEngineer";
+import {
+  COST_TYPE_ACTUAL_WORK, COST_TYPE_CALL_OUT_COSTS, COST_TYPE_DISTANCE,
+  COST_TYPE_EXTRA_WORK,
+  COST_TYPE_TRAVEL_HOURS,
+  COST_TYPE_USED_MATERIALS,
+  COST_TYPE_WORK_HOURS
+} from "../../../../src/models/orders/Cost";
 
 jest.mock('axios')
 
@@ -39,7 +45,19 @@ axios.get.mockImplementation((url) => {
       return Promise.resolve(invoiceResponse)
     case '/customer/customer/424/':
       return Promise.resolve(customerResponse)
-    case '/order/cost/?page=1&order=null&cost_type=call_out_costs':
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_USED_MATERIALS}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_WORK_HOURS}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_TRAVEL_HOURS}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_EXTRA_WORK}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_ACTUAL_WORK}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_DISTANCE}`:
+      return Promise.resolve(emptyCosts)
+    case `/order/cost/?page=1&order=null&cost_type=${COST_TYPE_CALL_OUT_COSTS}`:
       return Promise.resolve(emptyCosts)
     default:
       console.log(url)
@@ -181,7 +199,7 @@ describe('CallOutCosts', () => {
     })
   })
 
-  it('has 4 HeaderCells', async () => {
+  it('has 3 HeaderCells', async () => {
     const wrapper = shallowMount(CallOutCosts, {
       localVue,
       store,
@@ -190,14 +208,15 @@ describe('CallOutCosts', () => {
       },
       propsData: {
         invoice_default_call_out_costs: '0.00',
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: []
       }
     })
 
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(4)
+    expect(trs.length).to.equal(3)
   })
 
   it('has a total of €10.50', async () => {
@@ -209,7 +228,8 @@ describe('CallOutCosts', () => {
       },
       propsData: {
         invoice_default_call_out_costs: '10.50',
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: []
       }
     })
 
@@ -230,7 +250,7 @@ describe('Distance', () => {
     })
   })
 
-  it('has 7 HeaderCells', async () => {
+  it('has 6 HeaderCells', async () => {
     const wrapper = shallowMount(Distance, {
       localVue,
       store,
@@ -242,14 +262,15 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total,
-        invoice_default_price_per_km: '1.00'
+        invoice_default_price_per_km: '1.00',
+        invoiceLinesParent: [],
       }
     })
 
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(7)
+    expect(trs.length).to.equal(6)
   })
 
   it('has a total of €325.00', async () => {
@@ -264,7 +285,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total,
-        invoice_default_price_per_km: '1.00'
+        invoice_default_price_per_km: '1.00',
+        invoiceLinesParent: [],
       }
     })
 
@@ -287,7 +309,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total,
-        invoice_default_price_per_km: '1.00'
+        invoice_default_price_per_km: '1.00',
+        invoiceLinesParent: [],
       }
     })
 
@@ -309,7 +332,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total,
-        invoice_default_price_per_km: '1.00'
+        invoice_default_price_per_km: '1.00',
+        invoiceLinesParent: [],
       }
     })
 
@@ -351,7 +375,8 @@ describe('Distance', () => {
         engineer_models: invoiceResponse.data.engineer_models,
         customer: new CustomerModel(customerResponse.data),
         distance_total: invoiceResponse.data.activity_totals.distance_total * digit,
-        invoice_default_price_per_km: '1.15'
+        invoice_default_price_per_km: '1.15',
+        invoiceLinesParent: [],
       }
     })
 
@@ -378,7 +403,7 @@ describe('Materials', () => {
     })
   })
 
-  it('has 6 HeaderCells', async () => {
+  it('has 5 HeaderCells', async () => {
     const wrapper = shallowMount(Materials, {
       localVue,
       store,
@@ -389,17 +414,18 @@ describe('Materials', () => {
         material_models: invoiceResponse.data.material_models,
         used_materials: invoiceResponse.data.used_materials,
         engineer_models: invoiceResponse.data.engineer_models,
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: [],
       }
     })
 
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(6)
+    expect(trs.length).to.equal(5)
   })
 
-  it('has a total of €20.50 and VAT €4.30', async () => {
+  it('has a total of €53.50 and VAT €4.30', async () => {
     const wrapper = mount(Materials, {
       localVue,
       store,
@@ -410,24 +436,18 @@ describe('Materials', () => {
         material_models: invoiceResponse.data.material_models,
         engineer_models: invoiceResponse.data.engineer_models,
         used_materials: invoiceResponse.data.used_materials,
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: [],
       }
     })
-
-    // 4x 947 a 1.25 = 5, vat 1.05
-    // 4x 1001 a 0.75 = 3, vat 0.63
-    // 50x 955 a 0.25 = 12.5, vat 2.63
-    // total 20.5, vat 4.30
-
-    // amount is DecimalField(decimal_places=2)
 
     await flushPromises()
 
     const total_input = wrapper.find('input.total-input-final')
-    expect(total_input.element.value).to.equal('€20.50')
+    expect(total_input.element.value).to.equal('€53.50')
 
     const vat_input = wrapper.find('input.vat-input-final')
-    expect(vat_input.element.value).to.contain("€4.30")
+    expect(vat_input.element.value).to.contain("€11.24")
   })
   //
 })
@@ -441,7 +461,7 @@ describe('Hours', () => {
     })
   })
 
-  it('has 6 HeaderCells', async () => {
+  it('has 4 HeaderCells', async () => {
     const engineer_models = invoiceResponse.data.engineer_models.map((m) => new RateEngineerUserModel({
       ...m,
       margin_perc: 0
@@ -454,21 +474,22 @@ describe('Hours', () => {
         $trans: (f) => f
       },
       propsData: {
-        type: HOURS_TYPE_WORK,
+        type: COST_TYPE_WORK_HOURS,
         hours_total: invoiceResponse.data.activity_totals.work_total,
         user_totals: invoiceResponse.data.activity_totals.user_totals,
         engineer_models,
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: [],
       }
     })
 
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(5)
+    expect(trs.length).to.equal(4)
   })
 
-  it('has a total of €230.00 and VAT €48.30', async () => {
+  it('has a total of €365.00 and VAT €76.65', async () => {
     const engineer_models = invoiceResponse.data.engineer_models.map((m) => new RateEngineerUserModel({
       ...m,
       margin_perc: 0
@@ -481,11 +502,12 @@ describe('Hours', () => {
         $trans: (f) => f
       },
       propsData: {
-        type: HOURS_TYPE_WORK,
+        type: COST_TYPE_WORK_HOURS,
         hours_total: invoiceResponse.data.activity_totals.work_total,
         user_totals: invoiceResponse.data.activity_totals.user_totals,
         engineer_models,
-        customer: new CustomerModel(customerResponse.data)
+        customer: new CustomerModel(customerResponse.data),
+        invoiceLinesParent: [],
       }
     })
 

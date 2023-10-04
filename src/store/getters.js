@@ -79,4 +79,10 @@ export const getters = {
   getDefaultCurrency(state) {
     return state.memberInfo.settings.default_currency
   },
+  getInvoiceDefaultTermOfPaymentDays(state) {
+    return state.memberInfo.settings.invoice_default_term_of_payment_days
+  },
+  getMaintenanceEquipment(state) {
+    return state.maintenanceEquipment
+  }
 }

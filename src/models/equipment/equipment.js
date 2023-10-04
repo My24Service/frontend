@@ -1,6 +1,39 @@
 import BaseModel from '../base'
+import priceMixin from "../../mixins/price";
 
-class Equipment extends BaseModel {
+class EquipmentModel {
+  customer
+  branch
+  location
+  name
+  brand
+  identifier
+  description
+  installation_date
+  production_date
+  serialnumber
+  standard_hours
+  default_replace_months
+  latest_state
+  price
+  price_currency
+  created
+  modified
+
+  priceFields = ['price']
+
+  constructor(equipment) {
+    for (const [k, v] of Object.entries(equipment)) {
+      this[k] = v
+    }
+    this.setPriceFields(this)
+  }
+}
+
+Object.assign(EquipmentModel.prototype, priceMixin);
+
+class EquipmentService extends BaseModel {
+  model = EquipmentModel
   fields = {
     'customer': null,
     'branch': null,
@@ -71,6 +104,7 @@ class Equipment extends BaseModel {
   }
 }
 
-const equipmentModel = new Equipment()
+const equipmentService = new EquipmentService()
 
-export default equipmentModel
+export default equipmentService
+export  {EquipmentModel}

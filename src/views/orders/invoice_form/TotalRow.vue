@@ -7,7 +7,7 @@
       <span class="total-text items-total">{{ items_total }}</span>
     </b-col>
     <b-col cols="2">
-      <Totals
+      <TotalsInputs
         :total="total"
         :is-final-total="true"
         :vat="total_vat"
@@ -17,12 +17,12 @@
 </template>
 
 <script>
-import Totals from "./Totals";
+import TotalsInputs from "../../../components/TotalsInputs";
 
 export default {
   name: "TotalRow",
   components: {
-    Totals,
+    TotalsInputs,
   },
   props: {
     items_total: {

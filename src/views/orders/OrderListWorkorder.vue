@@ -127,10 +127,10 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-<!--            <router-link class="px-1" v-if="data.item.customer_relation" v-bind:title="`$trans('Create invoice')`"-->
-<!--                         :to="{name: 'order-invoice-create', params: {uuid: data.item.uuid}}">-->
-<!--              <b-icon-currency-dollar></b-icon-currency-dollar>-->
-<!--            </router-link>-->
+            <router-link class="px-1" v-if="data.item.customer_relation" v-bind:title="`$trans('Create invoice')`"
+                         :to="{name: 'order-invoice-create', params: {uuid: data.item.uuid}}">
+              <b-icon-currency-dollar></b-icon-currency-dollar>
+            </router-link>
             <IconLinkPlus
               type="tr"
               v-bind:title="$trans('Change status')"
@@ -144,7 +144,7 @@
 </template>
 
 <script>
-import orderWorkorderModel from '../../models/orders/OrderWorkorder.js'
+import { OrderWorkorderService } from '../../models/orders/OrderWorkorder.js'
 import statusModel from '../../models/orders/Status.js'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -177,7 +177,7 @@ export default {
     return {
       sortMode: 'default',
       searchQuery: null,
-      model: orderWorkorderModel,
+      model: new OrderWorkorderService(),
       status: {
         statuscode: '',
         extra_text: ''

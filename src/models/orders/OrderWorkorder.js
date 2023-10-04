@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class OrderWorkorder extends BaseModel {
+class OrderWorkorderService extends BaseModel {
   fields = {
 
   }
@@ -10,6 +10,7 @@ class OrderWorkorder extends BaseModel {
 
 }
 
-let orderWorkorderModel = new OrderWorkorder()
+let orderWorkorderModelService = new OrderWorkorderService()
 
-export default orderWorkorderModel
+export default orderWorkorderModelService
+export { OrderWorkorderService }

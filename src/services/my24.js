@@ -7,7 +7,7 @@ class My24 extends BaseModel {
   }
 
   getLanguageVars() {
-    return this.axios.get('/get-language-vars/').then((response) => response.data)
+    return this.axios.get('/get-language-vars/', {withCredentials:true}).then((response) => response.data)
   }
 
   getParameterByName(name, url) {

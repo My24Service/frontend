@@ -14,20 +14,6 @@
         ></b-form-input>
       </b-col>
     </b-row>
-    <b-row v-if="!isFinalTotal">
-      <b-col cols="4">
-        <span v-if="!isFinalTotal" class="value-container">{{ $trans("Margin") }}</span>
-        <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("Margin") }}</span>
-      </b-col>
-      <b-col cols="8">
-        <b-form-input
-          readonly
-          :value="margin.toFormat('$0.00')"
-          size="sm"
-          :class="marginClass"
-        ></b-form-input>
-      </b-col>
-    </b-row>
     <b-row>
       <b-col cols="4">
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
@@ -47,13 +33,9 @@
 
 <script>
 export default {
-  name: "InvoiceFormTotals",
+  name: "TotalsInputs",
   props: {
     vat: {
-      type: [Object],
-      default: null
-    },
-    margin: {
       type: [Object],
       default: null
     },
@@ -75,10 +57,6 @@ export default {
       let base = 'input-total-used'
       return this.isFinalTotal ? `${base} vat-input-final` : `${base} vat-input`
     },
-    marginClass() {
-      let base = 'input-total-used'
-      return this.isFinalTotal ? `${base} margin-input-final` : `${base} margin-input`
-    },
   }
 }
 </script>
@@ -95,11 +73,5 @@ export default {
   padding-left: 4px;
   font-size: 14px;
   font-weight: bold;
-}
-.input-total-used {
-  width: 90px;
-  padding: 1px;
-  margin: 1px;
-  text-align: right;
 }
 </style>
