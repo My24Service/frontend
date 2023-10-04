@@ -382,10 +382,10 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import customerModel from '../../models/customer/Customer.js'
-import maintenanceContractService from '../../models/customer/MaintenanceContract.js'
-import maintenanceEquipmentService from "../../models/customer/MaintenanceEquipment";
-import equipmentModel from "../../models/equipment/equipment";
+import { CustomerService } from '../../models/customer/Customer.js'
+import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
+import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
+import { EquipmentService } from "../../models/equipment/equipment";
 import {componentMixin} from "../../utils";
 import PriceInput from "../../components/PriceInput";
 
@@ -436,10 +436,12 @@ export default {
     return {
       isLoading: false,
       submitClicked: false,
-      maintenanceContractService,
-      maintenanceEquipmentService,
+      maintenanceContractService: new MaintenanceContractService(),
+      maintenanceEquipmentService: new MaintenanceEquipmentService(),
+      customerService: new CustomerService(),
+      equipmentService: new EquipmentService(),
       errorMessage: null,
-      customer: customerModel.getFields(),
+      customer: null,
       customers: [],
       getCustomersDebounced: null,
       getEquipmentDebounced: null,
@@ -479,7 +481,7 @@ export default {
     if (this.isCreate) {
       this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
       this.maintenanceContractService.newEditItem()
-      this.customer = new customerModel.model({})
+      this.customer = new this.customerService.model({})
     } else {
       await this.loadData()
     }
@@ -501,7 +503,7 @@ export default {
     },
     async getCustomers(query) {
       try {
-        this.customers = await customerModel.search(query)
+        this.customers = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
@@ -541,8 +543,8 @@ export default {
 
       try {
         const response = this.isPlanning || this.isStaff || this.isSuperuser ?
-          await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.customer.id) :
-          await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
+          await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.customer.id) :
+          await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
         this.maintenanceEquipment.equipment = response.id
         this.maintenanceEquipment.equipment_name = response.name
@@ -555,7 +557,7 @@ export default {
     },
     async getEquipment(query) {
       try {
-        this.equipmentSearch = await equipmentModel.searchCustomer(query, this.customer.id)
+        this.equipmentSearch = await this.equipmentService.searchCustomer(query, this.customer.id)
       } catch(error) {
         console.log('Error searching equipment', error)
         this.errorToast(this.$trans('Error searching equipment'))
@@ -667,7 +669,7 @@ export default {
         this.maintenanceContractService.editItem = new this.maintenanceContractService.model(
           {...data, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
         )
-        this.customer = await customerModel.detail(this.maintenanceContractService.editItem.customer)
+        this.customer = await this.customerService.detail(this.maintenanceContractService.editItem.customer)
 
         this.maintenanceEquipmentService.setListArgs(`contract=${this.pk}`)
         const equipmentData = await this.maintenanceEquipmentService.list()

@@ -172,4 +172,4 @@ class CustomerService extends BaseModel {
 }
 
 export default new CustomerService()
-export { CustomerPriceModel, CustomerModel }
+export { CustomerPriceModel, CustomerModel, CustomerService }
