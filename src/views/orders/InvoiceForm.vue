@@ -552,8 +552,8 @@
 </template>
 
 <script>
-import invoiceService from '../../models/orders/Invoice.js'
-import invoiceLineService from '../../models/orders/InvoiceLine.js'
+import { InvoiceService, InvoiceModel } from '../../models/orders/Invoice.js'
+import { InvoiceLineService } from '../../models/orders/InvoiceLine.js'
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
 import materialService, {MaterialModel} from "../../models/inventory/Material";
@@ -615,7 +615,7 @@ export default {
 
       isLoading: false,
       submitClicked: false,
-      invoice: new invoiceService.model({
+      invoice: new InvoiceModel({
         total: "0.00",
         total_currency: this.$store.getters.getDefaultCurrency,
         vat: "0.00",
@@ -650,8 +650,8 @@ export default {
       customerPk: null,
       customer: null,
 
-      invoiceService,
-      invoiceLineService,
+      invoiceService: new InvoiceService(),
+      invoiceLineService: new InvoiceLineService(),
       deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
     }
@@ -683,7 +683,7 @@ export default {
     this.invoiceLineService.newEditItem()
 
     // get invoice data
-    const invoiceData = await invoiceService.getData(this.uuid)
+    const invoiceData = await this.invoiceService.getData(this.uuid)
 
     // get customer
     this.customerPk = invoiceData.customer_pk
@@ -832,7 +832,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.invoice = await invoiceService.detail(this.pk)
+        this.invoice = await this.invoiceService.detail(this.pk)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoice', error)

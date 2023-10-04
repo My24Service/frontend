@@ -98,4 +98,4 @@ class InvoiceLineService extends BaseModel {
 
 export default new InvoiceLineService()
 
-export { InvoiceLineModel }
+export { InvoiceLineModel, InvoiceLineService }
