@@ -33,21 +33,14 @@
   export default {
     name: "customerCard",
     props: {
-      pk: Number,
-      customer: Object
-    },
-    data() {
-      return {
-        isLoading: true
+      pk: { 
+        type: [Number],
+        default: null
+      },
+      customer: {
+        type: [Object],
+        default: null
       }
-    },
-    methods: {
-      
-    },
-    created() {
-      console.log('created, loading')
-      this.loading = false;
-      
     }
   }
   </script>
