@@ -1,154 +1,168 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container" v-if="!isLoading">
-      <h2 align="center">{{ maintenanceContract.name }}</h2>
+  <div class="app-page" v-if="!isLoading">
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="file-earmark-lock"></b-icon> 
+          <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ $trans('Maintenance contracts') }}</router-link> / 
+          <span>{{ maintenanceContract.name }}</span>
+        </h3>
+        
+      </div>
+    </header>
 
-      <CustomerDetail
-        :customer="customer"
-      />
-
-      <h4 align="center">
-        {{ $trans('Contract value') }}: {{ maintenanceContract.sum_tariffs_dinero.toFormat('$0.00') }}
-      </h4>
-
-      <h4 align="center">
-        {{ $trans('Remarks') }}: {{ maintenanceContract.remarks }}
-      </h4>
-
-      <h4>{{ $trans('Equipment') }}</h4>
-      <div
-        v-if="!isCreate && maintenanceEquipmentService.collection.length > 0"
-      >
-        <b-row>
-          <b-col cols="12">
+    <div class='page-detail'>
+      
+      <div class='flex-columns'>
+      <div class='panel col-1-3'>
+        <h6>{{ $trans('Contract')}}</h6>
+        <dl>
+          <dt>{{ $trans('Value') }}</dt>
+          <dd>{{ maintenanceContract.sum_tariffs_dinero.toFormat('$0.00') }}</dd>
+          <dt>{{ $trans('Remarks') }}</dt>
+          <dd>{{ maintenanceContract.remarks }}</dd>
+        </dl>
+        <h6>{{ $trans('Customer') }}</h6>
+        <CustomerCard :customer="customer"/>
+      </div>
+    
+      <div class='panel col-2-3'>
+        <b-tabs>
+          <b-tab :title="$trans('Equipment')">
+            <!-- equipment select -->
+            <div class="flex-columns" style="justify-content: end;">
+              <span>
+                {{ $trans('Create order?') }}&nbsp;
+                <b-button
+                  @click="selectEquipment"
+                  class="btn btn-primary"
+                  size="sm"
+                  type="button"
+                  variant="primary"
+                  :disabled="isCreate ? 'disabled' : false"
+                >
+                  {{ $trans("Select equipment") }}
+                </b-button>
+              </span>
+            </div>
+            <hr/>
             <div>
-              {{ $trans('Create order?') }}&nbsp;
-              <b-button
-                @click="selectEquipment"
-                class="btn btn-primary"
-                size="sm"
-                type="button"
-                variant="primary"
+              <b-table
+                small
+                :fields="equipmentFieldsCreate"
+                :items="orderLinesData" responsive="md"
               >
-                {{ $trans("Select equipment") }}
-              </b-button>
-            </div>
-          </b-col>
-        </b-row>
-        <b-table
-          small
-          :fields="equipmentFields"
-          :items="maintenanceEquipmentService.collection" responsive="md"
-        >
-          <template #cell(times_per_year)="data">
-            {{ data.item.times_per_year }} ({{ $trans('in orders') }}: {{ data.item.num_order_equipment }})
-          </template>
-          <template #cell(tariff)="data">
-            {{ data.item.tariff_dinero.toFormat('$0.00')}}
-          </template>
-          <template #cell(tariff_total)="data">
-            {{ data.item.tariff_total_dinero.toFormat('$0.00')}}
-          </template>
-        </b-table>
-      </div>
-
-      <div v-if="!isCreate">
-        <b-row align-h="center">
-          <h3>{{ $trans("Orders") }}</h3>
-        </b-row>
-
-        <SearchModal
-          id="search-modal"
-          ref="search-modal"
-          @do-search="handleSearchOk"
-        />
-
-        <b-pagination
-          v-if="ordersMaintenanceService.count > 20"
-          class="pt-4"
-          v-model="currentPage"
-          :total-rows="ordersMaintenanceService.count"
-          :per-page="ordersMaintenanceService.perPage"
-          aria-controls="maintenance-orders-table"
-        ></b-pagination>
-
-        <b-table
-          id="maintenance-orders-table"
-          small
-          :busy='isLoading'
-          :fields="maintenanceOrdersFields"
-          :items="maintenanceOrders"
-          responsive="md"
-          class="data-table"
-        >
-          <template #head(icons)="">
-            <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-                  <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
+                <template #cell(id)="data">
+                  <b-form-checkbox
+                    :id="`equipment${data.item.equipment_pk}`"
+                    v-model="data.item.useAsOrderLine"
+                  >
+                    {{ data.item.id }}
+                  </b-form-checkbox>
+                </template>
+                  <template #cell(frequency)="data">
+                    <span>
+                      <strong>{{ data.item.times_per_year }}</strong> &times; {{ $trans('yearly') }}
+                    </span>
+                    <small class="dimmed">({{ data.item.num_order_equipment }} {{ $trans('in orders') }})</small>
+                </template>
+                <template #cell(amount)="data">
+                  <b-form-group
+                  label-cols="4">
+                  <b-form-input
+                    :value="`${data.item.amount}`"
+                    v-model="data.item.amount"
+                    type="number"
+                    min="1"
                   />
-                  <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
-                  />
-                </b-button-group>
-              </b-button-toolbar>
+                </b-form-group>
+                </template>
+              </b-table>
+      
+              
+                <footer class="modal-footer">
+                  <b-button @click="cancelForm" class="btn btn-secondary" type="reset" variant="secondary">
+                    {{ $trans('Cancel') }}
+                  </b-button>
+                  <b-button @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary">
+                    {{ $trans('Submit') }}
+                  </b-button>
+                </footer>
+              
             </div>
-          </template>
-          <template #cell(id)="data">
-            <OrderTableInfo
-              v-bind:order="data.item"
+          
+            <!-- equipment list -->
+            <div v-if="maintenanceEquipmentService.collection.length > 0" >
+              <b-table
+                
+                :fields="equipmentFields"
+                :items="maintenanceEquipmentService.collection" responsive="md"
+              >
+                <template #cell(times_per_year)="data">
+                  <span>
+                    <strong>{{ data.item.times_per_year }}</strong> &times; {{ $trans('yearly') }}
+                  </span>
+                  <small class="dimmed">({{ data.item.num_order_equipment }} {{ $trans('in orders') }})</small>
+                </template>
+                <template #cell(tariff)="data">
+                  <div style="text-align: end;">{{ data.item.tariff_dinero.toFormat('$0.00')}}</div>
+                </template>
+                <template #cell(tariff_total)="data">
+                  <div style="text-align: end;">{{ data.item.tariff_total_dinero.toFormat('$0.00')}}</div>
+                </template>
+              </b-table>
+            </div>
+          </b-tab>
+          <b-tab 
+          :title="`${$trans('Orders')} (${maintenanceOrders.length})`"
+          >
+            <!-- orders -->
+            <SearchModal
+              id="search-modal"
+              ref="search-modal"
+              @do-search="handleSearchOk"
             />
-          </template>
-        </b-table>
-      </div>
+            <div class="flex-columns" style="justify-content: end;">
+              <span>
+                <b-button-toolbar>
+                  <b-button-group class="mr-1">
+                    <ButtonLinkRefresh
+                      v-bind:method="function() { loadData() }"
+                      v-bind:title="$trans('Refresh')"
+                    />
+                    <ButtonLinkSearch
+                      v-bind:method="function() { showSearchModal() }"
+                    />
+                  </b-button-group>
+                </b-button-toolbar>
+              </span>
+            </div>
+            <hr/>
+            <ul class='listing order-list' v-if="!isLoading">
+              <li v-if="!maintenanceOrders.length">
+                <div style="text-align: center;">{{ $trans('No orders for') }} {{ $trans('contract')}}.</div>
+              </li>
+              <li v-for="item in maintenanceOrders" >
+                <OrderTableInfo v-bind:order="item" /> 
+              </li>
+            </ul>
+            <b-pagination
+              v-if="ordersMaintenanceService.count > 20"
+              class="pt-4"
+              v-model="currentPage"
+              :total-rows="ordersMaintenanceService.count"
+              :per-page="ordersMaintenanceService.perPage"
+              aria-controls="maintenance-orders-table"
+            ></b-pagination>
 
-      <div
-        v-if="isCreate"
-      >
-        <b-table
-          small
-          :fields="equipmentFieldsCreate"
-          :items="orderLinesData" responsive="md"
-        >
-          <template #cell(id)="data">
-            <b-form-checkbox
-              :id="`equipment${data.item.equipment_pk}`"
-              v-model="data.item.useAsOrderLine"
-            >
-              {{ data.item.id }}
-            </b-form-checkbox>
-          </template>
-          <template #cell(amount)="data">
-            <b-form-input
-              :value="`${data.item.amount}`"
-              v-model="data.item.amount"
-            >
-            </b-form-input>
-            {{ $trans('Times / year') }}: <b>{{ data.item.times_per_year }}</b><br/>
-            {{ $trans('done so far') }}: <b>{{ data.item.num_order_equipment }}</b><br/>
-          </template>
-        </b-table>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
-              {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-          </footer>
-        </div>
-
-      </div>
-      <br/>
-      <br/>
-      <br/>
-      <br/>
-    </div>
-  </b-overlay>
+          </b-tab>
+        </b-tabs>
+        
+      </div><!-- .panel -->
+      </div><!-- .flex-columns -->
+      
+    </div><!-- .page-detail -->
+  </div><!-- .app-page -->
 </template>
 
 <script>
@@ -156,6 +170,7 @@ import { MaintenanceContractService } from '../../models/customer/MaintenanceCon
 import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
 import {componentMixin} from "../../utils";
 import CustomerDetail from "../../components/CustomerDetail";
+import CustomerCard from "../../components/CustomerCard";
 import {OrdersMaintenanceService} from '../../models/orders/OrdersMaintenance'
 import ButtonLinkRefresh from "../../components/ButtonLinkRefresh";
 import ButtonLinkSearch from "../../components/ButtonLinkSearch";
@@ -166,6 +181,7 @@ export default {
   mixins: [componentMixin],
   components: {
     CustomerDetail,
+    CustomerCard,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     OrderTableInfo,
@@ -191,21 +207,22 @@ export default {
 
       equipmentFields: [
         { key: 'equipment_name', label: this.$trans('Name') },
-        { key: 'times_per_year', label: this.$trans('Times / year') },
-        { key: 'tariff', label: this.$trans('Tariff') },
+        { key: 'times_per_year', label: this.$trans('Frequency') },
+        { key: 'tariff', label: this.$trans('Tariff'), thAttr: {style: 'text-align: right;'}},
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       equipmentFieldsCreate: [
         { key: 'id', label: this.$trans('id'), thAttr: {width: '5%'} },
-        { key: 'name', label: this.$trans('Name'), thAttr: {width: '85%'} },
-        { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '10%'} },
+        { key: 'name', label: this.$trans('Name'), },
+        { key: 'frequency', label: this.$trans('Frequency'), thAttr: {width: '50%'} },
+        { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '15%'} },
       ],
       orderLinesData: [],
       selectedData: [],
       maintenanceOrdersFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
-        { key: 'icons', thAttr: {width: '5%'} },
+        { key: 'icons', label: ''},
       ],
       maintenanceOrders: []
     }
