@@ -90,6 +90,9 @@
         <template #cell(customer_view_name)="data">
           {{ data.item.customer_view.name }}
         </template>
+        <template #cell(created)="data">
+          <small>{{ data.item.created }}</small>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkDelete
