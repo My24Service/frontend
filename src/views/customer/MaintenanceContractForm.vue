@@ -54,14 +54,13 @@
                 ref="contractName"
                 id="maintenance_contract_name"
                 size="sm"
-                v-model="maintenanceContract.name"
+                v-model="maintenanceContractService.editItem.name"
               ></b-form-input>
               <b-form-invalid-feedback
-                :state="!v$.maintenanceContract.name.$error">
+                :state="!v$.maintenanceContractService.editItem.name.$error">
                 {{ $trans('Please enter a contract name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-
             <b-form-group
               label-cols="4"
               label-size="sm"
@@ -71,7 +70,9 @@
                 ref="contract_value"
                 id="maintenance_contract_contract_value"
                 size="sm"
-                v-model="maintenanceContract.contract_value">
+                readonly
+                :value="total_dinero.toFormat('$0.00')"
+              >
               </b-form-input>
             </b-form-group>
 
@@ -150,7 +151,7 @@
                 readonly
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-cols="4"
               label-size="sm"
@@ -164,7 +165,7 @@
                 readonly
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-cols="4"
               label-size="sm"
@@ -330,7 +331,7 @@
                       v-model="maintenanceEquipmentService.editItem.equipment_name"
                     ></b-form-input>
                     <b-form-invalid-feedback
-                      :state="!v$.maintenanceEquipment.equipment_name.$error">
+                      :state="!v$.maintenanceEquipmentService.editItem.equipment_name.$error">
                       {{ $trans('Please select an equipment') }}
                     </b-form-invalid-feedback>
                   </b-form-group>
@@ -362,15 +363,16 @@
                     <b-form-input
                       id="maintenance-contract-equipment-times_per_year"
                       size="sm"
-                      v-model="maintenanceEquipmentService.editItem.times_per_year"
+                      ref="times_per_year"
+                      v-model="maintenanceEquipmentService.editItemService.editItem.times_per_year"
                     ></b-form-input>
                     <b-form-invalid-feedback
-                      :state="!v$.maintenanceEquipment.times_per_year.$error">
-                      {{ $trans('Please enter an amount') }}
+                      :state="!v$.maintenanceEquipmentService.editItem.times_per_year.$error">
+                      {{ $trans('Please enter a number') }}
                     </b-form-invalid-feedback>
                   </b-form-group>
                 </b-col>
-                <b-col cols="2" role="group">
+                <b-col cols="3" role="group">
                   <b-form-group
                     label-size="sm"
                     v-bind:label="$trans('Tariff')"
@@ -481,18 +483,20 @@ export default {
         },
       }
     },
-    maintenanceEquipment: {
-      equipment: {
-        required
-      },
+    maintenanceEquipmentService: {
+      editItem: {
+        equipment: {
+          required
+        },
 
-      equipment_name: {
-        required
-      },
+        equipment_name: {
+          required
+        },
 
-      times_per_year: {
-        required,
-        greaterThanZero
+        times_per_year: {
+          required,
+          greaterThanZero
+        }
       }
     }
   },
