@@ -527,13 +527,13 @@ ul.listing {
         width: 5rem;
       }
       .order-type {
-        width: 10rem;
+        max-width: 10rem;
       }
       .order-company-name {
         width: 7rem;
       }
       .order-start-date {
-        width: 9rem;
+        max-width: 9rem;
       }
       .order-documents {
         flex-grow: grow;
