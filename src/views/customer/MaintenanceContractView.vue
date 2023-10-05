@@ -193,7 +193,6 @@ export default {
         { key: 'equipment_name', label: this.$trans('Name') },
         { key: 'times_per_year', label: this.$trans('Times / year') },
         { key: 'tariff', label: this.$trans('Tariff') },
-        { key: 'sum_tariffs', label: this.$trans('Tariff total') },
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
