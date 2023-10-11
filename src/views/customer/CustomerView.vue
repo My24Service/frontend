@@ -5,7 +5,7 @@
         <div class="page-title">
           <h3>
             <b-icon icon="building"></b-icon>
-            <router-link :to="{name: 'customer-list'}">Customers</router-link> / {{  customer.name }}
+            <span class="backlink" @click="goBack">Customers</span> / {{  customer.name }}
           </h3>
           <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
             <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit customer') }}
@@ -302,14 +302,8 @@
             </b-tabs>
           </div>
         </div>
-        <!--
-        <footer class="modal-footer">
-          <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-            {{ $trans('Back') }}</b-button>
-        </footer>
-        -->
-      </div>
 
+      </div>
     </div>
   </b-overlay>
 </template>

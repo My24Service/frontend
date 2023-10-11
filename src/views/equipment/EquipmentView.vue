@@ -1,50 +1,39 @@
 <template>
   <div class="app-page">
+
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
     <header>
 
-      <div class='page-title'>
-        <h3>
-          <b-icon icon="tools"></b-icon>
-          <span @click="goBack" class="backlink">Equipment</span>
-          / {{ equipment.name }}
-        </h3>
-        <router-link :to="{name: editLink, params: {pk: this.pk}}" class="btn primary">Edit equipment</router-link>
-      </div>
-      <SearchModal
-          id="search-modal"
-          ref="search-modal"
-          @do-search="handleSearchOk"
-        />
     </header>
-    <div class='page-detail flex-columns'>
+    <div class='page-detail flex-columns' v-if="equipment && !isLoading">
       <div class='panel'>
         <h6>Equipment details</h6>
         <dl>
-              <dt>{{ $trans('Name') }}</dt>
-              <dd>{{ equipment.name }}</dd>
-              <dt>{{ $trans('Brand') }}</dt>
-              <dd>{{ equipment.brand }}</dd>
-              <dt>{{ $trans('Identifier') }}</dt>
-              <dd>{{ equipment.identifier }}</dd>
-              <dt>{{ $trans('Description') }}</dt>
-              <dd>{{ equipment.description }}</dd>
-              <dt>{{ $trans('Installation date') }}</dt>
-              <dd>{{ equipment.installation_date }}</dd>
-              <dt>{{ $trans('Production date') }}</dt>
-              <dd>{{ equipment.production_date }}</dd>
-              <dt>{{ $trans('Serial number') }}</dt>
-              <dd>{{ equipment.serialnumber }}</dd>
-              <dt>{{ $trans('Standard hours') }}</dt>
-              <dd>{{ equipment.standard_hours }}</dd>
-              <b-tr>
-                <b-td><strong>{{ $trans('Lifespan (months)') }}:</strong></b-td>
-                <b-td>{{ equipment.default_replace_months }}</b-td>
-              </b-tr>
-              <b-tr>
-                <b-td><strong>{{ $trans('Price') }}:</strong></b-td>
-                <b-td>{{ equipment.price_dinero.toFormat('$0.00') }}</b-td>
-              </b-tr>
-          </dl>
+          <dt>{{ $trans('Name') }}</dt>
+          <dd>{{ equipment.name }}</dd>
+          <dt>{{ $trans('Brand') }}</dt>
+          <dd>{{ equipment.brand }}</dd>
+          <dt>{{ $trans('Identifier') }}</dt>
+          <dd>{{ equipment.identifier }}</dd>
+          <dt>{{ $trans('Description') }}</dt>
+          <dd>{{ equipment.description }}</dd>
+          <dt>{{ $trans('Installation date') }}</dt>
+          <dd>{{ equipment.installation_date }}</dd>
+          <dt>{{ $trans('Production date') }}</dt>
+          <dd>{{ equipment.production_date }}</dd>
+          <dt>{{ $trans('Serial number') }}</dt>
+          <dd>{{ equipment.serialnumber }}</dd>
+          <dt>{{ $trans('Standard hours') }}</dt>
+          <dd>{{ equipment.standard_hours }}</dd>
+          <dt>{{ $trans('Lifespan (months)') }}</dt>
+          <dd>{{ equipment.default_replace_months }}</dd>
+          <dt>{{ $trans('Price') }}</dt>
+          <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
+        </dl>
 
           <b-table
             id="customer-past-table"
