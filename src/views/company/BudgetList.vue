@@ -101,11 +101,6 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkPlus
-              type="tr"
-              :title="$trans('Add state')"
-              :method="() => showEditModal(data.item.id)"
-            />
             <IconLinkEdit
               :method="() => showEditModal(data.item.id)"
               :title="$trans('Edit')"
@@ -132,7 +127,6 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {componentMixin} from "../../utils";
-import IconLinkPlus from "../../components/IconLinkPlus";
 import PriceInput from "../../components/PriceInput";
 
 export default {
@@ -146,7 +140,6 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
-    IconLinkPlus,
     PriceInput,
   },
   data() {
