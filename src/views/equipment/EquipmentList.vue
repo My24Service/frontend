@@ -1,5 +1,5 @@
 <template>
-  <div class="app-grid" v-if="!isLoading">
+  <div class="app-page">
 
     <b-modal
       id="add-state-modal"
@@ -54,13 +54,29 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Equipment')"
-      />
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="tools"></b-icon>
+          Equipment
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+            v-bind:method="function() { loadData() }"
+            v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: newLink}" class="btn">Add Equipment</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
 
+    <div class="page-detail panel">
+      
       <b-table
         id="equipment-table"
         small
@@ -73,21 +89,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :router_name="newLink"
-                  v-bind:title="$trans('New equipment')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #table-busy>
@@ -137,6 +139,12 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Equipment')"
+      />
+
   </div>
 </template>
 
@@ -308,7 +316,7 @@ export default {
     async loadData() {
       try {
         const data = await this.model.list()
-        this.equipmentObjects = data.results
+        this.equipmentObjects = data.results;
       } catch(error) {
         console.log('error fetching equipment', error)
         this.errorToast(this.$trans('Error loading equipment'))

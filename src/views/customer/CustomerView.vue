@@ -5,7 +5,7 @@
         <div class="page-title">
           <h3>
             <b-icon icon="building"></b-icon>
-            <router-link :to="{name: 'customer-list'}">Customers</router-link> / {{  customer.name }}
+            <span class="backlink" @click="goBack">Customers</span> / {{  customer.name }}
           </h3>
           <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
             <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit customer') }}
@@ -16,12 +16,7 @@
 
       <div class="page-detail customer-details" v-if="!isCustomer">
         <div v-if="!isCustomer">
-        <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-
-        <CustomerDetail
-          :customer="customer"
-        />
-
+          <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
         </div>
 
         <div class='flex-columns'>
@@ -258,80 +253,8 @@
             </b-tabs>
           </div>
         </div>
-        <!--
-        <footer class="modal-footer">
-          <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-            {{ $trans('Back') }}</b-button>
-        </footer>
-        -->
+
       </div>
-
-
-      <div class="spacer"></div>
-
-      <div>
-        <b-row align-h="center">
-          <h3>{{ $trans("Orders") }}</h3>
-        </b-row>
-
-        <SearchModal
-          id="search-modal"
-          ref="search-modal"
-          @do-search="handleSearchOk"
-        />
-
-        <b-pagination
-          v-if="orderService.count > 20"
-          class="pt-4"
-          v-model="currentPage"
-          :total-rows="orderService.count"
-          :per-page="orderService.perPage"
-          aria-controls="customer-orders-table"
-        ></b-pagination>
-
-        <b-table
-          id="customer-orders-table"
-          small
-          :busy='isLoading'
-          :fields="orderFields"
-          :items="orders"
-          responsive="md"
-          class="data-table"
-        >
-          <template #head(icons)="">
-            <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-                  <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
-                  />
-                  <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
-                  />
-                </b-button-group>
-              </b-button-toolbar>
-            </div>
-          </template>
-          <template #table-busy>
-            <div class="text-center text-danger my-2">
-              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-              <strong>{{ $trans('Loading...') }}</strong>
-            </div>
-          </template>
-          <template #cell(id)="data">
-            <OrderTableInfo
-              v-bind:order="data.item"
-            />
-          </template>
-        </b-table>
-      </div>
-
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
->>>>>>> develop
     </div>
   </b-overlay>
 </template>
