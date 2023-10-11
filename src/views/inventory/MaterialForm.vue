@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="bookshelf"></b-icon> 
+          <b-icon icon="box"></b-icon> 
           <span class="backlink" @click="cancelForm">Materials</span> / 
           <span v-if="isCreate && !this.material.name" class="dimmed">(Material name)</span>
           <span v-else>{{this.material.name}}</span>

@@ -4,10 +4,10 @@
       <div class="page-title">
         <h3><b-icon icon="box-arrow-right"></b-icon>{{ $trans('Move materials') }}</h3>
         <div class="flex-columns" style="z-index:1000">
-          <b-dropdown split :text="$trans('Submit')" class="m-2" variant="primary" @click="submitForm" :disabled="buttonDisabled">
+          <b-dropdown split :text="$trans('Submit')" class="m-2" variant="primary" @click="submitForm" :disabled="canSubmit">
             <b-dropdown-item-button 
               @click="submitFormBulk" 
-              :disabled="buttonDisabled"
+              :disabled="canSubmit"
               title="Submit and move another material">
               {{ $trans('Bulk') }}
             </b-dropdown-item-button>
@@ -28,38 +28,8 @@
         
         <div class="panel col-1-3">
           <h6>Material</h6>
-          <b-form-group
-            label-size="sm"
-            label-for="move-material-purchase-order-material-search"
-            >
-            <multiselect
-            id="move-material-purchase-order-material-search"
-            track-by="id"
-                :placeholder="$trans('Select material (type to search)')"
-                open-direction="bottom"
-                :options="materials"
-                :multiple="false"
-                :internal-search="false"
-                :clear-on-select="false"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                :hide-selected="true"
-                @search-change="getMaterials"
-                @select="selectMaterial"
-                :custom-label="materialLabel"
-                ref="searchMaterial"
-                >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
-                {{ $trans('Please select a material') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-            <div  v-if="selectedMaterial.material_name">
+
+            <div v-if="selectedMaterial.material_name">
               <h3>{{ selectedMaterial.material_name }}</h3>
               <dl>
                 <dt>In stock</dt>
@@ -91,11 +61,60 @@
                 </b-form-invalid-feedback>
               </b-form-group>
             </div>
-
+            <div v-else class="dimmed">
+              <h3>
+                <span class='h1'><br><b-icon icon="box"></b-icon></span>
+                <br><br> Material</h3>
+            </div>
+            <b-form-group
+              label-size="sm"
+              label-for="move-material-purchase-order-material-search"
+              >
+              <multiselect
+              id="move-material-purchase-order-material-search"
+              track-by="id"
+                  :placeholder="$trans('Select material (type to search)')"
+                  open-direction="bottom"
+                  :options="materials"
+                  :multiple="false"
+                  :internal-search="false"
+                  :clear-on-select="false"
+                  :close-on-select="true"
+                  :options-limit="30"
+                  :limit="10"
+                  :max-height="600"
+                  :show-no-results="false"
+                  :hide-selected="true"
+                  @search-change="getMaterials"
+                  @select="selectMaterial"
+                  :custom-label="materialLabel"
+                  ref="searchMaterial"
+                  >
+                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+              </multiselect>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
+                {{ $trans('Please select a material') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
         </div>
 
         <div class="panel col-1-3">
           <h6>{{$trans('Move from')}}</h6>
+
+          <div v-if="selectedFromLocation.location_name">
+            <h3>
+              <span class="h1 text-danger"><br><b-icon icon="box-arrow-up-right"></b-icon></span>
+              <br/><br/>{{ selectedFromLocation.location_name }}
+            </h3>
+          </div>
+          <div v-else class="dimmed">
+            <h3>
+              <span class='h1'><br><b-icon icon="box-arrow-right"></b-icon></span>
+              <br/><br/>{{ $trans('Departure location') }}
+            </h3>
+          </div>
+
           <b-form-group
             label-size="sm"
             v-bind:label="$trans('')"
@@ -125,18 +144,26 @@
               {{ $trans('Please select from location') }}
             </b-form-invalid-feedback>
           </b-form-group>
-          
-          <h3 v-if="selectedFromLocation.location_name">
-            <br><b-icon icon="box-arrow-right"></b-icon><br/><br/>{{ selectedFromLocation.location_name }}
-          </h3>
-          <h3 v-else class="dimmed">
-            <br><b-icon icon="box-arrow-right"></b-icon><br/><br/>{{ $trans('Departure location') }}
-          </h3>
+
         </div>
 
         <div class="panel col-1-3">
           <h6> {{ $trans('Move to')}}</h6>
-          
+
+          <div v-if="selectedToLocation.name">
+            <h3>
+              <span class="h1 text-success"><br><b-icon icon="box-arrow-in-down-right"></b-icon></span>
+              <br/><br/>{{ selectedToLocation.name }}
+            </h3>
+          </div>
+
+          <div v-else class="dimmed">
+            <h3>
+              <span class="h1"><br><b-icon icon="box-arrow-in-right"></b-icon></span>
+              <br/><br/>{{ $trans('Arrival location') }}
+            </h3>
+          </div>
+
           <b-form-group
             label-for="move-material-to-location-search"
             >
@@ -165,20 +192,23 @@
               {{ $trans('Please select to location') }}
             </b-form-invalid-feedback>
           </b-form-group>
-          
-          <h3 v-if="selectedToLocation.name"><br><b-icon icon="box-arrow-in-right"></b-icon><br/><br/>{{ selectedToLocation.name }}</h3>
-          <h3 v-else class="dimmed">
-              <br><b-icon icon="box-arrow-right"></b-icon><br/><br/>{{ $trans('Arrival location') }}
-            </h3>
+
         </div>
       </b-form>
     </div>
   </div>
 </template>
-<style scope>
+<style scoped>
 header {
   position: relative !important;
 }
+
+.col-1-3 {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 </style>
 <script>
 import { useVuelidate } from '@vuelidate/core'
@@ -235,6 +265,10 @@ export default {
   computed: {
     isSubmitClicked() {
       return this.submitClicked
+    },
+    canSubmit() {
+      return !this.selectedFromLocationPk || !this.selectedToLocationPk;
+      
     }
   },
   created() {
@@ -326,7 +360,7 @@ export default {
           this.selectedToLocationPk,
           this.amount)
         this.infoToast(this.$trans('Moved'), this.$trans('Material moved'))
-        this.buttonDisabled = false
+        this.buttonDisabled = true
         this.isLoading = false
 
         if (isBulk) {

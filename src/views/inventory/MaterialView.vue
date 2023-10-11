@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="bookshelf"></b-icon> 
+          <b-icon icon="box"></b-icon> 
           <span class="backlink" @click="goBack">Materials</span> / {{  this.material.name }}
         </h3>
         <div class="flex-columns">

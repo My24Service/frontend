@@ -4,7 +4,7 @@
       <header>
         <div class="page-title">
           <h3>
-
+            <b-icon icon="bookshelf"></b-icon>
             <span v-if="isCreate">{{ $trans('New stock location') }}</span>
             <span v-if="!isCreate">{{ $trans('Edit stock location') }}</span>
           </h3>  

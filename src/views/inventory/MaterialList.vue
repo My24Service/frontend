@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="bookshelf"></b-icon>
+          <b-icon icon="box"></b-icon>
           Materials
         </h3>
         <b-button-toolbar>
