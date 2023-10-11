@@ -1,4 +1,4 @@
-import BaseModel from '@/models/base'
+import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
 
 class EngineerUserModel {

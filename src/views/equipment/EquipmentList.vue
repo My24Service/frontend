@@ -24,7 +24,7 @@
             </b-col>
             <b-col cols="5">
               <b-form-group
-                v-bind:label="$trans('Lifespan')"
+                v-bind:label="$trans('Replace after months')"
                 label-for="add-state-replace_months"
               >
                 <b-form-input
