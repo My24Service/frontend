@@ -20,23 +20,27 @@
       <div class='panel'>
         <h6>Equipment details</h6>
         <dl>
-              <dt>{{ $trans('Name') }}</dt>
-              <dd>{{ equipment.name }}</dd>
-              <dt>{{ $trans('Brand') }}</dt>
-              <dd>{{ equipment.brand }}</dd>
-              <dt>{{ $trans('Identifier') }}</dt>
-              <dd>{{ equipment.identifier }}</dd>
-              <dt>{{ $trans('Description') }}</dt>
-              <dd>{{ equipment.description }}</dd>
-              <dt>{{ $trans('Installation date') }}</dt>
-              <dd>{{ equipment.installation_date }}</dd>
-              <dt>{{ $trans('Production date') }}</dt>
-              <dd>{{ equipment.production_date }}</dd>
-              <dt>{{ $trans('Serial number') }}</dt>
-              <dd>{{ equipment.serialnumber }}</dd>
-              <dt>{{ $trans('Standard hours') }}</dt>
-              <dd>{{ equipment.standard_hours }}</dd>
-          </dl>
+          <dt>{{ $trans('Name') }}</dt>
+          <dd>{{ equipment.name }}</dd>
+          <dt>{{ $trans('Brand') }}</dt>
+          <dd>{{ equipment.brand }}</dd>
+          <dt>{{ $trans('Identifier') }}</dt>
+          <dd>{{ equipment.identifier }}</dd>
+          <dt>{{ $trans('Description') }}</dt>
+          <dd>{{ equipment.description }}</dd>
+          <dt>{{ $trans('Installation date') }}</dt>
+          <dd>{{ equipment.installation_date }}</dd>
+          <dt>{{ $trans('Production date') }}</dt>
+          <dd>{{ equipment.production_date }}</dd>
+          <dt>{{ $trans('Serial number') }}</dt>
+          <dd>{{ equipment.serialnumber }}</dd>
+          <dt>{{ $trans('Standard hours') }}</dt>
+          <dd>{{ equipment.standard_hours }}</dd>
+          <dt>{{ $trans('Lifespan (months)') }}</dt>
+          <dd>{{ equipment.default_replace_months }}</dd>
+          <dt>{{ $trans('Price') }}</dt>
+          <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
+        </dl>
 
           <b-table
             id="customer-past-table"

@@ -1,68 +1,44 @@
 <template>
   <div class="app-page">
-    <header>
-      <div class="page-title">
-        <h3><b-icon icon="tools"></b-icon>Equipment</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
-            <ButtonLinkRefresh
-              v-bind:method="function() { loadData() }"
-              v-bind:title="$trans('Refresh')"
-            />
-            <ButtonLinkSearch
-              v-bind:method="function() { showSearchModal() }"
-            />
-          </b-button-group>
-          <router-link class="btn primary" :to="{name: newLink}">Add equipment</router-link>
-        </b-button-toolbar>
-      </div>
-    </header>
-    <div class="panel overflow-auto">
-      <b-table
-        id="equipment-table"
-        small
-        :busy='isLoading'
-        :fields="equipmentFields"
-        :items="equipmentObjects"
-        responsive="md"
-        class="data-table"
-        sort-icon-left
-      >
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(name)="data">
-          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
-            {{ data.item.name }}
-          </router-link>
-        </template>
-        <template #cell(customer)="data">
-            {{ data.item.customer_branch_view.name }} <span class="dimmed"> &middot; {{ data.item.customer_branch_view.city }}</span>
-        </template>
-        <template #cell(branch)="data">
-          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
-            {{ data.item.customer_branch_view.name }} <span class="dimmed"> &middot; {{ data.item.customer_branch_view.city }}</span>
-          </router-link>
-        </template>
-        <template #cell(icons)="data">
-          <div class="float-right">
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-              class="h2"
-            />
-          </div>
-        </template>
-      </b-table>
-    </div>
-    <Pagination
-      v-if="!isLoading"
-      :model="this.model"
-      :model_name="$trans('Equipment')"
-    />
+
+    <b-modal
+      id="add-state-modal"
+      ref="add-state-modal"
+      v-bind:title="$trans('Add state')"
+      @ok="addState"
+    >
+      <form ref="add-state-form">
+        <b-container>
+          <b-row>
+            <b-col cols="7">
+              <b-form-group
+                v-bind:label="$trans('State')"
+                label-for="add-state-state"
+              >
+                <b-form-input
+                  size="sm"
+                  id="add-state-state"
+                  v-model="state.state"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="5">
+              <b-form-group
+                v-bind:label="$trans('Lifespan')"
+                label-for="add-state-replace_months"
+              >
+                <b-form-input
+                  size="sm"
+                  id="add-state-replace_months"
+                  v-model="state.replace_months"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -78,13 +54,29 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this equipment?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Equipment')"
-      />
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="tools"></b-icon>
+          Equipment
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+            v-bind:method="function() { loadData() }"
+            v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: newLink}" class="btn">Add Equipment</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
 
+    <div class="page-detail panel">
+      
       <b-table
         id="equipment-table"
         small
@@ -97,21 +89,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :router_name="newLink"
-                  v-bind:title="$trans('New equipment')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #table-busy>
@@ -161,6 +139,12 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Equipment')"
+      />
+
   </div>
 </template>
 
@@ -329,7 +313,7 @@ export default {
     async loadData() {
       try {
         const data = await this.model.list()
-        this.equipmentObjects = data.results
+        this.equipmentObjects = data.results;
       } catch(error) {
         console.log('error fetching equipment', error)
         this.errorToast(this.$trans('Error loading equipment'))
