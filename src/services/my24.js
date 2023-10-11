@@ -115,7 +115,7 @@ class My24 extends BaseModel {
   }
 
   hasAccessToModule(config) {
-    const debug = false
+    const debug = true
     // console.log(config)
 
     // just pages like / and /no-access

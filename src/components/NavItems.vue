@@ -7,6 +7,16 @@
         to="/orders/orders">{{ $trans('Orders') }}
         <b-badge v-if="unacceptedCount && unacceptedCount > 0" variant="light">{{ unacceptedCount }}</b-badge>
       </b-nav-item>
+      <div
+        v-if="hasQuotations"
+        class="main-nav-divider">
+        &nbsp;|&nbsp;
+      </div>
+      <b-nav-item
+        :active="isActive('quotations')"
+        v-if="hasQuotations && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
+        to="/quotations/quotations">{{ $trans('Quotations') }}
+      </b-nav-item>
 
       <!-- dashboard for customer users -->
       <div

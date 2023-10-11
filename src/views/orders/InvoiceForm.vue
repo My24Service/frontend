@@ -682,41 +682,6 @@ export default {
     }
     this.invoiceLineService.newEditItem()
 
-    // get invoice data
-    const invoiceData = await invoiceService.getData(this.uuid)
-
-    // get customer
-    this.customerPk = invoiceData.customer_pk
-    await this.getCustomer()
-
-    // set data in component
-    this.invoice_id = invoiceData.invoice_id
-    this.order_pk = invoiceData.order_pk
-    this.invoice.order = this.order_pk
-
-    this.activity_totals = invoiceData.activity_totals
-    this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
-      ...m,
-      default_currency: this.default_currency,
-    }))
-
-    this.used_materials = invoiceData.used_materials
-
-    this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
-    this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
-
-    this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
-    this.invoice_default_partner_hourly_rate_dinero = toDinero(
-      this.invoice_default_partner_hourly_rate,
-      this.default_currency
-    )
-
-    // create engineer models
-    this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
-      ...m,
-      engineer: {...m.engineer, default_currency: this.default_currency}
-    }))
-
     this.isLoading = false
   },
   methods: {
