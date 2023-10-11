@@ -53,10 +53,11 @@ import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
 
 import TimeRegistration from '../views/company/TimeRegistration.vue'
-import CustomerView from "../views/customer/CustomerView";
 import SubNavCustomers from "../components/SubNavCustomers";
 import BranchView from "../views/company/BranchView";
 
+import BudgetList from "../views/company/BudgetList";
+import BudgetView from "../views/company/BudgetView";
 
 export default [
 {
@@ -648,6 +649,31 @@ export default [
       path: '/company/branches/:pk',
       components: {
         'app-content': BranchView,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
+    // budgets
+    {
+      name: 'company-budgets',
+      path: '/company/budgets',
+      components: {
+        'app-content': BudgetList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': {},
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'company-budget-view',
+      path: '/company/budgets/:pk',
+      components: {
+        'app-content': BudgetView,
         'app-subnav': SubNavCustomers
       },
       props: {
