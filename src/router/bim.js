@@ -1,5 +1,5 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import Webshop from '../views/webshop/WebshopIframe.vue';
+import BIMFrame from '../views/bim/BIMFrame.vue';
 
 export default [
   {
@@ -10,10 +10,10 @@ export default [
     },
     children: [
       {
-        path: '/webshop',
-        name: 'webshop',
+        path: '/bim',
+        name: 'bim-frame',
         components: {
-          'app-content': Webshop,
+          'app-content': BIMFrame,
         },
       }
     ]

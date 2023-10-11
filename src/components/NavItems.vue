@@ -165,7 +165,7 @@
     <!-- BIM / 3D -->
     <b-nav-item
       v-if="isPlanning"
-      to="/coming-soon"
+      :to="{name: 'bim-frame'}"
       :active="isActive('bim')"
       >
       <b-icon icon="mouse2" v-if="!isActive('bim')"></b-icon>
