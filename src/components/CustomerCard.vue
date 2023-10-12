@@ -22,28 +22,23 @@
       
       <dt v-if="customer.external_identifier">Ext. ID</dt>
       <dd v-if="customer.external_identifier">{{ customer.external_identifier }}</dd>
-      <dt :v-if="customer.remarks.trim()">{{ $trans('Remarks') }}</dt>
-      <dd v-if="customer.remarks" class="remarks">{{ customer.remarks }}</dd>
+      <dt :v-if="customer.remarks">{{ $trans('Remarks') }}</dt>
+      <dd v-if="customer.remarks" class="remarks">{{ customer.remarks.trim() }}</dd>
     </dl>
   </div>
-  </template>
+</template>
   
-  <script>
-  // import customerModel from '../models/customer/Customer.js'
-  export default {
-    name: "customerCard",
-    props: {
-      pk: { 
-        type: [Number],
-        default: null
-      },
-      customer: {
-        type: [Object],
-        default: null
-      }
-    }
+<script>
+export default {
+  name: "CustomerCard",
+  props: {
+    customer: {
+      type: [Object],
+      default: null
+    },
   }
-  </script>
+}
+</script>
   
   <style scope>
 .remarks {
