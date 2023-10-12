@@ -3,7 +3,7 @@ import BIMFrame from '../views/bim/BIMFrame.vue';
 
 export default [
   {
-    path: '/webshop',
+    path: '/',
     component: TheAppLayout,
     props: {
       hasSubNav: false,

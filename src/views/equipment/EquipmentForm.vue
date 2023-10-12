@@ -285,7 +285,7 @@
             </b-form-group>
           </b-col>
         </b-row>
-        
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -356,7 +356,7 @@
                 v-model="equipment.default_replace_months"
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Price')"
@@ -368,7 +368,7 @@
                 @priceChanged="(val) => priceChanged(val)"
               />
             </b-form-group>
-        
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -669,12 +669,16 @@ export default {
         const equipmentData = await equipmentService.detail(this.pk)
         this.equipment = new EquipmentModel(equipmentData)
         if (this.hasBranches && !this.isEmployee) {
-          this.branch = await branchModel.detail(this.equipment.branch)
-          this.locations = await locationModel.listForSelectBranch(this.branch.id)
+          if (this.equipment.branch) {
+            this.branch = await branchModel.detail(this.equipment.branch)
+            this.locations = await locationModel.listForSelectBranch(this.branch.id)
+          }
         }
         if (!this.hasBranches && !this.isCustomer) {
-          this.customer = await customerModel.detail(this.equipment.customer)
-          this.locations = await locationModel.listForSelectCustomer(this.customer.id)
+          if (this.equipment.customer) {
+            this.customer = await customerModel.detail(this.equipment.customer)
+            this.locations = await locationModel.listForSelectCustomer(this.customer.id)
+          }
         }
 
         this.isLoading = false
