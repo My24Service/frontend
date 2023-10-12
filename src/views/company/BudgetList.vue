@@ -1,8 +1,7 @@
 <template>
-  <div class="app-grid" v-if="!isLoading">
+  <div class="app-page">
 
-    <b-modal
-      id="model-modal"
+    <b-modal id="model-modal"
       ref="model-modal"
       :title="isEdit ? $trans('Edit budget') : $trans('New budget')"
       @ok="submitModel"
@@ -39,15 +38,8 @@
         </b-container>
       </form>
     </b-modal>
-
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
-
-    <b-modal
-      id="delete-modal"
+    
+    <b-modal id="delete-modal"
       ref="delete-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
@@ -55,12 +47,36 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this budget?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.service"
-        :model_name="$trans('Budget')"
-      />
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <header>
+      <div class='page-title'>
+        <h3><b-icon icon="credit-card2-front"></b-icon> Budgets</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+            :method="function() { loadData() }"
+            :title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            :method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <button 
+            class="btn primary"
+            @click="showAddModal"
+            >
+            <b-icon icon="plus"></b-icon>{{ $trans('New budget') }}
+          </button>
+        </b-button-toolbar>
+      </div>
+    </header>
+
+    <div class="page-detail panel">
 
       <b-table
         id="equipment-table"
@@ -74,21 +90,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :method="showAddModal"
-                  :title="$trans('New budget')"
-                />
-                <ButtonLinkRefresh
-                  :method="function() { loadData() }"
-                  :title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  :method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #cell(year)="data">
@@ -113,6 +115,11 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+        v-if="!isLoading"
+        :model="this.service"
+        :model_name="$trans('Budget')"
+      />
   </div>
 </template>
 
@@ -152,7 +159,7 @@ export default {
       isEdit: false,
       fields: [
         {key: 'year', label: this.$trans('Year')},
-        {key: 'amount', label: this.$trans('Amount')},
+        {key: 'amount', label: this.$trans('Budget size')},
         {key: 'icons'}
       ],
     }
