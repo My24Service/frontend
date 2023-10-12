@@ -9,8 +9,8 @@
       <b-icon icon="file-earmark-text" v-if="!isActive('orders')"></b-icon>
       <b-icon icon="file-earmark-text-fill" v-else></b-icon>
       {{ $trans('Orders') }}
-      <b-badge 
-        v-if="unacceptedCount && unacceptedCount > 0" 
+      <b-badge
+        v-if="unacceptedCount && unacceptedCount > 0"
         variant="light"
         :title="`${unacceptedCount} ${$trans('Unaccepted orders')}`">{{ unacceptedCount }}</b-badge>
     </b-nav-item>
@@ -32,7 +32,7 @@
         </b-nav-item>
       </b-nav>
     </div>
- 
+
     <!-- equipment -->
     <b-nav-item
       :active="isActive('equipment')"
@@ -121,7 +121,7 @@
     <SubNav v-if="isActive('company')">
       <router-view name="app-subnav"></router-view>
     </SubNav>
-    
+
     <!-- members -->
     <b-nav-item
       :active="isActive('members')"
@@ -164,7 +164,7 @@
 
     <!-- BIM / 3D -->
     <b-nav-item
-      v-if="isPlanning"
+      v-if="hasBim"
       :to="{name: 'bim-frame'}"
       :active="isActive('bim')"
       >
@@ -178,7 +178,7 @@
 
     <!-- webshop -->
     <b-nav-item
-      v-if="isPlanning"
+      v-if="hasWebshop"
       :to="{name:'webshop'}"
       :active="isActive('webshop')"
       >
@@ -271,6 +271,12 @@ export default {
     hasBranches() {
       return this.$store.getters.getMemberHasBranches
     },
+    hasBim() {
+      return this.isPlanning || this.isStaff || this.isSuperuser
+    },
+    hasWebshop() {
+      return this.isPlanning || this.isStaff || this.isSuperuser
+    }
   },
   watch: {
     unacceptedCount (oldValue, newValue) {

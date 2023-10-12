@@ -25,6 +25,8 @@ const routes = [
     path: '/',
     component: TheIndexLayout
   },
+  ...webshop,
+  ...bim,
   ...orders,
   ...mobile,
   ...customer,
@@ -36,8 +38,6 @@ const routes = [
   ...budget,
   ...catchall,
   ...docks,
-  ...webshop,
-  ...bim
 ]
 
 const router = new VueRouter({
@@ -70,7 +70,7 @@ router.beforeEach(async (to, from, next) => {
     next(`/no-access?next=${to.path}`)
     return
   }
-  
+
   // check user type if needed
   if (hasAccessRouteAuthLevel(authLevelNeeded, store)) {
     console.info('route allowed', {path, pathAuthLevel, userAuthLevel})

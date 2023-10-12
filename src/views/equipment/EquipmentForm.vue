@@ -677,12 +677,16 @@ export default {
         const equipmentData = await equipmentService.detail(this.pk)
         this.equipment = new EquipmentModel(equipmentData)
         if (this.hasBranches && !this.isEmployee) {
-          this.branch = await branchModel.detail(this.equipment.branch)
-          this.locations = await locationModel.listForSelectBranch(this.branch.id)
+          if (this.equipment.branch) {
+            this.branch = await branchModel.detail(this.equipment.branch)
+            this.locations = await locationModel.listForSelectBranch(this.branch.id)
+          }
         }
         if (!this.hasBranches && !this.isCustomer) {
-          this.customer = await customerModel.detail(this.equipment.customer)
-          this.locations = await locationModel.listForSelectCustomer(this.customer.id)
+          if (this.equipment.customer) {
+            this.customer = await customerModel.detail(this.equipment.customer)
+            this.locations = await locationModel.listForSelectCustomer(this.customer.id)
+          }
         }
 
         this.isLoading = false
