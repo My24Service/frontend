@@ -40,7 +40,7 @@ export default {
     OrderFormTemps,
   },
   async created() {
-    this.memberType = 'maintenance' //await this.$store.dispatch('getMemberType')
+    this.memberType = await this.$store.dispatch('getMemberType')
   },
 }
 </script>
