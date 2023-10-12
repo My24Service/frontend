@@ -1,7 +1,7 @@
-import BaseModel from '@/models/base'
+import BaseModel from '../../models/base'
 
 
-class Activity extends BaseModel {
+class ActivityService extends BaseModel {
   fields = {
     'id':null,
     'text': null,
@@ -12,6 +12,7 @@ class Activity extends BaseModel {
 
 }
 
-let activityModel = new Activity()
+let activityService = new ActivityService()
 
-export default activityModel
+export default activityService
+export  { ActivityService }

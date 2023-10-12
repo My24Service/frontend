@@ -35,4 +35,4 @@ class PurchaseInvoiceService extends BaseModel {
 const purchaseInvoiceService = new PurchaseInvoiceService()
 
 export default purchaseInvoiceService
-export { PurchaseInvoiceModel }
+export { PurchaseInvoiceModel, PurchaseInvoiceService }

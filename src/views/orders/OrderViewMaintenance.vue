@@ -320,9 +320,9 @@
 </template>
 
 <script>
-import orderModel from '../../models/orders/Order.js'
+import { OrderService } from '../../models/orders/Order.js'
 import { componentMixin } from '../../utils'
-import purchaseInvoiceService from "../../models/orders/PurchaseInvoice";
+import { PurchaseInvoiceService } from "../../models/orders/PurchaseInvoice";
 import IconLinkPlus from "../../components/IconLinkPlus";
 import PriceInput from "../../components/PriceInput";
 import IconLinkDelete from "../../components/IconLinkDelete";
@@ -364,6 +364,8 @@ export default {
       ],
       purchaseInvoice: null,
       deletePurchaseInvoicePk: null,
+      purchaseInvoiceService: new PurchaseInvoiceService(),
+      orderService: new OrderService(),
     }
   },
   props: {
@@ -383,7 +385,7 @@ export default {
   methods: {
     // purchase invoices
     async doDeletePurchaseInvoice() {
-      await purchaseInvoiceService.delete(this.deletePurchaseInvoicePk)
+      await this.purchaseInvoiceService.delete(this.deletePurchaseInvoicePk)
       await this.loadOrder()
     },
     showDeletePurchaseInvoiceModal(id) {
@@ -391,7 +393,7 @@ export default {
       this.$refs['delete-purchase-invoice-modal'].show()
     },
     async doAddPurchaseInvoice() {
-      await purchaseInvoiceService.insert(this.purchaseInvoice)
+      await this.purchaseInvoiceService.insert(this.purchaseInvoice)
       this.purchaseInvoice = this.newPurchaseInvoiceModel()
       await this.loadOrder()
     },
@@ -402,7 +404,7 @@ export default {
       this.purchaseInvoice.setPriceField('total', priceDinero)
     },
     newPurchaseInvoiceModel() {
-      return new purchaseInvoiceService.model({
+      return new this.purchaseInvoiceService.model({
         order: this.order.id,
         vat: '0.00',
         total: '0.00',
@@ -410,7 +412,9 @@ export default {
       })
     },
     addPurchaseInvoice() {
-      this.$refs['add-purchase-invoice-modal'].show()
+      if (this.$refs['add-purchase-invoice-modal']) {
+        this.$refs['add-purchase-invoice-modal'].show()
+      }
     },
 
     // the rest
@@ -423,7 +427,7 @@ export default {
       this.buttonDisabled = true
 
       try {
-        await orderModel.recreateWorkorderPdfGotenberg(this.pk)
+        await this.orderService.recreateWorkorderPdfGotenberg(this.pk)
         this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
         this.isLoading = false
         this.buttonDisabled = false
@@ -442,13 +446,13 @@ export default {
       this.isLoading = true
 
       try {
-        this.order = this.pk !== null ? await orderModel.detail(this.pk) : await orderModel.detailUuid(this.uuid)
+        this.order = this.pk !== null ? await this.orderService.detail(this.pk) : await this.orderService.detailUuid(this.uuid)
 
         if (this.hasBranches) {
-          purchaseInvoiceService.setListArgs(`order=${this.order.id}`)
-          const purchaseInvoiceData = await purchaseInvoiceService.list()
+          this.purchaseInvoiceService.setListArgs(`order=${this.order.id}`)
+          const purchaseInvoiceData = await this.purchaseInvoiceService.list()
           this.order.purchaseInvoices = purchaseInvoiceData.results.map(
-            (m) => new purchaseInvoiceService.model({
+            (m) => new this.purchaseInvoiceService.model({
               ...m, default_currency: this.$store.getters.getDefaultCurrency
             })
           )
