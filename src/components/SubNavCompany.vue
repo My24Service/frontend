@@ -8,7 +8,7 @@
         {{ $trans('Dashboard') }}
       </b-nav-item>
     -->
-      
+    <b-nav>
       <b-nav-item
         :active="isActive('company')"
         v-if="hasCompany"
@@ -76,7 +76,6 @@
         {{ $trans('Budgets') }}
       </b-nav-item>
     </b-nav>
-
   </div>
 </template>
 
