@@ -3,6 +3,21 @@
     <header>
       <div class='page-title'>
         <h3>Buildings</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+            v-bind:method="function() { loadData() }"
+            v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link 
+            :to="newLink"
+            class="btn"
+            >{{ $trans('New building') }}</router-link>
+        </b-button-toolbar>
       </div>
     </header>
     <SearchModal
@@ -20,12 +35,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this building?') }}</p>
     </b-modal>
 
-    <div class="panel overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('building')"
-      />
+    <div class="panel">
 
       <b-table
         id="building-table"
@@ -39,21 +49,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :router_name="newLink"
-                  v-bind:title="$trans('New building')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #table-busy>
@@ -92,6 +88,11 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('building')"
+      />
   </div>
 </template>
 
