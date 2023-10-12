@@ -134,7 +134,7 @@
       <router-view name="app-subnav"></router-view>
     </SubNav>
 
-    <!-- budgets -->
+    <!-- budgets 
     <b-nav-item
       v-if="isPlanning"
       to="/budget"
@@ -147,6 +147,7 @@
     <SubNav v-if="isActive('budget')">
       <router-view name="app-subnav"></router-view>
     </SubNav>
+    -->
 
     <!-- docks -->
     <b-nav-item
