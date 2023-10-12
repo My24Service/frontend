@@ -118,7 +118,7 @@
       <b-icon icon="bookmark-star-fill" v-if="isActive('company')"></b-icon>
       {{ $trans('My company') }}
     </b-nav-item>
-    <SubNav v-if="isActive('company')">
+    <SubNav v-if="isActive('company') || isActive('company', 'budgets')">
       <router-view name="app-subnav"></router-view>
     </SubNav>
 
