@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class Member extends BaseModel {
+class MemberService extends BaseModel {
   fields = {
     'companycode': '',
     'name': '',
@@ -72,8 +72,13 @@ class Member extends BaseModel {
     return this.axios.get(`/member/vat-types/`).then((response) => response.data)
   }
 
+  getOCIUrl() {
+    return this.axios.get(`${this.url}get_oci_url/`).then((response) => response.data)
+  }
+
 }
 
-let memberModel = new Member()
+let memberService = new MemberService()
 
-export default memberModel
+export default memberService
+export { MemberService }

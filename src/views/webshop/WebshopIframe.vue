@@ -7,7 +7,7 @@
     </header>
     <div class='page-detail'>
       <div class='panel'>
-        <iframe src=""></iframe>
+        <iframe ref="iframe" src=""></iframe>
       </div>
     </div>
   </div>
@@ -23,7 +23,18 @@ iframe {
 </style>
 
 <script>
+import {MemberService} from "@/models/member/Member";
+
 export default {
-  name: 'WebshopIframe'
+  name: 'WebshopIframe',
+  data() {
+    return {
+      service: new MemberService()
+    }
+  },
+  async created() {
+    const result = await this.service.getOCIUrl()
+    this.$refs['iframe'].src = result.url
+  }
 }
 </script>
