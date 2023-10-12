@@ -16,7 +16,7 @@
 <style scoped>
 iframe {
   width: 100%;
-  min-height: 50vh;
+  min-height: 65vh;
   border: none;
 }
 </style>

@@ -17,7 +17,7 @@
 iframe {
   background-color: #0001;
   width: 100%;
-  min-height: 50vh;
+  min-height: 65vh;
   border: none;
 }
 </style>
