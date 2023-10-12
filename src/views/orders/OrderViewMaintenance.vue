@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="order">
 
     <b-modal
       v-if="purchaseInvoice && hasBranches"
@@ -330,7 +330,7 @@
             close
           </b-button>
       </template>
-    
+
     <div class="flex-columns wrap">
       <div class="panel col-1-3">
         <h3>
@@ -505,6 +505,68 @@
           </div>
         </b-col>
       </b-row>
+      <b-row v-if="order.invoices.length">
+        <hr/>
+        <b-col cols="12">
+          <h4>{{ $trans('Invoices') }}</h4>
+          <b-container>
+            <b-row v-for="invoice of order.invoices" :key="invoice.uuid">
+              <b-col cols="12">
+                <router-link :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}">
+                  {{ $trans('Invoice') }} {{ invoice.invoice_id }}
+                </router-link><br/>
+              </b-col>
+            </b-row>
+          </b-container>
+        </b-col>
+      </b-row>
+      <b-row v-if="hasBranches">
+        <hr/>
+        <b-col cols="12">
+          <div class="purchase-invoices-table">
+            <h4>{{ $trans('Purchase invoices') }}</h4>
+            <b-table
+              id="purchase-invoices-table"
+              small
+              :busy='isLoading'
+              :fields="purchaseInvoiceFields"
+              :items="order.purchaseInvoices"
+              responsive="md"
+              class="data-table"
+              sort-icon-left
+            >
+              <template #head(icons)="">
+                <div class="float-right">
+                  <b-button-toolbar>
+                    <b-button-group class="mr-1">
+                      <IconLinkPlus
+                        type="th"
+                        :method="addPurchaseInvoice"
+                        :title="$trans('New purchase invoice')"
+                      />
+                    </b-button-group>
+                  </b-button-toolbar>
+                </div>
+              </template>
+              <template #cell(vat)="data">
+                {{ data.item.vat_dinero.toFormat('$0.00') }}
+              </template>
+              <template #cell(total)="data">
+                {{ data.item.total_dinero.toFormat('$0.00') }}
+              </template>
+              <template #cell(icons)="data">
+                <div class="h2 float-right">
+                  <IconLinkDelete
+                    v-bind:title="$trans('Delete')"
+                    v-bind:method="function() { showDeletePurchaseInvoiceModal(data.item.id) }"
+                  />
+                </div>
+              </template>
+            </b-table>
+
+          </div>
+        </b-col>
+      </b-row>
       </div>
     </div>
   </div>
@@ -529,33 +591,36 @@ export default {
     data() {
         return {
             isLoading: false,
+      iframeLoading: false,
+      isGeneratingPDF: false,
+      workorderURL: null,
             isGeneratingPDF: false,
             buttonDisabled: false,
             order: null,
             workorderURL: '',
             iframeLoading: true,
             orderLineFields: [
-                { key: 'product', label: this.$trans('Product') },
-                { key: 'location', label: this.$trans('Location') },
-                { key: 'remarks', label: this.$trans('Remarks') }
+                {key: 'product', label: this.$trans('Product')},
+                {key: 'location', label: this.$trans('Location')},
+                {key: 'remarks', label: this.$trans('Remarks')}
             ],
             infoLineFields: [
-                { key: 'info', label: this.$trans('Infolines') }
+                {key: 'info', label: this.$trans('Infolines')}
             ],
             workorderDocumentFields: [
-                { key: 'name', label: this.$trans('Name') },
-                { key: 'url', label: this.$trans('URL') },
+                {key: 'name', label: this.$trans('Name')},
+                {key: 'url', label: this.$trans('URL')},
             ],
             extraDataFields: [
-                { key: 'statuscode', label: this.$trans('Status') },
-                { key: 'extra_data', label: this.$trans('Text') },
+                {key: 'statuscode', label: this.$trans('Status')},
+                {key: 'extra_data', label: this.$trans('Text')},
             ],
           purchaseInvoiceFields: [
-        { key: 'reference', label: this.$trans('Reference') },
-        { key: 'description', label: this.$trans('Description') },
-        { key: 'vat', label: this.$trans('VAT') },
-        { key: 'total', label: this.$trans('Total') },
-        { key: 'icons' },
+        {key: 'reference', label: this.$trans('Reference')},
+        {key: 'description', label: this.$trans('Description')},
+        {key: 'vat', label: this.$trans('VAT')},
+        {key: 'total', label: this.$trans('Total')},
+        {key: 'icons'},
       ],
       purchaseInvoice: null,
       deletePurchaseInvoicePk: null,
