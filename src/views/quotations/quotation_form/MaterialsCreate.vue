@@ -121,6 +121,12 @@
           :total="total_dinero"
           :total_vat="totalVAT_dinero"
         />
+        <hr v-if="!parentHasQuotationLines">
+        <AddToQuotationLines
+          v-if="!parentHasQuotationLines"
+          :useOnQuotationOptions="useOnQuotationOptions"
+          @buttonClicked="createQuotationLinesClicked"
+        />
         <hr>
         <b-row>
           <b-col cols="8"></b-col>
@@ -159,8 +165,10 @@
 </template>
 
 <script>
+import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
 import AmountDecimalInput from "../../../components/AmountDecimalInput.vue"
+import quotationLineService from '@/models/quotations/QuotationLine.js'
 import Collapse from "../../../components/Collapse";
 import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/quotations/Cost";
 import {
@@ -177,12 +185,14 @@ import TotalRow from "./TotalRow";
 import TotalsInputs from "../../../components/TotalsInputs";
 import inventoryModel from '@/models/inventory/Inventory.js'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import AddToQuotationLines from './AddToQuotationLines.vue'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 
 
 export default {
   name: "MaterialsCreateComponent",
-  emits: ['invoiceLinesCreated', 'emptyCollectionClicked'],
+  emits: ['quotationLinesCreated', 'emptyCollectionClicked'],
+  mixins: [quotationMixin],
   components: {
     PriceInput,
     IconLinkDelete,
@@ -192,7 +202,8 @@ export default {
     TotalRow,
     TotalsInputs,
     Multiselect,
-    AmountDecimalInput
+    AmountDecimalInput,
+    AddToQuotationLines
   },
   props: {
     quotation_pk: {
@@ -202,7 +213,11 @@ export default {
     loading: {
       type: Boolean,
       default: false
-    }
+    },
+    quotationLinesParent: {
+      type: [Array],
+      default: null
+    },
   },
   computed: {
     compLoading () {
@@ -228,7 +243,10 @@ export default {
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
       hasStoredData: false,
       costType: COST_TYPE_USED_MATERIALS,
-      getMaterialsDebounced: ''
+      getMaterialsDebounced: '',
+      parentHasQuotationLines: false,
+      quotationLineType: INVOICE_LINE_TYPE_USED_MATERIALS,
+      quotationLineService
     }
   },
   async created() {
@@ -425,7 +443,20 @@ export default {
 
       this.total_dinero = this.costService.getItemsTotal()
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
-    }
+      this.totalAmount = this.costService.collection.reduce(
+        (total, m) => (total + parseFloat(m.amount_decimal)),
+        0
+      )
+    },
+    getDescriptionUserTotalsQuotationLine(cost) {
+      return `${this.$trans("material")}: ${this.getMaterialName(cost.material)}`
+    },
+    getDescriptionOnlyTotalQuotationLine() {
+      return `${this.$trans("Materials")}`
+    },
+    getTotalAmountQuotationLine() {
+      return this.totalAmount
+    },
   }
 }
 </script>

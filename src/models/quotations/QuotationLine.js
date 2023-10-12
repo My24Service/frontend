@@ -61,7 +61,7 @@ class QuotationLineService extends BaseModel {
     price_currency: null,
   }
 
-  url = '/order/quotation-line/'
+  url = '/quotation/quotation-line/'
 
   getItemsTotal() {
     if (!this.collection.length) {
@@ -96,7 +96,9 @@ class QuotationLineService extends BaseModel {
       price_currency: cost.price_currency,
       price_text: cost.price_dinero.toFormat('$0.00'),
       total: cost.total,
-      total_currency: cost.total_currency
+      total_currency: cost.total_currency,
+      material: cost?.material,
+      material_name: cost?.material_name
     })
   }
 }

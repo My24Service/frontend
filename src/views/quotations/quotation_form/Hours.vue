@@ -84,6 +84,12 @@
           :total="total_dinero"
           :total_vat="totalVAT_dinero"
         />
+        <hr v-if="!parentHasQuotationLines">
+        <AddToQuotationLines
+          v-if="!parentHasQuotationLines"
+          :useOnQuotationOptions="useOnQuotationOptions"
+          @buttonClicked="createQuotationLinesClicked"
+        />
         <hr>
         <b-row>
           <b-col cols="8"></b-col>
@@ -121,17 +127,19 @@
   </Collapse>
 </template>
 <script>
+import quotationMixin from "./mixin.js";
 import moment from 'moment'
 import Multiselect from 'vue-multiselect'
 import DurationInput from "../../../components/DurationInput.vue"
+import quotationLineService from '@/models/quotations/QuotationLine.js'
 import Collapse from "../../../components/Collapse";
 import {
-  USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS,
-  USE_PRICE_USER,
   USE_PRICE_PURCHASE,
-  USE_PRICE_SELLING
+  USE_PRICE_SELLING,
+  INVOICE_LINE_TYPE_HOURS_TYPE_WORK,
+  INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL
 } from "./constants";
 import CostService, {
   COST_TYPE_ACTUAL_WORK,
@@ -147,11 +155,13 @@ import TotalsInputs from "../../../components/TotalsInputs";
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import {toDinero} from "../../../utils";
 import customerService, { CustomerModel } from '../../../models/customer/Customer.js'
+import AddToQuotationLines from './AddToQuotationLines.vue'
 
 
 export default {
   name: "HoursComponent",
-  emits: ['invoiceLinesCreated', 'emptyCollectionClicked'],
+  emits: ['quotationLinesCreated', 'emptyCollectionClicked'],
+  mixins: [quotationMixin],
   components: {
     PriceInput,
     IconLinkDelete,
@@ -161,7 +171,8 @@ export default {
     TotalRow,
     TotalsInputs,
     Multiselect,
-    DurationInput
+    DurationInput,
+    AddToQuotationLines
   },
   props: {
     quotation_pk: {
@@ -184,6 +195,20 @@ export default {
   computed: {
     compLoading () {
       return this.loading || this.isLoading
+    },
+    quotationLineType() {
+      switch (this.type) {
+        case COST_TYPE_WORK_HOURS:
+          return INVOICE_LINE_TYPE_HOURS_TYPE_WORK
+        case COST_TYPE_TRAVEL_HOURS:
+          return INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL
+        case COST_TYPE_EXTRA_WORK:
+          return INVOICE_LINE_TYPE_HOURS_TYPE_EXTRA_WORK
+        case COST_TYPE_ACTUAL_WORK:
+          return INVOICE_LINE_TYPE_HOURS_TYPE_ACTUAL_WORK
+        default:
+          throw `quotationLineType(), unknown type ${this.type}`
+      }
     }
   },
   data() {
@@ -206,7 +231,9 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
-      hasStoredData: false
+      hasStoredData: false,
+      parentHasQuotationLines: false,
+      quotationLineService
     }
   },
   async created() {
@@ -296,8 +323,7 @@ export default {
         })
         this.customer = new CustomerModel(customer)
         this.costService.collection = costs
-        this.total_dinero = this.costService.getItemsTotal()
-        this.totalVAT_dinero = this.costService.getItemsTotalVAT()
+        this.updateTotals()
         this.isLoading = false
       } catch(error) {
         this.errorToast(this.$trans('Error fetching material cost'))
@@ -344,7 +370,21 @@ export default {
 
       this.total_dinero = this.costService.getItemsTotal()
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
-    }
+      const totalAmount = this.costService.collection.reduce(
+        (total, m) => (total + m.amount_duration_secs),
+        0
+      )
+      this.totalAmount = totalAmount ? Math.round(totalAmount / 3600) : 0
+    },
+    getDescriptionUserTotalsQuotationLine(cost) {
+      return this.getTitle()
+    },
+    getDescriptionOnlyTotalQuotationLine() {
+      return this.getTitle()
+    },
+    getTotalAmountQuotationLine() {
+      return this.totalAmount
+    },
   }
 }
 </script>

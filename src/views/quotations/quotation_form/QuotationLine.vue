@@ -222,10 +222,8 @@
     </b-row>
   </b-overlay>
 </template>
-
 <script>
-import quotationLineService, { QuotationLineModel } from '@/models/quotations/QuotationLine.js'
-import {toDinero} from "@/utils";
+import quotationLineService, { QuotationLineModel } from '@/models/quotations/QuotationLine.js';
 import PriceInput from "@/components/PriceInput";
 import Collapse from "@/components/Collapse";
 
@@ -266,6 +264,23 @@ export default {
     quotationData: {
       type: Object,
       default: null
+    },
+    submitQuotationLineform: {
+      type: Boolean,
+      default: false
+    }
+  },
+  watch: {
+    quotationData: {
+      handler(newValue) {
+        this.quotation = newValue
+      },
+      deep: true
+    },
+    submitQuotationLineform (val) {
+      if (val) {
+        this.submitQuotation()
+      }
     }
   },
   data () {
@@ -277,15 +292,7 @@ export default {
 
       isLoading: false,
       submitClicked: false,
-      quotation: new QuotationLineModel({
-        total: "0.00",
-        total_currency: this.$store.getters.getDefaultCurrency,
-        vat: "0.00",
-        vat_currency: this.$store.getters.getDefaultCurrency,
-        quotation_reference: '',
-        description: '',
-        accepted: false
-      }),
+      quotation: this.quotationData,
       errorMessage: null,
 
       invoice_id: null,
@@ -366,16 +373,16 @@ export default {
       this.quotationLineService.editItem.vat_type = vat_type
       this.quotationLineService.editItem.calcTotal()
     },
-    quotationLinesCreated(invoiceLines) {
-      if (invoiceLines.length > 0) {
-        for (let invoiceLine of invoiceLines) {
-          invoiceLine.id = this.getQuotationLineId()
+    quotationLinesCreated(quotationLines) {
+      if (quotationLines.length > 0) {
+        for (let quotationLine of quotationLines) {
+          quotationLine.id = this.getQuotationLineId()
           // console.log(`id: ${id}`)
-          this.quotationLineService.collection.push(invoiceLine)
+          this.quotationLineService.collection.push(quotationLine)
         }
         this.updateQuotationTotals()
-        const txt = invoiceLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
-        this.infoToast(this.$trans('Added'), this.$trans(`${invoiceLines.length} ${txt} added`))
+        const txt = quotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
+        this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
       }
     },
     emptyCollectionClicked(type) {
@@ -391,11 +398,28 @@ export default {
       const maxQuotationLine = this.quotationLineService.collection.reduce(function(prev, current) {
         return (prev.id > current.id) ? prev : current
       })
-
-      return maxQuotation.id + 1
+      return maxQuotationLine.id + 1
     },
-    cancelForm() {
-      this.$router.go(-1)
+    async submitQuotation () {
+      this.isLoading = true
+      this.$emit('quotationSubmitted', true)
+
+      try {
+          const quotation = await this.quotationService.insert(this.quotation)
+          for (let quotationLine of this.quotationLineService.collection) {
+            quotationLine.quotation = quotation.id
+            await this.quotationLineService.insert(quotationLine)
+          }
+
+          this.infoToast(this.$trans('Created'), this.$trans('quotation has been created'))
+          this.isLoading = false
+          this.$emit('quotationSubmitted', false)
+          this.$router.push({ name: 'quotation-list'})
+        } catch(error) {
+          this.errorToast(this.$trans('Error creating invoice'))
+          this.isLoading = false
+          this.$emit('quotationSubmitted', false)
+      }
     }
   }
 }

@@ -2,210 +2,218 @@
   <b-overlay rounded="sm">
     <b-form>
       <h3>{{ $trans('Customer') }}</h3>
-      <b-row>
-        <b-col cols="4" role="group">
-          <b-form-group
-            label-size="sm"
-            label-class="p-sm-0"
-            v-bind:label="$trans('Search existing address')"
-            label-for="order-customer-search"
-          >
-            <multiselect
-              id="order-customer-search"
-              track-by="id"
-              :placeholder="$trans('Type to search')"
-              open-direction="bottom"
-              :options="customers"
-              :multiple="false"
-              :loading="compLoading"
-              :internal-search="false"
-              :options-limit="30"
-              :limit="10"
-              :max-height="600"
-              :hide-selected="true"
-              @search-change="getCustomersDebounced"
-              @select="selectCustomer"
-              :custom-label="customerLabel"
+      <CustomerDetail
+        v-if="!isCreate"
+        :customer="customer"
+      />
+      <template v-if="isCreate">
+        <b-row>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              label-class="p-sm-0"
+              v-bind:label="$trans('Search existing address')"
+              label-for="order-customer-search"
             >
-              <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-            </multiselect>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col :cols="4" role="group">
-          <b-form-group
-            label-size="sm"
-            :label="$trans('Customer')"
-            label-for="quotation_name"
-          >
-            <b-form-input
-              v-model="quotation.quotation_name"
-              id="quotation_name"
-              size="sm"
-              :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null"
-            ></b-form-input>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null">
-              {{ $trans('Please enter the customer') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </b-col>
-        <b-col cols="2" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Customer ID')"
-            label-for="customer_id"
-          >
-            <b-form-input
-              v-model="quotation.customer_id"
-              readonly
-              id="customer_id"
-              size="sm"
-              :state="isSubmitClicked ? !v$.quotation.customer_id.$error : null"
-            ></b-form-input>
-          </b-form-group>
-        </b-col>
-        <b-col cols="4" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Address')"
-            label-for="quotation_address"
-          >
-            <b-form-input
-              id="quotation_address"
-              size="sm"
-              v-model="quotation.quotation_address"
-              :state="isSubmitClicked ? !v$.quotation.quotation_address.$error: null"
-            ></b-form-input>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.quotation.quotation_address.$error : null">
-              {{ $trans('Please enter the address') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </b-col>
-        <b-col cols="2" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Country')"
-            label-for="quotation_country_code"
-          >
-            <b-form-select v-model="quotation.quotation_country_code" :options="countries" size="sm">
-            </b-form-select>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="2" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Postal')"
-            label-for="quotation_postal"
-          >
-            <b-form-input
-              id="quotation_postal"
-              size="sm"
-              v-model="quotation.quotation_postal"
-              :state="isSubmitClicked ? !v$.quotation.quotation_postal.$error : null"
-            ></b-form-input>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.quotation.quotation_postal.$error : null">
-              {{ $trans('Please enter the postal') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </b-col>
-        <b-col cols="4" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('City')"
-            label-for="quotation_city"
-          >
-            <b-form-input
-              id="quotation_city"
-              size="sm"
-              v-model="quotation.quotation_city"
-              :state="isSubmitClicked ? !v$.quotation.quotation_city.$error : null"
-            ></b-form-input>
-            <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.quotation.quotation_city.$error : null">
-              {{ $trans('Please enter the city') }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="2" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Reference')"
-            label-for="quotation_reference"
-          >
-            <b-form-input
-              id="quotation_reference"
-              size="sm"
-              v-model="quotation.quotation_reference"
-            ></b-form-input>
-          </b-form-group>
-        </b-col>
-        <b-col cols="4" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Email')"
-            label-for="quotation_email"
-          >
-            <b-form-input
-              id="quotation_email"
-              size="sm"
-              v-model="quotation.quotation_email"
-            ></b-form-input>
-          </b-form-group>
-        </b-col>
-        <b-col cols="3" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Mobile')"
-            label-for="quotation_mobile"
-          >
-            <b-form-input
-              id="quotation_mobile"
-              size="sm"
-              v-model="quotation.quotation_mobile"
-            ></b-form-input>
-          </b-form-group>
-        </b-col>
-        <b-col cols="3" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Tel.')"
-            label-for="quotation_tel"
-          >
-            <b-form-input
-              id="quotation_tel"
-              size="sm"
-              v-model="quotation.quotation_tel"
-            ></b-form-input>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="4" role="group">
-          <b-form-group
-            label-size="sm"
-            v-bind:label="$trans('Contacts')"
-            label-for="quotation_contact"
-          >
-            <b-form-textarea
-              id="quotation_contact"
-              v-model="quotation.quotation_contact"
-              rows="3"
-            ></b-form-textarea>
-          </b-form-group>
-        </b-col>
-      </b-row>
+              <multiselect
+                id="order-customer-search"
+                track-by="id"
+                :placeholder="$trans('Type to search')"
+                open-direction="bottom"
+                :options="customers"
+                :multiple="false"
+                :loading="compLoading"
+                :internal-search="false"
+                :options-limit="30"
+                :limit="10"
+                :max-height="600"
+                :hide-selected="true"
+                @search-change="getCustomersDebounced"
+                @select="selectCustomer"
+                :custom-label="customerLabel"
+              >
+                <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+              </multiselect>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col :cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              :label="$trans('Customer')"
+              label-for="quotation_name"
+            >
+              <b-form-input
+                v-model="quotation.quotation_name"
+                id="quotation_name"
+                size="sm"
+                :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null">
+                {{ $trans('Please enter the customer') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Customer ID')"
+              label-for="customer_id"
+            >
+              <b-form-input
+                v-model="quotation.customer_id"
+                readonly
+                id="customer_id"
+                size="sm"
+                :state="isSubmitClicked ? !v$.quotation.customer_id.$error : null"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Address')"
+              label-for="quotation_address"
+            >
+              <b-form-input
+                id="quotation_address"
+                size="sm"
+                v-model="quotation.quotation_address"
+                :state="isSubmitClicked ? !v$.quotation.quotation_address.$error: null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.quotation.quotation_address.$error : null">
+                {{ $trans('Please enter the address') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Country')"
+              label-for="quotation_country_code"
+            >
+              <b-form-select v-model="quotation.quotation_country_code" :options="countries" size="sm">
+              </b-form-select>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Postal')"
+              label-for="quotation_postal"
+            >
+              <b-form-input
+                id="quotation_postal"
+                size="sm"
+                v-model="quotation.quotation_postal"
+                :state="isSubmitClicked ? !v$.quotation.quotation_postal.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.quotation.quotation_postal.$error : null">
+                {{ $trans('Please enter the postal') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('City')"
+              label-for="quotation_city"
+            >
+              <b-form-input
+                id="quotation_city"
+                size="sm"
+                v-model="quotation.quotation_city"
+                :state="isSubmitClicked ? !v$.quotation.quotation_city.$error : null"
+              ></b-form-input>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.quotation.quotation_city.$error : null">
+                {{ $trans('Please enter the city') }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Reference')"
+              label-for="quotation_reference"
+            >
+              <b-form-input
+                id="quotation_reference"
+                size="sm"
+                v-model="quotation.quotation_reference"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Email')"
+              label-for="quotation_email"
+            >
+              <b-form-input
+                id="quotation_email"
+                size="sm"
+                v-model="quotation.quotation_email"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="3" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Mobile')"
+              label-for="quotation_mobile"
+            >
+              <b-form-input
+                id="quotation_mobile"
+                size="sm"
+                v-model="quotation.quotation_mobile"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="3" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Tel.')"
+              label-for="quotation_tel"
+            >
+              <b-form-input
+                id="quotation_tel"
+                size="sm"
+                v-model="quotation.quotation_tel"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Contacts')"
+              label-for="quotation_contact"
+            >
+              <b-form-textarea
+                id="quotation_contact"
+                v-model="quotation.quotation_contact"
+                rows="3"
+              ></b-form-textarea>
+            </b-form-group>
+          </b-col>
+        </b-row>
+      </template>
       <hr  v-if="quotationData"/>
       <QuotationLine
         v-if="quotationData"
         :quotationData="quotation"
+        :submitQuotationLineform="submitQuotationLineform"
+        @quotationSubmitted="(loading) => this.isLoading = loading"
       />
       <div class="mx-auto">
         <footer class="modal-footer">
@@ -244,6 +252,8 @@ import OrderTypesSelect from '../../../components/OrderTypesSelect.vue'
 import quotationService from '../../../models/quotations/Quotation.js'
 import Collapse from '../../../components/Collapse.vue'
 import {componentMixin} from "../../../utils";
+import CustomerDetail from "@/components/CustomerDetail";
+
 
 export default {
   mixins: [componentMixin],
@@ -254,7 +264,8 @@ export default {
     Multiselect,
     OrderTypesSelect,
     Collapse,
-    QuotationLine
+    QuotationLine,
+    CustomerDetail
   },
   props: {
     pk: {
@@ -268,7 +279,19 @@ export default {
     loading: {
       type: Boolean,
       default: false,
+    },
+    customer:{
+      type: Object,
+      default: null
     }
+  },
+  watch: {
+    quotationData: {
+      handler(newValue) {
+        this.quotation = newValue
+      },
+      deep: true
+    },
   },
   data() {
     return {
@@ -279,7 +302,8 @@ export default {
       quotation: quotationService.getFields(),
       errorMessage: null,
       customers: [],
-      getCustomersDebounced: null
+      getCustomersDebounced: null,
+      submitQuotationLineform : false
     }
   },
   validations() {
@@ -346,11 +370,6 @@ export default {
       this.quotation.quotation_email = customer.email
       this.quotation.quotation_contact = customer.contact
     },
-    async editAndAccept() {
-      this.buttonDisabled = true
-      this.acceptOrder = true
-      await this.submitForm()
-    },
     async reject() {
       this.cancelForm()
     },
@@ -361,11 +380,11 @@ export default {
         console.log('invalid?', this.v$.$invalid)
         return
       }
-
       this.buttonDisabled = true
-      this.isLoading = true
 
       if (this.isCreate) {
+        this.isLoading = true
+
         try {
           const quotation = await quotationService.insert(this.quotation)
 
@@ -380,6 +399,8 @@ export default {
           this.buttonDisabled = false
           return
         }
+      } else {
+        this.submitQuotationLineform = true
       }
     },
     async getCustomers(query) {

@@ -8,6 +8,7 @@
           v-if="quotation"
           :quotation_pk="quotationPK"
           :loading="isLoading"
+          @quotationLinesCreated="quotationLinesCreated"
         />
         <hr v-if="quotation">
         <Hours
@@ -16,6 +17,7 @@
           :quotation="quotation"
           :loading="isLoading"
           :type="COST_TYPE_WORK_HOURS"
+          @quotationLinesCreated="quotationLinesCreated"
         />
         <hr v-if="quotation">
         <Hours
@@ -24,6 +26,7 @@
           :quotation="quotation"
           :loading="isLoading"
           :type="COST_TYPE_TRAVEL_HOURS"
+          @quotationLinesCreated="quotationLinesCreated"
         />
         <hr v-if="quotation">
         <Distance
@@ -31,6 +34,7 @@
           :quotation_pk="quotationPK"
           :quotation="quotation"
           :loading="isLoading"
+          @quotationLinesCreated="quotationLinesCreated"
         />
         <hr v-if="quotation">
         <CallOutCosts
@@ -38,11 +42,13 @@
           :quotation_pk="quotationPK"
           :quotation="quotation"
           :loading="isLoading"
+          @quotationLinesCreated="quotationLinesCreated"
         />
         <hr v-if="quotation">
         <Customer
           :quotation-data="quotation"
           :loading="isLoading"
+          :customer="customer"
         />
       </b-form>
     </div>
@@ -50,9 +56,8 @@
 </template>
 
 <script>
-import invoiceService from '../../models/orders/Invoice.js'
-import invoiceLineService from '../../models/orders/InvoiceLine.js'
-import quotationService from '../../models/quotations/Quotation.js'
+import quotationLineService from '@/models/quotations/QuotationLine.js'
+import quotationService, { QuotationModel } from '../../models/quotations/Quotation.js'
 import customerService, {CustomerModel, CustomerPriceModel} from "../../models/customer/Customer";
 import Customer from './quotation_form/Customer.vue'
 import Hours from './quotation_form/Hours.vue'
@@ -96,67 +101,27 @@ export default {
       COST_TYPE_TRAVEL_HOURS,
       COST_TYPE_EXTRA_WORK,
       COST_TYPE_ACTUAL_WORK,
-
       isLoading: false,
       submitClicked: false,
-      invoice: new invoiceService.model({
-        total: "0.00",
-        total_currency: this.$store.getters.getDefaultCurrency,
-        vat: "0.00",
-        vat_currency: this.$store.getters.getDefaultCurrency,
-        term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
-      }),
       errorMessage: null,
-
-      invoice_id: null,
       quotationPK: null,
       quotation: null,
-
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
       invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
-
-      invoice_default_partner_hourly_rate: null,
-      invoice_default_partner_hourly_rate_dinero: null,
-
-      invoice_default_call_out_costs: null,
-
-      invoice_default_price_per_km: null,
-
-      engineer_models: [],
-
-      activity_totals: null,
-      extra_work_totals: null,
-      actual_work_totals: null,
-
-      material_models: null,
-      used_materials: null,
-
       customerPk: null,
       customer: null,
-
-      invoiceService,
-      invoiceLineService,
-      deletedInvoiceLines: []
+      quotationLineCollection: [],
+      quotationLineService
     }
   },
   computed: {
     isEdit () {
       return !!this.$route?.params?.pk
-    },
-    invoiceLinesHaveTotals() {
-      return this.invoiceLineService.collection.find((line) => line.price_text === '*')
-    },
-    isInvoiceLineValid() {
-      return this.invoiceLineService.editItem.description !== null
-        && this.invoiceLineService.editItem.description !== ""
-        && this.invoiceLineService.editItem.amount !== null
-        && this.invoiceLineService.editItem.amount !== ""
     }
   },
   async created() {
-
     if (this.isEdit) {
       this.quotationPK = this.$route.params.pk
       this.loadQuotation()
@@ -164,29 +129,55 @@ export default {
   },
   methods: {
     // customer
-    async getCustomer() {
-      const customerData = await customerService.detail(this.customerPk)
+    async getCustomer(pk) {
+      const customerData = await customerService.detail(pk)
       this.customer = new CustomerModel(customerData)
-    },
-    async updateCustomer() {
-      // use minimal model for patch
-      const minimalModel = new CustomerPriceModel(this.customer)
-
-      const customerData = await customerService.update(this.customerPk, minimalModel)
-      this.customer = new CustomerModel(customerData)
-      this.infoToast(this.$trans('Updated'), this.$trans('Customer data has been updated'))
     },
     async loadQuotation() {
       this.isLoading = true
 
       try {
-        this.quotation = await quotationService.detail(this.quotationPK)
+        const quotation = await quotationService.detail(this.quotationPK)
+        await this.getCustomer(quotation.customer_id)
+        this.quotation = new QuotationModel(quotation)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
         this.errorToast(this.$trans('Error fetching quotation'))
         this.isLoading = false
       }
+    },
+    getQuotationLineId() {
+      if (this.quotationLineService.collection.length === 0) {
+        return 0
+      }
+
+      const maxQuotationLine = this.quotationLineService.collection.reduce(function(prev, current) {
+        return (prev.id > current.id) ? prev : current
+      })
+      return maxQuotationLine.id + 1
+    },
+    quotationLinesCreated(quotationLines) {
+      if (quotationLines.length > 0) {
+        for (let quotationLine of quotationLines) {
+          quotationLine.id = this.getQuotationLineId()
+          // console.log(`id: ${id}`)
+          this.quotationLineService.collection.push(quotationLine)
+        }
+        this.updateQuotationTotals()
+        const txt = quotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
+        this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
+      }
+    },
+    updateQuotationTotals() {
+      const total = this.quotationLineService.getItemsTotal()
+      const vat = this.quotationLineService.getItemsTotalVAT()
+
+      this.quotation.setPriceField('total', total)
+      this.quotation.setPriceField('vat', vat)
+    },
+    updateQuotationLineCollection (collection) {
+      this.quotationLineCollection = collection
     },
     cancelForm() {
       this.$router.go(-1)

@@ -31,6 +31,8 @@ class CostModel {
   total = "0.00"
   total_currency
 
+  total_amount = 0
+
   priceFields = ['margin', 'price', 'vat', 'total']
 
   constructor(cost) {
