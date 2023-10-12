@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="order">
 
     <b-modal
       v-if="purchaseInvoice && hasBranches"
@@ -330,7 +330,7 @@
             close
           </b-button>
       </template>
-    
+
     <div class="flex-columns wrap">
       <div class="panel col-1-3">
         <h3>
@@ -466,30 +466,33 @@ export default {
   data() {
     return {
       isLoading: false,
+      iframeLoading: false,
+      isGeneratingPDF: false,
+      workorderURL: null,
       buttonDisabled: false,
       order: null,
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') }
+        {key: 'product', label: this.$trans('Product')},
+        {key: 'location', label: this.$trans('Location')},
+        {key: 'remarks', label: this.$trans('Remarks')}
       ],
       infoLineFields: [
-        { key: 'info', label: this.$trans('Infolines') }
+        {key: 'info', label: this.$trans('Infolines')}
       ],
       workorderDocumentFields: [
-        { key: 'name', label: this.$trans('Name') },
-        { key: 'url', label: this.$trans('URL') },
+        {key: 'name', label: this.$trans('Name')},
+        {key: 'url', label: this.$trans('URL')},
       ],
       extraDataFields: [
-        { key: 'statuscode', label: this.$trans('Status') },
-        { key: 'extra_data', label: this.$trans('Text') },
+        {key: 'statuscode', label: this.$trans('Status')},
+        {key: 'extra_data', label: this.$trans('Text')},
       ],
       purchaseInvoiceFields: [
-        { key: 'reference', label: this.$trans('Reference') },
-        { key: 'description', label: this.$trans('Description') },
-        { key: 'vat', label: this.$trans('VAT') },
-        { key: 'total', label: this.$trans('Total') },
-        { key: 'icons' },
+        {key: 'reference', label: this.$trans('Reference')},
+        {key: 'description', label: this.$trans('Description')},
+        {key: 'vat', label: this.$trans('VAT')},
+        {key: 'total', label: this.$trans('Total')},
+        {key: 'icons'},
       ],
       purchaseInvoice: null,
       deletePurchaseInvoicePk: null,
@@ -502,93 +505,49 @@ export default {
       type: [String, Number],
       default: null
     },
-    props: {
-        pk: {
-            type: [String, Number],
-            default: null
-        },
-        uuid: {
-            type: [String],
-            default: null
-        },
-        past: {
-            type: [Boolean],
-            default: false
-        },
+    uuid: {
+      type: [String],
+      default: null
     },
-    methods: {
-        iframeLoaded() {
-            this.iframeLoading = false;
-        },
-        openWorkorder() {
-            const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } });
-            window.open(`${document.location.origin}/${routeData.href}`, '_blank');
-        },
-        getWorkorderURL() {
-            this.isLoading = true;
-            const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } });
-            return `${document.location.origin}/${routeData.href}`;
-        },
-        showWorkorderDialog() {
-            this.iframeLoading = true;
-            this.workorderURL = this.getWorkorderURL();
-            this.$refs['workorder-viewer'].show();
-        },
-        async recreateWorkorderPdf() {
-            this.isLoading = true;
-            this.buttonDisabled = true;
-            this.isGeneratingPDF = true;
-            try {
-                await orderModel.recreateWorkorderPdf(this.pk);
-                this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
-                this.isLoading = false;
-                this.buttonDisabled = false;
-                this.isGeneratingPDF = false;
-                await this.loadOrder();
-            }
-            catch (err) {
-                console.log('Error recreating workorder', err);
-                this.errorToast(this.$trans('Error recreating workorder'));
-                this.buttonDisabled = false;
-                this.isLoading = false;
-                this.isGeneratingPDF = false;
-            }
-        },
-        async recreateWorkorderPdfGotenberg() {
-            this.isLoading = true;
-            this.buttonDisabled = true;
-            this.isGeneratingPDF = true;
-            try {
-                await orderModel.recreateWorkorderPdfGotenberg(this.pk);
-                this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
-                await this.loadOrder();
-                this.isLoading = false;
-                this.buttonDisabled = false;
-                this.isGeneratingPDF = false;
-            }
-            catch (err) {
-                console.log('Error recreating workorder', err);
-                this.errorToast(this.$trans('Error recreating workorder'));
-                this.buttonDisabled = false;
-                this.isLoading = false;
-                this.isGeneratingPDF = false;
-            }
-        },
-        async loadOrder() {
-            this.isLoading = true;
-            try {
-                this.order = this.pk !== null ? await orderModel.detail(this.pk) : await orderModel.detailUuid(this.uuid);
-                this.isLoading = false;
-            }
-            catch (error) {
-                console.log('error fetching order', error);
-                this.errorToast(this.$trans('Error fetching order'));
-                this.isLoading = false;
-            }
-        }
+    past: {
+      type: [Boolean],
+      default: false
     },
   },
   methods: {
+    iframeLoaded() {
+        this.iframeLoading = false;
+    },
+    getWorkorderURL() {
+        this.isLoading = true;
+        const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } });
+        return `${document.location.origin}/${routeData.href}`;
+    },
+    showWorkorderDialog() {
+        this.iframeLoading = true;
+        this.workorderURL = this.getWorkorderURL();
+        this.$refs['workorder-viewer'].show();
+    },
+    async recreateWorkorderPdfGotenberg() {
+        this.isLoading = true;
+        this.buttonDisabled = true;
+        this.isGeneratingPDF = true;
+        try {
+            await orderModel.recreateWorkorderPdfGotenberg(this.pk);
+            this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
+            await this.loadOrder();
+            this.isLoading = false;
+            this.buttonDisabled = false;
+            this.isGeneratingPDF = false;
+        }
+        catch (err) {
+            console.log('Error recreating workorder', err);
+            this.errorToast(this.$trans('Error recreating workorder'));
+            this.buttonDisabled = false;
+            this.isLoading = false;
+            this.isGeneratingPDF = false;
+        }
+    },
     // purchase invoices
     async doDeletePurchaseInvoice() {
       await this.purchaseInvoiceService.delete(this.deletePurchaseInvoicePk)
@@ -627,23 +586,6 @@ export default {
     openWorkorder() {
       const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
       window.open(`${document.location.origin}/${routeData.href}`, '_blank')
-    },
-    async recreateWorkorderPdfGotenberg() {
-      this.isLoading = true
-      this.buttonDisabled = true
-
-      try {
-        await this.orderService.recreateWorkorderPdfGotenberg(this.pk)
-        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        await this.loadOrder()
-      } catch(err) {
-        console.log('Error recreating workorder', err)
-        this.errorToast(this.$trans('Error recreating workorder'))
-        this.buttonDisabled = false
-        this.isLoading = false
-      }
     },
     goBack() {
       this.$router.go(-1)
