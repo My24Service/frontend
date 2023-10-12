@@ -255,6 +255,65 @@
         <div class="panel col-1-3">
           <h6>{{  $trans('Equipment details') }}</h6>
 
+        <b-row v-if="branch && hasBranches">
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Branch')"
+              label-for="equipment_branch_name"
+            >
+              <b-form-input
+                id="equipment_branch_name"
+                size="sm"
+                v-model="branch.name"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Address')"
+              label-for="equipment_branch_address"
+            >
+              <b-form-input
+                id="equipment_branch_address"
+                size="sm"
+                v-model="branch.address"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('City')"
+              label-for="equipment_branch_city"
+            >
+              <b-form-input
+                id="equipment_branch_city"
+                size="sm"
+                v-model="branch.city"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Country')"
+              label-for="equipment_branch_country_code"
+            >
+              <b-form-input
+                id="equipment_branch_country_code"
+                size="sm"
+                v-model="branch.country_code"
+                readonly
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+        </b-row>
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -312,6 +371,31 @@
                 v-model="equipment.serialnumber"
               ></b-form-input>
             </b-form-group>
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Lifespan (months)')"
+              label-for="equipment_default_replace_months"
+            >
+              <b-form-input
+                id="equipment_default_replace_months"
+                size="sm"
+                v-model="equipment.default_replace_months"
+              ></b-form-input>
+            </b-form-group>
+
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Price')"
+              label-for="equipment_serialnumber"
+            >
+              <PriceInput
+                v-model="equipment.price"
+                :currency="equipment.price_currency"
+                @priceChanged="(val) => priceChanged(val)"
+              />
+            </b-form-group>
+
+>>>>>>> b27bb58 (fixes for equipment & webshop/BIM)
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -612,12 +696,16 @@ export default {
         const equipmentData = await equipmentService.detail(this.pk)
         this.equipment = new EquipmentModel(equipmentData)
         if (this.hasBranches && !this.isEmployee) {
-          this.branch = await branchModel.detail(this.equipment.branch)
-          this.locations = await locationModel.listForSelectBranch(this.branch.id)
+          if (this.equipment.branch) {
+            this.branch = await branchModel.detail(this.equipment.branch)
+            this.locations = await locationModel.listForSelectBranch(this.branch.id)
+          }
         }
         if (!this.hasBranches && !this.isCustomer) {
-          this.customer = await customerModel.detail(this.equipment.customer)
-          this.locations = await locationModel.listForSelectCustomer(this.customer.id)
+          if (this.equipment.customer) {
+            this.customer = await customerModel.detail(this.equipment.customer)
+            this.locations = await locationModel.listForSelectCustomer(this.customer.id)
+          }
         }
 
         this.isLoading = false

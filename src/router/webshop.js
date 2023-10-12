@@ -3,7 +3,7 @@ import Webshop from '../views/webshop/WebshopIframe.vue';
 
 export default [
   {
-    path: '/webshop',
+    path: '/',
     component: TheAppLayout,
     props: {
       hasSubNav: false,

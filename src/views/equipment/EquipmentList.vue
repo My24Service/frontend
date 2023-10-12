@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page">
+  <div class="app-page" v-if="!isLoading">
 
     <b-modal
       id="add-state-modal"
@@ -110,12 +110,12 @@
           </span>
         </template>
         <template #cell(customer)="data">
-          <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}">
+          <router-link v-if="data.item.customer_branch_view" :to="{name: 'customer-view', params: {pk: data.item.customer}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
           </router-link><br/>
         </template>
         <template #cell(branch)="data">
-          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
+          <router-link v-if="data.item.customer_branch_view" :to="{name: 'company-branch-view', params: {pk: data.item.branch}}">
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
           </router-link><br/>
         </template>
