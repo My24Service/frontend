@@ -103,7 +103,7 @@
 
     ul:last-of-type {
       &:not(:empty) {
-        margin-block: 2ex;
+        margin-block: 1ex;
       }
       a {
         border-left: 1px solid #232c2f30;
@@ -450,6 +450,9 @@
     width: 66%;
     max-width: unset!important;
   }
+  > .col-1-2 {
+    width: 50%;
+  }
 }
 
 .flex-stack > .panel + .panel {
@@ -744,19 +747,32 @@ fieldset:disabled textarea {
 }
 
 .progress {
-  height: .25rem;
-  transition: all .2s cubic-bezier(0.075, 0.82, 0.165, 1);
   
   & .progress-bar {
     opacity: .5;
+    max-width: 0;
+    transition: all .2s cubic-bezier(0.075, 0.82, 0.165, 1);
+    animation: progressbar 1.5s 0.25s cubic-bezier(0.65, 0.05, 0.36, 1) forwards 1;
+  }
+
+  
+  .progress-bar {
+    animation-delay: calc(var(--delay, .25s) * .25s);
+  }
+
+}
+
+:hover > .progress {
+  
+  & .progress-bar {
+    transition-duration: .4s;
+    opacity: 1;
   }
 }
 
-tr:hover .progress {
-  height: .5rem;
-  transition-duration: .4s;
-  & .progress-bar {
-    opacity: 1;
+@keyframes progressbar {
+  to {
+    max-width: 100vw;
   }
 }
 
