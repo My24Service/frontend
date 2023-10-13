@@ -26,6 +26,8 @@ class BaseSocket {
       return this.socket
     }
 
+    if (import.meta.env.VITE_TURN_OFF_WEBSOCKET) return
+
     const socket = this._connect()
     this.socket = socket
 

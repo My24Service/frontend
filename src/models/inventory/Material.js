@@ -24,6 +24,9 @@ class MaterialModel {
   price_selling_alt
   price_selling_alt_currency
 
+  price_other = '0.00'
+  price_other_currency = 'EUR'
+
   price_purchase_ex = "0.00"
   price_purchase_ex_currency
 

@@ -1,6 +1,6 @@
 module.exports = {
   devServer: {
-    host: 'demo.my24service-dev.com'
+    host: 'demo.my24service.com'
   },
   filenameHashing: false,
   productionSourceMap: false,
