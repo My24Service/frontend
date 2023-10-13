@@ -314,7 +314,8 @@ export default {
             {...data, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
           material: data.material_id,
           amount_decimal: "0.00",
-          cost_type: COST_TYPE_USED_MATERIALS
+          cost_type: COST_TYPE_USED_MATERIALS,
+          margin_perc: 0
         })
         this.isLoading = false
       } catch(error) {
