@@ -5,7 +5,6 @@ import { QuotationLineModel } from "./QuotationLine";
 
 class QuotationModel {
   id
-  quotation
   description
   customer_id
   customer_relation
@@ -83,6 +82,32 @@ class QuotationService extends BaseModel {
     return base
   }
 
+  removeNullFields(obj) {
+    for (const [field, value] of Object.entries(obj)) {
+      if (!value) {
+        delete obj[field]
+      }
+    }
+    return obj
+  }
+
+  preInsert(obj) {
+    if (obj.hasOwnProperty('created')) {
+      delete obj.created
+    }
+    if (obj.hasOwnProperty('modified')) {
+      delete obj.modified
+    }
+    obj = this.removeNullFields(obj)
+    return obj
+  }
+
+  preUpdate(obj) {
+    delete obj.created
+    delete obj.modified
+    obj = this.removeNullFields(obj)
+    return obj
+  }
 }
 
 let quotationService = new QuotationService()

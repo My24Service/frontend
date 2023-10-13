@@ -100,7 +100,7 @@
           <b-col cols="1" v-if="cost.material">
             <VAT @vatChanged="(val) => changeVatType(cost, val)" />
           </b-col>
-          <b-col cols="2" v-if="cost.material">
+          <b-col cols="2" v-if="cost.material && cost.total_dinero">
             <TotalsInputs
               :total="cost.total_dinero"
               :vat="cost.vat_dinero"

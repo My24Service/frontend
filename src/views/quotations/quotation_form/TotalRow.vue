@@ -8,6 +8,7 @@
     </b-col>
     <b-col cols="2">
       <TotalsInputs
+        v-if="total"
         :total="total"
         :is-final-total="true"
         :vat="total_vat"

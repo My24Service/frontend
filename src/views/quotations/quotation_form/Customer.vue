@@ -213,7 +213,7 @@
         v-if="quotationData"
         :quotationData="quotation"
         :submitQuotationLineform="submitQuotationLineform"
-        @quotationSubmitted="(loading) => this.isLoading = loading"
+        @quotationSubmitted="(loading) => quotationSubmitted(loading)"
       />
       <div class="mx-auto">
         <footer class="modal-footer">
@@ -227,7 +227,7 @@
           </b-button>
           <b-button
             @click="submitForm"
-            :disabled="buttonDisabled"
+            :disabled="isLoading"
             class="btn btn-primary"
             type="button"
             variant="primary"
@@ -419,6 +419,10 @@ export default {
     cancelForm() {
       this.$router.push({ name: 'quotation-list'})
     },
+    quotationSubmitted(loading) {
+      this.submitQuotationLineform = false
+      this.isLoading = loading
+    }
   }
 }
 </script>

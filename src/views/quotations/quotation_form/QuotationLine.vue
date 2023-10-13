@@ -214,6 +214,7 @@
       </b-col>
       <b-col cols="2">
         <TotalsInputs
+          v-if="quotation.total_dinero"
           :total="quotation.total_dinero"
           :is-final-total="true"
           :vat="quotation.vat_dinero"
@@ -405,18 +406,20 @@ export default {
       this.$emit('quotationSubmitted', true)
 
       try {
-          const quotation = await this.quotationService.insert(this.quotation)
+          const quotation = await this.quotationService.update(this.quotation.id, this.quotation)
           for (let quotationLine of this.quotationLineService.collection) {
             quotationLine.quotation = quotation.id
             await this.quotationLineService.insert(quotationLine)
           }
 
-          this.infoToast(this.$trans('Created'), this.$trans('quotation has been created'))
+          this.infoToast(this.$trans('Updated'), this.$trans('quotation has been updated'))
           this.isLoading = false
           this.$emit('quotationSubmitted', false)
+          this.quotationLineService.collection = []
           this.$router.push({ name: 'quotation-list'})
         } catch(error) {
-          this.errorToast(this.$trans('Error creating invoice'))
+          console.log('error fetching quotation', error)
+          this.errorToast(this.$trans('Error updating quotation'))
           this.isLoading = false
           this.$emit('quotationSubmitted', false)
       }
