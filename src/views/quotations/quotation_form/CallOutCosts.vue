@@ -27,13 +27,16 @@
           :key="index"
           class="material_row"
         >
-          <b-col cols="2" v-if="cost.quotation">
+          <b-col cols="2" v-if="cost.quotation && !cost.callOutCostSaved">
             <b-form-input
               type="number"
               @blur="updateTotals"
               v-model="cost.amount_int"
               size="sm"
             ></b-form-input>
+          </b-col>
+          <b-col cols="2" v-if="cost.quotation && cost.callOutCostSaved">
+            {{ cost.amount_int }}
           </b-col>
           <b-col cols="4" v-if="cost.quotation">
             <b-form-radio-group
@@ -86,12 +89,6 @@
           :total="total_dinero"
           :total_vat="totalVAT_dinero"
         />
-        <hr v-if="!parentHasQuotationLines">
-        <AddToQuotationLines
-          v-if="!parentHasQuotationLines"
-          :useOnQuotationOptions="useOnQuotationOptions"
-          @buttonClicked="createQuotationLinesClicked"
-        />
         <hr>
         <b-row>
           <b-col cols="8"></b-col>
@@ -103,7 +100,7 @@
                 class="btn add-button"
                 type="button"
               >
-                {{ $trans("Add cost") }}
+                {{ $trans("Add call out costs") }}
               </b-button>
             </div>
           </b-col>
@@ -119,11 +116,17 @@
                 type="button"
                 variant="danger"
               >
-                {{ $trans("Save costs") }}
+                {{ $trans("Save call out costs") }}
               </b-button>
             </div>
           </b-col>
         </b-row>
+        <hr v-if="!parentHasQuotationLines">
+        <AddToQuotationLines
+          v-if="!parentHasQuotationLines"
+          :useOnQuotationOptions="useOnQuotationOptions"
+          @buttonClicked="createQuotationLinesClicked"
+        />
       </b-container>
     </b-overlay>
   </Collapse>
@@ -286,6 +289,7 @@ export default {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
           }
+          cost.callOutCostSaved = true
           return new this.costService.model(cost)
         })
         this.costService.collection = costs

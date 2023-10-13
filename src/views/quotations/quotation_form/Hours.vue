@@ -27,11 +27,14 @@
           :key="index"
           class="material_row"
         >
-          <b-col cols="2" v-if="cost.quotation">
+          <b-col cols="2" v-if="cost.quotation && !cost.savedHours">
             <DurationInput
               v-model="cost.amount_duration"
               @durationChanged="(duration) => changeDuration(cost, duration)"
             />
+          </b-col>
+          <b-col cols="2" v-if="cost.quotation && cost.savedHours">
+            {{ cost.amount_duration }}
           </b-col>
           <b-col cols="4" v-if="cost.quotation">
             <b-form-radio-group
@@ -84,12 +87,6 @@
           :total="total_dinero"
           :total_vat="totalVAT_dinero"
         />
-        <hr v-if="!parentHasQuotationLines">
-        <AddToQuotationLines
-          v-if="!parentHasQuotationLines"
-          :useOnQuotationOptions="useOnQuotationOptions"
-          @buttonClicked="createQuotationLinesClicked"
-        />
         <hr>
         <b-row>
           <b-col cols="8"></b-col>
@@ -101,7 +98,7 @@
                 class="btn add-button"
                 type="button"
               >
-                {{ $trans("Add cost") }}
+                {{ $trans(`Add ${this.getTitle().toLocaleLowerCase()}`) }}
               </b-button>
             </div>
           </b-col>
@@ -117,11 +114,17 @@
                 type="button"
                 variant="danger"
               >
-                {{ $trans("Save costs") }}
+                {{ $trans(`Save ${this.getTitle().toLocaleLowerCase()}`) }}
               </b-button>
             </div>
           </b-col>
         </b-row>
+        <hr v-if="!parentHasQuotationLines">
+        <AddToQuotationLines
+          v-if="!parentHasQuotationLines"
+          :useOnQuotationOptions="useOnQuotationOptions"
+          @buttonClicked="createQuotationLinesClicked"
+        />
       </b-container>
     </b-overlay>
   </Collapse>
@@ -320,6 +323,7 @@ export default {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
           }
+          cost.savedHours = true
           return new this.costService.model(cost)
         })
         this.costService.collection = costs

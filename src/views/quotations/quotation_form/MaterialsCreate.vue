@@ -121,12 +121,6 @@
           :total="total_dinero"
           :total_vat="totalVAT_dinero"
         />
-        <hr v-if="!parentHasQuotationLines">
-        <AddToQuotationLines
-          v-if="!parentHasQuotationLines"
-          :useOnQuotationOptions="useOnQuotationOptions"
-          @buttonClicked="createQuotationLinesClicked"
-        />
         <hr>
         <b-row>
           <b-col cols="8"></b-col>
@@ -138,7 +132,7 @@
                 class="btn add-button"
                 type="button"
               >
-                {{ $trans("Add cost") }}
+                {{ $trans("Add materials") }}
               </b-button>
             </div>
           </b-col>
@@ -154,11 +148,17 @@
                 type="button"
                 variant="danger"
               >
-                {{ $trans("Save costs") }}
+                {{ $trans("Save materials") }}
               </b-button>
             </div>
           </b-col>
         </b-row>
+        <hr v-if="!parentHasQuotationLines">
+        <AddToQuotationLines
+          v-if="!parentHasQuotationLines"
+          :useOnQuotationOptions="useOnQuotationOptions"
+          @buttonClicked="createQuotationLinesClicked"
+        />
       </b-container>
     </b-overlay>
   </Collapse>
