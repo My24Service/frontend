@@ -240,7 +240,6 @@ export default {
       },
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
       hasStoredData: false,
       costType: COST_TYPE_USED_MATERIALS,
       getMaterialsDebounced: '',
@@ -252,9 +251,6 @@ export default {
   async created() {
     this.isLoading = true
     this.getMaterialsDebounced = AwesomeDebouncePromise(this.getMaterials, 500)
-
-    // set vars in service
-    this.costService.invoice_default_margin = this.invoice_default_margin
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
 
@@ -301,7 +297,7 @@ export default {
         this.materialModels.push(
           new MaterialModel({
             ...data,
-            margin_perc: this.invoice_default_margin
+            margin_perc: 0
           })
         )
         data.material_id = data.id
@@ -382,7 +378,7 @@ export default {
         this.materialModels.push(
           new MaterialModel({
             ...data,
-            margin_perc: this.invoice_default_margin
+            margin_perc: 0
           })
         )
       }

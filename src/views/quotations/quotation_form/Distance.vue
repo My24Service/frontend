@@ -210,7 +210,6 @@ export default {
         USE_PRICE_SELLING,
         USE_PRICE_OTHER,
       },
-      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
@@ -245,7 +244,7 @@ export default {
             {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
           use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
           cost_type: COST_TYPE_DISTANCE,
-          margin_perc: this.invoice_default_margin
+          margin_perc: 0
         })
       )
       this.updateTotals()
