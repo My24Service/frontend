@@ -190,6 +190,10 @@ export default {
     quotation: {
       type: [Object],
       default: null
+    },
+    customer:{
+      type: Object,
+      default: null
     }
   },
   computed: {
@@ -214,7 +218,6 @@ export default {
   data() {
     return {
       isLoading: false,
-      customer: null,
       materialModels: [],
       engineerModels: [],
       total_dinero: null,
@@ -313,7 +316,6 @@ export default {
 
       try {
         const response = await this.costService.list()
-        const customer = await customerService.detail(this.quotation.customer_id)
         const costs = response.results.map((cost) => {
           if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
             cost.price_other = cost.price
@@ -321,7 +323,6 @@ export default {
           }
           return new this.costService.model(cost)
         })
-        this.customer = new CustomerModel(customer)
         this.costService.collection = costs
         this.updateTotals()
         this.isLoading = false

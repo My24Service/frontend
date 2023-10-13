@@ -8,6 +8,7 @@
           v-if="quotation"
           :quotation_pk="quotationPK"
           :loading="isLoading"
+          :customer="customer"
           @quotationLinesCreated="quotationLinesCreated"
         />
         <hr v-if="quotation">
@@ -16,6 +17,7 @@
           :quotation_pk="quotationPK"
           :quotation="quotation"
           :loading="isLoading"
+          :customer="customer"
           :type="COST_TYPE_WORK_HOURS"
           @quotationLinesCreated="quotationLinesCreated"
         />
@@ -25,6 +27,7 @@
           :quotation_pk="quotationPK"
           :quotation="quotation"
           :loading="isLoading"
+          :customer="customer"
           :type="COST_TYPE_TRAVEL_HOURS"
           @quotationLinesCreated="quotationLinesCreated"
         />
@@ -34,6 +37,7 @@
           :quotation_pk="quotationPK"
           :quotation="quotation"
           :loading="isLoading"
+          :customer="customer"
           @quotationLinesCreated="quotationLinesCreated"
         />
         <hr v-if="quotation">
@@ -42,6 +46,7 @@
           :quotation_pk="quotationPK"
           :quotation="quotation"
           :loading="isLoading"
+          :customer="customer"
           @quotationLinesCreated="quotationLinesCreated"
         />
         <hr v-if="quotation">
