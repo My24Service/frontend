@@ -118,11 +118,14 @@ export default {
   },
   computed: {
     isEdit () {
-      return !!this.$route?.params?.pk
+      return !!this.$route?.params?.pk && !this.$route.params.is_new
+    },
+    isNew() {
+      return !!this.$route?.params?.is_new
     }
   },
   async created() {
-    if (this.isEdit) {
+    if (this.isEdit || this.isNew) {
       this.quotationPK = this.$route.params.pk
       this.loadQuotation()
     }
@@ -138,7 +141,7 @@ export default {
 
       try {
         const quotation = await quotationService.detail(this.quotationPK)
-        await this.getCustomer(quotation.customer_id)
+        await this.getCustomer(quotation.customer_relation)
         this.quotation = new QuotationModel(quotation)
         this.isLoading = false
       } catch(error) {

@@ -12,7 +12,7 @@ export default [
   component: TheAppLayout,
   children: [
     {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-list',
       path: '/quotations/quotations',
       components: {
@@ -25,7 +25,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'preliminary-quotations',
       path: '/quotations/quotations/preliminary-quotations',
       components: {
@@ -38,7 +38,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-add',
       path: '/quotations/quotations/form',
       components: {
@@ -51,7 +51,7 @@ export default [
       },
 	  },
     {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-edit',
       path: '/quotations/quotations/form/:pk(\\d+)',
       props: {
