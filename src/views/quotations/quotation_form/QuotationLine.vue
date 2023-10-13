@@ -44,6 +44,80 @@
         </b-form-group>
       </b-col>
     </b-row>
+    <b-row>
+      <b-col cols="3" role="group">
+        <b-form-group
+          label-size="sm"
+          v-bind:label="$trans('Signature name engineer')"
+          label-for="signature_name_engineer"
+        >
+          <b-form-input
+            v-model="quotation.signature_name_engineer"
+            id="signature_name_engineer"
+            size="sm"
+          ></b-form-input>
+        </b-form-group>
+      </b-col>
+      <b-col cols="3">
+        <b-form-group
+          label-size="sm"
+          v-bind:label="$trans('Signature engineer')"
+          label-for="signature_engineer"
+        >
+          <b-form-file
+            id="signature_engineer"
+            accept="image/*"
+            :placeholder="$trans('Choose a file or drop it here...')"
+            @input="engineerImageSignatureSelected"
+          ></b-form-file>
+        </b-form-group>
+      </b-col>
+      <b-col cols="3">
+        <h3>{{ $trans('Current image') }}</h3>
+        <img width="200px" :src="engineer_signature_current_image" alt=""/>
+      </b-col>
+      <b-col cols="3">
+        <h3>{{ $trans('Upload preview') }}</h3>
+        <img width="200px" :src="engineer_signature_upload_preview" alt=""/>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="3" role="group">
+        <b-form-group
+          label-size="sm"
+          v-bind:label="$trans('Signature name customer')"
+          label-for="signature_name_customer"
+        >
+          <b-form-input
+            v-model="quotation.signature_name_customer"
+            id="signature_name_customer"
+            size="sm"
+          ></b-form-input>
+        </b-form-group>
+      </b-col>
+      <b-col cols="3">
+        <b-form-group
+          label-size="sm"
+          v-bind:label="$trans('Signature customer')"
+          label-for="signature_customer"
+        >
+          <b-form-file
+            id="signature_customer"
+            accept="image/*"
+            :placeholder="$trans('Choose a file or drop it here...')"
+            @input="customerImageSignatureSelected"
+          ></b-form-file>
+        </b-form-group>
+      </b-col>
+      <b-col cols="3">
+        <h3>{{ $trans('Current image') }}</h3>
+        <img width="200px" :src="customer_signature_current_image" alt=""/>
+      </b-col>
+      <b-col cols="3">
+        <h3>{{ $trans('Upload preview') }}</h3>
+        <img width="200px" :src="customer_signature_upload_preview" alt=""/>
+      </b-col>
+    </b-row>
     <h4>{{ $trans('Quotation lines')}} </h4>
     <div class="invoice-lines" v-if="quotationLineService.collection.length">
       <b-row>
@@ -239,6 +313,7 @@ import {INVOICE_LINE_TYPE_MANUAL} from "../quotation_form/constants";
 import {useVuelidate} from "@vuelidate/core";
 import TotalsInputs from "@/components/TotalsInputs";
 import quotationService, { QuotationService } from '@/models/quotations/Quotation.js';
+import {NO_IMAGE_URL} from "../../../constants"
 
 
 export default {
@@ -317,6 +392,11 @@ export default {
       quotationLineService,
       deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
+
+      engineer_signature_current_image: NO_IMAGE_URL,
+      engineer_signature_upload_preview: NO_IMAGE_URL,
+      customer_signature_upload_preview: NO_IMAGE_URL,
+      customer_signature_current_image: NO_IMAGE_URL
     }
   },
   computed: {
@@ -344,10 +424,31 @@ export default {
       vat_type: this.$store.getters.getInvoiceDefaultVat,
     }
     this.quotationLineService.newEditItem()
-
+    this.engineer_signature_current_image = this.quotation.signature_engineer ?
+      this.quotation.signature_engineer : NO_IMAGE_URL
+    this.customer_signature_current_image = this.quotation.signature_customer ?
+      this.quotation.signature_customer : NO_IMAGE_URL
     this.isLoading = false
   },
   methods: {
+    engineerImageSignatureSelected(file) {
+      const reader = new FileReader()
+      reader.onload = (f) => {
+        const b64 = f.target.result
+        this.engineer_signature_upload_preview = b64
+        this.quotation.signature_engineer = b64
+      }
+      reader.readAsDataURL(file)
+    },
+    customerImageSignatureSelected(file) {
+      const reader = new FileReader()
+      reader.onload = (f) => {
+        const b64 = f.target.result
+        this.customer_signature_upload_preview = b64
+        this.quotation.signature_customer = b64
+      }
+      reader.readAsDataURL(file)
+    },
     // invoice lines
     updateQuotationTotals() {
       const total = this.quotationLineService.getItemsTotal()
