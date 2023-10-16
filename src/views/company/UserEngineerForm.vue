@@ -230,10 +230,8 @@
                 size="sm"
                 v-model="engineer.engineer.cost_price"></b-form-input>
             </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="2" role="group">
+        
+          
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Hourly rate')"
@@ -245,8 +243,7 @@
                 @priceChanged="(val) => engineer.engineer.setHourlyRate(val)"
               />
             </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
+          
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Preferred location')"

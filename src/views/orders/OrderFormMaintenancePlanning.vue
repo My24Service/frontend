@@ -510,7 +510,7 @@
                     size="sm"
                     v-model="remarks"
                     rows="1"
-                  ></b-form-textarea>
+                  ></b-form-input>
                 </b-form-group>
               </b-col>
               <b-col cols="12" role="group" v-if="usesEquipment && !maintenance">

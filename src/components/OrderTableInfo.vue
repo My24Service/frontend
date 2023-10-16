@@ -73,9 +73,7 @@
           v-bind:method="this.showDeleteModal"
         />
       </span>
-  </div>
-
-  <!-- FIXME -->
+      <!-- FIXME -->
     <div class="fixme" style="display: none">
       <div>
         <p v-if="memberType === 'temps'">
@@ -115,7 +113,7 @@
         </b-col>
       </b-row>
     </div>
-
+  </div>
 </template>
 
 <style scope>

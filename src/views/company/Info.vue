@@ -85,8 +85,7 @@
                 v-model="member.companycode"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
+          
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Chamber of commerce')"
@@ -98,8 +97,7 @@
                 v-model="member.chamber_of_commerce"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
+          
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('VAT number')"
@@ -111,10 +109,7 @@
                 v-model="member.vat_number"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="4" role="group">
+        
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Address')"

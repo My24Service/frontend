@@ -74,7 +74,8 @@
         :active="isActive('settings')"
         :to="{ name: 'company-settings' }">
         {{ $trans('Settings') }}
-    </b-nav-item>
+      </b-nav-item>
+    </b-nav>
   </div>
 </template>
 

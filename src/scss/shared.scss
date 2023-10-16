@@ -143,9 +143,9 @@
 
     }
     &.has-children a::after {
-        content: '›';
-        position: absolute;
-        right: 1ex;
+      content: '›';
+      position: absolute;
+      right: 1ex;
     }
   }
 
@@ -648,7 +648,6 @@ canvas.dispatchCanvas {
   border-top-style: hidden;
 }
 
-<<<<<<< HEAD
 /* Dispatch view */
 .week {
   .planning-head,
@@ -882,4 +881,5 @@ fieldset:disabled textarea {
 
 .active .badge.badge-light {
   background-color: white;
+}
 }
