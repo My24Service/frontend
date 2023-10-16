@@ -7,7 +7,7 @@ cd /tmp
 rm -fr pt-vue
 git clone git@scm.platform.my24service-dev.com:services/pt-vue.git
 cd pt-vue
-git co $BRANCH
+git checkout $BRANCH
 git pull origin $BRANCH
 npm install
 npm run build
