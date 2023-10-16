@@ -149,7 +149,7 @@
               </b-form-group>
             </b-col>
           </b-row>
-          <div class="assign-engineer section" v-if="!hasBranches">
+          <div class="assign-engineer section" v-if="!hasBranches && (isCreate || (!isCreate && (unaccepted || !order.customer_order_accepted)))">
             <b-row>
               <b-col cols="12" role="group" v-if="recommendedUsers.length > 0">
                 <h4>{{ $trans('Recommended engineers') }}</h4>
@@ -184,7 +184,6 @@
             </b-row>
           </div>
 
-
           <b-form-group
             label-size="sm"
             v-bind:label="$trans('Remarks')"
@@ -200,12 +199,10 @@
 
           <h6>
             {{ $trans('Documents') }}
-            <router-link v-if="!isCreate" :to="{name: 'order-documents', params : {'orderPk': pk}}">
-              {{ $trans('edit documents') }}
-            </router-link>
+            <router-link v-if="!isCreate" :to="{name: 'order-documents', params : {'orderPk': pk}}">edit documents</router-link>
           </h6>
           <div class="order-documents section">
-            <div class="my-2" v-if="!isCreate && order.documents && order.documents.length > 0">
+            <div class="my-2" v-if="!isCreate && order.documents.length > 0">
               <ul class="listing">
                 <li v-for="doc in order.documents" :key="doc.url">
                   <a class="listing-item" :href="doc.url" target="_blank">
@@ -295,8 +292,9 @@
                 </b-table>
               </b-col>
             </b-row>
-            <b-row v-if="usesEquipment">
-              <b-col cols="8" role="group">
+            <b-row>
+              <!-- equipment -->
+              <b-col cols="4" role="group" v-if="usesEquipment">
                 <b-form-group
                   label-size="sm"
                   label-class="p-sm-2"
@@ -341,7 +339,7 @@
                   </multiselect>
                 </b-form-group>
               </b-col>
-              <b-col cols="4" role="group">
+              <b-col cols="2" role="group" v-if="usesEquipment">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Equipment')"
@@ -362,10 +360,26 @@
                   </b-input-group>
                 </b-form-group>
               </b-col>
-            </b-row>
-            <b-row v-if="usesEquipment">
+              <!-- end equipment -->
+
+              <!-- normal product -->
+              <b-col cols="4" role="group" v-if="!usesEquipment">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Equipment')"
+                  label-for="order-orderline-product"
+                >
+                  <b-form-input
+                    id="order-orderline-product"
+                    size="sm"
+                    v-model="product"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <!-- end normal product -->
+
               <!-- equipment locations -->
-              <b-col cols="8" role="group">
+              <b-col cols="4" role="group" v-if="usesEquipment">
                 <b-form-group
                   label-size="sm"
                   label-class="p-sm-2"
@@ -410,7 +424,7 @@
                   </multiselect>
                 </b-form-group>
               </b-col>
-              <b-col cols="4" role="group">
+              <b-col cols="2" role="group" v-if="usesEquipment">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Location')"
@@ -465,7 +479,7 @@
               </b-col>
 
               <!-- normal location -->
-              <b-col cols="4" role="group">
+              <b-col cols="4" role="group" v-if="!usesEquipment">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Location')"
@@ -480,7 +494,7 @@
               </b-col>
               <!-- end normal location -->
 
-              <b-col cols="4" role="group">
+              <b-col cols="4" role="group" v-if="!usesEquipment">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
@@ -558,6 +572,9 @@
               </b-button>
             </footer>
 
+          </div>
+
+        </div>
         <div class="panel col-1-3">
           <!-- order start/end times -->
             <h6>Planning</h6>
@@ -898,8 +915,6 @@
 
       </b-form>
     </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -921,7 +936,7 @@ import Collapse from '../../components/Collapse.vue'
 import {componentMixin} from "../../utils";
 import branchModel from "../../models/company/Branch";
 import timeRegistrationModel from "../../models/company/TimeRegistration";
-import equipmentService from "../../models/equipment/equipment";
+import equipmentModel from "../../models/equipment/equipment";
 import locationModel from "../../models/equipment/location";
 import orderlineModel from "../../models/orders/Orderline";
 import infolineModel from "../../models/orders/Infoline";
@@ -977,7 +992,6 @@ export default {
       location: '',
       equipment_location: null,
       remarks: '',
-      amount: 0,
 
       isEditOrderLine: false,
 
@@ -988,13 +1002,6 @@ export default {
       orderLineFields: [
         { key: 'product', label: this.$trans('Product') },
         { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') },
-        { key: 'icons', label: '' }
-      ],
-      orderLineFieldsMaintenance: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'amount', label: this.$trans('Amount') },
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
@@ -1044,7 +1051,6 @@ export default {
 
       deletedOrderlines: [],
       deletedInfolines: [],
-      equipmentService,
     }
   },
   validations() {
@@ -1155,35 +1161,6 @@ export default {
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
-
-      if (this.maintenance) {
-        this.isLoading = true
-        const data = this.$store.getters.getMaintenanceEquipment
-
-        if (data) {
-          const {maintenanceEquipment, customer_pk, contract_pk} = data
-
-          const customer = await customerModel.detail(customer_pk)
-          this.fillCustomer(customer)
-
-          for (const equipmentData of maintenanceEquipment) {
-            const equipment = await this.equipmentService.detail(equipmentData.equipment_pk)
-
-            this.order.orderlines.push({
-              product: equipment.name,
-              location: equipment.location_name,
-              remarks: "",
-              equipment_location: equipment.location,
-              equipment: equipment.id,
-              amount: equipmentData.amount,
-              maintenance_contract: contract_pk
-            })
-          }
-
-          this.$refs['orderlines-collapse'].toggleOpen()
-        }
-        this.isLoading = false
-      }
     } else {
       await this.loadOrder()
     }
@@ -1204,13 +1181,13 @@ export default {
       try {
         if (!this.hasBranches) {
           const response = this.isPlanning || this.isStaff || this.isSuperuser ?
-            await equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
-            await equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
+            await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
+            await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
 
           this.equipment = response.id
           this.product = response.name
         } else {
-          const response = await equipmentService.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
+          const response = await equipmentModel.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
 
           this.equipment = response.id
           this.product = response.name
@@ -1223,9 +1200,9 @@ export default {
     async getEquipment(query) {
       try {
         if (this.hasBranches) {
-          this.equipmentSearch = await equipmentService.searchBranch(query, this.order.branch)
+          this.equipmentSearch = await equipmentModel.searchBranch(query, this.order.branch)
         } else {
-          this.equipmentSearch = await equipmentService.searchCustomer(query, this.order.customer_relation)
+          this.equipmentSearch = await equipmentModel.searchCustomer(query, this.order.customer_relation)
         }
 
       } catch(error) {
@@ -1336,7 +1313,7 @@ export default {
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
-      this.amount = item.amount
+      console.log(this.orderline_pk)
 
       if (item.equipment && item.equipment_location) {
         this.equipment_location = item.equipment_location
@@ -1351,7 +1328,6 @@ export default {
       this.remarks = ''
       this.equipment_location = null
       this.equipment = null
-      this.amount = 0
     },
     doEditOrderLine() {
       const orderLine = {
@@ -1361,7 +1337,6 @@ export default {
         remarks: this.remarks,
         equipment_location: this.equipment_location,
         equipment: this.equipment,
-        amount: this.amount
       }
       this.order.orderlines.splice(this.editIndex, 1, orderLine)
       this.editIndex = null
@@ -1376,7 +1351,6 @@ export default {
         remarks: this.remarks,
         equipment_location: this.equipment_location,
         equipment: this.equipment,
-        amount: this.amount,
       })
       this.emptyOrderLine()
     },
@@ -1531,7 +1505,6 @@ export default {
             console.log('Error creating infolines', error)
           }
 
-          await this.$store.dispatch('setMaintenanceEquipment', [])
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -1636,23 +1609,6 @@ export default {
           }
         }
 
-        // assign engineers
-        try {
-          for (const engineer of this.selectedEngineers) {
-            await Assign.assignToUser(engineer.id, [this.order.order_id], true)
-          }
-
-          if (this.selectedEngineers.length) {
-            this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
-          }
-        } catch (error) {
-          console.log('error assigning to users', error)
-          this.errorToast(this.$trans('Error assigning to users'))
-          this.isLoading = false
-          this.buttonDisabled = false
-          return
-        }
-
         this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
@@ -1667,6 +1623,23 @@ export default {
       if (this.acceptOrder) {
         try {
           await orderNotAcceptedModel.setAccepted(this.pk)
+
+          // assign engineers
+          try {
+            for (const engineer of this.selectedEngineers) {
+              await Assign.assignToUser(engineer.id, [this.order.order_id], true)
+            }
+
+            if (this.selectedEngineers.length) {
+              this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
+            }
+          } catch (error) {
+            console.log('error assigning to users', error)
+            this.errorToast(this.$trans('Error assigning to users'))
+            this.isLoading = false
+            this.buttonDisabled = false
+            return
+          }
 
           this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
         } catch(error) {
@@ -1708,13 +1681,8 @@ export default {
 
       try {
         this.order = await orderModel.detail(this.pk)
-
-        // keep this, all members have this date notation in their settings
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
-
-        // this.order.start_date = this.$moment(this.order.start_date).format('YYYY-MM-DD')
-        // this.order.end_date = this.$moment(this.order.end_date).format('YYYY-MM-DD')
+        this.order.start_date = this.$moment(this.order.start_date).format('YYYY-MM-DD')
+        this.order.end_date = this.$moment(this.order.end_date).format('YYYY-MM-DD')
         this.isLoading = false
       } catch(error) {
         console.warn('error fetching order', error)
