@@ -1162,6 +1162,34 @@ export default {
 
     if (this.isCreate) {
       this.order = orderModel.getFields()
+
+      if (this.maintenance) {
+        this.isLoading = true
+        const data = this.$store.getters.getMaintenanceEquipment
+
+        if (data) {
+          const {maintenanceEquipment, customer_pk, contract_pk} = data
+
+          const customer = await customerModel.detail(customer_pk)
+          this.fillCustomer(customer)
+
+          for (const equipmentData of maintenanceEquipment) {
+            const equipment = await this.equipmentService.detail(equipmentData.equipment_pk)
+
+            this.order.orderlines.push({
+              product: equipment.name,
+              location: equipment.location_name,
+              remarks: "",
+              equipment_location: equipment.location,
+              equipment: equipment.id,
+              amount: equipmentData.amount,
+              maintenance_contract: contract_pk
+            })
+          }
+        }
+        this.isLoading = false
+      }
+
     } else {
       await this.loadOrder()
     }
