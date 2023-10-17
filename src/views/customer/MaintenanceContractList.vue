@@ -65,20 +65,17 @@
           </router-link>
         </template>
         <template #cell(totals)="data">
-          <table class="totals">
-            <tr>
-              <td><strong>{{ $trans('Created orders') }}</strong></td>
-              <td>{{ data.item.created_orders}}</td>
-            </tr>
-            <tr>
-              <td><strong>{{ $trans('# equipment') }}</strong></td>
-              <td>{{ data.item.num_equipment}}</td>
-            </tr>
-            <tr>
-              <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
-              <td>{{ data.item.num_order_equipment}}</td>
-            </tr>
-          </table>
+          <strong v-if="data.item.created_orders">{{ data.item.created_orders}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('created orders') }}</small>
+          &nbsp;
+          <strong v-if="data.item.num_equipment">{{ data.item.num_equipment}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('contract equipment') }}</small>
+          &nbsp;
+          <strong v-if="data.item.num_order_equipment">{{ data.item.num_order_equipment}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('equipment in orders') }}</small>
         </template>
         <template #cell(customer_view_name)="data">
           {{ data.item.customer_view.name }}
@@ -95,6 +92,12 @@
           </div>
         </template>
       </b-table>
+
+      <Pagination
+        v-if="!isLoading"
+        :model="this.maintenanceContractService"
+        :model_name="$trans('Contract')"
+      />
     </div>
 
     <Pagination

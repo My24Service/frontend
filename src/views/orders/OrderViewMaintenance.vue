@@ -1,9 +1,7 @@
 <template>
   <div class="page-detail">
 
-
     <div class="" v-if="order">
-
       <div class="flex-columns wrap">
         <div class="panel col-1-3">
           <h3>
@@ -386,7 +384,7 @@
           </b-button>
       </template>
       </b-modal>
-  </div>
+    </div>
 </template>
 
 <script>
@@ -463,6 +461,26 @@ export default {
         this.workorderURL = this.getWorkorderURL();
         this.$refs['workorder-viewer'].show();
     },
+    async recreateWorkorderPdfGotenberg() {
+        this.isLoading = true;
+        this.buttonDisabled = true;
+        this.isGeneratingPDF = true;
+        try {
+            await this.orderService.recreateWorkorderPdfGotenberg(this.pk);
+            this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
+            await this.loadOrder();
+            this.isLoading = false;
+            this.buttonDisabled = false;
+            this.isGeneratingPDF = false;
+        }
+        catch (err) {
+            console.log('Error recreating workorder', err);
+            this.errorToast(this.$trans('Error recreating workorder'));
+            this.buttonDisabled = false;
+            this.isLoading = false;
+            this.isGeneratingPDF = false;
+        }
+    },
     // purchase invoices
     async doDeletePurchaseInvoice() {
       await this.purchaseInvoiceService.delete(this.deletePurchaseInvoicePk)
@@ -498,45 +516,9 @@ export default {
     },
 
     // the rest
-    async recreateWorkorderPdf() {
-      this.isLoading = true
-      this.buttonDisabled = true
-      this.isGeneratingPDF = true
-
-      try {
-        await this.orderService.recreateWorkorderPdf(this.pk)
-        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        this.isGeneratingPDF = false
-        await this.loadOrder()
-      } catch(err) {
-        console.log('Error recreating workorder', err)
-        this.errorToast(this.$trans('Error recreating workorder'))
-        this.buttonDisabled = false
-        this.isLoading = false
-        this.isGeneratingPDF = false
-      }
-    },
-    async recreateWorkorderPdfGotenberg() {
-      this.isLoading = true
-      this.buttonDisabled = true
-      this.isGeneratingPDF = true
-
-      try {
-        await this.orderService.recreateWorkorderPdfGotenberg(this.pk)
-        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-        await this.loadOrder()
-        this.isLoading = false
-        this.buttonDisabled = false
-        this.isGeneratingPDF = false
-      } catch (err) {
-        console.log('Error recreating workorder', err)
-        this.errorToast(this.$trans('Error recreating workorder'))
-        this.buttonDisabled = false
-        this.isLoading = false
-        this.isGeneratingPDF = false
-      }
+    openWorkorder() {
+      const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
+      window.open(`${document.location.origin}/${routeData.href}`, '_blank')
     },
     goBack() {
       this.$router.go(-1)
@@ -572,6 +554,14 @@ export default {
 </script>
 
 <style scoped>
+
+.iframe-loader {
+  min-height: 720px
+}
+iframe {
+  min-height: 720px;
+  width: 100%;
+}
 .purchase-invoices-table {
   padding-top: 10px;
 }

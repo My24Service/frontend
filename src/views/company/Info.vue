@@ -12,7 +12,6 @@
             <b-icon icon="pencil"></b-icon>
             Edit
           </b-button>
-
           <b-button type="button" @click="cancelForm" v-if="isEditing" variant="outline">Cancel</b-button>
           <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary" v-if="isEditing">
             <b-icon icon="save"></b-icon>
@@ -70,8 +69,6 @@
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-
-
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Company code')"
@@ -87,6 +84,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Chamber of commerce')"
               label-for="member_chamber_of_commerce"
             >
@@ -99,6 +97,7 @@
           <b-col cols="2" role="group">
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('VAT number')"
               label-for="member_vat_number"
             >
@@ -108,8 +107,6 @@
                 v-model="member.vat_number"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Address')"
@@ -285,7 +282,6 @@
             </b-form-group>
           </fieldset>
         </div>
-
         <div class="panel col-1-3">
           <h6>{{ $trans('Workorder image') }}</h6>
           <fieldset :disabled="!isEditing">
@@ -419,7 +415,6 @@ export default {
       this.fileWorkorderChanged = true
     },
     async submitForm() {
-
       this.submitClicked = true
       this.isEditing = false
       this.v$.$touch()

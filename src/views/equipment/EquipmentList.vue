@@ -206,6 +206,10 @@ export default {
       equipmentObjects: [],
       equipmentFields: [],
       equipmentFieldsCustomerPlanning: [
+
+        {key: 'name', label: this.$trans('Equipment'), sortable: true},
+        {key: 'customer', label: this.$trans('Customer'), sortable: true},
+        {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'customer', label: this.$trans('Customer')},
         {key: 'location_name', label: this.$trans('Location')},
@@ -218,6 +222,7 @@ export default {
       equipmentFieldsBranchPlanning: [
         {key: 'name', label: this.$trans('Equipment')},
         {key: 'branch', label: this.$trans('Branch')},
+        {key: 'brand', label: this.$trans('Brand')},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
         {key: 'brand', label: this.$trans('Brand')},

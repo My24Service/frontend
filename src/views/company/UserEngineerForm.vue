@@ -59,7 +59,6 @@
                 {{ $trans('Please enter a password') }}
               </b-form-invalid-feedback>
             </b-form-group>
-
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Password again')"
@@ -230,6 +229,7 @@
                 size="sm"
                 v-model="engineer.engineer.cost_price"></b-form-input>
             </b-form-group>
+
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Hourly rate')"

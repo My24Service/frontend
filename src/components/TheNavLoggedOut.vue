@@ -14,10 +14,6 @@ export default {
   name: "TheNavLoggedOut",
   data() {
     return {
-      username: '',
-      usernameState: null,
-      password: '',
-      passwordState: null,
     }
   }
 }

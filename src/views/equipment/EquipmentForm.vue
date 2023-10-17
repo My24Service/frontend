@@ -371,6 +371,7 @@
                 v-model="equipment.serialnumber"
               ></b-form-input>
             </b-form-group>
+
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Lifespan (months)')"
@@ -395,7 +396,6 @@
               />
             </b-form-group>
 
->>>>>>> b27bb58 (fixes for equipment & webshop/BIM)
             <b-form-group
               label-size="sm"
               label-cols="4"

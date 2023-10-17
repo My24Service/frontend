@@ -6,9 +6,7 @@
       ref="search-modal"
       @do-search="handleSearchOk"
     />
-    <header>
 
-    </header>
     <div class='page-detail flex-columns' v-if="equipment && !isLoading">
       <div class='panel'>
         <h6>Equipment details</h6>
@@ -90,6 +88,7 @@
       </div>
     </div>
   </div>
+
 </template>
 
 <script>

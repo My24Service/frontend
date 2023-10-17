@@ -64,6 +64,12 @@
         {{ $trans('Branches') }}
       </b-nav-item>
       <b-nav-item
+        v-if="memberType === 'maintenance'"
+        :active="isActive('settings')"
+        :to="{ name: 'company-settings' }">
+        {{ $trans('Settings') }}
+      </b-nav-item>
+      <b-nav-item
         :active="isActive('budgets')"
         v-if="hasBranches"
         :to="{ name: 'company-budgets' }">

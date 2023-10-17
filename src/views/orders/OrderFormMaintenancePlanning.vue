@@ -424,6 +424,7 @@
                   </multiselect>
                 </b-form-group>
               </b-col>
+
               <b-col cols="2" role="group" v-if="usesEquipment">
                 <b-form-group
                   label-size="sm"
@@ -527,13 +528,13 @@
                   label-for="order-orderline-amount"
                 >
                   <b-form-input
-                    id="order-orderline-amount"
+                    id="order-orderline-remarks"
                     size="sm"
-                    v-model="amount"
+                    v-model="remarks"
                   ></b-form-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="10" role="group" v-if="usesEquipment && maintenance">
+              <b-col cols="12" role="group" v-if="usesEquipment">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"

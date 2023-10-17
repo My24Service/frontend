@@ -10,16 +10,18 @@
           <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
             <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit customer') }}
           </router-link>
-
         </div>
       </header>
 
       <div class="page-detail customer-details" v-if="!isCustomer">
+        <div v-if="!isCustomer">
+          <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
+        </div>
+
         <div class='flex-columns'>
           <div class="panel col-1-3">
             <CustomerCard :customer="customer" />
           </div>
-
           <div class="panel col-2-3">
             <b-tabs>
               <b-tab :title="$trans('Orders')">
