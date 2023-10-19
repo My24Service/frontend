@@ -800,3 +800,35 @@ fieldset:disabled textarea {
 .active .badge.badge-light {
   background-color: white;
 }
+
+.b-toaster.b-toaster-top-center {
+  .b-toaster-slot {
+    max-width: unset !important;
+  }
+
+  .b-toast-solid {
+    &.b-toast {
+      max-width: 60ch;
+      margin-inline: auto;
+
+      .toast {
+        background-color: transparent;
+        --bg-color: #000b;
+        --txt-color: white;
+        border-color: black;
+        max-width: 60ch;
+      }
+      .toast-header button.close {
+        text-shadow: none;
+        color: var(--text-color);
+        font-weight: 300;
+      }
+      .toast-header,
+      .toast-body {
+        background: var(--bg-color);
+        color: var(--txt-color);
+        border-width: 0px;
+      }
+    }
+  }
+}

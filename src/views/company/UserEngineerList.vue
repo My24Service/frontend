@@ -31,10 +31,10 @@
     <b-modal
       id="delete-engineer-modal"
       ref="delete-engineer-modal"
-      v-bind:title="$trans('Delete?')"
+      v-bind:title="`${$trans('Remove engineer')} (${selectedEngineer ? selectedEngineer.username :''})`"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this engineer?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to remove') }} <strong>{{ selectedEngineer ? selectedEngineer.full_name : ''}}</strong>?</p>
     </b-modal>
 
     <div class="panel overflow-auto">
@@ -74,7 +74,7 @@
             />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
+              v-bind:method="function() { showDeleteModal(data.item.id,  data.item.full_name) }"
             />
           </div>
         </template>
@@ -140,6 +140,11 @@ export default {
     this.model.currentPage = this.$route.query.page || 1
     this.loadData()
   },
+  computed: {
+    selectedEngineer () {
+      return this.engineers.filter(engineer => engineer.id === this.pk)[0];
+    }
+  },
   methods: {
     // download
     downloadList() {
@@ -164,11 +169,10 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Engineer has been deleted'))
+        this.infoToast(this.$trans('Removed engineer'), `${this.$trans('Engineer has been removed')}`)
         await this.loadData()
       } catch(error) {
-        console.log('Error deleting engineer', error)
-        this.errorToast(this.$trans('Error deleting engineer'))
+        this.errorToast(`${this.$trans('Error deleting engineer:')} ${error}`);
       }
     },
     // rest

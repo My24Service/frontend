@@ -25,6 +25,7 @@
             <h6>User info</h6>
             <b-form-group
                 label-size="sm"
+                label-cols="4"
                 v-bind:label="$trans('Username')"
                 label-for="engineer_username">
                 <b-form-input
@@ -45,6 +46,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Password')"
               label-for="engineer_password">
               <b-form-input
@@ -61,6 +63,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Password again')"
               label-for="engineer_password_again">
               <b-form-input
@@ -86,6 +89,7 @@
             <h6>Personal details</h6>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('First name')"
               label-for="engineer_first_name">
               <b-form-input
@@ -100,6 +104,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Last name')"
               label-for="engineer_last_name">
               <b-form-input
@@ -114,6 +119,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Email')"
               label-for="engineer_email">
               <b-form-input
@@ -128,6 +134,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Mobile phone')"
               label-for="engineer_mobile">
               <b-form-input
@@ -137,6 +144,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Address')"
               label-for="engineer_address"
             >
@@ -147,6 +155,7 @@
             </b-form-group>
             <b-form-group
                 label-size="sm"
+                label-cols="4"
                 v-bind:label="$trans('Postal')"
                 label-for="engineer_postal">
               <b-form-input
@@ -156,6 +165,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('City')"
               label-for="engineer_city">
               <b-form-input
@@ -165,6 +175,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Country')"
               label-for="engineer_country_code">
               <b-form-select
@@ -173,6 +184,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Passport')"
               label-for="engineer_passport">
               <b-form-input
@@ -186,6 +198,7 @@
             <h6>Work info</h6>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Email tablet')"
               label-for="engineer_email_tablet">
               <b-form-input
@@ -195,6 +208,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('License plate')"
               label-for="engineer_license_plate">
               <b-form-input
@@ -204,6 +218,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Contract hours per week')"
               label-for="engineer_contract_hours_week">
               <b-form-input
@@ -213,6 +228,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('VCA')"
               label-for="engineer_vca">
               <b-form-input
@@ -222,6 +238,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Cost price')"
               label-for="engineer_cost_price">
               <b-form-input
@@ -232,6 +249,7 @@
 
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Hourly rate')"
               label-for="engineer_hourly_rate"
             >
@@ -243,6 +261,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Prefered location')"
               label-for="engineer_prefered_location">
               <b-form-select
@@ -259,6 +278,7 @@
             </b-form-group>
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Or create new location')"
               label-for="engineer_prefered_location_new">
               <div>
@@ -481,12 +501,12 @@ export default {
         this.engineer.password = this.engineer.password1
         try {
           await engineerModel.insert(this.engineer)
-          this.infoToast(this.$trans('Created'), this.$trans('Engineer has been created'))
+          this.infoToast(`${this.$trans('Created')} ${this.engineer.username}`, `${this.$trans('Engineer has been added')}: ${this.engineer,first_name} ${this.engineer.last_name}`)
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating engineer', error)
-          this.errorToast(this.$trans('Error creating engineer'))
+          this.errorToast(`${this.$trans('Error creating engineer')} ${error}`);
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -504,12 +524,12 @@ export default {
         }
 
         await engineerModel.update(this.pk, this.engineer)
-        this.infoToast(this.$trans('Updated'), this.$trans('Engineer has been updated'))
+        this.infoToast(`${this.$trans('Updated')} ${this.engineer.username}`, `${this.engineer.first_name} ${this.engineer.last_name}'s ${this.$trans('details updated')}`)
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating engineer', error)
-        this.errorToast(this.$trans('Error updating engineer'))
+        this.errorToast(`${this.$trans('Error updating engineer details: ')} ${error}`)
         this.isLoading = false
         this.buttonDisabled = false
       }
