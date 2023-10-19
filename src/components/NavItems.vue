@@ -171,7 +171,7 @@
       >
       <b-icon icon="mouse2" v-if="!isActive('bim')"></b-icon>
       <b-icon icon="mouse2-fill" v-if="isActive('bim')"></b-icon>
-      {{ $trans('BIM / 3D') }}
+      {{ $trans('3D Module') }}
     </b-nav-item>
     <SubNav v-if="isActive('bim')">
       <router-view name="app-subnav"></router-view>
