@@ -137,7 +137,7 @@
             />
 
             <div class="h2 float-right">
-              <router-link class="px-1" v-if="order.customer_relation" v-bind:title="`$trans('Create invoice')`"
+              <router-link class="px-1" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
                            :to="{name: 'order-invoice-create', params: {uuid: order.uuid}}">
                 <b-icon-currency-dollar></b-icon-currency-dollar>
               </router-link>

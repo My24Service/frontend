@@ -1,14 +1,291 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form v-if="!isLoading">
-        <h2>{{ $trans('New invoice') }}</h2>
+    <div class="app-page">
+      <header>
+        <div class="page-title">
+          <h3>
+            <b-icon-receipt-cutoff></b-icon-receipt-cutoff>
+            {{ $trans('New invoice') }}
+          </h3>
+          <b-button-toolbar>
+            <b-button @click="cancelForm" type="button" variant="outline">
+              {{ $trans('Cancel') }}</b-button>
+            <b-button @click="submitForm" type="button" variant="primary">
+              {{ $trans('Submit') }}</b-button>
+          </b-button-toolbar>
+        </div>
+      </header>
+      
+      <b-form v-if="!isLoading" class="page-detail flex-columns" @submit="(e) => {e.preventDefault(); return false;}">
 
-        <Collapse
-          :title="$trans('Manage prices')"
-        >
+        <div class="panel col-1-3">
+          <div class="invoice-form-main">
+            <h6>{{ $trans('Invoice Recepient')}}</h6>
+            <CustomerCard
+              :customer="customer"
+            />
+
+            <hr />
+
+            <h6>{{ $trans('Invoice data')}}</h6>
+            <b-form-group
+              label-cols="5"
+              v-bind:label="$trans('Reference')"
+              label-for="invoice_reference"
+            >
+              <b-form-input
+                v-model="invoice.reference"
+                id="invoice_reference"
+                size="sm"
+              ></b-form-input>
+            </b-form-group>
+          
+          
+            <b-form-group
+              
+              label-cols="5"
+              v-bind:label="$trans('Term of payment')"
+              label-for="invoice_term_of_payment_days"
+            >
+              <b-input-group>
+
+                <b-form-input
+                id="invoice_term_of_payment_days"
+                
+                v-model="invoice.term_of_payment_days"
+                type="number"
+                >
+                </b-form-input>
+                <template #append>
+                  <b-input-group-text
+                  >
+                    {{ $trans('days')}}
+                  </b-input-group-text>
+                </template>
+              </b-input-group>
+            </b-form-group>
+          
+            <b-form-group
+              label-cols="5"
+              v-bind:label="$trans('Description')"
+              label-for="invoice_description"
+            >
+              <b-form-textarea
+                id="invoice_description"
+                v-model="invoice.description"
+                rows="1"
+              ></b-form-textarea>
+            </b-form-group>
+                    
+            <hr />
+
+            <h6 class="total-text">{{ $trans('Invoice total') }}</h6>
+            
+            <TotalsInputs
+              :total="invoice.total_dinero"
+              :is-final-total="true"
+              :vat="invoice.vat_dinero"
+            />
+          </div>
+        </div>
+
+        <div class="panel col-2-3">
+
+        <details open>
+          <summary class="flex-columns space-between">
+            <h6>{{ $trans('Invoice lines')}} </h6>
+            <b-icon-chevron-down></b-icon-chevron-down>
+          </summary>
+
+          <ul class="listing invoice-lines" v-if="invoiceLineService.collection.length">
+            <li>
+              <div class="headings">
+                <span>
+                  {{ $trans("Description") }}
+                </span>
+                <span style="text-align: right">
+                  {{ $trans("Amount") }}
+                </span>
+                <span style="text-align: right">
+                  {{ $trans("Price") }}
+                </span>
+                
+                <span style="text-align: right">
+                  {{ $trans("Total") }}
+                </span>
+                <span style="text-align: right">
+                  {{ $trans("VAT") }}
+                </span>
+                <span></span>
+              </div>
+            </li>
+
+            <li>
+              <div class="listing-item" v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id">
+              <span>
+                {{ invoiceLine.description }}
+              </span>
+              <span style="text-align: right">
+                {{ invoiceLine.amount }}
+              </span>
+              <span style="text-align: right">
+                {{ invoiceLine.price_text }}
+              </span>
+              <span style="text-align: right">
+                {{ invoiceLine.total_dinero.toFormat('$0.00') }}
+              </span>
+              <span style="text-align: right">
+                {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
+              </span>
+              <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;">
+                <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
+                  <b-icon-trash></b-icon-trash>
+                </b-link>
+              </span>
+              <span v-else>&nbsp;</span>
+              </div>
+            </li>
+
+            <li v-if="invoiceLinesHaveTotals" class="text-right">
+              <i>
+                <b-icon-info-square-fill variant="primary"></b-icon-info-square-fill> 
+                * <span class="dimmed">{{ $trans("Prices are combined in totals") }}</span>
+              </i>
+            </li>
+            
+          </ul>
+
+          <div class="new-invoice-line" v-if="invoiceLineService.editItem">
+              <b-row>
+                <b-col cols="3" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Item')"
+                    label-for="new-invoice-line-description"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-description"
+                      size="sm"
+                      v-model="invoiceLineService.editItem.description"
+                      :placeholder="$trans('Item description')"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Amount')"
+                    label-for="new-invoice-line-amount"
+                  >
+                    <b-form-input
+                      @blur="invoiceLineAmountChanged"
+                      id="new-invoice-line-amount"
+                      size="sm"
+                      type="number"
+                      v-model="invoiceLineService.editItem.amount"
+                      style="width: 5em"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Price')"
+                    label-for="new-invoice-line-price"
+                  >
+                    <PriceInput
+                      id="new-invoice-line-price"
+                      v-model="invoiceLineService.editItem.price"
+                      :currency="invoiceLineService.editItem.price_currency"
+                      @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
+                    />
+                  </b-form-group>
+                </b-col>
+                <b-col cols="" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Total')"
+                    label-for="new-invoice-line-total"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-total"
+                      readonly
+                      disabled
+                      :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
+                      size="sm"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('VAT type')"
+                    label-for="new-invoice-line-total"
+                  >
+                    <VAT @vatChanged="changeVatTypeInvoiceLine" />
+                  </b-form-group>
+                </b-col>
+                <b-col cols="" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('VAT')"
+                    label-for="new-invoice-line-vat"
+                  >
+                    <b-form-input
+                      id="new-invoice-line-vat"
+                      readonly
+                      disabled
+                      :value="invoiceLineService.editItem.vat_dinero.toFormat('$0.00')"
+                      size="sm"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col >
+                  <b-form-group
+                  label-size="sm"
+                  label="‎"
+                  label-for="invoice-submit-button"
+                  style="text-align: end;"
+                  >
+                    <b-button
+                      v-if="invoiceLineService.isEdit"
+                      @click="invoiceService.doEditCollectionItem"
+                      class="btn btn-primary"
+                      size="sm" 
+                      type="submit"
+                      variant="warning"
+                      :disabled="!isInvoiceLineValid"
+                      id="invoice-submit-button"
+                    >
+                      {{ $trans('Edit') }}
+                    </b-button>
+                    <b-button
+                      v-else
+                      @click="addInvoiceLine"
+                      class="btn btn-primary"
+                      size="sm"
+                      type="submit"
+                      variant="primary"
+                      :disabled="!isInvoiceLineValid"
+                      id="invoice-submit-button"
+                    >
+                      {{ $trans('Add') }}
+                    </b-button>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+
+          </div>
+        </details>
+        <hr/>
+
+        <details>
+          <summary class="flex-columns space-between">
+            <h6>{{ $trans('Manage prices') }}</h6>
+            <b-icon-chevron-down></b-icon-chevron-down>
+          </summary>
           <b-container fluid>
-            <h3>{{ $trans("Materials") }}</h3>
+            <h5>{{ $trans("Materials") }}</h5>
             <b-row>
               <b-col cols="4" class="header">
                 {{ $trans("Name") }}
@@ -66,7 +343,7 @@
           <hr/>
 
           <b-container fluid>
-            <h3>{{ $trans("Engineers") }}</h3>
+            <h5>{{ $trans("Engineers") }}</h5>
             <b-row>
               <b-col cols="9" class="header">
                 {{ $trans("Name") }}
@@ -107,7 +384,7 @@
           <hr/>
 
           <b-container fluid>
-            <h3>{{ $trans("Prices for customer") }}</h3>
+            <h5>{{ $trans("Prices for customer") }}</h5>
             <b-row>
               <b-col cols="9" class="header">
                 {{ $trans("Name") }}
@@ -145,7 +422,7 @@
             </b-row>
             <b-row>
               <b-col cols="9">
-                {{ $trans("Call out costs") }}
+                {{ $trans("Call out costs") }} 
               </b-col>
               <b-col cols="2">
                 <PriceInput
@@ -196,11 +473,14 @@
               </b-col>
             </b-row>
           </b-container>
-        </Collapse>
-
+        </details>
         <hr/>
 
-        <div v-if="used_materials.length > 0">
+        <details v-if="true || used_materials.length > 0">
+          <summary class="flex-columns space-between">
+            <h6>Used Materials</h6>
+            <b-icon-chevron-down></b-icon-chevron-down>
+          </summary>
           <MaterialsComponent
             :order_pk="order_pk"
             :customer="customer"
@@ -211,10 +491,10 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-          <hr/>
-        </div>
+        </details>
+        <hr/>
 
-        <div v-if="activity_totals.work_total !== '00:00'">
+        <div v-if="true || activity_totals.work_total !== '00:00'">
           <HoursComponent
             :order_pk="order_pk"
             :type="COST_TYPE_WORK_HOURS"
@@ -226,10 +506,10 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-          <hr/>
         </div>
+        <hr/>
 
-        <div v-if="activity_totals.travel_total !== '00:00'">
+        <div v-if="true || activity_totals.travel_total !== '00:00'">
           <HoursComponent
             :order_pk="order_pk"
             :type="COST_TYPE_TRAVEL_HOURS"
@@ -241,10 +521,10 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-          <hr/>
         </div>
+        <hr/>
 
-        <div v-if="activity_totals.distance_total > 0">
+        <div v-if="true || activity_totals.distance_total > 0">
           <DistanceComponent
             :order_pk="order_pk"
             :customer="customer"
@@ -256,10 +536,10 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-          <hr/>
         </div>
+        <hr/>
 
-        <div v-if="activity_totals.extra_work_total !== '00:00'">
+        <div v-if="true || activity_totals.extra_work_total !== '00:00'">
           <HoursComponent
             :order_pk="order_pk"
             :type="COST_TYPE_EXTRA_WORK"
@@ -271,10 +551,10 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-          <hr/>
         </div>
+        <hr/>
 
-        <div v-if="activity_totals.actual_work_total !== '00:00'">
+        <div v-if=" true ||activity_totals.actual_work_total !== '00:00'">
           <HoursComponent
             :order_pk="order_pk"
             :type="COST_TYPE_ACTUAL_WORK"
@@ -286,266 +566,27 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-          <hr/>
         </div>
-
-        <CallOutCostsComponent
-          :order_pk="order_pk"
-          :customer="customer"
-          :invoice_default_call_out_costs="invoice_default_call_out_costs"
-          @invoiceLinesCreated="invoiceLinesCreated"
-          @emptyCollectionClicked="emptyCollectionClicked"
-          :invoiceLinesParent="invoiceLineService.collection"
-        />
-
         <hr/>
-
-        <div class="invoice-form-main">
-
-          <CustomerDetail
+          
+        <details>
+          <summary class="flex-columns space-between">
+            <h6>{{ $trans('Call out costs') }}</h6>
+            <b-icon-chevron-down></b-icon-chevron-down>
+          </summary>
+          <CallOutCostsComponent
+            :order_pk="order_pk"
             :customer="customer"
+            :invoice_default_call_out_costs="invoice_default_call_out_costs"
+            @invoiceLinesCreated="invoiceLinesCreated"
+            @emptyCollectionClicked="emptyCollectionClicked"
+            :invoiceLinesParent="invoiceLineService.collection"
           />
+        </details>
 
-          <h4>{{ $trans('Invoice data')}} </h4>
+      </div>
 
-          <b-row>
-            <b-col cols="2" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Reference')"
-                label-for="invoice_reference"
-              >
-                <b-form-input
-                  v-model="invoice.reference"
-                  id="invoice_reference"
-                  size="sm"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="2" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Term of payment (days)')"
-                label-for="invoice_term_of_payment_days"
-              >
-                <b-form-input
-                  id="invoice_term_of_payment_days"
-                  size="sm"
-                  v-model="invoice.term_of_payment_days"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="8" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Description')"
-                label-for="invoice_description"
-              >
-                <b-form-textarea
-                  id="invoice_description"
-                  v-model="invoice.description"
-                  rows="1"
-                ></b-form-textarea>
-              </b-form-group>
-            </b-col>
-          </b-row>
-
-          <h4>{{ $trans('Invoice lines')}} </h4>
-
-          <div class="invoice-lines" v-if="invoiceLineService.collection.length">
-            <b-row>
-              <b-col cols="3" class="header">
-                {{ $trans("Description") }}
-              </b-col>
-              <b-col cols="2" class="header">
-                {{ $trans("Amount") }}
-              </b-col>
-              <b-col cols="2" class="header">
-                {{ $trans("Price") }}
-              </b-col>
-              <b-col cols="2" class="header">
-                {{ $trans("Total") }}
-              </b-col>
-              <b-col cols="2" class="header">
-                {{ $trans("VAT") }}
-              </b-col>
-              <b-col cols="1">
-
-              </b-col>
-            </b-row>
-
-            <b-row v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id">
-              <b-col cols="3">
-                <b-form-textarea
-                  v-model="invoiceLine.description"
-                  rows="2"
-                ></b-form-textarea>
-              </b-col>
-              <b-col cols="2">
-                {{ invoiceLine.amount }}
-              </b-col>
-              <b-col cols="2">
-                {{ invoiceLine.price_text }}
-              </b-col>
-              <b-col cols="2">
-                {{ invoiceLine.total_dinero.toFormat('$0.00') }}
-              </b-col>
-              <b-col cols="2">
-                {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
-              </b-col>
-              <b-col cols="1" v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL">
-                <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
-                  <b-icon-trash></b-icon-trash>
-                </b-link>
-              </b-col>
-            </b-row>
-
-            <b-row v-if="invoiceLinesHaveTotals">
-              <b-col>
-                <div class="float-right">
-                  <i>* {{ $trans("Prices are combined in totals") }}</i>
-                </div>
-              </b-col>
-            </b-row>
-          </div>
-
-          <div class="new-invoice-line" v-if="invoiceLineService.editItem">
-            <b-container>
-              <b-row>
-                <b-col cols="3" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Description')"
-                    label-for="new-invoice-line-description"
-                  >
-                    <b-form-input
-                      id="new-invoice-line-description"
-                      size="sm"
-                      v-model="invoiceLineService.editItem.description"
-                    ></b-form-input>
-                  </b-form-group>
-                </b-col>
-                <b-col cols="2" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Amount')"
-                    label-for="new-invoice-line-amount"
-                  >
-                    <b-form-input
-                      @blur="invoiceLineAmountChanged"
-                      id="new-invoice-line-amount"
-                      size="sm"
-                      v-model="invoiceLineService.editItem.amount"
-                    ></b-form-input>
-                  </b-form-group>
-                </b-col>
-                <b-col cols="2" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Price')"
-                    label-for="new-invoice-line-price"
-                  >
-                    <PriceInput
-                      id="new-invoice-line-price"
-                      v-model="invoiceLineService.editItem.price"
-                      :currency="invoiceLineService.editItem.price_currency"
-                      @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
-                    />
-                  </b-form-group>
-                </b-col>
-                <b-col cols="1" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('VAT type')"
-                    label-for="new-invoice-line-total"
-                  >
-                    <VAT @vatChanged="changeVatTypeInvoiceLine" />
-                  </b-form-group>
-                </b-col>
-                <b-col cols="2" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Total')"
-                    label-for="new-invoice-line-total"
-                  >
-                    <b-form-input
-                      id="new-invoice-line-total"
-                      readonly
-                      :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
-                      size="sm"
-                    ></b-form-input>
-                  </b-form-group>
-                </b-col>
-                <b-col cols="2" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('VAT')"
-                    label-for="new-invoice-line-vat"
-                  >
-                    <b-form-input
-                      id="new-invoice-line-vat"
-                      readonly
-                      :value="invoiceLineService.editItem.vat_dinero.toFormat('$0.00')"
-                      size="sm"
-                    ></b-form-input>
-                  </b-form-group>
-                </b-col>
-              </b-row>
-            </b-container>
-
-            <footer class="modal-footer">
-              <b-button
-                v-if="invoiceLineService.isEdit"
-                @click="invoiceService.doEditCollectionItem"
-                class="btn btn-primary"
-                size="sm" type="button"
-                variant="warning"
-                :disabled="!isInvoiceLineValid"
-              >
-                {{ $trans('Edit invoice line') }}
-              </b-button>
-              <b-button
-                v-if="!invoiceLineService.isEdit"
-                @click="addInvoiceLine"
-                class="btn btn-primary"
-                size="sm"
-                type="button"
-                variant="primary"
-                :disabled="!isInvoiceLineValid"
-              >
-                {{ $trans('Add invoice line') }}
-              </b-button>
-            </footer>
-
-          </div>
-
-          <hr/>
-
-          <b-row>
-            <b-col cols="10">
-              <span class="total-text">{{ $trans('Invoice total') }}</span>
-            </b-col>
-            <b-col cols="2">
-              <TotalsInputs
-                :total="invoice.total_dinero"
-                :is-final-total="true"
-                :vat="invoice.vat_dinero"
-              />
-            </b-col>
-          </b-row>
-
-        </div>
-
-        <hr/>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
-          </footer>
-        </div>
+        
       </b-form>
     </div>
   </b-overlay>
@@ -567,7 +608,7 @@ import MaterialsComponent from "./invoice_form/Materials";
 import CallOutCostsComponent from "./invoice_form/CallOutCosts";
 
 import VAT from "./invoice_form/VAT";
-import CustomerDetail from "../../components/CustomerDetail";
+import CustomerCard from "../../components/CustomerCard";
 import {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
@@ -589,7 +630,7 @@ export default {
     DistanceComponent,
     CallOutCostsComponent,
     VAT,
-    CustomerDetail,
+    CustomerCard,
     TotalsInputs,
   },
   setup() {

@@ -1,19 +1,6 @@
 <template>
-  <div v-if="isLoaded" class="app-page">
-    <header>
-      <div class="page-title">
-        <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
-          <router-link :to="{name: 'order-list'}">Orders</router-link> / 
-          <span>#<strong>{{ pk }}</strong></span>
-        </h3>
-        <div class="flex-columns">
-          <router-link class="btn button" :to="{name:'order-edit', pk: pk}">
-            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit order') }}
-          </router-link>
-        </div>
-      </div>
-    </header>
+  <div v-if="isLoaded">
+    
     <OrderViewMaintenance
       v-if="memberType === 'maintenance'"
       v-bind:pk="pk"

@@ -14,3 +14,31 @@ html, body {
   height: 100%;
   background: #f8f9fe;
 }
+
+details > summary {
+  padding-block: 1rem;
+}
+
+details > summary > * {
+  display: inline;
+  color: var(--text-color) !important;
+}
+
+details > summary > h6 {
+  margin-bottom: 0 !important;
+}
+
+details > summary > svg {
+  transition: all .25s ease;
+}
+
+details[open] > summary {
+  margin-bottom: 1rem !important;
+  > * {
+    color: $active-link !important;
+  }
+}
+
+details[open] > summary > svg {
+  rotate: 180deg;
+}

@@ -1,106 +1,101 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <Collapse
-      :title="$trans('Call out costs')"
+    <div
+      class="costs-table"
+      v-if="!isLoading && hasStoredData"
     >
-      <div
-        class="costs-table"
-        v-if="!isLoading && hasStoredData"
-      >
-        <CostsTable
-          :collection="costService.collection"
-          :type="costType"
-        />
+      <CostsTable
+        :collection="costService.collection"
+        :type="costType"
+      />
 
-        <CollectionEmptyContainer
-          @buttonClicked="() => { emptyCollectionClicked() }"
-        />
+      <CollectionEmptyContainer
+        @buttonClicked="() => { emptyCollectionClicked() }"
+      />
 
-        <AddToInvoiceLinesDiv
-          v-if="!parentHasInvoiceLines"
-          :useOnInvoiceOptions="useOnInvoiceOptions"
-          @buttonClicked="createInvoiceLinesClicked"
-        />
+      <AddToInvoiceLinesDiv
+        v-if="!parentHasInvoiceLines"
+        :useOnInvoiceOptions="useOnInvoiceOptions"
+        @buttonClicked="createInvoiceLinesClicked"
+      />
 
-      </div>
+    </div>
 
-      <b-container fluid v-if="!isLoading && !hasStoredData">
-        <b-row>
-          <b-col cols="2">
-            <HeaderCell
-              :text='$trans("Amount")'
-            />
-          </b-col>
-          <b-col cols="6">
-            <HeaderCell
-              :text='$trans("Rate")'
-            />
-          </b-col>
-          <b-col cols="2">
-            <HeaderCell
-              :text='$trans("VAT type")'
-            />
-          </b-col>
-          <b-col cols="2" />
-        </b-row>
-        <b-row>
-          <b-col cols="2">
-            <b-form-input
-              @blur="updateTotals"
-              v-model="coc_item.amount_int"
-              size="sm"
-            ></b-form-input>
-          </b-col>
-          <b-col cols=6>
-            <b-form-radio-group
-              @change="updateTotals"
-              v-model="coc_item.use_price"
-            >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
-                {{ $trans('Settings') }}
-                {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-              </b-form-radio>
+    <b-container fluid v-if="!isLoading && !hasStoredData">
+      <b-row>
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("Amount")'
+          />
+        </b-col>
+        <b-col cols="6">
+          <HeaderCell
+            :text='$trans("Rate")'
+          />
+        </b-col>
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("VAT type")'
+          />
+        </b-col>
+        <b-col cols="2" />
+      </b-row>
+      <b-row>
+        <b-col cols="2">
+          <b-form-input
+            @blur="updateTotals"
+            v-model="coc_item.amount_int"
+            size="sm"
+          ></b-form-input>
+        </b-col>
+        <b-col cols=6>
+          <b-form-radio-group
+            @change="updateTotals"
+            v-model="coc_item.use_price"
+          >
+            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              {{ $trans('Settings') }}
+              {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+            </b-form-radio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
-                {{ $trans('Customer') }}
-                {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-              </b-form-radio><br/>
+            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              {{ $trans('Customer') }}
+              {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+            </b-form-radio><br/>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
-                <p class="flex">
-                  {{ $trans("Other") }}:&nbsp;&nbsp;
-                  <PriceInput
-                    v-model="coc_item.price_other"
-                    :currency="coc_item.price_other_currency"
-                    @priceChanged="(val) => otherPriceChanged(val)"
-                  />
-                </p>
-              </b-form-radio>
-            </b-form-radio-group>
-          </b-col>
-          <b-col cols="2">
-            <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />
-          </b-col>
-          <b-col cols="2">
-            <TotalsInputs
-              :total="coc_item.total_dinero"
-              :vat="coc_item.vat_dinero"
-            />
-          </b-col>
-        </b-row>
-        <TotalRow
-          :items_total="totalAmount"
-          :total="total_dinero"
-          :total_vat="totalVAT_dinero"
-        />
+            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+              <p class="flex">
+                {{ $trans("Other") }}:&nbsp;&nbsp;
+                <PriceInput
+                  v-model="coc_item.price_other"
+                  :currency="coc_item.price_other_currency"
+                  @priceChanged="(val) => otherPriceChanged(val)"
+                />
+              </p>
+            </b-form-radio>
+          </b-form-radio-group>
+        </b-col>
+        <b-col cols="2">
+          <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />
+        </b-col>
+        <b-col cols="2">
+          <TotalsInputs
+            :total="coc_item.total_dinero"
+            :vat="coc_item.vat_dinero"
+          />
+        </b-col>
+      </b-row>
+      <TotalRow
+        :items_total="totalAmount"
+        :total="total_dinero"
+        :total_vat="totalVAT_dinero"
+      />
 
-        <CollectionSaveContainer
-          @buttonClicked="() => { saveCollection() }"
-        />
+      <CollectionSaveContainer
+        @buttonClicked="() => { saveCollection() }"
+      />
 
-      </b-container>
-
-    </Collapse>
+    </b-container>
   </b-overlay>
 </template>
 

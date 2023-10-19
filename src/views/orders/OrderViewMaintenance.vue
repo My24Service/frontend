@@ -1,8 +1,28 @@
 <template>
-  <div class="page-detail">
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <router-link :to="{name: 'order-list'}">Orders</router-link> / 
+          <span>#<strong>{{ pk }}</strong></span>
+        </h3>
+        <div class="flex-columns">
+          <router-link class="btn button outline" :to="{name:'order-edit', pk: pk}">
+            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit order') }}
+          </router-link>
+          <router-link class="btn" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
+              :to="{name: 'order-invoice-create', params: {uuid: order.uuid}}">
+            <b-icon-receipt-cutoff></b-icon-receipt-cutoff> {{ $trans('Create invoice') }}
+          </router-link>
+        </div>
+      </div>
+    </header>
 
-    <div class="" v-if="order">
-      <div class="flex-columns wrap">
+    <div class="page-detail">
+
+      <div v-if="order" class="flex-columns wrap" >
+
         <div class="panel col-1-3">
           <h3>
             <span><strong>{{ order.order_type }}</strong> <br><small>{{ order.order_name }}</small></span>
@@ -75,16 +95,16 @@
             </b-col>
           </b-row>
           <b-row class="my-2" v-if="order.workorder_documents.length > 0">
-            <b-col cols="12">
-              <h4>{{ $trans('Workorder documents') }}</h4>
-              <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents" responsive="sm">
-                <template #cell(url)="data">
-                  <b-link class="px-1" :href="data.item.url" target="_blank">
-                    {{ $trans('Order') }} {{ order.order_id }}
-                  </b-link>
-                </template>
-              </b-table>
-            </b-col>
+            
+            <h6>{{ $trans('Workorder documents') }}</h6>
+            <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents" responsive="sm">
+              <template #cell(url)="data">
+                <b-link class="px-1" :href="data.item.url" target="_blank">
+                  {{ $trans('Order') }} {{ order.order_id }}
+                </b-link>
+              </template>
+            </b-table>
+            
           </b-row>
           <b-row class="my-2" v-if="order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
             <b-col cols="12">
@@ -111,23 +131,26 @@
               ></b-table>
             </b-col>
           </b-row>
-
         </div>
 
         <div class="panel col-1-3">
-
-          <b-container v-if="order.invoices.length">
+          <div v-if="order.invoices.length">
             <h6>{{ $trans('Invoices') }}</h6>
-            <b-row v-for="invoice of order.invoices" :key="invoice.uuid">
-              <b-col cols="12">
-                <router-link :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}">
+            <ul class='listing'>
+              <li v-for="invoice of order.invoices" :key="invoice.uuid">
+                <router-link 
+                  class="listing-item"
+                  :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}"
+                  target="_blank"
+                  >
                   {{ $trans('Invoice') }} {{ invoice.invoice_id }}
-                </router-link><br/>
-              </b-col>
-            </b-row>
-          </b-container>
+                </router-link>
+              </li>
+            </ul>
+          </div>
 
           <div class="purchase-invoices-table" v-if="hasBranches">
+            
             <h6>{{ $trans('Purchase invoices') }}</h6>
             <b-table
               id="purchase-invoices-table"
@@ -168,8 +191,9 @@
               </template>
             </b-table>
           </div>
-
+          
           <h6>Timeline</h6>
+
           <ul class="listing" style="max-height: 75vh; overflow: auto;">
             <li v-for="status in order.statuses.slice().reverse()" :key="status.id">
               <div class="listing-item">
@@ -220,7 +244,7 @@
                 responsive="sm"
               ></b-table>
             </b-col>
-        </b-row>
+          </b-row>
           <b-container>
             <b-row v-if="hasBranches">
               <hr/>
@@ -265,23 +289,21 @@
                       </div>
                     </template>
                   </b-table>
-
                 </div>
               </b-col>
             </b-row>
           </b-container>
-
         </div>
-      </div>
-    </div>
 
-    <b-modal
+      </div>
+
+      <b-modal
         v-if="purchaseInvoice && hasBranches"
         id="delete-purchase-invoice-modal"
         ref="delete-purchase-invoice-modal"
         v-bind:title="$trans('Delete?')"
         @ok="doDeletePurchaseInvoice"
-      >
+        >
         <p class="my-4">{{ $trans('Are you sure you want to delete this purchase invoice?') }}</p>
       </b-modal>
 
@@ -382,9 +404,10 @@
           <b-button @click="ok()" variant="primary">
             close
           </b-button>
-      </template>
+        </template>
       </b-modal>
     </div>
+  </div>
 </template>
 
 <script>
