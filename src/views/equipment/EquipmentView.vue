@@ -7,6 +7,22 @@
       @do-search="handleSearchOk"
     />
 
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="tools"></b-icon>
+          <span class="backlink" @click="goBack">{{ $trans('Equipment') }}</span> / 
+          <span>{{ equipment.name }}</span>
+        </h3>
+        <b-button-toolbar>
+          <router-link 
+          :to="{name: editLink, params:{pk: this.pk}}"
+          class="btn"
+          >{{ `${$trans('Edit')} ${$trans('equipment')}`}}</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
+
     <div class='page-detail flex-columns' v-if="equipment && !isLoading">
       <div class='panel'>
         <h6>Equipment details</h6>
@@ -20,9 +36,9 @@
           <dt>{{ $trans('Description') }}</dt>
           <dd>{{ equipment.description }}</dd>
           <dt>{{ $trans('Installation date') }}</dt>
-          <dd>{{ equipment.installation_date }}</dd>
+          <dd>{{ equipment.installation_date ? this.$moment(equipment.installation_date).format('DD-MM-YYYY') : '' }}</dd>
           <dt>{{ $trans('Production date') }}</dt>
-          <dd>{{ equipment.production_date }}</dd>
+          <dd>{{ equipment.production_date ? this.$moment(equipment.production_date).format('DD-MM-YYYY') : ''}}</dd>
           <dt>{{ $trans('Serial number') }}</dt>
           <dd>{{ equipment.serialnumber }}</dd>
           <dt>{{ $trans('Standard hours') }}</dt>
@@ -101,6 +117,7 @@ import orderModel from '../../models/orders/Order.js'
 import OrderStats from "../../components/OrderStats";
 import {componentMixin} from "../../utils";
 import equipmentModel from "../../models/equipment/equipment";
+import moment from 'moment/min/moment-with-locales'
 
 export default {
   mixins: [componentMixin],
@@ -197,7 +214,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching equipment detail data', error)
-        this.errorToast(this.$trans('Error fetching equipment detail'))
+        this.errorToast(`${this.$trans('Error fetching equipment detail:')} ${error}`)
         this.isLoading = false
       }
     },
@@ -217,6 +234,9 @@ export default {
   },
   created() {
     this.loadData()
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment;
+    this.$moment.locale(lang)
   },
   async mounted () {
   }

@@ -6,8 +6,9 @@
             <h3>
               <b-icon icon="tools"></b-icon>
               <span class="backlink" @click=cancelForm>Equipment</span> /
-              <span v-if="isCreate">{{ $trans('New') }}</span>
-              <span v-if="!isCreate">{{ equipment.name }} <span class="dimmed">{{ $trans('edit') }}</span></span>
+              <span v-if="isCreate && !equipment.name">{{ $trans('new') }}</span>
+              <span v-if="!isCreate && !equipment.name"><span class="dimmed">{{ $trans('edit') }}</span></span>
+              <span v-else>{{ equipment.name }}</span>
             </h3>
             <div class="flex-columns">
               <b-button @click="cancelForm" type="button" variant="secondary">
@@ -208,7 +209,7 @@
                 ></b-form-input>
               </b-form-group>
             </b-col>
-            <b-col cols="2" role="group">
+
               <b-form-group
                 label-size="sm"
                 v-bind:label="$trans('Country')"
@@ -221,8 +222,7 @@
                   readonly
                 ></b-form-input>
               </b-form-group>
-            </b-col>
-            <b-col cols="2" role="group">
+
               <b-form-group
                 label-size="sm"
                 v-bind:label="$trans('Lifespan (months)')"
@@ -234,10 +234,10 @@
                   v-model="equipment.default_replace_months"
                 ></b-form-input>
               </b-form-group>
-            </b-col>
-            <b-col cols="2" role="group">
+
               <b-form-group
                 label-size="sm"
+                label-cols="3"
                 v-bind:label="$trans('Price')"
                 label-for="equipment_serialnumber"
               >
@@ -247,7 +247,7 @@
                   @priceChanged="(val) => priceChanged(val)"
                 />
               </b-form-group>
-            </b-col>
+            
 
           </div>
         </div>
@@ -374,6 +374,7 @@
 
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Lifespan (months)')"
               label-for="equipment_default_replace_months"
             >
@@ -386,6 +387,7 @@
 
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Price')"
               label-for="equipment_serialnumber"
             >
