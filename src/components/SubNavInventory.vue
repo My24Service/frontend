@@ -26,10 +26,11 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('supplier-reservations')"
-        v-if="hasSupplierReservations"
+        v-if="false && hasSupplierReservations"
         :to="{ name: 'supplier-reservation-list' }">
         {{ $trans('Reservations') }}
       </b-nav-item>
+
       <b-nav-item
         :active="isActive('stock-locations')"
         v-if="hasStockLocations"
