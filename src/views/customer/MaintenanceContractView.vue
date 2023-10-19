@@ -16,7 +16,7 @@
     <div class='page-detail'>
       
       <div class='flex-columns'>
-      <div class='panel col-1-3'>
+      <div class='panel col-1-3 sidebar'>
         <h6>{{ $trans('Contract')}}</h6>
         <dl>
           <dt>{{ $trans('Value') }}</dt>
