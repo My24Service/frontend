@@ -135,11 +135,11 @@ export default {
 
 <style scoped>
 .input-number {
-  width: 50px;
+  max-width: 10ch;
   text-align: right;
 }
 .input-decimal {
-  width: 56px !important;
+  max-width: 5ch !important;
   text-align: center;
 }
 .flex {
