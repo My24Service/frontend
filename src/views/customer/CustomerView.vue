@@ -50,43 +50,6 @@
                     aria-controls="customer-orders-table"
                   ></b-pagination>
 
-                  <b-table
-                    id="customer-orders-table"
-                    small
-                    :busy='isLoading'
-                    :fields="orderFields"
-                    :items="orders"
-                    responsive="md"
-                    class="data-table"
-                  >
-                    <template #head(icons)="">
-                      <div class="float-right">
-                        <b-button-toolbar>
-                          <b-button-group class="mr-1">
-                            <ButtonLinkRefresh
-                              v-bind:method="function() { loadData() }"
-                              v-bind:title="$trans('Refresh')"
-                            />
-                            <ButtonLinkSearch
-                              v-bind:method="function() { showSearchModal() }"
-                            />
-                          </b-button-group>
-                        </b-button-toolbar>
-                      </div>
-                    </template>
-                    <template #table-busy>
-                      <div class="text-center text-danger my-2">
-                        <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-                        <strong>{{ $trans('Loading...') }}</strong>
-                      </div>
-                    </template>
-                    <template #cell(id)="data">
-                      <OrderTableInfo
-                        v-bind:order="data.item"
-                      />
-                    </template>
-                  </b-table>
-
                 </div>
               </b-tab>
               <b-tab :title="$trans('Equipment')">
