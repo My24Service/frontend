@@ -7,7 +7,9 @@
           <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ $trans('Maintenance contracts') }}</router-link> / 
           <span>{{ maintenanceContract.name }}</span>
         </h3>
-        
+        <b-button-toolbar>
+          <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">Edit contract</router-link>
+        </b-button-toolbar>
       </div>
     </header>
 
@@ -24,6 +26,12 @@
         </dl>
         <h6>{{ $trans('Customer') }}</h6>
         <CustomerCard :customer="customer"/>
+        <router-link 
+            class="primary" 
+            :to="{name: 'customer-view', params: {pk: customer.id}}">
+            <b-icon icon="building"></b-icon>
+            {{ $trans('Customer details') }}
+          </router-link>
       </div>
     
       <div class='panel col-2-3'>
@@ -78,16 +86,14 @@
                 </b-form-group>
                 </template>
               </b-table>
-      
-              
-                <footer class="modal-footer">
-                  <b-button @click="cancelForm" class="btn btn-secondary" type="reset" variant="secondary">
-                    {{ $trans('Cancel') }}
-                  </b-button>
-                  <b-button @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary">
-                    {{ $trans('Submit') }}
-                  </b-button>
-                </footer>
+              <footer class="modal-footer">
+                <b-button @click="cancelForm" class="btn btn-secondary" type="reset" variant="secondary">
+                  {{ $trans('Cancel') }}
+                </b-button>
+                <b-button @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary">
+                  {{ $trans('Add equipment') }}
+                </b-button>
+              </footer>
               
             </div>
           
@@ -303,8 +309,8 @@ export default {
 
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching maintenance contract', error)
-        this.errorToast(this.$trans('Error loading maintenance contract'))
+        console.log('error fetching maintenance contract', error.response)
+        this.errorToast(`${this.$trans('Error loading maintenance contract')}: ${error.response.status} ${error.response.statusText}`)
         this.isLoading = false
       }
     },
