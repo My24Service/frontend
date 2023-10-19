@@ -3,13 +3,20 @@
   box-shadow: none;
 }
 
+textarea::placeholder,
+input::placeholder {
+  font-size: 14px;
+  color: #adadad !important;
+}
+
 .multiselect {
   font-size: 14px !important;
   min-height: 25px !important;
 }
 
 .multiselect__placeholder {
-  margin-bottom: 4px;
+  margin: unset;
+  padding-inline-start: 5px;
 }
 
 .multiselect__select {
@@ -22,6 +29,12 @@
 .multiselect, .multiselect__input, .multiselect__single {
   font-size: 14px !important;
 }
+
+.multiselect__input {
+  margin: unset;
+  
+}
+
 .multiselect__single {
   margin-bottom: 4px;
 }
@@ -452,6 +465,10 @@
   }
   > .col-1-2 {
     width: 50%;
+  }
+
+  &.space-between {
+    justify-content: space-between;
   }
 }
 

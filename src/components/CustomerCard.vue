@@ -6,12 +6,12 @@
       <dd>
         <address>
           {{ customer.address }}, {{ customer.city }} {{  customer.country_code }},
-          {{ customer.postal.toUpperCase() }}
+          {{ customer.postal ? customer.postal.toUpperCase() : ''}}
         </address>
       </dd>
       <dt>{{ $trans('Contact') }}</dt>
       <dd>
-        {{ customer.contact }} <br />
+        {{ customer.contact ?  customer.contact + ' &middot; ' : ''}} 
         {{ customer.email || '(email unknown)' }} <br>
         <span v-if="customer.tel">{{ customer.tel }} <br></span>
         <span v-if="customer.mobile">{{ customer.mobile }}</span>
@@ -22,7 +22,7 @@
       
       <dt v-if="customer.external_identifier">Ext. ID</dt>
       <dd v-if="customer.external_identifier">{{ customer.external_identifier }}</dd>
-      <dt :v-if="customer.remarks">{{ $trans('Remarks') }}</dt>
+      <dt v-if="customer.remarks">{{ $trans('Remarks') }}</dt>
       <dd v-if="customer.remarks" class="remarks">{{ customer.remarks.trim() }}</dd>
     </dl>
   </div>
