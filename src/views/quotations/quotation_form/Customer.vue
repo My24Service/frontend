@@ -361,7 +361,7 @@ export default {
       this.quotation.customer_relation = customer.id
       this.quotation.customer_id = customer.customer_id
       this.quotation.quotation_name = customer.name
-      this.quotation.quotation_addres = customer.address
+      this.quotation.quotation_address = customer.address
       this.quotation.quotation_city = customer.city
       this.quotation.quotation_postal = customer.postal
       this.quotation.quotation_country_code = customer.country_code
