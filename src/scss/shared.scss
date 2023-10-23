@@ -411,7 +411,8 @@ input::placeholder {
     text-transform: uppercase;
     color: #232c2f;
     margin-bottom: 1ex;
-
+    user-select: none;
+    
     &:not(:first-child) {
       margin-top: 2rem;
     }
@@ -470,6 +471,7 @@ input::placeholder {
   &.space-between {
     justify-content: space-between;
   }
+  
 }
 
 .flex-stack > .panel + .panel {

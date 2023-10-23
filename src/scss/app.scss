@@ -17,6 +17,7 @@ html, body {
 
 details > summary {
   padding-block: 1rem;
+  user-select: none;
 }
 
 details > summary > * {
@@ -33,7 +34,7 @@ details > summary > svg {
 }
 
 details[open] > summary {
-  margin-bottom: 1rem !important;
+  
   > * {
     color: $active-link !important;
   }
