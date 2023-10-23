@@ -141,6 +141,8 @@ export default {
 .input-decimal {
   max-width: 5ch !important;
   text-align: center;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 .flex {
   display : flex;
