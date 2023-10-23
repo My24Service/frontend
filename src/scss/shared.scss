@@ -485,10 +485,13 @@ dl {
     font-size: smaller;
     margin: 0;
     text-align: end;
-    vertical-align: middle;
+    
     line-height: 1.9;
     font-weight: 500;
     opacity: .5;
+    display: flex;
+    align-items: center;
+    justify-content: end;
   }
   dd {
     margin: 0;
