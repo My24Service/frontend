@@ -1,11 +1,11 @@
 <template>
   <div>
-      <!-- <b-nav-item
+      <b-nav-item
         :active="isActive('purchaseorders')"
         v-if="hasPurchaseOrders"
         :to="{ name: 'purchaseorder-list' }">
         {{ $trans('Purchase orders') }}
-      </b-nav-item> -->
+      </b-nav-item>
       <b-nav-item
         :active="isActive('purchaseorder-entries')"
         v-if="hasPurchaseOrderEntries"

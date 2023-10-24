@@ -72,13 +72,11 @@
       <router-view name="app-subnav"></router-view>
     </SubNav>
 
-
-
     <!-- inventory -->
     <b-nav-item
       :active="isActive('inventory')"
       v-if="showInventory"
-      to="/inventory/purchaseorders"
+      to="/inventory/stats-table"
       class="has-children">
       <b-icon icon="collection" v-if="!isActive('inventory')"></b-icon>
       <b-icon icon="collection-fill" v-else></b-icon>
