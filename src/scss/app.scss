@@ -12,7 +12,27 @@ $font-size-base: 0.9rem;
 
 html, body {
   height: 100%;
-  background: #f8f9fe;
+  background: #f6f7fa;
+}
+
+details {
+  padding: 1ex 2ex;
+  transition: all .25s;
+
+  &:hover, &:focus {
+    background-color: #fcfcff;
+    summary > * {
+      color: $active-link !important;
+    }
+  }
+
+  &[open] {
+    background-color: #f8f9fa;
+  }
+
+  &:not(:last-of-type) {
+    border-bottom: 1px solid #f8f9fa;
+  }
 }
 
 details > summary {
