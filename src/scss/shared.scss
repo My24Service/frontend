@@ -782,7 +782,7 @@ fieldset:disabled textarea {
 
   
   .progress-bar {
-    animation-delay: calc(var(--delay, .25s) * .25s);
+    animation-delay: calc(var(--delay, .25s) * .05s);
   }
 
 }

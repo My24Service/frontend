@@ -108,7 +108,9 @@
 
         <template #cell(totals)="data">
           <div class="flex-columns">
-            <b-progress :value="(data.item.total_entries/data.item.total_materials)*100"></b-progress>
+            <b-progress 
+            :style="`--delay: ${data.index }`"
+            :value="(data.item.total_entries/data.item.total_materials)*100"></b-progress>
             <small class="dimmed">{{ data.item.total_entries || 0 }} / {{ data.item.total_materials }}</small>
           </div>
         </template>
@@ -183,6 +185,7 @@ export default {
       isLoading: false,
       purchaseOrders: [],
       fields: [
+        'index',
         {key: 'purchase_order_id', label: this.$trans('Order'), sortable: true },
         {key: 'supplier_reservation', label: this.$trans('Reservation')},
         {key: 'last_status', label: this.$trans('Status')},
