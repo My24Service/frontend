@@ -1,6 +1,11 @@
+button > * {
+  /* only allow the button element itself to be clicked,          */
+  /* ignore child elements (which are usually icons / text spans) */
+  pointer-events: none;
+}
 .btn:focus {
   outline: none;
-  box-shadow: none;
+  // box-shadow: none;
 }
 
 textarea::placeholder,
@@ -184,15 +189,14 @@ input::placeholder {
   padding: 0;
   height: 100vh;
   overflow-y: scroll;
-
+  background-image: linear-gradient(to bottom, var(--primary) 11rem, transparent 11rem);
   > header {
-    margin: 0 0rem -2rem;
-    padding: 2rem 2rem 3rem;
-    background: var(--primary);
+    margin: 0 0rem 0;
+    padding: 1rem 2rem;
     color: white;
-    position: sticky;
+    z-index: 2;
     top: 0;
-    min-height: 200px;
+    min-height: 8rem;
 
     h3:first-child {margin-top: calc(52px + 2ex);}
     .page-title {
@@ -248,11 +252,13 @@ input::placeholder {
       background-color: white !important;
       border-color: #fff6;
       color: $my24 !important;
+      &:not(:disabled):active {
+        border-color: white !important;
+      }
       &:hover,
       &:focus {
         background-color: #fffc;
         border-color: white;
-        box-shadow: 0 0 0 .25ex rgba(255,255,255,.25)
       }
       &.outline,
       &.btn-outline,
@@ -303,7 +309,7 @@ input::placeholder {
 
 .app-detail, .panel {
   @extend .mx-auto;
-  @extend .p-4;
+  @extend .p-3;
   background: white;
   border-radius: .5ex;
   box-shadow: 0 1ex 1rem #394b5923;
@@ -366,7 +372,7 @@ input::placeholder {
   
   .tabs {
     &:first-child {
-      margin: -1.5rem -1.5rem 0;
+      margin: -1rem -1rem 0;
       border-top-left-radius: .5ex;
       border-top-right-radius: .5ex;
       overflow: hidden;
@@ -392,7 +398,7 @@ input::placeholder {
           }
 
           &.active {
-            box-shadow: inset 0px -4px #ff9933;
+            box-shadow: inset 0px -4px $primary;
             color: $primary;
             font-weight: 500;
           }
@@ -400,7 +406,7 @@ input::placeholder {
       }
     }
     .tab-content {
-      margin: 1.5rem;
+      margin: 2rem 1rem;
     }
   }
   button.primary,
@@ -506,7 +512,7 @@ dl {
   }
 }
 
-ul.listing {
+.listing {
   padding: 0;
   margin: 0;
   list-style: none;
@@ -535,7 +541,7 @@ ul.listing {
       justify-content: space-between;
       text-align: initial;
       gap: 1rem;
-      padding-inline: 1ex;
+      padding-inline: 0.3rem;
       color:var(--text-color);
       text-decoration: none!important;
 
@@ -596,6 +602,7 @@ ul.listing {
       }
     }
 
+    &.headings,
     .headings {
       text-transform: uppercase;
       font-size: smaller;
