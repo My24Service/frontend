@@ -381,7 +381,7 @@
               </b-form-group>
             </b-col>
           </b-row>
-          <div class="assign-engineer section" v-if="!hasBranches && (isCreate || (!isCreate && (unaccepted || !order.customer_order_accepted)))">
+          <div class="assign-engineer section" v-if="true || !hasBranches && (isCreate || (!isCreate && (unaccepted || !order.customer_order_accepted)))">
             <b-row>
               <b-col cols="12" role="group" v-if="recommendedUsers.length > 0">
                 <h4>{{ $trans('Recommended engineers') }}</h4>
