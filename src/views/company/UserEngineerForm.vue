@@ -501,7 +501,7 @@ export default {
         this.engineer.password = this.engineer.password1
         try {
           await engineerModel.insert(this.engineer)
-          this.infoToast(`${this.$trans('Created')} ${this.engineer.username}`, `${this.$trans('Engineer has been added')}: ${this.engineer,first_name} ${this.engineer.last_name}`)
+          this.infoToast(`${this.$trans('Created')} ${this.engineer.username}`, `${this.$trans('Engineer has been added')}: ${this.engineer.first_name} ${this.engineer.last_name}`)
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
