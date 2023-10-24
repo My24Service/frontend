@@ -74,17 +74,19 @@
             class="btn btn-secondary"
             type="button"
             variant="secondary"
-            >{{ $trans('Cancel') }}</b-button>
-          <b-button
-            @click="submitForm"
-            :disabled="buttonDisabled"
-            class="btn btn-primary"
-            type="button"
-            variant="primary"
             >
-            <span v-if="isCreate"><b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add order') }}</span>
-            <span v-else><b-icon icon="file-earmark-check"></b-icon> {{ $trans('Save changes') }}</span>
+            {{ $trans('Cancel') }}
           </b-button>
+          <b-dropdown split type="submit" :text="$trans('Add order')" @click="submitForm" variant="primary">
+            <b-dropdown-item-button 
+              @click="(e) => { submitForm(e)  }" 
+              type="button" 
+              name="nextPage" 
+              value="dispatch"
+              style="border-left: 1px solid;">
+              {{ $trans('Add order') }} {{ $trans('and open dispatch') }}
+            </b-dropdown-item-button>
+          </b-dropdown>
         </div>
         <div class="flex-columns" v-if="!isCreate && !hasBranches && (unaccepted || !order.customer_order_accepted)">
           <b-button
@@ -97,6 +99,8 @@
             :disabled="buttonDisabled"
             class="btn btn-primary"
             type="button"
+            name="order-done-next"
+            value="dispatch"
             variant="primary">{{ $trans('Save &amp; accept') }}
           </b-button>
         </div>
@@ -890,32 +894,6 @@
         </div>
       </div>
     </div>
-    <div class="page-detail">
-      <b-form>
-        <div class="order-done" v-if="isCreate && !hasBranches">
-          <h4>{{ $trans('Next page after create') }}</h4>
-          <b-row>
-            <b-col cols="12">
-              <b-form-group
-                label-size="sm"
-                label-for="order-done-next"
-              >
-                <b-form-radio-group
-                  id="order-done-next"
-                  v-model="nextField"
-                  :options="nextFieldOptions"
-                  class="mb-3"
-                  value-field="item"
-                  text-field="name"
-                ></b-form-radio-group>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </div>
-
-
-      </b-form>
-    </div>
   </div>
 </template>
 
@@ -1486,7 +1464,10 @@ export default {
       await orderNotAcceptedModel.setRejected(this.pk)
       this.cancelForm()
     },
-    async submitForm() {
+    async submitForm(e) {
+      
+      if(e.target.value == 'dispatch') this.nextField = 'dispatch';
+
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
