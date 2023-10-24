@@ -91,411 +91,403 @@
 
         <div class="panel col-2-3">
 
-        <details open>
-          <summary class="flex-columns space-between">
-            <h6>{{ $trans('Invoice lines')}} </h6>
-            <b-icon-chevron-down></b-icon-chevron-down>
-          </summary>
+          <details open>
+            <summary class="flex-columns space-between">
+              <h6>{{ $trans('Invoice lines')}} </h6>
+              <b-icon-chevron-down></b-icon-chevron-down>
+            </summary>
 
-          <ul class="listing invoice-lines" v-if="invoiceLineService.collection.length">
-            <li>
-              <div class="headings">
-                <span>
-                  {{ $trans("Description") }}
-                </span>
-                <span style="text-align: right">
-                  {{ $trans("Amount") }}
-                </span>
-                <span style="text-align: right">
-                  {{ $trans("Price") }}
-                </span>
+            <ul class="listing invoice-lines" v-if="invoiceLineService.collection.length">
+              <li class="headings">
+                  <span>
+                    {{ $trans("Description") }}
+                  </span>
+                  <span style="text-align: right">
+                    {{ $trans("Amount") }}
+                  </span>
+                  <span style="text-align: right">
+                    {{ $trans("Price") }}
+                  </span>
+                  
+                  <span style="text-align: right">
+                    {{ $trans("Total") }}
+                  </span>
+                  <span style="text-align: right">
+                    {{ $trans("VAT") }}
+                  </span>
+                  <span></span>
                 
-                <span style="text-align: right">
-                  {{ $trans("Total") }}
+              </li>
+
+              <li v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id" class="listing-item">
+                <span>
+                  {{ invoiceLine.description }}
                 </span>
                 <span style="text-align: right">
-                  {{ $trans("VAT") }}
+                  {{ invoiceLine.amount }}
                 </span>
-                <span></span>
-              </div>
-            </li>
+                <span style="text-align: right">
+                  {{ invoiceLine.price_text }}
+                </span>
+                <span style="text-align: right">
+                  {{ invoiceLine.total_dinero.toFormat('$0.00') }}
+                </span>
+                <span style="text-align: right">
+                  {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
+                </span>
+                <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;">
+                  <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
+                    <b-icon-trash></b-icon-trash>
+                  </b-link>
+                </span>
+                <span v-else>&nbsp;</span>
+              </li>
 
-            <li>
-              <div class="listing-item" v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id">
-              <span>
-                {{ invoiceLine.description }}
-              </span>
-              <span style="text-align: right">
-                {{ invoiceLine.amount }}
-              </span>
-              <span style="text-align: right">
-                {{ invoiceLine.price_text }}
-              </span>
-              <span style="text-align: right">
-                {{ invoiceLine.total_dinero.toFormat('$0.00') }}
-              </span>
-              <span style="text-align: right">
-                {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
-              </span>
-              <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;">
-                <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
-                  <b-icon-trash></b-icon-trash>
-                </b-link>
-              </span>
-              <span v-else>&nbsp;</span>
-              </div>
-            </li>
+              <li v-if="invoiceLinesHaveTotals" >
+                <i>
+                  <b-icon-info-square-fill variant="primary"></b-icon-info-square-fill> 
+                  * <span class="dimmed">{{ $trans("Prices are combined in totals") }}</span>
+                </i>
+              </li>
+              
+            </ul>
+            <hr>
+            <div class="new-invoice-line" v-if="invoiceLineService.editItem">
+                <b-row>
+                  <b-col cols="4" role="group">
+                    <b-form-group
+                      label-size="sm"
+                      label-for="new-invoice-line-description"
+                    >
+                      <b-form-input
+                        id="new-invoice-line-description"
+                        size="sm"
+                        v-model="invoiceLineService.editItem.description"
+                        :placeholder="$trans('Item description')"
+                      ></b-form-input>
+                    </b-form-group>
+                  </b-col>
+                  <b-col cols="1" role="group">
+                    <b-form-group
+                      label-size="sm"
+                      label-for="new-invoice-line-amount"
+                    >
+                      <b-form-input
+                        @input="invoiceLineAmountChanged"
+                        id="new-invoice-line-amount"
+                        size="sm"
+                        type="number"
+                        v-model="invoiceLineService.editItem.amount"
+                        :placeholder="$trans('Amount')"
+                        
+                      ></b-form-input>
+                    </b-form-group>
+                  </b-col>
+                  <b-col cols="2" role="group">
+                    <b-form-group
+                      label-size="sm"
+                      label-for="new-invoice-line-price"
+                    >
+                      <PriceInput
+                        id="new-invoice-line-price"
+                        v-model="invoiceLineService.editItem.price"
+                        :currency="invoiceLineService.editItem.price_currency"
+                        @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
+                      />
+                    </b-form-group>
+                  </b-col>
+                  <b-col cols="2" role="group">
+                    <b-form-group
+                      label-size="sm"
+                      label-for="new-invoice-line-total"
+                    >
+                      <b-form-input
+                        id="new-invoice-line-total"
+                        readonly
+                        disabled
+                        :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
+                        size="sm"
+                      ></b-form-input>
+                    </b-form-group>
+                  </b-col>
+                  <b-col cols="2" role="group">
+                    <b-form-group
+                      class="flex-columns vat"
+                      label-size="sm"
+                      v-bind:label="$trans('VAT %')"
+                      label-for="new-invoice-line-total"
+                    >
+                    <span class="flex-columns space-between align-items-center">
+                      <VAT @vatChanged="changeVatTypeInvoiceLine" />
 
-            <li v-if="invoiceLinesHaveTotals" class="text-right">
-              <i>
-                <b-icon-info-square-fill variant="primary"></b-icon-info-square-fill> 
-                * <span class="dimmed">{{ $trans("Prices are combined in totals") }}</span>
-              </i>
-            </li>
-            
-          </ul>
+                      {{ invoiceLineService.editItem.vat_dinero.toFormat('$0.00') }}
+                    </span>
+                    </b-form-group>
+                  </b-col>
+                  <!--
+                  <b-col cols="" role="group">
+                    <b-form-group
+                      label-size="sm"
+                      v-bind:label="$trans('VAT')"
+                      label-for="new-invoice-line-vat"
+                    >
+                      <b-form-input
+                        id="new-invoice-line-vat"
+                        readonly
+                        disabled
+                        :value="invoiceLineService.editItem.vat_dinero.toFormat('$0.00')"
+                        size="sm"
+                      ></b-form-input>
+                    </b-form-group>
+                  </b-col>
+                -->
+                  <b-col cols="1">
+                    <b-form-group
+                    label-size="sm"
+                    
+                    label-for="invoice-submit-button"
+                    style="text-align: end;"
+                    >
+                      <b-button
+                        v-if="invoiceLineService.isEdit"
+                        @click="invoiceService.doEditCollectionItem"
+                        class="btn "
+                        size="sm" 
+                        type="submit"
+                        :disabled="!isInvoiceLineValid"
+                        id="invoice-submit-button"
+                      >
+                        {{ $trans('Edit') }}
+                      </b-button>
+                      <b-button
+                        v-else
+                        @click="addInvoiceLine"
+                        class="btn"
+                        size="sm"
+                        type="submit"
+                        
+                        :disabled="!isInvoiceLineValid"
+                        id="invoice-submit-button"
+                      >
+                        {{ $trans('Add') }}
+                      </b-button>
+                    </b-form-group>
+                  </b-col>
+                </b-row>
 
-          <div class="new-invoice-line" v-if="invoiceLineService.editItem">
+            </div>
+          </details>
+
+          <details>
+            <summary class="flex-columns space-between">
+              <h6>{{ $trans('Manage prices') }}</h6>
+              <b-icon-chevron-down></b-icon-chevron-down>
+            </summary>
+            <b-container fluid>
+              <h5>{{ $trans("Materials") }}</h5>
               <b-row>
-                <b-col cols="3" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Item')"
-                    label-for="new-invoice-line-description"
-                  >
-                    <b-form-input
-                      id="new-invoice-line-description"
-                      size="sm"
-                      v-model="invoiceLineService.editItem.description"
-                      :placeholder="$trans('Item description')"
-                    ></b-form-input>
-                  </b-form-group>
+                <b-col cols="4" class="header">
+                  {{ $trans("Name") }}
                 </b-col>
-                <b-col cols="2" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Amount')"
-                    label-for="new-invoice-line-amount"
-                  >
-                    <b-form-input
-                      @blur="invoiceLineAmountChanged"
-                      id="new-invoice-line-amount"
-                      size="sm"
-                      type="number"
-                      v-model="invoiceLineService.editItem.amount"
-                      style="width: 5em"
-                    ></b-form-input>
-                  </b-form-group>
+                <b-col cols="3" class="header">
+                  {{ $trans("Identifier") }}
                 </b-col>
-                <b-col cols="2" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Price')"
-                    label-for="new-invoice-line-price"
-                  >
-                    <PriceInput
-                      id="new-invoice-line-price"
-                      v-model="invoiceLineService.editItem.price"
-                      :currency="invoiceLineService.editItem.price_currency"
-                      @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
-                    />
-                  </b-form-group>
+                <b-col cols="2" class="header ml-3">
+                  {{ $trans("Purchase price ex.") }}
                 </b-col>
-                <b-col cols="" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('Total')"
-                    label-for="new-invoice-line-total"
-                  >
-                    <b-form-input
-                      id="new-invoice-line-total"
-                      readonly
-                      disabled
-                      :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
-                      size="sm"
-                    ></b-form-input>
-                  </b-form-group>
+                <b-col cols="2" class="header">
+                  {{ $trans("Selling price ex.") }}
                 </b-col>
-                <b-col cols="" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('VAT type')"
-                    label-for="new-invoice-line-total"
-                  >
-                    <VAT @vatChanged="changeVatTypeInvoiceLine" />
-                  </b-form-group>
+                <b-col cols="1" />
+              </b-row>
+              <b-row v-for="material in material_models" :key="material.id">
+                <b-col cols="4">
+                  {{ material.name }}
                 </b-col>
-                <b-col cols="" role="group">
-                  <b-form-group
-                    label-size="sm"
-                    v-bind:label="$trans('VAT')"
-                    label-for="new-invoice-line-vat"
-                  >
-                    <b-form-input
-                      id="new-invoice-line-vat"
-                      readonly
-                      disabled
-                      :value="invoiceLineService.editItem.vat_dinero.toFormat('$0.00')"
-                      size="sm"
-                    ></b-form-input>
-                  </b-form-group>
+                <b-col cols="3">
+                  {{ material.identifier }}
                 </b-col>
-                <b-col >
-                  <b-form-group
-                  label-size="sm"
-                  label="‎"
-                  label-for="invoice-submit-button"
-                  style="text-align: end;"
-                  >
+                <b-col cols="2">
+                  <PriceInput
+                    v-model="material.price_purchase_ex"
+                    :currency="default_currency"
+                    @priceChanged="(val) => material.setPurchasePrice(val)"
+                  />
+                </b-col>
+                <b-col cols="2">
+                  <PriceInput
+                    :ref="`selling_price_${material.id}`"
+                    v-model="material.price_selling_ex"
+                    :currency="default_currency"
+                    @priceChanged="(val) => material.setSellingPrice(val)"
+                  />
+                </b-col>
+                <b-col cols="1">
+                  <p class="flex">
                     <b-button
-                      v-if="invoiceLineService.isEdit"
-                      @click="invoiceService.doEditCollectionItem"
-                      class="btn btn-primary"
-                      size="sm" 
-                      type="submit"
-                      variant="warning"
-                      :disabled="!isInvoiceLineValid"
-                      id="invoice-submit-button"
-                    >
-                      {{ $trans('Edit') }}
-                    </b-button>
-                    <b-button
-                      v-else
-                      @click="addInvoiceLine"
-                      class="btn btn-primary"
+                      @click="() => { updateMaterial(material.id) }"
+                      class="btn update-button"
                       size="sm"
-                      type="submit"
-                      variant="primary"
-                      :disabled="!isInvoiceLineValid"
-                      id="invoice-submit-button"
+                      type="button"
+                      variant=""
+                      :title="$trans('This will update the API')"
                     >
-                      {{ $trans('Add') }}
+                      {{ $trans("Update") }} asd
                     </b-button>
-                  </b-form-group>
+                  </p>
                 </b-col>
               </b-row>
+            </b-container>
 
-          </div>
-        </details>
-        <hr/>
+            <hr/>
 
-        <details>
-          <summary class="flex-columns space-between">
-            <h6>{{ $trans('Manage prices') }}</h6>
-            <b-icon-chevron-down></b-icon-chevron-down>
-          </summary>
-          <b-container fluid>
-            <h5>{{ $trans("Materials") }}</h5>
-            <b-row>
-              <b-col cols="4" class="header">
-                {{ $trans("Name") }}
-              </b-col>
-              <b-col cols="3" class="header">
-                {{ $trans("Identifier") }}
-              </b-col>
-              <b-col cols="2" class="header ml-3">
-                {{ $trans("Purchase price ex.") }}
-              </b-col>
-              <b-col cols="2" class="header">
-                {{ $trans("Selling price ex.") }}
-              </b-col>
-              <b-col cols="1" />
-            </b-row>
-            <b-row v-for="material in material_models" :key="material.id">
-              <b-col cols="4">
-                {{ material.name }}
-              </b-col>
-              <b-col cols="3">
-                {{ material.identifier }}
-              </b-col>
-              <b-col cols="2">
-                <PriceInput
-                  v-model="material.price_purchase_ex"
-                  :currency="default_currency"
-                  @priceChanged="(val) => material.setPurchasePrice(val)"
-                />
-              </b-col>
-              <b-col cols="2">
-                <PriceInput
-                  :ref="`selling_price_${material.id}`"
-                  v-model="material.price_selling_ex"
-                  :currency="default_currency"
-                  @priceChanged="(val) => material.setSellingPrice(val)"
-                />
-              </b-col>
-              <b-col cols="1">
-                <p class="flex">
-                  <b-button
-                    @click="() => { updateMaterial(material.id) }"
-                    class="btn btn-danger update-button"
-                    size="sm"
-                    type="button"
-                    variant="danger"
-                    :title="$trans('This will update the API')"
-                  >
-                    {{ $trans("Update") }}
-                  </b-button>
-                </p>
-              </b-col>
-            </b-row>
-          </b-container>
+            <b-container fluid>
+              <h5>{{ $trans("Engineers") }}</h5>
+              <b-row>
+                <b-col cols="9" class="header">
+                  {{ $trans("Name") }}
+                </b-col>
+                <b-col cols="2" class="header ml-3">
+                  {{ $trans("Hourly price") }}
+                </b-col>
+                <b-col cols="1" />
+              </b-row>
+              <b-row v-for="user in engineer_models" :key="user.id">
+                <b-col cols="9">
+                  {{ user.full_name }}
+                </b-col>
+                <b-col cols="2">
+                  <PriceInput
+                    v-model="user.engineer.hourly_rate"
+                    :currency="default_currency"
+                    @priceChanged="(val) => user.engineer.setHourlyRate(val)"
+                  />
+                </b-col>
+                <b-col cols="1">
+                  
+                    <b-button
+                      @click="() => { updateEngineer(user.id) }"
+                      class="btn update-button"
+                      size="sm"
+                      type="button"
+                      :title="$trans('This will update the API')"
+                    >
+                      {{ $trans("Update") }}
+                    </b-button>
+                  
+                </b-col>
+              </b-row>
+            </b-container>
 
-          <hr/>
+            <hr/>
 
-          <b-container fluid>
-            <h5>{{ $trans("Engineers") }}</h5>
-            <b-row>
-              <b-col cols="9" class="header">
-                {{ $trans("Name") }}
-              </b-col>
-              <b-col cols="2" class="header ml-3">
-                {{ $trans("Hourly price") }}
-              </b-col>
-              <b-col cols="1" />
-            </b-row>
-            <b-row v-for="user in engineer_models" :key="user.id">
-              <b-col cols="9">
-                {{ user.full_name }}
-              </b-col>
-              <b-col cols="2">
-                <PriceInput
-                  v-model="user.engineer.hourly_rate"
-                  :currency="default_currency"
-                  @priceChanged="(val) => user.engineer.setHourlyRate(val)"
-                />
-              </b-col>
-              <b-col cols="1">
-                <p class="flex">
-                  <b-button
-                    @click="() => { updateEngineer(user.id) }"
-                    class="btn btn-danger update-button"
-                    size="sm"
-                    type="button"
-                    variant="danger"
-                    :title="$trans('This will update the API')"
-                  >
-                    {{ $trans("Update") }}
-                  </b-button>
-                </p>
-              </b-col>
-            </b-row>
-          </b-container>
+            <b-container fluid>
+              <h5>{{ $trans("Prices for customer") }}</h5>
+              <b-row>
+                <b-col cols="9" class="header">
+                  {{ $trans("Name") }}
+                </b-col>
+                <b-col cols="2" class="header ml-3">
+                  {{ $trans("Price") }}
+                </b-col>
+                <b-col cols="1" />
+              </b-row>
+              <b-row>
+                <b-col cols="9">
+                  {{ $trans("Hourly rate engineer") }}
+                </b-col>
+                <b-col cols="2">
+                  <PriceInput
+                    v-model="customer.hourly_rate_engineer"
+                    :currency="default_currency"
+                    @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
+                  />
+                </b-col>
+                <b-col cols="1">
+                  <p class="flex">
+                    <b-button
+                      @click="() => { updateCustomer() }"
+                      class="btn update-button"
+                      size="sm"
+                      type="button"
+                      :title="$trans('This will update the API')"
+                    >
+                      {{ $trans("Update") }}
+                    </b-button>
+                  </p>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="9">
+                  {{ $trans("Call out costs") }} 
+                </b-col>
+                <b-col cols="2">
+                  <PriceInput
+                    v-model="customer.call_out_costs"
+                    :currency="default_currency"
+                    @priceChanged="(val) => customer.setCallOutCosts(val)"
+                  />
+                </b-col>
+                <b-col cols="1">
+                  <p class="flex">
+                    <b-button
+                      @click="() => { updateCustomer() }"
+                      class="btn update-button"
+                      size="sm"
+                      type="button"
+                      :title="$trans('This will update the API')"
+                    >
+                      {{ $trans("Update") }}
+                    </b-button>
+                  </p>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="9">
+                  {{ $trans("Price/KM") }}
+                </b-col>
+                <b-col cols="2">
+                  <PriceInput
+                    v-model="customer.price_per_km"
+                    :currency="default_currency"
+                    @priceChanged="(val) => customer.setPricePerKm(val)"
+                  />
+                </b-col>
+                <b-col cols="1">
+                  <p class="flex">
+                    <b-button
+                      @click="() => { updateCustomer() }"
+                      class="btn update-button"
+                      size="sm"
+                      type="button"
+                      :title="$trans('This will update the API')"
+                    >
+                      {{ $trans("Update") }}
+                    </b-button>
+                  </p>
+                </b-col>
+              </b-row>
+            </b-container>
+          </details>
 
-          <hr/>
-
-          <b-container fluid>
-            <h5>{{ $trans("Prices for customer") }}</h5>
-            <b-row>
-              <b-col cols="9" class="header">
-                {{ $trans("Name") }}
-              </b-col>
-              <b-col cols="2" class="header ml-3">
-                {{ $trans("Price") }}
-              </b-col>
-              <b-col cols="1" />
-            </b-row>
-            <b-row>
-              <b-col cols="9">
-                {{ $trans("Hourly rate engineer") }}
-              </b-col>
-              <b-col cols="2">
-                <PriceInput
-                  v-model="customer.hourly_rate_engineer"
-                  :currency="default_currency"
-                  @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
-                />
-              </b-col>
-              <b-col cols="1">
-                <p class="flex">
-                  <b-button
-                    @click="() => { updateCustomer() }"
-                    class="btn btn-danger update-button"
-                    size="sm"
-                    type="button"
-                    variant="danger"
-                    :title="$trans('This will update the API')"
-                  >
-                    {{ $trans("Update") }}
-                  </b-button>
-                </p>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="9">
-                {{ $trans("Call out costs") }} 
-              </b-col>
-              <b-col cols="2">
-                <PriceInput
-                  v-model="customer.call_out_costs"
-                  :currency="default_currency"
-                  @priceChanged="(val) => customer.setCallOutCosts(val)"
-                />
-              </b-col>
-              <b-col cols="1">
-                <p class="flex">
-                  <b-button
-                    @click="() => { updateCustomer() }"
-                    class="btn btn-danger update-button"
-                    size="sm"
-                    type="button"
-                    variant="danger"
-                    :title="$trans('This will update the API')"
-                  >
-                    {{ $trans("Update") }}
-                  </b-button>
-                </p>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="9">
-                {{ $trans("Price/KM") }}
-              </b-col>
-              <b-col cols="2">
-                <PriceInput
-                  v-model="customer.price_per_km"
-                  :currency="default_currency"
-                  @priceChanged="(val) => customer.setPricePerKm(val)"
-                />
-              </b-col>
-              <b-col cols="1">
-                <p class="flex">
-                  <b-button
-                    @click="() => { updateCustomer() }"
-                    class="btn btn-danger update-button"
-                    size="sm"
-                    type="button"
-                    variant="danger"
-                    :title="$trans('This will update the API')"
-                  >
-                    {{ $trans("Update") }}
-                  </b-button>
-                </p>
-              </b-col>
-            </b-row>
-          </b-container>
-        </details>
-        <hr/>
-
-        <details v-if="true || used_materials.length > 0">
-          <summary class="flex-columns space-between">
-            <h6>Used Materials</h6>
-            <b-icon-chevron-down></b-icon-chevron-down>
-          </summary>
-          <MaterialsComponent
-            :order_pk="order_pk"
-            :customer="customer"
-            :material_models="material_models"
-            :engineer_models="engineer_models"
-            :used_materials="used_materials"
-            @invoiceLinesCreated="invoiceLinesCreated"
-            @emptyCollectionClicked="emptyCollectionClicked"
-            :invoiceLinesParent="invoiceLineService.collection"
-          />
-        </details>
-        <hr/>
-
-        <div v-if="true || activity_totals.work_total !== '00:00'">
-          <HoursComponent
+          <details v-if="used_materials.length > 0">
+            <summary class="flex-columns space-between">
+              <h6>Used Materials</h6>
+              <b-icon-chevron-down></b-icon-chevron-down>
+            </summary>
+            <MaterialsComponent
+              :order_pk="order_pk"
+              :customer="customer"
+              :material_models="material_models"
+              :engineer_models="engineer_models"
+              :used_materials="used_materials"
+              @invoiceLinesCreated="invoiceLinesCreated"
+              @emptyCollectionClicked="emptyCollectionClicked"
+              :invoiceLinesParent="invoiceLineService.collection"
+            />
+          </details>
+          
+          <HoursComponent v-if="activity_totals.work_total !== '00:00'"
             :order_pk="order_pk"
             :type="COST_TYPE_WORK_HOURS"
             :hours_total="activity_totals.work_total"
@@ -506,11 +498,8 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-        </div>
-        <hr/>
-
-        <div v-if="true || activity_totals.travel_total !== '00:00'">
-          <HoursComponent
+          
+          <HoursComponent v-if="activity_totals.travel_total !== '00:00'"
             :order_pk="order_pk"
             :type="COST_TYPE_TRAVEL_HOURS"
             :hours_total="activity_totals.travel_total"
@@ -521,11 +510,8 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-        </div>
-        <hr/>
 
-        <div v-if="true || activity_totals.distance_total > 0">
-          <DistanceComponent
+          <DistanceComponent v-if="activity_totals.distance_total > 0"
             :order_pk="order_pk"
             :customer="customer"
             :user_totals="activity_totals.user_totals"
@@ -536,11 +522,8 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-        </div>
-        <hr/>
 
-        <div v-if="true || activity_totals.extra_work_total !== '00:00'">
-          <HoursComponent
+          <HoursComponent v-if="activity_totals.extra_work_total !== '00:00'"
             :order_pk="order_pk"
             :type="COST_TYPE_EXTRA_WORK"
             :hours_total="activity_totals.extra_work_total"
@@ -551,11 +534,8 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-        </div>
-        <hr/>
 
-        <div v-if=" true ||activity_totals.actual_work_total !== '00:00'">
-          <HoursComponent
+          <HoursComponent v-if="activity_totals.actual_work_total !== '00:00'"
             :order_pk="order_pk"
             :type="COST_TYPE_ACTUAL_WORK"
             :hours_total="activity_totals.actual_work_total"
@@ -566,27 +546,25 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
+
+          <details>
+            <summary class="flex-columns space-between">
+              <h6>{{ $trans('Call out costs') }}</h6>
+              <b-icon-chevron-down></b-icon-chevron-down>
+            </summary>
+            <CallOutCostsComponent
+              :order_pk="order_pk"
+              :customer="customer"
+              :invoice_default_call_out_costs="invoice_default_call_out_costs"
+              @invoiceLinesCreated="invoiceLinesCreated"
+              @emptyCollectionClicked="emptyCollectionClicked"
+              :invoiceLinesParent="invoiceLineService.collection"
+            />
+            <br>
+          </details>
+
         </div>
-        <hr/>
-          
-        <details>
-          <summary class="flex-columns space-between">
-            <h6>{{ $trans('Call out costs') }}</h6>
-            <b-icon-chevron-down></b-icon-chevron-down>
-          </summary>
-          <CallOutCostsComponent
-            :order_pk="order_pk"
-            :customer="customer"
-            :invoice_default_call_out_costs="invoice_default_call_out_costs"
-            @invoiceLinesCreated="invoiceLinesCreated"
-            @emptyCollectionClicked="emptyCollectionClicked"
-            :invoiceLinesParent="invoiceLineService.collection"
-          />
-        </details>
 
-      </div>
-
-        
       </b-form>
     </div>
   </b-overlay>
@@ -892,6 +870,9 @@ export default {
   display : flex;
   margin-top: auto;
 }
+.vat {
+  white-space: nowrap;
+}
 .value-container {
   padding-top: 4px;
   padding-right: 4px;
@@ -907,4 +888,9 @@ export default {
 .total-text {
   font-weight: bold;
 }
+
+.listing { display: table; }
+.listing li:not(.text-right) { display: table-row;}  
+.listing li:not(.text-right) span  {  display: table-cell;}
+
 </style>

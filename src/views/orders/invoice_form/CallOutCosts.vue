@@ -12,7 +12,7 @@
       <CollectionEmptyContainer
         @buttonClicked="() => { emptyCollectionClicked() }"
       />
-
+      <hr>
       <AddToInvoiceLinesDiv
         v-if="!parentHasInvoiceLines"
         :useOnInvoiceOptions="useOnInvoiceOptions"
@@ -90,7 +90,7 @@
         :total="total_dinero"
         :total_vat="totalVAT_dinero"
       />
-
+      
       <CollectionSaveContainer
         @buttonClicked="() => { saveCollection() }"
       />

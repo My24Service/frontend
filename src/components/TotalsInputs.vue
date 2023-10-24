@@ -1,11 +1,11 @@
 <template>
   <b-container>
     <b-row>
-      <b-col cols="10">
+      <b-col cols="6">
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("Total") }}</span>
         <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("Total") }}</span>
       </b-col>
-      <b-col cols="2">
+      <b-col cols="6">
         <b-form-input
           readonly
           disabled
@@ -16,11 +16,11 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="10">
+      <b-col cols="6">
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
         <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("VAT") }}</span>
       </b-col>
-      <b-col cols="2">
+      <b-col cols="6">
         <b-form-input
           readonly
           disabled
