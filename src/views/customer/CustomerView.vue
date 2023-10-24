@@ -14,9 +14,6 @@
       </header>
 
       <div class="page-detail customer-details" v-if="!isCustomer">
-        <div v-if="!isCustomer">
-          <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-        </div>
 
         <div class='flex-columns'>
           <div class="panel col-1-3">
