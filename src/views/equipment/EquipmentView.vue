@@ -24,7 +24,7 @@
     </header>
 
     <div class='page-detail flex-columns' v-if="equipment && !isLoading">
-      <div class='panel'>
+      <div class='panel sidebar col-1-3'>
         <h6>Equipment details</h6>
         <dl>
           <dt>{{ $trans('Name') }}</dt>
@@ -48,59 +48,47 @@
           <dt>{{ $trans('Price') }}</dt>
           <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
         </dl>
-
-          <b-table
-            id="customer-past-table"
-            small
-            :busy='isLoading'
-            :fields="orderPastFields"
-            :items="orders"
-            responsive="md"
-            class="data-table"
-          >
-          <template #head(icons)="">
-            <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-                  <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
-                  />
-                  <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
-                  />
-                </b-button-group>
-              </b-button-toolbar>
-            </div>
-          </template>
-          <template #table-busy>
-            <div class="text-center text-danger my-2">
-              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-              <strong>{{ $trans('Loading...') }}</strong>
-            </div>
-          </template>
-          <template #cell(id)="data">
-            <OrderTableInfo
-              v-bind:order="data.item"
-            />
-          </template>
-          </b-table>
-          <b-pagination
-            v-if="this.orderPastModel.count > 20"
-            class="pt-4"
-            v-model="currentPage"
-            :total-rows="this.orderPastModel.count"
-            :per-page="this.orderPastModel.perPage"
-            aria-controls="customer-past-table"
-          ></b-pagination>
       </div>
 
-      <div class='panel wide'>
-        <h6>Stats for {{ equipment.name }}</h6>
-        <OrderStats
-          v-if="!isLoading"
-          ref="order-stats"
-        />
+      <div class='panel wide col-2-3'>
+        <b-tabs>
+          <b-tab :title="$trans('Orders')">
+            <div class='flex-columns space-between align-items-center'>
+              <h6>{{ $trans('Orders')}}</h6>
+              <span>
+                <b-button-group class="">
+                  <ButtonLinkRefresh
+                    v-bind:method="function() { loadData() }"
+                    v-bind:title="$trans('Refresh')" />
+                  <ButtonLinkSearch v-bind:method="function() { showSearchModal() }"/>
+                </b-button-group>
+              </span>
+            </div>
+            <hr>
+            <ul class='listing order-list'>
+              <li v-for="item in orders">
+                <OrderTableInfo
+                  v-bind:order="item"
+                />
+              </li>
+            </ul>
+            <b-pagination
+              v-if="this.orderPastModel.count > 20"
+              class="pt-4"
+              v-model="currentPage"
+              :total-rows="this.orderPastModel.count"
+              :per-page="this.orderPastModel.perPage"
+              aria-controls="customer-past-table"
+            ></b-pagination>
+          </b-tab>
+          <b-tab :title="$trans('Insights')">
+            <h6>Stats for {{ equipment.name }}</h6>
+            <OrderStats
+              v-if="!isLoading"
+              ref="order-stats"
+            />
+          </b-tab>
+        </b-tabs>
       </div>
     </div>
   </div>
