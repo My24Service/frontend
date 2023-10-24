@@ -36,12 +36,11 @@
             <dd>{{ order.service_number }}</dd>
             <dt>Reference</dt>
             <dd>{{ order.order_reference }}</dd>
-            <dt>Workorder {{  order.workorder_documents[0] }}</dt>
-            <dd>
+            <dt>Workorder</dt>
+            <dd class="flex-columns">
+              <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank"><b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}</b-link>
               
-              <b-link class="btn btn-primary" @click.prevent="showWorkorderDialog()" target="_blank"><b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}</b-link>
-              &nbsp;&nbsp;
-              <b-link class="" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+              <b-link class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
                 <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
               </b-link>
             </dd>
@@ -67,13 +66,6 @@
               {{ order.order_city }}, {{ order.order_country_code }}
             </address>
           </div>
-
-          
-
-          <!-- FIXME -->
-
-
-         
         </div>
 
         <div class="panel col-1-3">
@@ -81,12 +73,14 @@
             <b-icon-receipt-cutoff></b-icon-receipt-cutoff> 
             {{ $trans('Invoices') }}
           </h6>
+          
           <div v-if="order.invoices.length">
             <ul class='listing'>
-              <li v-for="invoice of order.invoices" :key="invoice.uuid" class="listing-item">
+              <li v-for="invoice of order.invoices" :key="invoice.uuid" >
                 <router-link 
                   :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}"
                   target="_blank"
+                  class="listing-item"
                   >
                   {{ $trans('Invoice') }} {{ invoice.invoice_id }}
                 </router-link>
@@ -148,32 +142,37 @@
               </template>
             </b-table>
           </div>
+          <h6 v-else class="dimmed">{{ $trans('Purchase invoices') }}</h6>
           
-          <h6>{{ $trans('Workorder documents') }}</h6>
-          <div v-if="true || order.workorder_documents.length > 0">
+          <h6 v-if="order.workorder_documents.length > 0">{{ $trans('Workorder documents') }}</h6>
+          <div v-if="order.workorder_documents.length > 0">
             <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents" responsive="sm">
               <template #cell(url)="data">
-                <b-link class="px-1" :href="data.item.url" target="_blank">
+                <b-link :href="data.item.url" target="_blank" class="flex-columns">
                   {{ $trans('Order') }} {{ order.order_id }}
+                  <small class="dimmed">{{ data.item.name }}</small>
                 </b-link>
               </template>
+              
             </b-table>
           </div>
-
+          <h6 v-else class="dimmed">{{ $trans('Workorder documents') }}</h6>
           
-          <h6>{{ $trans('Workorder documents partner') }}</h6>
-            <div v-if="true || order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
+          <div v-if="order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
+            <h6>{{ $trans('Workorder documents partner') }}</h6>
             <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents_partners" responsive="sm">
               <template #cell(url)="data">
-                <b-link class="px-1" :href="data.item.url" target="_blank">
+                <b-link :href="data.item.url" target="_blank"  class="flex-columns">
                   {{ $trans('Order') }} {{ order.order_id }}
+                  <small class="dimmed">{{ data.item.name }}</small>
                 </b-link>
               </template>
             </b-table>
           </div>
+          <h6 v-else class="dimmed">{{ $trans('Workorder documents partner') }}</h6>
 
-          <h6>{{ $trans('Reported extra text') }}</h6>
-          <div v-if="true || order.reported_codes_extra_data.length">  
+          <div v-if="order.reported_codes_extra_data.length">  
+            <h6>{{ $trans('Reported extra text') }}</h6>
             <b-table
               borderless
               small
@@ -183,14 +182,15 @@
               responsive="sm"
             ></b-table>
           </div>
+          <h6 v-else class="dimmed">{{ $trans('Reported extra text') }}</h6>
    
         </div>
 
         <div class="panel col-1-3">
           
-          <h6 class="flex-columns space-between">
+          <h6 class="flex-columns space-between align-items-center">
             <span><b-icon-paperclip></b-icon-paperclip> {{ $trans('Documents') }}</span>
-            <router-link :to="{name: 'order-documents', params : {'orderPk': pk}}" class="button btn-outline">edit documents</router-link>
+            <router-link :to="{name: 'order-documents', params : {'orderPk': pk}}" class="button btn-sm btn-primary">edit documents</router-link>
           </h6>
           <div class="my-2" v-if="order.documents.length > 0">
             <ul class="listing">
@@ -203,24 +203,25 @@
           </div>
           <small v-else class="dimmed">{{ $trans('No Documents found') }}</small>
 
-          <h6>Orderlines</h6>
+          <h6 v-if="order.orderlines.length">{{ $trans('Orderlines') }}</h6>
           <ul class="listing" v-if="order.orderlines.length">
             <li v-for="line in order.orderlines" :key="line.id">
               <div class="listing-item flex-columns">
-                <div>{{ line.product  }}</div>
-                <div>{{ line.remarks  }}</div>
-                <div>{{ line.location  }}</div>
+                <small>{{ line.product  }}</small>
+                <small>{{ line.location  }}</small>
+                <small>{{ line.remarks  }}</small>
               </div>
             </li>
           </ul>
-         
-          <h6>{{ $trans('Info lines') }}</h6>
+          <h6 v-else class="dimmed">{{ $trans('Orderlines') }}</h6>
+
           <ul class='listing' v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
+            <h6>{{ $trans('Info lines') }}</h6>
             <li v-for="item of order.infolines" :key="item.id">
               {{ item.info }}
             </li>
           </ul>
-          <small v-else class="dimmed">--</small>
+          <h6 v-else class="dimmed">{{ $trans('Info lines') }}</h6>
 
           <h6>
             <b-icon-bar-chart-steps></b-icon-bar-chart-steps>
@@ -230,8 +231,8 @@
           <ul class="listing" style="max-height: 75vh; overflow: auto;">
             <li v-for="status in order.statuses.slice().reverse()" :key="status.id">
               <div class="listing-item">
-                <span>{{ status.status }}</span>
-                <span class="dimmed">{{ status.created }}</span>
+                <small>{{ status.status }}</small>
+                <small class="dimmed">{{ status.created }}</small>
               </div>
             </li>
           </ul>
@@ -378,8 +379,7 @@ export default {
         {key: 'info', label: this.$trans('Infolines')}
       ],
       workorderDocumentFields: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'url', label: this.$trans('URL')},
+        {key: 'url', label: this.$trans('URL'),  thStyle: {display: 'none'}},
       ],
       extraDataFields: [
         {key: 'statuscode', label: this.$trans('Status')},
