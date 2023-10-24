@@ -51,6 +51,12 @@
             {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>
           <!-- </router-link> -->
         </template>
+        <template #cell(created)="data">
+          <small>{{ data.item.created }}</small>
+        </template>
+        <template #cell(modified)="data">
+          <small>{{ data.item.modified }}</small>
+        </template>
         <template #cell(branch)="data">
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
             {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>

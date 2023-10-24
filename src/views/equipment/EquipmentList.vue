@@ -119,6 +119,12 @@
             {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
           </router-link><br/>
         </template>
+        <template #cell(created)="data">
+          <small>{{ data.item.created }}</small>
+        </template>
+        <template #cell(modified)="data">
+          <small>{{ data.item.modified }}</small>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkPlus
