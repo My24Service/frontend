@@ -26,12 +26,17 @@
         </dl>
         <h6>{{ $trans('Customer') }}</h6>
         <CustomerCard :customer="customer"/>
-        <router-link 
-            class="primary" 
-            :to="{name: 'customer-view', params: {pk: customer.id}}">
-            <b-icon icon="building"></b-icon>
-            {{ $trans('Customer details') }}
-          </router-link>
+        <dl>
+          <dt></dt>
+          <dd>
+            <router-link 
+              class="btn btn-primary" 
+              :to="{name: 'customer-view', params: {pk: customer.id}}">
+              <b-icon icon="building"></b-icon>
+              {{ $trans('view customer details') }}
+            </router-link>
+          </dd>
+        </dl>
       </div>
     
       <div class='panel col-2-3'>

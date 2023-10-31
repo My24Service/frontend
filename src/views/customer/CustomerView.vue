@@ -16,7 +16,7 @@
       <div class="page-detail customer-details" v-if="!isCustomer">
 
         <div class='flex-columns'>
-          <div class="panel col-1-3">
+          <div class="panel col-1-3 sidebar">
             <CustomerCard :customer="customer" />
           </div>
           <div class="panel col-2-3">
