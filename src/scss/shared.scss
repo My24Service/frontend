@@ -119,7 +119,7 @@ input::placeholder {
       flex-direction: column;
     }
 
-    ul:last-of-type {
+    .page-subnav ul.nav {
       &:not(:empty) {
         margin-block: 1ex;
       }
@@ -453,7 +453,7 @@ input::placeholder {
       flex-grow: 0;
       align-self: flex-start;
       position: sticky;
-      top: 170px;
+      top: 0px;
     }
   }
 
@@ -518,7 +518,7 @@ dl {
   list-style: none;
   width:100%;
 
-  &.order-list {
+  &:not(.full-size) {
     inline-size: fit-content;
   }
 
@@ -583,6 +583,7 @@ dl {
       }
       .order-status {
         min-width: 10rem;
+        justify-content: space-between;
       }
 
       .order-status > span {
