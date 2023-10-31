@@ -518,10 +518,6 @@ dl {
   list-style: none;
   width:100%;
 
-  &:not(.full-size) {
-    inline-size: fit-content;
-  }
-
   &.order-list {
     li > .listing-item,
     li > .headings {
