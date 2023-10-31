@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <NavBrand />
-  </div>
+  <NavBrand />
 </template>
 
 <script>
