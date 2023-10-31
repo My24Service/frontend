@@ -3,7 +3,7 @@
     v-if="this.orderTypes.length > 0"
     :input="$emit('update:orderType', orderType)"
     v-model="orderType"
-    :options="orderTypes" size="sm"
+    :options="orderTypes"
   ></b-form-select>
 </template>
 
