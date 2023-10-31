@@ -32,7 +32,9 @@ export default [{
         meta: { needsAuth: false },
         name: 'no-access',
         path: '/no-access',
-        component: TheNoAccessLayout
+        components: {
+          'app-content' : TheNoAccessLayout,
+        }
       },
   ]
 }]
