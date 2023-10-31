@@ -31,11 +31,10 @@
           v-on:keyup.enter="doLogin"
         ></b-form-input>
       </b-form-group>
-      <b-form-group>
+      <div class='flex-columns align-items-center justify-content-center'>
         <b-button type="submit">log in</b-button>
-      </b-form-group>
-      <hr>
-      <b-link @click="function() { forgotPassword() }">{{ $trans('Forgot your password?') }}</b-link>
+        <b-link @click="function() { forgotPassword() }">{{ $trans('Forgot password?') }}</b-link>
+      </div>
     </form>
 </template>
 
