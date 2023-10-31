@@ -28,6 +28,13 @@
             <span><strong>{{ order.order_type }}</strong> <br><small>{{ order.order_name }}</small></span>
           </h3>
           <dl>
+            <dt>
+              <span v-if="order.assigned_user_info.length">{{ $trans('Assigned to') }}</span>
+            </dt>
+            <dd>
+              <span v-if="!order.assigned_user_info.length" class="dimmed">{{ $trans('Not assigned') }}</span>
+              <span v-for="person in order.assigned_user_info" class="order-assignee">{{ person.full_name }}</span>
+            </dd>
             <dt>Status</dt>
             <dd>{{ order.last_status }}</dd>
             <dt>Dates</dt>
@@ -51,14 +58,13 @@
           <hr/>
 
           <h6><b-icon-person></b-icon-person> Contact</h6>
-          <div class='flex-columns space-between'>
+          <div class="flex-columns space-between" style="max-width: 60ch; margin-inline: auto">
             <p>
               {{ order.order_contact }}<br/>
               <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link></br>
               {{ order.order_tel }}<br/> 
               {{ order.order_mobile }}<br/>
             </p>
-          
             <address>
               <strong>{{ order.order_name }}</strong><br />
               {{ order.order_address }}<br />
@@ -204,7 +210,7 @@
           <small v-else class="dimmed">{{ $trans('No Documents found') }}</small>
 
           <h6 v-if="order.orderlines.length">{{ $trans('Orderlines') }}</h6>
-          <ul class="listing" v-if="order.orderlines.length">
+          <ul class="listing full-size" v-if="order.orderlines.length">
             <li v-for="line in order.orderlines" :key="line.id">
               <div class="listing-item flex-columns">
                 <small>{{ line.product  }}</small>
@@ -215,7 +221,7 @@
           </ul>
           <h6 v-else class="dimmed">{{ $trans('Orderlines') }}</h6>
 
-          <ul class='listing' v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
+          <ul class='listing full-size' v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
             <h6>{{ $trans('Info lines') }}</h6>
             <li v-for="item of order.infolines" :key="item.id">
               {{ item.info }}
@@ -228,7 +234,7 @@
             {{ $trans('Timeline') }}
           </h6>
 
-          <ul class="listing" style="max-height: 75vh; overflow: auto;">
+          <ul class="listing full-size" style="max-height: 75vh; overflow: auto;">
             <li v-for="status in order.statuses.slice().reverse()" :key="status.id">
               <div class="listing-item">
                 <small>{{ status.status }}</small>
