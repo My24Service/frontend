@@ -379,16 +379,17 @@
               </multiselect>
             </b-form-group>
               
-            <b-form-group
-              v-bind:label="$trans('Assignee(s)')"
-              label-for="order-assigned-to"
-              label-cols="3"
-              label-class="dimmed">
-
-              <label class="col-form-label order-assignee" v-for="person in order.assigned_user_info">{{ person.full_name }}</label>
-            </b-form-group>
             
           </div>
+          
+          <b-form-group
+            v-bind:label="$trans('Assignee(s)')"
+            label-for="order-assigned-to"
+            label-cols="3"
+            label-class="dimmed">
+
+            <label class="col-form-label order-assignee" v-for="person in order.assigned_user_info">{{ person.full_name }}</label>
+          </b-form-group>
           
           <b-form-group
             v-bind:label="$trans('Remarks')"
