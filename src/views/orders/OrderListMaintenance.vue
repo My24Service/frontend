@@ -137,7 +137,7 @@
         </div>
         
         <div class="overflow-auto">
-          <ul class="listing order-list">
+          <ul class="listing order-list full-size">
             <li><!-- FIXME -->
               <div class="headings">
                 <span class="order-id">order id</span>

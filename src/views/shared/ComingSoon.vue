@@ -16,15 +16,15 @@ export default {
 
 <style scoped>
 h1 {
-  color: #eceef8;
+  color: #fffc;
   text-align: center;
   padding-block: 3rem 1rem;
-  font-size: 5rem;
+  font-size: 4rem;
 }
 .coming-soon {
     padding: 3rem!important;
     text-align: center;
-    margin: 3rem auto!important;
+    margin: -1rem auto 3rem!important;
     max-width: 60ch;
   }
 </style>

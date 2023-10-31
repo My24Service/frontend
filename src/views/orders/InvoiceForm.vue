@@ -97,7 +97,7 @@
               <b-icon-chevron-down></b-icon-chevron-down>
             </summary>
 
-            <ul class="listing invoice-lines" v-if="invoiceLineService.collection.length">
+            <ul class="listing invoice-lines full-size" v-if="invoiceLineService.collection.length">
               <li class="headings">
                   <span>
                     {{ $trans("Description") }}
