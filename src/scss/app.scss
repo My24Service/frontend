@@ -63,3 +63,9 @@ details[open] > summary {
 details[open] > summary > svg {
   rotate: 180deg;
 }
+
+.app-page header div.page-title .btn-outline {
+  color: white;
+  border-color: #fff6;
+  background-color: transparent;
+}
