@@ -130,7 +130,7 @@
               <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
             </span>
 
-            <b-button variant="outline-primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
+            <b-button variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
               <b-icon-person-lines-fill></b-icon-person-lines-fill>
               {{ $trans('Assign these orders') }}
             </b-button>
