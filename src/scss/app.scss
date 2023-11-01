@@ -26,42 +26,40 @@ details {
       color: $active-link !important;
     }
   }
-
-  &[open] {
-    background-color: #f8f9fa;
-  }
-
+  
   &:not(:last-of-type) {
     border-bottom: 1px solid #f8f9fa;
   }
-}
 
-details > summary {
-  padding-block: 1rem;
-  user-select: none;
-}
+  summary {
+    padding-block: 1rem;
+    user-select: none;
 
-details > summary > * {
-  display: inline;
-  color: var(--text-color) !important;
-}
+    > * {
+      display: inline;
+      color: var(--text-color) !important;
+    }
 
-details > summary > h6 {
-  margin-bottom: 0 !important;
-}
+    > h6 {
+      margin-bottom: 0 !important;
+    }
 
-details > summary > svg {
-  transition: all .25s ease;
-}
+    > svg {
+      transition: all .25s ease;
+    }
+  }
 
-details[open] > summary {
-  
-  > * {
-    color: $active-link !important;
+  &[open] {
+    background-color: #f8f9fa;
+    
+    summary {
+      > * {
+        color: $active-link !important;
+      }
+
+      > svg {
+        rotate: 180deg;
+      }
+    }
   }
 }
-
-details[open] > summary > svg {
-  rotate: 180deg;
-}
-
