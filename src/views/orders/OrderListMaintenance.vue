@@ -135,7 +135,7 @@
             <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
           </div>
         </div>
-        
+
         <div class="overflow-auto">
           <ul class="listing order-list full-size">
             <li><!-- FIXME -->
@@ -159,6 +159,12 @@
                   :model="model"
                   @reload-data="loadData"
                 />
+              <IconLinkAssign
+                v-if="!isCustomer && !isBranchEmployee && dispatch"
+                v-bind:title="$trans('Assign')"
+                v-bind:method="function() { selectOrder(order) }"
+              />
+
             </li>
           </ul>
         </div>
