@@ -62,10 +62,16 @@ input::placeholder {
 }
 
 .edit-icon {
-  @extend .border;
-  @extend .border-primary;
-  @extend .rounded;
-  @extend .px-2;
+  width: 1.2rem;
+  height: 1.2rem;
+  opacity: .2;
+}
+
+li:hover .edit-icon,
+li:focus-within .edit-icon,
+tr:hover .edit-icon,
+tr:focus-within .edit-icon {
+  opacity: 1;
 }
 
 .navbar-light .navbar-nav .nav-link {
@@ -491,15 +497,6 @@ dl {
       }
     }
 
-    a.px-1 {
-      opacity: .1;
-      pointer-events: none;
-      transition: all .1s;
-      svg {
-        border: none!important;
-      }
-    }
-
     &:not(:last-child) {
       border-bottom: 1px solid #f2f3f4;
     }
@@ -556,8 +553,8 @@ dl {
       }
 
       .order-status > span {
-        display: flex;
-        align-content: center;
+        
+        text-align: center;
         min-width: 2rem;
       }
     }
