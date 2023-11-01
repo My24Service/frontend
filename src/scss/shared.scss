@@ -715,6 +715,75 @@ fieldset:disabled textarea {
 }
 
 /* (bootstrap) overrides */
+
+html {
+  .app-page header div.page-title {
+    .button, .btn {
+      padding-block: .23rem !important;
+      display: flex;
+      gap: 1ex;
+      align-items: center;
+    }
+
+    .btn,
+    .button,
+    .btn-primary {
+      background-color: white ;
+      border-color: #fff6;
+      color: $my24 ;
+      &:not(:disabled):active {
+        border-color: white !important;
+      }
+
+      &.outline,
+      &.btn-outline,
+      .outline-primary {
+        background-color: transparent !important;
+        border-color: #fff9 !important;
+        color: white !important;
+      }
+      &.btn-secondary {
+        background-color: #0009;
+        border-color:  transparent;
+        color: white;
+        &:hover {
+          background-color: $secondary;
+        }
+      }
+      &[disabled] {
+        opacity: .5;
+        pointer-events: none;
+      }
+    }
+    .btn-toolbar {
+      gap: 1ex;
+      
+      button {
+        font-size: 0.9rem;
+      }
+    }
+
+    .btn-group .btn-secondary {
+      margin-inline: 0;
+    }
+    .backlink {
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.badge {
+  display: inline-flex;
+  min-width: 2em;
+  line-height: 1.5;
+  border-radius: 1em;
+  text-align: center;
+  justify-content: center;
+}
+
 .float-right {
   margin-bottom: 0;
 }

@@ -1,6 +1,7 @@
 // Define variable defaults
 $my24: #ff9933;
 $primary: $my24;
+$secondary: #000;
 $navbar-light-color: $my24;
 $active-link: #232c2fd9;
 $normal-link: #fff;
@@ -64,57 +65,3 @@ details[open] > summary > svg {
   rotate: 180deg;
 }
 
-html {
-  .app-page header div.page-title {
-    .button, .btn {
-      padding-block: .23rem !important;
-      display: flex;
-      gap: 1ex;
-      align-items: center;
-    }
-
-    .btn,
-    .button,
-    .btn-primary {
-      background-color: white !important;
-      border-color: #fff6;
-      color: $my24 !important;
-      &:not(:disabled):active {
-        border-color: white !important;
-      }
-      &:hover,
-      &:focus {
-        background-color: #fffc;
-        border-color: white;
-      }
-      &.outline,
-      &.btn-outline,
-      .outline-primary {
-        background-color: transparent !important;
-        border-color: #fff9 !important;
-        color: white !important;
-      }
-      &[disabled] {
-        opacity: .5;
-        pointer-events: none;
-      }
-    }
-    .btn-secondary {
-      background-color: #ffffffab !important;
-    }
-    .btn-toolbar {
-      gap: 1ex;
-      
-      button {
-        font-size: 0.9rem;
-      }
-    }
-
-    .backlink {
-      cursor: pointer;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-}

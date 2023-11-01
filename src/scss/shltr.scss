@@ -10,9 +10,9 @@
 $color-accent: #30BFBF;
 //global-color-1cf88dd:
 
-$my24: #000000;
-$primary: #000000;
-$secondary: #30BFBF;
+$my24: #30BFBF;
+$primary: #000;
+$secondary: $my24;
 
 $navbar-light-color: $secondary;
 $active-link: $secondary;
