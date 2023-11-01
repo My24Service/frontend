@@ -104,10 +104,10 @@
               </div>
             </li>
 
-            <li v-if="isLoading" class="text-center my-2">
+            <section v-if="isLoading" class="text-center my-2">
               <b-spinner class="align-middle"></b-spinner><br>
-              <strong>{{ $trans('loading orders') }}</strong>
-            </li>
+              <span>{{ $trans('loading orders') }}</span>
+            </section>
 
             <li v-for="order in orders" :key="order.id">
               <OrderTableInfo

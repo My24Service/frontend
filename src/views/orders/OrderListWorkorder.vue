@@ -136,14 +136,17 @@
             v-bind:order="order"
             />
 
-            <div class="h2 float-right">
-              <router-link class="px-1" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
-                           :to="{name: 'order-invoice-create', params: {uuid: order.uuid}}">
-                <b-icon-currency-dollar></b-icon-currency-dollar>
-              </router-link>
-            </div>
+            <router-link  v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
+                :to="{name: 'order-invoice-create', params: {uuid: order.uuid}}">
+              <b-icon-receipt-cutoff class="edit-icon"></b-icon-receipt-cutoff>
+            </router-link>
 
+            <div v-else>
+              <!-- fill with empty space -->
+              <a class="edit-icon"><svg class="edit-icon b-icon bi" width="1em" height="1em"></svg></a>
+            </div>
           </li>
+
         </ul>
 
         <Pagination
