@@ -63,12 +63,14 @@
       {{ $trans('Trip statuscodes') }}
     </b-nav-item>
 
+    <!--
     <b-nav-item
       :active="isActive('timesheet')"
       v-if="hasTimesheet"
       :to="{name: 'mobile-timesheet'}">
       {{ $trans('Timesheet') }}
     </b-nav-item>
+    -->
 
     <b-nav-item
       :active="isActive('assignedorder-materials')"
