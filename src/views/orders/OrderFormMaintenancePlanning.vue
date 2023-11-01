@@ -388,7 +388,10 @@
             label-cols="3"
             label-class="dimmed">
 
-            <label class="col-form-label order-assignee" v-for="person in order.assigned_user_info">{{ person.full_name }}</label>
+            <label class="col-form-label order-assignee" v-for="(person, index) in order.assigned_user_info">
+              <span v-if="index > 0">,</span>
+              {{ person.full_name }}
+            </label>
           </b-form-group>
           
           <b-form-group
