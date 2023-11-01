@@ -473,17 +473,40 @@ dl {
     li > .headings {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
+      width: 100%;
     }
   }
 
   li {
+    display: flex;
+    padding-inline: 2ex;
     line-height: 2.4rem;
+
+    &:hover {
+      background: #f6f9fc;
+      
+      a.px-1 {
+        opacity: 1;
+        pointer-events: all;
+      }
+    }
+
+    a.px-1 {
+      opacity: .1;
+      pointer-events: none;
+      transition: all .1s;
+      svg {
+        border: none!important;
+      }
+    }
+
     &:not(:last-child) {
       border-bottom: 1px solid #f2f3f4;
     }
     > .listing-item,
     .headings {
       display: flex;
+      width: 100%;
       justify-content: space-between;
       text-align: initial;
       gap: 1rem;
@@ -537,16 +560,6 @@ dl {
         align-content: center;
         min-width: 2rem;
       }
-
-      a.px-1 {
-        font-size: 2rem;
-        opacity: .1;
-        pointer-events: none;
-        transition: all .1s;
-        svg {
-          border: none!important;
-        }
-      }
     }
 
     &.headings,
@@ -562,16 +575,11 @@ dl {
     }
 
     > .listing-item:hover {
-      background: #f6f9fc;
+      
       > * {
         color: #323435;
       }
 
-      a.px-1 {
-        opacity: 1;
-        pointer-events: all;
-
-      }
     }
   }
 }

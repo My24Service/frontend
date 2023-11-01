@@ -111,20 +111,6 @@
         </form>
       </b-modal>
 
-
-      <b-row v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
-        <b-col cols="12">
-          <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
-          <span v-for="(order, index) in selectedOrders" :key="order.id">
-            {{ order.order_id }}
-            <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
-          </span>
-          <b-link v-if="dispatch" class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
-            <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
-          </b-link>
-        </b-col>
-      </b-row>
-
       <div>
         <div class="flex-columns order-filter-links" v-if="isActive('orders')">
           <div>
@@ -134,11 +120,28 @@
             <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
             <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
           </div>
+          <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
+
+            <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
+            
+            <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
+              {{ order.order_id }}
+              <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+              <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+            </span>
+
+            <b-button variant="outline-primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
+              <b-icon-person-lines-fill></b-icon-person-lines-fill>
+              {{ $trans('Assign these orders') }}
+            </b-button>
+
+          </div>
         </div>
 
         <div class="overflow-auto">
           <ul class="listing order-list full-size">
             <li><!-- FIXME -->
+              
               <div class="headings">
                 <span class="order-id">order id</span>
                 <span class="order-type">type</span>
@@ -155,16 +158,15 @@
             </section>
             <li v-for="order in orders" :key="order.id">
               <OrderTableInfo
-                  v-bind:order="order"
-                  :model="model"
-                  @reload-data="loadData"
-                />
+              v-bind:order="order"
+              :model="model"
+              @reload-data="loadData"
+              />
               <IconLinkAssign
-                v-if="!isCustomer && !isBranchEmployee && dispatch"
+                v-if="true || !isCustomer && !isBranchEmployee && dispatch"
                 v-bind:title="$trans('Assign')"
                 v-bind:method="function() { selectOrder(order) }"
               />
-
             </li>
           </ul>
         </div>
@@ -261,6 +263,9 @@
     align-items: center;
     gap: 2ex;
 }
+.selected-order .icon {cursor: pointer;}
+.selected-order:not(:hover) .icon:last-of-type,
+.selected-order:hover .icon:first-of-type { display: none;}
 
 </style>
 <script>

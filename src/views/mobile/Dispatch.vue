@@ -6,6 +6,28 @@
           <b-icon icon="person-lines-fill"></b-icon>
           Dispatch
         </h3>
+        <div v-if="assignMode && selectedOrders.length > 0" class="flex-columns">
+
+          <span class="dimmed">{{ $trans('Selected orders') }}:</span>
+          <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-items">
+            {{ order.order_id }}
+            <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+            <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+          </span>
+
+          <span class="dimmed">{{ $trans('Selected people') }}:</span>
+          <span v-for="(user, index) in selectedUsers" :key="user.submodel_id" class="selected-items">
+            {{ user.full_name }}
+            <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedUser(index)"></b-icon>
+            <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedUser(index)"></b-icon>
+          </span>
+          <b-button-toolbar>
+          <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
+            {{ $trans('Cancel') }}</b-button>
+          <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            {{ $trans('Assign') }}</b-button>
+          </b-button-toolbar>
+        </div>
       </div>
     </header>
     <b-button @click="backToTop" id="btn-back-to-top">
@@ -153,36 +175,7 @@
       </template>
     </b-modal>
     <div class="panel">
-      <div class="heading" v-if="assignMode && selectedOrders.length > 0">
-        <b-row>
-          <b-col cols="12">
-            <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
-            <span v-for="(order, index) in selectedOrders" :key="order.id">
-              {{ order.order_id }}
-              <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
-            </span>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="12">
-            <strong>{{ $trans('Selected users') }}:</strong>&nbsp;
-            <span v-for="(user, index) in selectedUsers" :key="user.submodel_id">
-              {{ user.full_name }}
-              <b-link class="px-1" @click.prevent="removeSelectedUser(index)">[ x ]</b-link>
-            </span>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="12">
-            <footer class="modal-footer">
-              <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
-                {{ $trans('Cancel') }}</b-button>
-              <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-                {{ $trans('Submit') }}</b-button>
-            </footer>
-          </b-col>
-        </b-row>
-      </div>
+
 
       <b-row class="py-2">
         <b-col cols="1">
@@ -425,6 +418,7 @@ export default {
         this.showOverlay = false
         this.buttonDisabled = false
       }
+      
     },
     postUnassign() {
       this.showOverlay = true
@@ -534,6 +528,14 @@ export default {
 </script>
 
 <style scoped>
+
+.selected-items .icon {
+  fill: white ;
+}
+.selected-items:not(:hover) .icon:last-of-type,
+.selected-items:hover .icon:first-of-type {
+  display: none;
+}
 canvas.dispatchCanvas {
   display: block;
   margin: 0 auto;
