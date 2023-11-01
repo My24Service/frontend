@@ -747,7 +747,7 @@ html {
         border-color:  transparent;
         color: white;
         &:hover {
-          background-color: $secondary;
+          /* background-color: $secondary; */
         }
       }
       &[disabled] {
