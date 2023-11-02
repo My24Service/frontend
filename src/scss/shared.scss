@@ -721,9 +721,8 @@ html {
       gap: 1ex;
       align-items: center;
     }
-
+    
     .btn,
-    .button,
     .btn-primary {
       background-color: white ;
       border-color: #fff6;
@@ -772,6 +771,8 @@ html {
   }
 }
 
+
+
 .badge {
   display: inline-flex;
   min-width: 2em;
@@ -789,6 +790,10 @@ html {
   display: flex;
   .multiselect__placeholder {
     align-self: center;
+  }
+  .multiselect__tag {
+    margin-bottom: 0;
+    margin-top: 8px;
   }
 }
 
