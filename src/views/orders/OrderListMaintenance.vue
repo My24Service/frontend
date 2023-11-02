@@ -163,7 +163,7 @@
               @reload-data="loadData"
               />
               <IconLinkAssign
-                v-if="true || !isCustomer && !isBranchEmployee && dispatch"
+                v-if="!isCustomer && !isBranchEmployee && dispatch"
                 v-bind:title="$trans('Assign')"
                 v-bind:method="function() { selectOrder(order) }"
               />
