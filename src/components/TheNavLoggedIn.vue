@@ -78,7 +78,17 @@
     v-bind:title="$trans('Change language')"
     ok-disabled
     >
-    <TheLanguageChooser />
+      <template #modal-footer>
+        <b-button
+          variant="secondary"
+          size="sm"
+          class="float-right"
+          @click="$bvModal.hide('lang-modal')"
+        >
+          {{ $trans('Close') }}
+        </b-button>
+      </template>
+      <TheLanguageChooser />
   </b-modal>
 
     <nav class="app-sidebar">
