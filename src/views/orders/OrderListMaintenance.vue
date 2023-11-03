@@ -112,16 +112,18 @@
       </b-modal>
 
       <div>
-        <div class="flex-columns order-filter-links" v-if="isActive('orders')">
-          <div>
+        <div class="flex-columns order-filter-links">
+          
+          <div v-if="isActive('orders')">
             <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
             <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
             <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
             <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
             <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
           </div>
-          <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
+          <div v-else></div>
 
+          <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
             <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
             
             <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
@@ -163,7 +165,7 @@
               @reload-data="loadData"
               />
               <IconLinkAssign
-                v-if="true || !isCustomer && !isBranchEmployee && dispatch"
+                v-if="!isCustomer && !isBranchEmployee && dispatch"
                 v-bind:title="$trans('Assign')"
                 v-bind:method="function() { selectOrder(order) }"
               />
