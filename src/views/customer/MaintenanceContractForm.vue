@@ -125,20 +125,22 @@
             </b-form-group>
 
             <h6 v-if="customer.id">Customer</h6>
-            <CustomerCard 
+            <CustomerCard
               :key="customer.id"
               v-if="customer.name"
-              :customer="customer" 
+              :customer="customer"
               />
           </div>
+
           <div class="panel col-2-3">
             <h6 :class="!customer.id ? 'dimmed' : ''">{{ $trans('Equipment') }}</h6>
             <hr />
-            
+
             <h3 v-if="!customer.id" class="text-center">
-              <b-icon icon="info-square" variant="primary"></b-icon> &nbsp; 
+              <b-icon icon="info-square" variant="primary"></b-icon> &nbsp;
               <span class="dimmed">{{ $trans('Select a customer to add equipment to this contract.') }}</span>
             </h3>
+
             <div class="maintenance-contract-equipment" v-else>
               <b-row>
                 <b-col cols="12">
@@ -146,7 +148,7 @@
                     v-if="maintenanceEquipmentService.collection.length > 0"
                     small
                     :fields="equipmentFields"
-                    :items="maintenanceEquipmentService.collection.equipment" responsive="md"
+                    :items="maintenanceEquipmentService.collection" responsive="md"
                   >
                     <template #cell(tariff)="data">
                       {{ data.item.tariff_dinero.toFormat('$0.00')}}
@@ -312,7 +314,7 @@
               </footer>
 
             </div>
-            
+
           </div>
         </b-form>
       </div>
@@ -428,7 +430,7 @@ export default {
     isEquipmentValid() {
       return this.maintenanceEquipmentService.editItem.equipment !== null
     },
-    customerName () { 
+    customerName () {
       return this.customer.name
     }
   },
@@ -544,7 +546,7 @@ export default {
 
       this.maintenanceEquipmentService.editItem.equipment = option.id
       this.maintenanceEquipmentService.editItem.equipment_name = option.name
-      this.v$.maintenanceEquipment.$reset()
+      this.v$.maintenanceEquipmentService.$reset()
       this.$refs.times_per_year.focus()
     },
     deleteEquipment(index) {

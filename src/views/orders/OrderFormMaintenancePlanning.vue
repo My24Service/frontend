@@ -820,6 +820,7 @@ import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
 import Collapse from '../../components/Collapse.vue'
 import {componentMixin} from "../../utils";
 import branchModel from "../../models/company/Branch";
+import {EquipmentService} from "../../models/equipment/equipment";
 import timeRegistrationModel from "../../models/company/TimeRegistration";
 import equipmentModel from "../../models/equipment/equipment";
 import locationModel from "../../models/equipment/location";
@@ -938,6 +939,8 @@ export default {
 
       deletedOrderlines: [],
       deletedInfolines: [],
+
+      equipmentService: new EquipmentService()
     }
   },
   validations() {

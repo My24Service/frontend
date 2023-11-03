@@ -99,42 +99,36 @@
       </b-table>
 
       <Pagination
-        v-if="!isLoading"
+        v-if="!isLoading && this.maintenanceContractService"
         :model="this.maintenanceContractService"
         :model_name="$trans('Contract')"
       />
     </div>
 
-    <Pagination
-      v-if="!isLoading"
-      :model="this.model"
-      :model_name="$trans('Contract')"
-    />
   </div>
 </template>
 
 <script>
-import maintenanceContractService from '../../models/customer/MaintenanceContract.js'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import IconLinkEdit from "@/components/IconLinkEdit.vue";
 
 export default {
   name: 'MaintenanceContractList',
   components: {
     IconLinkDelete,
-    IconLinkEdit,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
     Pagination,
     IconLinkEdit
-},
+  },
   props: {
     customer_pk: {
       type: [String, Number],
@@ -145,7 +139,7 @@ export default {
     return {
       customer: null,
       searchQuery: null,
-      isLoading: false,
+      isLoading: true,
       maintenanceContracts: [],
       maintenanceContractFields: [
         {key: 'name', label: this.$trans('Contract name'), sortable: true},
@@ -155,7 +149,7 @@ export default {
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'icons'}
       ],
-      maintenanceContractService,
+      maintenanceContractService: new MaintenanceContractService(),
     }
   },
   async created() {

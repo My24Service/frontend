@@ -1,10 +1,10 @@
 <template>
-  <div class="app-page" v-if="!isLoading">
+  <div class="app-page" v-if="!isLoading && maintenanceContract">
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="file-earmark-lock"></b-icon> 
-          <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ $trans('Maintenance contracts') }}</router-link> / 
+          <b-icon icon="file-earmark-lock"></b-icon>
+          <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ $trans('Maintenance contracts') }}</router-link> /
           <span>{{ maintenanceContract.name }}</span>
         </h3>
         <b-button-toolbar>
@@ -14,7 +14,7 @@
     </header>
 
     <div class='page-detail'>
-      
+
       <div class='flex-columns'>
       <div class='panel col-1-3 sidebar'>
         <h6>{{ $trans('Contract')}}</h6>
@@ -29,8 +29,8 @@
         <dl>
           <dt></dt>
           <dd>
-            <router-link 
-              class="btn btn-primary" 
+            <router-link
+              class="btn btn-primary"
               :to="{name: 'customer-view', params: {pk: customer.id}}">
               <b-icon icon="building"></b-icon>
               {{ $trans('view customer details') }}
@@ -38,7 +38,7 @@
           </dd>
         </dl>
       </div>
-    
+
       <div class='panel col-2-3'>
         <b-tabs>
           <b-tab :title="$trans('Equipment')">
@@ -99,13 +99,13 @@
                   {{ $trans('Add equipment') }}
                 </b-button>
               </footer>
-              
+
             </div>
-          
+
             <!-- equipment list -->
             <div v-if="maintenanceEquipmentService.collection.length > 0" >
               <b-table
-                
+
                 :fields="equipmentFields"
                 :items="maintenanceEquipmentService.collection" responsive="md"
               >
@@ -124,7 +124,7 @@
               </b-table>
             </div>
           </b-tab>
-          <b-tab 
+          <b-tab
           :title="`${$trans('Orders')} (${maintenanceOrders.length})`"
           >
             <!-- orders -->
@@ -154,7 +154,7 @@
                 <div style="text-align: center;">{{ $trans('No orders for') }} {{ $trans('contract')}}.</div>
               </li>
               <li v-for="item in maintenanceOrders" >
-                <OrderTableInfo v-bind:order="item" /> 
+                <OrderTableInfo v-bind:order="item" />
               </li>
             </ul>
             <b-pagination
@@ -168,10 +168,10 @@
 
           </b-tab>
         </b-tabs>
-        
+
       </div><!-- .panel -->
       </div><!-- .flex-columns -->
-      
+
     </div><!-- .page-detail -->
   </div><!-- .app-page -->
 </template>
