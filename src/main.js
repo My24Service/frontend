@@ -133,7 +133,8 @@ import './scss/shared.scss'
 const defaultTheme = 'theme-default'
 const themes = {
   'saled': 'theme-saled',
-  'shltr': 'theme-shltr'
+  'shltr': 'theme-shltr',
+  'shltr-installation': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 
