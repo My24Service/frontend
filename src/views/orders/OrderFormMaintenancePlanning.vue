@@ -1376,7 +1376,7 @@ export default {
     },
     async submitForm(e) {
 
-      if(e.target.value == 'dispatch') this.nextField = 'dispatch';
+      if(e.target.value === 'dispatch') this.nextField = 'dispatch';
 
       this.submitClicked = true
       this.v$.$touch()

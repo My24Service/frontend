@@ -47,9 +47,9 @@
         <span v-else>&ndash;</span>
       </span>
       <span class="order-status">
-        <b-icon icon="circle-fill" v-bind:style="`color:${this.orderStatusColorCode}`" :title="order.last_status_full"></b-icon>
+        <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`" :title="order.last_status_full"></b-icon>
         <b-form-select
-          :title="this.orderStatusCode.statuscode"
+          :title="orderStatusCodeComputed.statuscode"
           :id="order.id + '-change-status'"
           v-model="orderStatusCode"
           :options="statuscodes"
@@ -92,6 +92,7 @@ export default {
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
     this.isLoaded = true;
     this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
+    this.orderStatusCode = this.orderStatusCodeComputed
   },
   computed: {
     hasInfolines() {
@@ -101,7 +102,7 @@ export default {
 
       return this.order.infolines.length > 0
     },
-    orderStatusCode() {
+    orderStatusCodeComputed() {
       let statusCode = my24.getStatuscode(this.statuscodes, this.order.last_status);
       if (statusCode) {
         return statusCode.statuscode;
@@ -115,6 +116,7 @@ export default {
       isLoaded: false,
       memberType: null,
       orderStatus: this.order.last_status,
+      orderStatusCode: null,
       orderStatusColorCode: '#666',
       statuscodes: [],
       orderLineFields: [
