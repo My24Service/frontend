@@ -139,10 +139,8 @@ import quotationLineService from '@/models/quotations/QuotationLine.js'
 import DurationInput from "../../../components/DurationInput.vue"
 import Collapse from "../../../components/Collapse";
 import {
-  USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS,
-  USE_PRICE_USER,
   USE_PRICE_PURCHASE,
   USE_PRICE_SELLING,
   INVOICE_LINE_TYPE_CALL_OUT_COSTS
@@ -157,7 +155,6 @@ import TotalRow from "./TotalRow";
 import TotalsInputs from "../../../components/TotalsInputs";
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import {toDinero} from "../../../utils";
-import customerService, { CustomerModel } from '../../../models/customer/Customer.js'
 import AddToQuotationLines from './AddToQuotationLines.vue'
 
 
