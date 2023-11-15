@@ -441,10 +441,7 @@ export default {
 
     async loadHistory() {
       try {
-        if (!this.isCustomer) {
-          this.orderService.setListArgs(`customer_id=${this.pk}`)
-        }
-        const results = await this.orderService.list()
+        const results = await this.orderService.getAllForCustomer(this.pk)
         this.orders = results.results
         this.isLoading = false
       } catch(error) {
