@@ -969,7 +969,6 @@ class Dispatch {
           `${spot.order.order_info}\nOrder status: ${spot.order.order_status}\nAssigned order status: ${spot.order.assignedorder_status ?? ''}\n`, mouseX, mouseY
         )
         hit = true
-        return
       }
     })
 
@@ -997,7 +996,7 @@ class Dispatch {
     this.tipCanvas.width = maxLen * (this.getFontsize()-8) + 10
     this.tipCanvas.height = lines.length * this.getFontsize() + 5
 
-    this.tipCanvas.style.left = (mouseX + 20) + "px"
+    this.tipCanvas.style.left = (mouseX + 160) + "px"
     this.tipCanvas.style.top = (mouseY) + "px"
     this.tipCtx.clearRect(0, 0, this.tipCanvas.width, this.tipCanvas.height)
 

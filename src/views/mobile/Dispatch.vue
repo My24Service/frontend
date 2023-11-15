@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="person-lines-fill"></b-icon>
-          Dispatch
+          {{ $trans('Dispatch') }}
         </h3>
         <div v-if="assignMode && selectedOrders.length > 0" class="flex-columns">
 
@@ -328,7 +328,7 @@ export default {
           await assignedOrderModel.updateDetailChangeDate(this.assignedOrderPk, this.assignedOrder)
           this.$refs['dispatch-change-date-modal'].hide();
           this.showOverlay = false
-          this.dispatch.drawDispatch()
+          await this.dispatch.drawDispatch()
         } catch(error) {
           console.log('error updating assignedOrder dates', error)
           this.errorToast(this.$trans('Error updating dates'))
@@ -410,7 +410,7 @@ export default {
 
         this.infoToast(this.$trans('Success'), this.$trans('Order(s) assigned'))
         this.cancelAssign()
-        this.dispatch.drawDispatch()
+        await this.dispatch.drawDispatch()
         this.buttonDisabled = false
         this.showOverlay = false
       } catch (e) {
@@ -418,7 +418,7 @@ export default {
         this.showOverlay = false
         this.buttonDisabled = false
       }
-      
+
     },
     postUnassign() {
       this.showOverlay = true
@@ -429,7 +429,7 @@ export default {
           await assign.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
           this.infoToast(this.$trans('Success'), this.$trans('Order removed from planning'))
           this.showOverlay = false
-          this.dispatch.drawDispatch()
+          await this.dispatch.drawDispatch()
         } catch (error) {
           console.log('error un-assigning', error)
           this.errorToast(this.$trans('Error un-assigning order'))
