@@ -110,13 +110,16 @@ class CostService extends BaseModel {
 
   // method to create cost from material
   newModelFromMaterial(material, price, price_currency, defaultPropsView) {
+    const user = material.is_partner ? null : material.user_id
+    const user_full_name = material.is_partner ? material.full_name : null
     return new this.model({
       ...material,
       ...this.getDefaultCostProps(),
       ...defaultPropsView,
       material: material.material_id,
       amount_decimal: material.amount,
-      user: material.user_id,
+      user,
+      user_full_name,
       price,
       price_currency,
       cost_type: COST_TYPE_USED_MATERIALS,
@@ -125,6 +128,8 @@ class CostService extends BaseModel {
 
   // method to create cost from work hours
   newModelFromWorkHours(activity, price, price_currency, defaultPropsView) {
+    const user = activity.is_partner ? null : activity.user_id
+    const user_full_name = activity.is_partner ? activity.full_name : null
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
@@ -132,7 +137,8 @@ class CostService extends BaseModel {
       amount_duration_read: activity.work,
       amount_duration: activity.work_secs,
       amount_duration_secs: parseInt(activity.work_secs),
-      user: activity.user_id,
+      user,
+      user_full_name,
       price,
       price_currency,
       cost_type: COST_TYPE_WORK_HOURS,
@@ -141,6 +147,8 @@ class CostService extends BaseModel {
 
   // method to create cost from travel hours
   newModelFromTravelHours(activity, price, price_currency, defaultPropsView) {
+    const user = activity.is_partner ? null : activity.user_id
+    const user_full_name = activity.is_partner ? activity.full_name : null
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
@@ -148,7 +156,8 @@ class CostService extends BaseModel {
       amount_duration_read: activity.travel_total,
       amount_duration: activity.travel_total_secs,
       amount_duration_secs: parseInt(activity.travel_total_secs),
-      user: activity.user_id,
+      user,
+      user_full_name,
       price,
       price_currency,
       cost_type: COST_TYPE_TRAVEL_HOURS,
@@ -157,6 +166,8 @@ class CostService extends BaseModel {
 
   // method to create cost from extra work
   newModelFromExtraWork(activity, price, price_currency, defaultPropsView) {
+    const user = activity.is_partner ? null : activity.user_id
+    const user_full_name = activity.is_partner ? activity.full_name : null
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
@@ -164,7 +175,8 @@ class CostService extends BaseModel {
       amount_duration_read: activity.extra_work,
       amount_duration: activity.extra_work_secs,
       amount_duration_secs: parseInt(activity.extra_work_secs),
-      user: activity.user_id,
+      user,
+      user_full_name,
       price,
       price_currency,
       cost_type: COST_TYPE_EXTRA_WORK,
@@ -173,6 +185,8 @@ class CostService extends BaseModel {
 
   // method to create cost from actual work
   newModelFromActualWork(activity, price, price_currency, defaultPropsView) {
+    const user = activity.is_partner ? null : activity.user_id
+    const user_full_name = activity.is_partner ? activity.full_name : null
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
@@ -180,7 +194,8 @@ class CostService extends BaseModel {
       amount_duration_read: activity.actual_work,
       amount_duration: activity.actual_work_secs,
       amount_duration_secs: parseInt(activity.actual_work_secs),
-      user: activity.user_id,
+      user,
+      user_full_name,
       price,
       price_currency,
       cost_type: COST_TYPE_ACTUAL_WORK,
@@ -189,6 +204,8 @@ class CostService extends BaseModel {
 
   // method to create cost from distance
   newModelFromDistance(activity, price, price_currency, defaultPropsView) {
+    const user = activity.is_partner ? null : activity.user_id
+    const user_full_name = activity.is_partner ? activity.full_name : null
     return new this.model({
       ...activity,
       ...this.getDefaultCostProps(),
@@ -197,7 +214,8 @@ class CostService extends BaseModel {
       distance_back: activity.distance_back,
       distance_total: activity.distance_total,
       amount_int: activity.distance_total,
-      user: activity.user_id,
+      user,
+      user_full_name,
       price,
       price_currency,
       cost_type: COST_TYPE_DISTANCE,
