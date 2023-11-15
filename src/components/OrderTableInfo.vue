@@ -91,8 +91,8 @@ export default {
     this.memberType = await this.$store.dispatch('getMemberType')
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
     this.isLoaded = true;
-    this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
     this.orderStatusCode = this.orderStatusCodeComputed
+    this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
   },
   computed: {
     hasInfolines() {
