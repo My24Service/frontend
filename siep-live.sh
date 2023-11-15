@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BRANCH="app-layout-merge-dev"
+BRANCH="siep-develop-latest"
 HOST="178.79.153.236"
 REPO_NAME="frontend"
 
