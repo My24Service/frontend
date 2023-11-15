@@ -363,10 +363,16 @@
 import { OrderService } from '../../models/orders/Order.js'
 import { componentMixin } from '../../utils'
 import { PurchaseInvoiceService } from "../../models/orders/PurchaseInvoice";
+import IconLinkPlus from "@/components/IconLinkPlus.vue";
+import PriceInput from "@/components/PriceInput.vue";
+import IconLinkDelete from "@/components/IconLinkDelete.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    IconLinkPlus,
+    PriceInput,
+    IconLinkDelete
   },
   data() {
     return {
