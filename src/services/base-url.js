@@ -8,3 +8,4 @@ if (document.location.protocol === 'http:') {
 }
 
 export default BASE_URL
+// export default 'https://demo.api.my24service-dev.com'

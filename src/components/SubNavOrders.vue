@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-nav tabs>
+      <!--
       <b-nav-item
         :active="isActive('orders')"
         v-if="isStaff || isSuperuser || (hasOrders && (isPlanning || isCustomer || isBranchEmployee))"
@@ -32,6 +32,7 @@
         :to="{ name: 'workorder-orders' }">
         {{ $trans('Workorder orders') }}
       </b-nav-item>
+      -->
       <b-nav-item
         :active="isActive('statuscodes')"
         v-if="isStaff || isSuperuser || (hasStatuscodes && isPlanning)"
@@ -50,7 +51,6 @@
         to="/orders/month-stats">
         {{ $trans('Month') }}
       </b-nav-item>
-    </b-nav>
   </div>
 </template>
 

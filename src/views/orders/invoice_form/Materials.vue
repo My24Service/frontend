@@ -1,115 +1,111 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <Collapse
-      :title="$trans('Used materials')"
+    <div
+      class="costs-table"
+      v-if="!isLoading && hasStoredData"
     >
-      <div
-        class="costs-table"
-        v-if="!isLoading && hasStoredData"
-      >
-        <CostsTable
-          :collection="costService.collection"
-          :type="costType"
-        />
+      <CostsTable
+        :collection="costService.collection"
+        :type="costType"
+      />
 
-        <CollectionEmptyContainer
-          @buttonClicked="() => { emptyCollectionClicked() }"
-        />
+      <CollectionEmptyContainer
+        @buttonClicked="() => { emptyCollectionClicked() }"
+      />
 
-        <AddToInvoiceLinesDiv
-          v-if="!parentHasInvoiceLines"
-          :useOnInvoiceOptions="useOnInvoiceOptions"
-          @buttonClicked="createInvoiceLinesClicked"
-        />
+      <AddToInvoiceLinesDiv
+        v-if="!parentHasInvoiceLines"
+        :useOnInvoiceOptions="useOnInvoiceOptions"
+        @buttonClicked="createInvoiceLinesClicked"
+      />
 
-      </div>
+    </div>
 
-      <b-container fluid v-if="!isLoading && !hasStoredData">
-        <b-row>
-          <b-col cols="2">
-            <HeaderCell
-              :text='$trans("Engineer")'
-            />
-          </b-col>
-          <b-col cols="2">
-            <HeaderCell
-              :text='$trans("Material")'
-            />
-          </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("Amount")'
-            />
-          </b-col>
-          <b-col cols="4">
-            <HeaderCell
-              :text='$trans("Use price")'
-            />
-          </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("VAT type")'
-            />
-          </b-col>
-          <b-col cols="2" />
-        </b-row>
-        <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
-          <b-col cols="2">
-            {{ getFullname(material.user_id) }}
-          </b-col>
-          <b-col cols="2">
-            {{ material.name }}
-          </b-col>
-          <b-col cols="1">
-            {{ material.amount }}
-          </b-col>
-          <b-col cols="4">
-            <b-form-radio-group
-              @change="updateTotals"
-              v-model="material.use_price"
-            >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
-                {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-              </b-form-radio>
+    <b-container fluid v-if="!isLoading && !hasStoredData">
+      <b-row>
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("Engineer")'
+          />
+        </b-col>
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("Material")'
+          />
+        </b-col>
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Amount")'
+          />
+        </b-col>
+        <b-col cols="4">
+          <HeaderCell
+            :text='$trans("Use price")'
+          />
+        </b-col>
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("VAT type")'
+          />
+        </b-col>
+        <b-col cols="2" />
+      </b-row>
+      <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
+        <b-col cols="2">
+          {{ getFullname(material.user_id) }}
+        </b-col>
+        <b-col cols="2">
+          {{ material.name }}
+        </b-col>
+        <b-col cols="1">
+          {{ material.amount }}
+        </b-col>
+        <b-col cols="4">
+          <b-form-radio-group
+            @change="updateTotals"
+            v-model="material.use_price"
+          >
+            <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+              {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
+            </b-form-radio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
-                {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-              </b-form-radio>
+            <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+              {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
+            </b-form-radio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
-                <p class="flex">
-                  {{ $trans("Other") }}:&nbsp;&nbsp;
-                  <PriceInput
-                    v-model="material.price_other"
-                    :currency="material.price_other_currency"
-                    @priceChanged="(val) => otherPriceChanged(val, material)"
-                  />
-                </p>
-              </b-form-radio>
-            </b-form-radio-group>
-          </b-col>
-          <b-col cols="1">
-            <VAT @vatChanged="(val) => changeVatType(material, val)" />
-          </b-col>
-          <b-col cols="2">
-            <TotalsInputs
-              :total="material.total_dinero"
-              :vat="material.vat_dinero"
-            />
-          </b-col>
-        </b-row>
-        <TotalRow
-          :items_total="totalAmount"
-          :total="total_dinero"
-          :total_vat="totalVAT_dinero"
-        />
+            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+              <p class="flex">
+                {{ $trans("Other") }}:&nbsp;&nbsp;
+                <PriceInput
+                  v-model="material.price_other"
+                  :currency="material.price_other_currency"
+                  @priceChanged="(val) => otherPriceChanged(val, material)"
+                />
+              </p>
+            </b-form-radio>
+          </b-form-radio-group>
+        </b-col>
+        <b-col cols="1">
+          <VAT @vatChanged="(val) => changeVatType(material, val)" />
+        </b-col>
+        <b-col cols="2">
+          <TotalsInputs
+            :total="material.total_dinero"
+            :vat="material.vat_dinero"
+          />
+        </b-col>
+      </b-row>
+      <TotalRow
+        :items_total="totalAmount"
+        :total="total_dinero"
+        :total_vat="totalVAT_dinero"
+      />
 
-        <CollectionSaveContainer
-          @buttonClicked="() => { saveCollection() }"
-        />
+      <CollectionSaveContainer
+        @buttonClicked="() => { saveCollection() }"
+      />
 
-      </b-container>
-    </Collapse>
+    </b-container>
   </b-overlay>
 </template>
 

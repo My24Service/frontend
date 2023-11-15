@@ -6,15 +6,17 @@
       <template #prepend>
         <b-input-group-text
         >
-          {{ currencyCode }}
+        {{ currencyCode }}
         </b-input-group-text>
       </template>
 
       <b-form-input
         v-model="number"
         class="input-number"
+        type="number"
+        :placeholder="$trans('Price')"
         size="sm"
-        @blur="update"
+        @input="update"
         :state="v$.number.$error ? false : null"
       ></b-form-input>
 
@@ -22,9 +24,10 @@
         <b-form-input
           v-model="decimal"
           class="input-decimal"
+          type="number"
           size="sm"
           :state="v$.decimal.$error ? false : null"
-          @blur="update"
+          @input="update"
         ></b-form-input>
       </template>
     </b-input-group>
@@ -135,12 +138,14 @@ export default {
 
 <style scoped>
 .input-number {
-  width: 50px;
+  max-width: 10ch;
   text-align: right;
 }
 .input-decimal {
-  width: 56px !important;
+  max-width: 7ch !important;
   text-align: center;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 .flex {
   display : flex;

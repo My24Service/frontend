@@ -4,14 +4,17 @@ export default {
       this.$root.$bvToast.toast(message, {
         variant: 'info',
         title,
-        solid: true
+        solid: true,
+        toaster: 'b-toaster-top-center',
       });
     },
     errorToast(message, title=this.$trans('Error')) {
+
       this.$root.$bvToast.toast(message, {
-        variant: 'danger',
+        variant: 'warning',
         title,
-        solid: true
+        solid: true,
+        toaster: 'b-toaster-top-center',
       });
     },
   }

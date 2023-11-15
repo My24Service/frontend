@@ -14,12 +14,6 @@
       </b-nav>
     </div>
 
-    <b-breadcrumb
-      class="mt-2"
-      :items="breadcrumb"
-      v-if="isDetail"
-    ></b-breadcrumb>
-
     <h3 v-if="isDetail && fullName" align="center">{{ fullName }}</h3>
 
     <b-row align-v="center" v-if="activeDateQueryMode === 'year'">

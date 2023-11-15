@@ -1,9 +1,23 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3><b-icon icon="person-square"></b-icon>{{ $trans('Partners') }}</h3>
+        <b-button-toolbar>
+          <b-button-group>
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'partner-request-add'}" class="btn">{{$trans('New partner request')}}</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
 
-    <div class="subnav-pills">
-      <PillsCompanyPartners />
-    </div>
 
     <SearchModal
       id="search-modal"
@@ -20,13 +34,10 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this partner relation?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Partner')"
-      />
-
+    <div class="panel overflow-auto">
+      
+      <PillsCompanyPartners />
+      <br />      
       <b-table
         id="partner-table"
         small
@@ -39,17 +50,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #table-busy>
@@ -61,9 +62,9 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-            />
+            v-bind:title="$trans('Delete')"
+            v-bind:method="function() { showDeleteModal(data.item.id) }"
+          />
           </div>
         </template>
         <template #cell(has_branches)="data">
@@ -72,6 +73,11 @@
           ></b-icon-check-square-fill>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Partner')"
+      />
     </div>
   </div>
 </template>

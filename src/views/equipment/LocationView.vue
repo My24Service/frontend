@@ -1,94 +1,74 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <div class="app-page">
+    <header>
 
-    <div class="app-detail">
-      <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-      <b-row align-h="center">
-        <h2>{{ location.name }}</h2>
-      </b-row>
-      <b-row>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
-              <b-td>{{ location.name }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-        <b-col cols="6">
-        </b-col>
-      </b-row>
-
-      <OrderStats
-        v-if="!isLoading"
-        ref="order-stats"
-      />
-
-      <div class="spacer"></div>
-
-      <div>
-        <b-row align-h="center">
-          <h3>{{ $trans("Past orders") }}</h3>
-        </b-row>
-        <SearchModal
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="shop-window"></b-icon> 
+          <span @click="goBack" class="backlink">Locations</span>
+          / {{ location.name }}
+        </h3>
+        <router-link :to="{name: editLink, params: {pk: this.pk}}" class="btn primary">{{$trans('Edit location')}}</router-link>
+      </div>
+      <SearchModal
           id="search-modal"
           ref="search-modal"
           @do-search="handleSearchOk"
         />
+    </header>
 
-        <b-pagination
-          v-if="this.orderPastModel.count > 20"
-          class="pt-4"
-          v-model="currentPage"
-          :total-rows="this.orderPastModel.count"
-          :per-page="this.orderPastModel.perPage"
-          aria-controls="customer-past-table"
-        ></b-pagination>
-
-        <b-table
-          id="customer-past-table"
-          small
-          :busy='isLoading'
-          :fields="orderPastFields"
-          :items="orders"
-          responsive="md"
-          class="data-table"
-        >
-          <template #head(icons)="">
-            <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
+    <div class='page-detail flex-columns'>
+      <div class='panel col-1-3 sidebar'>
+        <h6>{{ $trans('Location details') }}</h6>
+        <dl>
+            <dt>{{ $trans('Name') }}</dt>
+            <dd>{{ location.name }}</dd>
+        </dl>
+      </div>
+      
+      <div class='panel col-2-3'>
+        <b-tabs>
+          <b-tab :title="$trans('Orders')">
+            <div class='flex-columns space-between align-items-center'>
+              <h6>{{ $trans("Past orders") }}</h6>
+              <span>
+                <b-button-group>
                   <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
+                  v-bind:method="function() { loadData() }"
+                  v-bind:title="$trans('Refresh')"
                   />
                   <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
+                  v-bind:method="function() { showSearchModal() }"
                   />
                 </b-button-group>
-              </b-button-toolbar>
+              </span>
             </div>
-          </template>
-          <template #table-busy>
-            <div class="text-center text-danger my-2">
-              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-              <strong>{{ $trans('Loading...') }}</strong>
-            </div>
-          </template>
-          <template #cell(id)="data">
-            <OrderTableInfo
-              v-bind:order="data.item"
+            <ul class='listing order-list'>
+              <li v-for="item in orders">
+                <OrderTableInfo
+                  v-bind:order="item"
+                />
+              </li>
+            </ul>
+            <b-pagination
+              v-if="this.orderPastModel.count > 20"
+              class="pt-4"
+              v-model="currentPage"
+              :total-rows="this.orderPastModel.count"
+              :per-page="this.orderPastModel.perPage"
+              aria-controls="customer-past-table"
+            ></b-pagination>
+          </b-tab>
+          <b-tab :title="$trans('Insights')">
+            <OrderStats
+            v-if="!isLoading"
+            ref="order-stats"
             />
-          </template>
-        </b-table>
+          </b-tab>
+        </b-tabs>
       </div>
-
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
@@ -148,6 +128,15 @@ export default {
       this.loadData()
     }
   },
+  computed: {
+    editLink() {
+      if (this.hasBranches) {
+        return 'equipment-location-edit'
+      } else {
+        return 'customers-location-edit'
+      }
+    },
+  },
   methods: {
     listLink() {
       if (this.hasBranches) {
@@ -185,7 +174,7 @@ export default {
         this.$refs['order-stats'].render(
           orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
         )
-
+        console.info(this.location)
       } catch(error) {
         console.log('error fetching location detail data', error)
         this.errorToast(this.$trans('Error fetching location detail'))
@@ -215,10 +204,8 @@ export default {
 </script>
 
 <style scoped>
-span.spacer {
-  width: 10px;
-}
-div.spacer {
-  margin: 10px;
-}
+  .wide {
+    min-width: 66%;
+    max-width: unset;
+  }
 </style>

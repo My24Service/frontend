@@ -1,41 +1,43 @@
 <template>
   <div v-if="isLoaded">
-    <b-nav tabs>
+      <!--
       <b-nav-item
         :active="isActive('dashboard')"
         v-if="hasDashBoard"
         :to="{ name: 'company-dashboard' }">
         {{ $trans('Dashboard') }}
       </b-nav-item>
+    -->
+    <b-nav>
       <b-nav-item
         :active="isActive('company')"
         v-if="hasCompany"
         :to="{ name: 'company-info' }">
-        {{ $trans('Company') }}
-      </b-nav-item>
-      <b-nav-item
-        v-if="memberType === 'maintenance'"
-        :active="isActive('users')"
-        :to="getToRouteMaintenanceUsers">
-        {{ $trans('Users') }}
-      </b-nav-item>
-      <b-nav-item
-        v-if="memberType === 'temps'"
-        :active="isActive('users')"
-        :to="getToRouteTempsUsers">
-        {{ $trans('Users') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('partners')"
-        v-if="hasPartners"
-        :to="{ name: 'company-partners-active' }">
-        {{ $trans('Partners') }}
+        {{ $trans('Info') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('activity')"
         v-if="hasActivity"
         :to="{ name: 'company-activity' }">
         {{ $trans('Activity') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="memberType === 'maintenance'"
+        :active="isActive('users')"
+        :to="getToRouteMaintenanceUsers">
+        {{ $trans('People') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="memberType === 'temps'"
+        :active="isActive('users')"
+        :to="getToRouteTempsUsers">
+        {{ $trans('People') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('partners')"
+        v-if="hasPartners"
+        :to="{ name: 'company-partners-active' }">
+        {{ $trans('Partners') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('pictures')"
@@ -60,6 +62,12 @@
         v-if="hasBranches"
         :to="{ name: 'company-branches' }">
         {{ $trans('Branches') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="memberType === 'maintenance'"
+        :active="isActive('settings')"
+        :to="{ name: 'company-settings' }">
+        {{ $trans('Settings') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('budgets')"

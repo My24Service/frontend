@@ -1,13 +1,14 @@
 <template>
   <b-container>
     <b-row>
-      <b-col cols="4">
+      <b-col cols="6">
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("Total") }}</span>
         <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("Total") }}</span>
       </b-col>
-      <b-col cols="8">
+      <b-col cols="6">
         <b-form-input
           readonly
+          disabled
           :value="total.toFormat('$0.00')"
           size="sm"
           :class="totalClass"
@@ -15,13 +16,14 @@
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="4">
+      <b-col cols="6">
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
         <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("VAT") }}</span>
       </b-col>
-      <b-col cols="8">
+      <b-col cols="6">
         <b-form-input
           readonly
+          disabled
           :value="vat.toFormat('$0.00')"
           size="sm"
           :class="vatClass"
@@ -73,5 +75,9 @@ export default {
   padding-left: 4px;
   font-size: 14px;
   font-weight: bold;
+}
+
+input {
+  text-align: end;
 }
 </style>

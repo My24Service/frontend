@@ -1,6 +1,24 @@
 <template>
-  <div class="app-grid">
-
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-medical"></b-icon> Purchase orders
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'purchaseorder-add'}" class="btn">{{$trans('Add purchase order')}}</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -43,12 +61,7 @@
       </form>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Purchase order')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="purchaseorder-table"
@@ -62,48 +75,44 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="purchaseorder-add"
-                  v-bind:title="$trans('New purchase order')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+          <div class="text-center my-2">
+            <b-spinner class="align-middle"></b-spinner><br><br>
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
         <template #cell(purchase_order_id)="data">
-          <p>
-            <router-link :to="{name: 'purchaseorder-view', params: {pk: data.item.id}}">{{ data.item.purchase_order_id }}</router-link>
-          </p>
-          {{ data.item.order_name }}<br/>
+          
+            <router-link :to="{name: 'purchaseorder-view', params: {pk: data.item.id}}">{{ data.item.purchase_order_id }} {{ data.item.order_name }}</router-link>
+          
+          <!--
           {{ data.item.order_address }}<br/>
           {{ data.item.order_country_code }}-{{ data.item.order_postal }} {{ data.item.order_city }}
-
-          <p>
-            <b>{{ $trans('Last status') }}:</b> {{ data.item.last_status_full }}
-          </p>
-
-          <span v-if="data.item.supplier_reservation">
-            {{ $trans('Reservation')}}: <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.supplier_reservation}}">{{ data.item.supplier_reservation }}</router-link>
+          -->
+        </template>
+        <template #cell(supplier_reservation)="data">
+          <span v-if="!data.item.supplier_reservation" class="dimmed">
+            &mdash;
+          </span>
+          <span v-else>
+            <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.supplier_reservation}}">{{ data.item.supplier_reservation }}</router-link>
           </span>
         </template>
+
+        <template #cell(last_status)="data">
+          <small :title="data.item.last_status_full">{{ data.item.last_status }}</small>
+        </template>
+
         <template #cell(totals)="data">
-          {{ data.item.total_entries || 0 }} / {{ data.item.total_materials }}
-          <b-progress :value="(data.item.total_entries/data.item.total_materials)*100" class="mb-3"></b-progress>
+          <div class="flex-columns">
+            <b-progress 
+            :style="`--delay: ${data.index }`"
+            :value="(data.item.total_entries/data.item.total_materials)*100"></b-progress>
+            <small class="dimmed">{{ data.item.total_entries || 0 }} / {{ data.item.total_materials }}</small>
+          </div>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -125,8 +134,25 @@
         </template>
       </b-table>
     </div>
+
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Purchase order')"
+    />
   </div>
 </template>
+
+<style scoped>
+.flex-columns {
+  align-items: center;
+}
+
+.dimmed {
+  min-width: 3rem;
+  text-align: center;
+}
+</style>
 
 <script>
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
@@ -159,7 +185,10 @@ export default {
       isLoading: false,
       purchaseOrders: [],
       fields: [
-        {key: 'purchase_order_id', label: this.$trans('Order'), sortable: true, thAttr: {width: '40%'}},
+        'index',
+        {key: 'purchase_order_id', label: this.$trans('Order'), sortable: true },
+        {key: 'supplier_reservation', label: this.$trans('Reservation')},
+        {key: 'last_status', label: this.$trans('Status')},
         {key: 'expected_entry_date', label: this.$trans('Expected entry date'), sortable: true,thAttr: {width: '15%'}},
         {key: 'created', label: this.$trans('Created'), sortable: true,thAttr: {width: '15%'}},
         {key: 'totals', label: this.$trans('# entries / # products'),thAttr: {width: '15%'}},

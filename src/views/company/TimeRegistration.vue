@@ -1,9 +1,14 @@
 <template>
-  <div class="app-grid">
-    <TimeRegistrationData
-      ref="user-time-registration"
-      :user_id="user_id"
-    />
+  <div class="app-page">
+    <header>
+      <h3>Time registration</h3>
+    </header>
+    <div class='panel'>
+      <TimeRegistrationData
+        ref="user-time-registration"
+        :user_id="user_id"
+      />
+    </div>
   </div>
 </template>
 

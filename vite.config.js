@@ -36,6 +36,14 @@ export default defineConfig({
             scopeName: "theme-shltr",
             path: path.resolve("./src/scss/shltr.scss"),
           },
+          {
+            scopeName: "theme-wsmes",
+            path: path.resolve("./src/scss/shltr.scss"),
+          },
+          {
+            scopeName: "theme-wsmes-corporate",
+            path: path.resolve("./src/scss/shltr.scss"),
+          },
         ],
         // add scopeName to html tag className. default use multipleScopeVars[0].scopeName
         defaultScopeName: "",

@@ -1,303 +1,305 @@
 <template>
 
-  <b-overlay :show="isLoading" rounded="sm">
+  <div class="app-page">
 
-    <footer class="modal-footer">
-      <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-        {{ $trans('Back') }}
-      </b-button>
-    </footer>
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="people"></b-icon>
+          <span class="backlink" @click="goBack">People</span> / 
+          <strong>{{ engineer.full_name}}</strong>
+        </h3>
+        
+      </div>
+    </header>
+    <div class='page-details panel'>
+      
+      <div v-if="this.companycode === 'grm'">
+        <EngineerEventOrderForm
+          v-if="engineer"
+          id="attach-order-modal"
+          ref="attach-order-modal"
+          @assigned="assignedOk"
+        />
 
-    <div v-if="this.companycode === 'grm'">
-      <EngineerEventOrderForm
-        v-if="engineer"
-        id="attach-order-modal"
-        ref="attach-order-modal"
-        @assigned="assignedOk"
-      />
-
-      <div class="app-detail events well" v-if="engineer">
-        <div v-if="engineer && engineer.engineer.last_event">
-          <h3>{{ engineer.full_name }}</h3>
-          <div>
-            <p>{{ $trans('Status') }}:
-              <span :class="getStatusClass">
-                {{ engineer.engineer.last_event.event_type }}
-                <span v-if="engineer.engineer.last_event.assigned_order">
-                  ({{ engineer.engineer.last_event.assigned_order.order_name }})
+        <div class="events well" v-if="engineer">
+          <div v-if="engineer && engineer.engineer.last_event">
+            <h3>{{ engineer.full_name }}</h3>
+            <div>
+              <p>{{ $trans('Status') }}:
+                <span :class="getStatusClass">
+                  {{ engineer.engineer.last_event.event_type }}
+                  <span v-if="engineer.engineer.last_event.assigned_order">
+                    ({{ engineer.engineer.last_event.assigned_order.order_name }})
+                  </span>
                 </span>
-              </span>
-            </p>
-            <div v-if="currentState === DOOR_OPEN && this.doorOpenCounter">
-              <h3>{{ $trans("Time open") }}: {{ this.doorOpenCounter }}</h3>
-            </div>
-            <div v-if="!engineer.engineer.last_event.assigned_order">
-              <b-button @click="function() { showOrderModal() }"
-                        class="btn btn-info" type="button" variant="primary"
-              >
-                {{ $trans("No order found, attach one")}}
-              </b-button>
-            </div>
-            <div v-if="engineer.engineer.last_event.measure_last_event_type">
-              <p>{{ $trans('Time') }} {{ engineer.engineer.last_event.measure_last_event_type }}:
-                {{ displayDurationFromSeconds(engineer.engineer.last_event.secs_since_last_measure_event_type) }}
               </p>
+              <div v-if="currentState === DOOR_OPEN && this.doorOpenCounter">
+                <h3>{{ $trans("Time open") }}: {{ this.doorOpenCounter }}</h3>
+              </div>
+              <div v-if="!engineer.engineer.last_event.assigned_order">
+                <b-button @click="function() { showOrderModal() }"
+                          class="btn btn-info" type="button" variant="primary"
+                >
+                  {{ $trans("No order found, attach one")}}
+                </b-button>
+              </div>
+              <div v-if="engineer.engineer.last_event.measure_last_event_type">
+                <p>{{ $trans('Time') }} {{ engineer.engineer.last_event.measure_last_event_type }}:
+                  {{ displayDurationFromSeconds(engineer.engineer.last_event.secs_since_last_measure_event_type) }}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <hr/>
-        <div class="app-detail">
-          <h3>{{ $trans("Order history") }}</h3>
-          <b-table
-            id="assignedorders-table"
-            small
-            :busy='isLoading'
-            :fields="assignedordersFields"
-            :items="assignedorders"
-            responsive="md"
-            class="data-table"
-            sort-icon-left
-          ></b-table>
-        </div>
+          <hr/>
+          <div class="app-detail">
+            <h3>{{ $trans("Order history") }}</h3>
+            <b-table
+              id="assignedorders-table"
+              small
+              :busy='isLoading'
+              :fields="assignedordersFields"
+              :items="assignedorders"
+              responsive="md"
+              class="data-table"
+              sort-icon-left
+            ></b-table>
+          </div>
 
-        <hr/>
-        <div>
-          <h4>{{ $trans("Trigger event manually") }}</h4>
-          <b-row>
-            <b-col cols="6" role="group">
-              <b-form-group
-                label-size="sm"
-                label-class="p-sm-0"
-                v-bind:label="$trans('Event date')"
-                label-for="event_date"
+          <hr/>
+          <div>
+            <h4>{{ $trans("Trigger event manually") }}</h4>
+            <b-row>
+              <b-col cols="6" role="group">
+                <b-form-group
+                  label-size="sm"
+                  label-class="p-sm-0"
+                  v-bind:label="$trans('Event date')"
+                  label-for="event_date"
+                >
+                  <b-form-datepicker
+                    id="event_date"
+                    size="sm"
+                    class="p-sm-0"
+                    v-model="event_date"
+                    v-bind:placeholder="$trans('Choose a date')"
+                    value="event_date"
+                    locale="nl"
+                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  ></b-form-datepicker>
+                </b-form-group>
+              </b-col>
+              <b-col cols="6" role="group">
+                <b-form-group
+                  label-size="sm"
+                  label-class="p-sm-0"
+                  :label="$trans('Event time')"
+                  label-for="event_time"
+                >
+                  <b-form-timepicker
+                    id="event_time"
+                    size="sm"
+                    v-model="event_time"
+                    :placeholder="$trans('Choose a time')"
+                    :hour12=false
+                  ></b-form-timepicker>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <footer class="modal-footer">
+              <b-button @click="doorOpen" class="btn btn-info" type="button" variant="primary"
+                        :disabled="currentState === DOOR_OPEN"
               >
-                <b-form-datepicker
-                  id="event_date"
-                  size="sm"
-                  class="p-sm-0"
-                  v-model="event_date"
-                  v-bind:placeholder="$trans('Choose a date')"
-                  value="event_date"
-                  locale="nl"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                ></b-form-datepicker>
-              </b-form-group>
-            </b-col>
-            <b-col cols="6" role="group">
-              <b-form-group
-                label-size="sm"
-                label-class="p-sm-0"
-                :label="$trans('Event time')"
-                label-for="event_time"
+                {{ $trans('Trigger door open') }}
+              </b-button>
+              <b-button @click="doorClosed" class="btn btn-info" type="button" variant="primary"
+                        :disabled="currentState === DOOR_CLOSED"
               >
-                <b-form-timepicker
-                  id="event_time"
-                  size="sm"
-                  v-model="event_time"
-                  :placeholder="$trans('Choose a time')"
-                  :hour12=false
-                ></b-form-timepicker>
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <footer class="modal-footer">
-            <b-button @click="doorOpen" class="btn btn-info" type="button" variant="primary"
-                      :disabled="currentState === DOOR_OPEN"
-            >
-              {{ $trans('Trigger door open') }}
-            </b-button>
-            <b-button @click="doorClosed" class="btn btn-info" type="button" variant="primary"
-                      :disabled="currentState === DOOR_CLOSED"
-            >
-              {{ $trans('Trigger door closed') }}
-            </b-button>
-          </footer>
+                {{ $trans('Trigger door closed') }}
+              </b-button>
+            </footer>
+          </div>
         </div>
       </div>
-    </div>
 
-    <h2>{{ $trans("Stats") }}</h2>
-    <b-row align-v="center">
-      <b-col cols="8">
-        <div class="subnav-pills">
-          <b-nav pills>
-            <b-nav-item
-              v-for="item in dateQueryMode"
-              :active="item.value === activeDateQueryMode"
-              :key="item.value"
-              @click="activeDateQueryMode = item.value"
-              >
-              {{ item.label }}
-            </b-nav-item>
-          </b-nav>
-        </div>
-      </b-col>
-      <b-col cols="4">
-        <div class="float-right">
+      <h2>{{ $trans("Stats") }}</h2>
+      <b-row align-v="center">
+        <b-col cols="8">
           <div class="subnav-pills">
             <b-nav pills>
               <b-nav-item
-                v-for="item in dataModes"
-                :active="item.value === activeDataMode"
+                v-for="item in dateQueryMode"
+                :active="item.value === activeDateQueryMode"
                 :key="item.value"
-                @click="activeDataMode = item.value"
-              >
+                @click="activeDateQueryMode = item.value"
+                >
                 {{ item.label }}
               </b-nav-item>
             </b-nav>
           </div>
+        </b-col>
+        <b-col cols="4">
+          <div class="float-right">
+            <div class="subnav-pills">
+              <b-nav pills>
+                <b-nav-item
+                  v-for="item in dataModes"
+                  :active="item.value === activeDataMode"
+                  :key="item.value"
+                  @click="activeDataMode = item.value"
+                >
+                  {{ item.label }}
+                </b-nav-item>
+              </b-nav>
+            </div>
+          </div>
+        </b-col>
+      </b-row>
+
+      <div class="" v-if="!isLoading">
+        <b-row align-v="center" v-if="activeDateQueryMode === 'week'">
+          <b-col cols="2">
+            <b-link @click.prevent="backWeek" v-bind:title="$trans('Week back')">
+              <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+            </b-link>
+          </b-col>
+          <b-col cols="8" class="text-center">
+            <h4>{{ $trans('Week totals for') }} {{ fullName }}, {{ $trans('starting from') }} {{ startDate.format('DD/MM/YYYY') }}</h4>
+          </b-col>
+          <b-col cols="2">
+            <div class="float-right">
+              <b-link @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
+                <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+              </b-link>
+            </div>
+          </b-col>
+        </b-row>
+
+        <b-row align-v="center" v-if="activeDateQueryMode === 'month'">
+          <b-col cols="2">
+            <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+              <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+            </b-link>
+          </b-col>
+          <b-col cols="8" class="text-center">
+            <h4>{{ $trans('Month totals for') }} {{ fullName }}, {{ monthTxt }} {{ year }}</h4>
+          </b-col>
+          <b-col cols="2">
+            <div class="float-right">
+              <b-link @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+                <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+              </b-link>
+            </div>
+          </b-col>
+        </b-row>
+
+        <b-row align-v="center" v-if="activeDateQueryMode === 'quarter'">
+          <b-col cols="2">
+            <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
+              <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+            </b-link>
+          </b-col>
+          <b-col cols="8" class="text-center">
+            <h4>{{ $trans('Quarter totals for') }} {{ fullName }}, {{ year }}</h4>
+          </b-col>
+          <b-col cols="2">
+            <div class="float-right">
+              <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+                <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+              </b-link>
+            </div>
+          </b-col>
+        </b-row>
+
+        <b-row align-v="center" v-if="activeDateQueryMode === 'year'">
+          <b-col cols="2">
+            <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
+              <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+            </b-link>
+          </b-col>
+          <b-col cols="8" class="text-center">
+            <h4>{{ $trans('Year totals for') }} {{ fullName }}, {{ year }}</h4>
+          </b-col>
+          <b-col cols="2">
+            <div class="float-right">
+              <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+                <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+              </b-link>
+            </div>
+          </b-col>
+        </b-row>
+
+        <!-- work hours -->
+        <div class="work-hours">
+          <h3>{{ $trans('Work hours')}}</h3>
+          <b-table
+            small
+            id="data-table"
+            :fields="headers"
+            :items="workHoursData"
+            responsive="md"
+            class="data-table"
+          />
+
+          <b-row>
+            <b-col cols="6">
+              <bar-chart
+                id="bar-chart-data"
+                v-if="!isLoading && barChartdataWorkhours"
+                :chart-data="barChartdataWorkhours"
+                :options="options"
+              />
+              <p class="no-data" v-if="!barChartdataWorkhours">
+                {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
+              </p>
+            </b-col>
+            <b-col cols="6">
+              <pie-chart
+                id="pie-chart-data"
+                v-if="!isLoading && pieChartdataWorkhours"
+                :chart-data="pieChartdataWorkhours"
+                :options="optionsPie"
+              />
+              <p class="no-data" v-if="!pieChartdataWorkhours">
+                {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
+              </p>
+            </b-col>
+          </b-row>
+
+          <b-row>
+            <b-col cols="12">
+              <bar-chart
+                id="bar-chart-period"
+                v-if="!isLoading && barChartdataWorkhoursPeriod"
+                :chart-data="barChartdataWorkhoursPeriod"
+                :options="options"
+              />
+              <p class="no-data" v-if="!barChartdataWorkhoursPeriod">
+                {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
+              </p>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12">
+              <pie-chart
+                id="pie-chart-period"
+                v-if="!isLoading && pieChartdataWorkhoursPeriod"
+                :chart-data="pieChartdataWorkhoursPeriod"
+                :options="optionsPie"
+              />
+              <p class="no-data" v-if="!pieChartdataWorkhoursPeriod">
+                {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
+              </p>
+            </b-col>
+          </b-row>
+
         </div>
-      </b-col>
-    </b-row>
-
-    <div class="app-detail" v-if="!isLoading">
-      <b-row align-v="center" v-if="activeDateQueryMode === 'week'">
-        <b-col cols="2">
-          <b-link @click.prevent="backWeek" v-bind:title="$trans('Week back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
-        </b-col>
-        <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Week totals for') }} {{ fullName }}, {{ $trans('starting from') }} {{ startDate.format('DD/MM/YYYY') }}</h4>
-        </b-col>
-        <b-col cols="2">
-          <div class="float-right">
-            <b-link @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
-          </div>
-        </b-col>
-      </b-row>
-
-      <b-row align-v="center" v-if="activeDateQueryMode === 'month'">
-        <b-col cols="2">
-          <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
-        </b-col>
-        <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Month totals for') }} {{ fullName }}, {{ monthTxt }} {{ year }}</h4>
-        </b-col>
-        <b-col cols="2">
-          <div class="float-right">
-            <b-link @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
-          </div>
-        </b-col>
-      </b-row>
-
-      <b-row align-v="center" v-if="activeDateQueryMode === 'quarter'">
-        <b-col cols="2">
-          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
-        </b-col>
-        <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Quarter totals for') }} {{ fullName }}, {{ year }}</h4>
-        </b-col>
-        <b-col cols="2">
-          <div class="float-right">
-            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
-          </div>
-        </b-col>
-      </b-row>
-
-      <b-row align-v="center" v-if="activeDateQueryMode === 'year'">
-        <b-col cols="2">
-          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
-        </b-col>
-        <b-col cols="8" class="text-center">
-          <h4>{{ $trans('Year totals for') }} {{ fullName }}, {{ year }}</h4>
-        </b-col>
-        <b-col cols="2">
-          <div class="float-right">
-            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
-          </div>
-        </b-col>
-      </b-row>
-
-      <!-- work hours -->
-      <div class="work-hours">
-        <h3>{{ $trans('Work hours')}}</h3>
-        <b-table
-          small
-          id="data-table"
-          :fields="headers"
-          :items="workHoursData"
-          responsive="md"
-          class="data-table"
-        />
-
-        <b-row>
-          <b-col cols="6">
-            <bar-chart
-              id="bar-chart-data"
-              v-if="!isLoading && barChartdataWorkhours"
-              :chart-data="barChartdataWorkhours"
-              :options="options"
-            />
-            <p class="no-data" v-if="!barChartdataWorkhours">
-              {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
-            </p>
-          </b-col>
-          <b-col cols="6">
-            <pie-chart
-              id="pie-chart-data"
-              v-if="!isLoading && pieChartdataWorkhours"
-              :chart-data="pieChartdataWorkhours"
-              :options="optionsPie"
-            />
-            <p class="no-data" v-if="!pieChartdataWorkhours">
-              {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
-            </p>
-          </b-col>
-        </b-row>
-
-        <b-row>
-          <b-col cols="12">
-            <bar-chart
-              id="bar-chart-period"
-              v-if="!isLoading && barChartdataWorkhoursPeriod"
-              :chart-data="barChartdataWorkhoursPeriod"
-              :options="options"
-            />
-            <p class="no-data" v-if="!barChartdataWorkhoursPeriod">
-              {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
-            </p>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="12">
-            <pie-chart
-              id="pie-chart-period"
-              v-if="!isLoading && pieChartdataWorkhoursPeriod"
-              :chart-data="pieChartdataWorkhoursPeriod"
-              :options="optionsPie"
-            />
-            <p class="no-data" v-if="!pieChartdataWorkhoursPeriod">
-              {{ $trans('No graph data for week starting from') }} {{ startDate.format('DD/MM/YYYY') }}
-            </p>
-          </b-col>
-        </b-row>
 
       </div>
 
     </div>
-
-    <footer class="modal-footer">
-      <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-        {{ $trans('Back') }}
-      </b-button>
-    </footer>
-  </b-overlay>
+  </div>
 </template>
 
 <script>

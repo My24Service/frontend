@@ -1,11 +1,26 @@
 <template>
-  <div class="app-grid">
-
-    <div class="subnav-pills">
-      <PillsCompanyUsers />
-    </div>
-
-    <PillsEngineer v-if="companycode === 'grm'" />
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3><b-icon icon="people"></b-icon>People</h3>
+        <b-button-toolbar class="flex-columns">
+          <b-button-group class="mr-1">
+            
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+            
+          </b-button-group>
+          <b-button @click="()=>{ downloadList()}" class="btn primary mr-1"><b-icon icon="save"></b-icon> {{$trans('Download')}}</b-button>
+          <b-link :to="{name: 'engineer-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add engineer</b-link>
+        </b-button-toolbar>
+      </div>
+    </header>
+    
 
     <SearchModal
       id="search-modal"
@@ -16,18 +31,19 @@
     <b-modal
       id="delete-engineer-modal"
       ref="delete-engineer-modal"
-      v-bind:title="$trans('Delete?')"
+      v-bind:title="`${$trans('Remove engineer')} (${selectedEngineer ? selectedEngineer.username :''})`"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this engineer?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to remove') }} <strong>{{ selectedEngineer ? selectedEngineer.full_name : ''}}</strong>?</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Engineer')"
-      />
+    <div class="panel overflow-auto">
+      <div class="subnav-pills">
+        <PillsCompanyUsers />
+      </div>
+
+      <PillsEngineer v-if="companycode === 'grm'" />
+      <br>
 
       <b-table
         id="engineer-table"
@@ -39,31 +55,9 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="engineer-add"
-                  v-bind:title="$trans('New engineer')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-                <ButtonLinkDownload
-                  v-bind:method="function() { downloadList() }"
-                  v-bind:title="$trans('Download')"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
+        
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
@@ -80,12 +74,18 @@
             />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
+              v-bind:method="function() { showDeleteModal(data.item.id,  data.item.full_name) }"
             />
           </div>
         </template>
       </b-table>
     </div>
+
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Engineer')"
+    />
   </div>
 </template>
 
@@ -132,13 +132,18 @@ export default {
         {key: 'email', label: this.$trans('Email'), sortable: true},
         {key: 'last_login', label: this.$trans('Last login'), sortable: true},
         {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
-        {key: 'icons'}
+        {key: 'icons', label: ''}
       ]
     }
   },
   created() {
     this.model.currentPage = this.$route.query.page || 1
     this.loadData()
+  },
+  computed: {
+    selectedEngineer () {
+      return this.engineers.filter(engineer => engineer.id === this.pk)[0];
+    }
   },
   methods: {
     // download
@@ -164,11 +169,10 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Engineer has been deleted'))
+        this.infoToast(this.$trans('Removed engineer'), `${this.$trans('Engineer has been removed')}`)
         await this.loadData()
       } catch(error) {
-        console.log('Error deleting engineer', error)
-        this.errorToast(this.$trans('Error deleting engineer'))
+        this.errorToast(`${this.$trans('Error deleting engineer:')} ${error}`);
       }
     },
     // rest

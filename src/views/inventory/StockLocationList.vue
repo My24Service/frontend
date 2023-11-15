@@ -1,6 +1,24 @@
 <template>
-  <div class="mt-4">
-
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="bookshelf"></b-icon>Stock Locations
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+            v-bind:method="function() { loadData() }"
+            v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'stock-location-add'}" class="btn">{{ $trans('Add stock location') }}</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -16,12 +34,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this stock location?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Location')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="stock-location-table"
@@ -34,23 +47,6 @@
         sort-icon-left
       >
         <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="stock-location-add"
-                  v-bind:title="$trans('New stock location')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
         </template>
         <template #table-busy>
           <div class="text-center text-danger my-2">
@@ -68,11 +64,6 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="stock-location-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -81,12 +72,16 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Location')"
+    />
   </div>
 </template>
 
 <script>
 import stockLocationModel from '@/models/inventory/StockLocation.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
@@ -96,7 +91,6 @@ import Pagination from "@/components/Pagination.vue"
 
 export default {
   components: {
-    IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,

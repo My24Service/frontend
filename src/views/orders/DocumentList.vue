@@ -1,6 +1,72 @@
 <template>
-  <div class="app-grid">
-    <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
+  <div class="app-page">
+    <!-- <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb> -->
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <router-link :to="{name: 'order-list'}">Orders</router-link> /
+          <router-link :to="{name: 'order-view', params: {pk:orderPk}}">#<strong>{{ orderPk }}</strong></router-link> /
+          docs
+        </h3>
+        
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link
+            class="btn button"
+            :to="{name: 'order-document-add', params: {orderPk: this.orderPk}}"
+            v-bind:title="$trans('Add document')"
+            >{{  $trans('Add document') }}</router-link>
+        </b-button-toolbar>
+        
+      </div>
+    </header>
+
+    <div class="panel overflow-auto">
+      <b-table
+        small
+        id="document-table"
+        :busy='isLoading'
+        :fields="fields"
+        :items="documents"
+        responsive="md"
+        class="data-table"
+      >
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        
+        <template #cell(icons)="data">
+          <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="order-document-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Document')"
+      />
+    </div>
 
     <SearchModal
       id="search-modal"
@@ -17,62 +83,6 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this document?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Document')"
-      />
-      <b-table
-        small
-        id="document-table"
-        :busy='isLoading'
-        :fields="fields"
-        :items="documents"
-        responsive="md"
-        class="data-table"
-      >
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #head(icons)="data">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="order-document-add"
-                  v-bind:router_params="{orderPk: data.field.value}"
-                  v-bind:title="$trans('New statuscode')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="order-document-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-            />
-          </div>
-        </template>
-      </b-table>
-    </div>
   </div>
 </template>
 

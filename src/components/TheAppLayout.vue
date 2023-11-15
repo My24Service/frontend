@@ -1,21 +1,19 @@
 <template>
-  <div ref="app-layout">
-    <TheNav />
-    <router-view/>
-    <div class="container main-app-container">
-      <SubNav v-if="hasSubNav">
-        <router-view name="app-subnav"></router-view>
-      </SubNav>
-      <router-view :key="$route.fullPath" name="app-content"></router-view>
-    </div>
+  <div ref="app-layout" id="app-layout">
+    <TheNavLoggedIn v-if="isLoggedIn" />
+    <TheNavLoggedOut v-if="!isLoggedIn" />
+
+    <router-view :key="$route.fullPath" name="app-content"></router-view>
+
   </div>
 </template>
 
 <script>
-import TheNav from './TheNav.vue'
-import SubNav from './SubNav.vue'
-
+import { componentMixin } from '@/utils.js'
+import TheNavLoggedIn from './TheNavLoggedIn.vue'
+import TheNavLoggedOut from './TheNavLoggedOut.vue'
 export default {
+  mixins: [componentMixin],
   props: {
     hasSubNav: {
       type: Boolean,
@@ -23,11 +21,8 @@ export default {
     }
   },
   components: {
-    TheNav,
-    SubNav
+    TheNavLoggedIn,
+    TheNavLoggedOut,
   },
 }
 </script>
-
-<style scoped>
-</style>

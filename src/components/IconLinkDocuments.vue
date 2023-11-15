@@ -1,6 +1,6 @@
 <template>
   <span>
-    <router-link class="px-1" :to="{name: router_name, params: router_params}" v-bind:title="title">
+    <router-link :to="{name: router_name, params: router_params}" v-bind:title="title">
       <b-icon-file class="edit-icon"></b-icon-file>
     </router-link>
   </span>

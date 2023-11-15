@@ -1,24 +1,26 @@
 <template>
-  <div>
+  <span class="version" @click="openReloadModal">
+    <span :title="message">{{ version }}
+      <small v-if="newVersionAvailable">
+        <b>&nbsp;&nbsp;{{ $trans('update available') }}</b>
+      </small>
+    </span>
+
     <b-modal
       id="reload-modal"
       ref="reload-modal"
       v-bind:title="$trans('Reload page?')"
       @ok="doReload"
+      ok-only
     >
       <p class="my-4">
-        {{ $trans('A new version is available') }}: {{ newVersion }} {{ $trans('Do you want to reload the page?') }}
+        {{ $trans(message) }}: {{ newVersion }}
+      </p>
+      <p class="my-4">
+        {{ $trans('Do you want to reload the page?') }}
       </p>
     </b-modal>
-
-    <div class="version">
-      <h6>{{ version }}
-        <b-badge v-if="newVersionAvailable">
-          <b-link @click="openReloadModal">{{ $trans('New version available')  }}</b-link>
-        </b-badge>
-      </h6>
-    </div>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -26,13 +28,14 @@ import { VERSION } from '@/version.js'
 import axios from '@/services/api.js'
 
 export default {
-  name: "Version",
+  name: "appVersion",
   data() {
     return {
       version: VERSION,
       newVersionAvailable: false,
       newVersion: null,
-      intervalId: null
+      intervalId: null,
+      message: `Using the latest version (${VERSION})`
     }
   },
   methods: {
@@ -42,6 +45,7 @@ export default {
       if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
         this.newVersionAvailable = true
         this.newVersion = data.version
+        this.message = `A new version is available`
       } else {
         this.newVersionAvailable = false
       }
@@ -50,10 +54,16 @@ export default {
       return parseInt(version.slice(1).replaceAll('.', ''))
     },
     openReloadModal() {
-      this.$refs['reload-modal'].show()
+      if(this.newVersionAvailable) {
+        this.$refs['reload-modal'].show()
+      }
     },
     doReload() {
-      window.location.reload(false)
+      if(!this.newVersionAvailable) {
+        this.$refs['reload-modal'].hide()
+      } else {
+        window.location.reload(false)
+      }
     }
   },
   mounted() {
@@ -68,13 +78,11 @@ export default {
 
 <style scoped>
   .version {
-    padding-top: 6px;
-    padding-left: 8px;
-    color: white;
     font-size: 14px;
   }
-  .version a {
-    color: white;
+  .version span {
     text-decoration: none;
+    display: block;
+    cursor: help;
   }
 </style>

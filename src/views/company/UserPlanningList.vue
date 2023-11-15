@@ -1,9 +1,25 @@
 <template>
-  <div class="app-grid">
-
-    <div class="subnav-pills">
-      <PillsCompanyUsers />
-    </div>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3><b-icon icon="people"></b-icon>People</h3>
+        <div>
+          <b-button-toolbar>
+            <b-button-group class="mr-1">
+              <ButtonLinkRefresh
+                v-bind:method="function() { loadData() }"
+                v-bind:title="$trans('Refresh')"
+              />
+              <ButtonLinkSearch
+                v-bind:method="function() { showSearchModal() }"
+              />
+            </b-button-group>
+            <b-link :to="{name: 'planninguser-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add planner</b-link>
+          </b-button-toolbar>
+        </div>
+      </div>
+    </header>
+    
 
     <SearchModal
       id="search-modal"
@@ -20,12 +36,11 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this planning user?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Planning user')"
-      />
+    <div class="page-details panel">
+      
+      <PillsCompanyUsers />
+      <br>
+      
 
       <b-table
         id="planninguser-table"
@@ -37,38 +52,19 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="planninguser-add"
-                  v-bind:title="$trans('New planning user')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
+      
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(full_name)="data">
+          <router-link :to="{name:'planninguser-edit', params : {pk: data.item.id} }">{{ data.item.full_name }}</router-link>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="planninguser-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
+            
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -77,15 +73,18 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Planning user')"
+    />
   </div>
 </template>
 
 <script>
 import planningUserModel from '@/models/company/UserPlanning.js'
 import PillsCompanyUsers from '@/components/PillsCompanyUsers.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
@@ -95,9 +94,7 @@ export default {
   name: 'UserPlanningList',
   components: {
     PillsCompanyUsers,
-    IconLinkEdit,
     IconLinkDelete,
-    ButtonLinkAdd,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
@@ -116,7 +113,7 @@ export default {
         {key: 'email', label: this.$trans('Email'), sortable: true},
         {key: 'last_login', label: this.$trans('Last login'), sortable: true},
         {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
-        {key: 'icons'}
+        {key: 'icons', label: ''}
       ],
     }
   },

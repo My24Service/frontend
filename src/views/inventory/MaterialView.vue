@@ -1,86 +1,73 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-detail">
-      <h3>{{ $trans('Material details') }}</h3>
-      <b-row>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Identifier') }}:</strong></b-td>
-              <b-td>{{ material.identifier }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Name') }}:</strong></b-td>
-              <b-td>{{ material.name }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Name short') }}:</strong></b-td>
-              <b-td>{{ material.name_short }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Unit') }}:</strong></b-td>
-              <b-td>{{ material.unit }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Supplier') }}:</strong></b-td>
-              <b-td>{{ material.supplier_name }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Product type') }}:</strong></b-td>
-              <b-td>{{ material.product_type }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Purchase price') }}:</strong></b-td>
-              <b-td>{{ material.price_purchase }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Selling price') }}:</strong></b-td>
-              <b-td>{{ material.price_selling }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Alt. selling price') }}:</strong></b-td>
-              <b-td>{{ material.price_selling_alt }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Purchase price ex.') }}:</strong></b-td>
-              <b-td>{{ material.price_purchase_ex }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Selling price ex.') }}:</strong></b-td>
-              <b-td>{{ material.price_selling_ex }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Alt. selling price ex.') }}:</strong></b-td>
-              <b-td>{{ material.price_selling_alt_ex }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="12" class="text-center">
-          <h4>{{ $trans('Image') }}</h4>
-          <img :src="material.image || NO_IMAGE_URL"  alt=""/>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="12">
-          <h4>{{ $trans('Inventory') }}</h4>
-          <b-table dark borderless small :fields="inventoryFields" :items="inventory" responsive="sm"></b-table>
-        </b-col>
-      </b-row>
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}
-        </b-button>
-      </footer>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="box"></b-icon> 
+          <span class="backlink" @click="goBack">Materials</span> / {{  this.material.name }}
+        </h3>
+        <div class="flex-columns">
+          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
+            {{ $trans('Back') }}
+          </b-button>
+          <router-link :to="{name: 'material-edit', params:{pk: this.pk}}" class="btn">{{ $trans('Edit material') }}</router-link>
+        </div>
+      </div>
+    </header>
+    <div class="page-detail">
+      <b-overlay :show="isLoading" rounded="sm" class="flex-columns">
+        <div class="panel col-1-3">
+          <h3>{{ material.name }}</h3>
+          <dl>
+            <dt>{{ $trans('Identifier') }}</dt>
+            <dd>{{ material.identifier }}</dd>
+            <dt>{{ $trans('Shortname') }}</dt>
+            <dd>{{ material.name_short }}</dd>
+            <dt>{{ $trans('Unit') }}</dt>
+            <dd>{{ material.unit }}</dd>
+            <dt>{{ $trans('Supplier') }}</dt>
+            <dd>{{ material.supplier_name }}</dd>
+            <dt>{{ $trans('Product type') }}</dt>
+            <dd>{{ material.product_type }}</dd>
+          </dl>
+          <br>
+          <dl>
+            <dt>{{ $trans('Purchase price') }}</dt>
+            <dd>{{ material.price_purchase }}</dd>
+            <dt>{{ $trans('Selling price') }}</dt>
+            <dd>{{ material.price_selling }}</dd>
+            <dt>{{ $trans('Alt. selling price') }}</dt>
+            <dd>{{ material.price_selling_alt }}</dd>
+            <dt>{{ $trans('Purchase price ex.') }}</dt>
+            <dd>{{ material.price_purchase_ex }}</dd>
+            <dt>{{ $trans('Selling price ex.') }}</dt>
+            <dd>{{ material.price_selling_ex }}</dd>
+            <dt>{{ $trans('Alt. selling price ex.') }}</dt>
+            <dd>{{ material.price_selling_alt_ex }}</dd>
+          </dl>
+          <hr/>
+          <img :src="material.image || NO_IMAGE_URL"  :alt="`${material.name} - ${$trans('Product image')}`"/>
+        </div>
+        
+        <div class="panel col-2-3">
+          <h6>{{ $trans('Inventory') }}</h6>
+          <b-table :fields="inventoryFields" :items="inventory" responsive="sm"></b-table>
+        </div>
+      </b-overlay>
     </div>
-  </b-overlay>
+  </div>
 </template>
+<style scope>
+img {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+}
 
+img[src*="no-img.png"] {
+  max-width: 320px;
+}
+</style>
 <script>
 import materialService from '../../models/inventory/Material.js'
 import inventoryModel from '../../models/inventory/Inventory.js'

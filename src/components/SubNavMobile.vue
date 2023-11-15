@@ -1,83 +1,83 @@
 <template>
   <div v-if="isLoaded">
-    <b-nav tabs>
-      <b-nav-item
-        :active="isActive('dispatch')"
-        v-if="hasDispatch"
-        :to="{name: 'mobile-dispatch'}">
-        {{ $trans('Dispatch') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('dispatch')"
+      v-if="hasDispatch"
+      :to="{name: 'mobile-dispatch'}">
+      {{ $trans('Dispatch') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('orders')"
-        v-if="hasOrders"
-        :to="{name: 'mobile-orders'}">
-        {{ $trans('Orders') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('orders')"
+      v-if="hasOrders"
+      :to="{name: 'mobile-orders'}">
+      {{ $trans('Orders') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('orders-in-progress')"
-        v-if="hasOrdersInProgress && memberType === 'maintenance'"
-        :to="{name: 'mobile-orders-in-progress'}">
-        {{ $trans('In progress') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('orders-in-progress')"
+      v-if="hasOrdersInProgress && memberType === 'maintenance'"
+      :to="{name: 'mobile-orders-in-progress'}">
+      {{ $trans('In progress') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('orders-finished')"
-        v-if="hasOrdersFinished"
-        :to="{name: 'mobile-orders-finished'}">
-        {{ $trans('Finished') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('orders-finished')"
+      v-if="hasOrdersFinished"
+      :to="{name: 'mobile-orders-finished'}">
+      {{ $trans('Finished') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('orders-unassigned')"
-        v-if="hasOrdersUnassigned"
-        :to="{name: 'mobile-orders-unassigned'}">
-        {{ $trans('Unassigned') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('orders-unassigned')"
+      v-if="hasOrdersUnassigned"
+      :to="{name: 'mobile-orders-unassigned'}">
+      {{ $trans('Unassigned') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('assigned-finished')"
-        v-if="hasAssignedFinished"
-        :to="{name: 'mobile-assigned-finished'}">
-        {{ $trans('Assigned finished') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('assigned-finished')"
+      v-if="hasAssignedFinished"
+      :to="{name: 'mobile-assigned-finished'}">
+      {{ $trans('Assigned finished') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('trips')"
-        v-if="hasTrips && memberType === 'temps'"
-        :to="{name: 'mobile-trips'}">
-        {{ $trans('Trips') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('trips')"
+      v-if="hasTrips && memberType === 'temps'"
+      :to="{name: 'mobile-trips'}">
+      {{ $trans('Trips') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('trip-availability')"
-        v-if="hasTripAvailability && memberType === 'temps'"
-        :to="{name: 'mobile-trip-availability'}">
-        {{ $trans('Trip availability') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('trip-availability')"
+      v-if="hasTripAvailability && memberType === 'temps'"
+      :to="{name: 'mobile-trip-availability'}">
+      {{ $trans('Trip availability') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('trip-statuscodes')"
-        v-if="hasTripStatuscodes && memberType === 'temps'"
-        :to="{ name: 'trip-statuscode-list' }">
-        {{ $trans('Trip statuscodes') }}
-      </b-nav-item>
+    <b-nav-item
+      :active="isActive('trip-statuscodes')"
+      v-if="hasTripStatuscodes && memberType === 'temps'"
+      :to="{ name: 'trip-statuscode-list' }">
+      {{ $trans('Trip statuscodes') }}
+    </b-nav-item>
 
-      <b-nav-item
-        :active="isActive('timesheet')"
-        v-if="hasTimesheet"
-        :to="{name: 'mobile-timesheet'}">
-        {{ $trans('Timesheet') }}
-      </b-nav-item>
+    <!--
+    <b-nav-item
+      :active="isActive('timesheet')"
+      v-if="hasTimesheet"
+      :to="{name: 'mobile-timesheet'}">
+      {{ $trans('Timesheet') }}
+    </b-nav-item>
+    -->
 
-      <b-nav-item
-        :active="isActive('assignedorder-materials')"
-        v-if="hasAssignedorderMaterials"
-        :to="{name: 'assignedorder-materials'}">
-        {{ $trans('Materials') }}
-      </b-nav-item>
-    </b-nav>
+    <b-nav-item
+      :active="isActive('assignedorder-materials')"
+      v-if="hasAssignedorderMaterials"
+      :to="{name: 'assignedorder-materials'}">
+      {{ $trans('Materials') }}
+    </b-nav-item>
   </div>
 </template>
 
