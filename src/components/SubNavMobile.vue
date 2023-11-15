@@ -72,12 +72,12 @@
     </b-nav-item>
     -->
 
-    <b-nav-item
-      :active="isActive('assignedorder-materials')"
-      v-if="hasAssignedorderMaterials"
-      :to="{name: 'assignedorder-materials'}">
-      {{ $trans('Materials') }}
-    </b-nav-item>
+<!--    <b-nav-item-->
+<!--      :active="isActive('assignedorder-materials')"-->
+<!--      v-if="hasAssignedorderMaterials"-->
+<!--      :to="{name: 'assignedorder-materials'}">-->
+<!--      {{ $trans('Materials') }}-->
+<!--    </b-nav-item>-->
   </div>
 </template>
 
