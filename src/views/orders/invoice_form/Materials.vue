@@ -51,8 +51,11 @@
         <b-col cols="2" />
       </b-row>
       <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
-        <b-col cols="2">
+        <b-col cols="2" v-if="!material.is_partner">
           {{ getFullname(material.user_id) }}
+        </b-col>
+        <b-col cols="2" v-if="material.is_partner">
+          {{ material.full_name }} ({{ material.partner_companycode }})
         </b-col>
         <b-col cols="2">
           {{ material.name }}

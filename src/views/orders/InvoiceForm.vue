@@ -15,12 +15,12 @@
           </b-button-toolbar>
         </div>
       </header>
-      
+
       <b-form v-if="!isLoading" class="page-detail flex-columns" @submit="(e) => {e.preventDefault(); return false;}">
 
         <div class="panel col-1-3">
           <div class="invoice-form-main">
-            <h6>{{ $trans('Invoice Recepient')}}</h6>
+            <h6>{{ $trans('Invoice recipient')}}</h6>
             <CustomerCard
               :customer="customer"
             />
@@ -39,10 +39,10 @@
                 size="sm"
               ></b-form-input>
             </b-form-group>
-          
-          
+
+
             <b-form-group
-              
+
               label-cols="5"
               v-bind:label="$trans('Term of payment')"
               label-for="invoice_term_of_payment_days"
@@ -51,7 +51,7 @@
 
                 <b-form-input
                 id="invoice_term_of_payment_days"
-                
+
                 v-model="invoice.term_of_payment_days"
                 type="number"
                 >
@@ -64,7 +64,7 @@
                 </template>
               </b-input-group>
             </b-form-group>
-          
+
             <b-form-group
               label-cols="5"
               v-bind:label="$trans('Description')"
@@ -76,11 +76,11 @@
                 rows="1"
               ></b-form-textarea>
             </b-form-group>
-                    
+
             <hr />
 
             <h6 class="total-text">{{ $trans('Invoice total') }}</h6>
-            
+
             <TotalsInputs
               :total="invoice.total_dinero"
               :is-final-total="true"
@@ -108,7 +108,7 @@
                   <span style="text-align: right">
                     {{ $trans("Price") }}
                   </span>
-                  
+
                   <span style="text-align: right">
                     {{ $trans("Total") }}
                   </span>
@@ -116,7 +116,7 @@
                     {{ $trans("VAT") }}
                   </span>
                   <span></span>
-                
+
               </li>
 
               <li v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id" class="listing-item">
@@ -145,11 +145,11 @@
 
               <li v-if="invoiceLinesHaveTotals" >
                 <i>
-                  <b-icon-info-square-fill variant="primary"></b-icon-info-square-fill> 
+                  <b-icon-info-square-fill variant="primary"></b-icon-info-square-fill>
                   * <span class="dimmed">{{ $trans("Prices are combined in totals") }}</span>
                 </i>
               </li>
-              
+
             </ul>
             <hr>
             <div class="new-invoice-line" v-if="invoiceLineService.editItem">
@@ -179,7 +179,7 @@
                         type="number"
                         v-model="invoiceLineService.editItem.amount"
                         :placeholder="$trans('Amount')"
-                        
+
                       ></b-form-input>
                     </b-form-group>
                   </b-col>
@@ -244,7 +244,7 @@
                   <b-col cols="1">
                     <b-form-group
                     label-size="sm"
-                    
+
                     label-for="invoice-submit-button"
                     style="text-align: end;"
                     >
@@ -252,7 +252,7 @@
                         v-if="invoiceLineService.isEdit"
                         @click="invoiceService.doEditCollectionItem"
                         class="btn "
-                        size="sm" 
+                        size="sm"
                         type="submit"
                         :disabled="!isInvoiceLineValid"
                         id="invoice-submit-button"
@@ -265,7 +265,7 @@
                         class="btn"
                         size="sm"
                         type="submit"
-                        
+
                         :disabled="!isInvoiceLineValid"
                         id="invoice-submit-button"
                       >
@@ -364,7 +364,7 @@
                   />
                 </b-col>
                 <b-col cols="1">
-                  
+
                     <b-button
                       @click="() => { updateEngineer(user.id) }"
                       class="btn update-button"
@@ -374,7 +374,7 @@
                     >
                       {{ $trans("Update") }}
                     </b-button>
-                  
+
                 </b-col>
               </b-row>
             </b-container>
@@ -419,7 +419,7 @@
               </b-row>
               <b-row>
                 <b-col cols="9">
-                  {{ $trans("Call out costs") }} 
+                  {{ $trans("Call out costs") }}
                 </b-col>
                 <b-col cols="2">
                   <PriceInput
@@ -486,7 +486,7 @@
               :invoiceLinesParent="invoiceLineService.collection"
             />
           </details>
-          
+
           <HoursComponent v-if="activity_totals.work_total !== '00:00'"
             :order_pk="order_pk"
             :type="COST_TYPE_WORK_HOURS"
@@ -498,7 +498,7 @@
             @emptyCollectionClicked="emptyCollectionClicked"
             :invoiceLinesParent="invoiceLineService.collection"
           />
-          
+
           <HoursComponent v-if="activity_totals.travel_total !== '00:00'"
             :order_pk="order_pk"
             :type="COST_TYPE_TRAVEL_HOURS"
@@ -890,7 +890,7 @@ export default {
 }
 
 .listing { display: table; }
-.listing li:not(.text-right) { display: table-row;}  
+.listing li:not(.text-right) { display: table-row;}
 .listing li:not(.text-right) span  {  display: table-cell;}
 
 </style>

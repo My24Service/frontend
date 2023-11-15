@@ -4,7 +4,7 @@
       <h6>{{ getTitle() }}</h6>
       <b-icon-chevron-down></b-icon-chevron-down>
     </summary>
-  
+
     <b-overlay :show="isLoading" rounded="sm">
       <div
         class="costs-table"
@@ -52,8 +52,11 @@
           <b-col cols="2" />
         </b-row>
         <b-row v-for="activity in costService.collection" :key="activity.user" class="material_row">
-          <b-col cols="3">
+          <b-col cols="3" v-if="!activity.is_partner">
             {{ getFullname(activity.user) }}
+          </b-col>
+          <b-col cols="3" v-if="activity.is_partner">
+            {{ activity.full_name }} ({{ activity.partner_companycode }})
           </b-col>
           <b-col cols="2">
             {{ activity.amount_duration_read }}
@@ -63,7 +66,7 @@
               @change="updateTotals"
               v-model="activity.use_price"
             >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_USER">
+              <b-form-radio :value="usePriceOptions.USE_PRICE_USER" v-if="!activity.is_partner">
                 {{ $trans('Engineer') }}
                 {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_USER).toFormat("$0.00") }}
               </b-form-radio>
@@ -112,7 +115,7 @@
 
       </b-container>
     </b-overlay>
-  </details> 
+  </details>
 </template>
 
 <script>
@@ -400,7 +403,20 @@ export default {
             throw `getPrice: unknown use_price for engineer: ${activity.use_price}`
         }
       } else {
-        console.error(`getPrice: user model ${activity.user} not found`, this.engineer_models)
+        if (activity.is_partner) {
+          switch (activity.use_price) {
+            case this.usePriceOptions.USE_PRICE_CUSTOMER:
+              return this.customer.hourly_rate_engineer
+            case this.usePriceOptions.USE_PRICE_SETTINGS:
+              return this.default_hourly_rate
+            case this.usePriceOptions.USE_PRICE_OTHER:
+              return activity.price_other
+            default:
+              throw `getPrice: unknown use_price for engineer: ${activity.use_price}`
+          }
+        } else {
+          console.error(`getPrice: user model ${activity.user} not found`, this.engineer_models)
+        }
       }
     },
     getCurrency(activity) {
@@ -421,7 +437,20 @@ export default {
             throw `getEngineerRateFor: unknown usePrice for engineer: ${usePrice}`
         }
       } else {
-        console.error(`getEngineerRateFor: user model ${obj.user} not found`, this.engineer_models)
+        if (obj.is_partner) {
+          switch (usePrice) {
+            case this.usePriceOptions.USE_PRICE_CUSTOMER:
+              return this.customer.hourly_rate_engineer_dinero
+            case this.usePriceOptions.USE_PRICE_SETTINGS:
+              return toDinero(this.default_hourly_rate, this.default_currency)
+            case this.usePriceOptions.USE_PRICE_OTHER:
+              return obj.price_other
+            default:
+              throw `getPrice: unknown use_price for engineer: ${usePrice}`
+          }
+        } else {
+          console.error(`getEngineerRateFor: user model ${obj.user} not found`, this.engineer_models)
+        }
       }
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
