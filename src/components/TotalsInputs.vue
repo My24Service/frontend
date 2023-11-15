@@ -1,26 +1,26 @@
 <template>
-  <b-container>
-    <b-row>
-      <b-col cols="6">
+  <div>
+    <div class="flex-columns">
+
+      <div>
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("Total") }}</span>
         <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("Total") }}</span>
-      </b-col>
-      <b-col cols="6">
-        <b-form-input
-          readonly
-          disabled
-          :value="total.toFormat('$0.00')"
-          size="sm"
-          :class="totalClass"
-        ></b-form-input>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="6">
+      </div>
+      
+      <b-form-input
+        readonly
+        disabled
+        :value="total.toFormat('$0.00')"
+        size="sm"
+        :class="totalClass"
+      ></b-form-input>
+
+    </div>
+
+    <div class="flex-columns">
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
         <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("VAT") }}</span>
-      </b-col>
-      <b-col cols="6">
+
         <b-form-input
           readonly
           disabled
@@ -28,9 +28,9 @@
           size="sm"
           :class="vatClass"
         ></b-form-input>
-      </b-col>
-    </b-row>
-  </b-container>
+
+    </div>
+  </div>
 </template>
 
 <script>
