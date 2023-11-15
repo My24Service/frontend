@@ -1,10 +1,10 @@
 <template>
-  <div class="app-page">
+  <div class="app-page" v-if="location">
     <header>
 
       <div class='page-title'>
         <h3>
-          <b-icon icon="shop-window"></b-icon> 
+          <b-icon icon="shop-window"></b-icon>
           <span @click="goBack" class="backlink">Locations</span>
           / {{ location.name }}
         </h3>
@@ -25,7 +25,7 @@
             <dd>{{ location.name }}</dd>
         </dl>
       </div>
-      
+
       <div class='panel col-2-3'>
         <b-tabs>
           <b-tab :title="$trans('Orders')">
@@ -72,15 +72,15 @@
 </template>
 
 <script>
-import orderPastModel from '../../models/orders/OrderPast.js'
+import { OrderPastService } from '../../models/orders/OrderPast.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import orderModel from '../../models/orders/Order.js'
+import { OrderService } from '../../models/orders/Order.js'
 import OrderStats from "../../components/OrderStats";
 import {componentMixin} from "../../utils";
-import locationModel from "../../models/equipment/location";
+import { LocationService } from "../../models/equipment/location";
 
 export default {
   mixins: [componentMixin],
@@ -96,9 +96,9 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderPastModel,
+      orderPastService: new OrderPastService(),
       buttonDisabled: false,
-      location: locationModel.getFields(),
+      location: null,
       orders: [],
       orderPastFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -114,6 +114,8 @@ export default {
           active: true
         },
       ],
+      locationService: new LocationService(),
+      orderService: new OrderService()
     }
   },
   props: {
@@ -124,7 +126,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderPastModel.currentPage = val
+      this.orderPastService.currentPage = val
       this.loadData()
     }
   },
@@ -148,7 +150,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderPastModel.setSearchQuery(val)
+      this.orderPastService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -163,13 +165,13 @@ export default {
 
       await this.loadHistory()
 
-      this.location = await locationModel.detail(this.pk)
+      this.location = await this.locationService.detail(this.pk)
 
       try {
-        const orderTypeStatsData = await orderModel.getOrderTypesStatsLocation(this.pk)
-        const monthsStatsData = await orderModel.getMonthsStatsLocation(this.pk)
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsLocation(this.pk)
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsLocation(this.pk)
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsLocation(this.pk)
+        const monthsStatsData = await this.orderService.getMonthsStatsLocation(this.pk)
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsLocation(this.pk)
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsLocation(this.pk)
 
         this.$refs['order-stats'].render(
           orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
@@ -184,8 +186,8 @@ export default {
 
     async loadHistory() {
       try {
-        orderPastModel.addListArg(`location=${this.pk}`)
-        const results = await orderPastModel.list()
+        this.orderPastService.addListArg(`location=${this.pk}`)
+        const results = await this.orderPastService.list()
         this.orders = results.results
         this.isLoading = false
       } catch(error) {

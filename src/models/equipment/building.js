@@ -1,6 +1,14 @@
 import BaseModel from '../base'
 
-class Building extends BaseModel {
+class BuildingModel {
+  customer
+  branch
+  name
+  created
+  modified
+}
+
+class BuildingService extends BaseModel {
   fields = {
     'customer': null,
     'branch': null,
@@ -26,12 +34,18 @@ class Building extends BaseModel {
       .then((response) => response.data)
   }
 
-  listForSelect() {
-    return this.axios.get(`${this.url}list_for_select/`)
+  listForSelectBranch(branch) {
+    return this.axios.get(`${this.url}list_for_select/?branch=${branch}`)
+      .then((response) => response.data)
+  }
+
+  listForSelectCustomer(customer) {
+    return this.axios.get(`${this.url}list_for_select/?customer=${customer}`)
       .then((response) => response.data)
   }
 }
 
-const buildingModel = new Building()
+const buildingService = new BuildingService()
 
-export default buildingModel
+export default buildingService
+export { BuildingService, BuildingModel }

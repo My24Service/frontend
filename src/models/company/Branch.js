@@ -1,7 +1,7 @@
 import BaseModel from '../base'
 
 
-class Branch extends BaseModel {
+class BranchService extends BaseModel {
   fields = {
     'name': '',
     'address': '',
@@ -25,6 +25,7 @@ class Branch extends BaseModel {
   }
 }
 
-let branchModel = new Branch()
+let branchService = new BranchService()
 
-export default branchModel
+export default branchService
+export { BranchService }

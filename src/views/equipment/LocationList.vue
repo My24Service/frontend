@@ -5,7 +5,7 @@
         <h3><b-icon icon="shop-window"></b-icon> Locations</h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
-            
+
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -32,7 +32,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -79,7 +79,7 @@
     </div>
     <Pagination
       v-if="!isLoading"
-      :model="this.model"
+      :model="locationService"
       :model_name="$trans('Location')"
     />
 
@@ -101,7 +101,7 @@
 </template>
 
 <script>
-import locationModel from '../../models/equipment/location.js'
+import { LocationService } from '../../models/equipment/location.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -148,7 +148,7 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: locationModel,
+      locationService: new LocationService(),
       locationPk: null,
       isLoading: false,
       locations: [],
@@ -182,7 +182,7 @@ export default {
     }
   },
   created() {
-    locationModel.resetListArgs()
+    this.locationService.resetListArgs()
     if (this.hasBranches) {
       if (this.isEmployee) {
         this.fields = this.fieldsBranchNonPlanning
@@ -196,14 +196,14 @@ export default {
         this.fields = this.fieldsCustomerPlanning
       }
     }
-    this.model.currentPage = this.$route.query.page || 1
+    this.locationService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.locationService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -216,7 +216,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.locationPk)
+        await this.locationService.delete(this.locationPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Location has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -229,7 +229,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.model.list()
+        const data = await this.locationService.list()
         this.locations = data.results
         this.isLoading = false
       } catch(error){

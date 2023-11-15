@@ -240,7 +240,7 @@
                     size="sm"
                     ref="name"
                     :state="isSubmitClicked ? !v$.location.name.$error : null"
-                  ></b-form-input> 
+                  ></b-form-input>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.location.name.$error : null">
                     {{ $trans('Please enter a name') }}
@@ -277,11 +277,11 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import locationModel from '../../models/equipment/location.js'
+import { LocationService, LocationModel } from '../../models/equipment/location.js'
 import {componentMixin} from "../../utils";
-import customerModel from "../../models/customer/Customer";
-import branchModel from "../../models/company/Branch";
-import buildingModel from "../../models/equipment/building";
+import { CustomerService } from "../../models/customer/Customer";
+import { BranchService } from "../../models/company/Branch";
+import { BuildingService } from "../../models/equipment/building";
 
 export default {
   mixins: [componentMixin],
@@ -302,7 +302,7 @@ export default {
       isLoading: false,
       buttonDisabled: false,
       submitClicked: false,
-      location: locationModel.getFields(),
+      location: new LocationModel(),
 
       getCustomersDebounced: null,
       customersSearch: [],
@@ -311,7 +311,11 @@ export default {
       getBranchesDebounced: null,
       branchesSearch: [],
       branch: null,
-      buildings: []
+      buildings: [],
+      branchService: new BranchService(),
+      buildingService: new BuildingService(),
+      customerService: new CustomerService(),
+      locationService: new LocationService()
     }
   },
   validations() {
@@ -361,19 +365,18 @@ export default {
   async created() {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
-    this.buildings = await buildingModel.listForSelect()
 
     if (!this.isCreate) {
-      this.loadData()
+      await this.loadData()
     } else {
-      this.location = locationModel.getFields()
+      this.location = new LocationModel()
     }
   },
   methods: {
     // customers
     async getCustomers(query) {
       try {
-        this.customersSearch = await customerModel.search(query)
+        this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
@@ -382,15 +385,16 @@ export default {
     customerLabel({ name, city}) {
       return `${name} - ${city}`
     },
-    selectCustomer(option) {
+    async selectCustomer(option) {
       this.location.customer = option.id
       this.customer = option
+      this.buildings = await this.buildingService.listForSelectCustomer(option.id)
       this.$refs.name.focus()
     },
     // branches
     async getBranches(query) {
       try {
-        this.branchesSearch = await branchModel.search(query)
+        this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
         this.errorToast(this.$trans('Error fetching branches'))
@@ -399,9 +403,10 @@ export default {
     branchLabel({ name, city}) {
       return `${name} - ${city}`
     },
-    selectBranch(option) {
+    async selectBranch(option) {
       this.location.branch = option.id
       this.branch = option
+      this.buildings = await this.buildingService.listForSelectBranch(option.id)
       this.$refs.name.focus()
     },
 
@@ -424,13 +429,13 @@ export default {
 
       if (this.isCreate) {
         try {
-          await locationModel.insert(this.location)
+          await this.locationService.insert(this.location)
           this.infoToast(this.$trans('Created'), this.$trans('Location has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
           if (isBulk) {
-            let empty = locationModel.getFields()
+            let empty = new LocationModel()
             empty.branch = this.location.branch
             empty.customer = this.location.customer
             this.location = empty
@@ -450,7 +455,7 @@ export default {
       }
 
       try {
-        await locationModel.update(this.pk, this.location)
+        await this.locationService.update(this.pk, this.location)
         this.infoToast(this.$trans('Updated'), this.$trans('Location has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -466,12 +471,14 @@ export default {
       this.isLoading = true
 
       try {
-        this.location = await locationModel.detail(this.pk)
+        this.location = await this.locationService.detail(this.pk)
         if (this.hasBranches && !this.isEmployee) {
-          this.branch = await branchModel.detail(this.location.branch)
+          this.branch = await this.branchService.detail(this.location.branch)
+          this.buildings = await this.buildingService.listForSelectBranch(this.branch.id)
         }
         if (!this.hasBranches && !this.isCustomer) {
-          this.customer = await customerModel.detail(this.location.customer)
+          this.customer = await this.customerService.detail(this.location.customer)
+          this.buildings = await this.buildingService.listForSelectCustomer(this.customer.id)
         }
         this.isLoading = false
       } catch(error) {

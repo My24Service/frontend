@@ -247,7 +247,7 @@
                   @priceChanged="(val) => priceChanged(val)"
                 />
               </b-form-group>
-            
+
 
           </div>
         </div>
@@ -495,13 +495,14 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import customerModel from '../../models/customer/Customer.js'
-import equipmentService, {
+import { CustomerService } from '../../models/customer/Customer.js'
+import {
+  EquipmentService,
   EquipmentModel
 } from '../../models/equipment/equipment.js'
-import branchModel from "../../models/company/Branch";
+import { BranchService } from "../../models/company/Branch";
 import {componentMixin} from "../../utils";
-import locationModel from "../../models/equipment/location";
+import { LocationService } from "../../models/equipment/location";
 import PriceInput from "../../components/PriceInput";
 
 export default {
@@ -572,7 +573,11 @@ export default {
       branchesSearch: [],
       branch: null,
 
-      locations: []
+      locations: [],
+      customerService: new CustomerService(),
+      branchService: new BranchService(),
+      locationService: new LocationService(),
+      equipmentService: new EquipmentService()
     }
   },
   computed: {
@@ -605,7 +610,7 @@ export default {
     // customers
     async getCustomers(query) {
       try {
-        this.customersSearch = await customerModel.search(query)
+        this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
@@ -617,13 +622,13 @@ export default {
     async selectCustomer(option) {
       this.equipment.customer = option.id
       this.customer = option
-      this.locations = await locationModel.listForSelectCustomer(option.id)
+      this.locations = await this.locationService.listForSelectCustomer(option.id)
       this.$refs.name.focus()
     },
     // branches
     async getBranches(query) {
       try {
-        this.branchesSearch = await branchModel.search(query)
+        this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
         this.errorToast(this.$trans('Error fetching branches'))
@@ -635,7 +640,7 @@ export default {
     async selectBranch(option) {
       this.equipment.branch = option.id
       this.branch = option
-      this.locations = await locationModel.listForSelectBranch(option.id)
+      this.locations = await this.locationService.listForSelectBranch(option.id)
       this.$refs.name.focus()
     },
 
@@ -657,7 +662,7 @@ export default {
 
       if (this.isCreate) {
         try {
-          await equipmentService.insert(this.equipment)
+          await this.equipmentService.insert(this.equipment)
           this.infoToast(this.$trans('Created'), this.$trans('Equipment has been created'))
           this.isLoading = false
 
@@ -681,7 +686,7 @@ export default {
       }
 
       try {
-        await equipmentService.update(this.pk, this.equipment)
+        await this.equipmentService.update(this.pk, this.equipment)
         this.infoToast(this.$trans('Updated'), this.$trans('Equipment has been updated'))
         this.isLoading = false
         this.cancelForm()
@@ -695,18 +700,18 @@ export default {
       this.isLoading = true
 
       try {
-        const equipmentData = await equipmentService.detail(this.pk)
+        const equipmentData = await this.equipmentService.detail(this.pk)
         this.equipment = new EquipmentModel(equipmentData)
         if (this.hasBranches && !this.isEmployee) {
           if (this.equipment.branch) {
-            this.branch = await branchModel.detail(this.equipment.branch)
-            this.locations = await locationModel.listForSelectBranch(this.branch.id)
+            this.branch = await this.branchService.detail(this.equipment.branch)
+            this.locations = await this.locationService.listForSelectBranch(this.branch.id)
           }
         }
         if (!this.hasBranches && !this.isCustomer) {
           if (this.equipment.customer) {
-            this.customer = await customerModel.detail(this.equipment.customer)
-            this.locations = await locationModel.listForSelectCustomer(this.customer.id)
+            this.customer = await this.customerService.detail(this.equipment.customer)
+            this.locations = await this.locationService.listForSelectCustomer(this.customer.id)
           }
         }
 

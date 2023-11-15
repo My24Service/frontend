@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page">
+  <div class="app-page" v-if="equipment">
 
     <SearchModal
       id="search-modal"
@@ -11,11 +11,11 @@
       <div class='page-title'>
         <h3>
           <b-icon icon="tools"></b-icon>
-          <span class="backlink" @click="goBack">{{ $trans('Equipment') }}</span> / 
+          <span class="backlink" @click="goBack">{{ $trans('Equipment') }}</span> /
           <span>{{ equipment.name }}</span>
         </h3>
         <b-button-toolbar>
-          <router-link 
+          <router-link
           :to="{name: editLink, params:{pk: this.pk}}"
           class="btn"
           >{{ `${$trans('Edit')} ${$trans('equipment')}`}}</router-link>
@@ -66,7 +66,7 @@
             </div>
             <hr>
             <ul class='listing order-list'>
-              <li v-for="item in orders">
+              <li v-for="item in orders" :key="item.id">
                 <OrderTableInfo
                   v-bind:order="item"
                 />
@@ -96,15 +96,15 @@
 </template>
 
 <script>
-import orderPastModel from '../../models/orders/OrderPast.js'
+import { OrderPastService } from '../../models/orders/OrderPast.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import orderModel from '../../models/orders/Order.js'
+import { OrderService } from '../../models/orders/Order.js'
 import OrderStats from "../../components/OrderStats";
 import {componentMixin} from "../../utils";
-import equipmentModel from "../../models/equipment/equipment";
+import { EquipmentService } from "../../models/equipment/equipment";
 import moment from 'moment/min/moment-with-locales'
 
 export default {
@@ -121,7 +121,9 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderPastModel,
+      orderPastService: new OrderPastService(),
+      orderService: new OrderService(),
+      equipmentService: new EquipmentService(),
       buttonDisabled: false,
       equipment: null,
       orders: [],
@@ -158,7 +160,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderPastModel.currentPage = val
+      this.orderPastService.currentPage = val
       this.loadData()
     }
   },
@@ -173,7 +175,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderPastModel.setSearchQuery(val)
+      this.orderPastService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -188,13 +190,13 @@ export default {
 
       await this.loadHistory()
 
-      const equipmentData = await equipmentModel.detail(this.pk)
-      this.equipment = new equipmentModel.model(equipmentData)
+      const equipmentData = await this.equipmentService.detail(this.pk)
+      this.equipment = new this.equipmentService.model(equipmentData)
       try {
-        const orderTypeStatsData = await orderModel.getOrderTypesStatsEquipment(this.pk)
-        const monthsStatsData = await orderModel.getMonthsStatsEquipment(this.pk)
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsEquipment(this.pk)
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsEquipment(this.pk)
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsEquipment(this.pk)
+        const monthsStatsData = await this.orderService.getMonthsStatsEquipment(this.pk)
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsEquipment(this.pk)
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsEquipment(this.pk)
 
         this.$refs['order-stats'].render(
           orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
@@ -209,8 +211,8 @@ export default {
 
     async loadHistory() {
       try {
-        orderPastModel.addListArg(`equipment=${this.pk}`)
-        const results = await orderPastModel.list()
+        this.orderPastService.addListArg(`equipment=${this.pk}`)
+        const results = await this.orderPastService.list()
         this.orders = results.results
         this.isLoading = false
       } catch(error) {

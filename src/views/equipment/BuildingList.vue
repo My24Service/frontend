@@ -13,7 +13,7 @@
             v-bind:method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <router-link 
+          <router-link
             :to="newLink"
             class="btn"
             >{{ $trans('New building') }}</router-link>
@@ -49,7 +49,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -90,14 +90,14 @@
     </div>
     <Pagination
         v-if="!isLoading"
-        :model="this.model"
+        :model="buildingService"
         :model_name="$trans('building')"
       />
   </div>
 </template>
 
 <script>
-import buildingModel from '../../models/equipment/building.js'
+import { BuildingService } from '../../models/equipment/building.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -144,7 +144,7 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: buildingModel,
+      buildingService: new BuildingService(),
       buildingPk: null,
       isLoading: false,
       buildings: [],
@@ -178,7 +178,7 @@ export default {
     }
   },
   created() {
-    buildingModel.resetListArgs()
+    this.buildingService.resetListArgs()
     if (this.hasBranches) {
       if (this.isEmployee) {
         this.fields = this.fieldsBranchNonPlanning
@@ -192,14 +192,14 @@ export default {
         this.fields = this.fieldsCustomerPlanning
       }
     }
-    this.model.currentPage = this.$route.query.page || 1
+    this.buildingService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.buildingService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -212,7 +212,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.buildingPk)
+        await this.buildingService.delete(this.buildingPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('building has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -225,7 +225,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.model.list()
+        const data = await this.buildingService.list()
         this.buildings = data.results
         this.isLoading = false
       } catch(error){

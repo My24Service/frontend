@@ -147,7 +147,7 @@
     </div>
     <Pagination
         v-if="!isLoading"
-        :model="this.model"
+        :model="equipmentService"
         :model_name="$trans('Equipment')"
       />
 
@@ -155,7 +155,7 @@
 </template>
 
 <script>
-import equipmentModel from '../../models/equipment/equipment.js'
+import { EquipmentService } from '../../models/equipment/equipment.js'
 
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
@@ -165,7 +165,7 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {componentMixin} from "../../utils";
-import equipmentStateService, {EquipmentStateModel} from "../../models/equipment/EquipmentState";
+import { EquipmentStateModel, EquipmentStateService } from "../../models/equipment/EquipmentState";
 import IconLinkPlus from "../../components/IconLinkPlus";
 
 export default {
@@ -207,12 +207,12 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: equipmentModel,
+      equipmentStateService: new EquipmentStateService(),
+      equipmentService: new EquipmentService(),
       isLoading: false,
       equipmentObjects: [],
       equipmentFields: [],
       equipmentFieldsCustomerPlanning: [
-
         {key: 'name', label: this.$trans('Equipment'), sortable: true},
         {key: 'customer', label: this.$trans('Customer'), sortable: true},
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
@@ -257,9 +257,9 @@ export default {
     }
   },
   async created() {
-    equipmentModel.resetListArgs()
+    this.equipmentService.resetListArgs()
     this.isLoading = true
-    this.model.currentPage = this.$route.query.page || 1
+    this.equipmentService.currentPage = this.$route.query.page || 1
 
     if (this.hasBranches) {
       if (this.isEmployee) {
@@ -285,7 +285,7 @@ export default {
     },
     async addState() {
       try {
-        await equipmentStateService.insert(this.state)
+        await this.equipmentStateService.insert(this.state)
         this.state = new EquipmentStateModel({})
         this.infoToast(this.$trans('Created'), this.$trans('State added'))
         await this.loadData()
@@ -297,7 +297,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.equipmentService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -310,7 +310,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.pk)
+        await this.equipmentService.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Equipment has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -321,7 +321,7 @@ export default {
     // rest
     async loadData() {
       try {
-        const data = await this.model.list()
+        const data = await this.equipmentService.list()
         this.equipmentObjects = data.results;
       } catch(error) {
         console.log('error fetching equipment', error)
