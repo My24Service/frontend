@@ -1,6 +1,6 @@
 <template>
   <div class="use-on-invoice-container">
-    <h5>{{ $trans("Add call out costs on infolines")}}</h5>
+    <h5>{{ $trans("Add costs on infolines")}}</h5>
 
     <b-form-group>
       <div class="flex-columns">
