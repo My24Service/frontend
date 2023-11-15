@@ -866,4 +866,9 @@ export default {
 .total-text {
   font-weight: bold;
 }
+
+.listing { display: table; }
+.listing li:not(.text-right) { display: table-row;}
+.listing li:not(.text-right) span  {  display: table-cell;}
+
 </style>

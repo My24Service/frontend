@@ -24,53 +24,58 @@
 
       </div>
 
-      <b-container fluid v-if="!isLoading && !hasStoredData">
-        <b-row>
-          <b-col cols="2">
-            <HeaderCell
-              :text='$trans("Engineer")'
-            />
-          </b-col>
-          <b-col cols="2">
-            <HeaderCell
-              :text='$trans("Material")'
-            />
-          </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("Amount")'
-            />
-          </b-col>
-          <b-col cols="4">
-            <HeaderCell
-              :text='$trans("Use price")'
-            />
-          </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("VAT type")'
-            />
-          </b-col>
-          <b-col cols="2" />
-        </b-row>
-        <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
-          <b-col cols="2">
-            {{ getFullname(material.user_id) }}
-          </b-col>
-          <b-col cols="2">
-            {{ material.name }}
-          </b-col>
-          <b-col cols="1">
-            {{ material.amount }}
-          </b-col>
-          <b-col cols="4">
-            <b-form-radio-group
-              @change="updateTotals"
-              v-model="material.use_price"
-            >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
-                {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-              </b-form-radio>
+
+    <b-container fluid v-if="!isLoading && !hasStoredData">
+      <b-row>
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("Engineer")'
+          />
+        </b-col>
+        <b-col cols="2">
+          <HeaderCell
+            :text='$trans("Material")'
+          />
+        </b-col>
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("Amount")'
+          />
+        </b-col>
+        <b-col cols="4">
+          <HeaderCell
+            :text='$trans("Use price")'
+          />
+        </b-col>
+        <b-col cols="1">
+          <HeaderCell
+            :text='$trans("VAT type")'
+          />
+        </b-col>
+        <b-col cols="2" />
+      </b-row>
+      <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
+        <b-col cols="2" v-if="!material.is_partner">
+          {{ getFullname(material.user_id) }}
+        </b-col>
+        <b-col cols="2" v-if="material.is_partner">
+          {{ material.full_name }} ({{ material.partner_companycode }})
+        </b-col>
+        <b-col cols="2">
+          {{ material.name }}
+        </b-col>
+        <b-col cols="1">
+          {{ material.amount }}
+        </b-col>
+        <b-col cols="4">
+          <b-form-radio-group
+            @change="updateTotals"
+            v-model="material.use_price"
+          >
+            <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+              {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
+            </b-form-radio>
+
 
               <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
                 {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
