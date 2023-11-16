@@ -6,8 +6,9 @@
       :unaccepted="unaccepted"
       :maintenance="maintenance"
     />
-    <OrderFormTemps 
+    <OrderFormTemps
       v-if="memberType === 'temps'"
+      :unaccepted="unaccepted"
       :pk="pk"
     />
   </div>

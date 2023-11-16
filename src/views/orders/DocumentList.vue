@@ -9,7 +9,7 @@
           <router-link :to="{name: 'order-view', params: {pk:orderPk}}">#<strong>{{ orderPk }}</strong></router-link> /
           docs
         </h3>
-        
+
         <b-button-toolbar>
           <b-button-group class="mr-1">
             <ButtonLinkRefresh
@@ -26,7 +26,7 @@
             v-bind:title="$trans('Add document')"
             >{{  $trans('Add document') }}</router-link>
         </b-button-toolbar>
-        
+
       </div>
     </header>
 
@@ -46,7 +46,7 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        
+
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit

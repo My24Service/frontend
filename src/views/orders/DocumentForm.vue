@@ -159,7 +159,7 @@ export default {
 
         this.infoToast(this.$trans('Created'), this.$trans('Document(s) have been created'))
         this.isLoading = false
-        this.$router.push({name: 'order-documents', params: {orderPk: this.orderPk}})
+        await this.$router.push({name: 'order-documents', params: {orderPk: this.orderPk}})
 
         return
       }
@@ -169,7 +169,7 @@ export default {
         await documentModel.update(this.pk, this.document)
         this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
         this.isLoading = false
-        this.$router.push({name: 'order-documents', params: {orderPk: this.document.order}})
+        await this.$router.push({name: 'order-documents', params: {orderPk: this.document.order}})
       } catch(error) {
         console.log('Error updating document', error)
         this.errorToast(this.$trans('Error updating document'))
