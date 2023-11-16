@@ -400,12 +400,42 @@
         </div>
 
         <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+          <footer class="modal-footer" v-if="!unaccepted">
+            <b-button
+              @click="cancelForm"
+              class="btn btn-secondary"
+              type="button"
+              variant="secondary"
+            >
               {{ $trans('Cancel') }}
             </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            <b-button
+              @click="submitForm"
+              :disabled="buttonDisabled"
+              class="btn btn-primary"
+              type="button"
+              variant="primary"
+            >
               {{ $trans('Submit') }}
+            </b-button>
+          </footer>
+          <footer class="modal-footer" v-if="!isCreate && (unaccepted || !order.customer_order_accepted)">
+            <b-button
+              @click="reject"
+              class="btn btn-danger"
+              type="button"
+              variant="danger"
+            >
+              {{ $trans('Reject') }}
+            </b-button>
+            <b-button
+              @click="editAndAccept"
+              :disabled="buttonDisabled"
+              class="btn btn-primary"
+              type="button"
+              variant="primary"
+            >
+              {{ $trans('Edit and accept') }}
             </b-button>
           </footer>
         </div>
@@ -425,11 +455,15 @@ import customerModel from '@/models/customer/Customer.js'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import orderlineModel from "../../models/orders/Orderline";
+import {componentMixin} from "@/utils";
+import orderNotAcceptedModel from "@/models/orders/OrderNotAccepted";
+import Assign from "@/models/mobile/Assign";
 
 export default {
   setup() {
     return { v$: useVuelidate() }
   },
+  mixins: [componentMixin],
   components: {
     Multiselect,
     OrderTypesSelect
@@ -438,6 +472,10 @@ export default {
     pk: {
       type: [String, Number],
       default: null
+    },
+    unaccepted: {
+      type: [Boolean],
+      default: false
     },
   },
   watch: {
@@ -476,6 +514,7 @@ export default {
       customerSearch: '',
       selectedCustomer: null,
       deletedOrderlines: [],
+      acceptOrder: false,
     }
   },
   validations() {
@@ -590,6 +629,15 @@ export default {
       this.order.order_contact = option.contact
       this.order.customer_remarks = option.remarks
     },
+    async editAndAccept() {
+      this.buttonDisabled = true
+      this.acceptOrder = true
+      await this.submitForm()
+    },
+    async reject() {
+      await orderNotAcceptedModel.setRejected(this.pk)
+      this.cancelForm()
+    },
     async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
@@ -681,6 +729,18 @@ export default {
         this.isLoading = false
         this.buttonDisabled = false
       }
+
+      if (this.acceptOrder) {
+        try {
+          await orderNotAcceptedModel.setAccepted(this.pk)
+
+          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
+        } catch(error) {
+          console.log('Error accepting order', error)
+          this.errorToast(this.$trans('Error accepting order'))
+        }
+      }
+
     },
     async getCustomers(query) {
       this.isLoading = true
@@ -696,8 +756,6 @@ export default {
     },
     async loadOrder() {
       this.isLoading = true
-      let start_date
-      let end_date
 
       try {
         this.order = await orderModel.detail(this.pk)
