@@ -101,7 +101,7 @@
                 id="new-invoice-line-price"
                 v-model="quotationLineService.editItem.price"
                 :currency="quotationLineService.editItem.price_currency"
-                @priceChanged="(val) => quotationLineService.editItem.setPriceField('price', val) && quotationLineService.editItem.calcTotal()"
+                @priceChanged="quotationLinePriceChanged"
               />
             </b-form-group>
           </b-col>
@@ -172,15 +172,29 @@
       >
         <b-button
           :disabled="isLoading || !quotationLineService.collection.length"
-          @click="submitQuotation"
+          @click="submitQuotationLine"
           class="btn btn-danger update-button"
           type="button"
           variant="danger"
         >
-          {{ $trans('Save Chapter') }}
+          {{ $trans('Save chapter') }}
         </b-button>
       </footer>
     </div>
+    <hr>
+    <b-row class="quotation-total">
+      <b-col cols="10">
+        <span class="total-text">{{ $trans('Chapter total') }}</span>
+      </b-col>
+      <b-col cols="2">
+        <TotalsInputs
+          v-if="total"
+          :total="total"
+          :is-final-total="true"
+          :vat="vat"
+        />
+      </b-col>
+    </b-row>
     <footer
       class="modal-footer"
       v-if="!chapter.new"
@@ -192,7 +206,7 @@
         type="button"
         variant="danger"
       >
-        {{ $trans('Delete Chapter') }}
+        {{ $trans('Delete chapter') }}
       </b-button>
     </footer>
     <b-modal
@@ -212,12 +226,6 @@ import{QuotationLineService, QuotationLineModel } from '@/models/quotations/Quot
 import PriceInput from "@/components/PriceInput";
 import Collapse from "@/components/Collapse";
 import VAT from "../quotation_form/VAT";
-import {
-  COST_TYPE_ACTUAL_WORK,
-  COST_TYPE_EXTRA_WORK,
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS
-} from "@/models/orders/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useVuelidate} from "@vuelidate/core";
 import TotalsInputs from "@/components/TotalsInputs";
@@ -266,37 +274,14 @@ export default {
   },
   data () {
     return {
-      COST_TYPE_WORK_HOURS,
-      COST_TYPE_TRAVEL_HOURS,
-      COST_TYPE_EXTRA_WORK,
-      COST_TYPE_ACTUAL_WORK,
-
-      isLoading: false,
       submitClicked: false,
       quotation: this.quotationData,
-      errorMessage: null,
-
-      invoice_id: null,
-      order_pk: null,
-
-      default_currency: this.$store.getters.getDefaultCurrency,
-
-      engineer_models: [],
-
-      activity_totals: null,
-      extra_work_totals: null,
-      actual_work_totals: null,
-
-      material_models: null,
-      used_materials: null,
-
-      customerPk: null,
-      customer: null,
-
       quotationService: new QuotationService(),
       quotationLineService: new QuotationLineService(),
-      deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
+      total: 0,
+      vat: 0,
+      isLoading: false
     }
   },
   computed: {
@@ -347,11 +332,8 @@ export default {
   },
   methods: {
     updateQuotationTotals() {
-      const total = this.quotationLineService.getItemsTotal()
-      const vat = this.quotationLineService.getItemsTotalVAT()
-
-      this.quotation.setPriceField('total', total)
-      this.quotation.setPriceField('vat', vat)
+      this.total = this.quotationLineService.getItemsTotal()
+      this.vat = this.quotationLineService.getItemsTotalVAT()
     },
     addQuotationLine() {
       this.quotationLineService.editItem.id = this.getQuotationLineId()
@@ -367,10 +349,17 @@ export default {
     quotationLineAmountChanged() {
       this.quotationLineService.editItem.amount = this.quotationLineService.editItem.amount.replace(',', '.')
       this.quotationLineService.editItem.calcTotal()
+      this.updateQuotationTotals()
+    },
+    quotationLinePriceChanged(val) {
+      this.quotationLineService.editItem.setPriceField('price', val)
+      this.quotationLineService.editItem.calcTotal()
+      this.updateQuotationTotals()
     },
     changeVatTypeQuotationLine(vat_type) {
       this.quotationLineService.editItem.vat_type = vat_type
       this.quotationLineService.editItem.calcTotal()
+      this.updateQuotationTotals()
     },
     getQuotationLineId() {
       if (this.quotationLineService.collection.length === 0) {
@@ -382,10 +371,9 @@ export default {
       })
       return maxQuotationLine.id + 1
     },
-    async submitQuotation () {
-      this.isLoading = true
-
+    async submitQuotationLine() {
       try {
+          this.isLoading = true
           for (let quotationLine of this.quotationLineService.collection) {
             quotationLine.quotation = this.quotationData.id
             quotationLine.chapter = this.chapter.id
@@ -464,5 +452,11 @@ export default {
 }
 .quotation-line-header {
   margin-bottom: 20px;
+}
+.quotation-total {
+  margin-bottom: 20px;
+}
+.total-text {
+  font-weight: bold;
 }
 </style>

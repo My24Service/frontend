@@ -236,20 +236,6 @@
           {{ $trans('Add new chapter') }}
         </b-button>
       </footer>
-      <hr>
-      <b-row class="quotation-total" v-if="quotation.id">
-        <b-col cols="10">
-          <span class="total-text">{{ $trans('Quotation total') }}</span>
-        </b-col>
-        <b-col cols="2">
-          <TotalsInputs
-            v-if="quotationData.total_dinero"
-            :total="quotationData.total_dinero"
-            :is-final-total="true"
-            :vat="quotationData.vat_dinero"
-          />
-        </b-col>
-      </b-row>
       <div class="mx-auto">
         <footer class="modal-footer">
           <b-button
@@ -267,7 +253,7 @@
             type="button"
             variant="primary"
           >
-            {{ $trans('Submit') }}
+            {{ $trans('Submit quotation') }}
           </b-button>
         </footer>
       </div>
@@ -508,11 +494,5 @@ div.section-header-icon {
 }
 div.bottom {
   margin-bottom: 80px;
-}
-.quotation-total {
-  margin-bottom: 20px;
-}
-.total-text {
-  font-weight: bold;
 }
 </style>
