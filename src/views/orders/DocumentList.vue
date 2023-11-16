@@ -45,7 +45,7 @@
                 <ButtonLinkAdd
                   router_name="order-document-add"
                   v-bind:router_params="{orderPk: data.field.value}"
-                  v-bind:title="$trans('New statuscode')"
+                  v-bind:title="$trans('New document')"
                 />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
