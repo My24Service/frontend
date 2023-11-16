@@ -1236,6 +1236,11 @@
     "consola" "^2.15.0"
     "node-fetch" "^2.6.1"
 
+"@popperjs/core@^2.4.0":
+  "integrity" "sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A=="
+  "resolved" "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz"
+  "version" "2.11.8"
+
 "@rollup/pluginutils@^4.1.1":
   "integrity" "sha512-ROn4qvkxP9SyPeHaf7uQC/GPFY6L/OWy9+bd9AwcjOAWQwxRscoEyAUD8qCY5o5iL4jqQwoLk2kaTKJPb/HwzQ=="
   "resolved" "https://registry.npmjs.org/@rollup/pluginutils/-/pluginutils-4.1.2.tgz"
@@ -2419,9 +2424,9 @@
     "electron-to-chromium" "^1.3.47"
 
 "browserslist@^4.0.0", "browserslist@^4.16.6", "browserslist@^4.17.5", "browserslist@^4.20.3", "browserslist@^4.21.10", "browserslist@>= 4.21.0":
-  "integrity" "sha512-tUkiguQGW7S3IhB7N+c2MV/HZPSCPAAiYBZXLsBhFB/PCy6ZKKsZrmBayHV9fdGV/ARIfJ14NkxKzRDjvp7L6w=="
-  "resolved" "https://registry.npmjs.org/browserslist/-/browserslist-4.21.5.tgz"
-  "version" "4.21.5"
+  "integrity" "sha512-bipEBdZfVH5/pwrvqc+Ub0kUPVfGUhlKxbvfD+z1BDnPEO/X98ruXGA1WP5ASpAFKan7Qr6j736IacbZQuAlKQ=="
+  "resolved" "https://registry.npmjs.org/browserslist/-/browserslist-4.21.10.tgz"
+  "version" "4.21.10"
   dependencies:
     "caniuse-lite" "^1.0.30001517"
     "electron-to-chromium" "^1.4.477"
@@ -2479,9 +2484,9 @@
     "lodash.uniq" "^4.5.0"
 
 "caniuse-lite@^1.0.0", "caniuse-lite@^1.0.30000844", "caniuse-lite@^1.0.30001517":
-  "integrity" "sha512-x1mgZEXK8jHIfAxm+xgdpHpk50IN3z3q3zP261/WS+uvePxW8izXuCu6AHz0lkuYTlATDehiZ/tNyYBdSQsOUQ=="
-  "resolved" "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001489.tgz"
-  "version" "1.0.30001489"
+  "integrity" "sha512-Jj917pJtYg9HSJBF95HVX3Cdr89JUyLT4IZ8SvM5aDRni95swKgYi3TgYLH5hnGfPE/U1dg6IfZ50UsIlLkwSA=="
+  "resolved" "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001524.tgz"
+  "version" "1.0.30001524"
 
 "chai@^4.1.2":
   "integrity" "sha512-yS5H68VYOCtN1cjfwumDSuzn/9c+yza4f3reKXlE5rUg7SFcCEy90gJvydNgOYtblyf4Zi6jIWRnXOgErta0KA=="
@@ -3138,9 +3143,9 @@
     "sigmund" "^1.0.1"
 
 "electron-to-chromium@^1.3.47", "electron-to-chromium@^1.4.477":
-  "integrity" "sha512-te57sWvQdpxmyd1GiswaodKdXdPgn9cN4ht8JlNa04QgtrfnUdWEo1261rY2vaC6TKaiHn0E7QerJWPKFCvMVw=="
-  "resolved" "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.404.tgz"
-  "version" "1.4.404"
+  "integrity" "sha512-cSMwIAd8yUh54VwitVRVvHK66QqHWE39C3DRj8SWiXitEpVSY3wNPD9y1pxQtLIi4w3UdzF9klLsmuPshz09DQ=="
+  "resolved" "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.504.tgz"
+  "version" "1.4.504"
 
 "emittery@^0.8.1":
   "integrity" "sha512-uDfvUjVrfGJJhymx/kz6prltenw1u7WrCg1oa94zYY8xxVpLLUu045LAT0dhDZdXG58/EpPL/5kA180fQ/qudg=="
@@ -4612,6 +4617,11 @@
     "import-local" "^3.0.2"
     "jest-cli" "^27.5.1"
 
+"jquery@1.9.1 - 3":
+  "integrity" "sha512-m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg=="
+  "resolved" "https://registry.npmjs.org/jquery/-/jquery-3.7.1.tgz"
+  "version" "3.7.1"
+
 "js-beautify@^1.6.12", "js-beautify@^1.6.14":
   "integrity" "sha512-yuck9KirNSCAwyNJbqW+BxJqJ0NLJ4PwBUzQQACl5O3qHMBXVkXb/rD0ilh/Lat/tn88zSZ+CAHOlk0DsY7GuQ=="
   "resolved" "https://registry.npmjs.org/js-beautify/-/js-beautify-1.14.0.tgz"
@@ -5048,9 +5058,9 @@
   "version" "0.4.0"
 
 "node-releases@^2.0.13":
-  "integrity" "sha512-+M0PwXeU80kRohZ3aT4J/OnR+l9/KD2nVLNNoRgFtnf+umQVFdGBAO2N8+nCnEi0xlh/Wk3zOGC+vNNx+uM79Q=="
-  "resolved" "https://registry.npmjs.org/node-releases/-/node-releases-2.0.11.tgz"
-  "version" "2.0.11"
+  "integrity" "sha512-uYr7J37ae/ORWdZeQ1xxMJe3NtdmqMC/JZK+geofDrkLUApKRHPd18/TxtBOJ4A0/+uUIliorNrfYV6s1b02eQ=="
+  "resolved" "https://registry.npmjs.org/node-releases/-/node-releases-2.0.13.tgz"
+  "version" "2.0.13"
 
 "nopt@^5.0.0":
   "integrity" "sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ=="
