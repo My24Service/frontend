@@ -1,5 +1,6 @@
 import axios from '@/services/api'
 import my24 from '@/services/my24'
+import DispatchData from "@/services/dispatch_data";
 
 const COMPACT = 'compact'
 const WIDE = 'wide'
@@ -72,6 +73,7 @@ class Dispatch {
   debugSubstr = 'Arno'
 
   statuscodes = null
+  dispatchData = null
 
   url = '/company/dispatch-assignedorders-user-list-v3/'
 
@@ -195,7 +197,13 @@ class Dispatch {
       this.partnerYPositions = []
       this.userYPositions = []
       const results = await this.fetchData()
-      this._draw(results.data)
+      if (this.component.getUseOld()) {
+        this._draw_old(results.data)
+      } else {
+        this.dispatchData = new DispatchData(this.monday, this.getCurrentDate(), results.data)
+        this._draw()
+      }
+
       this.component.showOverlay = false
       this.component.newData = false
     } catch(error) {
@@ -206,7 +214,31 @@ class Dispatch {
   }
 
   lastYPlus = 150
-  _draw(data, timesDone=0) {
+  _draw(timesDone=0) {
+    console.log("USING NEW DRAW")
+    this.canvas.height = this.lastYPlus
+
+    this.component.showOverlay = true
+
+    this.lastY = 1
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.hotspots = []
+
+    this.reOffset()
+    this.setDates()
+    this.drawHeader()
+
+    this.reOffset()
+    this.drawData()
+
+    if (timesDone === 0) {
+      this.lastYPlus = this.lastY + 30
+      this._draw(++timesDone)
+    }
+  }
+
+  _draw_old(data, timesDone=0) {
+    console.log("USING OLD DRAW")
     this.canvas.height = this.lastYPlus
 
     this.component.showOverlay = true
@@ -224,7 +256,7 @@ class Dispatch {
 
     if (timesDone === 0) {
       this.lastYPlus = this.lastY + 30
-      this._draw(data, ++timesDone)
+      this._draw_old(data, ++timesDone)
     }
   }
 
@@ -319,6 +351,167 @@ class Dispatch {
       for(let i=0; i<this.daysInView.length; i++) {
         console.log(`days in view: ${this.daysInView[i].dateFormatted}`, this.daysInView[i].orders)
       }
+    }
+  }
+
+  drawData() {
+    const userRegex = new RegExp(this.debugSubstr, 'i')
+    for(let i=0; i<this.dispatchData.userRows.length; i++) {
+      const userRow = this.dispatchData.userRows[i]
+      if (this.debug) {
+        if (this.debugSubstr && userRow.full_name.search(userRegex) === -1) {
+          continue
+        }
+      }
+      if (userRow.is_partner) {
+        this.ctx.fillStyle = "#e5e5e5"
+        this.ctx.fillRect(1, this.lastY, this.width-1, this.getRowHeight(userRow))
+      }
+
+      this.setText(userRow.full_name, 1+this.xPadding, this.lastY+this.getYPadding(), this.slotWidth)
+      this.drawUserRowSections(userRow)
+    }
+  }
+
+  drawUserRowSections(userRow) {
+    const startY = this.lastY
+
+    // draw order lines
+    userRow.drawData.start_outside_end_within.forEach(lineData => {
+      if (this.debug) {
+        console.log('drawOrderLine: start outside window, end within')
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, ySlot=${lineData.ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+      }
+
+      lineData.startPosX = this.getSlotsStartX()
+      lineData.endPosX = this.getEndXPos(this.dispatchData.dateToIndex[lineData.endDate])
+
+      // draw the line
+      this._drawOrderLine(lineData, lineData.ySlot, userRow.user_id)
+    })
+
+    userRow.drawData.start_inside_end_outside.forEach(lineData => {
+      if (this.debug) {
+        console.log('drawOrderLine: start inside window, end outside')
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, ySlot=${lineData.ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+      }
+
+      lineData.startPosX = this.getStartXPos(this.dispatchData.dateToIndex[lineData.startDate])
+      lineData.endPosX = this.getSlotsEndX()
+
+      // draw the line
+      this._drawOrderLine(lineData, lineData.ySlot, userRow.user_id)
+    })
+
+    userRow.drawData.start_end_inside.forEach(lineData => {
+      if (this.debug) {
+        console.log('drawOrderLine: start & end inside window, not same day')
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, ySlot=${lineData.ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+      }
+
+      lineData.startPosX = this.getStartXPos(this.dispatchData.dateToIndex[lineData.startDate])
+      lineData.endPosX = this.getEndXPos(this.dispatchData.dateToIndex[lineData.endDate])
+
+      // draw the line
+      this._drawOrderLine(lineData, lineData.ySlot, userRow.user_id)
+    })
+
+    userRow.drawData.same_day.forEach(lineData => {
+      if (this.debug) {
+        console.log('drawOrderLine: start & end inside window, same day')
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
+      }
+
+      lineData.startPosX = this.getStartXPosSameDay(this.dispatchData.dateToIndex[lineData.startDate])
+      lineData.endPosX = this.getEndXPosSameDay(this.dispatchData.dateToIndex[lineData.startDate])
+
+      // draw the line
+      this._drawOrderLine(lineData, lineData.ySlot, userRow.user_id)
+    })
+
+    userRow.drawData.start_end_outside.forEach(lineData => {
+      if (this.debug) {
+        console.log('drawOrderLine: start & end outside window, same day')
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
+      }
+
+      lineData.startPosX = this.getSlotsStartX()
+      lineData.endPosX = this.getSlotsEndX()
+
+      // draw the line
+      this._drawOrderLine(lineData, lineData.ySlot, userRow.user_id)
+    })
+
+    // vertical lines
+    const rowHeight = this.getRowHeight(userRow)
+    this.ctx.beginPath()
+    this.ctx.lineWidth = this.lineWidth
+    this.ctx.strokeStyle = '#000'
+    this.ctx.moveTo(1, this.lastY)
+    this.ctx.lineTo(1, this.lastY + rowHeight)
+    this.ctx.stroke()
+
+    this.ctx.beginPath()
+    this.ctx.lineWidth = this.lineWidth
+    this.ctx.strokeStyle = '#000'
+    this.ctx.moveTo(this.slotWidth, this.lastY)
+    this.ctx.lineTo(this.slotWidth, this.lastY + rowHeight)
+    this.ctx.stroke()
+
+    for (let x=this.slotWidth*2, i=1; x<this.width; x+=this.slotWidth, i++) {
+      this.ctx.beginPath()
+      this.ctx.strokeStyle = '#ccc'
+      this.ctx.moveTo(x, this.lastY)
+      this.ctx.lineTo(x, this.lastY + rowHeight)
+      this.ctx.stroke()
+    }
+
+    // last vertical line
+    this.ctx.beginPath()
+    this.ctx.strokeStyle = '#000'
+    this.ctx.moveTo(this.width-1, this.lastY)
+    this.ctx.lineTo(this.width-1, this.lastY + rowHeight)
+    this.ctx.stroke()
+
+    if (this.debug) {
+      console.log(`updating lastY (${this.lastY}) with height ${rowHeight}`)
+    }
+    this.lastY += rowHeight
+
+    const shape = new Path2D()
+    shape.moveTo(1, startY)
+    shape.lineTo(1, this.lastY)
+    shape.lineTo(this.width, this.lastY)
+    shape.lineTo(this.width, startY)
+    shape.closePath()
+
+    if (userRow.is_partner) {
+      if (!this.partnerYPositions.find(position => position.user_id === userRow.user_id)) {
+        this.partnerYPositions.push({
+          start: startY,
+          end: rowHeight,
+          user_id: userRow.user_id
+        })
+      }
+    } else {
+      const image = this.ctx.getImageData(
+        this.slotWidth, startY, this.width-this.slotWidth, this.lastY - startY)
+      this.userYPositions.push({
+        hover: false,
+        transImage: this.createTransparentImg(image),
+        image,
+        shape,
+        start: startY,
+        end: this.lastY,
+        user_id: userRow.user_id,
+        full_name: userRow.full_name,
+        isEmpty: true
+      })
+    }
+
+    this.horizontalLine(this.lastY)
+    if (this.debug) {
+      console.log(`--- end drawing row for user`)
     }
   }
 
@@ -794,12 +987,17 @@ class Dispatch {
     }
   }
 
-  getRowHeight() {
+  getRowHeight(userRow) {
     let max = 0
-    for(let i=0; i<this.daysInView.length; i++) {
-      if (this.daysInView[i].orders.length > max) {
-        max = this.daysInView[i].orders.length
+    if (!userRow) {
+      for(let i=0; i<this.daysInView.length; i++) {
+        if (this.daysInView[i].orders.length > max) {
+          max = this.daysInView[i].orders.length
+        }
       }
+    } else {
+      // plus 1 because it's an array pos and not the length
+      max = userRow.maxYSlot + 1
     }
 
     const height = max * this.getSlotHeight()
