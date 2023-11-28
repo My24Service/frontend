@@ -1,35 +1,5 @@
 <template>
-  <div class="app-page">
-    <header>
-      <div class="page-title">
-        <h3>
-          <b-icon icon="person-lines-fill"></b-icon>
-          {{ $trans('Dispatch') }}
-        </h3>
-        <div v-if="assignMode && selectedOrders.length > 0" class="flex-columns">
-
-          <span class="dimmed">{{ $trans('Selected orders') }}:</span>
-          <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-items">
-            {{ order.order_id }}
-            <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
-            <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
-          </span>
-
-          <span class="dimmed">{{ $trans('Selected people') }}:</span>
-          <span v-for="(user, index) in selectedUsers" :key="user.submodel_id" class="selected-items">
-            {{ user.full_name }}
-            <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedUser(index)"></b-icon>
-            <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedUser(index)"></b-icon>
-          </span>
-          <b-button-toolbar>
-          <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
-            {{ $trans('Cancel') }}</b-button>
-          <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-            {{ $trans('Assign') }}</b-button>
-          </b-button-toolbar>
-        </div>
-      </div>
-    </header>
+  <div class="container app-grid">
     <b-button @click="backToTop" id="btn-back-to-top">
       <b-icon-arrow-up-circle-fill></b-icon-arrow-up-circle-fill>
     </b-button>
@@ -174,73 +144,104 @@
 
       </template>
     </b-modal>
-    <div class="panel">
 
-
-      <b-row class="py-2">
-        <b-col cols="1">
-          <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
-          &nbsp;
-          <b-link class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
-            <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
-          </b-link>
-        </b-col>
-        <b-col cols="10">
-          <b-row>
-            <b-col cols="2" class="my-auto">
-              <b-form-datepicker
-                v-model="startDate"
-                size="sm"
-                placeholder="Start date"
-                locale="nl"
-                :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
-              ></b-form-datepicker>
-            </b-col>
-            <b-col cols="6" class="my-auto">
-              <b-link @click="function() { loadToday() }">{{ $trans('today') }}</b-link>
-              |
-              <b-link @click="function() { showSearchModal() }">{{ $trans('search') }}</b-link>
-              |
-              <span v-if="newData && !showOverlay">
-                <b-link @click="function() { dispatch.drawDispatch() }">
-                  <span class="new-data">{{ $trans('dispatch changed, refresh now') }}</span></b-link>
-              </span>
-              <span v-if="!newData">
-                <b-link @click="function() { dispatch.drawDispatch() }">{{ $trans('refresh') }}</b-link>
-              </span>
-            </b-col>
-            <b-col cols="4" class="float-right">
-              <div>
-                <b-form-radio-group
-                  v-model="mode"
-                  :options="modeOptions"
-                  class="mb-1"
-                  value-field="item"
-                  text-field="name"
-                ></b-form-radio-group>
-              </div>
-            </b-col>
-          </b-row>
-        </b-col>
-        <b-col cols="1">
-          <div class="float-right">
-            <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
-              <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
-            </b-link>
-            &nbsp;
-            <b-link class="px-1" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
-          </div>
+    <div class="heading" v-if="assignMode && selectedOrders.length > 0">
+      <b-row>
+        <b-col cols="12">
+          <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
+          <span v-for="(order, index) in selectedOrders" :key="order.id">
+            {{ order.order_id }}
+            <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
+          </span>
         </b-col>
       </b-row>
-      <b-overlay :show="showOverlay" rounded="sm">
-        <canvas ref="dispatch-canvas" class="dispatchCanvas" width=1080 height=300 @mousemove="mousemove" @click="click"></canvas>
-        <canvas id="tip" ref="dispatch-tip-canvas" width=200 height=100></canvas>
-      </b-overlay>
+      <b-row>
+        <b-col cols="12">
+          <strong>{{ $trans('Selected users') }}:</strong>&nbsp;
+          <span v-for="(user, index) in selectedUsers" :key="user.submodel_id">
+            {{ user.full_name }}
+            <b-link class="px-1" @click.prevent="removeSelectedUser(index)">[ x ]</b-link>
+          </span>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="12">
+          <footer class="modal-footer">
+            <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</b-button>
+            <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+              {{ $trans('Submit') }}</b-button>
+          </footer>
+        </b-col>
+      </b-row>
     </div>
+
+    <b-row class="py-2">
+      <b-col cols="1">
+        <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
+          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+        </b-link>
+        &nbsp;
+        <b-link class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
+          <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
+        </b-link>
+      </b-col>
+      <b-col cols="10">
+        <b-row>
+          <b-col cols="2" class="my-auto">
+            <b-form-datepicker
+              v-model="startDate"
+              size="sm"
+              placeholder="Start date"
+              locale="nl"
+              :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
+            ></b-form-datepicker>
+          </b-col>
+          <b-col cols="6" class="my-auto">
+            <b-link @click="function() { loadToday() }">{{ $trans('today') }}</b-link>
+            |
+            <b-link @click="function() { showSearchModal() }">{{ $trans('search') }}</b-link>
+            |
+            <span v-if="newData && !showOverlay">
+              <b-link @click="function() { dispatch.drawDispatch() }">
+                <span class="new-data">{{ $trans('dispatch changed, refresh now') }}</span></b-link>
+            </span>
+            <span v-if="!newData">
+              <b-link @click="function() { dispatch.drawDispatch() }">{{ $trans('refresh') }}</b-link>
+            </span>
+          </b-col>
+          <b-col cols="4" class="float-right">
+            <b-form-checkbox
+              v-model="useOld"
+            >{{ $trans('use old') }}</b-form-checkbox>
+            <div>
+              <b-form-radio-group
+                v-model="mode"
+                :options="modeOptions"
+                class="mb-1"
+                value-field="item"
+                text-field="name"
+              ></b-form-radio-group>
+            </div>
+          </b-col>
+        </b-row>
+      </b-col>
+      <b-col cols="1">
+        <div class="float-right">
+          <b-link class="px-1" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
+            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+          </b-link>
+          &nbsp;
+          <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
+            <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
+          </b-link>
+        </div>
+      </b-col>
+    </b-row>
+    <b-overlay :show="showOverlay" rounded="sm">
+      <canvas ref="dispatch-canvas" class="dispatchCanvas" width=1080 height=300 @mousemove="mousemove" @click="click"></canvas>
+      <canvas id="tip" ref="dispatch-tip-canvas" width=200 height=100></canvas>
+    </b-overlay>
   </div>
 </template>
 
@@ -291,7 +292,8 @@ export default {
       startDate: null,
       newData: false,
       minDate: null,
-      maxDate: null
+      maxDate: null,
+      useOld: true,
     }
   },
   watch: {
@@ -303,9 +305,15 @@ export default {
     startDate: function(val) {
       this.dispatch.setStartDate(val)
       this.dispatch.drawDispatch()
+    },
+    useOld: function(val) {
+      this.dispatch.drawDispatch()
     }
   },
   methods: {
+    getUseOld() {
+      return this.useOld
+    },
     // dates
     clearAssignedorderDates() {
       this.assignedOrder.alt_start_date = null
@@ -418,7 +426,6 @@ export default {
         this.showOverlay = false
         this.buttonDisabled = false
       }
-
     },
     postUnassign() {
       this.showOverlay = true
@@ -512,6 +519,7 @@ export default {
     }
 
     const statuscodes = await this.$store.dispatch('getStatuscodes')
+    // console.log(JSON.stringify(statuscodes))
     const canvas = this.$refs['dispatch-canvas']
     const tipCanvas = this.$refs['dispatch-tip-canvas']
 
@@ -528,18 +536,6 @@ export default {
 </script>
 
 <style scoped>
-
-.selected-items .icon {
-  fill: white ;
-}
-.selected-items:not(:hover) .icon:last-of-type,
-.selected-items:hover .icon:first-of-type {
-  display: none;
-}
-canvas.dispatchCanvas {
-  display: block;
-  margin: 0 auto;
-}
 span.new-data {
   color: red;
   font-style: italic;
