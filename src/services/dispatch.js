@@ -69,7 +69,7 @@ class Dispatch {
 
   debug = false
   debugNumUsers = 300
-  debugSubstr = 'teus'
+  debugSubstr = 'Arno'
 
   statuscodes = null
 
@@ -487,7 +487,7 @@ class Dispatch {
 
       if (this.debug) {
         console.log('drawOrderLine: start inside window, end outside')
-        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
       }
 
       // set y slots in all slots
@@ -503,7 +503,7 @@ class Dispatch {
 
       if (this.debug) {
         console.log('drawOrderLine: start & end inside window, not same day')
-        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, ySlot=${ySlot}, startIndex=${lineData.startIndex}, endIndex=${lineData.endIndex}`)
       }
 
       // set y slots in all slots
@@ -516,7 +516,7 @@ class Dispatch {
     rowOrderLinesPrio4.forEach(lineData => {
       if (this.debug) {
         console.log('drawOrderLine: start & end inside window, same day')
-        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
       }
 
       // find an empty slot
@@ -532,7 +532,7 @@ class Dispatch {
     rowOrderLinesPrio5.forEach(lineData => {
       if (this.debug) {
         console.log('drawOrderLine: start & end outside window, same day')
-        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
+        console.log(`assignedorder_pk=${lineData.order.assignedorder_pk}, order_id=${lineData.order.order_id}, index: ${lineData.startIndex}, startPosX: ${lineData.startPosX}, endPosX: ${lineData.endPosX}`)
       }
 
       // find an empty slot
@@ -545,6 +545,7 @@ class Dispatch {
       this._drawOrderLine(lineData, ySlot, data.user_id)
     })
 
+    // console.log(this.daysInView)
     // store info positions
     this.rowInfoPositions[this.lastY] = rowInfo.join(' ')
 
@@ -827,24 +828,30 @@ class Dispatch {
       return
     }
 
-    const nextFreeStart = this.daysInView[startIndex].orders.length
-    const nextFreeEnd = this.daysInView[endIndex].orders.length
+    let freeSlot = 0
+    let found = false
 
-    if (this.debug) {
-      console.log(`findEmptyYSlot: startIndex=${startIndex}, endIndex=${endIndex}, nextFreeStart=${nextFreeStart}, nextFreeEnd=${nextFreeEnd}`)
-    }
-
-    if (nextFreeEnd > nextFreeStart) {
-      if (this.debug) {
-        console.log(`findEmptyYSlot: returning ${nextFreeEnd}`)
+    // check if empty
+    while(!found) {
+      let isEmpty = true
+      for(let i=startIndex; i<=endIndex; i++) {
+        if (this.daysInView[i].orders[freeSlot] !== undefined) {
+          isEmpty = false
+        }
       }
-      return nextFreeEnd
+
+      if (isEmpty) {
+        found = true
+        break
+      } else {
+        freeSlot++
+      }
     }
 
     if (this.debug) {
-      console.log(`findEmptyYSlot: returning ${nextFreeStart}`)
+      console.log(`findEmptyYSlot: startIndex=${startIndex}, endIndex=${endIndex}, freeSlot=${freeSlot}`)
     }
-    return nextFreeStart
+    return freeSlot
   }
 
   getSlotsStartX() {

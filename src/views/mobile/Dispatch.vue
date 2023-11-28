@@ -326,7 +326,7 @@ export default {
           await assignedOrderModel.updateDetailChangeDate(this.assignedOrderPk, this.assignedOrder)
           this.$refs['dispatch-change-date-modal'].hide();
           this.showOverlay = false
-          this.dispatch.drawDispatch()
+          await this.dispatch.drawDispatch()
         } catch(error) {
           console.log('error updating assignedOrder dates', error)
           this.errorToast(this.$trans('Error updating dates'))
@@ -408,7 +408,7 @@ export default {
 
         this.infoToast(this.$trans('Success'), this.$trans('Order(s) assigned'))
         this.cancelAssign()
-        this.dispatch.drawDispatch()
+        await this.dispatch.drawDispatch()
         this.buttonDisabled = false
         this.showOverlay = false
       } catch (e) {
@@ -426,7 +426,7 @@ export default {
           await assign.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
           this.infoToast(this.$trans('Success'), this.$trans('Order removed from planning'))
           this.showOverlay = false
-          this.dispatch.drawDispatch()
+          await this.dispatch.drawDispatch()
         } catch (error) {
           console.log('error un-assigning', error)
           this.errorToast(this.$trans('Error un-assigning order'))
@@ -509,6 +509,7 @@ export default {
     }
 
     const statuscodes = await this.$store.dispatch('getStatuscodes')
+    // console.log(JSON.stringify(statuscodes))
     const canvas = this.$refs['dispatch-canvas']
     const tipCanvas = this.$refs['dispatch-tip-canvas']
 
