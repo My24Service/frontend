@@ -822,29 +822,35 @@ class Dispatch {
   findEmptyYSlot(startIndex, endIndex) {
     if (!(startIndex in this.daysInView) || !(endIndex in this.daysInView)) {
       if (this.debug) {
-        console.log(`startIndex=${startIndex}, or endIndex=${endIndex} not in daysInView`)
+        console.log(`findEmptyYSlot: startIndex=${startIndex}, or endIndex=${endIndex} not in daysInView`)
       }
       return
     }
 
-    const nextFreeStart = this.daysInView[startIndex].orders.length
-    const nextFreeEnd = this.daysInView[endIndex].orders.length
+    let freeSlot = 0
+    let found = false
 
-    if (this.debug) {
-      console.log(`findEmptyYSlot: startIndex=${startIndex}, endIndex=${endIndex}, nextFreeStart=${nextFreeStart}, nextFreeEnd=${nextFreeEnd}`)
-    }
-
-    if (nextFreeEnd > nextFreeStart) {
-      if (this.debug) {
-        console.log(`findEmptyYSlot: returning ${nextFreeEnd}`)
+    // check if empty
+    while(!found) {
+      let isEmpty = true
+      for (let i = startIndex; i <= endIndex; i++) {
+        if (this.daysInView[i].orders[freeSlot] !== undefined) {
+          isEmpty = false
+        }
       }
-      return nextFreeEnd
+      if (isEmpty) {
+        found = true
+        break
+      } else {
+        freeSlot++
+      }
     }
 
     if (this.debug) {
-      console.log(`findEmptyYSlot: returning ${nextFreeStart}`)
+      console.log(`findEmptyYSlot: startIndex=${startIndex}, endIndex=${endIndex}, freeSlot=${freeSlot}`)
     }
-    return nextFreeStart
+
+    return freeSlot
   }
 
   getSlotsStartX() {
