@@ -830,7 +830,6 @@ class Dispatch {
     let freeSlot = 0
     let found = false
 
-    // check if empty
     while(!found) {
       let isEmpty = true
       for (let i = startIndex; i <= endIndex; i++) {
