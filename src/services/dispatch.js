@@ -214,7 +214,7 @@ class Dispatch {
   }
 
   lastYPlus = 150
-  _draw(timesDone=0) {
+  _draw() {
     console.log("USING NEW DRAW")
     this.canvas.height = this.lastYPlus
 
@@ -230,11 +230,6 @@ class Dispatch {
 
     this.reOffset()
     this.drawData()
-
-    if (timesDone === 0) {
-      this.lastYPlus = this.lastY + 30
-      this._draw(++timesDone)
-    }
   }
 
   _draw_old(data, timesDone=0) {
