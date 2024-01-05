@@ -9,9 +9,11 @@ class DispatchData {
   dateToIndex
   numDays = 5
   numSlots = 6
+  userRows = []
+  partnerYPositions= []
   debug = false
 
-  constructor(monday, dateString) {
+  constructor(monday, dateString, data) {
     if (!dateString) {
       this.startDate = moment().weekday(monday)
     } else {
@@ -19,6 +21,7 @@ class DispatchData {
     }
 
     this.setDates()
+    this.userRows = this.createUserRows(data)
   }
 
   setDates() {
@@ -45,26 +48,32 @@ class DispatchData {
   createUserRows(data) {
     let result = []
     for (let i=0; i<data.length; i++) {
-      result.push(this.createUserRow(data[i], i))
+      result.push(this.createUserRow(data[i]))
     }
 
     return result
   }
 
-  createUserRow(data, index) {
-    // this.resetDayOrders()
+  createUserRow(data) {
+    let userRow = {
+      partnerPositions: null,
+      is_partner: data.is_partner,
+      full_name: data.full_name,
+      user_id: data.user_id,
+      maxYSlot: 0,
+      drawData: {
+        start_outside_end_within: [],
+        start_inside_end_outside: [],
+        start_end_inside: [],
+        same_day: [],
+        start_end_outside: []
+      }
+    }
+    this.resetDayOrders()
 
-    // prio 1 = start outside, end within window
-    // prio 2 = start inside, end outside window
-    // prio 3 = start/end inside window
-    // prio 4 = same day
-    // prio 5 = start/end outside window
-    let result = {
-      start_outside_end_within: [],
-      start_inside_end_outside: [],
-      start_end_inside: [],
-      same_day: [],
-      start_end_outside: []
+    // draw partners with a grey background
+    if (data.is_partner && this.partnerYPositions.length) {
+      userRow.partnerPositions = this.partnerYPositions.find(position => position.user_id === data.user_id)
     }
 
     const format = 'YYYY-MM-DD'
@@ -77,11 +86,16 @@ class DispatchData {
         const endOrder = this.getEnd(orders[i].order_pk, data.assignedorders.end)
         const startDateOrder = moment(moment(date).format(format))
         const endDateOrder = moment(endOrder.date)
+        const baseData = {
+          order: orders[i],
+          startDate: date,
+          endDate: endOrder.date
+        }
 
         // start outside window, end within
         if (startDateOrder.isBefore(startDateView) && endDateOrder.isSameOrBefore(endDateView)) {
-          result.start_outside_end_within.push({
-            order: orders[i],
+          userRow.drawData.start_outside_end_within.push({
+            ...baseData,
             startIndex: 0,
             endIndex: this.dateToIndex[endOrder.date],
           })
@@ -90,8 +104,8 @@ class DispatchData {
           // start inside window, end outside
         // else if ((date in this.dateToIndex) && !(endOrder.date in this.dateToIndex)) {
         else if (startDateOrder.isSameOrAfter(startDateView) && endDateOrder.isAfter(endDateView)) {
-          result.start_inside_end_outside.push({
-            order: orders[i],
+          userRow.drawData.start_inside_end_outside.push({
+            ...baseData,
             startIndex: this.dateToIndex[date],
             endIndex: this.numSlots-2,
           })
@@ -102,23 +116,23 @@ class DispatchData {
           // else if ((date in this.dateToIndex) && (endOrder.date in this.dateToIndex)) {
           // not same day
           if (date !== endOrder.date) {
-            result.start_end_inside.push({
-              order: orders[i],
+            userRow.drawData.start_end_inside.push({
+              ...baseData,
               startIndex: this.dateToIndex[date],
               endIndex: this.dateToIndex[endOrder.date],
             })
           } else {
             // console.log(`same day date: ${date}`, orders[i])
-            result.same_day.push({
-              order: orders[i],
+            userRow.drawData.same_day.push({
+              ...baseData,
               startIndex: this.dateToIndex[date],
               endIndex: this.dateToIndex[date],
             })
           }
           // start & end outside window
         } else if (startDateOrder.isBefore(startDateView) && endDateOrder.isAfter(endDateView)) {
-          result.start_end_outside.push({
-            order: orders[i],
+          userRow.drawData.start_end_outside.push({
+            ...baseData,
             startIndex: 0,
             endIndex: this.numSlots-2,
           })
@@ -139,49 +153,64 @@ class DispatchData {
     } // for data.assignedorders.start
 
     // draw order lines
-    result.start_outside_end_within.forEach(lineData => {
+    userRow.drawData.start_outside_end_within.forEach(lineData => {
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      lineData.ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      if (lineData.ySlot > userRow.maxYSlot) {
+        userRow.maxYSlot = lineData.ySlot
+      }
 
       // set slot in all slots
-      this.setYSlot(lineData.order.assignedorder_pk, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.assignedorder_pk, lineData.ySlot, lineData.startIndex, lineData.endIndex)
     })
 
-    result.start_inside_end_outside.forEach(lineData => {
+    userRow.drawData.start_inside_end_outside.forEach(lineData => {
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      lineData.ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      if (lineData.ySlot > userRow.maxYSlot) {
+        userRow.maxYSlot = lineData.ySlot
+      }
 
-      // set slot in all slots
-      this.setYSlot(lineData.order.order_id, ySlot, lineData.startIndex, lineData.endIndex)
+      // set slot in all lineData.ySlot
+      this.setYSlot(lineData.order.order_id, lineData.ySlot, lineData.startIndex, lineData.endIndex)
     })
 
-    result.start_end_inside.forEach(lineData => {
+    userRow.drawData.start_end_inside.forEach(lineData => {
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      lineData.ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      if (lineData.ySlot > userRow.maxYSlot) {
+        userRow.maxYSlot = lineData.ySlot
+      }
 
       // set slot in all slots
-      this.setYSlot(lineData.order.assignedorder_pk, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.assignedorder_pk, lineData.ySlot, lineData.startIndex, lineData.endIndex)
     })
 
-    result.same_day.forEach(lineData => {
+    userRow.drawData.start_end_outside.forEach(lineData => {
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      lineData.ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      if (lineData.ySlot > userRow.maxYSlot) {
+        userRow.maxYSlot = lineData.ySlot
+      }
 
       // set slot in all slots
-      this.setYSlot(lineData.order.assignedorder_pk, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.assignedorder_pk, lineData.ySlot, lineData.startIndex, lineData.endIndex)
     })
 
-    result.start_end_outside.forEach(lineData => {
+    userRow.drawData.same_day.forEach(lineData => {
       // find an empty slot
-      const ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      lineData.ySlot = this.findEmptyYSlot(lineData.startIndex, lineData.endIndex, lineData.order.assignedorder_pk)
+      if (lineData.ySlot > userRow.maxYSlot) {
+        userRow.maxYSlot = lineData.ySlot
+      }
 
       // set slot in all slots
-      this.setYSlot(lineData.order.assignedorder_pk, ySlot, lineData.startIndex, lineData.endIndex)
+      this.setYSlot(lineData.order.assignedorder_pk, lineData.ySlot, lineData.startIndex, lineData.endIndex)
     })
 
     // console.log(this.daysInView)
 
-    return result
+    return userRow
   }
 
   resetDayOrders() {

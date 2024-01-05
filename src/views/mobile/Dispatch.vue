@@ -211,6 +211,9 @@
             </span>
           </b-col>
           <b-col cols="4" class="float-right">
+            <b-form-checkbox
+              v-model="useOld"
+            >{{ $trans('use old') }}</b-form-checkbox>
             <div>
               <b-form-radio-group
                 v-model="mode"
@@ -289,7 +292,8 @@ export default {
       startDate: null,
       newData: false,
       minDate: null,
-      maxDate: null
+      maxDate: null,
+      useOld: true,
     }
   },
   watch: {
@@ -301,9 +305,15 @@ export default {
     startDate: function(val) {
       this.dispatch.setStartDate(val)
       this.dispatch.drawDispatch()
+    },
+    useOld: function(val) {
+      this.dispatch.drawDispatch()
     }
   },
   methods: {
+    getUseOld() {
+      return this.useOld
+    },
     // dates
     clearAssignedorderDates() {
       this.assignedOrder.alt_start_date = null
