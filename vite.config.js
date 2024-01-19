@@ -29,19 +29,7 @@ export default defineConfig({
             // varsContent:`@primary-color:${defaultPrimaryColor};`
           },
           {
-            scopeName: "theme-saled",
-            path: path.resolve("./src/scss/saled.scss"),
-          },
-          {
             scopeName: "theme-shltr",
-            path: path.resolve("./src/scss/shltr.scss"),
-          },
-          {
-            scopeName: "theme-wsmes",
-            path: path.resolve("./src/scss/shltr.scss"),
-          },
-          {
-            scopeName: "theme-wsmes-corporate",
             path: path.resolve("./src/scss/shltr.scss"),
           },
         ],
