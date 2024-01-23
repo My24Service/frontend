@@ -134,7 +134,8 @@ const defaultTheme = 'theme-default'
 const themes = {
   'shltr': 'theme-shltr',
   'shltr-installation': 'theme-shltr',
-  'riedel': 'theme-shltr'
+  'riedel': 'theme-shltr',
+  'az-fresh': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 
