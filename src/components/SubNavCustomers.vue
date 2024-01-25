@@ -25,6 +25,12 @@
         :to="{ name: 'customers-location-list' }">
         {{ $trans('Locations') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('upload')"
+        v-if="hasUpload"
+        :to="{ name: 'customers-upload' }">
+        {{ $trans('Upload') }}
+      </b-nav-item>
 <!--      <b-nav-item-->
 <!--        :active="isActive('calendar')"-->
 <!--        v-if="hasMaintenanceOrdersPerYear"-->
@@ -62,6 +68,9 @@ export default {
     hasMaintenanceOrdersPerYear() {
       return this.hasAccessToModule('customers', 'maintenance-order-year')
     },
+    hasUpload() {
+      return this.isStaff || this.isSuperuser
+    }
   },
 }
 </script>

@@ -23,6 +23,8 @@ import {AUTH_LEVELS} from "../constants";
 import EquipmentView from "../views/equipment/EquipmentView";
 import LocationView from "../views/equipment/LocationView";
 
+import CustomerUpload from '../views/customer/CustomerUpload.vue'
+
 export default [
 {
   path: '/customers',
@@ -182,6 +184,20 @@ export default [
       path: '/customers/calendar',
       components: {
         'app-content': Calendar,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+
+    // upload
+    {
+      name: 'customers-upload',
+      path: '/customers/upload',
+      components: {
+        'app-content': CustomerUpload,
         'app-subnav': SubNavCustomers
       },
       props: {
