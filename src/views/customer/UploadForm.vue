@@ -91,25 +91,29 @@
         <p>{{ $trans("Existing") }}: <b>{{ previewData.num_existing }}</b></p>
         <div v-if="existingData">
           <h3>{{ $trans("Existing customers")}}</h3>
-          <table v-for="existingItem of existingData" :key="existingItem">
+          <table v-for="(existingItem, index) of existingData" :key="`table-${index}`">
             <tr>
               <th></th>
-              <th v-for="head in Object.keys(customerUpload.mapping)" :key="head">{{ head }}</th>
+              <th v-for="(head, index2) in Object.keys(customerUpload.mapping)" :key="`${head}-${index}-${index2}`">
+                {{ head }}
+              </th>
             </tr>
             <tr>
               <td>{{ $trans("Upload row") }}</td>
-              <td v-for="col of existingItem.upload_row" :key="col">{{ col }}</td>
+              <td v-for="(col, index2) of existingItem.upload_row" :key="`${col}-${index}-${index2}`">{{ col }}</td>
             </tr>
-            <tr v-for="db_row of existingItem.database_rows" :key="db_row">
+            <tr v-for="(db_row, index3) of existingItem.database_rows" :key="`db_row-${index}-${index3}`">
               <td>{{ $trans("Database row") }}</td>
-              <td v-for="col of db_row" :key="col">{{ col }}</td>
+              <td v-for="(col, index2) of db_row" :key="`${col}-${index}-${index2}-${index3}`">
+                {{ col }}
+              </td>
             </tr>
           </table>
         </div>
         <div v-if="errors.length">
           <h3>{{ $trans("Empty fields")}}</h3>
           <table>
-            <tr v-for="missing of errors" :key="missing">
+            <tr v-for="(missing, index) of errors" :key="`missing-${index}`">
               <td>{{ missing.name }}</td>
               <td>{{ missing.empty }}</td>
             </tr>
