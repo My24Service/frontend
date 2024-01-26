@@ -39,6 +39,7 @@
         <ul>
           <li>country_code: NL, BE, DE, etc.</li>
           <li>external_identifier: {{ $trans("internal ID used by company ") }}</li>
+          <li>{{ $trans("Required fields") }}: {{ required.join(', ') }}</li>
         </ul>
       </div>
       <div v-if="missing.length" class="missing">
@@ -87,24 +88,28 @@
         </footer>
       </div>
       <div v-if="previewData">
-        <p>{{ $trans("Inserts") }}: <b>{{ previewData.num_insert }}</b></p>
-        <p>{{ $trans("Existing") }}: <b>{{ previewData.num_existing }}</b></p>
-        <div v-if="existingData">
+        <p>{{ $trans("New customers") }}: <b>{{ previewData.num_insert }}</b></p>
+        <p>{{ $trans("Existing customers") }}: <b>{{ previewData.num_existing }}</b></p>
+        <div v-if="previewData.num_existing">
           <h3>{{ $trans("Existing customers")}}</h3>
-          <table v-for="(existingItem, index) of existingData" :key="`table-${index}`">
+          <table>
             <tr>
-              <th></th>
-              <th v-for="(head, index2) in Object.keys(customerUpload.mapping)" :key="`${head}-${index}-${index2}`">
+              <th>&nbsp;</th>
+              <th style="width: 80px" v-for="(head, index) in Object.keys(customerUpload.mapping)" :key="`head-${index}`">
                 {{ head }}
               </th>
             </tr>
+          </table>
+          <table v-for="(existingItem, index) of existingData" :key="`table-${index}`">
             <tr>
-              <td>{{ $trans("Upload row") }}</td>
-              <td v-for="(col, index2) of existingItem.upload_row" :key="`${col}-${index}-${index2}`">{{ col }}</td>
+              <td class="preview-col">{{ $trans("Upload row") }}</td>
+              <td class="preview-col" v-for="(col, index2) of existingItem.upload_row" :key="`${col}-${index}-${index2}`">
+                {{ col }}
+              </td>
             </tr>
             <tr v-for="(db_row, index3) of existingItem.database_rows" :key="`db_row-${index}-${index3}`">
-              <td>{{ $trans("Database row") }}</td>
-              <td v-for="(col, index2) of db_row" :key="`${col}-${index}-${index2}-${index3}`">
+              <td class="preview-col">{{ $trans("Database row") }}</td>
+              <td class="preview-col" v-for="(col, index2) of db_row" :key="`${col}-${index}-${index2}-${index3}`">
                 {{ col }}
               </td>
             </tr>
@@ -114,8 +119,12 @@
           <h3>{{ $trans("Empty fields")}}</h3>
           <table>
             <tr v-for="(missing, index) of errors" :key="`missing-${index}`">
-              <td>{{ missing.name }}</td>
-              <td>{{ missing.empty }}</td>
+              <td>
+                <div>
+                  {{ $trans("Name")}}: <b>{{ missing.name }}</b><br/>
+                  {{ $trans("fields") }}: <b><i>{{ missing.empty }}</i></b>
+                </div>
+              </td>
             </tr>
           </table>
         </div>
@@ -245,11 +254,6 @@ export default {
     },
     async submitUpdatePreview() {
       this.isPreviewLoading = true
-      // this.customerUpload = {
-      //   ...this.customerUpload,
-      //   filter_on: this.filter_on,
-      //   mapping: this.mapping
-      // }
       delete this.customerUpload.file
       await this.service.update(this.pk, this.customerUpload)
       this.previewData = await this.service.previewUpload(this.pk)
@@ -258,7 +262,6 @@ export default {
       const headers = Object.keys(this.customerUpload.mapping)
       this.existingData = []
 
-      // TODO dit is vreselijk stuk
       /*
       {
             'num_update': num_update,
@@ -356,5 +359,8 @@ export default {
 }
 .mapping_td {
   padding: 4px
+}
+.preview-col {
+  width: 100px;
 }
 </style>
