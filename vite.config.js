@@ -11,7 +11,11 @@ export default defineConfig({
   // },
   server: {
     host: 'demo.my24service.com',
-    port: 3000
+    port: 3000,
+    hmr: {
+      host: "localhost",
+      port: 3000
+    }
   },
   plugins: [
     vue(),
