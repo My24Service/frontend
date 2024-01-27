@@ -51,7 +51,7 @@
           <th class="mapping_header_db_field">{{ $trans('Database field') }}</th>
           <th class="mapping_header_filter_field">{{ $trans('Use in filter?') }}</th>
         </tr>
-        <tr v-for="head in Object.keys(customerUpload.mapping)" :key="head">
+        <tr v-for="head in uploadHeaders" :key="head">
           <td class="mapping_td">{{ head }}</td>
           <td class="mapping_td">
 <!--            <b-form-select-->
@@ -88,14 +88,18 @@
         </footer>
       </div>
       <div v-if="previewData">
-        <p>{{ $trans("New customers") }}: <b>{{ previewData.num_insert }}</b></p>
-        <p>{{ $trans("Existing customers") }}: <b>{{ previewData.num_existing }}</b></p>
+        <div class="bg-success previewBlock rounded">
+          {{ $trans("New customers") }}: <b>{{ previewData.num_insert }}</b>
+        </div>
+        <div class="bg-warning previewBlock rounded">
+          {{ $trans("Existing customers") }}: <b>{{ previewData.num_existing }}</b>
+        </div>
         <div v-if="previewData.num_existing">
           <h3>{{ $trans("Existing customers")}}</h3>
           <table>
             <tr>
               <th>&nbsp;</th>
-              <th style="width: 80px" v-for="(head, index) in Object.keys(customerUpload.mapping)" :key="`head-${index}`">
+              <th style="width: 80px" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
                 {{ head }}
               </th>
             </tr>
@@ -117,13 +121,20 @@
         </div>
         <div v-if="errors.length">
           <h3>{{ $trans("Empty fields")}}</h3>
-          <table>
-            <tr v-for="(missing, index) of errors" :key="`missing-${index}`">
-              <td>
-                <div>
-                  {{ $trans("Name")}}: <b>{{ missing.name }}</b><br/>
-                  {{ $trans("fields") }}: <b><i>{{ missing.empty }}</i></b>
-                </div>
+          <table style="border: black solid">
+            <tr style="border: black solid">
+              <th style="width: 120px; border: black solid" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
+                {{ head }}
+              </th>
+            </tr>
+            <tr style="border: black solid" v-for="(missing, index) of errors" :key="`missing-${index}`">
+              <td
+                v-for="(field, index2) of uploadHeaders"
+                :key="`td-${index}-${index2}`"
+                :class="`${missing.empty_fields.indexOf(field) !== -1 ? 'bg-danger' : ''}`"
+                style="border: black solid"
+              >
+                {{ missing.upload_rec[field] }}
               </td>
             </tr>
           </table>
@@ -192,6 +203,7 @@ export default {
       errors: [],
       isPreviewLoading: false,
       isLoading: true,
+      uploadHeaders: []
     }
   },
   async created() {
@@ -203,6 +215,11 @@ export default {
 
       // load
       this.customerUpload = await this.service.detail(this.pk)
+      const line = await this.service.readHead(this.pk)
+
+      // headers so we can keep that order
+      this.uploadHeaders = Object.keys(line);
+
       // define this here and not in the backend because the JS model contains more fields
       const exclude = [
         'default_currency', 'id', 'products_without_tax', 'maintenance_contract',
@@ -309,8 +326,8 @@ export default {
       console.log(nameField)
       for (const row of this.previewData.errors) {
         this.errors.push({
-          name: row.upload_rec[nameField],
-          empty: row.empty_fields.join(', ')
+          upload_rec: row.upload_rec,
+          empty_fields: row.empty_fields
         })
       }
 
@@ -328,13 +345,6 @@ export default {
       this.$router.go(-1)
     }
   },
-  // async beforeDestroy() {
-  //   // delete created entry
-  //   if (this.created.id) {
-  //     await this.service.delete(this.created.id)
-  //     this.created = new CustomerUpload({})
-  //   }
-  // }
 }
 </script>
 
@@ -362,5 +372,9 @@ export default {
 }
 .preview-col {
   width: 100px;
+}
+.previewBlock {
+  padding: 6px;
+  margin-bottom: 10px;
 }
 </style>
