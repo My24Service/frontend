@@ -96,24 +96,29 @@
         </div>
         <div v-if="previewData.num_existing">
           <h3>{{ $trans("Existing customers")}}</h3>
-          <table>
+
+          <table
+            v-for="(existingItem, index) of existingData" :key="`table-${index}`"
+            class="preview-table"
+          >
             <tr>
-              <th>&nbsp;</th>
-              <th style="width: 80px" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
+              <th class="preview-cell">&nbsp;&nbsp;</th>
+              <th class="preview-cell" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
                 {{ head }}
               </th>
             </tr>
-          </table>
-          <table v-for="(existingItem, index) of existingData" :key="`table-${index}`">
-            <tr>
-              <td class="preview-col">{{ $trans("Upload row") }}</td>
-              <td class="preview-col" v-for="(col, index2) of existingItem.upload_row" :key="`${col}-${index}-${index2}`">
+            <tr class="preview-row">
+              <td class="preview-cell">{{ $trans("Upload") }}</td>
+              <td class="preview-cell" v-for="(col, index2) of existingItem.upload_row" :key="`${col}-${index}-${index2}`">
                 {{ col }}
               </td>
             </tr>
-            <tr v-for="(db_row, index3) of existingItem.database_rows" :key="`db_row-${index}-${index3}`">
-              <td class="preview-col">{{ $trans("Database row") }}</td>
-              <td class="preview-col" v-for="(col, index2) of db_row" :key="`${col}-${index}-${index2}-${index3}`">
+            <tr
+              v-for="(db_row, index3) of existingItem.database_rows" :key="`db_row-${index}-${index3}`"
+              class="preview-row"
+            >
+              <td class="preview-cell">{{ $trans("Database") }}</td>
+              <td class="preview-cell" v-for="(col, index2) of db_row" :key="`${col}-${index}-${index2}-${index3}`">
                 {{ col }}
               </td>
             </tr>
@@ -121,18 +126,18 @@
         </div>
         <div v-if="errors.length">
           <h3>{{ $trans("Empty fields")}}</h3>
-          <table style="border: black solid">
-            <tr style="border: black solid">
-              <th style="width: 120px; border: black solid" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
+          <table class="preview-table">
+            <tr class="preview-row">
+              <th class="preview-cell" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
                 {{ head }}
               </th>
             </tr>
-            <tr style="border: black solid" v-for="(missing, index) of errors" :key="`missing-${index}`">
+            <tr class="preview-row" v-for="(missing, index) of errors" :key="`missing-${index}`">
               <td
                 v-for="(field, index2) of uploadHeaders"
                 :key="`td-${index}-${index2}`"
                 :class="`${missing.empty_fields.indexOf(field) !== -1 ? 'bg-danger' : ''}`"
-                style="border: black solid"
+                class="preview-cell"
               >
                 {{ missing.upload_rec[field] }}
               </td>
@@ -276,7 +281,6 @@ export default {
       this.previewData = await this.service.previewUpload(this.pk)
 
       // transform existing
-      const headers = Object.keys(this.customerUpload.mapping)
       this.existingData = []
 
       /*
@@ -299,19 +303,20 @@ export default {
             ]
         }
        */
+
       for (const name of Object.keys(this.previewData.updates)) {
         let row = {
           upload_row: [],
           database_rows: []
         }
 
-        for (const field of headers) {
+        for (const field of this.uploadHeaders) {
           row.upload_row.push(this.previewData.updates[name].upload_rec[field])
         }
 
         for (const customerData of this.previewData.updates[name].entries) {
           let db_row = []
-          for (const field of headers) {
+          for (const field of this.uploadHeaders) {
             db_row.push(customerData[this.customerUpload.mapping[field]])
           }
           row.database_rows.push(db_row)
@@ -319,11 +324,9 @@ export default {
 
         this.existingData.push(row)
       }
+      console.log(this.existingData)
 
       this.errors = []
-      const nameField = Object.keys(this.customerUpload.mapping).find(
-        (field) => this.customerUpload.mapping[field] === 'name')
-      console.log(nameField)
       for (const row of this.previewData.errors) {
         this.errors.push({
           upload_rec: row.upload_rec,
@@ -376,5 +379,16 @@ export default {
 .previewBlock {
   padding: 6px;
   margin-bottom: 10px;
+}
+.preview-table, .preview-row, .preview-cell {
+  border: black solid;
+}
+.preview-cell {
+  font-size: 10px;
+  width: 120px;
+  padding: 4px;
+}
+.preview-table {
+  margin-bottom: 16px;
 }
 </style>
