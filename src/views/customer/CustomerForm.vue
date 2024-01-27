@@ -357,7 +357,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import {CustomerModel, CustomerService} from '../../models/customer/Customer.js'
+import {CustomerModel, CustomerService} from '@/models/customer/Customer'
 import partnerModel from '../../models/company/Partner.js'
 import Collapse from '../../components/Collapse.vue'
 import PriceInput from "../../components/PriceInput";
@@ -406,7 +406,7 @@ export default {
       minutes: ['00', '15', '30', '45'],
       submitClicked: false,
       customerService: new CustomerService(),
-      customer: new CustomerModel(),
+      customer: new CustomerModel({}),
       errorMessage: null,
       branchPartners: [],
       branches: [],
