@@ -91,6 +91,7 @@
         :items="orders"
         responsive="md"
         class="data-table"
+        tbody-tr-class="order-row"
         v-bind:tbody-tr-attr="rowStyle"
       >
         <template #head(id)="">

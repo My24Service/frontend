@@ -1,11 +1,10 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
 import NavItems from '@/components/NavItems.vue'
-import localVue from '../index'
 import my24 from "@/services/my24"
 
 const resultCertainModules = {
@@ -63,9 +62,8 @@ describe('Navitems.vue no staff & no superuser', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       store,
       router,
       mocks: {
@@ -79,9 +77,8 @@ describe('Navitems.vue no staff & no superuser', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('has 2 items', async () => {
+  test('has 2 items', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -141,9 +138,8 @@ describe('Navitems.vue customer', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       store,
       router,
       mocks: {
@@ -157,9 +153,8 @@ describe('Navitems.vue customer', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('has 2 items', async () => {
+  test('has 2 items', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -173,9 +168,8 @@ describe('Navitems.vue customer', () => {
     expect(navbar.element.children.length).to.eq(3)
   })
 
-  it('contains Orders', async () => {
+  test('contains Orders', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -189,9 +183,8 @@ describe('Navitems.vue customer', () => {
     expect(navbar.html()).to.contain('/orders')
   })
 
-  it('does not contain Inventory', async () => {
+  test('does not contain Inventory', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -205,9 +198,8 @@ describe('Navitems.vue customer', () => {
     expect(navbar.html()).not.to.contain('/inventory')
   })
 
-  it('does not contain members', async () => {
+  test('does not contain members', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -267,9 +259,8 @@ describe('Navitems.vue branch employee', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       store,
       router,
       mocks: {
@@ -283,9 +274,8 @@ describe('Navitems.vue branch employee', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('has 5 items', async () => {
+  test('has 5 items', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -299,9 +289,8 @@ describe('Navitems.vue branch employee', () => {
     expect(navbar.element.children.length).to.eq(5)
   })
 
-  it('contains Orders', async () => {
+  test('contains Orders', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -315,9 +304,8 @@ describe('Navitems.vue branch employee', () => {
     expect(navbar.html()).to.contain('/orders')
   })
 
-  it('does not contain Inventory', async () => {
+  test('does not contain Inventory', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -331,9 +319,8 @@ describe('Navitems.vue branch employee', () => {
     expect(navbar.html()).not.to.contain('/inventory')
   })
 
-  it('does not contain members', async () => {
+  test('does not contain members', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -390,9 +377,8 @@ describe('Navitems.vue staff', () => {
     })
   })
 
-  it('has 8 items', async () => {
+  test('has 8 items', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -406,9 +392,8 @@ describe('Navitems.vue staff', () => {
     expect(navbar.element.children.length).to.eq(9)
   })
 
-  it('does contain members', async () => {
+  test('does contain members', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -465,9 +450,8 @@ describe('Navitems.vue superuser', () => {
     })
   })
 
-  it('has 8 items', async () => {
+  test('has 8 items', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {
@@ -481,9 +465,8 @@ describe('Navitems.vue superuser', () => {
     expect(navbar.element.children.length).to.eq(9)
   })
 
-  it('does contain members', async () => {
+  test('does contain members', async () => {
     const wrapper = shallowMount(NavItems, {
-      localVue,
       router,
       store,
       mocks: {

@@ -1,13 +1,13 @@
 import axios from "axios";
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import DispatchData from '@/services/dispatch_data'
 import dispatchResponse from '../fixtures/dispatch_dates'
 
-jest.mock('axios')
+vi.mock('axios')
 
 
 describe('dispatch data class', () => {
-  it('has correct data',() => {
+  test('has correct data',() => {
     const dispatchData = new DispatchData(
       1, '2023/11/20', dispatchResponse.data)
     console.log(JSON.stringify(dispatchData.userRows))

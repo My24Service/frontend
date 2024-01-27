@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import SupplierReservationList from '@/views/inventory/SupplierReservationList.vue'
 import supplierReservationListResponse from '../../fixtures/supplier-reservations'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -33,11 +32,10 @@ const router = new VueRouter({routes})
 
 
 describe('SupplierReservationList.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(supplierReservationListResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(supplierReservationListResponse);
 
     const wrapper = shallowMount(SupplierReservationList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -50,11 +48,10 @@ describe('SupplierReservationList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(supplierReservationListResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(supplierReservationListResponse);
 
     const wrapper = mount(SupplierReservationList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -63,15 +60,14 @@ describe('SupplierReservationList.vue', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('#supplier-reservation-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    const trs = wrapper.findAll('#supplier-reservation-table > tbody > tr.reservation-row')
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "My company" and "My company 2"', async () => {
-    axios.get.mockResolvedValueOnce(supplierReservationListResponse);
+  test('contains "My company" and "My company 2"', async () => {
+    axios.get.mockResolvedValue(supplierReservationListResponse);
 
     const wrapper = mount(SupplierReservationList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

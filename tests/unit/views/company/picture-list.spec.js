@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
 
-import localVue from '../../index'
 import PictureList from '@/views/company/PictureList.vue'
 import picturesResponse from '../../fixtures/pictures'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -25,11 +24,10 @@ const router = new VueRouter({routes})
 
 
 describe('PictureList.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(picturesResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(picturesResponse);
 
     const wrapper = shallowMount(PictureList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -42,11 +40,10 @@ describe('PictureList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(picturesResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(picturesResponse);
 
     const wrapper = mount(PictureList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -56,14 +53,13 @@ describe('PictureList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#picture-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(picturesResponse);
+  test('contains "test" and "test 2"', async () => {
+    axios.get.mockResolvedValue(picturesResponse);
 
     const wrapper = mount(PictureList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

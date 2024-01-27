@@ -1,15 +1,14 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import StockLocationView from '@/views/inventory/StockLocationView.vue'
 import stockLocationResponse from '../../fixtures/stocklocation'
 import locationMaterialsResponse from '../../fixtures/materials-for-location'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -28,9 +27,8 @@ const routes = [
 const router = new VueRouter({routes})
 
 describe('StockLocationView.vue', () => {
-  it('has StockLocationView component', async () => {
+  test('has StockLocationView component', async () => {
     const wrapper = shallowMount(StockLocationView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -46,9 +44,8 @@ describe('StockLocationView.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has 2 material rows', async () => {
+  test('has 2 material rows', async () => {
     const wrapper = mount(StockLocationView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -61,12 +58,11 @@ describe('StockLocationView.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#location-materials-table tbody tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "Centraal magazijn"', async () => {
+  test('contains "Centraal magazijn"', async () => {
     const wrapper = mount(StockLocationView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

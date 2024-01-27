@@ -1,13 +1,12 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import UserPlanningForm from '@/views/company/UserPlanningForm.vue'
 import userPlanningResponse from '../../fixtures/user-planning'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -20,9 +19,8 @@ axios.get.mockImplementation((url) => {
 
 
 describe('UserPlanningForm.vue', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(UserPlanningForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -34,9 +32,8 @@ describe('UserPlanningForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New planning user"', async () => {
+  test('insert, contains "New planning user"', async () => {
     const wrapper = mount(UserPlanningForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -48,9 +45,8 @@ describe('UserPlanningForm.vue', () => {
     expect(html).to.contain('<h2>New planning user</h2>')
   })
 
-  it('edit, contains "Edit planning user"', async () => {
+  test('edit, contains "Edit planning user"', async () => {
     const wrapper = mount(UserPlanningForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },

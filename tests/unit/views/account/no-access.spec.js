@@ -1,10 +1,9 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import Vuex from 'vuex'
 
-import localVue from '../../index'
 import NoAccess from '@/views/account/NoAccess.vue'
 
 
@@ -22,9 +21,8 @@ describe('NoAccess.vue - logged in', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(NoAccess, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -37,9 +35,8 @@ describe('NoAccess.vue - logged in', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has "enough rights', async () => {
+  test('has "enough rights', async () => {
     const wrapper = mount(NoAccess, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -52,9 +49,8 @@ describe('NoAccess.vue - logged in', () => {
     expect(html).to.contain('enough rights')
   })
 
-  it('doesn\'t have "Please login', async () => {
+  test('doesn\'t have "Please login', async () => {
     const wrapper = mount(NoAccess, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -82,9 +78,8 @@ describe('NoAccess.vue - not logged in', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(NoAccess, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -97,9 +92,8 @@ describe('NoAccess.vue - not logged in', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('doesn\'t have "enough rights', async () => {
+  test('doesn\'t have "enough rights', async () => {
     const wrapper = mount(NoAccess, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -112,9 +106,8 @@ describe('NoAccess.vue - not logged in', () => {
     expect(html).not.to.contain('enough rights')
   })
 
-  it('has "Please login', async () => {
+  test('has "Please login', async () => {
     const wrapper = mount(NoAccess, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f

@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
@@ -6,7 +6,6 @@ import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
 import SubNavMobile from '@/components/SubNavMobile'
-import localVue from '../index'
 import my24 from "@/services/my24"
 
 const memberContract = "mobile:assigned-finished,dispatch,orders,orders-finished,orders-in-progress,trips"
@@ -38,9 +37,8 @@ describe('SubNavMobile.vue maintenance', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(SubNavMobile, {
-      localVue,
       store,
       router,
       mocks: {
@@ -54,9 +52,8 @@ describe('SubNavMobile.vue maintenance', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('contains Assigned finished, Dispatch', async () => {
+  test('contains Assigned finished, Dispatch', async () => {
     const wrapper = shallowMount(SubNavMobile, {
-      localVue,
       router,
       store,
       mocks: {
@@ -71,9 +68,8 @@ describe('SubNavMobile.vue maintenance', () => {
     expect(html).to.contain('Dispatch')
   })
 
-  it('does not contain Trips, Timesheet', async () => {
+  test('does not contain Trips, Timesheet', async () => {
     const wrapper = shallowMount(SubNavMobile, {
-      localVue,
       router,
       store,
       mocks: {
@@ -114,9 +110,8 @@ describe('SubNavMobile.vue temps', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(SubNavMobile, {
-      localVue,
       store,
       router,
       mocks: {
@@ -130,9 +125,8 @@ describe('SubNavMobile.vue temps', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('contains Assigned finished, Dispatch, Trips', async () => {
+  test('contains Assigned finished, Dispatch, Trips', async () => {
     const wrapper = shallowMount(SubNavMobile, {
-      localVue,
       router,
       store,
       mocks: {
@@ -148,9 +142,8 @@ describe('SubNavMobile.vue temps', () => {
     expect(html).to.contain('Trips')
   })
 
-  it('does not contain Timesheet', async () => {
+  test('does not contain Timesheet', async () => {
     const wrapper = shallowMount(SubNavMobile, {
-      localVue,
       router,
       store,
       mocks: {
