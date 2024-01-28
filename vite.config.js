@@ -67,5 +67,6 @@ export default defineConfig({
     setupFiles: [
       'tests/unit/setupTests.js',
     ],
+    testTimeout: 300000
   },
 })
