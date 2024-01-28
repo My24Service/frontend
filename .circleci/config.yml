@@ -15,6 +15,7 @@ jobs:
       - run:
           name: Run tests
           command: yarn test
+          no_output_timeout: 20m
 #          environment:
 #            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
 #      - store_test_results:
