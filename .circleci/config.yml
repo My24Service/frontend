@@ -3,7 +3,7 @@ jobs:
   test:
     working_directory: ~/circleci-frontend
     docker:
-      - image: circleci/node
+      - image: cimg/node:18.19.0
     steps:
       - checkout
       - run:
@@ -24,7 +24,7 @@ jobs:
   build-upload-main:
     working_directory: ~/circleci-frontend
     docker:
-      - image: circleci/node
+      - image: cimg/node:18.19.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-main-build.tgz
           RELEASE_NAME: /tmp/frontend-release
@@ -84,7 +84,7 @@ jobs:
   build-upload-develop:
     working_directory: ~/circleci-frontend
     docker:
-      - image: circleci/node
+      - image: cimg/node:18.19.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-develop-build.tgz
           RELEASE_NAME: /tmp/frontend-release
