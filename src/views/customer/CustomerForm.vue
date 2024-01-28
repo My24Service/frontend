@@ -39,7 +39,7 @@
               {{ $trans('Please enter a customer ID') }}
             </b-form-invalid-feedback>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -52,7 +52,7 @@
               v-model="customer.external_identifier"
             ></b-form-input>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -71,7 +71,7 @@
               {{ $trans('Please enter a name') }}
             </b-form-invalid-feedback>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -90,7 +90,7 @@
               {{ $trans('Please enter an address') }}
             </b-form-invalid-feedback>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -128,7 +128,7 @@
               {{ $trans('Please enter a city') }}
             </b-form-invalid-feedback>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -141,7 +141,7 @@
               :options="countries"
               size="sm"></b-form-select>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -154,7 +154,7 @@
               v-model="customer.email"
             ></b-form-input>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -167,7 +167,7 @@
               v-model="customer.tel"
             ></b-form-input>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -180,7 +180,7 @@
               v-model="customer.mobile"
             ></b-form-input>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -193,7 +193,7 @@
               rows="5"
             ></b-form-input>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="3"
@@ -222,9 +222,9 @@
               rows="5"
             ></b-form-textarea>
           </b-form-group>
-        
-      
-        
+
+
+
           <b-form-group
             label-cols="6"
             label-size="sm"
@@ -232,7 +232,7 @@
             label-for="customer_standard_hours_hour"
           >
             <b-input-group>
-              
+
               <b-form-input
                 id="customer_standard_hours_hour"
                 size="sm"
@@ -245,7 +245,7 @@
               </template>
             </b-input-group>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="6"
@@ -258,7 +258,7 @@
             >
             </b-form-checkbox>
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="6"
@@ -271,7 +271,7 @@
               @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
             />
           </b-form-group>
-        
+
           <b-form-group
             label-size="sm"
             label-cols="6"
@@ -304,7 +304,7 @@
                 <b-icon-arrow-repeat v-else></b-icon-arrow-repeat>
                 &nbsp; {{ $trans('Synchronize orders') }}
               </b-button>
-            
+
             </div>
             <hr/>
             <details open>
@@ -323,7 +323,7 @@
                   size="sm"
                 ></b-form-select>
               </b-form-group>
-              
+
               <b-form-group label="Branches" v-if="customer.branch_partner !== null && branches.length > 0">
                 <b-form-radio
                   :key="branch.id"
@@ -371,7 +371,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
-import customerService, {CustomerModel} from '../../models/customer/Customer.js'
+import {CustomerModel, CustomerService} from '@/models/customer/Customer'
 import partnerModel from '../../models/company/Partner.js'
 import Collapse from '../../components/Collapse.vue'
 import PriceInput from "../../components/PriceInput";
@@ -419,7 +419,8 @@ export default {
       customerId: null,
       minutes: ['00', '15', '30', '45'],
       submitClicked: false,
-      customer: customerService.getFields(),
+      customer: new CustomerModel({}),
+      customerService: new CustomerService(),
       errorMessage: null,
       branchPartners: [],
       branches: [],
@@ -475,9 +476,9 @@ export default {
     }
 
     if (this.isCreate) {
-      const customerData = customerService.getFields()
+      const customerData = this.customerService.getFields()
       this.customer = new CustomerModel(customerData)
-      const result = await customerService.getCustomerId()
+      const result = await this.customerService.getCustomerId()
       if (result.created) {
         this.customerIdCreated = true
         this.customer.customer_id = result.customer_id
@@ -515,7 +516,7 @@ export default {
       this.selectedBranch = this.branches.find((branch) => branch.id === this.customer.branch_id)
     },
     async getNewCustomerIdFromLatest() {
-      const data = await customerService.getNewCustomerIdFromLatest()
+      const data = await this.customerService.getNewCustomerIdFromLatest()
       this.customer.customer_id = data.result.last_customer_id
     },
     async submitForm() {
@@ -538,7 +539,7 @@ export default {
 
       if (this.isCreate) {
         try {
-          await customerService.insert(this.customer)
+          await this.customerService.insert(this.customer)
           this.infoToast(this.$trans('Created'), this.$trans('Customer has been created'))
           this.isLoading = false
           this.cancelForm()
@@ -555,7 +556,7 @@ export default {
         if (this.customer.branch_partner === null) {
           this.customer.branch_id = null
         }
-        await customerService.update(this.pk, this.customer)
+        await this.customerService.update(this.pk, this.customer)
         this.infoToast(this.$trans('Updated'), this.$trans('Customer has been updated'))
         this.isLoading = false
         this.cancelForm()
@@ -569,7 +570,7 @@ export default {
       this.isLoading = true
 
       try {
-        const customerData = await customerService.detail(this.pk)
+        const customerData = await this.customerService.detail(this.pk)
         this.customer = new CustomerModel(customerData)
 
         this.isLoading = false
