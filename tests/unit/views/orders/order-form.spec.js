@@ -1,11 +1,9 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import OrderForm from '@/views/orders/OrderForm.vue'
 import OrderFormMaintenance from '@/views/orders/OrderFormMaintenance.vue'
 import OrderFormTemps from '@/views/orders/OrderFormTemps.vue'
@@ -13,7 +11,7 @@ import orderResponse from '../../fixtures/orders'
 import engineersResponse from '../../fixtures/user-engineers';
 import customerResponse from '../../fixtures/customer';
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -71,9 +69,8 @@ describe('OrderForm.vue temps', () => {
     })
   })
 
-  it('has OrderFormTemps component', async () => {
+  test('has OrderFormTemps component', async () => {
     const wrapper = mount(OrderForm, {
-      localVue,
       store,
       router,
       mocks: {
@@ -117,9 +114,8 @@ describe('OrderForm.vue maintenance', () => {
     })
   })
 
-  it('has OrderFormMaintenance component', async () => {
+  test('has OrderFormMaintenance component', async () => {
     const wrapper = mount(OrderForm, {
-      localVue,
       store,
       router,
       mocks: {

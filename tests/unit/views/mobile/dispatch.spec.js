@@ -1,15 +1,14 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import Vuex from 'vuex';
 const moment = require('moment')
 
-import localVue from '../../index'
 import Dispatch from '@/views/mobile/Dispatch.vue'
 import dispatchResponse from '../../fixtures/dispatch'
 
-jest.mock('axios')
+vi.mock('axios')
 
 describe('Dispatch.vue', () => {
   let actions
@@ -25,11 +24,10 @@ describe('Dispatch.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     axios.get.mockResolvedValue(dispatchResponse)
 
     const wrapper = shallowMount(Dispatch, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,

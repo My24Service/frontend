@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
@@ -6,7 +6,6 @@ import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
 import SubNavCustomers from '@/components/SubNavCustomers'
-import localVue from '../index'
 import my24 from "@/services/my24"
 
 const memberContract = "customers:all-maintenance-products,customers"
@@ -34,9 +33,8 @@ describe('SubNavCustomers.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(SubNavCustomers, {
-      localVue,
       store,
       router,
       mocks: {
@@ -50,7 +48,7 @@ describe('SubNavCustomers.vue', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  // it('contains Customers, All maintenance products', async () => {
+  // test('contains Customers, All maintenance products', async () => {
   //   const wrapper = await render(SubNavCustomers, {
   //     localVue,
   //     router,
@@ -67,7 +65,7 @@ describe('SubNavCustomers.vue', () => {
   //   expect(html).to.contain('Customers')
   // })
 
-  // it('does not contain "Maintenance orders/year"', async () => {
+  // test('does not contain "Maintenance orders/year"', async () => {
   //   const wrapper = await render(SubNavCustomers, {
   //     localVue,
   //     router,

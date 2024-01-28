@@ -1,15 +1,14 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import SupplierView from '@/views/inventory/SupplierView.vue'
 import supplierResponse from '../../fixtures/supplier'
 import supplierMaterialsResponse from '../../fixtures/supplier-materials'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -28,9 +27,8 @@ const routes = [
 const router = new VueRouter({routes})
 
 describe('SupplierView.vue', () => {
-  it('has SupplierView component', async () => {
+  test('has SupplierView component', async () => {
     const wrapper = shallowMount(SupplierView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -46,9 +44,8 @@ describe('SupplierView.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has 2 material rows', async () => {
+  test('has 2 material rows', async () => {
     const wrapper = mount(SupplierView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -61,12 +58,11 @@ describe('SupplierView.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#materials-table tbody tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "20 second showdown" and "Bla bla laptop"', async () => {
+  test('contains "20 second showdown" and "Bla bla laptop"', async () => {
     const wrapper = mount(SupplierView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

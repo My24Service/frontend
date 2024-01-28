@@ -1,15 +1,13 @@
 import axios from 'axios'
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import Vuex from 'vuex'
 
-import localVue from '../../index'
 import Info from '@/views/company/Info.vue'
 import infoResponse from '../../fixtures/info'
 
-jest.mock('axios')
-
+vi.mock('axios')
 
 describe('Info.vue', () => {
   let store
@@ -25,11 +23,10 @@ describe('Info.vue', () => {
     })
   })
 
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(infoResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(infoResponse);
 
     const wrapper = shallowMount(Info, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f

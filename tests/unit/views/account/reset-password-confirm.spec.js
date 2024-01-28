@@ -1,16 +1,14 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import ResetPasswordConfirm from '@/views/account/ResetPasswordConfirm.vue'
 
 
 describe('ResetPasswordConfirm.vue', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(ResetPasswordConfirm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },

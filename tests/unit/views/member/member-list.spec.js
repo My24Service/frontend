@@ -1,15 +1,14 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
 import Vuex from "vuex";
 
-import localVue from '../../index'
 import MemberList from '@/views/member/MemberList.vue'
 import memberResponse from '../../fixtures/contracts'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -50,11 +49,10 @@ describe('MemberList.vue', () => {
     })
   })
 
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(memberResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(memberResponse);
 
     const wrapper = shallowMount(MemberList, {
-      localVue,
       router,
       store,
       mocks: {
@@ -68,11 +66,10 @@ describe('MemberList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(memberResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(memberResponse);
 
     const wrapper = mount(MemberList, {
-      localVue,
       router,
       store,
       mocks: {
@@ -83,14 +80,13 @@ describe('MemberList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#member-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(memberResponse);
+  test('contains "test" and "test 2"', async () => {
+    axios.get.mockResolvedValue(memberResponse);
 
     const wrapper = mount(MemberList, {
-      localVue,
       router,
       store,
       mocks: {

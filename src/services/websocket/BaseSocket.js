@@ -119,6 +119,9 @@ class BaseSocket {
   }
 
   _connect() {
+    if (process.env.NODE_ENV === 'test') {
+      return
+    }
     const url = this._getWsUrl()
     if (this.debug) {
       console.debug(`${this.name}: connecting to: ${url}`)

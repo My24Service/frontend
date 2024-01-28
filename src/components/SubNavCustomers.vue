@@ -25,6 +25,12 @@
         :to="{ name: 'customers-location-list' }">
         {{ $trans('Locations') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('upload')"
+        v-if="hasUpload"
+        :to="{ name: 'customer-upload-list' }">
+        {{ $trans('Upload') }}
+      </b-nav-item>
 <!--      <b-nav-item-->
 <!--        :active="isActive('calendar')"-->
 <!--        v-if="hasMaintenanceOrdersPerYear"-->
@@ -36,7 +42,7 @@
 </template>
 
 <script>
-import { componentMixin } from '../utils.js'
+import { componentMixin } from '@/utils'
 
 export default {
   mixins: [componentMixin],
@@ -62,6 +68,9 @@ export default {
     hasMaintenanceOrdersPerYear() {
       return this.hasAccessToModule('customers', 'maintenance-order-year')
     },
+    hasUpload() {
+      return this.isStaff || this.isSuperuser
+    }
   },
 }
 </script>

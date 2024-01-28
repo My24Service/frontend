@@ -1,15 +1,13 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
-import localVue from '../index'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh'
 
 function HelloWorld() {}
 
 describe('ButtonLinkRefresh.vue', () => {
-  it('exists',() => {
+  test('exists',() => {
     const wrapper = shallowMount(ButtonLinkRefresh,{
-      localVue,
       propsData: {
         method: HelloWorld,
         title: 'Hello world refresh'

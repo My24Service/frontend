@@ -1,10 +1,9 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { mount, shallowMount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import InvoiceForm from '../../../../src/views/orders/InvoiceForm.vue'
 import CallOutCosts from '../../../../src/views/orders/invoice_form/CallOutCosts'
 import Distance from '../../../../src/views/orders/invoice_form/Distance'
@@ -15,17 +14,17 @@ import HeaderCell from '../../../../src/views/orders/invoice_form/Header'
 import invoiceResponse from '../../fixtures/invoiceData'
 import customerResponse from '../../fixtures/customer.js'
 import costsCocResponse from '../../fixtures/order_cost_coc'
-import {CustomerModel} from "../../../../src/models/customer/Customer";
-import {RateEngineerUserModel} from "../../../../src/models/company/UserEngineer";
+import {CustomerModel} from "@/models/customer/Customer";
+import {RateEngineerUserModel} from "@/models/company/UserEngineer";
 import {
   COST_TYPE_ACTUAL_WORK, COST_TYPE_CALL_OUT_COSTS, COST_TYPE_DISTANCE,
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_USED_MATERIALS,
   COST_TYPE_WORK_HOURS
-} from "../../../../src/models/orders/Cost";
+} from "@/models/orders/Cost";
 
-jest.mock('axios')
+vi.mock('axios')
 
 const uuid = '6487254-2387'
 
@@ -84,9 +83,8 @@ describe('InvoiceForm', () => {
     })
   })
 
-  it('has 1 InvoiceForm component', async () => {
+  test('has 1 InvoiceForm component', async () => {
     const wrapper = mount(InvoiceForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -102,12 +100,11 @@ describe('InvoiceForm', () => {
 
     el = wrapper.findAllComponents(InvoiceForm)
     expect(el.exists()).to.be.true
-    expect(el.length).to.equal(1)
+    expect(el.length).toBe(1)
   })
 
-  it('has 1 CallOutCosts component', async () => {
+  test('has 1 CallOutCosts component', async () => {
     const wrapper = mount(InvoiceForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -123,12 +120,11 @@ describe('InvoiceForm', () => {
 
     el = wrapper.findAllComponents(CallOutCosts)
     expect(el.exists()).to.be.true
-    expect(el.length).to.equal(1)
+    expect(el.length).toBe(1)
   })
 
-  it('has 4 Hours components', async () => {
+  test('has 4 Hours components', async () => {
     const wrapper = mount(InvoiceForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -144,12 +140,11 @@ describe('InvoiceForm', () => {
 
     el = wrapper.findAllComponents(Hours)
     expect(el.exists()).to.be.true
-    expect(el.length).to.equal(4)
+    expect(el.length).toBe(4)
   })
 
-  it('has 1 Distance component', async () => {
+  test('has 1 Distance component', async () => {
     const wrapper = mount(InvoiceForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -165,12 +160,11 @@ describe('InvoiceForm', () => {
 
     el = wrapper.findAllComponents(Distance)
     expect(el.exists()).to.be.true
-    expect(el.length).to.equal(1)
+    expect(el.length).toBe(1)
   })
 
-  it('has 1 Materials component', async () => {
+  test('has 1 Materials component', async () => {
     const wrapper = mount(InvoiceForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -186,7 +180,7 @@ describe('InvoiceForm', () => {
 
     el = wrapper.findAllComponents(Materials)
     expect(el.exists()).to.be.true
-    expect(el.length).to.equal(1)
+    expect(el.length).toBe(1)
   })
 })
 
@@ -199,9 +193,8 @@ describe('CallOutCosts', () => {
     })
   })
 
-  it('has 3 HeaderCells', async () => {
+  test('has 3 HeaderCells', async () => {
     const wrapper = shallowMount(CallOutCosts, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -216,12 +209,11 @@ describe('CallOutCosts', () => {
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(3)
+    expect(trs.length).toBe(3)
   })
 
-  it('has a total of €10.50', async () => {
+  test('has a total of €10.50', async () => {
     const wrapper = mount(CallOutCosts, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -236,7 +228,7 @@ describe('CallOutCosts', () => {
     await flushPromises()
 
     const total_input = wrapper.find('input.total-input-final')
-    expect(total_input.element.value).to.equal('€10.50')
+    expect(total_input.element.value).toBe('€10.50')
   })
   //
 })
@@ -250,9 +242,8 @@ describe('Distance', () => {
     })
   })
 
-  it('has 6 HeaderCells', async () => {
+  test('has 6 HeaderCells', async () => {
     const wrapper = shallowMount(Distance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -270,12 +261,11 @@ describe('Distance', () => {
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(6)
+    expect(trs.length).toBe(6)
   })
 
-  it('has a total of €325.00', async () => {
+  test('has a total of €325.00', async () => {
     const wrapper = mount(Distance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -293,13 +283,12 @@ describe('Distance', () => {
     await flushPromises()
 
     const total_input = wrapper.find('input.total-input-final')
-    expect(total_input.element.value).to.equal('€325.00')
+    expect(total_input.element.value).toBe('€325.00')
   })
   //
 
-  it('has 3 distance_row rows', async () => {
+  test('has 3 distance_row rows', async () => {
     const wrapper = mount(Distance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -317,12 +306,11 @@ describe('Distance', () => {
     await flushPromises()
 
     const els = wrapper.findAllComponents('.distance_row')
-    expect(els.length).to.equal(3)
+    expect(els.length).toBe(3)
   })
 
-  it('renders the total distance', async () => {
+  test('renders the total distance', async () => {
     const wrapper = mount(Distance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -343,7 +331,7 @@ describe('Distance', () => {
     expect(el.html()).to.contain(invoiceResponse.data.activity_totals.distance_total)
   })
 
-  it('renders a very big total distance and VAT', async () => {
+  test('renders a very big total distance and VAT', async () => {
     const digit = 1024 * 1024
     // const digit = 1024 * 1024 * 0.1 // ok
     // const digit = 1024 * 1024 * 0.01 // yields vat: expected '€823001.08' to include '823001.09'
@@ -362,7 +350,6 @@ describe('Distance', () => {
     )
 
     const wrapper = mount(Distance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -403,9 +390,8 @@ describe('Materials', () => {
     })
   })
 
-  it('has 5 HeaderCells', async () => {
+  test('has 5 HeaderCells', async () => {
     const wrapper = shallowMount(Materials, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -422,12 +408,11 @@ describe('Materials', () => {
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(5)
+    expect(trs.length).toBe(5)
   })
 
-  it('has a total of €53.50 and VAT €4.30', async () => {
+  test('has a total of €53.50 and VAT €4.30', async () => {
     const wrapper = mount(Materials, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -444,7 +429,7 @@ describe('Materials', () => {
     await flushPromises()
 
     const total_input = wrapper.find('input.total-input-final')
-    expect(total_input.element.value).to.equal('€53.50')
+    expect(total_input.element.value).toBe('€53.50')
 
     const vat_input = wrapper.find('input.vat-input-final')
     expect(vat_input.element.value).to.contain("€11.24")
@@ -461,14 +446,13 @@ describe('Hours', () => {
     })
   })
 
-  it('has 4 HeaderCells', async () => {
+  test('has 4 HeaderCells', async () => {
     const engineer_models = invoiceResponse.data.engineer_models.map((m) => new RateEngineerUserModel({
       ...m,
       margin_perc: 0
     }))
 
     const wrapper = shallowMount(Hours, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -486,17 +470,16 @@ describe('Hours', () => {
     await flushPromises()
 
     const trs = wrapper.findAllComponents(HeaderCell)
-    expect(trs.length).to.equal(4)
+    expect(trs.length).toBe(4)
   })
 
-  it('has a total of €365.00 and VAT €76.65', async () => {
+  test('has a total of €365.00 and VAT €76.65', async () => {
     const engineer_models = invoiceResponse.data.engineer_models.map((m) => new RateEngineerUserModel({
       ...m,
       margin_perc: 0
     }))
 
     const wrapper = mount(Hours, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -517,7 +500,7 @@ describe('Hours', () => {
     // 36:30 * 10 = 365
 
     const total_input = wrapper.find('input.total-input-final')
-    expect(total_input.element.value).to.equal('€365.00')
+    expect(total_input.element.value).toBe('€365.00')
 
     const vat_input = wrapper.find('input.vat-input-final')
     expect(vat_input.element.value).to.contain("€76.65")

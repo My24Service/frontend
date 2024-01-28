@@ -1,16 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderViewTemps from '@/views/orders/OrderViewTemps.vue'
 import orderResponse from '../../fixtures/order'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 ]
@@ -39,11 +38,10 @@ describe('OrderMaintenanceView.vue', () => {
     })
   })
 
-  it('has OrderViewTemps component', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('has OrderViewTemps component', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = shallowMount(OrderViewTemps, {
-      localVue,
       store,
       router,
       mocks: {
@@ -57,11 +55,10 @@ describe('OrderMaintenanceView.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has 2 orderline rows', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('has 2 orderline rows', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = mount(OrderViewTemps, {
-      localVue,
       store,
       router,
       mocks: {
@@ -72,14 +69,13 @@ describe('OrderMaintenanceView.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#orderline-table tbody tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "Required users"', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('contains "Required users"', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = mount(OrderViewTemps, {
-      localVue,
       store,
       router,
       mocks: {
@@ -93,11 +89,10 @@ describe('OrderMaintenanceView.vue', () => {
     expect(html).to.contain('Required users')
   })
 
-  it('does not have recreateWorkorderPdf button', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('does not have recreateWorkorderPdf button', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = mount(OrderViewTemps, {
-      localVue,
       store,
       router,
       mocks: {

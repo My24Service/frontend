@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
-import { createVuePlugin as vue } from "vite-plugin-vue2"
 import visualizer from 'rollup-plugin-visualizer'
 import themePreprocessorPlugin from "@zougt/vite-plugin-theme-preprocessor"
+import vue from '@vitejs/plugin-vue2'
 
 const path = require("path");
 export default defineConfig({
@@ -11,6 +11,11 @@ export default defineConfig({
   // },
   server: {
     host: 'demo.my24service.com',
+    port: 3000,
+    hmr: {
+      host: "localhost",
+      port: 3000
+    }
   },
   plugins: [
     vue(),
@@ -55,5 +60,12 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+    setupFiles: [
+      'tests/unit/setupTests.js',
+    ],
   },
 })

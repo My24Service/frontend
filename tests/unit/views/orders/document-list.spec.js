@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import DocumentList from '@/views/orders/DocumentList.vue'
 import documentsResponse from '../../fixtures/documents'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -19,17 +18,20 @@ const routes = [
   path: '/hello/world',
   name: 'order-document-add'
 },
+  {
+    path: '/hello/world',
+    name: 'order-list'
+  },
 ]
 
 const router = new VueRouter({routes})
 
 
 describe('DocumentList.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(documentsResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(documentsResponse);
 
     const wrapper = shallowMount(DocumentList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -42,11 +44,10 @@ describe('DocumentList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(documentsResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(documentsResponse);
 
     const wrapper = mount(DocumentList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -56,6 +57,6 @@ describe('DocumentList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#document-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 })

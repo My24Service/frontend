@@ -1,12 +1,10 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
-import localVue from '../index'
 import ButtonLinkSort from '@/components/ButtonLinkSort'
 
 describe('ButtonLinkSort.vue', () => {
-  it('exists',() => {
+  test('exists',() => {
     const wrapper = shallowMount(ButtonLinkSort,{
-      localVue,
       mocks: {
         $trans: () => {}
       }
