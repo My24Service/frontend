@@ -5,6 +5,7 @@ class CustomerUpload {
   file
   mapping
   filter_on
+  result_inserts
 
   constructor(data) {
     for (const [k, v] of Object.entries(data)) {
@@ -26,6 +27,10 @@ class CustomerUploadService extends BaseModel {
 
   previewUpload(pk) {
     return this.axios.get(`${this.url}${pk}/preview_upload/`).then((response) => response.data)
+  }
+
+  doUpload(pk) {
+    return this.axios.post(`${this.url}${pk}/do_upload/`).then((response) => response.data)
   }
 }
 

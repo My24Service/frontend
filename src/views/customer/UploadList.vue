@@ -105,6 +105,7 @@ export default {
       uploads: [],
       fields: [
         {key: 'file', label: this.$trans('File')},
+        {key: 'result_inserts', label: this.$trans('Customers created')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons'},
