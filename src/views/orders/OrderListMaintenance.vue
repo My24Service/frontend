@@ -34,6 +34,7 @@
         @set-filter="setStatusFilter"
         @remove-filter="removeStatusFilter"
       />
+
       <!-- FIXME sorting modal -->
       <b-modal
         id="sort-modal"
@@ -113,7 +114,7 @@
 
       <div>
         <div class="flex-columns order-filter-links">
-          
+
           <div v-if="isActive('orders')">
             <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
             <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
@@ -125,7 +126,7 @@
 
           <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
             <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
-            
+
             <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
               {{ order.order_id }}
               <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
@@ -143,7 +144,7 @@
         <div class="overflow-auto">
           <ul class="listing order-list full-size">
             <li><!-- FIXME -->
-              
+
               <div class="headings">
                 <span class="order-id">order id</span>
                 <span class="order-type">type</span>

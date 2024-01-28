@@ -192,7 +192,7 @@ export default {
         await documentModel.update(this.pk, this.document)
         this.infoToast(this.$trans('Updated'), this.$trans('Document has been updated'))
         this.isLoading = false
-        this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
+        await this.$router.push({name: 'customer-documents', params: {customerPk: this.document.customer}})
       } catch(error) {
         console.log('Error updating document', error)
         this.errorToast(this.$trans('Error updating document'))

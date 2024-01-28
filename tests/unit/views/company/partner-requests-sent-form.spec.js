@@ -1,13 +1,12 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import PartnerRequestsSentForm from '@/views/company/PartnerRequestsSentForm.vue'
 import membersResponse from '../../fixtures/members-for-partner-select'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -20,9 +19,8 @@ axios.get.mockImplementation((url) => {
 
 
 describe('PartnerRequestsSentForm.vue', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(PartnerRequestsSentForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -34,9 +32,8 @@ describe('PartnerRequestsSentForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New partner request"', async () => {
+  test('insert, contains "New partner request"', async () => {
     const wrapper = mount(PartnerRequestsSentForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },

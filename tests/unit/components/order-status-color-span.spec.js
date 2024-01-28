@@ -1,22 +1,19 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
-import localVue from '../index'
 import OrderStatusColorSpan from '@/components/OrderStatusColorSpan.vue'
 
 describe('OrderStatusColorSpan.vue', () => {
-  it('exists', () => {
+  test('exists', () => {
     const wrapper = shallowMount(OrderStatusColorSpan, {
-      localVue,
     })
 
     const navbrand = wrapper.findComponent(OrderStatusColorSpan)
     expect(navbrand.exists()).to.be.true
   })
 
-  it('has color', async () => {
+  test('has color', async () => {
     const wrapper = await render(OrderStatusColorSpan, {
-      localVue,
       propsData: {
         data: [
           {order_id: 1, color: '#fff'}
@@ -25,6 +22,7 @@ describe('OrderStatusColorSpan.vue', () => {
     })
 
     const html = wrapper.html()
-    expect(html).to.contain('style="background-color:#fff;">')
+    // console.log()
+    expect(html).to.contain('style="background-color:#fff;"')
   })
 })

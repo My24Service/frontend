@@ -192,6 +192,7 @@ class Dispatch {
   }
 
   async drawDispatch() {
+    console.log("DRAW DISPATCH")
     this.component.showOverlay = true
     try {
       this.partnerYPositions = []
@@ -216,7 +217,7 @@ class Dispatch {
   lastYPlus = 150
   _draw() {
     console.log("USING NEW DRAW")
-    this.canvas.height = this.lastYPlus
+    this.canvas.height = this.getHeight() + 50
 
     this.component.showOverlay = true
 
@@ -288,6 +289,18 @@ class Dispatch {
       date.add(1, 'days')
 	    this.endDate = date
     }
+  }
+
+  getHeight() {
+    // header
+    let height = 1 + 1 + this.getRowHeightInt() + this.lineWidth
+
+    for(let i=0; i<this.dispatchData.userRows.length; i++) {
+      const userRow = this.dispatchData.userRows[i]
+      height += this.getRowHeight(userRow)
+    }
+
+    return height
   }
 
   drawHeader() {

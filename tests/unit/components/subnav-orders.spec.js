@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
@@ -6,7 +6,6 @@ import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
 import SubNavOrders from '@/components/SubNavOrders'
-import localVue from '../index'
 import my24 from "@/services/my24"
 
 const memberContract = "orders:month-stats,orders,orders-not-accepted,past-orders,statuscodes"
@@ -36,9 +35,8 @@ describe('SubNavOrders.vue planning', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       store,
       router,
       mocks: {
@@ -52,9 +50,8 @@ describe('SubNavOrders.vue planning', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('contains Month, Not accepted orders, Past orders', async () => {
+  test('contains Month, Not accepted orders, Past orders', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       router,
       store,
       mocks: {
@@ -70,9 +67,8 @@ describe('SubNavOrders.vue planning', () => {
     expect(html).to.contain('Past orders')
   })
 
-  it('does not contain Year, Workorder orders', async () => {
+  test('does not contain Year, Workorder orders', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       router,
       store,
       mocks: {
@@ -111,9 +107,8 @@ describe('SubNavOrders.vue customer', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       store,
       router,
       mocks: {
@@ -127,9 +122,8 @@ describe('SubNavOrders.vue customer', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('contains Orders', async () => {
+  test('contains Orders', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       router,
       store,
       mocks: {
@@ -143,9 +137,8 @@ describe('SubNavOrders.vue customer', () => {
     expect(html).to.contain('Orders')
   })
 
-  it('does not contain Year, Workorder orders', async () => {
+  test('does not contain Year, Workorder orders', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       router,
       store,
       mocks: {
@@ -186,9 +179,8 @@ describe('SubNavOrders.vue branch employee', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       store,
       router,
       mocks: {
@@ -202,9 +194,8 @@ describe('SubNavOrders.vue branch employee', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('contains Orders', async () => {
+  test('contains Orders', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       router,
       store,
       mocks: {
@@ -218,9 +209,8 @@ describe('SubNavOrders.vue branch employee', () => {
     expect(html).to.contain('Orders')
   })
 
-  it('does not contain Year, Workorder orders', async () => {
+  test('does not contain Year, Workorder orders', async () => {
     const wrapper = shallowMount(SubNavOrders, {
-      localVue,
       router,
       store,
       mocks: {

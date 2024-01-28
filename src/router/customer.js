@@ -23,6 +23,9 @@ import {AUTH_LEVELS} from "../constants";
 import EquipmentView from "../views/equipment/EquipmentView";
 import LocationView from "../views/equipment/LocationView";
 
+import UploadForm from '../views/customer/UploadForm.vue'
+import UploadList from '../views/customer/UploadList.vue'
+
 export default [
 {
   path: '/customers',
@@ -182,6 +185,44 @@ export default [
       path: '/customers/calendar',
       components: {
         'app-content': Calendar,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+
+    // upload
+    {
+      name: 'customer-upload-list',
+      path: '/customers/upload',
+      components: {
+        'app-content': UploadList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-upload-add',
+      path: '/customers/upload/form',
+      components: {
+        'app-content': UploadForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-upload-edit',
+      path: '/customers/upload/form/:pk',
+      components: {
+        'app-content': UploadForm,
         'app-subnav': SubNavCustomers
       },
       props: {

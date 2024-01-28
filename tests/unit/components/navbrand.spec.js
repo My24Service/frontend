@@ -1,7 +1,6 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import Vuex from 'vuex'
-import localVue from '../index'
 import NavBrand from '@/components/NavBrand.vue'
 
 describe('NavBrand.vue', () => {
@@ -19,9 +18,8 @@ describe('NavBrand.vue', () => {
     })
   })
 
-  it('exists', () => {
+  test('exists', () => {
     const wrapper = shallowMount(NavBrand, {
-      localVue,
       store
     })
     const navbrand = wrapper.findComponent({ ref: 'nav-brand' })

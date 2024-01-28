@@ -1,15 +1,14 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import UserEmployeeForm from '../../../../src/views/company/UserEmployeeForm.vue'
 import userEmployeeResponse from '../../fixtures/user-employee'
 import branchesResponse from '../../fixtures/branches'
 import Vuex from "vuex";
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -37,9 +36,8 @@ describe('UserEmployeeForm.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(UserEmployeeForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -52,9 +50,8 @@ describe('UserEmployeeForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New employee"', async () => {
+  test('insert, contains "New employee"', async () => {
     const wrapper = mount(UserEmployeeForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -67,9 +64,8 @@ describe('UserEmployeeForm.vue', () => {
     expect(html).to.contain('<h2>New employee</h2>')
   })
 
-  it('edit, contains "Edit employee"', async () => {
+  test('edit, contains "Edit employee"', async () => {
     const wrapper = mount(UserEmployeeForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,

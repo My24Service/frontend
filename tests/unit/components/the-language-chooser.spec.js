@@ -1,9 +1,8 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import Vuex from "vuex"
 
 import TheLanguageChooser from '@/components/TheLanguageChooser.vue'
-import localVue from '../index'
 
 
 describe('TheLanguageChooser.vue', () => {
@@ -24,9 +23,8 @@ describe('TheLanguageChooser.vue', () => {
     })
   })
 
-  it('exists', () => {
+  test('exists', () => {
     const wrapper = shallowMount(TheLanguageChooser, {
-      localVue,
       store,
       mocks: {
         $trans: (t) => t

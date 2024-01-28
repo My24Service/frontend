@@ -1,16 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
 const moment = require('moment')
 
-import localVue from '../../index'
 import TimeSheet from '@/views/mobile/TimeSheet.vue'
 import TimeSheetResponse from '../../fixtures/timesheet-totals'
 import Vuex from "vuex";
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -35,11 +34,10 @@ describe('TimeSheet.vue', () => {
     })
   })
 
-  it('has TimeSheet component', async () => {
-    axios.get.mockResolvedValueOnce(TimeSheetResponse);
+  test('has TimeSheet component', async () => {
+    axios.get.mockResolvedValue(TimeSheetResponse);
 
     const wrapper = shallowMount(TimeSheet, {
-      localVue,
       router,
       store,
       mocks: {
@@ -54,11 +52,10 @@ describe('TimeSheet.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('contains "Apple User"', async () => {
-    axios.get.mockResolvedValueOnce(TimeSheetResponse);
+  test('contains "Apple User"', async () => {
+    axios.get.mockResolvedValue(TimeSheetResponse);
 
     const wrapper = mount(TimeSheet, {
-      localVue,
       router,
       store,
       mocks: {
@@ -73,11 +70,10 @@ describe('TimeSheet.vue', () => {
     expect(html).to.contain('Apple User')
   })
 
-  it('has two materials rows', async () => {
-    axios.get.mockResolvedValueOnce(TimeSheetResponse);
+  test('has two materials rows', async () => {
+    axios.get.mockResolvedValue(TimeSheetResponse);
 
     const wrapper = mount(TimeSheet, {
-      localVue,
       router,
       store,
       mocks: {
@@ -89,7 +85,7 @@ describe('TimeSheet.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#timesheet-material-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
 })

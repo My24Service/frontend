@@ -1,21 +1,24 @@
-import axios from "axios"
-import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
+import axios from "axios"
 
-import localVue from '../../index'
 import DocumentForm from '@/views/orders/DocumentForm.vue'
 import documentResponse from '../../fixtures/document'
 
-jest.mock('axios')
+vi.mock('axios')
 
 
 describe('DocumentForm.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(documentResponse);
+  beforeEach(() => {
+    axios.get.mockReset()
+  })
+
+  test('exists', async () => {
+    axios.get.mockResolvedValue(documentResponse);
 
     const wrapper = shallowMount(DocumentForm, {
-      localVue,
+      // localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -28,11 +31,11 @@ describe('DocumentForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New document"', async () => {
-    axios.get.mockResolvedValueOnce(documentResponse);
+  test('insert, contains "New document"', async () => {
+    axios.get.mockResolvedValue(documentResponse);
 
     const wrapper = mount(DocumentForm, {
-      localVue,
+      // localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -44,11 +47,11 @@ describe('DocumentForm.vue', () => {
     expect(html).to.contain('<h2>New document</h2>')
   })
 
-  it('edit, contains "Edit document"', async () => {
-    axios.get.mockResolvedValueOnce(documentResponse);
+  test('edit, contains "Edit document"', async () => {
+    axios.get.mockResolvedValue(documentResponse);
 
     const wrapper = mount(DocumentForm, {
-      localVue,
+      // localVue,
       mocks: {
         $trans: (f) => f
       },

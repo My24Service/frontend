@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import StatuscodeList from '@/views/shared/StatuscodeList.vue'
 import statuscodesResponse from '../../fixtures/trip-statuscodes'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -33,11 +32,10 @@ const router = new VueRouter({routes})
 
 
 describe('StatuscodeList.vue - trip', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(statuscodesResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(statuscodesResponse);
 
     const wrapper = shallowMount(StatuscodeList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -53,11 +51,10 @@ describe('StatuscodeList.vue - trip', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows - trip', async () => {
-    axios.get.mockResolvedValueOnce(statuscodesResponse);
+  test('has two rows - trip', async () => {
+    axios.get.mockResolvedValue(statuscodesResponse);
 
     const wrapper = mount(StatuscodeList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -69,15 +66,14 @@ describe('StatuscodeList.vue - trip', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('#statuscode-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    const trs = wrapper.findAll('#statuscode-table > tbody > tr.statuscode-row')
+    expect(trs.length).toBe(2)
   })
 
-  it('does not contain "Start order?" - trip', async () => {
-    axios.get.mockResolvedValueOnce(statuscodesResponse);
+  test('does not contain "Start order?" - trip', async () => {
+    axios.get.mockResolvedValue(statuscodesResponse);
 
     const wrapper = mount(StatuscodeList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -93,11 +89,10 @@ describe('StatuscodeList.vue - trip', () => {
     expect(html).not.to.contain('Start order?')
   })
 
-  it('contains "Start trip?" - trip', async () => {
-    axios.get.mockResolvedValueOnce(statuscodesResponse);
+  test('contains "Start trip?" - trip', async () => {
+    axios.get.mockResolvedValue(statuscodesResponse);
 
     const wrapper = mount(StatuscodeList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

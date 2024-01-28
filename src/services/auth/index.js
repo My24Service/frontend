@@ -28,7 +28,9 @@ const vm = new Vue({
       return this.authState
     },
     setInterceptors (client) {
-      clientDriver(client, this)
+      if (client) {
+        clientDriver(client, this)
+      }
     }
   }
 })
