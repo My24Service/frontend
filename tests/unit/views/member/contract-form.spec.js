@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import ContractForm from '@/views/member/ContractForm.vue'
 import contractResponse from '../../fixtures/contract'
 import moduleDataResponse from '../../fixtures/module-data'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -23,9 +22,8 @@ axios.get.mockImplementation((url) => {
 
 
 describe('ContractForm.vue', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(ContractForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -37,9 +35,8 @@ describe('ContractForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New contract"', async () => {
+  test('insert, contains "New contract"', async () => {
     const wrapper = mount(ContractForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -48,12 +45,11 @@ describe('ContractForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>New contract</h2>')
+    expect(html).to.contain('New contract</h2>')
   })
 
-  it('edit, contains "Edit contract"', async () => {
+  test('edit, contains "Edit contract"', async () => {
     const wrapper = mount(ContractForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -65,6 +61,6 @@ describe('ContractForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>Edit contract</h2>')
+    expect(html).to.contain('Edit contract</h2>')
   })
 })

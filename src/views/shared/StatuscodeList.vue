@@ -28,6 +28,7 @@
         :busy='isLoading'
         :fields="fields"
         :items="statuscodes"
+        tbody-tr-class="statuscode-row"
         responsive="md"
         class="data-table"
       >

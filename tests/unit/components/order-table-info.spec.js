@@ -1,10 +1,9 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
-import localVue from '../index'
 import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import orderResponse from '../fixtures/order'
 
@@ -36,9 +35,8 @@ describe('OrderTableInfo.vue temps', () => {
     })
   })
 
-  it('exists', () => {
+  test('exists', () => {
     const wrapper = shallowMount(OrderTableInfo, {
-      localVue,
       store,
       router,
       mocks: {
@@ -53,9 +51,8 @@ describe('OrderTableInfo.vue temps', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has "Required users"', async () => {
+  test('has "Required users"', async () => {
     const wrapper = shallowMount(OrderTableInfo, {
-      localVue,
       store,
       router,
       mocks: {
@@ -94,9 +91,8 @@ describe('OrderTableInfo.vue maintenance', () => {
     })
   })
 
-  it('exists', () => {
+  test('exists', () => {
     const wrapper = shallowMount(OrderTableInfo, {
-      localVue,
       store,
       router,
       mocks: {
@@ -111,9 +107,8 @@ describe('OrderTableInfo.vue maintenance', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('does not have "Required users"', async () => {
+  test('does not have "Required users"', async () => {
     const wrapper = shallowMount(OrderTableInfo, {
-      localVue,
       store,
       router,
       mocks: {

@@ -1,15 +1,14 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import Vuex from "vuex"
 
-import localVue from '../../index'
 import MemberForm from '@/views/member/MemberForm.vue'
 import memberResponse from '../../fixtures/contract'
 import contractsResponse from '../../fixtures/contracts'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -37,9 +36,8 @@ describe('MemberForm.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(MemberForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -52,9 +50,8 @@ describe('MemberForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New member"', async () => {
+  test('insert, contains "New member"', async () => {
     const wrapper = mount(MemberForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -64,12 +61,11 @@ describe('MemberForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>New member</h2>')
+    expect(html).to.contain('New member</h2>')
   })
 
-  it('edit, contains "Edit member"', async () => {
+  test('edit, contains "Edit member"', async () => {
     const wrapper = mount(MemberForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -82,6 +78,6 @@ describe('MemberForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>Edit member</h2>')
+    expect(html).to.contain('Edit member</h2>')
   })
 })

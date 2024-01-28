@@ -1,13 +1,11 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
-import localVue from '../index'
 import ButtonLinkDownload from '@/components/ButtonLinkDownload'
 
 describe('ButtonLinkDownload.vue', () => {
-  it('exists',() => {
+  test('exists',() => {
     const wrapper = shallowMount(ButtonLinkDownload,{
-      localVue,
       mocks: {
         $trans: () => {}
       }

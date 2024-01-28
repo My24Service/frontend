@@ -32,6 +32,7 @@
         :items="reservations"
         responsive="md"
         class="data-table"
+        tbody-tr-class="reservation-row"
         sort-icon-left
       >
         <template #head(icons)="">

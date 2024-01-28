@@ -1,16 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderListWorkorder from '@/views/orders/OrderListWorkorder.vue'
 import ordersResponse from '../../fixtures/orders'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -56,11 +55,10 @@ describe('OrderListWorkorder.vue', () => {
     })
   })
 
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListWorkorder, {
-      localVue,
       store,
       router,
       mocks: {
@@ -74,11 +72,10 @@ describe('OrderListWorkorder.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListWorkorder, {
-      localVue,
       store,
       router,
       mocks: {
@@ -88,15 +85,14 @@ describe('OrderListWorkorder.vue', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('#order-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    const trs = wrapper.findAllComponents('#order-table > tbody > tr.order-row')
+    expect(trs.length).toBe(2)
   })
 
-  it('does not contain "Required users"', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('does not contain "Required users"', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListWorkorder, {
-      localVue,
       store,
       router,
       mocks: {

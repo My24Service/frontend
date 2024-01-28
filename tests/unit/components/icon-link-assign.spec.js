@@ -1,15 +1,13 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
-import localVue from '../index'
 import IconLinkAssign from '@/components/IconLinkAssign'
 
 function HelloWorld() {}
 
 describe('IconLinkAssign.vue', () => {
-  it('exists',() => {
+  test('exists',() => {
     const wrapper = shallowMount(IconLinkAssign,{
-      localVue,
       propsData: {
         method: HelloWorld,
         title: 'Hello world'
@@ -20,9 +18,8 @@ describe('IconLinkAssign.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('renders', async () => {
+  test('renders', async () => {
     const wrapper = await render(IconLinkAssign,{
-      localVue,
       propsData: {
         method: HelloWorld,
         title: 'Hello world assign'

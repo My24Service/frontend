@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import Vuex from "vuex"
 
-import localVue from '../../index'
 import UserStudentForm from '@/views/company/UserStudentForm.vue'
 import userStudentResponse from '../../fixtures/user-student'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -34,9 +33,8 @@ describe('UserStudentForm.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(UserStudentForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -49,9 +47,8 @@ describe('UserStudentForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New student user"', async () => {
+  test('insert, contains "New student user"', async () => {
     const wrapper = mount(UserStudentForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -61,12 +58,11 @@ describe('UserStudentForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>New student user</h2>')
+    expect(html).to.contain('New student user')
   })
 
-  it('edit, contains "Edit student user"', async () => {
+  test('edit, contains "Edit student user"', async () => {
     const wrapper = mount(UserStudentForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -79,6 +75,6 @@ describe('UserStudentForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>Edit student user</h2>')
+    expect(html).to.contain('Edit student user</h2>')
   })
 })

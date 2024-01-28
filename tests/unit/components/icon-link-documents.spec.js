@@ -1,8 +1,7 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import VueRouter from 'vue-router'
-import localVue from '../index'
 import IconLinkDocuments from '@/components/IconLinkDocuments'
 
 const routes = [{
@@ -13,9 +12,8 @@ const routes = [{
 const router = new VueRouter({routes})
 
 describe('IconLinkDocuments.vue', () => {
-  it('exists',() => {
+  test('exists',() => {
     const wrapper = shallowMount(IconLinkDocuments,{
-      localVue,
       router,
       propsData: {
         router_name: 'my-documents',
@@ -28,9 +26,8 @@ describe('IconLinkDocuments.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('renders', async () => {
+  test('renders', async () => {
     const wrapper = await render(IconLinkDocuments,{
-      localVue,
       router,
       propsData: {
         router_name: 'my-documents',

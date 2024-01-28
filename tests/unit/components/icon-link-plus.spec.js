@@ -1,8 +1,7 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import VueRouter from 'vue-router'
-import localVue from '../index'
 import IconLinkPlus from '@/components/IconLinkPlus'
 
 const routes = [{
@@ -15,9 +14,8 @@ const router = new VueRouter({routes})
 function myFunction() {}
 
 describe('IconLinkPlus.vue', () => {
-  it('exists',() => {
+  test('exists',() => {
     const wrapper = shallowMount(IconLinkPlus,{
-      localVue,
       router,
       propsData: {
         router_name: 'my-documents',
@@ -30,9 +28,8 @@ describe('IconLinkPlus.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('renders th method', async () => {
+  test('renders th method', async () => {
     const wrapper = await render(IconLinkPlus,{
-      localVue,
       router,
       propsData: {
         type: 'th',
@@ -48,9 +45,8 @@ describe('IconLinkPlus.vue', () => {
     expect(html).not.to.contain('class="px-1"')
   })
 
-  it('renders th route', async () => {
+  test('renders th route', async () => {
     const wrapper = await render(IconLinkPlus,{
-      localVue,
       router,
       propsData: {
         type: 'th',
@@ -66,9 +62,8 @@ describe('IconLinkPlus.vue', () => {
     expect(html).not.to.contain('class="px-1"')
   })
 
-  it('renders tr method', async () => {
+  test('renders tr method', async () => {
     const wrapper = await render(IconLinkPlus,{
-      localVue,
       router,
       propsData: {
         type: 'tr',
@@ -84,9 +79,8 @@ describe('IconLinkPlus.vue', () => {
     expect(html).not.to.contain('href="#/add/something')
   })
 
-  it('renders tr route', async () => {
+  test('renders tr route', async () => {
     const wrapper = await render(IconLinkPlus,{
-      localVue,
       router,
       propsData: {
         type: 'tr',

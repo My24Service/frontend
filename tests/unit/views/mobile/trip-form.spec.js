@@ -1,15 +1,14 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 const moment = require('moment')
 import Vuex from "vuex"
 
-import localVue from '../../index'
 import TripForm from '@/views/mobile/TripForm.vue'
 import tripResponse from '../../fixtures/trip'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -35,9 +34,8 @@ describe('TripForm.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(TripForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
         $moment: moment,
@@ -51,9 +49,8 @@ describe('TripForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New trip"', async () => {
+  test('insert, contains "New trip"', async () => {
     const wrapper = mount(TripForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
         $moment: moment,
@@ -67,9 +64,8 @@ describe('TripForm.vue', () => {
     expect(html).to.contain('<h2>New trip</h2>')
   })
 
-  it('edit, contains "Edit trip"', async () => {
+  test('edit, contains "Edit trip"', async () => {
     const wrapper = mount(TripForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
         $moment: moment,

@@ -1,8 +1,7 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import VueRouter from 'vue-router'
-import localVue from '../index'
 import IconLinkEdit from '@/components/IconLinkEdit'
 
 const routes = [{
@@ -14,9 +13,8 @@ const routes = [{
 const router = new VueRouter({routes})
 
 describe('IconLinkEdit.vue', () => {
-  it('exists',() => {
+  test('exists',() => {
     const wrapper = shallowMount(IconLinkEdit,{
-      localVue,
       router,
       propsData: {
         router_name: 'edit-this',
@@ -29,9 +27,8 @@ describe('IconLinkEdit.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('renders', async () => {
+  test('renders', async () => {
     const wrapper = await render(IconLinkEdit,{
-      localVue,
       router,
       propsData: {
         router_name: 'edit-this',

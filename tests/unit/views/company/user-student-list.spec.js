@@ -1,16 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
 import Vuex from "vuex"
 
-import localVue from '../../index'
 import UserStudentList from '@/views/company/UserStudentList.vue'
 import userStudentResponse from '../../fixtures/users-student'
 import my24 from "../../../../src/services/my24";
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -58,11 +57,10 @@ describe('UserStudentList.vue', () => {
     })
   })
 
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(userStudentResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(userStudentResponse);
 
     const wrapper = shallowMount(UserStudentList, {
-      localVue,
       router,
       store,
       mocks: {
@@ -76,11 +74,10 @@ describe('UserStudentList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(userStudentResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(userStudentResponse);
 
     const wrapper = mount(UserStudentList, {
-      localVue,
       store,
       router,
       mocks: {
@@ -91,14 +88,13 @@ describe('UserStudentList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#studentuser-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(userStudentResponse);
+  test('contains "test" and "test 2"', async () => {
+    axios.get.mockResolvedValue(userStudentResponse);
 
     const wrapper = mount(UserStudentList, {
-      localVue,
       store,
       router,
       mocks: {

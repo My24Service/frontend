@@ -1,4 +1,4 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
@@ -6,7 +6,6 @@ import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
 import SubNavInventory from '@/components/SubNavInventory'
-import localVue from '../index'
 import my24 from "@/services/my24"
 
 const memberContract = "inventory:materials,move-material,mutations,stats,stock-locations"
@@ -34,9 +33,8 @@ describe('SubNavInventory.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(SubNavInventory, {
-      localVue,
       store,
       router,
       mocks: {
@@ -50,9 +48,8 @@ describe('SubNavInventory.vue', () => {
     expect(navbar.exists()).to.be.true
   })
 
-  it('contains Materials, Move, Statistics', async () => {
+  test('contains Materials, Move, Statistics', async () => {
     const wrapper = await render(SubNavInventory, {
-      localVue,
       router,
       store,
       mocks: {
@@ -68,9 +65,8 @@ describe('SubNavInventory.vue', () => {
     expect(html).to.contain('Statistics')
   })
 
-  it('does not contain Suppliers', async () => {
+  test('does not contain Suppliers', async () => {
     const wrapper = await render(SubNavInventory, {
-      localVue,
       router,
       store,
       mocks: {

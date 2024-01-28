@@ -1,9 +1,8 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import Vuex from "vuex"
 
 import TheIndex from '@/components/TheIndex.vue'
-import localVue from '../index'
 
 
 describe('TheIndex.vue', () => {
@@ -20,9 +19,8 @@ describe('TheIndex.vue', () => {
     })
   })
 
-  it('exists', () => {
+  test('exists', () => {
     const wrapper = shallowMount(TheIndex, {
-      localVue,
       store,
       mocks: {
         $trans: (t) => t
