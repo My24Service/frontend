@@ -9,18 +9,18 @@ jobs:
       - run:
           name: Install packages
           command: yarn
+#      - run:
+#          name: Install JUnit coverage reporter
+#          command: yarn add --dev jest-junit
       - run:
-          name: Install JUnit coverage reporter
-          command: yarn add --dev jest-junit
-      - run:
-          name: Run tests with JUnit as reporter
-          command: yarn ci:test
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
-      - store_test_results:
-          path: ./reports/junit/
-      - store_artifacts:
-          path: ./reports/junit
+          name: Run tests
+          command: yarn test
+#          environment:
+#            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+#      - store_test_results:
+#          path: ./reports/junit/
+#      - store_artifacts:
+#          path: ./reports/junit
   build-upload-main:
     working_directory: ~/circleci-frontend
     docker:
