@@ -1,17 +1,16 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import Vuex from 'vuex';
 const moment = require('moment')
 
-import localVue from '../../index'
 import PurchaseOrderForm from '@/views/inventory/PurchaseOrderForm.vue'
 import purchaseOrderResponse from '../../fixtures/purchaseorder'
 import supplierResponse from '../../fixtures/supplier-autocomplete'
 import materialResponse from '../../fixtures/material-autocomplete'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -43,9 +42,8 @@ describe('PurchaseOrderForm.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(PurchaseOrderForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -59,9 +57,8 @@ describe('PurchaseOrderForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New purchase order"', async () => {
+  test('insert, contains "New purchase order"', async () => {
     const wrapper = mount(PurchaseOrderForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -75,9 +72,8 @@ describe('PurchaseOrderForm.vue', () => {
     expect(html).to.contain('<h2>New purchase order</h2>')
   })
 
-  it('edit, contains "Edit purchase order"', async () => {
+  test('edit, contains "Edit purchase order"', async () => {
     const wrapper = mount(PurchaseOrderForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,

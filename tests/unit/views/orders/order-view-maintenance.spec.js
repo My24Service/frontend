@@ -1,16 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderViewMaintenance from '@/views/orders/OrderViewMaintenance.vue'
 import orderResponse from '../../fixtures/order'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 ]
@@ -39,11 +38,10 @@ describe('OrderMaintenanceView.vue', () => {
     })
   })
 
-  it('has OrderViewMaintenance component', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('has OrderViewMaintenance component', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = shallowMount(OrderViewMaintenance, {
-      localVue,
       store,
       router,
       mocks: {
@@ -57,11 +55,10 @@ describe('OrderMaintenanceView.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has 2 orderline rows', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('has 2 orderline rows', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = mount(OrderViewMaintenance, {
-      localVue,
       store,
       router,
       mocks: {
@@ -72,14 +69,13 @@ describe('OrderMaintenanceView.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#orderline-table tbody tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('does not contain "Required users"', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('does not contain "Required users"', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = mount(OrderViewMaintenance, {
-      localVue,
       store,
       router,
       mocks: {
@@ -93,11 +89,10 @@ describe('OrderMaintenanceView.vue', () => {
     expect(html).not.to.contain('Required users')
   })
 
-  it('has recreateWorkorderPdfButton when not past', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('has recreateWorkorderPdfButton when not past', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = mount(OrderViewMaintenance, {
-      localVue,
       store,
       router,
       mocks: {
@@ -111,11 +106,10 @@ describe('OrderMaintenanceView.vue', () => {
     expect(button.exists()).to.be.true
   })
 
-  it('does not have recreateWorkorderPdfButton when past', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('does not have recreateWorkorderPdfButton when past', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = mount(OrderViewMaintenance, {
-      localVue,
       store,
       router,
       mocks: {

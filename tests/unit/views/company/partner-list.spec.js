@@ -1,24 +1,21 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
 
-import localVue from '../../index'
 import PartnerList from '@/views/company/PartnerList.vue'
 import partnersResponse from '../../fixtures/partners'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const router = new VueRouter({routes: []})
 
-
 describe('PartnerList.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(partnersResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(partnersResponse);
 
     const wrapper = shallowMount(PartnerList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -31,11 +28,10 @@ describe('PartnerList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(partnersResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(partnersResponse);
 
     const wrapper = mount(PartnerList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -45,14 +41,13 @@ describe('PartnerList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#partner-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(partnersResponse);
+  test('contains "test" and "test 2"', async () => {
+    axios.get.mockResolvedValue(partnersResponse);
 
     const wrapper = mount(PartnerList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

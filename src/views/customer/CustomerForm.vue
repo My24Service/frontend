@@ -387,7 +387,6 @@ export default {
     },
   },
   components: {
-    Collapse,
     PriceInput,
   },
   validations() {

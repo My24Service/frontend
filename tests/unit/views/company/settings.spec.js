@@ -1,21 +1,18 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import Settings from '@/views/company/Settings.vue'
 import settingsResponse from '../../fixtures/settings'
 
-jest.mock('axios')
-
+vi.mock('axios')
 
 describe('Settings.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(settingsResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(settingsResponse);
 
     const wrapper = shallowMount(Settings, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },

@@ -1,16 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderListTemps from '@/views/orders/OrderListTemps.vue'
 import ordersResponse from '../../fixtures/orders'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -58,11 +57,10 @@ describe('OrderListTemps.vue', () => {
     })
   })
 
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = shallowMount(OrderListTemps, {
-      localVue,
       store,
       router,
       mocks: {
@@ -76,11 +74,10 @@ describe('OrderListTemps.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('contains order-list-temps ref', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('contains order-list-temps ref', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListTemps, {
-      localVue,
       store,
       router,
       mocks: {
@@ -94,11 +91,10 @@ describe('OrderListTemps.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListTemps, {
-      localVue,
       store,
       router,
       mocks: {
@@ -108,15 +104,14 @@ describe('OrderListTemps.vue', () => {
 
     await flushPromises()
 
-    const trs = wrapper.findAll('#order-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    const trs = wrapper.findAllComponents('#order-table > tbody > tr.order-row')
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "Required users"', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('contains "Required users"', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListTemps, {
-      localVue,
       store,
       router,
       mocks: {
@@ -130,11 +125,10 @@ describe('OrderListTemps.vue', () => {
     expect(html).to.contain('Required users')
   })
 
-  it('not dispatch: contains title="Documents"', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('not dispatch: contains title="Documents"', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListTemps, {
-      localVue,
       store,
       router,
       mocks: {
@@ -148,11 +142,10 @@ describe('OrderListTemps.vue', () => {
     expect(html).to.contain('title="Documents"')
   })
 
-  it('dispatch: does not contain title="Documents"', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('dispatch: does not contain title="Documents"', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListTemps, {
-      localVue,
       store,
       router,
       mocks: {

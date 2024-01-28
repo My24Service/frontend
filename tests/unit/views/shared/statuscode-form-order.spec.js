@@ -1,21 +1,19 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import StatuscodeForm from '@/views/shared/StatuscodeForm.vue'
 import statuscodeResponse from '../../fixtures/statuscode'
 
-jest.mock('axios')
+vi.mock('axios')
 
 
 describe('StatuscodeForm.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(statuscodeResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(statuscodeResponse);
 
     const wrapper = shallowMount(StatuscodeForm, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -31,11 +29,10 @@ describe('StatuscodeForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New statuscode"', async () => {
-    axios.get.mockResolvedValueOnce(statuscodeResponse);
+  test('insert, contains "New statuscode"', async () => {
+    axios.get.mockResolvedValue(statuscodeResponse);
 
     const wrapper = mount(StatuscodeForm, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -51,11 +48,10 @@ describe('StatuscodeForm.vue', () => {
     expect(html).to.contain('<h2>New statuscode</h2>')
   })
 
-  it('edit, contains "Edit statuscode"', async () => {
-    axios.get.mockResolvedValueOnce(statuscodeResponse);
+  test('edit, contains "Edit statuscode"', async () => {
+    axios.get.mockResolvedValue(statuscodeResponse);
 
     const wrapper = mount(StatuscodeForm, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -72,11 +68,10 @@ describe('StatuscodeForm.vue', () => {
     expect(html).to.contain('<h2>Edit statuscode</h2>')
   })
 
-  it('contains "Start order?" - order', async () => {
-    axios.get.mockResolvedValueOnce(statuscodeResponse);
+  test('contains "Start order?" - order', async () => {
+    axios.get.mockResolvedValue(statuscodeResponse);
 
     const wrapper = mount(StatuscodeForm, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -93,11 +88,10 @@ describe('StatuscodeForm.vue', () => {
     expect(html).to.contain('Start order?')
   })
 
-  it('doesn not contain "Start trip?" - order', async () => {
-    axios.get.mockResolvedValueOnce(statuscodeResponse);
+  test('doesn not contain "Start trip?" - order', async () => {
+    axios.get.mockResolvedValue(statuscodeResponse);
 
     const wrapper = mount(StatuscodeForm, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },

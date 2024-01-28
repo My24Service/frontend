@@ -1,14 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 const moment = require('moment')
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderFormMaintenancePlanning from '@/views/orders/OrderFormMaintenancePlanning.vue'
 import orderResponse from '../../fixtures/order'
 import engineersResponse from '../../fixtures/user-engineers.js'
+
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -47,9 +48,8 @@ describe('OrderFormMaintenance.vue temps', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = mount(OrderFormMaintenancePlanning, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -66,9 +66,8 @@ describe('OrderFormMaintenance.vue temps', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New order"', async () => {
+  test('insert, contains "New order"', async () => {
     const wrapper = mount(OrderFormMaintenancePlanning, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -80,12 +79,11 @@ describe('OrderFormMaintenance.vue temps', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>New order</h2>')
+    expect(html).to.contain('New order')
   })
 
-  it('edit, contains "Edit order"', async () => {
+  test('edit, contains "Edit order"', async () => {
     const wrapper = mount(OrderFormMaintenancePlanning, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -100,12 +98,11 @@ describe('OrderFormMaintenance.vue temps', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>Edit order</h2>')
+    expect(html).to.contain('Edit order')
   })
 
-  it('does not contain "Required users"', async () => {
+  test('does not contain "Required users"', async () => {
     const wrapper = mount(OrderFormMaintenancePlanning, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,

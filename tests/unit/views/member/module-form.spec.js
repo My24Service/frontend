@@ -1,13 +1,12 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import ModuleForm from '@/views/member/ModuleForm.vue'
 import moduleResponse from '../../fixtures/contract'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -20,9 +19,8 @@ axios.get.mockImplementation((url) => {
 
 
 describe('ModuleForm.vue', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(ModuleForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -34,9 +32,8 @@ describe('ModuleForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New module"', async () => {
+  test('insert, contains "New module"', async () => {
     const wrapper = mount(ModuleForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -45,12 +42,11 @@ describe('ModuleForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>New module</h2>')
+    expect(html).to.contain('New module</h2>')
   })
 
-  it('edit, contains "Edit module"', async () => {
+  test('edit, contains "Edit module"', async () => {
     const wrapper = mount(ModuleForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -62,6 +58,6 @@ describe('ModuleForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>Edit module</h2>')
+    expect(html).to.contain('Edit module</h2>')
   })
 })

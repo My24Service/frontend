@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
 
-import localVue from '../../index'
 import ModulePartList from '@/views/member/ModulePartList.vue'
 import modulePartResponse from '../../fixtures/module-parts'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -25,11 +24,10 @@ const router = new VueRouter({routes})
 
 
 describe('ModulePartList.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(modulePartResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(modulePartResponse);
 
     const wrapper = shallowMount(ModulePartList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -42,11 +40,10 @@ describe('ModulePartList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(modulePartResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(modulePartResponse);
 
     const wrapper = mount(ModulePartList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -56,14 +53,13 @@ describe('ModulePartList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#module-part-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(modulePartResponse);
+  test('contains "test" and "test 2"', async () => {
+    axios.get.mockResolvedValue(modulePartResponse);
 
     const wrapper = mount(ModulePartList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

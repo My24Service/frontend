@@ -1,16 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 const moment = require('moment')
 import Vuex from 'vuex'
 
-import localVue from '../../index'
 import AssignedFinished from '@/views/mobile/AssignedFinished.vue'
-import asssignedFisnihedResponse from '../../fixtures/assigned-finished'
+import assignedFinishedResponse from '../../fixtures/assigned-finished'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -36,11 +35,10 @@ describe('AssignedFinished.vue', () => {
     })
   })
 
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(asssignedFisnihedResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(assignedFinishedResponse);
 
     const wrapper = mount(AssignedFinished, {
-      localVue,
       router,
       store,
       mocks: {
@@ -55,11 +53,10 @@ describe('AssignedFinished.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(asssignedFisnihedResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(assignedFinishedResponse);
 
     const wrapper = mount(AssignedFinished, {
-      localVue,
       router,
       store,
       mocks: {
@@ -71,14 +68,13 @@ describe('AssignedFinished.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#assigned-finished-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "Duyvis Production B.V."', async () => {
-    axios.get.mockResolvedValueOnce(asssignedFisnihedResponse);
+  test('contains "Duyvis Production B.V."', async () => {
+    axios.get.mockResolvedValue(assignedFinishedResponse);
 
     const wrapper = mount(AssignedFinished, {
-      localVue,
       router,
       store,
       mocks: {

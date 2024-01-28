@@ -1,13 +1,12 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import PictureForm from '@/views/company/PictureForm.vue'
 import pictureResponse from '../../fixtures/picture'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -18,11 +17,9 @@ axios.get.mockImplementation((url) => {
   }
 })
 
-
 describe('PictureForm.vue', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(PictureForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -34,9 +31,8 @@ describe('PictureForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New picture"', async () => {
+  test('insert, contains "New picture"', async () => {
     const wrapper = mount(PictureForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -48,9 +44,8 @@ describe('PictureForm.vue', () => {
     expect(html).to.contain('<h2>New picture</h2>')
   })
 
-  it('edit, contains "Edit picture"', async () => {
+  test('edit, contains "Edit picture"', async () => {
     const wrapper = mount(PictureForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },

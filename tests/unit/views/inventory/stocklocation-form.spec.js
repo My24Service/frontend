@@ -1,13 +1,12 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import StockLocationForm from '@/views/inventory/StockLocationForm.vue'
 import stockLocationResponse from '../../fixtures/stocklocation'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -20,9 +19,8 @@ axios.get.mockImplementation((url) => {
 
 
 describe('StockLocationForm.vue', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(StockLocationForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -34,9 +32,8 @@ describe('StockLocationForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New stock location"', async () => {
+  test('insert, contains "New stock location"', async () => {
     const wrapper = mount(StockLocationForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -48,9 +45,8 @@ describe('StockLocationForm.vue', () => {
     expect(html).to.contain('<h2>New stock location</h2>')
   })
 
-  it('edit, contains "Edit stock location"', async () => {
+  test('edit, contains "Edit stock location"', async () => {
     const wrapper = mount(StockLocationForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },

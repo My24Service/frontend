@@ -85,18 +85,23 @@
       v-if="!isDetail"
     >
       <template #cell(full_name)="data">
-        <router-link class="px-1" :to="{
-          name: 'company-time-registration-detail',
-          params: {user_id: data.item.user_id},
-          query: {date: today.format('YYYY-MM-DD'), mode: activeDateQueryMode}}">
+        <router-link
+          class="px-1"
+          v-if="data.item.user_id"
+          :to="{
+            name: 'company-time-registration-detail',
+            params: {user_id: data.item.user_id},
+            query: {date: today.format('YYYY-MM-DD'), mode: activeDateQueryMode}}
+          ">
           {{ data.item.full_name }}
         </router-link>
+        <span v-if="!data.item.user_id">{{ data.item.full_name }}</span>
       </template>
       <template v-slot:[`cell(${dataField})`]="data" v-for="(dataField, index) in dataFields">
         <!-- Some complicated rendering logic here -->
 <!--        {{ date_list_moment[index] }} {{ index }}-->
         <router-link
-          v-if="activeDateQueryMode === 'month'"
+          v-if="activeDateQueryMode === 'month' && data.item.user_id"
           class="px-1"
           :to="{
             name: 'company-time-registration-detail',
@@ -105,9 +110,10 @@
           }">
           {{ data.item[dataField] }}
         </router-link>
+        <span v-if="activeDateQueryMode === 'month' && !data.item.user_id">{{ data.item[dataField] }}</span>
 
         <router-link
-          v-if="activeDateQueryMode === 'year'"
+          v-if="activeDateQueryMode === 'year' && data.item.user_id"
           class="px-1"
           :to="{
             name: 'company-time-registration-detail',
@@ -116,9 +122,10 @@
           }">
           {{ data.item[dataField] }}
         </router-link>
+        <span v-if="activeDateQueryMode === 'year' && !data.item.user_id">{{ data.item[dataField] }}</span>
 
         <router-link
-          v-if="activeDateQueryMode === 'week'"
+          v-if="activeDateQueryMode === 'week' && data.item.user_id"
           class="px-1"
           :to="{
             name: 'company-time-registration-detail',
@@ -127,6 +134,7 @@
           }">
           {{ data.item[dataField] }}
         </router-link>
+        <span v-if="activeDateQueryMode === 'week' && !data.item.user_id">{{ data.item[dataField] }}</span>
       </template>
     </b-table>
 

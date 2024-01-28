@@ -3,28 +3,29 @@ jobs:
   test:
     working_directory: ~/circleci-frontend
     docker:
-      - image: circleci/node
+      - image: cimg/node:18.19.0
     steps:
       - checkout
       - run:
           name: Install packages
           command: yarn
+#      - run:
+#          name: Install JUnit coverage reporter
+#          command: yarn add --dev jest-junit
       - run:
-          name: Install JUnit coverage reporter
-          command: yarn add --dev jest-junit
-      - run:
-          name: Run tests with JUnit as reporter
-          command: yarn ci:test
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
-      - store_test_results:
-          path: ./reports/junit/
-      - store_artifacts:
-          path: ./reports/junit
+          name: Run tests
+          command: yarn test
+          no_output_timeout: 20m
+#          environment:
+#            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
+#      - store_test_results:
+#          path: ./reports/junit/
+#      - store_artifacts:
+#          path: ./reports/junit
   build-upload-main:
     working_directory: ~/circleci-frontend
     docker:
-      - image: circleci/node
+      - image: cimg/node:18.19.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-main-build.tgz
           RELEASE_NAME: /tmp/frontend-release
@@ -84,7 +85,7 @@ jobs:
   build-upload-develop:
     working_directory: ~/circleci-frontend
     docker:
-      - image: circleci/node
+      - image: cimg/node:18.19.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-develop-build.tgz
           RELEASE_NAME: /tmp/frontend-release

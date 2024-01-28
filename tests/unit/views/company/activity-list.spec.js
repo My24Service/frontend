@@ -1,19 +1,18 @@
 import axios from 'axios'
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import ActivityList from '@/views/company/ActivityList.vue'
 import activityResponse from '../../fixtures/activity'
 
+vi.mock('axios')
 
 describe('ActivityList.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(activityResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(activityResponse);
 
     const wrapper = shallowMount(ActivityList, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -25,11 +24,10 @@ describe('ActivityList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(activityResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(activityResponse);
 
     const wrapper = mount(ActivityList, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -38,14 +36,13 @@ describe('ActivityList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#activity-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(activityResponse);
+  test('contains "test" and "test 2"', async () => {
+    axios.get.mockResolvedValue(activityResponse);
 
     const wrapper = mount(ActivityList, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },

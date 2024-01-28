@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import TripList from '@/views/mobile/TripList.vue'
 import tripsResponse from '../../fixtures/trips'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -25,11 +24,10 @@ const router = new VueRouter({routes})
 
 
 describe('TripList.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(tripsResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(tripsResponse);
 
     const wrapper = shallowMount(TripList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -42,11 +40,10 @@ describe('TripList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(tripsResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(tripsResponse);
 
     const wrapper = mount(TripList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -56,14 +53,13 @@ describe('TripList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#trip-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(tripsResponse);
+  test('contains "test" and "test 2"', async () => {
+    axios.get.mockResolvedValue(tripsResponse);
 
     const wrapper = mount(TripList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

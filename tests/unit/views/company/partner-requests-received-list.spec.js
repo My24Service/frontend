@@ -1,24 +1,21 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
 
-import localVue from '../../index'
 import PartnerRequestsReceivedList from '@/views/company/PartnerRequestsReceivedList'
 import partnerRequestsReceivedResponse from '../../fixtures/partner-requests-received'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const router = new VueRouter({routes: []})
 
-
 describe('PartnerRequestsReceivedList.vue', () => {
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(partnerRequestsReceivedResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(partnerRequestsReceivedResponse);
 
     const wrapper = shallowMount(PartnerRequestsReceivedList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -31,11 +28,10 @@ describe('PartnerRequestsReceivedList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(partnerRequestsReceivedResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(partnerRequestsReceivedResponse);
 
     const wrapper = mount(PartnerRequestsReceivedList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -45,14 +41,13 @@ describe('PartnerRequestsReceivedList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#partnerRequestsReceived-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    expect(trs.length).toBe(2)
   })
 
-  it('contains "test" and "test 2"', async () => {
-    axios.get.mockResolvedValueOnce(partnerRequestsReceivedResponse);
+  test('contains "test" and "test 2"', async () => {
+    axios.get.mockResolvedValue(partnerRequestsReceivedResponse);
 
     const wrapper = mount(PartnerRequestsReceivedList, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
