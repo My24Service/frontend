@@ -1,6 +1,6 @@
 import BaseModel from '../base'
 
-class CustomerUpload {
+class CustomerImport {
   id
   file
   mapping
@@ -14,8 +14,8 @@ class CustomerUpload {
   }
 }
 
-class CustomerUploadService extends BaseModel {
-  url = '/customer/upload/'
+class CustomerImportService extends BaseModel {
+  url = '/customer/import/'
 
   readHead(pk) {
     return this.axios.get(`${this.url}${pk}/read_head/`).then((response) => response.data)
@@ -29,13 +29,13 @@ class CustomerUploadService extends BaseModel {
     return this.axios.get(`${this.url}required/`).then((response) => response.data)
   }
 
-  previewUpload(pk) {
-    return this.axios.get(`${this.url}${pk}/preview_upload/`).then((response) => response.data)
+  previewImport(pk) {
+    return this.axios.get(`${this.url}${pk}/preview/`).then((response) => response.data)
   }
 
-  doUpload(pk) {
-    return this.axios.post(`${this.url}${pk}/do_upload/`).then((response) => response.data)
+  doImport(pk) {
+    return this.axios.post(`${this.url}${pk}/do_import/`).then((response) => response.data)
   }
 }
 
-export {CustomerUpload, CustomerUploadService}
+export {CustomerImport, CustomerImportService}

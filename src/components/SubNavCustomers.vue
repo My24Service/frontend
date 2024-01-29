@@ -31,10 +31,10 @@
         {{ $trans('Locations') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('upload')"
+        :active="isActive('import')"
         v-if="hasUpload"
-        :to="{ name: 'customer-upload-list' }">
-        {{ $trans('Upload') }}
+        :to="{ name: 'customer-import-list' }">
+        {{ $trans('Import') }}
       </b-nav-item>
 <!--      <b-nav-item-->
 <!--        :active="isActive('calendar')"-->
