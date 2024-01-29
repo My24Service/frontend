@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import { OrderSalesService } from '../../models/orders/OrderSales.js'
+import { OrderSalesService } from '@/models/orders/OrderSales'
 import my24 from '@/services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'

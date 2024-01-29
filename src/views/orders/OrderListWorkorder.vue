@@ -133,7 +133,8 @@
 
           <li v-for="order in orders" :key="order.id">
             <OrderTableInfo
-            v-bind:order="order"
+            :order="order"
+            :with-delete="false"
             />
 
             <router-link  v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
@@ -160,8 +161,8 @@
 </template>
 
 <script>
-import { OrderWorkorderService } from '../../models/orders/OrderWorkorder.js'
-import statusModel from '../../models/orders/Status.js'
+import { OrderWorkorderService } from '@/models/orders/OrderWorkorder'
+import {StatusService} from '@/models/orders/Status'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import IconLinkPlus from '../../components/IconLinkPlus.vue'
@@ -193,6 +194,7 @@ export default {
     return {
       sortMode: 'default',
       searchQuery: null,
+      statusService: new StatusService(),
       model: new OrderWorkorderService(),
       status: {
         statuscode: '',
@@ -256,9 +258,9 @@ export default {
       }
 
       try {
-        await statusModel.insert(status)
+        await this.statusService.insert(status)
         this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
-        this.loadData();
+        await this.loadData();
       } catch(error) {
         console.log('Error creating status', error)
         this.errorToast(this.$trans('Error creating status'))

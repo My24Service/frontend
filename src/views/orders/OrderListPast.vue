@@ -111,7 +111,8 @@
 
             <li v-for="order in orders" :key="order.id">
               <OrderTableInfo
-              v-bind:order="order"
+              :order="order"
+              :with-delete="false"
             />
             </li>
         </ul>
@@ -127,8 +128,8 @@
 
 <script>
 import my24 from '../../services/my24.js'
-import statusModel from '../../models/orders/Status.js'
-import { OrderPastService } from '../../models/orders/OrderPast.js'
+import {StatusService} from '@/models/orders/Status'
+import { OrderPastService } from '@/models/orders/OrderPast'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -137,7 +138,7 @@ import IconLinkPlus from '../../components/IconLinkPlus.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderFilters from "../../components/OrderFilters"
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '../../utils'
+import { componentMixin } from '@/utils'
 
 export default {
   mixins: [componentMixin],
@@ -155,6 +156,7 @@ export default {
     return {
       searchQuery: null,
       model: new OrderPastService(),
+      statusService: new StatusService(),
       statuscodes: [],
       isLoading: true,
       orders: [],
@@ -214,7 +216,7 @@ export default {
       }
 
       try {
-        await statusModel.insert(status)
+        await this.statusService.insert(status)
         this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
         await this.loadData()
       } catch(error) {

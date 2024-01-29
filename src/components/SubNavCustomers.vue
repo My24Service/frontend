@@ -32,7 +32,7 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('upload')"
-        v-if="hasUpload"
+        v-if="hasUpload && false"
         :to="{ name: 'customer-upload-list' }">
         {{ $trans('Upload') }}
       </b-nav-item>

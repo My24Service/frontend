@@ -87,11 +87,12 @@
           <li><!-- FIXME -->
             <div class="headings">
               <span class="order-id"></span>
-              <span class="order-type">type</span>
-              <span class="order-company-name">company</span>
-              <span class="order-due-date">due date</span>
-              <span class="order-assignees">people</span>
-              <span class="order-status">status</span>
+              <span class="order-type">{{ $trans("type") }}</span>
+              <span class="order-company-name">{{ $trans("company") }}</span>
+              <span class="order-due-date">{{ $trans("due date") }}</span>
+              <span class="order-assignees">{{ $trans("people") }}</span>
+              <span class="order-assignees">{{ $trans("documents") }}</span>
+              <span class="order-status">{{ $trans("status") }}</span>
             </div>
           </li>
 
@@ -102,7 +103,7 @@
 
           <li v-for="order in orders" :key="order.id">
             <OrderTableInfo
-            v-bind:order="order"
+              :order="order"
             />
           </li>
         </ul>
@@ -118,7 +119,7 @@
 </template>
 
 <script>
-import { OrderNotAcceptedService } from '../../models/orders/OrderNotAccepted.js'
+import { OrderNotAcceptedService } from '@/models/orders/OrderNotAccepted'
 import orderModel from '../../models/orders/Order.js'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -131,8 +132,8 @@ import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderFilters from "../../components/OrderFilters"
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '../../utils'
-import {NEW_DATA_EVENTS} from "../../constants";
+import { componentMixin } from '@/utils'
+import {NEW_DATA_EVENTS} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 
 export default {

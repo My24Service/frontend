@@ -272,8 +272,8 @@
 
 </style>
 <script>
-import { OrderService } from '../../models/orders/Order.js'
-import statusModel from '../../models/orders/Status.js'
+import { OrderService } from '@/models/orders/Order'
+import {StatusService} from '@/models/orders/Status'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
@@ -290,8 +290,8 @@ import SearchForm from '../../components/SearchForm.vue'
 import SubNavOrders from '../../components/SubNavOrders.vue'
 import OrderFilters from "../../components/OrderFilters.vue"
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '../../utils'
-import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "../../constants";
+import { componentMixin } from '@/utils'
+import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 
 export default {
@@ -328,6 +328,7 @@ export default {
       memberNewDataSocket: new MemberNewDataSocket(),
       sortMode: 'default',
       searchQuery: null,
+      statusService: new StatusService(),
       model: new OrderService(),
       selectedOrders: [],
       status: {
@@ -411,7 +412,7 @@ export default {
       }
 
       try {
-        await statusModel.insert(status)
+        await this.statusService.insert(status)
         this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
         await this.loadData()
       } catch(error) {

@@ -2,11 +2,11 @@
   <div class="listing-item" v-if="statuscodes.length > 0">
     <!-- delete order modal -->
     <b-modal
-      v-if="!isCustomer && !isBranchEmployee"
+      v-if="!isCustomer && !isBranchEmployee && withDelete"
       id="delete-order-modal"
       ref="delete-order-modal"
       v-bind:title="$trans('Delete?')"
-      @ok="this.doDelete"
+      @ok="doDelete"
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
     </b-modal>
@@ -30,11 +30,11 @@
           {{ $trans('Assigned to') }} {{ order.assigned_count }}
           <span v-if="order.assigned_count > 1">
             <span v-if="order.required_users"> / {{ order.required_users }}</span>
-            people
+            {{ $trans("people") }}
           </span>
-          <span v-else>person</span>
+          <span v-else>{{ $trans("person") }}</span>
         </span>
-        <span v-else title="Not assigned to anyone">&ndash;</span>
+        <span v-else :title="`$trans('Not assigned to anyone')`">&ndash;</span>
       </span>
       <span class="order-documents">
         <span v-if="order.documents.length" >
@@ -60,9 +60,9 @@
           @change="handleStatusChange(order.id, $event)"
         ></b-form-select>
         <IconLinkDelete
-          v-if="!isCustomer && !isBranchEmployee"
+          v-if="!isCustomer && !isBranchEmployee && withDelete"
           v-bind:title="$trans('Delete')"
-          v-bind:method="this.showDeleteModal"
+          v-bind:method="showDeleteModal"
         />
       </span>
   </div>
@@ -78,9 +78,10 @@
 
 <script>
 import my24 from '../services/my24.js'
-import { componentMixin } from '../utils.js'
-import statusModel from '@/models/orders/Status.js'
+import { componentMixin } from '@/utils'
+import {StatusService} from '@/models/orders/Status.js'
 import IconLinkDelete from './IconLinkDelete.vue'
+import {OrderService} from "@/models/orders/Order";
 
 export default {
   mixins: [componentMixin],
@@ -115,6 +116,8 @@ export default {
     return {
       isLoaded: false,
       memberType: null,
+      orderService: new OrderService(),
+      statusService: new StatusService(),
       orderStatus: this.order.last_status,
       orderStatusCode: null,
       orderStatusColorCode: '#666',
@@ -138,18 +141,18 @@ export default {
       type: [Object],
       required: true
     },
-    model: {
-      type: [Object],
+    withDelete: {
+      type: [Boolean],
+      default: true
     }
   },
   methods: {
     showDeleteModal() {
-      console.info('show modal')
       this.$refs['delete-order-modal'].show()
     },
     async doDelete() {
       try {
-        await this.model.delete(this.order.id)
+        await this.orderService.delete(this.order.id)
         this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
         this.$emit('reload-data')
       } catch(error) {
@@ -168,7 +171,7 @@ export default {
       }
 
       try {
-        await statusModel.insert(status)
+        await this.statusService.insert(status)
       } catch(error) {
         console.log('Error creating status', error)
         this.errorToast(this.$trans('Error creating status'))
