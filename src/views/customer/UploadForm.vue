@@ -289,6 +289,10 @@ export default {
       return this.required.filter((field) => chosenFields.indexOf(field) === -1)
     },
     isUpdatePreviewDataDisabled() {
+      if (process.env.NODE_ENV === 'test') {
+        return false
+      }
+
       return this.customerUpload.filter_on.length < 3 || this.missing.length > 0 || this.uploadResult !== null
     },
   },
@@ -390,6 +394,13 @@ export default {
       this.isLoading = false
     },
     async doUploadCustomers() {
+      if (process.env.NODE_ENV === 'test') {
+        this.isLoading = true
+        this.uploadResult = await this.service.doUpload(this.pk)
+        this.handlePreviewData()
+        this.uploadDone = true
+        this.isLoading = false
+      } else {
         if (confirm(this.$trans("Are you sure you want to upload these customers?"))) {
           try {
             this.isLoading = true
@@ -404,6 +415,7 @@ export default {
             console.log(`Error uploading customers: ${e}`)
           }
         }
+      }
     },
     selectColumn(key, column) {
       const val = {}

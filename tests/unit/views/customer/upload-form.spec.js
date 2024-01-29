@@ -35,6 +35,10 @@ const readHeadResponse = {
   }
 }
 
+const allowedExtensions = {
+  data: ['xls']
+}
+
 const tokenResponse = {
   data: {
     token: "bla"
@@ -59,6 +63,8 @@ axios.get.mockImplementation((url) => {
       return Promise.resolve(tokenResponse)
     case '/customer/upload/1/preview_upload/':
       return Promise.resolve(previewResponse)
+    case '/customer/upload/get_allowed_extensions/':
+      return Promise.resolve(allowedExtensions)
     default:
       return Promise.reject(new Error(`${url} not found`))
   }
@@ -133,6 +139,7 @@ describe('UploadForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
+    console.log(html)
     expect(html).to.contain('Existing customers</h3>')
     expect(html).to.contain('Problems found</h3>')
 
