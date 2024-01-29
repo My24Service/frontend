@@ -16,6 +16,7 @@
           <div class='panel col-1-2'>
             <b-form v-if="isCreate || isUploadAgain">
               <b-row>
+                <p><i>{{ $trans("Accepted file formats") }}: <b>{{ allowed_extensions.join(', ') }}</b></i></p>
                 <b-col cols="8" role="group">
                   <b-form-group
                     label-size="sm"
@@ -281,9 +282,8 @@ export default {
         return true
       }
 
-      const allowed_extensions = ['xls']
       const extension = this.getExtension(this.current_file)
-      return this.customerUpload.file === null && allowed_extensions.indexOf(extension) === -1
+      return this.customerUpload.file === null && this.allowed_extensions.indexOf(extension) === -1
     },
     availableColumns() {
       // return this.columns;
@@ -304,7 +304,7 @@ export default {
       return this.required.filter((field) => chosenFields.indexOf(field) === -1)
     },
     isUpdatePreviewDataDisabled() {
-      return this.missing.length > 0 || this.uploadResult !== null
+      return this.customerUpload.filter_on.length < 3 || this.missing.length > 0 || this.uploadResult !== null
     },
   },
   data() {
@@ -324,12 +324,17 @@ export default {
       uploadHeaders: [],
       uploadHeadersChanged: false,
       uploadDone: false,
-      insertErrors: []
+      insertErrors: [],
+      allowed_extensions: []
     }
   },
   async created() {
+
     if (this.isCreate) {
+      this.isLoading = true
+      this.allowed_extensions = await this.service.fetchAllowedExtensions()
       this.customerUpload = new CustomerUpload({})
+      this.isLoading = false
     } else {
       this.isLoading = true
       this.required = await this.service.fetchRequired()

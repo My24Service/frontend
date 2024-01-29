@@ -21,6 +21,10 @@ class CustomerUploadService extends BaseModel {
     return this.axios.get(`${this.url}${pk}/read_head/`).then((response) => response.data)
   }
 
+  fetchAllowedExtensions(pk) {
+    return this.axios.get(`${this.url}get_allowed_extensions/`).then((response) => response.data)
+  }
+
   fetchRequired(pk) {
     return this.axios.get(`${this.url}required/`).then((response) => response.data)
   }
