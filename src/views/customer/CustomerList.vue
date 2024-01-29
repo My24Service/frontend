@@ -5,7 +5,7 @@
       ref="search-modal"
       @do-search="handleSearchOk"
     />
-  
+
     <b-modal
       id="delete-customer-modal"
       ref="delete-customer-modal"
@@ -18,11 +18,11 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="building"></b-icon> Customers
+          <b-icon icon="building"></b-icon> {{ $trans("Customers") }}
         </h3>
         <b-button-toolbar>
               <b-button-group class="mr-1">
-                
+
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
@@ -39,10 +39,10 @@
             </b-button-toolbar>
       </div>
     </header>
-    
+
 
     <div class="app-detail panel overflow-auto">
-      
+
       <b-table
         id="customer-table"
         small
@@ -56,7 +56,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -94,7 +94,7 @@
         <template #cell(contract)="data">
           <span v-if="data.item.maintenance_contract && data.item.maintenance_contract.trim() != ''">
             <b>{{ data.item.maintenance_contract }}</b> <small>{{ $trans('Maintenance contract') }}</small>
-          </span> &nbsp; 
+          </span> &nbsp;
           <span v-if="data.item.standard_hours_txt !== '0:00'">
             <b>{{ data.item.standard_hours_txt }}</b> <small class="dimmed">{{ $trans('Standard hours') }}</small>
           </span>

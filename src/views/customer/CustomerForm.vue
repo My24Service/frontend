@@ -23,7 +23,7 @@
           <b-form-group
             label-cols="3"
             label-size="sm"
-            v-bind:label="$trans('Customer ID')"
+            :label="$trans('Customer ID')"
             label-for="customer_customer_id"
           >
             <b-form-input
