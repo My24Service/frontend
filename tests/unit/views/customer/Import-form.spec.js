@@ -61,7 +61,7 @@ axios.get.mockImplementation((url) => {
       return Promise.resolve(readHeadResponse)
     case '/get-csrf-token/':
       return Promise.resolve(tokenResponse)
-    case '/customer/import/1/preview_import/':
+    case '/customer/import/1/preview/':
       return Promise.resolve(previewResponse)
     case '/customer/import/get_allowed_extensions/':
       return Promise.resolve(allowedExtensions)
