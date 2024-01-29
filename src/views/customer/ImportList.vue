@@ -8,26 +8,26 @@
     />
 
     <b-modal
-      id="delete-customer-upload-modal"
-      ref="delete-customer-upload-modal"
+      id="delete-customer-import-modal"
+      ref="delete-customer-import-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this upload?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to delete this import?') }}</p>
     </b-modal>
 
     <div class="overflow-auto">
       <Pagination
         v-if="!isLoading"
         :model="this.service"
-        :model_name="$trans('Upload')"
+        :model_name="$trans('Import')"
       />
 
       <b-table
         small
         :busy='isLoading'
         :fields="fields"
-        :items="uploads"
+        :items="imports"
         responsive="md"
         class="data-table"
         sort-icon-left
@@ -43,8 +43,8 @@
             <b-button-toolbar>
               <b-button-group class="mr-1">
                 <ButtonLinkAdd
-                  router_name="customer-upload-add"
-                  v-bind:title="$trans('New upload')"
+                  router_name="customer-import-add"
+                  v-bind:title="$trans('New import')"
                 />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
@@ -60,7 +60,7 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              router_name="customer-upload-edit"
+              router_name="customer-import-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import {CustomerUploadService} from '@/models/customer/Upload.js'
+import {CustomerImportService} from '@/models/customer/Import.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
@@ -86,7 +86,7 @@ import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 
 export default {
-  name: 'UploadList',
+  name: 'ImportList',
   components: {
     IconLinkEdit,
     IconLinkDelete,
@@ -99,10 +99,10 @@ export default {
   data() {
     return {
       searchQuery: null,
-      uploadPk: null,
+      importPk: null,
       isLoading: false,
-      service: new CustomerUploadService(),
-      uploads: [],
+      service: new CustomerImportService(),
+      imports: [],
       fields: [
         {key: 'file', label: this.$trans('File')},
         {key: 'result_inserts', label: this.$trans('Customers created')},
@@ -128,17 +128,17 @@ export default {
     },
     // delete
     showDeleteModal(id) {
-      this.uploadPk = id
-      this.$refs['delete-customer-upload-modal'].show()
+      this.importPk = id
+      this.$refs['delete-customer-import-modal'].show()
     },
     async doDelete() {
       try {
-        await this.service.delete(this.uploadPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Upload has been deleted'))
+        await this.service.delete(this.importPk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Import has been deleted'))
         await this.loadData()
       } catch(error) {
-        console.log('error deleting upload', error)
-        this.errorToast(this.$trans('Error deleting upload'))
+        console.log('error deleting import', error)
+        this.errorToast(this.$trans('Error deleting import'))
       }
     },
     // rest
@@ -147,11 +147,11 @@ export default {
 
       try {
         const data = await this.service.list()
-        this.uploads = data.results
+        this.imports = data.results
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching uploads', error)
-        this.errorToast(this.$trans('Error loading uploads'))
+        console.log('error fetching imports', error)
+        this.errorToast(this.$trans('Error loading imports'))
         this.isLoading = false
       }
     }

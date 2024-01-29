@@ -2,9 +2,9 @@ import axios from "axios"
 import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
-import customerUploadResponse from "../../fixtures/customer_upload";
-import previewResponse from "../../fixtures/customer_upload_preview";
-import UploadForm from "@/views/customer/UploadForm.vue";
+import customerImportResponse from "../../fixtures/customer_import";
+import previewResponse from "../../fixtures/customer_import_preview";
+import ImportForm from "@/views/customer/ImportForm.vue";
 
 const readHeadResponse = {
   data: {
@@ -53,17 +53,17 @@ vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
-    case '/customer/upload/required/':
+    case '/customer/import/required/':
       return Promise.resolve(requiredResponse)
-    case '/customer/upload/1/':
-      return Promise.resolve(customerUploadResponse)
-    case '/customer/upload/1/read_head/':
+    case '/customer/import/1/':
+      return Promise.resolve(customerImportResponse)
+    case '/customer/import/1/read_head/':
       return Promise.resolve(readHeadResponse)
     case '/get-csrf-token/':
       return Promise.resolve(tokenResponse)
-    case '/customer/upload/1/preview_upload/':
+    case '/customer/import/1/preview_import/':
       return Promise.resolve(previewResponse)
-    case '/customer/upload/get_allowed_extensions/':
+    case '/customer/import/get_allowed_extensions/':
       return Promise.resolve(allowedExtensions)
     default:
       return Promise.reject(new Error(`${url} not found`))
@@ -72,16 +72,16 @@ axios.get.mockImplementation((url) => {
 
 axios.patch.mockImplementation((url) => {
   switch (url) {
-    case '/customer/upload/1/':
-      return Promise.resolve(customerUploadResponse)
+    case '/customer/import/1/':
+      return Promise.resolve(customerImportResponse)
     default:
       return Promise.reject(new Error(`${url} not found`))
   }
 })
 
-describe('UploadForm.vue', () => {
+describe('ImportForm.vue', () => {
   test('exists', async () => {
-    const wrapper = shallowMount(UploadForm, {
+    const wrapper = shallowMount(ImportForm, {
       mocks: {
         $trans: (f) => f,
       },
@@ -89,12 +89,12 @@ describe('UploadForm.vue', () => {
 
     await flushPromises()
 
-    const el = wrapper.findComponent(UploadForm)
+    const el = wrapper.findComponent(ImportForm)
     expect(el.exists()).to.be.true
   })
 
-  test('insert, contains "Upload customer data"', async () => {
-    const wrapper = mount(UploadForm, {
+  test('insert, contains "Import customer data"', async () => {
+    const wrapper = mount(ImportForm, {
       mocks: {
         $trans: (f) => f,
       },
@@ -103,11 +103,11 @@ describe('UploadForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('Upload customer data</h2>')
+    expect(html).to.contain('Import customer data</h2>')
   })
 
   test('edit, contains "Edit purchase order"', async () => {
-    const wrapper = mount(UploadForm, {
+    const wrapper = mount(ImportForm, {
       mocks: {
         $trans: (f) => f,
       },
@@ -119,11 +119,11 @@ describe('UploadForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('Modify upload data</h2>')
+    expect(html).to.contain('Modify import data</h2>')
   })
 
   test('edit, click preview', async () => {
-    const wrapper = mount(UploadForm, {
+    const wrapper = mount(ImportForm, {
       mocks: {
         $trans: (f) => f,
       },
@@ -143,8 +143,8 @@ describe('UploadForm.vue', () => {
     expect(html).to.contain('Existing customers</h3>')
     expect(html).to.contain('Problems found</h3>')
 
-    const upload_rows = wrapper.findAll('#preview-table-0 > tr.upload-row')
-    expect(upload_rows.length).toEqual(1)
+    const import_rows = wrapper.findAll('#preview-table-0 > tr.import-row')
+    expect(import_rows.length).toEqual(1)
 
     const db_rows = wrapper.findAll('tr.database-row')
     expect(db_rows.length).toEqual(1)

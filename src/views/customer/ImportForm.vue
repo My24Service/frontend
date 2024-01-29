@@ -1,18 +1,18 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="container app-form">
-      <b-form v-if="isCreate || isUploadAgain">
-        <h2>{{ $trans('Upload customer data') }}</h2>
+      <b-form v-if="isCreate || isImportAgain">
+        <h2>{{ $trans('Import customer data') }}</h2>
         <p><i>{{ $trans("Accepted file formats") }}: <b>{{ allowed_extensions.join(', ') }}</b></i></p>
         <b-row>
           <b-col cols="8" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('File')"
-              label-for="customer-upload-file"
+              label-for="customer-import-file"
             >
               <b-form-file
-                id="customer-upload-file"
+                id="customer-import-file"
                 v-model="file"
                 v-bind:placeholder="$trans('Choose a file or drop it here...')"
                 @input="fileSelected"
@@ -22,7 +22,7 @@
           </b-col>
         </b-row>
         <div class="mx-auto">
-          <footer class="modal-footer" v-if="!isUploadAgain">
+          <footer class="modal-footer" v-if="!isImportAgain">
             <b-button @click="cancelForm" type="button" variant="secondary">
               {{ $trans('Cancel') }}</b-button>
             <b-button
@@ -34,11 +34,11 @@
               {{ $trans('Submit') }}
             </b-button>
           </footer>
-          <footer class="modal-footer" v-if="isUploadAgain">
-            <b-button @click="cancelUploadAgain" type="button" variant="secondary">
+          <footer class="modal-footer" v-if="isImportAgain">
+            <b-button @click="cancelImportAgain" type="button" variant="secondary">
               {{ $trans('Cancel') }}</b-button>
             <b-button
-              @click="submitUploadAgain"
+              @click="submitImportAgain"
               type="button"
               variant="primary"
               :disabled="isSubmitDisabled"
@@ -48,8 +48,8 @@
           </footer>
         </div>
       </b-form>
-      <div v-if="!isCreate && !isLoading && !isUploadAgain">
-        <h2>{{ $trans('Modify upload data') }}</h2>
+      <div v-if="!isCreate && !isLoading && !isImportAgain">
+        <h2>{{ $trans('Modify import data') }}</h2>
         <div>
           <ul>
             <li>country_code: NL, BE, DE, etc.</li>
@@ -60,22 +60,22 @@
         <div v-if="missing.length" class="missing">
           {{ $trans("Missing fields") }}: {{ missing.join(', ') }}
         </div>
-        <div v-if="uploadHeadersChanged">
+        <div v-if="importHeadersChanged">
           <h3 class="headers-changed bg-warning">{{ $trans("Headers in file changed") }}</h3>
         </div>
         <table>
           <tr>
-            <th class="mapping_header_upload_field">{{ $trans('Upload field') }}</th>
+            <th class="mapping_header_import_field">{{ $trans('Import field') }}</th>
             <th class="mapping_header_db_field">{{ $trans('Database field') }}</th>
             <th class="mapping_header_filter_field">{{ $trans('Use in filter?') }}</th>
           </tr>
-          <tr v-for="head in uploadHeaders" :key="head">
+          <tr v-for="head in importHeaders" :key="head">
             <td class="mapping_td">{{ head }}</td>
             <td class="mapping_td">
               <multiselect
                 :searchable="false"
                 :options="availableColumns"
-                :value="customerUpload.mapping[head]"
+                :value="customerImport.mapping[head]"
                 :show-labels="false"
                 @select="function(option) { selectColumn(head, option) }"
               />
@@ -83,7 +83,7 @@
             <td class="mapping_td" style="text-align: center">
               <b-form-checkbox
                 :value="head"
-                v-model="customerUpload.filter_on"
+                v-model="customerImport.filter_on"
               >
               </b-form-checkbox>
             </td>
@@ -92,11 +92,11 @@
         <div class="mx-auto">
           <footer class="modal-footer">
             <b-button
-              @click="clickUploadAgainButton"
+              @click="clickImportAgainButton"
               type="button"
               variant="primary"
             >
-              {{ $trans('Upload file again') }}</b-button>
+              {{ $trans('Import file again') }}</b-button>
             <b-button
               @click="submitUpdatePreview"
               type="button"
@@ -107,8 +107,8 @@
               {{ $trans('Save & preview') }}</b-button>
           </footer>
         </div>
-        <div v-if="uploadResult">
-          <div v-if="uploadResult.num_existing">
+        <div v-if="importResult">
+          <div v-if="importResult.num_existing">
             <h3>{{ $trans("Existing customers")}}</h3>
 
             <table
@@ -118,13 +118,13 @@
             >
               <tr>
                 <th class="preview-cell">&nbsp;&nbsp;</th>
-                <th class="preview-cell" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
+                <th class="preview-cell" v-for="(head, index) in importHeaders" :key="`head-${index}`">
                   {{ head }}
                 </th>
               </tr>
-              <tr class="preview-row upload-row">
-                <td class="preview-cell">{{ $trans("Upload") }}</td>
-                <td class="preview-cell" v-for="(col, index2) of existingItem.upload_row" :key="`${col}-${index}-${index2}`">
+              <tr class="preview-row import-row">
+                <td class="preview-cell">{{ $trans("Import") }}</td>
+                <td class="preview-cell" v-for="(col, index2) of existingItem.import_row" :key="`${col}-${index}-${index2}`">
                   {{ col }}
                 </td>
               </tr>
@@ -143,44 +143,44 @@
             <h3>{{ $trans("Problems found")}}</h3>
             <table class="preview-table">
               <tr class="preview-row">
-                <th class="preview-cell" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
+                <th class="preview-cell" v-for="(head, index) in importHeaders" :key="`head-${index}`">
                   {{ head }}
                 </th>
               </tr>
               <tr class="preview-row" v-for="(missing, index) of errors" :key="`missing-${index}`">
                 <td
-                  v-for="(field, index2) of uploadHeaders"
+                  v-for="(field, index2) of importHeaders"
                   :key="`td-${index}-${index2}`"
                   :class="`${missing.error_fields.indexOf(field) !== -1 ? 'bg-danger' : ''}`"
                   class="preview-cell"
                 >
-                  {{ missing.upload_rec[field] }}
+                  {{ missing.import_rec[field] }}
                 </td>
               </tr>
             </table>
           </div>
-          <div v-if="insertErrors.length && uploadDone">
+          <div v-if="insertErrors.length && importDone">
             <h3>{{ $trans("Errors")}}</h3>
             <table class="preview-table">
               <tr class="preview-row">
-                <th class="preview-cell" v-for="(head, index) in uploadHeaders" :key="`head-${index}`">
+                <th class="preview-cell" v-for="(head, index) in importHeaders" :key="`head-${index}`">
                   {{ head }}
                 </th>
               </tr>
               <tr class="preview-row" v-for="(error, index) of insertErrors" :key="`error-${index}`">
-                <td :colspan="uploadHeaders.length">
+                <td :colspan="importHeaders.length">
                   <table>
                     <tr class="preview-row">
                       <td
-                        v-for="(field, index2) of uploadHeaders"
+                        v-for="(field, index2) of importHeaders"
                         :key="`td-${index}-${index2}`"
                         class="preview-cell"
                       >
-                        {{ error.upload_rec[field] }}
+                        {{ error.import_rec[field] }}
                       </td>
                     </tr>
                     <tr>
-                      <td :colspan="uploadHeaders.length">{{ error.error }}</td>
+                      <td :colspan="importHeaders.length">{{ error.error }}</td>
                     </tr>
                   </table>
                 </td>
@@ -188,29 +188,29 @@
             </table>
           </div>
           <div class="bg-success previewBlock rounded">
-            {{ $trans("New customers") }}: <b>{{ uploadResult.num_insert }}</b>
+            {{ $trans("New customers") }}: <b>{{ importResult.num_insert }}</b>
           </div>
           <div class="bg-warning previewBlock rounded">
-            {{ $trans("Existing customers") }}: <b>{{ uploadResult.num_existing }}</b>
+            {{ $trans("Existing customers") }}: <b>{{ importResult.num_existing }}</b>
           </div>
 
-          <footer class="modal-footer" v-if="!uploadDone">
+          <footer class="modal-footer" v-if="!importDone">
             <b-button
-              @click="doUploadCustomers"
+              @click="doImportCustomers"
               type="button"
               variant="primary"
             >
-              {{ $trans('Looks good! Upload customers') }}</b-button>
+              {{ $trans('Looks good! Import customers') }}</b-button>
           </footer>
-          <footer class="modal-footer" v-if="uploadDone">
-            <b-button @click="navUploadList" type="button" variant="secondary">
-              {{ $trans('Upload list') }}</b-button>
+          <footer class="modal-footer" v-if="importDone">
+            <b-button @click="navImportList" type="button" variant="secondary">
+              {{ $trans('Import list') }}</b-button>
             <b-button
-              @click="deleteUpload"
+              @click="deleteImport"
               type="button"
               variant="primary"
             >
-              {{ $trans('Delete this upload and load customers') }}</b-button>
+              {{ $trans('Delete this import and load customers') }}</b-button>
           </footer>
         </div>
       </div>
@@ -221,7 +221,7 @@
 <script>
 import Multiselect from "vue-multiselect";
 
-import {CustomerUpload, CustomerUploadService} from '@/models/customer/Upload'
+import {CustomerImport, CustomerImportService} from '@/models/customer/Import'
 import {CustomerModel} from "@/models/customer/Customer";
 
 Array.prototype.equals = function (array) {
@@ -268,12 +268,12 @@ export default {
       }
 
       const extension = this.getExtension(this.current_file)
-      return this.customerUpload.file === null && this.allowed_extensions.indexOf(extension) === -1
+      return this.customerImport.file === null && this.allowed_extensions.indexOf(extension) === -1
     },
     availableColumns() {
       // return this.columns;
       const columns = this.columns.filter((field) =>
-        Object.values(this.customerUpload.mapping).indexOf(field) === -1
+        Object.values(this.customerImport.mapping).indexOf(field) === -1
       )
       if (columns.length) {
         columns.unshift('-')
@@ -281,11 +281,11 @@ export default {
       return columns
     },
     missing() {
-      if (!this.customerUpload.mapping) {
+      if (!this.customerImport.mapping) {
         return []
       }
 
-      const chosenFields = Object.values(this.customerUpload.mapping)
+      const chosenFields = Object.values(this.customerImport.mapping)
       return this.required.filter((field) => chosenFields.indexOf(field) === -1)
     },
     isUpdatePreviewDataDisabled() {
@@ -293,7 +293,7 @@ export default {
         return false
       }
 
-      return this.customerUpload.filter_on.length < 3 || this.missing.length > 0 || this.uploadResult !== null
+      return this.customerImport.filter_on.length < 3 || this.missing.length > 0 || this.importResult !== null
     },
   },
   data() {
@@ -301,18 +301,18 @@ export default {
       file: null,
       current_file: null,
       base64data: null,
-      service: new CustomerUploadService(),
-      customerUpload: new CustomerUpload({}),
+      service: new CustomerImportService(),
+      customerImport: new CustomerImport({}),
       columns: [],
-      uploadResult: null,
+      importResult: null,
       required: [],
       existingData: [],
       errors: [],
-      isUploadAgain: false,
+      isImportAgain: false,
       isLoading: false,
-      uploadHeaders: [],
-      uploadHeadersChanged: false,
-      uploadDone: false,
+      importHeaders: [],
+      importHeadersChanged: false,
+      importDone: false,
       insertErrors: [],
       allowed_extensions: []
     }
@@ -322,18 +322,18 @@ export default {
     if (this.isCreate) {
       this.isLoading = true
       this.allowed_extensions = await this.service.fetchAllowedExtensions()
-      this.customerUpload = new CustomerUpload({})
+      this.customerImport = new CustomerImport({})
       this.isLoading = false
     } else {
       this.isLoading = true
       this.required = await this.service.fetchRequired()
 
       // load
-      this.customerUpload = await this.service.detail(this.pk)
+      this.customerImport = await this.service.detail(this.pk)
       const headData = await this.service.readHead(this.pk)
 
       // headers so we can keep that order
-      this.uploadHeaders = headData.headers;
+      this.importHeaders = headData.headers;
 
       // define this here and not in the backend because the JS model contains more fields
       const exclude = [
@@ -350,31 +350,31 @@ export default {
       this.columns = Object.keys(customer).filter((field) => exclude.indexOf(field) === -1)
 
       // set mapping returned from backend
-      this.customerUpload.mapping = headData.mapping
+      this.customerImport.mapping = headData.mapping
 
       this.isLoading = false
     }
   },
   methods: {
-    async navUploadList() {
-      await this.$router.push({name: 'customer-upload-list'})
+    async navImportList() {
+      await this.$router.push({name: 'customer-import-list'})
     },
-    async deleteUpload() {
+    async deleteImport() {
       await this.service.delete(this.pk)
       await this.$router.push({name: 'customer-list'})
     },
-    clickUploadAgainButton() {
-      this.isUploadAgain = true
+    clickImportAgainButton() {
+      this.isImportAgain = true
     },
-    cancelUploadAgain() {
-      this.isUploadAgain = false
+    cancelImportAgain() {
+      this.isImportAgain = false
     },
-    async submitUploadAgain() {
+    async submitImportAgain() {
       this.isLoading = true
 
       // patch only file
       const data = {
-        file: this.customerUpload.file
+        file: this.customerImport.file
       }
       await this.service.update(this.pk, data)
 
@@ -382,37 +382,37 @@ export default {
       const headData = await this.service.readHead(this.pk)
 
       // check header changes
-      if (!headData.headers.equals(this.uploadHeaders)) {
-        this.uploadHeadersChanged = true
+      if (!headData.headers.equals(this.importHeaders)) {
+        this.importHeadersChanged = true
       }
 
-      this.uploadHeaders = headData.headers
-      this.customerUpload.mapping = headData.mapping
+      this.importHeaders = headData.headers
+      this.customerImport.mapping = headData.mapping
 
-      this.uploadResult = null
-      this.isUploadAgain = false
+      this.importResult = null
+      this.isImportAgain = false
       this.isLoading = false
     },
-    async doUploadCustomers() {
+    async doImportCustomers() {
       if (process.env.NODE_ENV === 'test') {
         this.isLoading = true
-        this.uploadResult = await this.service.doUpload(this.pk)
+        this.importResult = await this.service.doImport(this.pk)
         this.handlePreviewData()
-        this.uploadDone = true
+        this.importDone = true
         this.isLoading = false
       } else {
-        if (confirm(this.$trans("Are you sure you want to upload these customers?"))) {
+        if (confirm(this.$trans("Are you sure you want to import these customers?"))) {
           try {
             this.isLoading = true
-            this.uploadResult = await this.service.doUpload(this.pk)
+            this.importResult = await this.service.doImport(this.pk)
             this.handlePreviewData()
-            this.uploadDone = true
+            this.importDone = true
             this.isLoading = false
-            this.infoToast(this.$trans("Upload complete"), this.$trans("New customers uploaded"))
+            this.infoToast(this.$trans("Import complete"), this.$trans("New customers imported"))
           } catch (e) {
             this.isLoading = false
-            this.errorToast(this.$trans('Error uploading customers'))
-            console.log(`Error uploading customers: ${e}`)
+            this.errorToast(this.$trans('Error importing customers'))
+            console.log(`Error importing customers: ${e}`)
           }
         }
       }
@@ -420,8 +420,8 @@ export default {
     selectColumn(key, column) {
       const val = {}
       val[key] = column
-      this.customerUpload.mapping = {
-        ...this.customerUpload.mapping,
+      this.customerImport.mapping = {
+        ...this.customerImport.mapping,
         ...val
       }
     },
@@ -435,28 +435,28 @@ export default {
       reader.onload = (f) => {
         const b64 = f.target.result
         this.current_file = file.name
-        this.customerUpload.file = b64
+        this.customerImport.file = b64
       }
 
       reader.readAsDataURL(file)
     },
     async submitUpdatePreview() {
       this.isLoading = true
-      this.uploadDone = false
-      delete this.customerUpload.file
-      await this.service.update(this.pk, this.customerUpload)
-      this.uploadResult = await this.service.previewUpload(this.pk)
+      this.importDone = false
+      delete this.customerImport.file
+      await this.service.update(this.pk, this.customerImport)
+      this.importResult = await this.service.previewImport(this.pk)
       this.handlePreviewData()
 
       this.isLoading = false
     },
     async submitForm() {
       try {
-        const created = await this.service.insert(this.customerUpload)
-        await this.$router.push({name: 'customer-upload-edit', params: {pk: created.id}})
+        const created = await this.service.insert(this.customerImport)
+        await this.$router.push({name: 'customer-import-edit', params: {pk: created.id}})
       } catch (e) {
-        this.errorToast(this.$trans('Error uploading file'))
-        console.log(`Error uploading file: ${e}`)
+        this.errorToast(this.$trans('Error importing file'))
+        console.log(`Error importing file: ${e}`)
       }
     },
     handlePreviewData() {
@@ -469,7 +469,7 @@ export default {
             'num_insert': num_insert,
             'updates': {
               {name}: {
-                        'upload_rec': rec,
+                        'import_rec': rec,
                         'num_entries': len(entries),
                         'entries': serializers.CustomerSerializer(data=entries, many=True).data,
                         'seen': 1
@@ -477,27 +477,27 @@ export default {
             }
             'errors': [
               {
-                'upload_rec': rec,
+                'import_rec': rec,
                 'error_fields': []
               }
             ]
         }
        */
 
-      for (const name of Object.keys(this.uploadResult.updates)) {
+      for (const name of Object.keys(this.importResult.updates)) {
         let row = {
-          upload_row: [],
+          import_row: [],
           database_rows: []
         }
 
-        for (const field of this.uploadHeaders) {
-          row.upload_row.push(this.uploadResult.updates[name].upload_rec[field])
+        for (const field of this.importHeaders) {
+          row.import_row.push(this.importResult.updates[name].import_rec[field])
         }
 
-        for (const customerData of this.uploadResult.updates[name].entries) {
+        for (const customerData of this.importResult.updates[name].entries) {
           let db_row = []
-          for (const field of this.uploadHeaders) {
-            db_row.push(customerData[this.customerUpload.mapping[field]])
+          for (const field of this.importHeaders) {
+            db_row.push(customerData[this.customerImport.mapping[field]])
           }
           row.database_rows.push(db_row)
         }
@@ -506,17 +506,17 @@ export default {
       }
 
       this.errors = []
-      for (const row of this.uploadResult.errors) {
+      for (const row of this.importResult.errors) {
         this.errors.push({
-          upload_rec: row.upload_rec,
+          import_rec: row.import_rec,
           error_fields: row.error_fields,
         })
       }
 
       this.insertErrors = []
-      for (const row of this.uploadResult.insert_errors) {
+      for (const row of this.importResult.insert_errors) {
           this.insertErrors.push({
-            upload_rec: row.upload_rec,
+            import_rec: row.import_rec,
             error: row.error,
           })
       }
@@ -535,7 +535,7 @@ export default {
   padding-bottom: 6px;
   color: red;
 }
-.mapping_header_upload_field {
+.mapping_header_import_field {
   width: 150px;
   padding: 4px
 }
