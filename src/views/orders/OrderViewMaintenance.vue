@@ -25,7 +25,11 @@
 
         <div class="panel col-1-3">
           <h3>
-            <span><strong>{{ order.order_type }}</strong> <br><small>{{ order.order_name }}</small></span>
+            <span><strong>{{ order.order_type }}</strong> <br><small>
+              <router-link :to="{name: 'customer-view', params: {pk: order.customer_relation}}">
+                {{ order.order_name }}
+              </router-link>
+            </small></span>
           </h3>
           <dl>
             <dt>
