@@ -138,6 +138,7 @@ const themes = {
   'wsmes-corporate': 'theme-shltr',
   'riedel': 'theme-shltr',
   'az-fresh': 'theme-shltr',
+  'amex': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 
