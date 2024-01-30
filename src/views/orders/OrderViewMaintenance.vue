@@ -89,7 +89,11 @@
             </b-tr>
             <b-tr>
               <b-td><strong>{{ $trans('Customer') }}:</strong></b-td>
-              <b-td>{{ order.order_name }}</b-td>
+              <b-td>
+                <router-link :to="{name: 'customer-view', params: {pk: order.customer_relation}}">
+                {{ order.order_name }}
+                </router-link>
+              </b-td>
             </b-tr>
             <b-tr>
               <b-td><strong>{{ $trans('Address') }}:</strong></b-td>
