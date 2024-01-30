@@ -27,7 +27,7 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('import')"
-        v-if="hasUpload"
+        v-if="hasUpload && false"
         :to="{ name: 'customer-import-list' }">
         {{ $trans('Import') }}
       </b-nav-item>
