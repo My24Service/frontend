@@ -104,7 +104,10 @@
     <b-nav-item
       :active="isActive('quotations')"
       v-if="hasQuotations && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
-      to="/quotations/quotations">{{ $trans('Quotations') }}
+      to="/quotations/quotations">
+      <b-icon icon="briefcase" v-if="!isActive('quotations')"></b-icon>
+      <b-icon icon="briefcase-fill" v-else></b-icon>
+      {{ $trans('Quotations') }}
     </b-nav-item>
 
     <b-nav-item
