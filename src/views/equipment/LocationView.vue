@@ -51,11 +51,11 @@
               </li>
             </ul>
             <b-pagination
-              v-if="this.orderPastModel.count > 20"
+              v-if="orderPastService.count > 20"
               class="pt-4"
               v-model="currentPage"
-              :total-rows="this.orderPastModel.count"
-              :per-page="this.orderPastModel.perPage"
+              :total-rows="orderPastService.count"
+              :per-page="orderPastService.perPage"
               aria-controls="customer-past-table"
             ></b-pagination>
           </b-tab>
@@ -176,7 +176,6 @@ export default {
         this.$refs['order-stats'].render(
           orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
         )
-        console.info(this.location)
       } catch(error) {
         console.log('error fetching location detail data', error)
         this.errorToast(this.$trans('Error fetching location detail'))
