@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import Vuex from 'vuex';
 
-import localVue from '../../index'
 import SupplierForm from '@/views/inventory/SupplierForm.vue'
 import supplierResponse from '../../fixtures/supplier-autocomplete'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -34,9 +33,8 @@ describe('SupplierForm.vue', () => {
     })
   })
 
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(SupplierForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -49,9 +47,8 @@ describe('SupplierForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New supplier"', async () => {
+  test('insert, contains "New supplier"', async () => {
     const wrapper = mount(SupplierForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,
@@ -64,9 +61,8 @@ describe('SupplierForm.vue', () => {
     expect(html).to.contain('<h2>New supplier</h2>')
   })
 
-  it('edit, contains "Edit supplier"', async () => {
+  test('edit, contains "Edit supplier"', async () => {
     const wrapper = mount(SupplierForm, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f,

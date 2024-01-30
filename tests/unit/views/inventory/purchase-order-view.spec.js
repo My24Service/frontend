@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import PurchaseOrderView from '@/views/inventory/PurchaseOrderView.vue'
 import purchaseOrderResponse from '../../fixtures/purchaseorder'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -25,9 +24,8 @@ const routes = [
 const router = new VueRouter({routes})
 
 describe('PurchaseOrderView.vue', () => {
-  it('has PurchaseOrderView component', async () => {
+  test('has PurchaseOrderView component', async () => {
     const wrapper = shallowMount(PurchaseOrderView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -43,9 +41,8 @@ describe('PurchaseOrderView.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has 3 material rows', async () => {
+  test('has 3 material rows', async () => {
     const wrapper = mount(PurchaseOrderView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -58,12 +55,11 @@ describe('PurchaseOrderView.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#purchaseorder-materials-table tbody tr')
-    expect(trs.length).to.equal(3)
+    expect(trs.length).toBe(3)
   })
 
-  it('has 1 entry row', async () => {
+  test('has 1 entry row', async () => {
     const wrapper = mount(PurchaseOrderView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f
@@ -76,12 +72,11 @@ describe('PurchaseOrderView.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#purchaseorder-entries-table tbody tr')
-    expect(trs.length).to.equal(1)
+    expect(trs.length).toBe(1)
   })
 
-  it('contains "Limoen Likeur"', async () => {
+  test('contains "Limoen Likeur"', async () => {
     const wrapper = mount(PurchaseOrderView, {
-      localVue,
       router,
       mocks: {
         $trans: (f) => f

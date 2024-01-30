@@ -1,16 +1,17 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderFormMaintenance from '@/views/orders/OrderFormMaintenance.vue'
 import OrderFormMaintenancePlanning from '@/views/orders/OrderFormMaintenancePlanning.vue'
 import OrderFormMaintenanceCustomer from '@/views/orders/OrderFormMaintenanceCustomer.vue'
 import OrderFormMaintenanceEmployee from '@/views/orders/OrderFormMaintenanceEmployee.vue'
 import customerResponse from '../../fixtures/customer.js'
 import engineersResponse from '../../fixtures/user-engineers.js'
+
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -55,9 +56,8 @@ describe('OrderFormMaintenance planning', () => {
     })
   })
 
-  it('has OrderFormMaintenancePlanning component', async () => {
+  test('has OrderFormMaintenancePlanning component', async () => {
     const wrapper = shallowMount(OrderFormMaintenance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -70,9 +70,8 @@ describe('OrderFormMaintenance planning', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('does not have OrderFormMaintenanceCustomer component', async () => {
+  test('does not have OrderFormMaintenanceCustomer component', async () => {
     const wrapper = shallowMount(OrderFormMaintenance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -85,9 +84,8 @@ describe('OrderFormMaintenance planning', () => {
     expect(el.exists()).not.to.be.true
   })
 
-  it('does not have OrderFormMaintenanceEmployee component', async () => {
+  test('does not have OrderFormMaintenanceEmployee component', async () => {
     const wrapper = shallowMount(OrderFormMaintenance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -134,9 +132,8 @@ describe('OrderFormMaintenanceCustomer.vue maintenance', () => {
     })
   })
 
-  it('has OrderFormMaintenanceCustomer component', async () => {
+  test('has OrderFormMaintenanceCustomer component', async () => {
     const wrapper = shallowMount(OrderFormMaintenance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -149,9 +146,8 @@ describe('OrderFormMaintenanceCustomer.vue maintenance', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('does not have OrderFormMaintenancePlanning component', async () => {
+  test('does not have OrderFormMaintenancePlanning component', async () => {
     const wrapper = shallowMount(OrderFormMaintenance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -198,9 +194,8 @@ describe('OrderFormMaintenanceEmployee.vue maintenance', () => {
     })
   })
 
-  it('has OrderFormMaintenanceEmployee component', async () => {
+  test('has OrderFormMaintenanceEmployee component', async () => {
     const wrapper = shallowMount(OrderFormMaintenance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -213,9 +208,8 @@ describe('OrderFormMaintenanceEmployee.vue maintenance', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('does not have OrderFormMaintenancePlanning component', async () => {
+  test('does not have OrderFormMaintenancePlanning component', async () => {
     const wrapper = shallowMount(OrderFormMaintenance, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f

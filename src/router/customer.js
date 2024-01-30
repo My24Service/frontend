@@ -19,9 +19,12 @@ import LocationList from '../views/equipment/LocationList.vue'
 import LocationForm from '../views/equipment/LocationForm.vue'
 
 import Calendar from '../views/customer/Calendar.vue'
-import {AUTH_LEVELS} from "../constants";
+import {AUTH_LEVELS} from "@/constants";
 import EquipmentView from "../views/equipment/EquipmentView";
 import LocationView from "../views/equipment/LocationView";
+
+import UploadForm from '../views/customer/ImportForm.vue'
+import UploadList from '../views/customer/ImportList.vue'
 
 export default [
 {
@@ -182,6 +185,44 @@ export default [
       path: '/customers/calendar',
       components: {
         'app-content': Calendar,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+
+    // import
+    {
+      name: 'customer-import-list',
+      path: '/customers/import',
+      components: {
+        'app-content': UploadList,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-import-add',
+      path: '/customers/import/form',
+      components: {
+        'app-content': UploadForm,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-import-edit',
+      path: '/customers/import/form/:pk',
+      components: {
+        'app-content': UploadForm,
         'app-subnav': SubNavCustomers
       },
       props: {

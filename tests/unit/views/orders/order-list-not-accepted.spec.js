@@ -1,11 +1,10 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderListNotAccepted from '@/views/orders/OrderListNotAccepted.vue'
 import ordersResponse from '../../fixtures/orders'
 
@@ -30,7 +29,7 @@ const routes = [
 
 const router = new VueRouter({routes})
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -68,11 +67,10 @@ describe('OrderListNotAccepted.vue', () => {
     })
   })
 
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListNotAccepted, {
-      localVue,
       store,
       router,
       mocks: {
@@ -86,11 +84,10 @@ describe('OrderListNotAccepted.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderListNotAccepted, {
-      localVue,
       store,
       router,
       mocks: {
@@ -101,7 +98,7 @@ describe('OrderListNotAccepted.vue', () => {
     await flushPromises()
 
     // console.log(wrapper.html())
-    const trs = wrapper.findAll('#order-table > tbody > tr')
-    expect(trs.length).to.equal(2)
+    const trs = wrapper.findAllComponents('#order-table > tbody > tr.order-row')
+    expect(trs.length).toBe(2)
   })
 })

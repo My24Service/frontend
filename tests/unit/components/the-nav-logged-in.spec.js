@@ -1,9 +1,8 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import Vuex from "vuex"
 
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
-import localVue from '../index'
 
 
 describe('TheNavLoggedIn.vue', () => {
@@ -21,9 +20,8 @@ describe('TheNavLoggedIn.vue', () => {
     })
   })
 
-  it('has logout-modal', () => {
+  test('has logout-modal', () => {
     const wrapper = shallowMount(TheNavLoggedIn, {
-      localVue,
       store,
       mocks: {
         $trans: (t) => t
@@ -34,9 +32,8 @@ describe('TheNavLoggedIn.vue', () => {
     expect(modal.exists()).to.be.true
   })
 
-  it('has password-change-modal', () => {
+  test('has password-change-modal', () => {
     const wrapper = shallowMount(TheNavLoggedIn, {
-      localVue,
       store,
       mocks: {
         $trans: (t) => t

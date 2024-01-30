@@ -1,10 +1,9 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { render } from '@vue/server-test-utils'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
-import localVue from '../index'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 
 
@@ -27,9 +26,8 @@ describe('OrderTypesSelect.vue', () => {
     })
   })
 
-  it('exists', () => {
+  test('exists', () => {
     const wrapper = shallowMount(OrderTypesSelect, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f
@@ -40,9 +38,8 @@ describe('OrderTypesSelect.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has includeAll', async () => {
+  test('has includeAll', async () => {
     const wrapper = shallowMount(OrderTypesSelect, {
-      localVue,
       store,
       mocks: {
         $trans: (f) => f

@@ -1,13 +1,12 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import ActionForm from '@/views/shared/ActionForm.vue'
 import actionResponse from '../../fixtures/action'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -23,9 +22,8 @@ axios.get.mockImplementation((url) => {
 
 
 describe('ActionForm.vue - order', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(ActionForm, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -40,9 +38,8 @@ describe('ActionForm.vue - order', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New action" - order', async () => {
+  test('insert, contains "New action" - order', async () => {
     const wrapper = mount(ActionForm, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },
@@ -57,9 +54,8 @@ describe('ActionForm.vue - order', () => {
     expect(html).to.contain('<h2>New action</h2>')
   })
 
-  it('edit, contains "Edit action" - order', async () => {
+  test('edit, contains "Edit action" - order', async () => {
     const wrapper = mount(ActionForm, {
-      localVue,
       mocks: {
         $trans: (f) => f
       },

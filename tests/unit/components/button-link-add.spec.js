@@ -1,7 +1,6 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import VueRouter from 'vue-router'
-import localVue from '../index'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd'
 
 const routes = [{
@@ -12,9 +11,8 @@ const routes = [{
 const router = new VueRouter({routes})
 
 describe('ButtonLinkAdd.vue', () => {
-  it('exists',() => {
+  test('exists',() => {
     const wrapper = shallowMount(ButtonLinkAdd,{
-      localVue,
       router,
       propsData: {
         router_name: 'hello-world',

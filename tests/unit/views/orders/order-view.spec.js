@@ -1,17 +1,16 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { shallowMount, mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderView from '@/views/orders/OrderView.vue'
 import OrderViewMaintenance from '@/views/orders/OrderViewMaintenance.vue'
 import OrderViewTemps from '@/views/orders/OrderViewTemps.vue'
 import orderResponse from '../../fixtures/order'
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 ]
@@ -40,11 +39,10 @@ describe('OrderView.vue temps', () => {
     })
   })
 
-  it('has OrderViewTemps component', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('has OrderViewTemps component', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = shallowMount(OrderView, {
-      localVue,
       store,
       router,
       mocks: {
@@ -58,11 +56,10 @@ describe('OrderView.vue temps', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('does not have OrderViewMaintenance component', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('does not have OrderViewMaintenance component', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = shallowMount(OrderView, {
-      localVue,
       store,
       router,
       mocks: {
@@ -92,11 +89,10 @@ describe('OrderView.vue maintenance', () => {
     })
   })
 
-  it('has OrderViewMaintenance component', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('has OrderViewMaintenance component', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = shallowMount(OrderView, {
-      localVue,
       store,
       router,
       mocks: {
@@ -110,11 +106,10 @@ describe('OrderView.vue maintenance', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('does not have OrderViewTemps component', async () => {
-    axios.get.mockResolvedValueOnce(orderResponse);
+  test('does not have OrderViewTemps component', async () => {
+    axios.get.mockResolvedValue(orderResponse);
 
     const wrapper = shallowMount(OrderView, {
-      localVue,
       store,
       router,
       mocks: {

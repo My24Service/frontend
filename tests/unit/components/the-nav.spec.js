@@ -1,9 +1,8 @@
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import Vuex from "vuex"
 
 import TheNav from '@/components/TheNav.vue'
-import localVue from '../index'
 
 
 describe('TheNav.vue', () => {
@@ -21,9 +20,8 @@ describe('TheNav.vue', () => {
     })
   })
 
-  it('has nav container', () => {
+  test('has nav container', () => {
     const wrapper = shallowMount(TheNav, {
-      localVue,
       store,
       mocks: {
         $trans: (t) => t

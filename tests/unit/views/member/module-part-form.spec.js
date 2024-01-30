@@ -1,14 +1,13 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 
-import localVue from '../../index'
 import ModulePartForm from '@/views/member/ModulePartForm.vue'
 import modulePartResponse from '../../fixtures/module-parts'
 import moduleResponse from '../../fixtures/modules'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -23,9 +22,8 @@ axios.get.mockImplementation((url) => {
 
 
 describe('ModulePartForm.vue', () => {
-  it('exists', async () => {
+  test('exists', async () => {
     const wrapper = shallowMount(ModulePartForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -37,9 +35,8 @@ describe('ModulePartForm.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('insert, contains "New module part"', async () => {
+  test('insert, contains "New module part"', async () => {
     const wrapper = mount(ModulePartForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -48,12 +45,11 @@ describe('ModulePartForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>New module part</h2>')
+    expect(html).to.contain('New module part</h2>')
   })
 
-  it('edit, contains "Edit module part"', async () => {
+  test('edit, contains "Edit module part"', async () => {
     const wrapper = mount(ModulePartForm, {
-      localVue,
       mocks: {
         $trans: (f) => f,
       },
@@ -65,6 +61,6 @@ describe('ModulePartForm.vue', () => {
     await flushPromises()
 
     const html = wrapper.html()
-    expect(html).to.contain('<h2>Edit module part</h2>')
+    expect(html).to.contain('Edit module part</h2>')
   })
 })

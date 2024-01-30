@@ -1,16 +1,15 @@
 import axios from "axios"
-import { expect } from 'chai'
+import { describe, expect, vi, test } from 'vitest'
 import { shallowMount, mount } from '@vue/test-utils'
 import flushPromises from 'flush-promises'
 import VueRouter from 'vue-router'
 import Vuex from "vuex"
 
-import localVue from '../../index'
 import UserEmployeeList from '../../../../src/views/company/UserEmployeeList.vue'
 import usersEmployeeResponse from '../../fixtures/users-employee'
 import my24 from "../../../../src/services/my24";
 
-jest.mock('axios')
+vi.mock('axios')
 
 const routes = [
 {
@@ -54,11 +53,10 @@ describe('UserEmployeeList.vue', () => {
     })
   })
 
-  it('exists', async () => {
-    axios.get.mockResolvedValueOnce(usersEmployeeResponse);
+  test('exists', async () => {
+    axios.get.mockResolvedValue(usersEmployeeResponse);
 
     const wrapper = shallowMount(UserEmployeeList, {
-      localVue,
       router,
       store,
       mocks: {
@@ -72,11 +70,10 @@ describe('UserEmployeeList.vue', () => {
     expect(el.exists()).to.be.true
   })
 
-  it('has two rows', async () => {
-    axios.get.mockResolvedValueOnce(usersEmployeeResponse);
+  test('has two rows', async () => {
+    axios.get.mockResolvedValue(usersEmployeeResponse);
 
     const wrapper = mount(UserEmployeeList, {
-      localVue,
       store,
       router,
       mocks: {
@@ -87,14 +84,13 @@ describe('UserEmployeeList.vue', () => {
     await flushPromises()
 
     const trs = wrapper.findAll('#employee-table > tbody > tr')
-    expect(trs.length).to.equal(1)
+    expect(trs.length).toBe(1)
   })
 
-  it('contains "Hoi""', async () => {
-    axios.get.mockResolvedValueOnce(usersEmployeeResponse);
+  test('contains "Hoi""', async () => {
+    axios.get.mockResolvedValue(usersEmployeeResponse);
 
     const wrapper = mount(UserEmployeeList, {
-      localVue,
       store,
       router,
       mocks: {

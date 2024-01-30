@@ -1,17 +1,16 @@
 import axios from "axios"
-import { expect } from 'chai'
 import { mount } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 import flushPromises from 'flush-promises'
+import { describe, expect, vi, test } from 'vitest'
 
-import localVue from '../../index'
 import OrderList from '@/views/orders/OrderList.vue'
 import OrderListMaintenance from '@/views/orders/OrderListMaintenance.vue'
 import OrderListTemps from '@/views/orders/OrderListTemps.vue'
 import ordersResponse from '../../fixtures/orders'
 
-jest.mock('axios')
+vi.mock('axios')
 
 axios.get.mockImplementation((url) => {
   switch (url) {
@@ -70,11 +69,10 @@ describe('OrderList.vue temps', () => {
     })
   })
 
-  it('has OrderListTemps component', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('has OrderListTemps component', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderList, {
-      localVue,
       store,
       router,
       mocks: {
@@ -118,11 +116,10 @@ describe('OrderList.vue maintenance', () => {
     })
   })
 
-  it('has OrderListMaintenance component', async () => {
-    axios.get.mockResolvedValueOnce(ordersResponse);
+  test('has OrderListMaintenance component', async () => {
+    axios.get.mockResolvedValue(ordersResponse);
 
     const wrapper = mount(OrderList, {
-      localVue,
       store,
       router,
       mocks: {
