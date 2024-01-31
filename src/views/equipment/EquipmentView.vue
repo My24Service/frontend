@@ -47,8 +47,25 @@
           <dd>{{ equipment.default_replace_months }}</dd>
           <dt>{{ $trans('Price') }}</dt>
           <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
+          <dt class="align-top-verdomme">{{ $trans('QR code') }}</dt>
+          <dd>
+            <b-link
+              v-if="equipment.qr_path"
+              class="btn btn-sm btn-outline" :href="equipment.qr_path"
+              target="_blank"
+              :title="$trans('Open QR in new tab')">
+              <img alt="QR code" class="qr-code-image" :src="equipment.qr_path" />
+            </b-link>
+            <img v-if="!equipment.qr_path" :alt="$trans('No QR yet')" class="qr-code-image" :src="NO_IMAGE_URL" />
+            <p>
+              <b-button @click="recreate_qr">
+                {{ $trans("Recreate")}}
+              </b-button>
+            </p>
+          </dd>
         </dl>
       </div>
+
 
       <div class='panel wide col-2-3'>
         <b-tabs>
@@ -96,16 +113,17 @@
 </template>
 
 <script>
-import { OrderPastService } from '../../models/orders/OrderPast.js'
+import { OrderPastService } from '@/models/orders/OrderPast'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import { OrderService } from '../../models/orders/Order.js'
+import { OrderService } from '@/models/orders/Order'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "../../utils";
-import { EquipmentService } from "../../models/equipment/equipment";
+import {componentMixin} from "@/utils";
+import { EquipmentService } from "@/models/equipment/equipment";
 import moment from 'moment/min/moment-with-locales'
+import {NO_IMAGE_URL} from '@/constants'
 
 export default {
   mixins: [componentMixin],
@@ -118,6 +136,7 @@ export default {
   },
   data() {
     return {
+      NO_IMAGE_URL,
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
@@ -165,6 +184,13 @@ export default {
     }
   },
   methods: {
+    async recreate_qr() {
+      const result = await this.equipmentService.recreateQr(this.pk)
+      this.equipment = {
+        ...this.equipment,
+        qr_path: result.qr_path
+      }
+    },
     listLink() {
       if (this.hasBranches) {
         return 'equipment-equipment-list'
@@ -237,5 +263,9 @@ export default {
 .wide {
   min-width: 66%;
   max-width: unset;
+}
+.qr-code-image {
+  width: 250px;
+  height: 250px;
 }
 </style>
