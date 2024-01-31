@@ -37,35 +37,51 @@
             </dt>
             <dd>
               <span v-if="!order.assigned_user_info.length" class="dimmed">{{ $trans('Not assigned') }}</span>
-              <span v-for="person in order.assigned_user_info" class="order-assignee">{{ person.full_name }}</span>
+              <span
+                v-for="person in order.assigned_user_info"
+                class="order-assignee"
+                :key="person.full_name"
+              >{{ person.full_name }}</span>
             </dd>
-            <dt>Status</dt>
+            <dt>{{ $trans("Status") }}</dt>
             <dd>{{ order.last_status }}</dd>
-            <dt>Dates</dt>
+            <dt>{{ $trans("Dates") }}</dt>
             <dd>{{ order.order_date }}</dd>
-            <dt>Service &numero;</dt>
+            <dt>{{ $trans("Service") }} &numero;</dt>
             <dd>{{ order.service_number }}</dd>
-            <dt>Reference</dt>
+            <dt>{{ $trans("Reference") }}</dt>
             <dd>{{ order.order_reference }}</dd>
-            <dt>Workorder</dt>
-            <dd class="flex-columns">
+            <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
+            <dd v-if="!hasBranches" class="flex-columns">
               <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank"><b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}</b-link>
 
               <b-link class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
                 <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
               </b-link>
             </dd>
-            <dt v-if="order.customer_remarks">Remarks</dt>
+            <dt>{{ $trans("Workorders partners") }}</dt>
+            <dd class="flex-columns">
+              <div v-for="workorder in order.workorder_pdf_url_partner" :key="workorder.companycode">
+                {{ workorder.companycode }}
+                <span v-if="workorder.via">({{ $trans("via") }} {{ workorder.via }})</span>
+                <b-link class="btn btn-sm btn-outline" :href="workorder.url" target="_blank" :title="$trans('Download PDF') + ' (' + workorder.url + ')'">
+                  <b-icon icon="file-earmark-pdf"></b-icon>
+
+                  {{ $trans('Download PDF') }}
+                </b-link>
+              </div>
+            </dd>
+            <dt v-if="order.customer_remarks">{{ $trans("Remarks") }}</dt>
             <dd v-if="order.customer_remarks">{{ order.remarks }}</dd>
           </dl>
 
           <hr/>
 
-          <h6><b-icon-person></b-icon-person> Contact</h6>
+          <h6><b-icon-person></b-icon-person>{{ $trans("Contact") }}</h6>
           <div class="flex-columns space-between" style="max-width: 60ch; margin-inline: auto">
             <p>
               {{ order.order_contact }}<br/>
-              <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link></br>
+              <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/>
               {{ order.order_tel }}<br/>
               {{ order.order_mobile }}<br/>
             </p>
