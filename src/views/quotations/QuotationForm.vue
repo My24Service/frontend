@@ -51,6 +51,7 @@
         />
         <hr v-if="quotation">
         <Customer
+          v-if="quotation"
           :quotation-data="quotation"
           :loading="isLoading"
           :customer="customer"
@@ -63,7 +64,7 @@
 <script>
 import quotationLineService from '@/models/quotations/QuotationLine.js'
 import quotationService, { QuotationModel } from '../../models/quotations/Quotation.js'
-import customerService, {CustomerModel, CustomerPriceModel} from "../../models/customer/Customer";
+import customerService, { CustomerModel } from "../../models/customer/Customer";
 import Customer from './quotation_form/Customer.vue'
 import Hours from './quotation_form/Hours.vue'
 import Distance from './quotation_form/Distance.vue'
@@ -76,6 +77,8 @@ import {
   COST_TYPE_WORK_HOURS
 } from "../../models/orders/Cost";
 import {useVuelidate} from "@vuelidate/core";
+import eventBus from '../../eventBus.js';
+
 
 export default {
   name: 'QuotationForm',
@@ -155,34 +158,8 @@ export default {
         this.isLoading = false
       }
     },
-    getQuotationLineId() {
-      if (this.quotationLineService.collection.length === 0) {
-        return 0
-      }
-
-      const maxQuotationLine = this.quotationLineService.collection.reduce(function(prev, current) {
-        return (prev.id > current.id) ? prev : current
-      })
-      return maxQuotationLine.id + 1
-    },
     quotationLinesCreated(quotationLines) {
-      if (quotationLines.length > 0) {
-        for (let quotationLine of quotationLines) {
-          quotationLine.id = this.getQuotationLineId()
-          // console.log(`id: ${id}`)
-          this.quotationLineService.collection.push(quotationLine)
-        }
-        this.updateQuotationTotals()
-        const txt = quotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
-        this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
-      }
-    },
-    updateQuotationTotals() {
-      const total = this.quotationLineService.getItemsTotal()
-      const vat = this.quotationLineService.getItemsTotalVAT()
-
-      this.quotation.setPriceField('total', total)
-      this.quotation.setPriceField('vat', vat)
+      eventBus.$emit('add-cost-quotationline', quotationLines)
     },
     updateQuotationLineCollection (collection) {
       this.quotationLineCollection = collection
