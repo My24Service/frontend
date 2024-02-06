@@ -2,7 +2,7 @@
   <div class='app-page'>
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="basket"></b-icon> Webshop</h3>
+        <h3><b-icon icon="basket"></b-icon>{{ $trans("Webshop") }}</h3>
       </div>
     </header>
     <div class='page-detail'>
@@ -23,18 +23,18 @@ iframe {
 </style>
 
 <script>
-import {MemberService} from "@/models/member/Member";
+// import {MemberService} from "@/models/member/Member";
 
 export default {
   name: 'WebshopIframe',
   data() {
     return {
-      service: new MemberService()
+      // service: new MemberService()
     }
   },
-  async created() {
-    const result = await this.service.getOCIUrl()
-    this.$refs['iframe'].src = result.url
+  mounted() {
+    // const result = await this.service.getOCIUrl()
+    this.$refs['iframe'].src = "https://shltr-group.com/product/trailerstand-plus/"
   }
 }
 </script>
