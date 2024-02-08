@@ -51,7 +51,6 @@
         />
         <hr v-if="quotation">
         <Customer
-          v-if="quotation"
           :quotation-data="quotation"
           :loading="isLoading"
           :customer="customer"
