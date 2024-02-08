@@ -259,6 +259,7 @@
       </div>
     </b-form>
     <ChapterModalVue
+      v-if="!isCreate"
       id="chapter-modal"
       ref="chapter-modal"
       @create-chapter="createChapter"
@@ -433,7 +434,8 @@ export default {
       if (this.isCreate) {
         this.submitClicked = true
         this.v$.$touch()
-        if (this.v$.$invalid) {
+        const result = await this.v$.$validate()
+        if (!result) {
           console.log('invalid?', this.v$.$invalid)
           return
         }
