@@ -66,16 +66,17 @@
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
-            <b-button
-              size="sm"
+            <b-link
+              class="px-1"
               v-if="!data.item.preliminary"
               :title="$trans('Create order')"
               @click="function() { createOrder(data.item.id) }"
             >
               <b-icon-arrow-up-right-circle
                 aria-hidden="true"
+                class="edit-icon"
               ></b-icon-arrow-up-right-circle>
-            </b-button>
+            </b-link>
           </div>
         </template>
       </b-table>
