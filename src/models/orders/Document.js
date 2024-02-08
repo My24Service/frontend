@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class Document extends BaseModel {
+class DocumentService extends BaseModel {
   fields = {
     order: null,
     name: '',
@@ -12,6 +12,7 @@ class Document extends BaseModel {
   url = '/order/document/'
 }
 
-const documentModel = new Document()
+const documentService = new DocumentService()
 
-export default documentModel
+export default documentService
+export { DocumentService }

@@ -1,7 +1,7 @@
 import BaseModel from '../base'
 
 
-class Infoline extends BaseModel {
+class InfolineService extends BaseModel {
   fields = {
     'order': null,
     'info': null,
@@ -11,6 +11,7 @@ class Infoline extends BaseModel {
 
 }
 
-let infolineModel = new Infoline()
+let infolineModel = new InfolineService()
 
 export default infolineModel
+export { InfolineService }

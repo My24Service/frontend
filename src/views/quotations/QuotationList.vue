@@ -18,7 +18,7 @@
     <div class="overflow-auto">
       <Pagination
         v-if="!isLoading"
-        :model="this.model"
+        :model="this.quotationService"
         :model_name="$trans('Quotation')"
       />
       <b-table
@@ -66,6 +66,16 @@
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
+            <b-button
+              size="sm"
+              v-if="!data.item.preliminary"
+              :title="$trans('Create order')"
+              @click="function() { createOrder(data.item.id) }"
+            >
+              <b-icon-arrow-up-right-circle
+                aria-hidden="true"
+              ></b-icon-arrow-up-right-circle>
+            </b-button>
           </div>
         </template>
       </b-table>
@@ -74,7 +84,7 @@
 </template>
 
 <script>
-import quotationService from '@/models/quotations/Quotation.js'
+import {QuotationService} from '@/models/quotations/Quotation.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
@@ -102,7 +112,7 @@ export default {
   },
   data() {
     return {
-      model: quotationService,
+      quotationService: new QuotationService(),
       searchQuery: null,
       quotationPk: null,
       isLoading: false,
@@ -118,14 +128,17 @@ export default {
     }
   },
   created () {
-    this.model.currentPage = this.$route.query.page || 1
+    this.quotationService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
+    async createOrder(id) {
+      await this.$router.push({name: 'order-add-quotation', params: {quotation_id: id}})
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      quotationService.setSearchQuery(val)
+      this.quotationService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -140,10 +153,10 @@ export default {
       this.isLoading = true
 
       try {
-        await quotationService.delete(this.quotationPk)
+        await this.quotationService.delete(this.quotationPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Quotation has been deleted'))
         this.isLoading = false
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting quotation', error)
@@ -155,7 +168,7 @@ export default {
       this.isLoading = true
 
       try {
-        const data = await quotationService.list()
+        const data = await this.quotationService.list()
         this.quotations = data.results
         this.isLoading = false
       } catch(error) {
@@ -169,9 +182,9 @@ export default {
     '$route.name': {
       handler: function(search) {
         if (this.$route.name === 'preliminary-quotations') {
-          this.model.queryMode = 'preliminary'
+          this.quotationService.queryMode = 'preliminary'
         } else {
-          this.model.queryMode = 'all'
+          this.quotationService.queryMode = 'all'
         }
       },
       deep: true,
