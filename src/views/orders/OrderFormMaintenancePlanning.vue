@@ -59,7 +59,7 @@
         <h2 v-if="isCreate">{{ $trans('New order') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit order') }}</h2>
         <b-row>
-          <b-col cols="4" role="group" v-if="!hasBranches">
+          <b-col cols="4" role="group" v-if="!hasBranches && !from_quotation">
             <b-form-group
               label-size="sm"
               label-class="p-sm-0"
@@ -1178,6 +1178,7 @@ export default {
         this.fillCustomer(customer)
         this.order = {
           ...this.order,
+          customer_relation: customer.id,
           quotation: this.quotation_id
         }
       }
