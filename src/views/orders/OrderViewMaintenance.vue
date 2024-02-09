@@ -205,6 +205,16 @@
             </b-link>
           </b-col>
       </b-row>
+      <b-row class="my-2" v-if="order.workorder_pdf_url_partner.length">
+        <b-col cols="2"><strong>{{ $trans('Workorder PDF partners') }}</strong></b-col>
+        <b-col cols="9">
+          <span v-for="pdf_data in order.workorder_pdf_url_partner" :key="pdf_data.companycode">
+              <b-link :href="pdf_data.url" target="_blank">
+                {{ pdf_data.companycode }} {{ $trans('Order') }} {{ order.order_id }}
+              </b-link>
+            </span>
+        </b-col>
+      </b-row>
       <b-row class="my-2" v-if="order.workorder_documents.length > 0">
         <b-col cols="12">
           <h4>{{ $trans('Workorder documents') }}</h4>
