@@ -18,10 +18,8 @@ class QuotationModel {
   quotation_mobile
   quotation_contact
   quotation_reference
-  description
-  total
-  vat
   accepted = false
+  preliminary
 
   vat_type
   vat
