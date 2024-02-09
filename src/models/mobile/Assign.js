@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class Assign extends BaseModel {
+class AssignService extends BaseModel {
   async assignToUser(user_id, order_ids, notify_user) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
@@ -22,4 +22,5 @@ class Assign extends BaseModel {
 }
 
 
-export default new Assign()
+export default new AssignService()
+export { AssignService }

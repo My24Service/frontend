@@ -20,7 +20,7 @@ import DocumentForm from '../views/orders/DocumentForm.vue'
 
 import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
-import {AUTH_LEVELS} from "../constants";
+import {AUTH_LEVELS} from "@/constants";
 
 import InvoiceForm from "../views/orders/InvoiceForm";
 import InvoiceView from "../views/orders/InvoiceView";
@@ -103,6 +103,18 @@ export default [
       },
       props: {
         'app-content': {maintenance: true},
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'order-add-quotation',
+      path: '/orders/orders/form-maintenance/:quotation_id',
+      components: {
+        'app-content': OrderForm,
+        'app-subnav': SubNavOrders
+      },
+      props: {
+        'app-content': route => ({...route.params, from_quotation: true}),
         'app-subnav': true
       },
     },
