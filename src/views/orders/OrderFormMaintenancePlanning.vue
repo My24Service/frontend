@@ -810,7 +810,7 @@
             <b-row>
               <b-col cols="12" role="group" v-if="recommendedUsers.length > 0">
                 <h4>{{ $trans('Recommended engineers') }}</h4>
-                <span v-for="(userData, index) in recommendedUsers">
+                <span v-for="(userData, index) in recommendedUsers" :key="index">
                   <strong>{{ index + 1 }}</strong> {{ userData.full_name }}
                 </span>
               </b-col>
@@ -1048,6 +1048,7 @@ export default {
       deletedOrderlines: [],
       deletedInfolines: [],
       equipmentService,
+      customerBranchId: null
     }
   },
   validations() {
@@ -1117,7 +1118,7 @@ export default {
       }
     },
     usesEquipment() {
-      return this.hasBranches || this.isEditEquipment || this.maintenance
+      return this.hasBranches || this.isEditEquipment || this.maintenance || this.customerBranchId !== null
     },
     startDate() {
       return this.order.start_date
@@ -1445,6 +1446,7 @@ export default {
       this.order.order_email = customer.email
       this.order.order_contact = customer.contact
       this.order.customer_remarks = customer.remarks
+      this.customerBranchId = customer.branch_id
     },
 
     branchLabel({ name, address, city}) {
