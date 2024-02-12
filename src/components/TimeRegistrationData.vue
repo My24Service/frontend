@@ -440,7 +440,7 @@ export default {
         results = this.addUserDataToResults(userData, results)
       }
 
-      return results.length === 1 ? results[0] : results
+      return results
     },
     processData(data) {
       if (this.isDetail) {
@@ -565,7 +565,7 @@ export default {
       this.fields = header_columns
 
       // create array for table
-      const normalizedData = this.normalizeData(data.totals, data.totals_fields, data.intervals)
+      const normalizedData = this.normalizeData(data.totals, data.totals_fields, data.intervals)[0]
       // console.log(normalizedData)
       let results = []
 
