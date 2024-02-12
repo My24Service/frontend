@@ -1,5 +1,5 @@
 import BaseModel from '@/models/base';
-
+import {normalClient} from "@/services/api";
 
 class My24 extends BaseModel {
   getInitialData() {
@@ -21,7 +21,7 @@ class My24 extends BaseModel {
   }
 
   downloadItem(url, name, callback) {
-    this.axios
+    normalClient
       .get(url, { responseType: 'blob' })
       .then((response) => {
         const blob = new Blob([response.data], { type: response.data.type });

@@ -49,18 +49,29 @@
           <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
           <dt class="align-top-verdomme">{{ $trans('QR code') }}</dt>
           <dd>
-            <b-link
-              v-if="equipment.qr_path"
-              class="btn btn-sm btn-outline" :href="equipment.qr_path"
-              target="_blank"
-              :title="$trans('Open QR in new tab')">
-              <img alt="QR code" class="qr-code-image" :src="equipment.qr_path" />
-            </b-link>
+            <div v-if="equipment.qr_path" class="qr-container">
+              <b-link
+                class="btn btn-sm btn-outline" :href="equipment.qr_path"
+                target="_blank"
+                :title="$trans('Open QR in new tab')">
+                <img alt="QR code" class="qr-code-image" :src="equipment.qr_path" />
+              </b-link>
+              <p>
+                <a href="javascript:" @click="download(equipment)">
+                  {{ $trans("Download") }}
+                </a>
+              </p>
+            </div>
             <img v-if="!equipment.qr_path" :alt="$trans('No QR yet')" class="qr-code-image" :src="NO_IMAGE_URL" />
             <p>
               <b-button @click="recreate_qr">
                 {{ $trans("Recreate")}}
               </b-button>
+              <span class="space">&nbsp;</span>
+              <b-button @click="recreate_qr_shltr">
+                {{ $trans("Recreate SHLTR")}}
+              </b-button>
+
             </p>
           </dd>
         </dl>
@@ -124,6 +135,7 @@ import {componentMixin} from "@/utils";
 import { EquipmentService } from "@/models/equipment/equipment";
 import moment from 'moment/min/moment-with-locales'
 import {NO_IMAGE_URL} from '@/constants'
+import my24 from "@/services/my24";
 
 export default {
   mixins: [componentMixin],
@@ -184,8 +196,18 @@ export default {
     }
   },
   methods: {
+    download(equipment) {
+      my24.downloadItem(equipment.qr_path, `${equipment.name} ${equipment.uuid}.png`)
+    },
     async recreate_qr() {
       const result = await this.equipmentService.recreateQr(this.pk)
+      this.equipment = {
+        ...this.equipment,
+        qr_path: result.qr_path
+      }
+    },
+    async recreate_qr_shltr() {
+      const result = await this.equipmentService.recreateQrShltr(this.pk)
       this.equipment = {
         ...this.equipment,
         qr_path: result.qr_path
@@ -267,5 +289,11 @@ export default {
 .qr-code-image {
   width: 250px;
   height: 250px;
+}
+span.space {
+  width: 10px;
+}
+.qr-container {
+  text-align: center;
 }
 </style>
