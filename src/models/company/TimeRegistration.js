@@ -1,7 +1,7 @@
 import BaseModel from '../base';
 
 
-class TimeRegistration extends BaseModel {
+class TimeRegistrationService extends BaseModel {
   url = '/company/time-registration/'
 
   getTopUsersForCustomerView(customer_pk) {
@@ -11,6 +11,7 @@ class TimeRegistration extends BaseModel {
 
 }
 
-let timeRegistrationModel = new TimeRegistration();
+let timeRegistrationModel = new TimeRegistrationService();
 
 export default timeRegistrationModel;
+export { TimeRegistrationService }
