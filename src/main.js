@@ -20,8 +20,8 @@ import VueSpinners from 'vue-spinners/dist/vue-spinners.common'
 
 Vue.use(VueSpinners)
 
-import VueCompositionAPI from '@vue/composition-api'
-Vue.use(VueCompositionAPI)
+// import VueCompositionAPI from '@vue/composition-api'
+// Vue.use(VueCompositionAPI)
 
 import { BadgePlugin } from 'bootstrap-vue'
 Vue.use(BadgePlugin)

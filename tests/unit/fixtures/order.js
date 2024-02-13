@@ -90,7 +90,7 @@ export default {
         "user_order_available_set_count": 0,
         "assigned_count": 0,
         "workorder_url": "http://kms.my24service.com:8000/order/workorder-view/b354dc2a-2f76-40ce-b93b-d86a232832da/",
-        "workorder_pdf_url_partner": "",
+        "workorder_pdf_url_partner": [],
         "customer_order_accepted": true,
         "workorder_documents": [],
         "infolines": []

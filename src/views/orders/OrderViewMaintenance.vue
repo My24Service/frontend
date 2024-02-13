@@ -89,7 +89,11 @@
             </b-tr>
             <b-tr>
               <b-td><strong>{{ $trans('Customer') }}:</strong></b-td>
-              <b-td>{{ order.order_name }}</b-td>
+              <b-td>
+                <router-link :to="{name: 'customer-view', params: {pk: order.customer_relation}}">
+                {{ order.order_name }}
+                </router-link>
+              </b-td>
             </b-tr>
             <b-tr>
               <b-td><strong>{{ $trans('Address') }}:</strong></b-td>
@@ -200,6 +204,16 @@
               {{ $trans('Order') }} {{ order.order_id }} |{{ order.workorder_pdf_url }}|
             </b-link>
           </b-col>
+      </b-row>
+      <b-row class="my-2" v-if="order.workorder_pdf_url_partner.length">
+        <b-col cols="2"><strong>{{ $trans('Workorder PDF partners') }}</strong></b-col>
+        <b-col cols="9">
+          <span v-for="pdf_data in order.workorder_pdf_url_partner" :key="pdf_data.companycode">
+              <b-link :href="pdf_data.url" target="_blank">
+                {{ pdf_data.companycode }} {{ $trans('Order') }} {{ order.order_id }}
+              </b-link>
+            </span>
+        </b-col>
       </b-row>
       <b-row class="my-2" v-if="order.workorder_documents.length > 0">
         <b-col cols="12">

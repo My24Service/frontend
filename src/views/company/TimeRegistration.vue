@@ -10,7 +10,7 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import timeRegistrationModel from "../../models/company/TimeRegistration";
+import { TimeRegistrationService } from "@/models/company/TimeRegistration";
 import TimeRegistrationData from "../../components/TimeRegistrationData.vue";
 
 export default {
@@ -25,7 +25,7 @@ export default {
     return {
       today: null,
       startDate: null,
-      model: timeRegistrationModel,
+      service: new TimeRegistrationService(),
       isLoading: true,
       mode: null
     }
@@ -69,9 +69,9 @@ export default {
           args.push(`year=${this.today.format('YYYY')}`)
         }
 
-        this.model.setListArgs(args.join('&'))
+        this.service.setListArgs(args.join('&'))
 
-        const data = await this.model.list()
+        const data = await this.service.list()
         this.$refs['user-time-registration'].processData(data)
         this.isLoading = false
       } catch(error) {

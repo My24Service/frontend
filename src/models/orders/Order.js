@@ -13,6 +13,44 @@ if (tomorrow.day() === 6) {
   tomorrow = tomorrow.add(2, 'days')
 }
 
+class OrderModel {
+  customer_id
+  order_name
+  order_address
+  order_postal
+  order_city
+  order_country_code
+  customer_relation
+  branch
+  order_type
+  order_reference
+  order_tel
+  order_mobile
+  order_email
+  order_contact
+  service_number
+  location
+  start_date = tomorrow.toDate()
+  start_time
+  end_date = tomorrow.toDate()
+  end_time
+  order_date
+  // 'visibility': 'private',
+  customer_remarks
+  remarks
+  required_users = 1
+  quotation
+  statuses = []
+  orderlines = []
+  infolines= []
+  workorder_documents = []
+
+  workorder_pdf_url
+  workorder_pdf_url_partner = []
+
+  reported_codes_extra_data = []
+
+}
 
 class OrderService extends BaseModel {
   fields = {
@@ -317,4 +355,4 @@ class OrderService extends BaseModel {
 let orderService = new OrderService()
 
 export default orderService
-export { OrderService }
+export { OrderService, OrderModel }

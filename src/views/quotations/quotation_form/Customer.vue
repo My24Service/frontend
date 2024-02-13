@@ -1,5 +1,5 @@
 <template>
-  <b-overlay rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm">
     <b-form>
       <h3>{{ $trans('Customer') }}</h3>
       <CustomerDetail
@@ -208,13 +208,34 @@
           </b-col>
         </b-row>
       </template>
-      <hr  v-if="quotationData"/>
-      <QuotationLine
+      <hr v-if="quotationData"/>
+      <QuotationData
         v-if="quotationData"
         :quotationData="quotation"
         :submitQuotationLineform="submitQuotationLineform"
         @quotationSubmitted="(loading) => quotationSubmitted(loading)"
       />
+      <hr v-if="quotationData"/>
+      <Chapter
+        v-if="quotation.id"
+        :quotationData="quotation"
+        :newChapter="newChapter"
+        @quotationLineSubmitted="quotationLineSubmitted"
+      />
+      <footer
+        class="modal-footer"
+        v-if="quotationData && !newChapter.name"
+      >
+        <b-button
+          :disabled="isLoading"
+          @click="showChapterModal"
+          class="btn btn-danger update-button"
+          type="button"
+          variant="danger"
+        >
+          {{ $trans('Add new chapter') }}
+        </b-button>
+      </footer>
       <div class="mx-auto">
         <footer class="modal-footer">
           <b-button
@@ -232,11 +253,17 @@
             type="button"
             variant="primary"
           >
-            {{ $trans('Submit') }}
+            {{ $trans('Submit quotation') }}
           </b-button>
         </footer>
       </div>
     </b-form>
+    <ChapterModalVue
+      v-if="!isCreate"
+      id="chapter-modal"
+      ref="chapter-modal"
+      @create-chapter="createChapter"
+    />
   </b-overlay>
 </template>
 
@@ -246,13 +273,17 @@ import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
-import QuotationLine from './QuotationLine.vue'
+import QuotationData from './QuotationData.vue'
 import customerModel from '../../../models/customer/Customer.js'
 import OrderTypesSelect from '../../../components/OrderTypesSelect.vue'
 import quotationService from '../../../models/quotations/Quotation.js'
+import chapterService from '../../../models/quotations/Chapter.js'
 import Collapse from '../../../components/Collapse.vue'
 import {componentMixin} from "../../../utils";
 import CustomerDetail from "@/components/CustomerDetail";
+import ChapterModalVue from './ChapterModal.vue'
+import Chapter from './Chapter.vue'
+import TotalsInputs from "@/components/TotalsInputs";
 
 
 export default {
@@ -264,8 +295,11 @@ export default {
     Multiselect,
     OrderTypesSelect,
     Collapse,
-    QuotationLine,
-    CustomerDetail
+    QuotationData,
+    CustomerDetail,
+    ChapterModalVue,
+    Chapter,
+    TotalsInputs
   },
   props: {
     pk: {
@@ -303,7 +337,8 @@ export default {
       errorMessage: null,
       customers: [],
       getCustomersDebounced: null,
-      submitQuotationLineform : false
+      submitQuotationLineform : false,
+      newChapter: {}
     }
   },
   validations() {
@@ -351,7 +386,27 @@ export default {
     }
   },
   methods: {
-    customerLabel({ name, address, city}) {
+    quotationLineSubmitted () {
+      this.newChapter = {}
+    },
+    async createChapter(chapter) {
+      this.$refs['chapter-modal'].hide()
+      try {
+        chapter.quotation = this.quotationData.id
+        this.isLoading = true
+        this.newChapter = await chapterService.insert(chapter)
+        this.infoToast(this.$trans('Created'), this.$trans('Chapter has been created'))
+        this.isLoading = false
+      } catch(error) {
+        console.log('Error creating chapter', error)
+        this.errorToast(this.$trans('Error creating chapter'))
+        this.isLoading = false
+      }
+    },
+    showChapterModal() {
+      this.$refs['chapter-modal'].show()
+    },
+    customerLabel({ name, address, city }) {
       return `${name} - ${address} - ${city}`
     },
     async selectCustomer(option) {
@@ -374,15 +429,16 @@ export default {
       this.cancelForm()
     },
     async submitForm() {
-      this.submitClicked = true
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
-        return
-      }
       this.buttonDisabled = true
 
       if (this.isCreate) {
+        this.submitClicked = true
+        this.v$.$touch()
+        const result = await this.v$.$validate()
+        if (!result) {
+          console.log('invalid?', this.v$.$invalid)
+          return
+        }
         this.isLoading = true
 
         try {

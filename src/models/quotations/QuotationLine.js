@@ -7,6 +7,7 @@ class QuotationLineModel {
   id
   type
   quotation
+  chapter
   info
   amount
   material
@@ -52,6 +53,7 @@ class QuotationLineService extends BaseModel {
   fields = {
     id: null,
     quotation: null,
+    chapter: null,
     info: null,
     amount: null,
     material_name: null,
@@ -105,4 +107,4 @@ class QuotationLineService extends BaseModel {
 
 export default new QuotationLineService()
 
-export { QuotationLineModel }
+export { QuotationLineService, QuotationLineModel }
