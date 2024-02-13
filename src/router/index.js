@@ -55,15 +55,15 @@ router.beforeEach(async (to, from, next) => {
   const userIsLoggedIn = getIsLoggedIn(store);
   const userAuthLevel = getUserAuthLevel(store);
 
-  if (!isAllowedMemberPath) {
-    console.warn('route not allowed because of member', {path});
-    next(`/no-access?next=${to.path}`)
-    return
-  }
-
   if (!needsAuth) {
     console.info('route allowed, no auth needed', {path})
     next()
+    return
+  }
+
+  if (!isAllowedMemberPath) {
+    console.warn('route not allowed because of member', {path});
+    next(`/no-access?next=${to.path}`)
     return
   }
 
