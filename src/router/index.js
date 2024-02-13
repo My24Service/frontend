@@ -39,6 +39,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
   if (!needsAuth) {
     console.debug(`route allowed, no auth needed: path=${to.path}`)
     next()
@@ -52,8 +53,6 @@ router.beforeEach(async (to, from, next) => {
     next(`/no-access?next=${to.path}`)
     return
   }
-
-  const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
 
   if (!getIsLoggedIn(store)) {
     console.debug(`route not allowed for user (not logged in), path: ${to.path}, needsAuth: ${needsAuth}, logged in: ${getIsLoggedIn(store)}`)
