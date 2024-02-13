@@ -79,15 +79,19 @@
         ></b-table>
       </b-col>
     </b-row>
-    <b-row v-if="order.workorder_pdf_url || order.workorder_pdf_url_partner.length">
-      <b-col cols="6">
-        <p v-if="order.workorder_pdf_url">
+    <b-row v-if="order.workorder_pdf_url">
+      <b-col cols="12">
+        <p>
           {{ $trans('Workorder PDF') }}
           <b-link :href="order.workorder_pdf_url" target="_blank">
             {{ $trans('Order') }} {{ order.order_id }}
           </b-link>
         </p>
-        <p v-if="order.workorder_pdf_url_partner.length">
+      </b-col>
+    </b-row>
+    <b-row v-if="order.workorder_pdf_url_partner && order.workorder_pdf_url_partner.length">
+      <b-col cols="12">
+        <p>
           {{ $trans('Workorder PDF partners') }}
           <span v-for="pdf_data in order.workorder_pdf_url_partner" :key="pdf_data.companycode">
             <b-link :href="pdf_data.url" target="_blank">
