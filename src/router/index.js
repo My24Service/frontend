@@ -13,7 +13,7 @@ import company from './company'
 import member from './member'
 import account from './account'
 import catchall from './catchall'
-import {AUTH_LEVELS} from "../constants";
+import {AUTH_LEVELS} from "@/constants";
 import {getIsLoggedIn, getUserAuthLevel, hasAccessRouteAuthLevel} from "../utils";
 
 const routes = [
@@ -39,19 +39,18 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
+  if (!needsAuth) {
+    console.debug(`route allowed, no auth needed: path=${to.path}`)
+    next()
+    return
+  }
+
   const isAllowedMemberPath = await store.dispatch('hasAccessToRoute', to.path)
 
   if (!isAllowedMemberPath) {
     console.debug(`route not allowed because of member: path=${to.path}`)
     next(`/no-access?next=${to.path}`)
-    return
-  }
-
-  const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
-
-  if (!needsAuth) {
-    console.debug(`route allowed, no auth needed: path=${to.path}`)
-    next()
     return
   }
 
