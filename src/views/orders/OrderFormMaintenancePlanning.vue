@@ -1053,6 +1053,7 @@ export default {
       locationSearchDisabled: false,
 
       isEditEquipment: false,
+      customerBranchId: null,
 
       deletedOrderlines: [],
       deletedInfolines: [],
@@ -1137,7 +1138,7 @@ export default {
       }
     },
     usesEquipment() {
-      return this.hasBranches || this.isEditEquipment || this.maintenance || this.customerBranchId !== null
+      return this.hasBranches || this.isEditEquipment || this.maintenance || this.customerBranchId
     },
     startDate() {
       return this.order.start_date
