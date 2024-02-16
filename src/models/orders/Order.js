@@ -279,7 +279,23 @@ class OrderService extends BaseModel {
 
   async getAllForCustomer(customer_pk) {
     const baseUrl = `${this.url}all_for_customer_web/?customer_id=${customer_pk}`
+    const listArgs = this.getListArgs()
+    const url = `${baseUrl}&${listArgs.join('&')}`
 
+    const response = await this.axios.get(url)
+
+    if ('count' in response.data) {
+      this.count = response.data.count
+    }
+
+    if ('num_pages' in response.data) {
+      this.numPages = response.data.num_pages
+    }
+
+    return response.data
+  }
+
+  getListArgs() {
     const listArgs = []
 
     listArgs.push(`page=${this.currentPage}`)
@@ -298,6 +314,13 @@ class OrderService extends BaseModel {
       }
     }
 
+    return listArgs
+  }
+
+  async getAllForEquipmentLocation(equipment_id, location_id) {
+    const filter = equipment_id ? `equipment=${equipment_id}` : `location=${location_id}`
+    const baseUrl = `${this.url}all_for_equipment_location/?${filter}`
+    const listArgs = this.getListArgs()
     const url = `${baseUrl}&${listArgs.join('&')}`
 
     const response = await this.axios.get(url)

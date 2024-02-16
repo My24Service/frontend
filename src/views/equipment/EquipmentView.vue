@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page" v-if="equipment">
+  <div class="app-page" v-show="equipment">
 
     <SearchModal
       id="search-modal"
@@ -12,7 +12,7 @@
         <h3>
           <b-icon icon="tools"></b-icon>
           <span class="backlink" @click="goBack">{{ $trans('Equipment') }}</span> /
-          <span>{{ equipment.name }}</span>
+          <span v-if="equipment">{{ equipment.name }}</span>
         </h3>
         <b-button-toolbar>
           <router-link
@@ -77,7 +77,6 @@
         </dl>
       </div>
 
-
       <div class='panel wide col-2-3'>
         <b-tabs>
           <b-tab :title="$trans('Orders')">
@@ -101,18 +100,17 @@
               </li>
             </ul>
             <b-pagination
-              v-if="orderPastService.count > 20"
+              v-if="orderService.count > 20"
               class="pt-4"
               v-model="currentPage"
-              :total-rows="orderPastService.count"
-              :per-page="orderPastService.perPage"
+              :total-rows="orderService.count"
+              :per-page="orderService.perPage"
               aria-controls="customer-past-table"
             ></b-pagination>
           </b-tab>
-          <b-tab :title="$trans('Insights')">
+          <b-tab :title="$trans('Insights')" @click="renderStats">
             <h6>Stats for {{ equipment.name }}</h6>
             <OrderStats
-              v-if="!isLoading"
               ref="order-stats"
             />
           </b-tab>
@@ -124,7 +122,6 @@
 </template>
 
 <script>
-import { OrderPastService } from '@/models/orders/OrderPast'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -152,7 +149,6 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderPastService: new OrderPastService(),
       orderService: new OrderService(),
       equipmentService: new EquipmentService(),
       buttonDisabled: false,
@@ -191,11 +187,29 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderPastService.currentPage = val
+      this.orderService.currentPage = val
       this.loadData()
     }
   },
   methods: {
+    async renderStats() {
+      try {
+        // this.isLoading = true
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsEquipment(this.pk)
+        const monthsStatsData = await this.orderService.getMonthsStatsEquipment(this.pk)
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsEquipment(this.pk)
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsEquipment(this.pk)
+
+        this.$refs['order-stats'].render(
+          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
+        )
+
+      } catch(error) {
+        console.log('error fetching equipment stats data', error)
+        this.errorToast(`${this.$trans('Error fetching equipment stats:')} ${error}`)
+        // this.isLoading = false
+      }
+    },
     download(equipment) {
       my24.downloadItem(equipment.qr_path, `${equipment.name} ${equipment.uuid}.png`)
     },
@@ -223,7 +237,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.orderPastService.setSearchQuery(val)
+      this.orderService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -236,19 +250,11 @@ export default {
     async loadData() {
       this.isLoading = true
 
-      await this.loadHistory()
-
-      const equipmentData = await this.equipmentService.detail(this.pk)
-      this.equipment = new this.equipmentService.model(equipmentData)
       try {
-        const orderTypeStatsData = await this.orderService.getOrderTypesStatsEquipment(this.pk)
-        const monthsStatsData = await this.orderService.getMonthsStatsEquipment(this.pk)
-        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsEquipment(this.pk)
-        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsEquipment(this.pk)
+        await this.loadHistory()
 
-        this.$refs['order-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-        )
+        const equipmentData = await this.equipmentService.detail(this.pk)
+        this.equipment = new this.equipmentService.model(equipmentData)
 
       } catch(error) {
         console.log('error fetching equipment detail data', error)
@@ -259,8 +265,7 @@ export default {
 
     async loadHistory() {
       try {
-        this.orderPastService.addListArg(`equipment=${this.pk}`)
-        const results = await this.orderPastService.list()
+        const results = await this.orderService.getAllForEquipmentLocation(this.pk, null)
         this.orders = results.results
         this.isLoading = false
       } catch(error) {
@@ -276,7 +281,7 @@ export default {
     this.$moment = moment;
     this.$moment.locale(lang)
   },
-  async mounted () {
+  mounted () {
   }
 }
 </script>

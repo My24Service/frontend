@@ -1,8 +1,8 @@
 <template>
-  <div class="app-page" v-if="location">
+  <div class="app-page" v-show="location">
     <header>
 
-      <div class='page-title'>
+      <div class='page-title' v-if="location">
         <h3>
           <b-icon icon="shop-window"></b-icon>
           <span @click="goBack" class="backlink">Locations</span>
@@ -22,7 +22,7 @@
         <h6>{{ $trans('Location details') }}</h6>
         <dl>
             <dt>{{ $trans('Name') }}</dt>
-            <dd>{{ location.name }}</dd>
+            <dd v-if="location">{{ location.name }}</dd>
         </dl>
       </div>
 
@@ -44,24 +44,23 @@
               </span>
             </div>
             <ul class='listing order-list'>
-              <li v-for="item in orders">
+              <li v-for="item in orders" :key="item.id">
                 <OrderTableInfo
                   v-bind:order="item"
                 />
               </li>
             </ul>
             <b-pagination
-              v-if="orderPastService.count > 20"
+              v-if="orderService.count > 20"
               class="pt-4"
               v-model="currentPage"
-              :total-rows="orderPastService.count"
-              :per-page="orderPastService.perPage"
+              :total-rows="orderService.count"
+              :per-page="orderService.perPage"
               aria-controls="customer-past-table"
             ></b-pagination>
           </b-tab>
-          <b-tab :title="$trans('Insights')">
+          <b-tab :title="$trans('Insights')" @click="renderStats">
             <OrderStats
-            v-if="!isLoading"
             ref="order-stats"
             />
           </b-tab>
@@ -72,7 +71,6 @@
 </template>
 
 <script>
-import { OrderPastService } from '../../models/orders/OrderPast.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
@@ -96,7 +94,6 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderPastService: new OrderPastService(),
       buttonDisabled: false,
       location: null,
       orders: [],
@@ -126,7 +123,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderPastService.currentPage = val
+      this.orderService.currentPage = val
       this.loadData()
     }
   },
@@ -140,6 +137,24 @@ export default {
     },
   },
   methods: {
+    async renderStats() {
+      try {
+        // this.isLoading = true
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsEquipment(this.pk)
+        const monthsStatsData = await this.orderService.getMonthsStatsEquipment(this.pk)
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsEquipment(this.pk)
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsEquipment(this.pk)
+
+        this.$refs['order-stats'].render(
+          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
+        )
+
+      } catch(error) {
+        console.log('error fetching location stats', error)
+        this.errorToast(`${this.$trans('Error fetching location insights:')} ${error}`)
+        // this.isLoading = false
+      }
+    },
     listLink() {
       if (this.hasBranches) {
         return 'equipment-location-list'
@@ -150,7 +165,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.orderPastService.setSearchQuery(val)
+      this.orderService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -163,19 +178,9 @@ export default {
     async loadData() {
       this.isLoading = true
 
-      await this.loadHistory()
-
-      this.location = await this.locationService.detail(this.pk)
-
       try {
-        const orderTypeStatsData = await this.orderService.getOrderTypesStatsLocation(this.pk)
-        const monthsStatsData = await this.orderService.getMonthsStatsLocation(this.pk)
-        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsLocation(this.pk)
-        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsLocation(this.pk)
-
-        this.$refs['order-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-        )
+        await this.loadHistory()
+        this.location = await this.locationService.detail(this.pk)
       } catch(error) {
         console.log('error fetching location detail data', error)
         this.errorToast(this.$trans('Error fetching location detail'))
@@ -185,8 +190,7 @@ export default {
 
     async loadHistory() {
       try {
-        this.orderPastService.addListArg(`location=${this.pk}`)
-        const results = await this.orderPastService.list()
+        const results = await this.orderService.getAllForEquipmentLocation(null, this.pk)
         this.orders = results.results
         this.isLoading = false
       } catch(error) {
