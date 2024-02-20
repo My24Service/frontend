@@ -274,10 +274,10 @@ export default {
       return this.$store.getters.getMemberHasBranches
     },
     hasBim() {
-      return this.isPlanning || this.isStaff || this.isSuperuser
+      return this.hasAccessToModule('3d') && (this.isPlanning || this.isStaff || this.isSuperuser)
     },
     hasWebshop() {
-      return this.isPlanning || this.isStaff || this.isSuperuser
+      return this.hasAccessToModule('webshop') && (this.isPlanning || this.isStaff || this.isSuperuser)
     }
   },
   watch: {
