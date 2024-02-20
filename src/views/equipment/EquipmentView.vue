@@ -47,8 +47,8 @@
           <dd>{{ equipment.default_replace_months }}</dd>
           <dt>{{ $trans('Price') }}</dt>
           <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
-          <dt class="align-top-verdomme">{{ $trans('QR code') }}</dt>
-          <dd>
+          <dt v-if="hasBranches" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
+          <dd v-if="hasBranches">
             <div v-if="equipment.qr_path" class="qr-container">
               <b-link
                 class="btn btn-sm btn-outline" :href="equipment.qr_path"
