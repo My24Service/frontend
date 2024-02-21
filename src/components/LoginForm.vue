@@ -72,7 +72,7 @@ export default {
     },
     async doLogin(e) {
       e.preventDefault();
-      
+
       // do login
       if (!this.checkFormValidity()) {
         return;
@@ -102,9 +102,7 @@ export default {
           await this.$router.push({path: nextPath})
         }
 
-        if(userDetails.submodel === 'planning_user') {
-          this.$router.push({ name: 'order-list' });
-        }
+        await this.$router.push({ name: 'order-list' });
 
       } catch (error) {
         console.log(error)
