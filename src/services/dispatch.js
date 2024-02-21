@@ -8,7 +8,7 @@ const WIDE = 'wide'
 
 class Dispatch {
   rowHeightCompact = 28
-  rowHeightWide = 28
+  rowHeightWide = 106
   numSlots = 6
 
   mode
@@ -851,8 +851,8 @@ class Dispatch {
       return this.orderLineWidth
     }
 
-    // we have 3 rows of fontsize height plus 4 x padding
-    return 4 * this.getFontsize() + 5 * this.fontPaddingWide
+    // we have 4 rows of fontsize height plus 4 x padding
+    return 5 * this.getFontsize() + 6 * this.fontPaddingWide
   }
 
   getSlotHeight() {
@@ -927,11 +927,26 @@ class Dispatch {
      *
      **/
 
+    // let linecount = 1
+    // if (order.order_name) {
+    //   linecount++
+    // }
+    // if (order.order_city) {
+    //   linecount++
+    // }
+    // linecount++
+    // if (order.order_reference) {
+    //   linecount++
+    // }
+
     const path = new Path2D()
     this.ctx.lineWidth = this.getOrderLineWidth()
+    // this.ctx.lineWidth = linecount * this.getFontsize() + ((linecount+1) * this.fontPaddingWide)
+    // 5 * this.getFontsize() + 6 * this.fontPaddingWide
+    // console.log(this.getOrderLineWidth())
     this.ctx.strokeStyle = color
-    path.moveTo(startX, yPos + 6)
-    path.lineTo(endX, yPos + 6)
+    path.moveTo(startX, yPos-62)
+    path.lineTo(endX, yPos-62)
     this.ctx.stroke(path)
 
     let textY = yPos + this.fontPaddingWide - this.getRowHeightInt() + 4
@@ -949,6 +964,11 @@ class Dispatch {
 
     textY += this.getFontsize() + this.fontPaddingWide
     this.setText(order.order_type, startX + 4, textY, endX - startX, text_color)
+
+    textY += this.getFontsize() + this.fontPaddingWide
+    if (order.order_reference) {
+      this.setText(`${order.order_reference.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
+    }
 
     this.hotspots.push({
       obj: path,
