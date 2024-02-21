@@ -150,20 +150,6 @@
     </SubNav>
     -->
 
-    <!-- docks -->
-    <b-nav-item
-      v-if="isPlanning"
-      :to="{name: 'docks-mockup'}"
-      :active="isActive('docks')"
-      >
-      <b-icon icon="truck-flatbed" v-if="!isActive('docks')"></b-icon>
-      <b-icon icon="truck" v-if="isActive('docks')"></b-icon>
-      {{ $trans('Docks') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('docks')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
     <!-- BIM / 3D -->
     <b-nav-item
       v-if="hasBim"
