@@ -229,15 +229,15 @@
         <b-button
           :disabled="isLoading"
           @click="showChapterModal"
-          class="btn btn-danger update-button"
+          class="btn btn-primary update-button"
           type="button"
-          variant="danger"
+          variant="primary"
         >
           {{ $trans('Add new chapter') }}
         </b-button>
       </footer>
       <div class="mx-auto">
-        <footer class="modal-footer">
+        <footer class="modal-footer quotation-actions">
           <b-button
             @click="cancelForm"
             class="btn btn-secondary"
@@ -496,5 +496,8 @@ div.section-header-icon {
 }
 div.bottom {
   margin-bottom: 80px;
+}
+.quotation-actions {
+  justify-content: flex-start;
 }
 </style>

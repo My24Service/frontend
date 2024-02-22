@@ -66,11 +66,21 @@ export default {
       }
     }
   },
+  props: {
+    chapterName: {
+      type: String,
+      default: ''
+    },
+    chapterDescription: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       chapter: {
-        name: '',
-        description: ''
+        name: this.chapterName,
+        description: this.chapterDescription
       },
       submitClicked: false
     }
@@ -89,8 +99,8 @@ export default {
       }
       this.$emit('create-chapter', this.chapter)
       this.chapter = {
-        name: '',
-        description: ''
+        name: this.chapterName,
+        description: this.chapterDescription
       }
       this.$nextTick(() => {
         this.hide()
