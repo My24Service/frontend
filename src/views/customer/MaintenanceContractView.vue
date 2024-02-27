@@ -269,7 +269,7 @@ export default {
       const data = {
         maintenanceEquipment: orderlines,
         customer_pk: this.customer.id,
-        contract_pk: this.pk
+        contract_pk: this.pk,
       }
       await this.$store.dispatch('setMaintenanceEquipment', data)
 
@@ -286,7 +286,8 @@ export default {
         num_order_equipment: m.num_order_equipment ? m.num_order_equipment : 0,
         amount: 1,
         contract_amount: 1,
-        useAsOrderLine: false
+        useAsOrderLine: false,
+        remarks: m.remarks
       }))
       this.isCreate = true
     },

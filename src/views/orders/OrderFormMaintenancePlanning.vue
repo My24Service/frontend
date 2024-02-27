@@ -1069,7 +1069,7 @@ export default {
             this.order.orderlines.push({
               product: equipment.name,
               location: equipment.location_name,
-              remarks: "",
+              remarks: equipmentData.remarks,
               equipment_location: equipment.location,
               equipment: equipment.id,
               amount: equipmentData.amount,
