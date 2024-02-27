@@ -4,7 +4,7 @@ export default {
     "num_insert": 128,
     "updates": {
       "Liander N.V.": {
-        "upload_rec": {
+        "import_rec": {
           "Naam (klant)": "Bla B.V.",
           "Klant ID": 25,
           "Postcode": "1234 AA",
@@ -36,7 +36,7 @@ export default {
     },
     "errors": [
       {
-        "upload_rec": {
+        "import_rec": {
           "Naam (klant)": "Klant onbekend",
           "Klant ID": 97,
           "Postcode": "",

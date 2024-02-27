@@ -31,6 +31,7 @@ export default {
                 "order_contact": null,
                 "last_status_full": "22/10/2021 19:53 gewijzigd door admin",
                 "workorder_pdf_url": "",
+                "workorder_pdf_url_partner": [],
                 "documents": [],
                 "user_order_is_available": true,
                 "created": "21/10/2021 18:10",
@@ -91,7 +92,8 @@ export default {
                 "customer_rate_avg": null,
                 "workorder_url": "http://bla.my24service.com:8000/order/workorder-view/b354dc2a-2f76-40ce-b93b-d86a232832da/",
                 "infolines": [],
-                "workorder_documents": []
+                "workorder_documents": [],
+              "assigned_user_info": []
             },
             {
                 "id": 1240,
@@ -119,6 +121,7 @@ export default {
                 "order_contact": null,
                 "last_status_full": "21/10/2021 18:10 aangemaakt door AnonymousUser",
                 "workorder_pdf_url": "",
+                "workorder_pdf_url_partner": [],
                 "documents": [],
                 "user_order_is_available": true,
                 "created": "21/10/2021 18:10",
@@ -172,7 +175,8 @@ export default {
                 "customer_rate_avg": null,
                 "workorder_url": "http://bla.my24service.com:8000/order/workorder-view/ee2977f6-87b9-4142-a256-4aaf035246a1/",
                 "infolines": [],
-                "workorder_documents": []
+                "workorder_documents": [],
+              "assigned_user_info": []
             }
         ]
     }
