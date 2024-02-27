@@ -26,6 +26,13 @@
 
       <!-- fixme -->
       <span v-if="memberType === 'maintenance'" class="order-assignees">
+        <span v-if="assignedUsers.length" :title="`assignees: ${assignedUsers.join(', ')}`">
+          <strong>{{ assignedUsers.join(', ') }}</strong>
+        </span>
+        <span v-else :title="`$trans('Not assigned to anyone')`">&ndash;</span>
+      </span>
+
+      <span v-if="memberType === 'temps'" class="order-assignees">
         <span v-if="order.assigned_count" :title="`assignees: ${order.required_assigned}`">
           {{ $trans('Assigned to') }} {{ order.assigned_count }}
           <span v-if="order.assigned_count > 1">
@@ -36,6 +43,7 @@
         </span>
         <span v-else :title="`$trans('Not assigned to anyone')`">&ndash;</span>
       </span>
+
       <span class="order-documents">
         <span v-if="order.documents.length" >
           <b-icon icon="paperclip"></b-icon>
@@ -91,6 +99,7 @@ export default {
   async created() {
     this.memberType = await this.$store.dispatch('getMemberType')
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.assignedUsers = this.getAssignedUsersList()
     this.isLoaded = true;
     this.orderStatusCode = this.orderStatusCodeComputed
     this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
@@ -130,6 +139,7 @@ export default {
       infoLineFields: [
         { key: 'info', label: this.$trans('Infolines') }
       ],
+      assignedUsers: []
     }
   },
   props: {
@@ -147,6 +157,19 @@ export default {
     }
   },
   methods: {
+    getAssignedUsersList() {
+      let users = []
+
+      for (const userInfo of this.order.assigned_user_info) {
+        if (userInfo.license_plate) {
+          users.push(`${userInfo.full_name} (${userInfo.license_plate})`)
+        } else {
+          users.push(userInfo.full_name)
+        }
+      }
+
+      return users
+    },
     showDeleteModal() {
       this.$refs['delete-order-modal'].show()
     },
