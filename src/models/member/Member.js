@@ -1,5 +1,44 @@
 import BaseModel from '@/models/base'
 
+// EQUIPMENT_QR_TYPES = (
+//   ('none', 'none'),
+//     ('my24service', 'my24service'),
+//     ('shltr', 'shltr'),
+// )
+
+export const EQUIPMENT_QR_TYPES = {
+  none: 'None',
+  my24service: 'My24Service',
+  shltr: 'SHLTR'
+}
+
+class MemberModel {
+  companycode
+  name
+  address
+  postal
+  city
+  country_code
+  tel
+  fax
+  www
+  email
+  contacts
+  activities
+  info
+  companylogo
+  companylogo_workorder
+  data
+  contract
+  is_deleted = false
+  member_type
+  is_public = true
+  has_api_users = false
+  has_branches = false
+  chamber_of_commerce
+  vat_number
+  equipment_qr_type
+}
 
 class MemberService extends BaseModel {
   fields = {
@@ -81,4 +120,4 @@ class MemberService extends BaseModel {
 let memberService = new MemberService()
 
 export default memberService
-export { MemberService }
+export { MemberService, MemberModel }

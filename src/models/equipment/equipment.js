@@ -57,11 +57,6 @@ class EquipmentService extends BaseModel {
       .then((response) => response.data)
   }
 
-  recreateQrShltr(pk) {
-    return this.axios.post(`${this.url}${pk}/create_qr_shltr/`)
-      .then((response) => response.data)
-  }
-
   searchCustomer(query, customerPk) {
     return this.axios.get(`${this.url}autocomplete/?q=${query}&customer=${customerPk}`)
       .then((response) => response.data)

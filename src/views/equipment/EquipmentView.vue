@@ -47,8 +47,8 @@
           <dd>{{ equipment.default_replace_months }}</dd>
           <dt>{{ $trans('Price') }}</dt>
           <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
-          <dt v-if="hasBranches" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
-          <dd v-if="hasBranches">
+          <dt v-if="hasQr" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
+          <dd v-if="hasQr">
             <div v-if="equipment.qr_path" class="qr-container">
               <b-link
                 class="btn btn-sm btn-outline" :href="equipment.qr_path"
@@ -67,11 +67,6 @@
               <b-button @click="recreate_qr">
                 {{ $trans("Recreate")}}
               </b-button>
-              <span class="space">&nbsp;</span>
-              <b-button @click="recreate_qr_shltr">
-                {{ $trans("Recreate SHLTR")}}
-              </b-button>
-
             </p>
           </dd>
         </dl>
@@ -171,6 +166,10 @@ export default {
     }
   },
   computed: {
+    hasQr() {
+      const qrType = this.$store.getters.getEquipmentQrType;
+      return qrType !== 'none'
+    },
     editLink() {
       if (this.hasBranches) {
         return 'equipment-equipment-edit'
@@ -215,13 +214,6 @@ export default {
     },
     async recreate_qr() {
       const result = await this.equipmentService.recreateQr(this.pk)
-      this.equipment = {
-        ...this.equipment,
-        qr_path: result.qr_path
-      }
-    },
-    async recreate_qr_shltr() {
-      const result = await this.equipmentService.recreateQrShltr(this.pk)
       this.equipment = {
         ...this.equipment,
         qr_path: result.qr_path

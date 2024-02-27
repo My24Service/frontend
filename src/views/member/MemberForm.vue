@@ -167,7 +167,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="2" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Tel.')"
@@ -185,7 +185,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Email')"
@@ -203,7 +203,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Website (http://...)')"
@@ -221,6 +221,8 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
+        </b-row>
+        <b-row>
           <b-col cols="1" role="group">
             <b-form-group
               label-size="sm"
@@ -258,6 +260,15 @@
                 v-model="member.has_branches"
               >
               </b-form-checkbox>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Equipment QR code type')"
+              label-for="member_country"
+            >
+              <b-form-select v-model="member.equipment_qr_type" :options="equipmentQrTypes" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
         </b-row>
@@ -390,9 +401,9 @@ import { useVuelidate } from '@vuelidate/core'
 import { url, email, required } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import memberModel from '../../models/member/Member.js'
-import contractModel from '../../models/member/Contract.js'
-import {NO_IMAGE_URL} from "../../constants";
+import {MemberService, EQUIPMENT_QR_TYPES, MemberModel} from '@/models/member/Member'
+import { ContractService } from '@/models/member/Contract'
+import {NO_IMAGE_URL} from "@/constants";
 
 export default {
   setup() {
@@ -414,8 +425,9 @@ export default {
         {value: 'temps', text: 'temps'},
         {value: 'maintenance', text: 'maintenance'},
       ],
+      equipmentQrTypes: EQUIPMENT_QR_TYPES,
       contracts: [],
-      member: memberModel.getFields(),
+      member: new MemberModel(),
       orgCompanycode: null,
       isDeletedOptions: [
         {value: true, text: this.$trans('Is deleted')},
@@ -428,6 +440,8 @@ export default {
       upload_preview_workorder: NO_IMAGE_URL,
       fileChanged: false,
       fileWorkorderChanged: false,
+      memberService: new MemberService(),
+      contractService: new ContractService()
     }
   },
   validations() {
@@ -472,7 +486,7 @@ export default {
       const isUnique = (value) => {
         if (value === '' || value.length < 3) return true
 
-        return memberModel.companycodeExists(value)
+        return this.memberService.companycodeExists(value)
       }
 
       validations['member']['companycode'] = {
@@ -489,7 +503,7 @@ export default {
           return true
         }
 
-        return memberModel.companycodeExists(value)
+        return this.memberService.companycodeExists(value)
       }
 
       validations['member']['companycode'] = {
@@ -513,7 +527,7 @@ export default {
     this.countries = await this.$store.dispatch('getCountries')
 
     try {
-      const data = await contractModel.list()
+      const data = await this.contractService.list()
       for(let i=0;i<data.results.length; i++) {
         this.contracts.push({
           value: data.results[i].id,
@@ -528,7 +542,7 @@ export default {
     if (!this.isCreate) {
       await this.loadData()
     } else {
-      this.member = memberModel.getFields()
+      this.member = new MemberModel()
       this.member.country_code = 'NL'
       this.member.member_type = 'maintenance'
       this.member.contract = this.contracts[0].value
@@ -596,7 +610,7 @@ export default {
       if (this.isCreate) {
         this.isLoading = true
         try {
-          await memberModel.insert(this.member)
+          await this.memberService.insert(this.member)
           this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
           this.buttonDisabled = false
           this.isLoading = false
@@ -618,7 +632,7 @@ export default {
 
         this.isLoading = true
 
-        await memberModel.update(this.pk, this.member)
+        await this.memberService.update(this.pk, this.member)
         this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -634,7 +648,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.member = await memberModel.detail(this.pk)
+        this.member = await this.memberService.detail(this.pk)
         this.current_image = this.member.companylogo ? this.member.companylogo : NO_IMAGE_URL
         this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : NO_IMAGE_URL
         this.orgCompanycode = this.member.companycode

@@ -84,5 +84,8 @@ export const getters = {
   },
   getMaintenanceEquipment(state) {
     return state.maintenanceEquipment
+  },
+  getEquipmentQrType(state) {
+    return state.memberInfo.equipment_qr_type
   }
 }
