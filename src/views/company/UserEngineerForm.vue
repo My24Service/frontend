@@ -262,8 +262,8 @@
             <b-form-group
               label-size="sm"
               label-cols="4"
-              v-bind:label="$trans('Prefered location')"
-              label-for="engineer_prefered_location">
+              v-bind:label="$trans('Preferred location')"
+              label-for="engineer_preferred_location">
               <b-form-select
                 id="engineer_preferred_location"
                 v-model="engineer.engineer.preferred_location"
@@ -280,7 +280,7 @@
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Or create new location')"
-              label-for="engineer_prefered_location_new">
+              label-for="engineer_preferred_location_new">
               <div>
                 <b-form-input
                   style="width: 140px !important; float:left !important;"
@@ -296,6 +296,20 @@
                   size="sm"
                   variant="primary">
                   {{ $trans('Create') }}</b-button>
+              </div>
+            </b-form-group>
+            <b-form-group
+              label-size="sm"
+              label-cols="4"
+              v-bind:label="$trans('Hide from dispatch?')"
+              label-for="engineer_hide_from_dispatch">
+              <div>
+                <b-form-checkbox
+                  id="planning_user_uses_time_registration"
+                  size="sm"
+                  v-model="engineer.engineer.hide_from_dispatch"
+                >
+                </b-form-checkbox>
               </div>
             </b-form-group>
           </div>
