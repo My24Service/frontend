@@ -31,7 +31,10 @@
           {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
         </p>
         <p v-if="memberType === 'maintenance'">
-          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
+          <span v-if="assignedUsers.length">
+            {{ $trans("Assigned users") }}: {{ assignedUsers.join(', ') }}<br/>
+          </span>
+          <span v-else><i>{{ $trans('Not assigned to anyone') }}</i></span><br/>
         </p>
       </b-col>
     </b-row>
@@ -65,7 +68,10 @@
           {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
         </p>
         <p v-if="memberType === 'maintenance'">
-          {{ $trans('Assigned users') }}: {{ order.assigned_count }}<br/>
+          <span v-if="assignedUsers.length">
+            {{ $trans("Assigned users") }}: {{ assignedUsers.join(', ') }}<br/>
+          </span>
+          <span v-else><i>{{ $trans('Not assigned to anyone') }}</i></span><br/>
           <span v-if="order.materials">
             {{ $trans('Used materials') }}: {{ order.materials.length }}<br/>
           </span>
@@ -149,6 +155,7 @@ import { componentMixin } from '../utils.js'
 export default {
   mixins: [componentMixin],
   async created() {
+    this.assignedUsers = this.getAssignedUsersList()
     this.memberType = await this.$store.dispatch('getMemberType')
     this.isLoaded = true
   },
@@ -173,7 +180,23 @@ export default {
       infoLineFields: [
         { key: 'info', label: this.$trans('Infolines') }
       ],
+      assignedUsers: []
     }
+  },
+  methods: {
+    getAssignedUsersList() {
+      let users = []
+
+      for (const userInfo of this.order.assigned_user_info) {
+        if (userInfo.license_plate) {
+          users.push(`${userInfo.full_name} (${userInfo.license_plate})`)
+        } else {
+          users.push(userInfo.full_name)
+        }
+      }
+
+      return users
+    },
   },
   props: {
     dispatch: {
