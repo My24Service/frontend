@@ -43,6 +43,20 @@
           </b-form-checkbox>
         </b-form-group>
       </b-col>
+      <b-col cols="2" role="group">
+        <b-form-group
+          label-size="sm"
+          v-bind:label="$trans('Quotation expiry days')"
+          label-for="quotation_expiry"
+        >
+          <b-form-input
+            v-model="quotation.quotation_expire_days"
+            :type="'number'"
+            id="quotation_reference"
+            size="sm"
+          ></b-form-input>
+        </b-form-group>
+      </b-col>
     </b-row>
     <b-row>
       <b-col cols="3" role="group">

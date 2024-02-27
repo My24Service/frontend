@@ -11,9 +11,11 @@
           </b-col>
         </b-row>
         <QuotationLine
+          :key="chapterKey"
           :quotationData="quotationData"
           :chapter="chapter"
           @quotationLineSubmitted="quotationLineSubmitted"
+          @chapter-updated="() => loadData()"
           @chapterDeleted="() => loadData()"
         />
       </Collapse>
@@ -26,6 +28,7 @@ import quotationService from '@/models/quotations/Quotation.js'
 import QuotationLine from './QuotationLine.vue'
 import Collapse from "../../../components/Collapse";
 import { ChapterService } from '../../../models/quotations/Chapter.js'
+import eventBus from '../../../eventBus.js'
 
 
 export default {
@@ -44,6 +47,28 @@ export default {
       default: null
     }
   },
+  mounted() {
+    eventBus.$on('edit-chapter-quotation-line', (chapterId) => {
+      for (let chapter of this.chapters) {
+        if (chapter.id === chapterId) {
+          chapter.new = true
+          continue
+        }
+        chapter.new = false
+      }
+      this.chapterKey += 1
+    })
+    eventBus.$on('cancel-edit-chapter-quotation-line', () => {
+      for (let chapter of this.chapters) {
+        chapter.new = false
+      }
+      this.chapterKey += 1
+    })
+  },
+  beforeDestroy() {
+    eventBus.$off('edit-chapter-quotation-line')
+    eventBus.$off('cancel-edit-chapter-quotation-line')
+  },
   data() {
     return {
       model: quotationService,
@@ -52,7 +77,8 @@ export default {
       isLoading: false,
       quotations: [],
       chapters: [],
-      chapterService: new ChapterService()
+      chapterService: new ChapterService(),
+      chapterKey: 0
     }
   },
   created () {

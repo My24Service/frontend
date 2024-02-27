@@ -44,7 +44,7 @@ let quotationMixin = {
         case OPTION_ONLY_TOTAL:
           const quotationLine = new this.quotationLineService.model({
             type: this.quotationLineType,
-            description: this.getDescriptionOnlyTotalQuotationLine(),
+            info: this.getDescriptionOnlyTotalQuotationLine(),
             amount: this.getTotalAmountQuotationLine(),
             vat: this.totalVAT_dinero.toFormat('0.00'),
             vat_currency: this.totalVAT_dinero.getCurrency(),
