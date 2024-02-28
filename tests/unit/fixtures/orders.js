@@ -92,7 +92,8 @@ export default {
                 "customer_rate_avg": null,
                 "workorder_url": "http://bla.my24service.com:8000/order/workorder-view/b354dc2a-2f76-40ce-b93b-d86a232832da/",
                 "infolines": [],
-                "workorder_documents": []
+                "workorder_documents": [],
+              "assigned_user_info": []
             },
             {
                 "id": 1240,
@@ -174,7 +175,8 @@ export default {
                 "customer_rate_avg": null,
                 "workorder_url": "http://bla.my24service.com:8000/order/workorder-view/ee2977f6-87b9-4142-a256-4aaf035246a1/",
                 "infolines": [],
-                "workorder_documents": []
+                "workorder_documents": [],
+              "assigned_user_info": []
             }
         ]
     }

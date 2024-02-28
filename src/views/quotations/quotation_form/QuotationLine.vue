@@ -3,61 +3,103 @@
     <hr>
     <h5 class="quotation-line-header">{{ $trans('Quotation lines')}} </h5>
     <div class="invoice-lines" v-if="quotationLineService.collection.length">
-      <b-row>
-        <b-col cols="3" class="header">
-          {{ $trans("Description") }}
-        </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("Amount") }}
-        </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("Price") }}
-        </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("Total") }}
-        </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("VAT") }}
-        </b-col>
-        <b-col cols="1">
-
-        </b-col>
-      </b-row>
-      <b-row v-for="quotationLine in quotationLineService.collection" :key="quotationLine.id">
-        <b-col cols="3" v-if="chapter.new">
-          <b-form-textarea
-            v-model="quotationLine.info"
-            rows="2"
-          ></b-form-textarea>
-        </b-col>
-        <b-col cols="3" v-if="!chapter.new">
-          {{ quotationLine.info }}
+      <b-row
+        class="quotation-lines"
+        v-for="quotationLine in quotationLineService.collection"
+        :key="quotationLine.key">
+        <b-col cols="3">
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Info") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12" v-if="chapter.new">
+              <b-form-textarea
+                v-model="quotationLine.info"
+                rows="2"
+              ></b-form-textarea>
+            </b-col>
+            <b-col cols="12" v-if="!chapter.new">
+              {{ quotationLine.info }}
+            </b-col>
+          </b-row>
         </b-col>
         <b-col cols="2">
-          {{ quotationLine.amount }}
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Amount") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12">
+              {{ quotationLine.amount }}
+            </b-col>
+          </b-row>
         </b-col>
         <b-col cols="2">
-          {{ quotationLine.price_dinero.toFormat('$0.00') }}
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Price") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12" v-if="quotationLine.price_text !== '*'">
+              {{ quotationLine.price_dinero.toFormat('$0.00') }}
+            </b-col>
+            <b-col cols="12" v-if="quotationLine.price_text === '*'">
+              *Price in totals
+            </b-col>
+          </b-row>
         </b-col>
         <b-col cols="2">
-          {{ quotationLine.total_dinero.toFormat('$0.00') }}
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Total") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12">
+              {{ quotationLine.total_dinero.toFormat('$0.00') }}
+            </b-col>
+          </b-row>
         </b-col>
         <b-col cols="2">
-          {{ quotationLine.vat_dinero.toFormat('$0.00') }}
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("VAT") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12">
+              {{ quotationLine.vat_dinero.toFormat('$0.00') }}
+            </b-col>
+          </b-row>
         </b-col>
         <b-col
           cols="1"
-          v-if="quotationLine.type === INVOICE_LINE_TYPE_MANUAL && chapter.new">
+          v-if="chapter.new">
           <b-link class="h5 mx-2" @click.prevent="deleteQuotationLine(quotationLine.id)">
             <b-icon-trash></b-icon-trash>
           </b-link>
         </b-col>
-      </b-row>
-      <b-row v-if="quotationLinesHaveTotals">
-        <b-col>
-          <div class="float-right">
-            <i>* {{ $trans("Prices are combined in totals") }}</i>
-          </div>
+        <b-col cols="6">
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Extra description") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12" v-if="chapter.new">
+              <b-form-textarea
+                v-model="quotationLine.extra_description"
+                rows="2"
+              ></b-form-textarea>
+            </b-col>
+            <b-col cols="12" v-if="!chapter.new">
+              {{ quotationLine.extra_description }}
+            </b-col>
+          </b-row>
         </b-col>
       </b-row>
     </div>
@@ -67,7 +109,7 @@
           <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Description')"
+              v-bind:label="$trans('Info')"
               label-for="new-invoice-line-description"
             >
               <b-form-input
@@ -142,6 +184,18 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Extra description')"
+              label-for="new-invoice-line-description"
+            >
+              <b-form-textarea
+                id="new-invoice-line-description"
+                v-model="quotationLineService.editItem.extra_description"
+              ></b-form-textarea>
+            </b-form-group>
+          </b-col>
         </b-row>
       </b-container>
       <footer class="modal-footer">
@@ -171,16 +225,35 @@
         class="modal-footer"
       >
         <b-button
+          :disabled="isLoading"
+          @click="cancelSaveQuotationLine"
+          class="btn btn-secondary update-button"
+          type="button"
+          variant="secondary"
+        >
+          {{ $trans('Cancel') }}
+        </b-button>
+        <b-button
           :disabled="isLoading || !quotationLineService.collection.length"
           @click="submitQuotationLine"
-          class="btn btn-danger update-button"
+          class="btn btn-primary update-button"
           type="button"
-          variant="danger"
+          variant="primary"
         >
           {{ $trans('Save chapter') }}
         </b-button>
       </footer>
     </div>
+    <footer class="modal-footer" v-if="!chapter.new">
+      <b-button
+        @click="editQuotationLine"
+        class="btn btn-primary update-button"
+        type="button"
+        variant="primary"
+      >
+        {{ $trans('Edit quotation lines') }}
+      </b-button>
+    </footer>
     <hr>
     <b-row class="quotation-total">
       <b-col cols="10">
@@ -201,6 +274,15 @@
     >
       <b-button
         :disabled="isLoading"
+        @click="showEditChapterModal"
+        class="btn btn-primary update-button"
+        type="button"
+        variant="primary"
+      >
+        {{ $trans('Edit chapter') }}
+      </b-button>
+      <b-button
+        :disabled="isLoading"
         @click="showDeleteModal"
         class="btn btn-danger update-button"
         type="button"
@@ -219,6 +301,13 @@
         {{ $trans('Are you sure you want to delete this chapter?') }}
       </p>
     </b-modal>
+    <ChapterModalVue
+      id="edit-chapter-modal"
+      ref="edit-chapter-modal"
+      :chapterName="chapter.name"
+      :chapterDescription="chapter.description"
+      @create-chapter="editChapter"
+    />
   </b-overlay>
 </template>
 <script>
@@ -232,6 +321,7 @@ import TotalsInputs from "@/components/TotalsInputs";
 import { QuotationService } from '@/models/quotations/Quotation.js';
 import chapterService from '../../../models/quotations/Chapter.js'
 import eventBus from '../../../eventBus.js'
+import ChapterModalVue from './ChapterModal.vue'
 
 
 export default {
@@ -241,6 +331,7 @@ export default {
     Collapse,
     VAT,
     TotalsInputs,
+    ChapterModalVue,
   },
   setup() {
     return { v$: useVuelidate() }
@@ -281,7 +372,7 @@ export default {
       INVOICE_LINE_TYPE_MANUAL,
       total: 0,
       vat: 0,
-      isLoading: false
+      isLoading: false,
     }
   },
   computed: {
@@ -299,7 +390,7 @@ export default {
     eventBus.$on('add-cost-quotationline', (quotationLines) => {
       if (this.chapter.new) {
         for (let quotationLine of quotationLines) {
-          quotationLine.id = this.getQuotationLineId()
+          quotationLine.key = this.getQuotationLineKey()
           this.quotationLineService.collection.push(quotationLine)
         }
         const txt = quotationLines.length === 1 ? this.$trans('quotation line') : this.$trans('quotation lines')
@@ -316,6 +407,7 @@ export default {
     if (this.chapter.new) {
       // init new model for manual entry
       this.quotationLineService.modelDefaults = {
+        amount: '0',
         price: '0.00',
         price_currency: this.$store.getters.getDefaultCurrency,
         total: '0.00',
@@ -325,9 +417,9 @@ export default {
         vat_type: this.$store.getters.getInvoiceDefaultVat,
       }
       this.quotationLineService.newEditItem()
-    } else {
-      this.loadData()
     }
+
+    await this.loadData()
     this.isLoading = false
   },
   methods: {
@@ -336,7 +428,7 @@ export default {
       this.vat = this.quotationLineService.getItemsTotalVAT()
     },
     addQuotationLine() {
-      this.quotationLineService.editItem.id = this.getQuotationLineId()
+      this.quotationLineService.editItem.key = this.getQuotationLineKey()
       this.quotationLineService.editItem.type = this.INVOICE_LINE_TYPE_MANUAL
       this.quotationLineService.editItem.price_text = this.quotationLineService.editItem.price_dinero.toFormat('$0.00')
       this.quotationLineService.addCollectionItem()
@@ -361,15 +453,15 @@ export default {
       this.quotationLineService.editItem.calcTotal()
       this.updateQuotationTotals()
     },
-    getQuotationLineId() {
+    getQuotationLineKey() {
       if (this.quotationLineService.collection.length === 0) {
         return 0
       }
 
       const maxQuotationLine = this.quotationLineService.collection.reduce(function(prev, current) {
-        return (prev.id > current.id) ? prev : current
+        return (prev.key > current.key) ? prev : current
       })
-      return maxQuotationLine.id + 1
+      return maxQuotationLine.key + 1
     },
     async submitQuotationLine() {
       try {
@@ -377,8 +469,8 @@ export default {
           for (let quotationLine of this.quotationLineService.collection) {
             quotationLine.quotation = this.quotationData.id
             quotationLine.chapter = this.chapter.id
-            await this.quotationLineService.insert(quotationLine)
           }
+          await this.quotationLineService.updateCollection()
           this.infoToast(this.$trans('Updated'), this.$trans('chapter has been updated'))
           this.isLoading = false
           this.quotationLineService.collection = []
@@ -388,6 +480,9 @@ export default {
           this.errorToast(this.$trans('Error updating chapter'))
           this.isLoading = false
       }
+    },
+    editQuotationLine() {
+      eventBus.$emit('edit-chapter-quotation-line', this.chapter.id)
     },
     async deleteChapter() {
       this.isLoading = true
@@ -413,6 +508,7 @@ export default {
       try {
         const data = await this.quotationLineService.list()
         for (const quotationLine of data.results) {
+          quotationLine.key = this.getQuotationLineKey()
           this.quotationLineService.collection.push(new QuotationLineModel(quotationLine))
         }
         this.isLoading = false
@@ -427,6 +523,26 @@ export default {
     showDeleteModal() {
       this.$refs['delete-chapter-modal'].show()
     },
+    showEditChapterModal() {
+      this.$refs['edit-chapter-modal'].show()
+    },
+    async editChapter (chapter) {
+      this.$refs['edit-chapter-modal'].hide()
+      try {
+        this.isLoading = true
+        this.newChapter = await chapterService.update(this.chapter.id, chapter)
+        this.infoToast(this.$trans('Updated'), this.$trans('Chapter has been updated'))
+        this.isLoading = false
+        this.$emit('chapter-updated')
+      } catch(error) {
+        console.log('Error updating chapter', error)
+        this.errorToast(this.$trans('Error updating chapter'))
+        this.isLoading = false
+      }
+    },
+    cancelSaveQuotationLine() {
+      eventBus.$emit('cancel-edit-chapter-quotation-line')
+    }
   }
 }
 </script>
@@ -458,5 +574,8 @@ export default {
 }
 .total-text {
   font-weight: bold;
+}
+.quotation-lines {
+  margin-bottom: 20px;
 }
 </style>

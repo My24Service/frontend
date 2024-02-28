@@ -93,6 +93,7 @@ export default {
         "workorder_pdf_url_partner": [],
         "customer_order_accepted": true,
         "workorder_documents": [],
-        "infolines": []
+        "infolines": [],
+      "assigned_user_info": []
     }
 }
