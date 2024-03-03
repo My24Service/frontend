@@ -1,191 +1,121 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <h4>{{ $trans('Quotation data')}} </h4>
-    <b-row>
-      <b-col cols="2" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Reference')"
-          label-for="quotation_reference"
-        >
-          <b-form-input
-            v-model="quotation.quotation_reference"
-            id="quotation_reference"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-      </b-col>
-      <b-col cols="6" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Description')"
-          label-for="quotation_description"
-        >
-          <b-form-textarea
-            id="quotation_description"
-            v-model="quotation.description"
-            rows="1"
-          ></b-form-textarea>
-        </b-form-group>
-      </b-col>
-      <b-col cols="2" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Accepted')"
-          label-for="quotation_accepted"
-        >
-          <b-form-checkbox
-            id="quotation_accepted"
-            v-model="quotation.accepted"
-            value="true"
-            unchecked-value="false"
-          >
-          </b-form-checkbox>
-        </b-form-group>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="3" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Signature name engineer')"
-          label-for="signature_name_engineer"
-        >
-          <b-form-input
-            v-model="quotation.signature_name_engineer"
-            id="signature_name_engineer"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Signature engineer')"
-          label-for="signature_engineer"
-        >
-          <b-form-file
-            id="signature_engineer"
-            accept="image/*"
-            :placeholder="$trans('Choose a file or drop it here...')"
-            @input="engineerImageSignatureSelected"
-          ></b-form-file>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <h3>{{ $trans('Current image') }}</h3>
-        <img width="200px" :src="engineer_signature_current_image" alt=""/>
-      </b-col>
-      <b-col cols="3">
-        <h3>{{ $trans('Upload preview') }}</h3>
-        <img width="200px" :src="engineer_signature_upload_preview" alt=""/>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="3" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Signature name customer')"
-          label-for="signature_name_customer"
-        >
-          <b-form-input
-            v-model="quotation.signature_name_customer"
-            id="signature_name_customer"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Signature customer')"
-          label-for="signature_customer"
-        >
-          <b-form-file
-            id="signature_customer"
-            accept="image/*"
-            :placeholder="$trans('Choose a file or drop it here...')"
-            @input="customerImageSignatureSelected"
-          ></b-form-file>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <h3>{{ $trans('Current image') }}</h3>
-        <img width="200px" :src="customer_signature_current_image" alt=""/>
-      </b-col>
-      <b-col cols="3">
-        <h3>{{ $trans('Upload preview') }}</h3>
-        <img width="200px" :src="customer_signature_upload_preview" alt=""/>
-      </b-col>
-    </b-row>
-    <h4>{{ $trans('Quotation lines')}} </h4>
+    <hr>
+    <h5 class="quotation-line-header">{{ $trans('Quotation lines')}} </h5>
     <div class="invoice-lines" v-if="quotationLineService.collection.length">
-      <b-row>
-        <b-col cols="3" class="header">
-          {{ $trans("Description") }}
-        </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("Amount") }}
-        </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("Price") }}
-        </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("Total") }}
-        </b-col>
-        <b-col cols="2" class="header">
-          {{ $trans("VAT") }}
-        </b-col>
-        <b-col cols="1">
-
-        </b-col>
-      </b-row>
-      <b-row v-for="quotationLine in quotationLineService.collection" :key="quotationLine.id">
+      <b-row
+        class="quotation-lines"
+        v-for="quotationLine in quotationLineService.collection"
+        :key="quotationLine.key">
         <b-col cols="3">
-          <b-form-textarea
-            v-model="quotationLine.description"
-            rows="2"
-          ></b-form-textarea>
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Info") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12" v-if="chapter.new">
+              <b-form-textarea
+                v-model="quotationLine.info"
+                rows="2"
+              ></b-form-textarea>
+            </b-col>
+            <b-col cols="12" v-if="!chapter.new">
+              {{ quotationLine.info }}
+            </b-col>
+          </b-row>
         </b-col>
         <b-col cols="2">
-          {{ quotationLine.amount }}
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Amount") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12">
+              {{ quotationLine.amount }}
+            </b-col>
+          </b-row>
         </b-col>
         <b-col cols="2">
-          {{ quotationLine.price_text }}
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Price") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12" v-if="quotationLine.price_text !== '*'">
+              {{ quotationLine.price_dinero.toFormat('$0.00') }}
+            </b-col>
+            <b-col cols="12" v-if="quotationLine.price_text === '*'">
+              *Price in totals
+            </b-col>
+          </b-row>
         </b-col>
         <b-col cols="2">
-          {{ quotationLine.total_dinero.toFormat('$0.00') }}
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Total") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12">
+              {{ quotationLine.total_dinero.toFormat('$0.00') }}
+            </b-col>
+          </b-row>
         </b-col>
         <b-col cols="2">
-          {{ quotationLine.vat_dinero.toFormat('$0.00') }}
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("VAT") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12">
+              {{ quotationLine.vat_dinero.toFormat('$0.00') }}
+            </b-col>
+          </b-row>
         </b-col>
-        <b-col cols="1" v-if="quotationLine.type === INVOICE_LINE_TYPE_MANUAL">
+        <b-col
+          cols="1"
+          v-if="chapter.new">
           <b-link class="h5 mx-2" @click.prevent="deleteQuotationLine(quotationLine.id)">
             <b-icon-trash></b-icon-trash>
           </b-link>
         </b-col>
-      </b-row>
-      <b-row v-if="quotationLinesHaveTotals">
-        <b-col>
-          <div class="float-right">
-            <i>* {{ $trans("Prices are combined in totals") }}</i>
-          </div>
+        <b-col cols="6">
+          <b-row>
+            <b-col cols="12" class="header">
+              {{ $trans("Extra description") }}
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12" v-if="chapter.new">
+              <b-form-textarea
+                v-model="quotationLine.extra_description"
+                rows="2"
+              ></b-form-textarea>
+            </b-col>
+            <b-col cols="12" v-if="!chapter.new">
+              {{ quotationLine.extra_description }}
+            </b-col>
+          </b-row>
         </b-col>
       </b-row>
     </div>
-    <div class="new-invoice-line" v-if="quotationLineService.editItem">
+    <div class="new-invoice-line" v-if="quotationLineService.editItem && chapter.new">
       <b-container>
         <b-row>
           <b-col cols="3" role="group">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Description')"
+              v-bind:label="$trans('Info')"
               label-for="new-invoice-line-description"
             >
               <b-form-input
                 id="new-invoice-line-description"
                 size="sm"
-                v-model="quotationLineService.editItem.description"
+                v-model="quotationLineService.editItem.info"
               ></b-form-input>
             </b-form-group>
           </b-col>
@@ -213,7 +143,7 @@
                 id="new-invoice-line-price"
                 v-model="quotationLineService.editItem.price"
                 :currency="quotationLineService.editItem.price_currency"
-                @priceChanged="(val) => quotationLineService.editItem.setPriceField('price', val) && quotationLineService.editItem.calcTotal()"
+                @priceChanged="quotationLinePriceChanged"
               />
             </b-form-group>
           </b-col>
@@ -254,6 +184,18 @@
               ></b-form-input>
             </b-form-group>
           </b-col>
+          <b-col cols="4" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Extra description')"
+              label-for="new-invoice-line-description"
+            >
+              <b-form-textarea
+                id="new-invoice-line-description"
+                v-model="quotationLineService.editItem.extra_description"
+              ></b-form-textarea>
+            </b-form-group>
+          </b-col>
         </b-row>
       </b-container>
       <footer class="modal-footer">
@@ -279,41 +221,107 @@
           {{ $trans('Add quotation line') }}
         </b-button>
       </footer>
-
+      <footer
+        class="modal-footer"
+      >
+        <b-button
+          :disabled="isLoading"
+          @click="cancelSaveQuotationLine"
+          class="btn btn-secondary update-button"
+          type="button"
+          variant="secondary"
+        >
+          {{ $trans('Cancel') }}
+        </b-button>
+        <b-button
+          :disabled="isLoading || !quotationLineService.collection.length"
+          @click="submitQuotationLine"
+          class="btn btn-primary update-button"
+          type="button"
+          variant="primary"
+        >
+          {{ $trans('Save chapter') }}
+        </b-button>
+      </footer>
     </div>
-    <hr/>
+    <footer class="modal-footer" v-if="!chapter.new">
+      <b-button
+        @click="editQuotationLine"
+        class="btn btn-primary update-button"
+        type="button"
+        variant="primary"
+      >
+        {{ $trans('Edit quotation lines') }}
+      </b-button>
+    </footer>
+    <hr>
     <b-row class="quotation-total">
       <b-col cols="10">
-        <span class="total-text">{{ $trans('Quotation total') }}</span>
+        <span class="total-text">{{ $trans('Chapter total') }}</span>
       </b-col>
       <b-col cols="2">
         <TotalsInputs
-          v-if="quotation.total_dinero"
-          :total="quotation.total_dinero"
+          v-if="total"
+          :total="total"
           :is-final-total="true"
-          :vat="quotation.vat_dinero"
+          :vat="vat"
         />
       </b-col>
     </b-row>
+    <footer
+      class="modal-footer"
+      v-if="!chapter.new"
+    >
+      <b-button
+        :disabled="isLoading"
+        @click="showEditChapterModal"
+        class="btn btn-primary update-button"
+        type="button"
+        variant="primary"
+      >
+        {{ $trans('Edit chapter') }}
+      </b-button>
+      <b-button
+        :disabled="isLoading"
+        @click="showDeleteModal"
+        class="btn btn-danger update-button"
+        type="button"
+        variant="danger"
+      >
+        {{ $trans('Delete chapter') }}
+      </b-button>
+    </footer>
+    <b-modal
+      id="delete-chapter-modal"
+      ref="delete-chapter-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="deleteChapter"
+    >
+      <p class="my-4">
+        {{ $trans('Are you sure you want to delete this chapter?') }}
+      </p>
+    </b-modal>
+    <ChapterModalVue
+      id="edit-chapter-modal"
+      ref="edit-chapter-modal"
+      :chapterName="chapter.name"
+      :chapterDescription="chapter.description"
+      @create-chapter="editChapter"
+    />
   </b-overlay>
 </template>
 <script>
-import quotationLineService, { QuotationLineModel } from '@/models/quotations/QuotationLine.js';
+import{QuotationLineService, QuotationLineModel } from '@/models/quotations/QuotationLine.js';
 import PriceInput from "@/components/PriceInput";
 import Collapse from "@/components/Collapse";
-
 import VAT from "../quotation_form/VAT";
-import {
-  COST_TYPE_ACTUAL_WORK,
-  COST_TYPE_EXTRA_WORK,
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS
-} from "@/models/orders/Cost";
-import {INVOICE_LINE_TYPE_MANUAL} from "../quotation_form/constants";
+import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useVuelidate} from "@vuelidate/core";
 import TotalsInputs from "@/components/TotalsInputs";
-import quotationService, { QuotationService } from '@/models/quotations/Quotation.js';
-import {NO_IMAGE_URL} from "../../../constants"
+import { QuotationService } from '@/models/quotations/Quotation.js';
+import chapterService from '../../../models/quotations/Chapter.js'
+import eventBus from '../../../eventBus.js'
+import ChapterModalVue from './ChapterModal.vue'
 
 
 export default {
@@ -323,6 +331,7 @@ export default {
     Collapse,
     VAT,
     TotalsInputs,
+    ChapterModalVue,
   },
   setup() {
     return { v$: useVuelidate() }
@@ -341,9 +350,9 @@ export default {
       type: Object,
       default: null
     },
-    submitQuotationLineform: {
-      type: Boolean,
-      default: false
+    chapter: {
+      type: Object,
+      default: null
     }
   },
   watch: {
@@ -352,51 +361,18 @@ export default {
         this.quotation = newValue
       },
       deep: true
-    },
-    submitQuotationLineform (val) {
-      if (val) {
-        this.submitQuotation()
-      }
     }
   },
   data () {
     return {
-      COST_TYPE_WORK_HOURS,
-      COST_TYPE_TRAVEL_HOURS,
-      COST_TYPE_EXTRA_WORK,
-      COST_TYPE_ACTUAL_WORK,
-
-      isLoading: false,
       submitClicked: false,
       quotation: this.quotationData,
-      errorMessage: null,
-
-      invoice_id: null,
-      order_pk: null,
-
-      default_currency: this.$store.getters.getDefaultCurrency,
-
-      engineer_models: [],
-
-      activity_totals: null,
-      extra_work_totals: null,
-      actual_work_totals: null,
-
-      material_models: null,
-      used_materials: null,
-
-      customerPk: null,
-      customer: null,
-
-      quotationService,
-      quotationLineService,
-      deletedInvoiceLines: [],
+      quotationService: new QuotationService(),
+      quotationLineService: new QuotationLineService(),
       INVOICE_LINE_TYPE_MANUAL,
-
-      engineer_signature_current_image: NO_IMAGE_URL,
-      engineer_signature_upload_preview: NO_IMAGE_URL,
-      customer_signature_upload_preview: NO_IMAGE_URL,
-      customer_signature_current_image: NO_IMAGE_URL
+      total: 0,
+      vat: 0,
+      isLoading: false,
     }
   },
   computed: {
@@ -410,55 +386,49 @@ export default {
         && this.quotationLineService.editItem.amount !== ""
     }
   },
+  mounted() {
+    eventBus.$on('add-cost-quotationline', (quotationLines) => {
+      if (this.chapter.new) {
+        for (let quotationLine of quotationLines) {
+          quotationLine.key = this.getQuotationLineKey()
+          this.quotationLineService.collection.push(quotationLine)
+        }
+        const txt = quotationLines.length === 1 ? this.$trans('quotation line') : this.$trans('quotation lines')
+        this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
+      }
+    })
+  },
+  beforeDestroy() {
+    eventBus.$off('add-cost-quotationline')
+  },
   async created() {
     this.isLoading = true
 
-    // init new model for manual entry
-    this.quotationLineService.modelDefaults = {
-      price: '0.00',
-      price_currency: this.$store.getters.getDefaultCurrency,
-      total: '0.00',
-      total_currency: this.$store.getters.getDefaultCurrency,
-      vat: '0.00',
-      vat_currency: this.$store.getters.getDefaultCurrency,
-      vat_type: this.$store.getters.getInvoiceDefaultVat,
+    if (this.chapter.new) {
+      // init new model for manual entry
+      this.quotationLineService.modelDefaults = {
+        amount: '0',
+        price: '0.00',
+        price_currency: this.$store.getters.getDefaultCurrency,
+        total: '0.00',
+        total_currency: this.$store.getters.getDefaultCurrency,
+        vat: '0.00',
+        vat_currency: this.$store.getters.getDefaultCurrency,
+        vat_type: this.$store.getters.getInvoiceDefaultVat,
+      }
+      this.quotationLineService.newEditItem()
     }
-    this.quotationLineService.newEditItem()
-    this.engineer_signature_current_image = this.quotation.signature_engineer ?
-      this.quotation.signature_engineer : NO_IMAGE_URL
-    this.customer_signature_current_image = this.quotation.signature_customer ?
-      this.quotation.signature_customer : NO_IMAGE_URL
+
+    await this.loadData()
     this.isLoading = false
   },
   methods: {
-    engineerImageSignatureSelected(file) {
-      const reader = new FileReader()
-      reader.onload = (f) => {
-        const b64 = f.target.result
-        this.engineer_signature_upload_preview = b64
-        this.quotation.signature_engineer = b64
-      }
-      reader.readAsDataURL(file)
-    },
-    customerImageSignatureSelected(file) {
-      const reader = new FileReader()
-      reader.onload = (f) => {
-        const b64 = f.target.result
-        this.customer_signature_upload_preview = b64
-        this.quotation.signature_customer = b64
-      }
-      reader.readAsDataURL(file)
-    },
-    // invoice lines
     updateQuotationTotals() {
-      const total = this.quotationLineService.getItemsTotal()
-      const vat = this.quotationLineService.getItemsTotalVAT()
-
-      this.quotation.setPriceField('total', total)
-      this.quotation.setPriceField('vat', vat)
+      this.total = this.quotationLineService.getItemsTotal()
+      this.vat = this.quotationLineService.getItemsTotalVAT()
     },
     addQuotationLine() {
-      this.quotationLineService.editItem.id = this.getQuotationLineId()
+      this.quotationLineService.editItem.key = this.getQuotationLineKey()
       this.quotationLineService.editItem.type = this.INVOICE_LINE_TYPE_MANUAL
       this.quotationLineService.editItem.price_text = this.quotationLineService.editItem.price_dinero.toFormat('$0.00')
       this.quotationLineService.addCollectionItem()
@@ -466,64 +436,112 @@ export default {
     },
     deleteQuotationLine(id) {
       this.quotationLineService.deleteCollectionItemByid(id)
+      this.updateQuotationTotals()
     },
     quotationLineAmountChanged() {
       this.quotationLineService.editItem.amount = this.quotationLineService.editItem.amount.replace(',', '.')
       this.quotationLineService.editItem.calcTotal()
+      this.updateQuotationTotals()
+    },
+    quotationLinePriceChanged(val) {
+      this.quotationLineService.editItem.setPriceField('price', val)
+      this.quotationLineService.editItem.calcTotal()
+      this.updateQuotationTotals()
     },
     changeVatTypeQuotationLine(vat_type) {
       this.quotationLineService.editItem.vat_type = vat_type
       this.quotationLineService.editItem.calcTotal()
-    },
-    quotationLinesCreated(quotationLines) {
-      if (quotationLines.length > 0) {
-        for (let quotationLine of quotationLines) {
-          quotationLine.id = this.getQuotationLineId()
-          // console.log(`id: ${id}`)
-          this.quotationLineService.collection.push(quotationLine)
-        }
-        this.updateQuotationTotals()
-        const txt = quotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
-        this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
-      }
-    },
-    emptyCollectionClicked(type) {
-      this.quotationLineService.collection = this.quotationLineService.collection.filter((m) => m.type !== type)
       this.updateQuotationTotals()
-      this.infoToast(this.$trans('Removed'), this.$trans(`quotation lines removed`))
     },
-    getQuotationLineId() {
+    getQuotationLineKey() {
       if (this.quotationLineService.collection.length === 0) {
         return 0
       }
 
       const maxQuotationLine = this.quotationLineService.collection.reduce(function(prev, current) {
-        return (prev.id > current.id) ? prev : current
+        return (prev.key > current.key) ? prev : current
       })
-      return maxQuotationLine.id + 1
+      return maxQuotationLine.key + 1
     },
-    async submitQuotation () {
+    async submitQuotationLine() {
+      try {
+          this.isLoading = true
+          for (let quotationLine of this.quotationLineService.collection) {
+            quotationLine.quotation = this.quotationData.id
+            quotationLine.chapter = this.chapter.id
+          }
+          await this.quotationLineService.updateCollection()
+          this.infoToast(this.$trans('Updated'), this.$trans('chapter has been updated'))
+          this.isLoading = false
+          this.quotationLineService.collection = []
+          this.$emit('quotationLineSubmitted')
+          this.loadData()
+        } catch(error) {
+          this.errorToast(this.$trans('Error updating chapter'))
+          this.isLoading = false
+      }
+    },
+    editQuotationLine() {
+      eventBus.$emit('edit-chapter-quotation-line', this.chapter.id)
+    },
+    async deleteChapter() {
       this.isLoading = true
-      this.$emit('quotationSubmitted', true)
+      try {
+        await chapterService.delete(this.chapter.id)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Chapter has been deleted'))
+        this.isLoading = false
+        this.$emit('quotationLineSubmitted')
+        this.$emit('chapterDeleted')
+      } catch(error) {
+        console.log('Error deleting chapter', error)
+        this.errorToast(this.$trans('Error deleting chapter'))
+        this.isLoading = false
+      }
+    },
+    async loadData() {
+      this.isLoading = true
+      this.quotationLineService.listArgs = [
+        `quotation=${this.quotationData.id}`,
+        `chapter=${this.chapter.id}`
+      ]
 
       try {
-          const quotation = await this.quotationService.update(this.quotation.id, this.quotation)
-          for (let quotationLine of this.quotationLineService.collection) {
-            quotationLine.quotation = quotation.id
-            await this.quotationLineService.insert(quotationLine)
-          }
-
-          this.infoToast(this.$trans('Updated'), this.$trans('quotation has been updated'))
-          this.isLoading = false
-          this.$emit('quotationSubmitted', false)
-          this.quotationLineService.collection = []
-          this.$router.push({ name: 'quotation-list'})
-        } catch(error) {
-          console.log('error fetching quotation', error)
-          this.errorToast(this.$trans('Error updating quotation'))
-          this.isLoading = false
-          this.$emit('quotationSubmitted', false)
+        const data = await this.quotationLineService.list()
+        for (const quotationLine of data.results) {
+          quotationLine.key = this.getQuotationLineKey()
+          this.quotationLineService.collection.push(new QuotationLineModel(quotationLine))
+        }
+        this.isLoading = false
+        this.updateQuotationTotals()
+      } catch(error) {
+        console.log('error fetching quotation lines', error)
+        this.errorToast(this.$trans('Error loading quotation lines'))
+        this.isLoading = false
       }
+      this.quotationLineService.listArgs = []
+    },
+    showDeleteModal() {
+      this.$refs['delete-chapter-modal'].show()
+    },
+    showEditChapterModal() {
+      this.$refs['edit-chapter-modal'].show()
+    },
+    async editChapter (chapter) {
+      this.$refs['edit-chapter-modal'].hide()
+      try {
+        this.isLoading = true
+        this.newChapter = await chapterService.update(this.chapter.id, chapter)
+        this.infoToast(this.$trans('Updated'), this.$trans('Chapter has been updated'))
+        this.isLoading = false
+        this.$emit('chapter-updated')
+      } catch(error) {
+        console.log('Error updating chapter', error)
+        this.errorToast(this.$trans('Error updating chapter'))
+        this.isLoading = false
+      }
+    },
+    cancelSaveQuotationLine() {
+      eventBus.$emit('cancel-edit-chapter-quotation-line')
     }
   }
 }
@@ -545,10 +563,19 @@ export default {
   font-size: 14px;
   font-weight: bold;
 }
+.invoice-lines {
+  margin-bottom: 20px;
+}
+.quotation-line-header {
+  margin-bottom: 20px;
+}
+.quotation-total {
+  margin-bottom: 20px;
+}
 .total-text {
   font-weight: bold;
 }
-.quotation-total {
+.quotation-lines {
   margin-bottom: 20px;
 }
 </style>

@@ -44,7 +44,7 @@
                 :placeholder="$trans('Type to search')"
                 open-direction="bottom"
                 :options="materials"
-                :loading="compLoading"
+                :loading="fetchingMaterials"
                 :multiple="false"
                 :internal-search="false"
                 :clear-on-select="false"
@@ -245,7 +245,8 @@ export default {
       getMaterialsDebounced: '',
       parentHasQuotationLines: false,
       quotationLineType: INVOICE_LINE_TYPE_USED_MATERIALS,
-      quotationLineService
+      quotationLineService,
+      fetchingMaterials: false,
     }
   },
   async created() {
@@ -330,11 +331,14 @@ export default {
       return `${material.material_name}, ${text}: ${material.total_amount}`
     },
     async getMaterials(query) {
+      this.fetchingMaterials = true
       try {
         this.materials = await inventoryModel.getMaterials(query)
+        this.fetchingMaterials = false
       } catch(error) {
         console.log('Error fetching materials', error)
         this.errorToast(this.$trans('Error fetching materials'))
+        this.fetchingMaterials = false
       }
     },
     changeVatType(obj, vatType) {
