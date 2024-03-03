@@ -7,7 +7,9 @@ class QuotationLineModel {
   id
   type
   quotation
+  chapter
   info
+  extra_description
   amount
   material
   material_name
@@ -52,7 +54,9 @@ class QuotationLineService extends BaseModel {
   fields = {
     id: null,
     quotation: null,
+    chapter: null,
     info: null,
+    extra_description: null,
     amount: null,
     material_name: null,
     material_identifier: null,
@@ -88,7 +92,8 @@ class QuotationLineService extends BaseModel {
   newModelFromCost(cost, description, type) {
     return new this.model({
       type,
-      description,
+      extra_description: '',
+      info: description,
       amount: cost.getAmount(),
       vat: cost.vat,
       vat_currency: cost.vat_currency,
@@ -105,4 +110,4 @@ class QuotationLineService extends BaseModel {
 
 export default new QuotationLineService()
 
-export { QuotationLineModel }
+export { QuotationLineService, QuotationLineModel }
