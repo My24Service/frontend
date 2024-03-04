@@ -104,11 +104,15 @@
     <b-nav-item
       :active="isActive('quotations')"
       v-if="hasQuotations && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
+      class="has-children"
       to="/quotations/quotations">
       <b-icon icon="briefcase" v-if="!isActive('quotations')"></b-icon>
       <b-icon icon="briefcase-fill" v-else></b-icon>
       {{ $trans('Quotations') }}
     </b-nav-item>
+    <SubNav v-if="isActive('quotations') || isActive('quotations', 'quotations')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
 
     <b-nav-item
       :active="isActive('company')"

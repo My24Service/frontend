@@ -142,7 +142,9 @@ import {
   USE_PRICE_PURCHASE,
   USE_PRICE_SELLING,
   INVOICE_LINE_TYPE_HOURS_TYPE_WORK,
-  INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL
+  INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL,
+  INVOICE_LINE_TYPE_HOURS_TYPE_EXTRA_WORK,
+  INVOICE_LINE_TYPE_HOURS_TYPE_ACTUAL_WORK
 } from "./constants";
 import CostService, {
   COST_TYPE_ACTUAL_WORK,
@@ -159,6 +161,8 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import {toDinero} from "../../../utils";
 import customerService, { CustomerModel } from '../../../models/customer/Customer.js'
 import AddToQuotationLines from './AddToQuotationLines.vue'
+import {QuotationModel} from "@/models/quotations/Quotation";
+import {ChapterModel} from "@/models/quotations/Chapter";
 
 
 export default {
@@ -178,10 +182,6 @@ export default {
     AddToQuotationLines
   },
   props: {
-    quotation_pk: {
-      type: [Number, String],
-      default: null
-    },
     loading: {
       type: Boolean,
       default: false
@@ -190,8 +190,8 @@ export default {
       type: String,
       default: ''
     },
-    quotation: {
-      type: [Object],
+    chapter: {
+      type: ChapterModel,
       default: null
     },
     customer:{
@@ -246,9 +246,11 @@ export default {
     // set vars in service
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
-    this.costService.addListArg(`quotation=${this.quotation_pk}`)
-    this.costService.addListArg(`cost_type=${this.type}`)
-    await this.loadData()
+    if (this.chapter.id) {
+      this.costService.addListArg(`chapter=${this.chapter.id}`)
+      this.costService.addListArg(`cost_type=${this.type}`)
+      await this.loadData()
+    }
     this.isLoading = false
   },
   methods: {

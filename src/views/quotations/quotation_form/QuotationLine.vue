@@ -318,8 +318,8 @@ import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useVuelidate} from "@vuelidate/core";
 import TotalsInputs from "@/components/TotalsInputs";
-import { QuotationService } from '@/models/quotations/Quotation.js';
-import chapterService from '../../../models/quotations/Chapter.js'
+import {QuotationModel, QuotationService} from '@/models/quotations/Quotation.js';
+import chapterService, {ChapterModel} from '../../../models/quotations/Chapter.js'
 import eventBus from '../../../eventBus.js'
 import ChapterModalVue from './ChapterModal.vue'
 
@@ -346,27 +346,18 @@ export default {
       type: [String],
       default: null
     },
-    quotationData: {
-      type: Object,
+    quotation: {
+      type: QuotationModel,
       default: null
     },
     chapter: {
-      type: Object,
+      type: ChapterModel,
       default: null
-    }
-  },
-  watch: {
-    quotationData: {
-      handler(newValue) {
-        this.quotation = newValue
-      },
-      deep: true
     }
   },
   data () {
     return {
       submitClicked: false,
-      quotation: this.quotationData,
       quotationService: new QuotationService(),
       quotationLineService: new QuotationLineService(),
       INVOICE_LINE_TYPE_MANUAL,
@@ -387,19 +378,19 @@ export default {
     }
   },
   mounted() {
-    eventBus.$on('add-cost-quotationline', (quotationLines) => {
-      if (this.chapter.new) {
-        for (let quotationLine of quotationLines) {
-          quotationLine.key = this.getQuotationLineKey()
-          this.quotationLineService.collection.push(quotationLine)
-        }
-        const txt = quotationLines.length === 1 ? this.$trans('quotation line') : this.$trans('quotation lines')
-        this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
-      }
-    })
+    // eventBus.$on('add-cost-quotationline', (quotationLines) => {
+    //   if (this.chapter.new) {
+    //     for (let quotationLine of quotationLines) {
+    //       quotationLine.key = this.getQuotationLineKey()
+    //       this.quotationLineService.collection.push(quotationLine)
+    //     }
+    //     const txt = quotationLines.length === 1 ? this.$trans('quotation line') : this.$trans('quotation lines')
+    //     this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
+    //   }
+    // })
   },
   beforeDestroy() {
-    eventBus.$off('add-cost-quotationline')
+    // eventBus.$off('add-cost-quotationline')
   },
   async created() {
     this.isLoading = true
@@ -475,7 +466,7 @@ export default {
           this.isLoading = false
           this.quotationLineService.collection = []
           this.$emit('quotationLineSubmitted')
-          this.loadData()
+          await this.loadData()
         } catch(error) {
           this.errorToast(this.$trans('Error updating chapter'))
           this.isLoading = false
@@ -484,60 +475,28 @@ export default {
     editQuotationLine() {
       eventBus.$emit('edit-chapter-quotation-line', this.chapter.id)
     },
-    async deleteChapter() {
-      this.isLoading = true
-      try {
-        await chapterService.delete(this.chapter.id)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Chapter has been deleted'))
-        this.isLoading = false
-        this.$emit('quotationLineSubmitted')
-        this.$emit('chapterDeleted')
-      } catch(error) {
-        console.log('Error deleting chapter', error)
-        this.errorToast(this.$trans('Error deleting chapter'))
-        this.isLoading = false
-      }
-    },
     async loadData() {
-      this.isLoading = true
-      this.quotationLineService.listArgs = [
-        `quotation=${this.quotationData.id}`,
-        `chapter=${this.chapter.id}`
-      ]
-
-      try {
-        const data = await this.quotationLineService.list()
-        for (const quotationLine of data.results) {
-          quotationLine.key = this.getQuotationLineKey()
-          this.quotationLineService.collection.push(new QuotationLineModel(quotationLine))
-        }
-        this.isLoading = false
-        this.updateQuotationTotals()
-      } catch(error) {
-        console.log('error fetching quotation lines', error)
-        this.errorToast(this.$trans('Error loading quotation lines'))
-        this.isLoading = false
-      }
-      this.quotationLineService.listArgs = []
-    },
-    showDeleteModal() {
-      this.$refs['delete-chapter-modal'].show()
-    },
-    showEditChapterModal() {
-      this.$refs['edit-chapter-modal'].show()
-    },
-    async editChapter (chapter) {
-      this.$refs['edit-chapter-modal'].hide()
-      try {
+      if (this.chapter.id) {
         this.isLoading = true
-        this.newChapter = await chapterService.update(this.chapter.id, chapter)
-        this.infoToast(this.$trans('Updated'), this.$trans('Chapter has been updated'))
-        this.isLoading = false
-        this.$emit('chapter-updated')
-      } catch(error) {
-        console.log('Error updating chapter', error)
-        this.errorToast(this.$trans('Error updating chapter'))
-        this.isLoading = false
+
+        this.quotationLineService.listArgs = [
+          `chapter=${this.chapter.id}`
+        ]
+
+        try {
+          const data = await this.quotationLineService.list()
+          for (const quotationLine of data.results) {
+            quotationLine.key = this.getQuotationLineKey()
+            this.quotationLineService.collection.push(new QuotationLineModel(quotationLine))
+          }
+          this.isLoading = false
+          this.updateQuotationTotals()
+        } catch(error) {
+          console.log('error fetching quotation lines', error)
+          this.errorToast(this.$trans('Error loading quotation lines'))
+          this.isLoading = false
+        }
+        this.quotationLineService.listArgs = []
       }
     },
     cancelSaveQuotationLine() {
@@ -547,15 +506,6 @@ export default {
 }
 </script>
 <style scoped>
-.flex {
-  display : flex;
-  margin-top: auto;
-}
-.value-container {
-  padding-top: 4px;
-  padding-right: 4px;
-  padding-left: 4px;
-}
 .update-button {
   margin-bottom: 8px;
 }

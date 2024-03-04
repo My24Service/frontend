@@ -1,138 +1,117 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <h3>{{ $trans('Chapters')}} </h3>
-    <div v-for="(chapter, index) in chapters" :key="chapter.id">
-      <Collapse
-        :title="chapter.name"
-      >
-        <b-row>
-          <b-col cols="6" class="chapter-description">
-            {{ chapter.description }}
-          </b-col>
-        </b-row>
-        <QuotationLine
-          :key="chapterKey"
-          :quotationData="quotationData"
-          :chapter="chapter"
-          @quotationLineSubmitted="quotationLineSubmitted"
-          @chapter-updated="() => loadData()"
-          @chapterDeleted="() => loadData()"
-        />
-      </Collapse>
-      <hr v-if="index !== chapters.length - 1">
+  <div>
+{{ quotation.chapters }}
+    <div v-if="quotation.chapters.length">
+      <h3>{{ $trans('Chapters')}} </h3>
+      <div v-for="chapter in quotation.chapters" :key="chapter.id">
+        <h4>
+          <b-link @click="function() { loadChapter(chapter.name) }">
+            {{ chapter.name }}
+          </b-link>
+        </h4>
+        <p>{{ chapter.description }}</p>
+      </div>
     </div>
-  </b-overlay>
+
+    <div>
+      <h3>{{ $trans("New chapter" )}}</h3>
+      <div>
+        <b-form-group
+          v-bind:label="$trans('Name')"
+          label-for="name"
+          label-cols="3"
+        >
+          <b-form-input
+            id="name"
+            size="sm"
+            autofocus
+            v-model="chapter.name"
+            :state="submitClicked ? !v$.chapter.name.$error : null"
+          ></b-form-input>
+          <b-form-invalid-feedback
+            :state="submitClicked ? !v$.chapter.name.$error : null">
+            {{ $trans('Please enter the chapter name') }}
+          </b-form-invalid-feedback>
+        </b-form-group>
+
+        <b-form-group
+          v-bind:label="$trans('Description')"
+          label-for="description"
+          label-cols="3"
+        >
+          <b-form-textarea
+            id="description"
+            size="sm"
+            v-model="chapter.description"
+            placeholder="Chapter description"
+          ></b-form-textarea>
+        </b-form-group>
+
+        <footer
+          class="modal-footer"
+        >
+          <b-button
+            @click="addChapter"
+            class="btn btn-primary update-button"
+            type="button"
+            variant="primary"
+          >
+            {{ $trans('Add new chapter') }}
+          </b-button>
+        </footer>
+      </div>
+    </div>
+  </div>
 </template>
 <script>
-import quotationService from '@/models/quotations/Quotation.js'
-import QuotationLine from './QuotationLine.vue'
-import Collapse from "../../../components/Collapse";
-import { ChapterService } from '../../../models/quotations/Chapter.js'
-import eventBus from '../../../eventBus.js'
-
+import {QuotationModel} from '@/models/quotations/Quotation.js'
+import {ChapterModel} from '@/models/quotations/Chapter'
+import {useVuelidate} from "@vuelidate/core";
+import {required} from "@vuelidate/validators";
 
 export default {
-  name: 'Chapter',
+  name: 'ChapterComponent',
   components: {
-    Collapse,
-    QuotationLine
   },
   props: {
-    quotationData: {
-      type: Object,
+    quotation: {
+      type: QuotationModel,
       default: null
     },
-    newChapter: {
-      type: Object,
-      default: null
-    }
+  },
+  setup() {
+    return { v$: useVuelidate() }
   },
   mounted() {
-    eventBus.$on('edit-chapter-quotation-line', (chapterId) => {
-      for (let chapter of this.chapters) {
-        if (chapter.id === chapterId) {
-          chapter.new = true
-          continue
-        }
-        chapter.new = false
-      }
-      this.chapterKey += 1
-    })
-    eventBus.$on('cancel-edit-chapter-quotation-line', () => {
-      for (let chapter of this.chapters) {
-        chapter.new = false
-      }
-      this.chapterKey += 1
-    })
   },
   beforeDestroy() {
-    eventBus.$off('edit-chapter-quotation-line')
-    eventBus.$off('cancel-edit-chapter-quotation-line')
   },
   data() {
     return {
-      model: quotationService,
-      searchQuery: null,
-      quotationPk: null,
-      isLoading: false,
-      quotations: [],
-      chapters: [],
-      chapterService: new ChapterService(),
-      chapterKey: 0
+      submitClicked: false,
+      chapter: new ChapterModel({}),
     }
   },
   created () {
-    this.model.currentPage = this.$route.query.page || 1
-    this.loadData()
+  },
+  validations() {
+    return {
+      chapter: {
+        name: required
+      }
+    }
   },
   methods: {
-    async loadData() {
-      this.isLoading = true
-      this.chapterService.listArgs = [`quotation=${this.quotationData.id}`]
-
-      try {
-        const data = await this.chapterService.list()
-        this.chapters = data.results
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching quotation chapters', error)
-        this.errorToast(this.$trans('Error loading quotation chapters'))
-        this.isLoading = false
-      }
-      this.chapterService.listArgs = []
+    addChapter() {
+      this.submitClicked = true
+      this.$emit('chapterCreated', this.chapter)
+      this.chapter = new ChapterModel({});
     },
-    quotationLineSubmitted() {
-      this.loadData()
-      this.$emit('quotationLineSubmitted')
+    loadChapter(name) {
+      this.$emit('selectChapter', name)
     }
   },
-  watch: {
-    '$route.name': {
-      handler: function(search) {
-        if (this.$route.name === 'preliminary-quotations') {
-          this.model.queryMode = 'preliminary'
-        } else {
-          this.model.queryMode = 'all'
-        }
-      },
-      deep: true,
-      immediate: true
-    },
-    newChapter: {
-      handler(newChapter) {
-        const chapter = {...newChapter}
-        if (chapter.name) {
-          chapter.new = true
-          this.$set(this.chapters, this.chapters.length, chapter)
-        }
-      },
-      deep: true
-    }
-  }
 }
 </script>
 <style scoped>
-.chapter-description {
-  margin-top: 20px;
-}
 </style>

@@ -187,6 +187,8 @@ import inventoryModel from '@/models/inventory/Inventory.js'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
+import {QuotationModel} from "@/models/quotations/Quotation";
+import {ChapterModel} from "@/models/quotations/Chapter";
 
 
 export default {
@@ -206,8 +208,8 @@ export default {
     AddToQuotationLines
   },
   props: {
-    quotation_pk: {
-      type: [Number, String],
+    chapter: {
+      type: ChapterModel,
       default: null
     },
     loading: {
@@ -255,11 +257,11 @@ export default {
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
 
-
-    this.costService.addListArg(`quotation=${this.quotation_pk}`)
-    this.costService.addListArg(`cost_type=${COST_TYPE_USED_MATERIALS}`)
-
-    await this.loadData()
+    if (this.chapter.id) {
+      this.costService.addListArg(`chapter=${this.chapter.id}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE_USED_MATERIALS}`)
+      await this.loadData()
+    }
 
     this.isLoading = false
   },
@@ -283,7 +285,7 @@ export default {
         await this.costService.updateCollection()
         this.infoToast(this.$trans('Created'), this.$trans('Materials costs have been updated'))
         this.isLoading = false
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error creating material costs', error)
         this.errorToast(this.$trans('Error creating material costs'))
@@ -470,13 +472,7 @@ export default {
 .add-button {
   margin: 20px 0;
 }
-.row.total-row {
-  margin-top: 20px;
-}
 .material_row {
   margin-bottom: 20px;
-}
-.delete-button {
-  font-size: 1.8rem;
 }
 </style>

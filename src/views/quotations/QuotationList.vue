@@ -1,5 +1,29 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
+    <header>
+      <div class='search-form'>
+        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search quotations')}`"/>
+      </div>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <span>{{ $trans("Quotations") }}</span>
+        </h3>
+
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+          </b-button-group>
+          <router-link class="btn button" :to="{name:'quotation-add'}">
+            <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add quotation') }}
+          </router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -15,12 +39,8 @@
         {{ $trans('Are you sure you want to delete this quotation?') }}
       </p>
     </b-modal>
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.quotationService"
-        :model_name="$trans('Quotation')"
-      />
+
+    <div class="panel overflow-auto">
       <b-table
         small
         id="document-table"
@@ -36,32 +56,11 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #head(icons)>
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="quotation-add"
-                  v-bind:title="$trans('New quotation')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
+        <template #cell(quotation_name)="data">
+          <router-link :to="{name: 'quotation-edit', params: {pk: data.item.id}}">{{ data.item.quotation_name }}</router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="quotation-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
             <IconLinkDocuments
               router_name="quotation-documents"
               v-bind:router_params="{quotationPk: data.item.id}"
@@ -85,6 +84,11 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.quotationService"
+        :model_name="$trans('Quotation')"
+      />
     </div>
   </div>
 </template>
@@ -99,10 +103,13 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
+import SearchForm from "@/components/SearchForm.vue";
 
 export default {
   name: 'QuotationList',
   components: {
+    SearchForm, ButtonLinkSort,
     IconLinkEdit,
     IconLinkDelete,
     IconLinkDocuments,

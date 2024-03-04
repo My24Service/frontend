@@ -8,6 +8,8 @@ class ChapterModel {
   name
   description
 
+  lines = []
+
   constructor(chapter) {
     for (const [k, v] of Object.entries(chapter)) {
       this[k] = v

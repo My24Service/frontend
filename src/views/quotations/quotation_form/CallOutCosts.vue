@@ -139,15 +139,13 @@ import quotationLineService from '@/models/quotations/QuotationLine.js'
 import DurationInput from "../../../components/DurationInput.vue"
 import Collapse from "../../../components/Collapse";
 import {
+  INVOICE_LINE_TYPE_CALL_OUT_COSTS,
   USE_PRICE_OTHER,
-  USE_PRICE_SETTINGS,
   USE_PRICE_PURCHASE,
   USE_PRICE_SELLING,
-  INVOICE_LINE_TYPE_CALL_OUT_COSTS
+  USE_PRICE_SETTINGS
 } from "./constants";
-import CostService, {
-  COST_TYPE_CALL_OUT_COSTS,
-} from "../../../models/quotations/Cost";
+import CostService, {COST_TYPE_CALL_OUT_COSTS,} from "../../../models/quotations/Cost";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import PriceInput from "../../../components/PriceInput";
@@ -156,6 +154,8 @@ import TotalsInputs from "../../../components/TotalsInputs";
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import {toDinero} from "../../../utils";
 import AddToQuotationLines from './AddToQuotationLines.vue'
+import {QuotationModel} from "@/models/quotations/Quotation";
+import {ChapterModel} from "@/models/quotations/Chapter";
 
 
 export default {
@@ -175,16 +175,12 @@ export default {
      AddToQuotationLines
   },
   props: {
-    quotation_pk: {
-      type: [Number, String],
-      default: null
-    },
     loading: {
       type: Boolean,
       default: false
     },
-    quotation: {
-      type: [Object],
+    chapter: {
+      type: ChapterModel,
       default: null
     },
     customer:{
@@ -223,9 +219,12 @@ export default {
     // set vars in service
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
-    this.costService.addListArg(`quotation=${this.quotation_pk}`)
-    this.costService.addListArg(`cost_type=${COST_TYPE_CALL_OUT_COSTS}`)
-    await this.loadData()
+    if (this.chapter.id) {
+      console.log("LOADING?")
+      this.costService.addListArg(`chapter=${this.chapter.id}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE_CALL_OUT_COSTS}`)
+      await this.loadData()
+    }
     this.isLoading = false
   },
   methods: {
@@ -259,7 +258,7 @@ export default {
         await this.costService.updateCollection()
         this.infoToast(this.$trans('Created'), this.$trans('Call out costs have been updated'))
         this.isLoading = false
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error creating call out costs', error)
         this.errorToast(this.$trans('Error creating call out costs'))
@@ -281,7 +280,7 @@ export default {
 
       try {
         const response = await this.costService.list()
-        const costs = response.results.map((cost) => {
+        this.costService.collection = response.results.map((cost) => {
           if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
@@ -289,7 +288,6 @@ export default {
           cost.callOutCostSaved = true
           return new this.costService.model(cost)
         })
-        this.costService.collection = costs
         this.updateTotals()
         this.isLoading = false
       } catch(error) {

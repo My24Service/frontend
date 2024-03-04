@@ -139,17 +139,13 @@ import DurationInput from "../../../components/DurationInput.vue"
 import quotationLineService from '@/models/quotations/QuotationLine.js'
 import Collapse from "../../../components/Collapse";
 import {
-  USE_PRICE_CUSTOMER,
+  INVOICE_LINE_TYPE_DISTANCE,
   USE_PRICE_OTHER,
-  USE_PRICE_SETTINGS,
-  USE_PRICE_USER,
   USE_PRICE_PURCHASE,
   USE_PRICE_SELLING,
-  INVOICE_LINE_TYPE_DISTANCE
+  USE_PRICE_SETTINGS
 } from "./constants";
-import CostService, {
-  COST_TYPE_DISTANCE,
-} from "../../../models/quotations/Cost";
+import CostService, {COST_TYPE_DISTANCE,} from "../../../models/quotations/Cost";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import PriceInput from "../../../components/PriceInput";
@@ -157,7 +153,6 @@ import TotalRow from "./TotalRow";
 import TotalsInputs from "../../../components/TotalsInputs";
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import {toDinero} from "../../../utils";
-import customerService, { CustomerModel } from '../../../models/customer/Customer.js'
 import AddToQuotationLines from './AddToQuotationLines.vue'
 
 
@@ -226,9 +221,11 @@ export default {
     // set vars in service
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
-    this.costService.addListArg(`quotation=${this.quotation_pk}`)
-    this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
-    await this.loadData()
+    if (this.quotation_pk) {
+      this.costService.addListArg(`quotation=${this.quotation_pk}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
+      await this.loadData()
+    }
     this.isLoading = false
   },
   methods: {
@@ -262,7 +259,7 @@ export default {
         await this.costService.updateCollection()
         this.infoToast(this.$trans('Created'), this.$trans('Distance have been updated'))
         this.isLoading = false
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('Error creating distance costs', error)
         this.errorToast(this.$trans('Error creating distance costs'))
@@ -284,7 +281,7 @@ export default {
 
       try {
         const response = await this.costService.list()
-        const costs = response.results.map((cost) => {
+        this.costService.collection = response.results.map((cost) => {
           if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
@@ -292,7 +289,6 @@ export default {
           cost.distanceSaved = true
           return new this.costService.model(cost)
         })
-        this.costService.collection = costs
         this.updateTotals()
         this.isLoading = false
       } catch(error) {

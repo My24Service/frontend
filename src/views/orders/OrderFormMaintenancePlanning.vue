@@ -69,7 +69,6 @@
         </h3>
 
         <div class="flex-columns">
-
             <b-button
               v-if="!isCreate && !hasBranches && (unaccepted || !order.customer_order_accepted)"
               @click="reject"
@@ -86,8 +85,6 @@
               value="dispatch"
               variant="primary">{{ $trans('Save &amp; accept') }}
             </b-button>
-
-
 
             <b-button
               v-if="!unaccepted || hasBranches"
@@ -179,7 +176,6 @@
             </multiselect>
           </b-form-group>
 
-
           <b-form-group :label="!hasBranches ? $trans('Customer') : $trans('Branch')"
             label-for="order_name"
             label-cols="3"
@@ -204,13 +200,13 @@
             </b-input-group>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.order.order_name.$error : null">
-              {{ hasBranches ? $trans('Please enter the customer') : $trans('Please enter the branch') }}
+              {{ !hasBranches ? $trans('Please enter the customer') : $trans('Please enter the branch') }}
             </b-form-invalid-feedback>
           </b-form-group>
 
           <details v-if="order.customer_id" open>
             <summary class="flex-columns space-between">
-              <h6>Customer details</h6>
+              <h6>{{ $trans('Customer details') }}</h6>
               <b-icon-chevron-down></b-icon-chevron-down>
             </summary>
             <b-form-group

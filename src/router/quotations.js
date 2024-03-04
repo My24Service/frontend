@@ -29,7 +29,7 @@ export default [
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'preliminary-quotations',
-      path: '/quotations/quotations/preliminary-quotations',
+      path: '/quotations/preliminary',
       components: {
         'app-content': QuotationList,
         'app-subnav': SubNavQuotations
