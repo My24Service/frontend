@@ -61,11 +61,6 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkDocuments
-              router_name="quotation-documents"
-              v-bind:router_params="{quotationPk: data.item.id}"
-              v-bind:title="$trans('Documents')"
-            />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
