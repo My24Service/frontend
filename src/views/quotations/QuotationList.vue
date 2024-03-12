@@ -133,7 +133,7 @@ export default {
         {key: 'total', label: this.$trans('Total')},
         {key: 'vat', label: this.$trans('Vat')},
         {key: 'accepted', label: this.$trans('Accepted')},
-        {key: 'icons', value: ''},
+        {key: 'icons', label: ''},
       ]
     }
   },
