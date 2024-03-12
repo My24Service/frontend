@@ -1,5 +1,29 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
+    <header>
+      <div class='search-form'>
+        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search quotations')}`"/>
+      </div>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <span>{{ $trans("Quotations") }}</span>
+        </h3>
+
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+          </b-button-group>
+          <router-link class="btn button" :to="{name:'quotation-add'}">
+            <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add quotation') }}
+          </router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -15,12 +39,8 @@
         {{ $trans('Are you sure you want to delete this quotation?') }}
       </p>
     </b-modal>
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Quotation')"
-      />
+
+    <div class="panel overflow-auto">
       <b-table
         small
         id="document-table"
@@ -36,58 +56,63 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #head(icons)>
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="quotation-add"
-                  v-bind:title="$trans('New quotation')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
+        <template #cell(quotation_name)="data">
+          <router-link :to="{name: 'quotation-edit', params: {pk: data.item.id}}">{{ data.item.quotation_name }}</router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="quotation-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
+            <IconLinkDocuments
+              router_name="quotation-documents"
+              v-bind:router_params="{quotationPk: data.item.id}"
+              v-bind:title="$trans('Documents')"
             />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
+            <b-link
+              class="px-1"
+              v-if="!data.item.preliminary"
+              :title="$trans('Create order')"
+              @click="function() { createOrder(data.item.id) }"
+            >
+              <b-icon-arrow-up-right-circle
+                aria-hidden="true"
+                class="edit-icon"
+              ></b-icon-arrow-up-right-circle>
+            </b-link>
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.quotationService"
+        :model_name="$trans('Quotation')"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import quotationService from '@/models/quotations/Quotation.js'
+import {QuotationService} from '@/models/quotations/Quotation.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
+import SearchForm from "@/components/SearchForm.vue";
 
 export default {
   name: 'QuotationList',
   components: {
+    SearchForm, ButtonLinkSort,
     IconLinkEdit,
     IconLinkDelete,
+    IconLinkDocuments,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkAdd,
@@ -102,7 +127,7 @@ export default {
   },
   data() {
     return {
-      model: quotationService,
+      quotationService: new QuotationService(),
       searchQuery: null,
       quotationPk: null,
       isLoading: false,
@@ -118,14 +143,17 @@ export default {
     }
   },
   created () {
-    this.model.currentPage = this.$route.query.page || 1
+    this.quotationService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
+    async createOrder(id) {
+      await this.$router.push({name: 'order-add-quotation', params: {quotation_id: id}})
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      quotationService.setSearchQuery(val)
+      this.quotationService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -140,10 +168,10 @@ export default {
       this.isLoading = true
 
       try {
-        await quotationService.delete(this.quotationPk)
+        await this.quotationService.delete(this.quotationPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Quotation has been deleted'))
         this.isLoading = false
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting quotation', error)
@@ -155,7 +183,7 @@ export default {
       this.isLoading = true
 
       try {
-        const data = await quotationService.list()
+        const data = await this.quotationService.list()
         this.quotations = data.results
         this.isLoading = false
       } catch(error) {
@@ -169,9 +197,9 @@ export default {
     '$route.name': {
       handler: function(search) {
         if (this.$route.name === 'preliminary-quotations') {
-          this.model.queryMode = 'preliminary'
+          this.quotationService.queryMode = 'preliminary'
         } else {
-          this.model.queryMode = 'all'
+          this.quotationService.queryMode = 'all'
         }
       },
       deep: true,

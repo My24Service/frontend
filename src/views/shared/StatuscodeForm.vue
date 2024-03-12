@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-check-fill"></b-icon>
-          <router-link to="/orders/statuscodes">Statuscodes</router-link> /
+          <router-link :to="{name: 'order-statuscode-list'}">{{ $trans('Statuscodes') }}</router-link> /
           <strong>{{ statuscode.statuscode }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !statuscode.statuscode">{{ $trans('new') }}</span>
@@ -21,7 +21,7 @@
     </header>
     <div class="page-detail flex-columns">
       <div class="panel">
-        <h6>Settings</h6>
+        <h6>{{ $trans('Settings') }}</h6>
         <b-form-group
         v-bind:label="$trans('Statuscode')"
         label-for="statuscode_statuscode"
@@ -61,14 +61,14 @@
               v-model="statuscode.description"
               rows="3"></b-form-textarea>
           </b-form-group>
-          
+
           <h6>Label</h6>
           <b-form-group
             label-cols="3"
             label="Label preview"
           >
-          <small 
-            class="statuscode-preview" 
+          <small
+            class="statuscode-preview"
             :style="`--bg-color: ${statuscode.color}; --text-color: ${statuscode.text_color}`">
             {{  statuscode.statuscode || 'statuscode text'}}
           </small>
@@ -87,7 +87,7 @@
                 v-model="statuscode.color"
               ></color-picker>
           </b-form-group>
-              
+
           <b-form-group
             label-cols="3"
             v-bind:label="$trans('Text color')"
@@ -135,13 +135,13 @@
               v-model="statuscode.as_filter"
             >
               <b-icon icon="check" v-if="statuscode.as_filter"></b-icon>
-              
+
               {{ $trans('Use as filter') }}
             </b-form-checkbox>
           </b-form-group>
 
           <h6>Workflow</h6>
-      
+
           <b-form-group
             v-if="list_type === 'order'"
             label-cols="3"
@@ -156,7 +156,7 @@
               v-model="statuscode.start_order"
             >
               <b-icon icon="check" v-if="statuscode.start_order"></b-icon>
-              
+
               {{ $trans('Start order') }}
             </b-form-checkbox>
           </b-form-group>
@@ -174,11 +174,11 @@
               v-model="statuscode.start_trip"
             >
             <b-icon icon="check" v-if="statuscode.start_trip"></b-icon>
-            
+
             {{ $trans('Starts trip') }}
             </b-form-checkbox>
           </b-form-group>
-        
+
           <b-form-group
             v-if="list_type === 'order'"
             label-cols="3"
@@ -193,7 +193,7 @@
               v-model="statuscode.end_order"
             >
             <b-icon icon="check" v-if="statuscode.end_order"></b-icon>
-            
+
             {{ $trans('Completes order') }}
             </b-form-checkbox>
           </b-form-group>
@@ -210,7 +210,7 @@
             >
             </b-form-checkbox>
           </b-form-group>
-          
+
           <b-form-group
             v-if="list_type === 'order'"
             button
@@ -227,11 +227,11 @@
               v-model="statuscode.after_end_order"
             >
             <b-icon icon="check" v-if="statuscode.after_end_order"></b-icon>
-            
+
             {{$trans('After end order') }}
             </b-form-checkbox>
           </b-form-group>
-        
+
           <b-form-group
             v-if="list_type === 'order'"
             label-cols="3"
@@ -239,18 +239,18 @@
             label-for="statuscode_can_be_reassigned_after_end"
             :description="$trans('When checked, the order can be re-assigned after ending it. For example after no workorder has been reported.')"
           >
-            <b-form-checkbox 
+            <b-form-checkbox
               button
               button-variant="primary"
               id="statuscode_can_be_reassigned_after_end"
               v-model="statuscode.can_be_reassigned_after_end"
-            > 
+            >
             <b-icon icon="check" v-if="statuscode.can_be_reassigned_after_end"></b-icon>
-            
+
             {{ $trans('Re-assignable') }}
             </b-form-checkbox>
           </b-form-group>
-        </div>  
+        </div>
       </div>
   </div>
 </template>

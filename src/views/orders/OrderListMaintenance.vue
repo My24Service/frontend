@@ -3,12 +3,12 @@
     <header>
       <!-- WIP -->
       <div class='search-form'>
-        <SearchForm @do-search="handleSearchOk" placeholderText="Search orders"/>
+        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search orders')}`"/>
       </div>
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
-          <span>Orders</span>
+          <span>{{ $trans("Orders") }}</span>
         </h3>
 
         <b-button-toolbar>
