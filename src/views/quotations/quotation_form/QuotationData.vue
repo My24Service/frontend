@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <div>
     <h4>{{ $trans('Quotation data')}} </h4>
 
       <b-form-group
@@ -8,7 +8,7 @@
         label-cols="3"
       >
         <b-form-input
-          v-model="quotation.quotation_reference"
+          v-model="quotationData.quotation_reference"
           id="quotation_reference"
           size="sm"
         ></b-form-input>
@@ -20,7 +20,7 @@
         label-for="quotation_expiry"
       >
         <b-form-input
-          v-model="quotation.quotation_expire_days"
+          v-model="quotationData.quotation_expire_days"
           :type="'number'"
           id="quotation_reference"
           size="sm"
@@ -34,18 +34,24 @@
       >
         <b-form-textarea
           id="quotation_description"
-          v-model="quotation.description"
+          v-model="quotationData.description"
           rows="1"
         ></b-form-textarea>
       </b-form-group>
 
-  </b-overlay>
+    <footer
+      class="modal-footer"
+      v-if="!quotation.id"
+    >
+      <i>{{ $trans('Save quotation to start adding chapters') }}</i>
+    </footer>
+
+  </div>
 </template>
 <script>
-import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useVuelidate} from "@vuelidate/core";
-import quotationService from '@/models/quotations/Quotation.js';
-
+import {QuotationModel} from '@/models/quotations/Quotation.js';
+import eventBus from "@/eventBus";
 
 export default {
   name: 'QuotationDataForm',
@@ -58,31 +64,37 @@ export default {
     }
   },
   props: {
-    quotationData: {
-      type: Object,
+    quotation: {
+      type: QuotationModel,
       default: null
-    },
-  },
-  watch: {
-    quotationData: {
-      handler(newValue) {
-        this.quotation = newValue
-      },
-      deep: true
     },
   },
   data () {
     return {
       isLoading: false,
-      quotation: this.quotationData,
-      quotationService,
-      INVOICE_LINE_TYPE_MANUAL,
+      quotationData: {
+        quotation_reference: null,
+        quotation_expire_days: null,
+        description: null
+      }
     }
   },
   async created() {
+    this.quotationData = {
+      quotation_reference: this.quotation.quotation_reference,
+      quotation_expire_days: this.quotation.quotation_expire_days,
+      description: this.quotation.description
+    }
+
+    if (!this.quotationData.quotation_expire_days) {
+      this.quotationData.quotation_expire_days = this.$store.getters.getQuotationDefaultExpireDays
+    }
   },
   methods: {
-  }
+    getQuotationData() {
+      return this.quotationData
+    },
+  },
 }
 </script>
 <style scoped>

@@ -151,5 +151,5 @@ class MaterialService extends BaseModel {
 
 let materialService = new MaterialService()
 
-export { MaterialModel }
+export { MaterialModel, MaterialService }
 export default materialService

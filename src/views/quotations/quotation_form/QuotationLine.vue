@@ -240,7 +240,7 @@
           type="button"
           variant="primary"
         >
-          {{ $trans('Save chapter') }}
+          {{ $trans('Save quotation line') }}
         </b-button>
       </footer>
     </div>
@@ -251,7 +251,7 @@
         type="button"
         variant="primary"
       >
-        {{ $trans('Edit quotation lines') }}
+        {{ $trans('Edit quotation line') }}
       </b-button>
     </footer>
     <hr>
@@ -268,46 +268,6 @@
         />
       </b-col>
     </b-row>
-    <footer
-      class="modal-footer"
-      v-if="!chapter.new"
-    >
-      <b-button
-        :disabled="isLoading"
-        @click="showEditChapterModal"
-        class="btn btn-primary update-button"
-        type="button"
-        variant="primary"
-      >
-        {{ $trans('Edit chapter') }}
-      </b-button>
-      <b-button
-        :disabled="isLoading"
-        @click="showDeleteModal"
-        class="btn btn-danger update-button"
-        type="button"
-        variant="danger"
-      >
-        {{ $trans('Delete chapter') }}
-      </b-button>
-    </footer>
-    <b-modal
-      id="delete-chapter-modal"
-      ref="delete-chapter-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="deleteChapter"
-    >
-      <p class="my-4">
-        {{ $trans('Are you sure you want to delete this chapter?') }}
-      </p>
-    </b-modal>
-    <ChapterModalVue
-      id="edit-chapter-modal"
-      ref="edit-chapter-modal"
-      :chapterName="chapter.name"
-      :chapterDescription="chapter.description"
-      @create-chapter="editChapter"
-    />
   </b-overlay>
 </template>
 <script>

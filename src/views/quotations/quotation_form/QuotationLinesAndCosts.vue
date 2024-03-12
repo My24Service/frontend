@@ -3,34 +3,54 @@
   <MaterialsCreate
     :customer="customer"
     :chapter="chapter"
+    class="component-margin"
   />
 
   <Hours
     :chapter="chapter"
     :customer="customer"
     :type="COST_TYPE_WORK_HOURS"
+    class="component-margin"
   />
 
   <Hours
     :chapter="chapter"
     :customer="customer"
     :type="COST_TYPE_TRAVEL_HOURS"
+    class="component-margin"
   />
 
   <Distance
     :quotation_pk="quotation.id"
     :chapter="chapter"
     :customer="customer"
+    class="component-margin"
   />
 
   <CallOutCosts
     :chapter="chapter"
     :customer="customer"
+    class="component-margin"
   />
 
   <QuotationLine
     :chapter="chapter"
+    v-if="false"
   />
+
+  <footer
+    class="modal-footer"
+    v-if="false"
+  >
+    <b-button
+      @click="saveChapter"
+      class="btn btn-primary update-button"
+      type="button"
+      variant="primary"
+    >
+      {{ $trans('Save chapter') }}
+    </b-button>
+  </footer>
 
 </div>
 </template>
@@ -41,8 +61,6 @@ import Hours from "@/views/quotations/quotation_form/Hours.vue";
 import MaterialsCreate from "@/views/quotations/quotation_form/MaterialsCreate.vue";
 import CallOutCosts from "@/views/quotations/quotation_form/CallOutCosts.vue";
 import {
-  COST_TYPE_ACTUAL_WORK,
-  COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_WORK_HOURS
 } from "@/models/orders/Cost";
@@ -52,6 +70,7 @@ import QuotationLine from "@/views/quotations/quotation_form/QuotationLine.vue";
 import {ChapterModel} from "@/models/quotations/Chapter";
 
 export default {
+  name: 'QuotationLinesAndCosts',
   props: {
     quotation: {
       type: QuotationModel,
@@ -65,7 +84,6 @@ export default {
       type: ChapterModel,
       default: null
     },
-
   },
   components: {
     QuotationLine,
@@ -78,12 +96,29 @@ export default {
     return {
       COST_TYPE_WORK_HOURS,
       COST_TYPE_TRAVEL_HOURS,
-      COST_TYPE_EXTRA_WORK,
-      COST_TYPE_ACTUAL_WORK,
+      lines: [],
+      materialsCosts: [],
+      workhoursCosts: [],
+      travelHoursCosts: [],
+      distanceCosts: [],
+      callOutCosts: [],
+    }
+  },
+  methods: {
+    saveChapter() {
+      let chapter = {
+        ...this.chapter,
+        costs: this.costs,
+        lines: this.lines
+      }
+
+      this.$emit('chapter-update', chapter)
     }
   }
 }
 </script>
 <style scoped>
-
+.component-margin {
+  margin-bottom: 10px;
+}
 </style>

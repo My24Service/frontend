@@ -14,7 +14,11 @@
         <div class="flex-columns">
           <b-button @click="cancelForm" type="button" variant="secondary">
             {{ $trans('Cancel') }}</b-button>
-          <b-button @click="submitQuotation" type="button" variant="primary">
+          <b-button
+            @click="submitQuotation"
+            type="button"
+            variant="primary"
+          >
             {{ $trans('Submit') }}</b-button>
         </div>
       </div>
@@ -33,25 +37,25 @@
 
           <div class="panel col-1-3">
             <QuotationData
-              v-if="quotation"
-              :quotationData="quotation"
-              :submitQuotationLineForm="submitQuotationLineForm"
-              @quotationSubmitted="(loading) => quotationSubmitted(loading)"
-            />
-            <Chapter
+              v-if="quotation && quotation.customer_relation"
               :quotation="quotation"
-              :newChapter="newChapter"
+              ref="quotationDataComponent"
+            />
+
+            <Chapter
+              v-if="quotation.id"
+              :quotation="quotation"
               @chapterCreated="chapterCreated"
-              @selectChapter="selectChapter"
+              @loadChapterClicked="loadChapterClicked"
             />
           </div>
 
           <div class="panel col-1-3">
             <QuotationLinesAndCosts
               v-if="loadChapterModel"
-              quotation="quotation"
-              customer="customer"
-              chapter="loadChapterModel"
+              :quotation="quotation"
+              :customer="customer"
+              :chapter="loadChapterModel"
             />
 
           </div>
@@ -65,17 +69,17 @@
 import {useVuelidate} from "@vuelidate/core";
 import eventBus from '../../eventBus.js';
 
-import { QuotationLineService } from '@/models/quotations/QuotationLine.js'
-import { QuotationModel, QuotationService } from '@/models/quotations/Quotation'
-import { CustomerModel, CustomerService } from "@/models/customer/Customer";
-import { ChapterService, ChapterModel } from "@/models/quotations/Chapter";
+import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
+import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
+import {CustomerModel, CustomerService} from "@/models/customer/Customer";
+import {ChapterModel, ChapterService} from "@/models/quotations/Chapter";
 
 import Customer from './quotation_form/Customer.vue'
 import Hours from './quotation_form/Hours.vue'
 import Distance from './quotation_form/Distance.vue'
 import MaterialsCreate from './quotation_form/MaterialsCreate.vue'
 import CallOutCosts from './quotation_form/CallOutCosts.vue'
-import {
+import CostService, {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
@@ -84,8 +88,8 @@ import {
 
 import QuotationData from "@/views/quotations/quotation_form/QuotationData.vue";
 import Chapter from "@/views/quotations/quotation_form/Chapter.vue";
-import ChapterModalVue from "@/views/quotations/quotation_form/ChapterModal.vue";
 import QuotationLinesAndCosts from "@/views/quotations/quotation_form/QuotationLinesAndCosts.vue";
+import {uuidv4} from "@/utils";
 
 export default {
   name: 'QuotationForm',
@@ -130,14 +134,15 @@ export default {
       invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
       customerPk: null,
       customer: null,
-      quotationLineCollection: [],
-      quotationLineService: new QuotationLineService(),
-      chapterService: new ChapterService(),
-      quotationService: new QuotationService(),
+
+      loadChapterModel: null,
+
       customerService: new CustomerService(),
-      newChapter: new ChapterModel({}),
-      submitQuotationLineForm : false,
-      loadChapterModel: null
+
+      quotationService: new QuotationService(),
+      chapterService: new ChapterService(),
+      costService: new CostService(),
+      quotationLineService: new QuotationLineService(),
     }
   },
   computed: {
@@ -155,35 +160,13 @@ export default {
     }
   },
   methods: {
-    chapterCreated(chapter) {
-      this.quotation.chapters.push(chapter)
-    },
-    selectChapter(name) {
-      const chapter = this.quotation.chapters.find((c) => c.name === name)
-      this.loadChapterModel = chapter
-    },
-    quotationLineSubmitted () {
-      this.newChapter = {}
-    },
-    quotationSubmitted(loading) {
-      this.submitQuotationLineform = false
-      this.isLoading = loading
-    },
-
     // chapters
-    async createChapter(chapter) {
-      this.$refs['chapter-modal'].hide()
-      try {
-        chapter.quotation = this.quotationData.id
-        this.isLoading = true
-        this.newChapter = await this.chapterService.insert(chapter)
-        this.infoToast(this.$trans('Created'), this.$trans('Chapter has been created'))
-        this.isLoading = false
-      } catch(error) {
-        console.log('Error creating chapter', error)
-        this.errorToast(this.$trans('Error creating chapter'))
-        this.isLoading = false
-      }
+    async chapterCreated(newChapter) {
+      this.quotation.chapters.push(newChapter)
+      this.loadChapterModel = newChapter
+    },
+    loadChapterClicked(chapter) {
+      this.loadChapterModel = chapter
     },
 
     // customer
@@ -195,9 +178,11 @@ export default {
       this.isLoading = true
 
       try {
-        const quotation = await this.quotationService.detail(this.quotationPK)
+        const quotation = new QuotationModel(await this.quotationService.detail(this.quotationPK))
         await this.getCustomer(quotation.customer_relation)
-        this.quotation = new QuotationModel(quotation)
+
+
+        this.quotation = quotation
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
@@ -205,33 +190,57 @@ export default {
         this.isLoading = false
       }
     },
-    quotationLinesCreated(quotationLines) {
-      eventBus.$emit('add-cost-quotationline', quotationLines)
-    },
-    updateQuotationLineCollection (collection) {
-      this.quotationLineCollection = collection
-    },
     cancelForm() {
       this.$router.go(-1)
     },
     async submitQuotation () {
-      this.isLoading = true
-      this.$emit('quotationSubmitted', true)
+      if (!this.quotation.id) {
+        this.isLoading = true
+        const quotationData = this.$refs['quotationDataComponent'].getQuotationData()
+        const quotation = {
+          ...this.quotation,
+          ...quotationData
+        }
+        const newQuotation = await this.quotationService.insert(quotation)
+        this.isLoading = false
+        await this.$router.push({ name: 'quotation-edit', params: {pk: newQuotation.id }})
 
+        return
+      }
+
+      this.isLoading = true
       try {
         await this.quotationService.update(this.quotation.id, this.quotation)
         this.infoToast(this.$trans('Updated'), this.$trans('quotation has been updated'))
         this.isLoading = false
-        this.$emit('quotationSubmitted', false)
         await this.$router.push({ name: 'quotation-list'})
       } catch(error) {
         console.log('error fetching quotation', error)
         this.errorToast(this.$trans('Error updating quotation'))
         this.isLoading = false
-        this.$emit('quotationSubmitted', false)
       }
     }
-  }
+  },
+  beforeDestroy() {
+    eventBus.$off('chapter-update')
+  },
+  mounted() {
+    eventBus.$on('chapter-update', (newChapter) => {
+      let quotation = this.quotation;
+      for (let i=0; i<quotation.chapters.length; i++) {
+        if (quotation.chapters[i].name === newChapter.name) {
+          quotation.chapters[i] = newChapter
+        }
+      }
+
+      this.quotation = {
+        ...quotation
+      }
+
+      this.loadChapterModel = newChapter
+    })
+
+  },
 }
 </script>
 <style scoped>

@@ -9,6 +9,7 @@ class ChapterModel {
   description
 
   lines = []
+  costs = []
 
   constructor(chapter) {
     for (const [k, v] of Object.entries(chapter)) {

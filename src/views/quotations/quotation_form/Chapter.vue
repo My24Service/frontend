@@ -1,11 +1,11 @@
 <template>
   <div>
-{{ quotation.chapters }}
-    <div v-if="quotation.chapters.length">
+
+    <div v-if="chapters.length">
       <h3>{{ $trans('Chapters')}} </h3>
-      <div v-for="chapter in quotation.chapters" :key="chapter.id">
+      <div v-for="chapter in chapters" :key="chapter.id">
         <h4>
-          <b-link @click="function() { loadChapter(chapter.name) }">
+          <b-link @click="function() { loadChapter(chapter) }">
             {{ chapter.name }}
           </b-link>
         </h4>
@@ -65,7 +65,7 @@
 </template>
 <script>
 import {QuotationModel} from '@/models/quotations/Quotation.js'
-import {ChapterModel} from '@/models/quotations/Chapter'
+import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 
@@ -90,25 +90,51 @@ export default {
     return {
       submitClicked: false,
       chapter: new ChapterModel({}),
+      chapterService: new ChapterService(),
+      chapters: []
     }
   },
-  created () {
+  async created () {
+    this.chapterService.addListArg(`quotation=${this.quotation.id}`)
+    await this.loadData()
   },
   validations() {
     return {
       chapter: {
-        name: required
+        name: {
+          required
+        }
       }
     }
   },
   methods: {
-    addChapter() {
+    async addChapter() {
       this.submitClicked = true
-      this.$emit('chapterCreated', this.chapter)
+
+      this.v$.$touch()
+
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
+        return
+      }
+
+      this.chapter.quotation = this.quotation.id
+      const newChapter = await this.chapterService.insert(this.chapter)
+
+      // emit created so the main form can load costs and lines
+      this.$emit('chapterCreated', newChapter)
+
+      this.v$.$reset()
+
       this.chapter = new ChapterModel({});
+      await this.loadData()
     },
-    loadChapter(name) {
-      this.$emit('selectChapter', name)
+    loadChapter(chapter) {
+      this.$emit('loadChapterClicked', chapter)
+    },
+    async loadData() {
+      const response = await this.chapterService.list()
+      this.chapters = response.results.map((c) => new ChapterModel(c))
     }
   },
 }
