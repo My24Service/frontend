@@ -140,7 +140,7 @@
           </b-col>
         </b-row>
 
-        <b-row v-if="costService.collection.length">
+        <b-row v-if="costService.collection.length && false">
           <b-col cols="12">
             <hr v-if="!parentHasQuotationLines">
             <AddToQuotationLines
