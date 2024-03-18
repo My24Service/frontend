@@ -90,7 +90,7 @@
         :total="total_dinero"
         :total_vat="totalVAT_dinero"
       />
-      
+
       <CollectionSaveContainer
         @buttonClicked="() => { saveCollection() }"
       />
@@ -100,7 +100,7 @@
 </template>
 
 <script>
-import {toDinero} from "../../../utils";
+import {toDinero} from "@/utils";
 import {
   INVOICE_LINE_TYPE_CALL_OUT_COSTS,
   USE_PRICE_CUSTOMER,
@@ -114,7 +114,7 @@ import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
 import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
-import invoiceLineService from "../../../models/orders/InvoiceLine";
+import {InvoiceLineService} from "../../../models/orders/InvoiceLine";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
@@ -178,7 +178,7 @@ export default {
       costType: COST_TYPE_CALL_OUT_COSTS,
       parentHasInvoiceLines: false,
       invoiceLineType: INVOICE_LINE_TYPE_CALL_OUT_COSTS,
-      invoiceLineService,
+      invoiceLineService: new InvoiceLineService(),
     }
   },
   async created() {

@@ -165,6 +165,7 @@ import {toDinero} from "@/utils";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import {ChapterModel} from "@/models/quotations/Chapter";
 import {CustomerModel} from "@/models/customer/Customer";
+import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 export default {
   name: "CallOutCostsComponent",
@@ -212,6 +213,7 @@ export default {
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
       quotationLineType: INVOICE_LINE_TYPE_CALL_OUT_COSTS,
       parentHasQuotationLines: false,
+      quotationLineService: new QuotationLineService(),
     }
   },
   async created() {

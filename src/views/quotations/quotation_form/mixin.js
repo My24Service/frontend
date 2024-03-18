@@ -1,4 +1,5 @@
 import {OPTION_NONE, OPTION_ONLY_TOTAL, OPTION_USER_TOTALS} from "./constants";
+import {QuotationLineModel} from "@/models/quotations/QuotationLine";
 
 let quotationMixin = {
   data() {
@@ -12,6 +13,10 @@ let quotationMixin = {
     }
   },
   methods: {
+    checkParentHasQuotationLines(quotationLines) {
+      this.parentHasQuotationLines = !!quotationLines.find((line) => line.type === this.quotationLineType)
+      console.log(this.parentHasQuotationLines)
+    },
     async emptyCollection() {
       this.isLoading = true
       try {
@@ -42,7 +47,7 @@ let quotationMixin = {
     createQuotationLines() {
       switch (this.useOnQuotationSelected) {
         case OPTION_ONLY_TOTAL:
-          const quotationLine = new this.quotationLineService.model({
+          const quotationLine = new QuotationLineModel({
             type: this.quotationLineType,
             info: this.getDescriptionOnlyTotalQuotationLine(),
             amount: this.getTotalAmountQuotationLine(),

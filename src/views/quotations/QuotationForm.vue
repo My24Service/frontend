@@ -36,27 +36,77 @@
           </div>
 
           <div class="panel col-1-3">
-            <QuotationData
-              v-if="quotation && quotation.customer_relation"
-              :quotation="quotation"
-              ref="quotationDataComponent"
-            />
+            <div v-if="loadChapterModel">
+              <QuotationLine
+                :chapter="loadChapterModel"
+                ref="quotation-lines"
+                @backToChapters="backToChapters"
+                @quotationLineAdded="quotationLineAdded"
+                @quotationLineDeleted="quotationLineDeleted"
+              />
+            </div>
+            <div v-else>
+              <QuotationData
+                v-if="quotation && quotation.customer_relation"
+                :quotation="quotation"
+                ref="quotationDataComponent"
+              />
 
-            <Chapter
-              v-if="quotation.id"
-              :quotation="quotation"
-              @chapterCreated="chapterCreated"
-              @loadChapterClicked="loadChapterClicked"
-            />
+              <Chapter
+                v-if="quotation.id"
+                :quotation="quotation"
+                @chapterCreated="chapterCreated"
+                @loadChapterClicked="loadChapterClicked"
+              />
+            </div>
+
           </div>
 
           <div class="panel col-1-3">
-            <QuotationLinesAndCosts
-              v-if="loadChapterModel"
-              :quotation="quotation"
-              :customer="customer"
-              :chapter="loadChapterModel"
-            />
+            <div v-if="loadChapterModel">
+              <h3>{{ $trans("Your costs") }}</h3>
+
+              <MaterialsCreate
+                :customer="customer"
+                :chapter="loadChapterModel"
+                @quotationLinesCreated="quotationLinesCreated"
+                class="component-margin"
+              />
+
+              <Hours
+                :chapter="loadChapterModel"
+                :customer="customer"
+                :type="COST_TYPE_WORK_HOURS"
+                @quotationLinesCreated="quotationLinesCreated"
+                class="component-margin"
+              />
+
+              <Hours
+                :chapter="loadChapterModel"
+                :customer="customer"
+                :type="COST_TYPE_TRAVEL_HOURS"
+                @quotationLinesCreated="quotationLinesCreated"
+                class="component-margin"
+              />
+
+              <Distance
+                :quotation_pk="quotation.id"
+                :chapter="loadChapterModel"
+                :customer="customer"
+                :quotationLinesParent="quotationLines"
+                @quotationLinesCreated="quotationLinesCreated"
+                @quotationLineSubmitted="quotationLineSubmitted"
+                class="component-margin"
+              />
+
+              <CallOutCosts
+                :chapter="loadChapterModel"
+                :customer="customer"
+                @quotationLinesCreated="quotationLinesCreated"
+                class="component-margin"
+              />
+
+            </div>
 
           </div>
         </div>
@@ -72,7 +122,7 @@ import eventBus from '../../eventBus.js';
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
-import {ChapterModel, ChapterService} from "@/models/quotations/Chapter";
+import {ChapterService} from "@/models/quotations/Chapter";
 
 import Customer from './quotation_form/Customer.vue'
 import Hours from './quotation_form/Hours.vue'
@@ -83,17 +133,17 @@ import CostService, {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS
+  COST_TYPE_WORK_HOURS,
 } from "@/models/orders/Cost";
 
 import QuotationData from "@/views/quotations/quotation_form/QuotationData.vue";
 import Chapter from "@/views/quotations/quotation_form/Chapter.vue";
-import QuotationLinesAndCosts from "@/views/quotations/quotation_form/QuotationLinesAndCosts.vue";
-import {uuidv4} from "@/utils";
+import QuotationLine from "@/views/quotations/quotation_form/QuotationLine.vue";
 
 export default {
   name: 'QuotationForm',
   components: {
+    QuotationLine,
     Chapter,
     QuotationData,
     Customer,
@@ -101,7 +151,6 @@ export default {
     Hours,
     Distance,
     CallOutCosts,
-    QuotationLinesAndCosts
   },
   setup() {
     return { v$: useVuelidate() }
@@ -143,6 +192,8 @@ export default {
       chapterService: new ChapterService(),
       costService: new CostService(),
       quotationLineService: new QuotationLineService(),
+
+      quotationLines: []
     }
   },
   computed: {
@@ -160,6 +211,25 @@ export default {
     }
   },
   methods: {
+    // quotation lines
+    quotationLinesCreated(quotationLines) {
+      this.$refs['quotation-lines'].quotationLinesCreated(quotationLines)
+      this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
+    },
+    quotationLineSubmitted() {
+      this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
+    },
+    backToChapters() {
+      this.loadChapterModel = null
+    },
+    quotationLineAdded() {
+      this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
+    },
+    quotationLineDeleted() {
+      this.quotationLines = []
+      this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
+    },
+
     // chapters
     async chapterCreated(newChapter) {
       this.quotation.chapters.push(newChapter)
@@ -244,4 +314,7 @@ export default {
 }
 </script>
 <style scoped>
+.component-margin {
+  margin-bottom: 10px;
+}
 </style>

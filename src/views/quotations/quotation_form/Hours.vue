@@ -181,6 +181,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import {toDinero} from "@/utils";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import {ChapterModel} from "@/models/quotations/Chapter";
+import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 export default {
   name: "HoursComponent",
@@ -250,7 +251,8 @@ export default {
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
       hasStoredData: false,
-      costService: new CostService()
+      costService: new CostService(),
+      quotationLineService: new QuotationLineService(),
     }
   },
   async created() {

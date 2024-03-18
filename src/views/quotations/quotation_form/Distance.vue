@@ -140,7 +140,7 @@
           </b-col>
         </b-row>
 
-        <b-row v-if="costService.collection.length && false">
+        <b-row v-if="costService.collection.length">
           <b-col cols="12">
             <hr v-if="!parentHasQuotationLines">
             <AddToQuotationLines
@@ -178,6 +178,7 @@ import AddToQuotationLines from './AddToQuotationLines.vue'
 import {ChapterModel} from "@/models/quotations/Chapter";
 import {USE_PRICE_CUSTOMER} from "@/views/orders/invoice_form/constants";
 import {CustomerModel} from "@/models/customer/Customer";
+import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 export default {
   name: "DistanceComponent",
@@ -203,11 +204,21 @@ export default {
     customer:{
       type: CustomerModel,
       default: null
-    }
+    },
+    quotationLinesParent: {
+      type: [Array],
+      default: null
+    },
   },
   computed: {
     compLoading () {
       return this.isLoading
+    }
+  },
+  watch: {
+    quotationLinesParent(newVal) {
+      console.log('quotationLinesParent changed', newVal)
+      this.checkParentHasQuotationLines(newVal)
     }
   },
   data() {
@@ -228,6 +239,7 @@ export default {
       invoice_default_price_per_km: this.$store.getters.getInvoiceDefaultPricePerKm,
       quotationLineType: INVOICE_LINE_TYPE_DISTANCE,
       parentHasQuotationLines: false,
+      quotationLineService: new QuotationLineService(),
     }
   },
   async created() {
@@ -245,6 +257,7 @@ export default {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
       this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
       await this.loadData()
+      this.checkParentHasQuotationLines(this.quotationLinesParent)
     }
     this.isLoading = false
   },
