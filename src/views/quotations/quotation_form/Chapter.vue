@@ -24,7 +24,6 @@
           <b-form-input
             id="name"
             size="sm"
-            autofocus
             v-model="chapter.name"
             :state="submitClicked ? !v$.chapter.name.$error : null"
           ></b-form-input>

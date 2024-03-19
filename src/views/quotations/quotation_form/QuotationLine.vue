@@ -1,207 +1,150 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <b-button style="width: 100%" @click="backToChapters">
+    <b-button
+      style="width: 100%"
+      :variant="hasChanges ? 'danger' : 'success'"
+      :disabled="hasChanges"
+      @click="backToChapters"
+    >
       <b-icon-arrow-left-circle-fill></b-icon-arrow-left-circle-fill>
         {{ $trans("Back to quotation and chapters") }}
     </b-button>
-    <h3 class="quotation-line-header">{{ $trans('Quotation lines for chapter:')}} <i>{{ chapter.name }}</i></h3>
-    <div class="invoice-lines" v-if="quotationLineService.collection.length">
-      <div
-        class="quotation-lines"
-        v-for="quotationLine in quotationLineService.collection"
-        :key="quotationLine.id">
-
-        <b-form-group
-          label-cols="3"
-          v-bind:label="$trans('Info')"
+    <h3 class="quotation-line-header">{{ $trans('Quotation lines for chapter')}} <i>{{ chapter.name }}</i></h3>
+    <p v-if="!quotationLineService.collection.length && !showForm">
+      <i>{{ $trans("No quotation lines") }}</i>
+    </p>
+    <b-table
+      small
+      :busy='isLoading'
+      :fields="fields"
+      :items="quotationLineService.collection"
+      responsive="md"
+      class="data-table"
+      v-if="!showForm && quotationLineService.collection.length"
+    >
+      <template #cell(total)="data">
+        {{ data.item.total_dinero.toFormat('$0.00') }}
+      </template>
+      <template #cell(vat)="data">
+        {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ Math.round(data.item.vat_type) }}%)
+      </template>.
+      <template #cell(icons)="data">
+        <div
+          class="h2 float-right"
+          v-if="data.item.id"
         >
-          <b-form-textarea
-            v-model="quotationLine.info"
-            rows="2"
-          ></b-form-textarea>
-        </b-form-group>
+          <IconLinkEdit
+            :method="function() { editQuotationLine(data.item, data.index) }"
+            v-bind:title="$trans('Edit')"
+          />
+          <IconLinkDelete
+            v-bind:title="$trans('Delete')"
+            v-bind:method="function() { deleteQuotationLine(data.index) }"
+          />
+        </div>
+      </template>
+    </b-table>
 
-        <b-form-group
-          label-cols="3"
-          v-bind:label="$trans('Amount')"
-        >
-          <b-form-input
-            readonly="readonly"
-            :value="quotationLine.amount"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-
-        <b-form-group
-          label-cols="3"
-          v-bind:label="$trans('Price')"
-        >
-          <b-form-input
-            readonly="readonly"
-            :value="quotationLine.price_dinero.toFormat('$0.00')"
-            size="sm"
-            v-if="quotationLine.price_text !== '*'"
-          ></b-form-input>
-          <b-form-input
-            readonly="readonly"
-            :value="$trans('*Price in totals')"
-            size="sm"
-            v-else
-          ></b-form-input>
-        </b-form-group>
-
-        <b-form-group
-          label-cols="3"
-          v-bind:label="$trans('Total')"
-        >
-          <b-form-input
-            readonly="readonly"
-            :value="quotationLine.total_dinero.toFormat('$0.00')"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-
-        <b-form-group
-          label-cols="3"
-          :label="$trans('VAT')"
-        >
-          <b-form-input
-            readonly="readonly"
-            :value="quotationLine.vat_dinero.toFormat('$0.00')"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-
-        <b-form-group
-          label-cols="3"
-          :label="$trans('Extra description')"
-        >
-          <b-form-textarea
-            v-model="quotationLine.extra_description"
-            rows="2"
-          ></b-form-textarea>
-        </b-form-group>
-
+    <div class="new-invoice-line" v-if="showForm">
+      <b-form-group
+        label-cols="0"
+        label-for="new-invoice-line-amount"
+      >
         <b-container>
           <b-row>
-            <b-col cols="6"></b-col>
-            <b-col cols="6">
-              <b-button
-                @click="() => deleteQuotationLine(quotationLine.id)"
-                class="btn btn-danger"
-                type="button"
-                variant="danger"
+            <b-col cols="3">
+              <b-form-group
+                v-bind:label="$trans('Amount')"
+                label-for="new-invoice-line-price"
               >
-                {{ $trans("Delete quotation line") }}
-              </b-button>
+                <b-form-input
+                  autofocus
+                  @blur="quotationLineAmountChanged"
+                  id="new-invoice-line-amount"
+                  size="sm"
+                  v-model="quotationLineService.editItem.amount"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="5">
+              <b-form-group
+                v-bind:label="$trans('Price')"
+                label-for="new-invoice-line-price"
+              >
+                <PriceInput
+                  id="new-invoice-line-price"
+                  v-model="quotationLineService.editItem.price"
+                  :currency="quotationLineService.editItem.price_currency"
+                  @priceChanged="quotationLinePriceChanged"
+                />
+              </b-form-group>
+            </b-col>
+            <b-col cols="4">
+              <b-form-group
+                v-bind:label="$trans('VAT type')"
+                label-for="new-invoice-line-total"
+              >
+                <VAT @vatChanged="changeVatTypeQuotationLine" />
+              </b-form-group>
             </b-col>
           </b-row>
-          <hr/>
         </b-container>
+      </b-form-group>
 
-      </div>
-    </div>
-    <div class="new-invoice-line" v-if="quotationLineService.editItem">
+      <b-form-group
+        label-cols="3"
+        v-bind:label="$trans('Info')"
+        label-for="new-invoice-line-description"
+      >
+        <b-form-input
+          id="new-invoice-line-description"
+          size="sm"
+          v-model="quotationLineService.editItem.info"
+        ></b-form-input>
+      </b-form-group>
+
+      <b-form-group
+        label-cols="3"
+        v-bind:label="$trans('Extra description')"
+        label-for="new-invoice-line-description"
+      >
+        <b-form-textarea
+          id="new-invoice-line-description"
+          v-model="quotationLineService.editItem.extra_description"
+        ></b-form-textarea>
+      </b-form-group>
+
+      <hr/>
+
       <b-container>
         <b-row>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Info')"
-              label-for="new-invoice-line-description"
-            >
-              <b-form-input
-                id="new-invoice-line-description"
-                size="sm"
-                v-model="quotationLineService.editItem.info"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Amount')"
-              label-for="new-invoice-line-amount"
-            >
-              <b-form-input
-                @blur="quotationLineAmountChanged"
-                id="new-invoice-line-amount"
-                size="sm"
-                v-model="quotationLineService.editItem.amount"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Price')"
-              label-for="new-invoice-line-price"
-            >
-              <PriceInput
-                id="new-invoice-line-price"
-                v-model="quotationLineService.editItem.price"
-                :currency="quotationLineService.editItem.price_currency"
-                @priceChanged="quotationLinePriceChanged"
-              />
-            </b-form-group>
-          </b-col>
-          <b-col cols="1" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('VAT type')"
-              label-for="new-invoice-line-total"
-            >
-              <VAT @vatChanged="changeVatTypeQuotationLine" />
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Total')"
-              label-for="new-invoice-line-total"
-            >
-              <b-form-input
-                id="new-invoice-line-total"
-                readonly
-                :value="quotationLineService.editItem.total_dinero.toFormat('$0.00')"
-                size="sm"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('VAT')"
-              label-for="new-invoice-line-vat"
-            >
-              <b-form-input
-                id="new-invoice-line-vat"
-                readonly
-                :value="quotationLineService.editItem.vat_dinero.toFormat('$0.00')"
-                size="sm"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Extra description')"
-              label-for="new-invoice-line-description"
-            >
-              <b-form-textarea
-                id="new-invoice-line-description"
-                v-model="quotationLineService.editItem.extra_description"
-              ></b-form-textarea>
-            </b-form-group>
+          <b-col cols="12">
+            <TotalsInputs
+              :total="quotationLineService.editItem.total_dinero"
+              :vat="quotationLineService.editItem.vat_dinero"
+            />
           </b-col>
         </b-row>
       </b-container>
+      {{ isQuotationLineValid }}
+
       <footer class="modal-footer">
         <b-button
+          :disabled="isLoading"
+          @click="cancelEditQuotationLine"
+          class="btn btn-secondary update-button"
+          type="button"
+          size="sm"
+          variant="secondary"
+        >
+          {{ $trans('Cancel') }}
+        </b-button>
+        <b-button
           v-if="quotationLineService.isEdit"
-          @click="quotationService.doEditCollectionItem"
+          @click="doEditCollectionItem"
           class="btn btn-primary"
-          size="sm" type="button"
+          size="sm"
+          type="button"
           variant="warning"
           :disabled="!isQuotationLineValid"
         >
@@ -219,87 +162,87 @@
           {{ $trans('Add quotation line') }}
         </b-button>
       </footer>
-      <footer
-        class="modal-footer"
-      >
-        <b-button
-          :disabled="isLoading"
-          @click="cancelSaveQuotationLine"
-          class="btn btn-secondary update-button"
-          type="button"
-          variant="secondary"
-        >
-          {{ $trans('Cancel') }}
-        </b-button>
-        <b-button
-          :disabled="isLoading || !quotationLineService.collection.length"
-          @click="submitQuotationLines"
-          class="btn btn-primary update-button"
-          type="button"
-          variant="primary"
-        >
-          {{ $trans('Save quotation line') }}
-        </b-button>
-      </footer>
     </div>
-    <footer class="modal-footer">
-      <b-button
-        @click="editQuotationLine"
-        class="btn btn-primary update-button"
-        type="button"
-        variant="primary"
-      >
-        {{ $trans('Edit quotation line') }}
-      </b-button>
-    </footer>
-    <hr>
 
     <footer
       class="modal-footer"
-      v-if="false"
+      v-if="!showForm"
     >
       <b-button
-        @click="saveQuotationLines"
+        @click="newQuotationLine"
         class="btn btn-primary update-button"
         type="button"
         variant="primary"
       >
-        {{ $trans('Save quotation line') }}
+        {{ $trans('New quotation line') }}
       </b-button>
     </footer>
 
-    <b-row class="quotation-total">
-      <b-col cols="10">
-        <span class="total-text">{{ $trans('Chapter total') }}</span>
-      </b-col>
-      <b-col cols="2">
-        <TotalsInputs
-          v-if="total"
-          :total="total"
-          :is-final-total="true"
-          :vat="vat"
-        />
-      </b-col>
-    </b-row>
+    <b-container
+      v-if="!showForm && quotationLineService.collection.length"
+    >
+      <b-row class="quotation-total">
+        <b-col cols="7">
+          <span class="total-text">{{ $trans('Chapter total') }}</span>
+        </b-col>
+        <b-col cols="5">
+          <TotalsInputs
+            v-if="total"
+            :total="total"
+            :is-final-total="true"
+            :vat="vat"
+          />
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="2"></b-col>
+        <b-col cols="10">
+          <b-button
+            @click="loadData"
+            class="btn btn-secondary"
+            type="button"
+
+            :disabled="!hasChanges"
+          >
+            {{ $trans('Discard changes') }}
+          </b-button>
+          &nbsp;
+          <b-button
+            @click="submitQuotationLines"
+            class="btn btn-danger"
+            type="button"
+            variant="danger"
+            :disabled="!hasChanges"
+          >
+            {{ $trans('Save quotation lines') }}
+          </b-button>
+        </b-col>
+      </b-row>
+    </b-container>
   </b-overlay>
 </template>
 <script>
-import{QuotationLineService, QuotationLineModel } from '@/models/quotations/QuotationLine.js';
+import{ QuotationLineService, QuotationLineModel } from '@/models/quotations/QuotationLine.js';
 import PriceInput from "@/components/PriceInput";
 import Collapse from "@/components/Collapse";
 import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useVuelidate} from "@vuelidate/core";
 import TotalsInputs from "@/components/TotalsInputs";
-import {QuotationModel, QuotationService} from '@/models/quotations/Quotation.js';
-import chapterService, {ChapterModel} from '../../../models/quotations/Chapter.js'
-import eventBus from '../../../eventBus.js'
+import {QuotationModel} from '@/models/quotations/Quotation.js';
+import {ChapterModel} from '@/models/quotations/Chapter'
 import ChapterModalVue from './ChapterModal.vue'
+import IconLinkDelete from "@/components/IconLinkDelete.vue";
+import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
+import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
+import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
+import IconLinkEdit from "@/components/IconLinkEdit.vue";
 
 
 export default {
   name: 'QuotationLineForm',
   components: {
+    IconLinkEdit, ButtonLinkAdd, ButtonLinkRefresh, ButtonLinkSearch, IconLinkDelete,
     PriceInput,
     Collapse,
     VAT,
@@ -331,15 +274,26 @@ export default {
   data () {
     return {
       submitClicked: false,
-      quotationService: new QuotationService(),
       quotationLineService: new QuotationLineService(),
       INVOICE_LINE_TYPE_MANUAL,
       total: 0,
       vat: 0,
       isLoading: false,
+      newItem: false,
+      hasChanges: false,
+      fields: [
+        {key: 'info', label: this.$trans('Info')},
+        {key: 'amount', label: this.$trans('Amount')},
+        {key: 'vat', label: this.$trans('VAT')},
+        {key: 'total', label: this.$trans('Total')},
+        {key: 'icons', label: ''},
+      ]
     }
   },
   computed: {
+    showForm() {
+      return this.quotationLineService.isEdit || this.newItem
+    },
     quotationLinesHaveTotals() {
       return this.quotationLineService.collection.find((line) => line.price_text === '*')
     },
@@ -347,105 +301,100 @@ export default {
       return this.quotationLineService.editItem.description !== null
         && this.quotationLineService.editItem.description !== ""
         && this.quotationLineService.editItem.amount !== null
-        && this.quotationLineService.editItem.amount !== ""
+        && this.quotationLineService.editItem.amount !== "0"
     }
-  },
-  mounted() {
-    // eventBus.$on('add-cost-quotationline', (quotationLines) => {
-    //   if (this.chapter.new) {
-    //     for (let quotationLine of quotationLines) {
-    //       quotationLine.key = this.getQuotationLineKey()
-    //       this.quotationLineService.collection.push(quotationLine)
-    //     }
-    //     const txt = quotationLines.length === 1 ? this.$trans('quotation line') : this.$trans('quotation lines')
-    //     this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
-    //   }
-    // })
-  },
-  beforeDestroy() {
-    // eventBus.$off('add-cost-quotationline')
   },
   async created() {
     this.isLoading = true
 
-    // if (this.chapter.new) {
-    //   // init new model for manual entry
-    //   this.quotationLineService.modelDefaults = {
-    //     amount: '0',
-    //     price: '0.00',
-    //     price_currency: this.$store.getters.getDefaultCurrency,
-    //     total: '0.00',
-    //     total_currency: this.$store.getters.getDefaultCurrency,
-    //     vat: '0.00',
-    //     vat_currency: this.$store.getters.getDefaultCurrency,
-    //     vat_type: this.$store.getters.getInvoiceDefaultVat,
-    //   }
-    //   this.quotationLineService.newEditItem()
-    // }
+    this.quotationLineService.model = QuotationLineModel
+    this.quotationLineService.modelDefaults = {
+      amount: '0',
+      price: '0.00',
+      price_currency: this.$store.getters.getDefaultCurrency,
+      total: '0.00',
+      total_currency: this.$store.getters.getDefaultCurrency,
+      vat: '0.00',
+      vat_currency: this.$store.getters.getDefaultCurrency,
+      vat_type: this.$store.getters.getInvoiceDefaultVat,
+    }
 
     await this.loadData()
     this.isLoading = false
   },
   methods: {
+    doEditCollectionItem() {
+      this.quotationLineService.doEditCollectionItem()
+      this.hasChanges = true
+    },
+    editQuotationLine(item, index) {
+      this.quotationLineService.editCollectionItem(item, index)
+    },
+    cancelEditQuotationLine() {
+      this.quotationLineService.cancelEdit()
+      this.newItem = false
+    },
+    newQuotationLine() {
+      this.quotationLineService.newEditItem()
+      this.newItem = true
+    },
+    // delete
+    deleteQuotationLine(index) {
+      this.quotationLineService.deleteCollectionItem(index)
+      this.updateChapterTotals()
+      this.hasChanges = true
+      this.$emit('quotationLineDeleted')
+      this.infoToast(this.$trans('Marked for delete'), this.$trans("Quotation line marked for delete"))
+    },
     backToChapters() {
       this.$emit('backToChapters')
     },
     getQuotationLines() {
       return this.quotationLineService.collection
     },
-    getQuotationLineId() {
-      if (this.quotationLineService.collection.length === 0) {
-        return 0
-      }
-
-      const maxQuotationLine = this.quotationLineService.collection.reduce(function(prev, current) {
-        return (prev.id > current.id) ? prev : current
-      })
-      return maxQuotationLine.id + 1
-    },
     quotationLinesCreated(quotationLines) {
       if (quotationLines.length > 0) {
-        for (let quotationLine of quotationLines) {
-          quotationLine.id = this.getQuotationLineId()
-          // console.log(`id: ${id}`)
-          this.quotationLineService.collection.push(quotationLine)
-        }
-        this.updateQuotationTotals()
+        this.quotationLineService.collection = [
+          ...this.quotationLineService.collection,
+          ...quotationLines
+        ]
+        this.updateChapterTotals()
         const txt = quotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
         this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
+        this.hasChanges = true
       }
     },
-    updateQuotationTotals() {
+    updateChapterTotals() {
       this.total = this.quotationLineService.getItemsTotal()
       this.vat = this.quotationLineService.getItemsTotalVAT()
     },
     addQuotationLine() {
-      this.quotationLineService.editItem.id = this.getQuotationLineId()
       this.quotationLineService.editItem.type = this.INVOICE_LINE_TYPE_MANUAL
       this.quotationLineService.editItem.price_text = this.quotationLineService.editItem.price_dinero.toFormat('$0.00')
       this.quotationLineService.addCollectionItem()
-      this.updateQuotationTotals()
+      this.updateChapterTotals()
+      this.newItem = false
+      this.quotationLineService.newEditItem()
+      this.hasChanges = true
       this.$emit('quotationLineAdded')
-    },
-    deleteQuotationLine(id) {
-      this.quotationLineService.deleteCollectionItemByid(id)
-      this.updateQuotationTotals()
-      this.$emit('quotationLineDeleted')
     },
     quotationLineAmountChanged() {
       this.quotationLineService.editItem.amount = this.quotationLineService.editItem.amount.replace(',', '.')
       this.quotationLineService.editItem.calcTotal()
-      this.updateQuotationTotals()
+      this.hasChanges = true
+      this.updateChapterTotals()
     },
     quotationLinePriceChanged(val) {
       this.quotationLineService.editItem.setPriceField('price', val)
       this.quotationLineService.editItem.calcTotal()
-      this.updateQuotationTotals()
+      this.hasChanges = true
+      this.updateChapterTotals()
     },
     changeVatTypeQuotationLine(vat_type) {
       this.quotationLineService.editItem.vat_type = vat_type
       this.quotationLineService.editItem.calcTotal()
-      this.updateQuotationTotals()
+      this.hasChanges = true
+      this.updateChapterTotals()
     },
     async submitQuotationLines() {
       try {
@@ -477,13 +426,15 @@ export default {
           const data = await this.quotationLineService.list()
           this.quotationLineService.collection = data.results.map((line) => new QuotationLineModel(line))
           this.isLoading = false
-          this.updateQuotationTotals()
+          this.updateChapterTotals()
         } catch(error) {
           console.log('error fetching quotation lines', error)
           this.errorToast(this.$trans('Error loading quotation lines'))
           this.isLoading = false
         }
         this.quotationLineService.listArgs = []
+        this.quotationLineService.deletedItems = []
+        this.hasChanges = false
       }
     }
   }
@@ -493,13 +444,6 @@ export default {
 .update-button {
   margin-bottom: 8px;
 }
-.header {
-  font-size: 14px;
-  font-weight: bold;
-}
-.invoice-lines {
-  margin-bottom: 20px;
-}
 .quotation-line-header {
   margin-bottom: 20px;
 }
@@ -508,8 +452,5 @@ export default {
 }
 .total-text {
   font-weight: bold;
-}
-.quotation-lines {
-  margin-bottom: 20px;
 }
 </style>

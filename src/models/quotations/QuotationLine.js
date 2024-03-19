@@ -1,7 +1,6 @@
 import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
-import {CostModel} from "./Cost";
-import {toDinero} from "../../utils";
+import {toDinero} from "@/utils";
 
 class QuotationLineModel {
   id
@@ -95,6 +94,7 @@ class QuotationLineService extends BaseModel {
       extra_description: '',
       info: description,
       amount: cost.getAmount(),
+      vat_type: Math.round(cost.vat_type),
       vat: cost.vat,
       vat_currency: cost.vat_currency,
       price: cost.price,

@@ -484,7 +484,6 @@ export default {
 
       this.total_dinero = this.costService.getItemsTotal()
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
-      console.log(this.totalVAT_dinero.toFormat('$0.00'))
       this.totalAmount = this.costService.collection.reduce(
         (total, m) => (total + parseFloat(m.amount_decimal)),
         0
@@ -507,9 +506,6 @@ export default {
 .flex {
   display : flex;
   margin-top: auto;
-}
-.add-button {
-  margin: 20px 0;
 }
 .material_row {
   margin-bottom: 20px;

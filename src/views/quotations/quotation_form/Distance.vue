@@ -217,7 +217,6 @@ export default {
   },
   watch: {
     quotationLinesParent(newVal) {
-      console.log('quotationLinesParent changed', newVal)
       this.checkParentHasQuotationLines(newVal)
     }
   },

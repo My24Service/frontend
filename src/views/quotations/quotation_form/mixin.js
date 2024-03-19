@@ -15,7 +15,6 @@ let quotationMixin = {
   methods: {
     checkParentHasQuotationLines(quotationLines) {
       this.parentHasQuotationLines = !!quotationLines.find((line) => line.type === this.quotationLineType)
-      console.log(this.parentHasQuotationLines)
     },
     async emptyCollection() {
       this.isLoading = true
@@ -53,13 +52,13 @@ let quotationMixin = {
             amount: this.getTotalAmountQuotationLine(),
             vat: this.totalVAT_dinero.toFormat('0.00'),
             vat_currency: this.totalVAT_dinero.getCurrency(),
+            vat_type: Math.round(this.costService.collection[0].vat_type),
             price: "0.00",
             price_currency: "EUR",
             price_text: "*",
             total: this.total_dinero.toFormat('0.00'),
             total_currency: this.total_dinero.getCurrency(),
           })
-          this.parentHasQuotationLines = true
           this.$emit('quotationLinesCreated', [quotationLine])
           break
         case OPTION_USER_TOTALS:
@@ -70,11 +69,10 @@ let quotationMixin = {
               this.quotationLineType
             )
           )
-          this.parentHasQuotationLines = true
           this.$emit('quotationLinesCreated', quotationLines)
           break
         case OPTION_NONE:
-          console.debug("not adding any distance")
+          console.debug("not adding any costs")
           break
         default:
           throw `createQuotationLines: unknown option: ${this.useOnQuotationSelected}`

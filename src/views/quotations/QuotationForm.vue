@@ -64,7 +64,7 @@
 
           <div class="panel col-1-3">
             <div v-if="loadChapterModel">
-              <h3>{{ $trans("Your costs") }}</h3>
+              <h3>{{ $trans("Chapter costs") }}</h3>
 
               <MaterialsCreate
                 :customer="customer"
@@ -220,6 +220,7 @@ export default {
       this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
     },
     backToChapters() {
+      this.quotationLines = []
       this.loadChapterModel = null
     },
     quotationLineAdded() {
