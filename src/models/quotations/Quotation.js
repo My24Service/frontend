@@ -93,7 +93,4 @@ class QuotationService extends BaseModel {
   }
 }
 
-let quotationService = new QuotationService()
-
-export default quotationService
 export { QuotationService, QuotationModel }

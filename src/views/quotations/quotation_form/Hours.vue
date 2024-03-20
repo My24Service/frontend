@@ -1,7 +1,9 @@
 <template>
-  <Collapse
-    :title="getTitle()"
-  >
+  <details>
+    <summary class="flex-columns space-between">
+      <h6>{{ getTitle() }}</h6>
+      <b-icon-chevron-down></b-icon-chevron-down>
+    </summary>
     <b-overlay :show="compLoading" rounded="sm">
       <div
         v-for="(cost, index) in this.costService.collection"
@@ -153,16 +155,14 @@
       </b-container>
 
     </b-overlay>
-  </Collapse>
+  </details>
 </template>
 <script>
-
 import moment from 'moment'
 import Multiselect from 'vue-multiselect'
 
 import quotationMixin from "./mixin.js";
 import DurationInput from "../../../components/DurationInput.vue"
-import Collapse from "../../../components/Collapse";
 import {
   INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL,
   INVOICE_LINE_TYPE_HOURS_TYPE_WORK,
@@ -185,12 +185,10 @@ import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 export default {
   name: "HoursComponent",
-  emits: ['quotationLinesCreated', 'emptyCollectionClicked'],
   mixins: [quotationMixin],
   components: {
     PriceInput,
     IconLinkDelete,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -200,10 +198,6 @@ export default {
     AddToQuotationLines
   },
   props: {
-    loading: {
-      type: Boolean,
-      default: false
-    },
     type: {
       type: String,
       default: ''
@@ -216,13 +210,19 @@ export default {
       type: Object,
       default: null
     },
-    costs: {
-      type: Array,
+    quotationLinesParent: {
+      type: [Array],
+      default: null
+    },
+  },
+  watch: {
+    quotationLinesParent(newVal) {
+      this.checkParentHasQuotationLines(newVal)
     }
   },
   computed: {
     compLoading () {
-      return this.loading || this.isLoading
+      return this.isLoading
     },
     quotationLineType() {
       switch (this.type) {
@@ -339,6 +339,7 @@ export default {
           return new this.costService.model(cost)
         })
         this.updateTotals()
+        this.checkParentHasQuotationLines(this.quotationLinesParent)
         this.isLoading = false
       } catch(error) {
         this.errorToast(this.$trans('Error fetching material cost'))

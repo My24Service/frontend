@@ -26,8 +26,8 @@ class QuotationLineModel {
 
   priceFields = ['price', 'vat', 'total']
 
-  constructor(invoiceLine) {
-    for (const [k, v] of Object.entries(invoiceLine)) {
+  constructor(quotationLine) {
+    for (const [k, v] of Object.entries(quotationLine)) {
       this[k] = v
     }
 
@@ -107,7 +107,5 @@ class QuotationLineService extends BaseModel {
     })
   }
 }
-
-export default new QuotationLineService()
 
 export { QuotationLineService, QuotationLineModel }

@@ -1,18 +1,23 @@
 import BaseModel from '@/models/base'
 
 
-class DocumentService extends BaseModel {
-  fields = {
-    quotation: null,
-    name: '',
-    description: '',
-    file: ''
-  }
+class DocumentModel {
+  id
+  quotation
+  name
+  description
+  file
 
+  constructor(document) {
+    for (const [k, v] of Object.entries(document)) {
+      this[k] = v
+    }
+
+  }
+}
+
+class DocumentService extends BaseModel {
   url = '/quotation/document/'
 }
 
-const documentService = new DocumentService()
-
-export default documentService
-export { DocumentService }
+export { DocumentService, DocumentModel }

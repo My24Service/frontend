@@ -58,6 +58,11 @@
                 @chapterCreated="chapterCreated"
                 @loadChapterClicked="loadChapterClicked"
               />
+
+              <DocumentsComponent
+                :quotation="quotation"
+              />
+
             </div>
 
           </div>
@@ -69,7 +74,9 @@
               <MaterialsCreate
                 :customer="customer"
                 :chapter="loadChapterModel"
+                :quotationLinesParent="quotationLines"
                 @quotationLinesCreated="quotationLinesCreated"
+                @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
               />
 
@@ -77,7 +84,9 @@
                 :chapter="loadChapterModel"
                 :customer="customer"
                 :type="COST_TYPE_WORK_HOURS"
+                :quotationLinesParent="quotationLines"
                 @quotationLinesCreated="quotationLinesCreated"
+                @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
               />
 
@@ -85,7 +94,9 @@
                 :chapter="loadChapterModel"
                 :customer="customer"
                 :type="COST_TYPE_TRAVEL_HOURS"
+                :quotationLinesParent="quotationLines"
                 @quotationLinesCreated="quotationLinesCreated"
+                @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
               />
 
@@ -102,7 +113,9 @@
               <CallOutCosts
                 :chapter="loadChapterModel"
                 :customer="customer"
+                :quotationLinesParent="quotationLines"
                 @quotationLinesCreated="quotationLinesCreated"
+                @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
               />
 
@@ -139,10 +152,12 @@ import CostService, {
 import QuotationData from "@/views/quotations/quotation_form/QuotationData.vue";
 import Chapter from "@/views/quotations/quotation_form/Chapter.vue";
 import QuotationLine from "@/views/quotations/quotation_form/QuotationLine.vue";
+import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsComponent.vue";
 
 export default {
   name: 'QuotationForm',
   components: {
+    DocumentsComponent,
     QuotationLine,
     Chapter,
     QuotationData,

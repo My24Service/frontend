@@ -1,6 +1,9 @@
 <template>
-  <div>
-    <h4>{{ $trans('Quotation data')}} </h4>
+  <details open>
+    <summary class="flex-columns space-between">
+      <h6>{{ $trans('Details') }}</h6>
+      <b-icon-chevron-down></b-icon-chevron-down>
+    </summary>
 
       <b-form-group
         v-bind:label="$trans('Reference')"
@@ -46,12 +49,11 @@
       <i>{{ $trans('Save quotation to start adding chapters') }}</i>
     </footer>
 
-  </div>
+  </details>
 </template>
 <script>
 import {useVuelidate} from "@vuelidate/core";
 import {QuotationModel} from '@/models/quotations/Quotation.js';
-import eventBus from "@/eventBus";
 
 export default {
   name: 'QuotationDataForm',

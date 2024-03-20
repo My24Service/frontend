@@ -1,7 +1,9 @@
 <template>
-  <Collapse
-    :title="$trans('Distance')"
-  >
+  <details>
+    <summary class="flex-columns space-between">
+      <h6>{{ $trans('Distance') }}</h6>
+      <b-icon-chevron-down></b-icon-chevron-down>
+    </summary>
     <b-overlay :show="compLoading" rounded="sm">
       <div
         v-for="(cost, index) in this.costService.collection"
@@ -154,13 +156,12 @@
 
       </b-container>
     </b-overlay>
-  </Collapse>
+  </details>
 </template>
 <script>
 import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
 import DurationInput from "../../../components/DurationInput.vue"
-import Collapse from "../../../components/Collapse";
 import {
   INVOICE_LINE_TYPE_DISTANCE,
   USE_PRICE_OTHER,
@@ -182,12 +183,10 @@ import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 export default {
   name: "DistanceComponent",
-  emits: ['quotationLinesCreated', 'emptyCollectionClicked'],
   mixins: [quotationMixin],
   components: {
     PriceInput,
     IconLinkDelete,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -256,7 +255,6 @@ export default {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
       this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
       await this.loadData()
-      this.checkParentHasQuotationLines(this.quotationLinesParent)
     }
     this.isLoading = false
   },
@@ -319,6 +317,7 @@ export default {
           return new this.costService.model(cost)
         })
         this.updateTotals()
+        this.checkParentHasQuotationLines(this.quotationLinesParent)
         this.isLoading = false
       } catch(error) {
         this.errorToast(this.$trans('Error fetching distance costs'))

@@ -1,7 +1,9 @@
 <template>
-  <Collapse
-    :title="$trans('Materials')"
-  >
+  <details>
+    <summary class="flex-columns space-between">
+      <h6>{{ $trans('Materials') }}</h6>
+      <b-icon-chevron-down></b-icon-chevron-down>
+    </summary>
     <b-overlay :show="compLoading" rounded="sm">
       <div
         v-for="(cost, index) in this.costService.collection"
@@ -198,7 +200,7 @@
       </b-container>
 
     </b-overlay>
-  </Collapse>
+  </details>
 </template>
 
 <script>
@@ -206,7 +208,6 @@ import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
 import AmountDecimalInput from "../../../components/AmountDecimalInput.vue"
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
-import Collapse from "../../../components/Collapse";
 import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/quotations/Cost";
 import {
   INVOICE_LINE_TYPE_USED_MATERIALS,
@@ -228,12 +229,10 @@ import {ChapterModel} from "@/models/quotations/Chapter";
 
 export default {
   name: "MaterialsCreateComponent",
-  emits: ['quotationLinesCreated', 'emptyCollectionClicked'],
   mixins: [quotationMixin],
   components: {
     PriceInput,
     IconLinkDelete,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -255,6 +254,11 @@ export default {
       type: [Array],
       default: null
     },
+  },
+  watch: {
+    quotationLinesParent(newVal) {
+      this.checkParentHasQuotationLines(newVal)
+    }
   },
   computed: {
     compLoading () {
@@ -407,6 +411,7 @@ export default {
         await this.loadMaterials(materialIds)
         this.costService.collection = costs
         this.updateTotals()
+        this.checkParentHasQuotationLines(this.quotationLinesParent)
         this.isLoading = false
       } catch(error) {
         this.errorToast(this.$trans('Error fetching material cost'))

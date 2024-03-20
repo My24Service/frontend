@@ -1,7 +1,9 @@
 <template>
-  <Collapse
-    :title="$trans('Call out costs')"
-  >
+  <details>
+    <summary class="flex-columns space-between">
+      <h6>{{ $trans('Call out costs') }}</h6>
+      <b-icon-chevron-down></b-icon-chevron-down>
+    </summary>
     <div
       v-for="(cost, index) in this.costService.collection"
       :key="index"
@@ -142,14 +144,12 @@
       </b-row>
 
     </b-container>
-  </Collapse>
+  </details>
 </template>
 <script>
 import quotationMixin from "./mixin.js";
-import moment from 'moment'
 import Multiselect from 'vue-multiselect'
 import DurationInput from "../../../components/DurationInput.vue"
-import Collapse from "../../../components/Collapse";
 import {
   INVOICE_LINE_TYPE_CALL_OUT_COSTS,
   USE_PRICE_OTHER,
@@ -168,13 +168,11 @@ import {CustomerModel} from "@/models/customer/Customer";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 export default {
-  name: "CallOutCostsComponent",
-  emits: ['quotationLinesCreated', 'emptyCollectionClicked'],
+  name: "CallOutCosts",
   mixins: [quotationMixin],
   components: {
     PriceInput,
     IconLinkDelete,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -191,6 +189,15 @@ export default {
     customer:{
       type: CustomerModel,
       default: null
+    },
+    quotationLinesParent: {
+      type: [Array],
+      default: null
+    },
+  },
+  watch: {
+    quotationLinesParent(newVal) {
+      this.checkParentHasQuotationLines(newVal)
     }
   },
   computed: {
@@ -285,6 +292,7 @@ export default {
           return new this.costService.model(cost)
         })
         this.updateTotals()
+        this.checkParentHasQuotationLines(this.quotationLinesParent)
         this.isLoading = false
       } catch(error) {
         this.errorToast(this.$trans('Error fetching material cost'))
@@ -353,17 +361,5 @@ export default {
 .flex {
   display : flex;
   margin-top: auto;
-}
-.add-button {
-  margin: 20px 0;
-}
-.row.total-row {
-  margin-top: 20px;
-}
-.material_row {
-  margin-bottom: 20px;
-}
-.delete-button {
-  font-size: 1.8rem;
 }
 </style>
