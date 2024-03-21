@@ -329,7 +329,6 @@ export default {
       this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
     },
     quotationLinesLoaded(quotationLines) {
-      console.log('setting quotationLines')
       this.quotationLines = quotationLines
     },
 
