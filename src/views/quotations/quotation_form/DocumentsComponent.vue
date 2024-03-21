@@ -1,5 +1,5 @@
 <template>
-  <details closed>
+  <details open>
     <summary class="flex-columns space-between">
       <h6>{{ $trans('Documents') }}</h6>
       <b-icon-chevron-down></b-icon-chevron-down>
@@ -43,7 +43,7 @@
     <!-- form -->
     <div v-if="showForm">
       <b-form v-if="!documentService.isEdit">
-        <h4>{{ $trans("New document(s)") }}</h4>
+        <h4>{{ $trans("Add document(s)") }}</h4>
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Choose files')"
@@ -117,17 +117,6 @@
         >
           {{ $trans('Edit document') }}
         </b-button>
-        <b-button
-          v-if="!documentService.isEdit"
-          @click="addDocuments"
-          class="btn btn-primary"
-          size="sm"
-          type="button"
-          variant="primary"
-          :disabled="!isDocumentValid"
-        >
-          {{ $trans('Add document(s)') }}
-        </b-button>
       </footer>
 
     </div>
@@ -142,12 +131,12 @@
         type="button"
         variant="primary"
       >
-        {{ $trans('New document(s)') }}
+        {{ $trans('Add document(s)') }}
       </b-button>
     </footer>
 
     <b-container
-      v-if="!showForm && (documentService.collection.length || documentService.deletedItems.length)"
+      v-if="showChangesBlock"
     >
       <b-row>
         <b-col cols="2"></b-col>
@@ -156,8 +145,6 @@
             @click="loadData"
             class="btn btn-secondary"
             type="button"
-
-            :disabled="!hasChanges"
           >
             {{ $trans('Discard changes') }}
           </b-button>
@@ -167,7 +154,6 @@
             class="btn btn-danger"
             type="button"
             variant="danger"
-            :disabled="!hasChanges"
           >
             {{ $trans('Save changes') }}
           </b-button>
@@ -211,11 +197,13 @@ export default {
       ],
       documentService: new DocumentService(),
       newItem: false,
-      hasChanges: false,
       files: []
     }
   },
   computed: {
+    showChangesBlock() {
+      return !this.showForm && (this.documentService.collection.length || this.documentService.deletedItems.length) && this.documentService.collectionHasChanges
+    },
     showForm() {
       return this.documentService.isEdit || this.newItem
     },
@@ -224,20 +212,13 @@ export default {
     }
   },
   async created () {
-    this.documentService.model = DocumentModel
     this.documentService.setListArgs(`quotation=${this.quotation.id}`)
     this.documentService.currentPage = this.$route.query.page || 1
     await this.loadData()
   },
   methods: {
-    addDocuments() {
-      this.newItem = false
-      this.documentService.newEditItem()
-      this.hasChanges = true
-    },
     doEditCollectionItem() {
       this.documentService.doEditCollectionItem()
-      this.hasChanges = true
     },
     editDocument(item, index) {
       this.documentService.editCollectionItem(item, index)
@@ -252,18 +233,17 @@ export default {
     },
     deleteDocument(index) {
       this.documentService.deleteCollectionItem(index)
-      this.hasChanges = true
       this.infoToast(this.$trans('Marked for delete'), this.$trans("Document marked for delete"))
     },
     async loadData() {
       this.isLoading = true
 
       try {
-        const data = await this.documentService.list()
-        this.documentService.collection = data.results.map((d) => new DocumentModel(d))
-        this.documentService.deletedItems = []
+        await this.documentService.loadCollection()
+        if (this.documentService.collection.length === 0) {
+          this.newDocument()
+        }
         this.isLoading = false
-        this.hasChanges = false
       } catch(error) {
         console.log('error fetching documents', error)
         this.errorToast(this.$trans('Error loading documents'))
@@ -272,19 +252,24 @@ export default {
     },
     // form
     filesSelected(files) {
-      for (let i=0;i<files.length; i++) {
-        const reader = new FileReader()
-        reader.onload = (f) => {
-          const b64 = f.target.result
-          this.documentService.collection.push(new DocumentModel({
-            quotation: this.quotation.id,
-            file: b64,
-            name: files[i].name,
-            description: ''
-          }))
-        }
+      if (files.length) {
+        for (let i=0;i<files.length; i++) {
+          const reader = new FileReader()
+          reader.onload = (f) => {
+            const b64 = f.target.result
+            this.documentService.collection.push(new DocumentModel({
+              quotation: this.quotation.id,
+              file: b64,
+              name: files[i].name,
+              description: ''
+            }))
+          }
 
-        reader.readAsDataURL(files[i])
+          reader.readAsDataURL(files[i])
+        }
+        this.newItem = false
+        this.documentService.newEditItem()
+        this.documentService.collectionHasChanges = true
       }
     },
     async submitDocuments() {

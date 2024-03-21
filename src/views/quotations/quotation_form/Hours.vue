@@ -1,7 +1,10 @@
 <template>
   <details>
     <summary class="flex-columns space-between">
-      <h6>{{ getTitle() }}</h6>
+      <h6>
+        {{ getTitle() }}
+        <b-icon-check-circle v-if="parentHasQuotationLines"></b-icon-check-circle>
+      </h6>
       <b-icon-chevron-down></b-icon-chevron-down>
     </summary>
     <b-overlay :show="compLoading" rounded="sm">
@@ -19,13 +22,17 @@
             v-model="cost.amount_duration"
             @durationChanged="(duration) => changeDuration(cost, duration)"
             style="width: 100px !important; float:left !important;"
+            v-if="!parentHasQuotationLines"
           />
+          <span v-else>{{ cost.amount_duration }}</span>
           <div style="width: 100px !important; float:right !important;">
             {{ $trans('VAT') }}
             <VAT
+              v-if="!parentHasQuotationLines"
               @vatChanged="(val) => changeVatType(cost, val)"
               style="width: 60px"
             />
+            <span v-else>{{ cost.vat_type }}%</span>
           </div>
         </b-form-group>
 
@@ -37,6 +44,7 @@
           <b-form-radio-group
             @change="updateTotals"
             v-model="cost.use_price"
+            v-if="!parentHasQuotationLines"
           >
             <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
               {{ $trans('Settings') }}
@@ -59,6 +67,12 @@
               </p>
             </b-form-radio>
           </b-form-radio-group>
+          <b-form-input
+            v-else
+            :value="cost.price_dinero.toFormat('$0.00')"
+            disabled="disabled"
+          >
+          </b-form-input>
         </b-form-group>
 
         <b-container>
@@ -72,7 +86,7 @@
               </div>
             </b-col>
           </b-row>
-          <b-row>
+          <b-row v-if="!parentHasQuotationLines">
             <b-col cols="8"></b-col>
             <b-col cols="4">
               <b-button
@@ -102,7 +116,7 @@
             <hr/>
           </b-col>
         </b-row>
-        <b-row v-if="costService.collection.length">
+        <b-row v-if="costService.collection.length && !parentHasQuotationLines">
           <b-col cols="2"></b-col>
           <b-col cols="10">
             <b-button
@@ -126,7 +140,7 @@
             </b-button>
           </b-col>
         </b-row>
-        <b-row v-else>
+        <b-row v-if="!costService.collection.length && !parentHasQuotationLines">
           <b-col cols="7"></b-col>
           <b-col cols="5">
             <b-button
@@ -140,11 +154,10 @@
           </b-col>
         </b-row>
 
-        <b-row v-if="costService.collection.length && false">
+        <b-row v-if="showAddQuotationLinesBlock">
           <b-col cols="12">
-            <hr v-if="!parentHasQuotationLines">
+            <hr />
             <AddToQuotationLines
-              v-if="!parentHasQuotationLines"
               :useOnQuotationOptions="useOnQuotationOptions"
               @buttonClicked="createQuotationLinesClicked"
             />
@@ -171,7 +184,11 @@ import {
   USE_PRICE_SELLING,
   USE_PRICE_SETTINGS
 } from "./constants";
-import CostService, {COST_TYPE_TRAVEL_HOURS, COST_TYPE_WORK_HOURS} from "../../../models/quotations/Cost";
+import {
+  COST_TYPE_TRAVEL_HOURS,
+  COST_TYPE_WORK_HOURS,
+  CostService
+} from "@/models/quotations/Cost";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import PriceInput from "../../../components/PriceInput";
@@ -225,14 +242,10 @@ export default {
       return this.isLoading
     },
     quotationLineType() {
-      switch (this.type) {
-        case COST_TYPE_WORK_HOURS:
-          return INVOICE_LINE_TYPE_HOURS_TYPE_WORK
-        case COST_TYPE_TRAVEL_HOURS:
-          return INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL
-        default:
-          throw `quotationLineType(), unknown type ${this.type}`
-      }
+      return this.type
+    },
+    showAddQuotationLinesBlock() {
+      return this.costService.collection.length && !this.parentHasQuotationLines
     }
   },
   data() {
@@ -253,6 +266,7 @@ export default {
       hasStoredData: false,
       costService: new CostService(),
       quotationLineService: new QuotationLineService(),
+      parentHasQuotationLines: false
     }
   },
   async created() {
@@ -260,6 +274,7 @@ export default {
     // set vars in service
     this.costService.invoice_default_vat = this.invoice_default_vat
     this.costService.default_currency = this.default_currency
+
     if (this.chapter.id) {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
       this.costService.addListArg(`cost_type=${this.type}`)
@@ -329,8 +344,8 @@ export default {
       this.isLoading = true
 
       try {
-        const response = await this.costService.list()
-        this.costService.collection = response.results.map((cost) => {
+        await this.costService.loadCollection()
+        this.costService.collection = this.costService.collection.map((cost) => {
           if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
             cost.price_other = cost.price
             cost.price_other_currency = cost.price_currency
@@ -338,6 +353,9 @@ export default {
           cost.savedHours = true
           return new this.costService.model(cost)
         })
+        if (this.costService.collection.length === 0) {
+          this.addCost()
+        }
         this.updateTotals()
         this.checkParentHasQuotationLines(this.quotationLinesParent)
         this.isLoading = false
@@ -409,17 +427,5 @@ export default {
 .flex {
   display : flex;
   margin-top: auto;
-}
-.add-button {
-  margin: 20px 0;
-}
-.row.total-row {
-  margin-top: 20px;
-}
-.material_row {
-  margin-bottom: 20px;
-}
-.delete-button {
-  font-size: 1.8rem;
 }
 </style>

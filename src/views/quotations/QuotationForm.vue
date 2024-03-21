@@ -4,7 +4,15 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-check-fill"></b-icon>
-          <router-link :to="{name: 'quotation-list' }">{{ $trans('Quotations') }}</router-link> /
+          <router-link
+            :to="{name: 'preliminary-quotations' }"
+            v-if="quotation.preliminary"
+          >{{ $trans('Quotations') }}</router-link>
+          <router-link
+            :to="{name: 'quotation-list' }"
+            v-else
+          >{{ $trans('Quotations') }}</router-link>
+          /
           <strong>{{ quotation.quotation_name }}</strong>
           <span class="dimmed">
           <span v-if="!isEdit && !quotation.id">{{ $trans('new') }}</span>
@@ -43,6 +51,7 @@
                 @backToChapters="backToChapters"
                 @quotationLineAdded="quotationLineAdded"
                 @quotationLineDeleted="quotationLineDeleted"
+                @quotationLinesLoaded="quotationLinesLoaded"
               />
             </div>
             <div v-else>
@@ -52,14 +61,8 @@
                 ref="quotationDataComponent"
               />
 
-              <Chapter
-                v-if="quotation.id"
-                :quotation="quotation"
-                @chapterCreated="chapterCreated"
-                @loadChapterClicked="loadChapterClicked"
-              />
-
               <DocumentsComponent
+                v-if="quotation && quotation.id"
                 :quotation="quotation"
               />
 
@@ -120,7 +123,14 @@
               />
 
             </div>
-
+            <div v-else>
+              <Chapter
+                v-if="quotation.id"
+                :quotation="quotation"
+                @chapterCreated="chapterCreated"
+                @loadChapterClicked="loadChapterClicked"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -244,6 +254,10 @@ export default {
     quotationLineDeleted() {
       this.quotationLines = []
       this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
+    },
+    quotationLinesLoaded(quotationLines) {
+      console.log('setting quotationLines')
+      this.quotationLines = quotationLines
     },
 
     // chapters

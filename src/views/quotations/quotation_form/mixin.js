@@ -14,7 +14,9 @@ let quotationMixin = {
   },
   methods: {
     checkParentHasQuotationLines(quotationLines) {
-      this.parentHasQuotationLines = !!quotationLines.find((line) => line.type === this.quotationLineType)
+      this.parentHasQuotationLines = !!quotationLines.find(
+        (line) => line.cost_type === this.quotationLineType
+      )
     },
     async emptyCollection() {
       this.isLoading = true
@@ -47,7 +49,7 @@ let quotationMixin = {
       switch (this.useOnQuotationSelected) {
         case OPTION_ONLY_TOTAL:
           const quotationLine = new QuotationLineModel({
-            type: this.quotationLineType,
+            cost_type: this.quotationLineType,
             info: this.getDescriptionOnlyTotalQuotationLine(),
             amount: this.getTotalAmountQuotationLine(),
             vat: this.totalVAT_dinero.toFormat('0.00'),

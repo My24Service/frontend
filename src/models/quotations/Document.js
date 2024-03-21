@@ -18,6 +18,7 @@ class DocumentModel {
 
 class DocumentService extends BaseModel {
   url = '/quotation/document/'
+  model = DocumentModel
 }
 
 export { DocumentService, DocumentModel }

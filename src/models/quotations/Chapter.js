@@ -23,16 +23,8 @@ Object.assign(ChapterModel.prototype, priceMixin);
 class ChapterService extends BaseModel {
   model = ChapterModel
   collection = []
-  fields = {
-    id: null,
-    quotation: null,
-    name: null,
-    description: null
-  }
   url = '/quotation/chapter/'
   listArgs = []
 }
-
-export default new ChapterService()
 
 export { ChapterService, ChapterModel }

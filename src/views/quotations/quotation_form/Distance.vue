@@ -1,7 +1,10 @@
 <template>
   <details>
     <summary class="flex-columns space-between">
-      <h6>{{ $trans('Distance') }}</h6>
+      <h6>
+        {{ $trans('Distance') }}
+        <b-icon-check-circle v-if="parentHasQuotationLines"></b-icon-check-circle>
+      </h6>
       <b-icon-chevron-down></b-icon-chevron-down>
     </summary>
     <b-overlay :show="compLoading" rounded="sm">
@@ -21,13 +24,16 @@
             v-model="cost.amount_int"
             size="sm"
             style="width: 100px !important; float:left !important;"
+            :disabled="parentHasQuotationLines"
           ></b-form-input>
           <div style="width: 100px !important; float:right !important;">
             {{ $trans('VAT') }}
             <VAT
+              v-if="!parentHasQuotationLines"
               @vatChanged="(val) => changeVatType(cost, val)"
               style="width: 60px"
             />
+            <span v-else>{{ cost.vat_type }}%</span>
           </div>
         </b-form-group>
 
@@ -39,6 +45,7 @@
           <b-form-radio-group
             @change="updateTotals"
             v-model="cost.use_price"
+            v-if="!parentHasQuotationLines"
           >
             <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
               {{ $trans('Settings') }}
@@ -61,6 +68,12 @@
               </p>
             </b-form-radio>
           </b-form-radio-group>
+          <b-form-input
+            v-else
+            :value="cost.price_dinero.toFormat('$0.00')"
+            disabled="disabled"
+          >
+          </b-form-input>
         </b-form-group>
 
         <b-container>
@@ -74,7 +87,7 @@
               </div>
             </b-col>
           </b-row>
-          <b-row>
+          <b-row v-if="!parentHasQuotationLines">
             <b-col cols="8"></b-col>
             <b-col cols="4">
               <b-button
@@ -104,7 +117,7 @@
             <hr/>
           </b-col>
         </b-row>
-        <b-row v-if="costService.collection.length">
+        <b-row v-if="costService.collection.length && !parentHasQuotationLines">
           <b-col cols="2"></b-col>
           <b-col cols="10">
             <b-button
@@ -128,7 +141,7 @@
             </b-button>
           </b-col>
         </b-row>
-        <b-row v-else>
+        <b-row v-if="!costService.collection.length && !parentHasQuotationLines">
           <b-col cols="7"></b-col>
           <b-col cols="5">
             <b-button
@@ -142,11 +155,10 @@
           </b-col>
         </b-row>
 
-        <b-row v-if="costService.collection.length">
+        <b-row v-if="showAddQuotationLinesBlock">
           <b-col cols="12">
-            <hr v-if="!parentHasQuotationLines">
+            <hr />
             <AddToQuotationLines
-              v-if="!parentHasQuotationLines"
               :useOnQuotationOptions="useOnQuotationOptions"
               @buttonClicked="createQuotationLinesClicked"
             />
@@ -163,11 +175,10 @@ import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
 import DurationInput from "../../../components/DurationInput.vue"
 import {
-  INVOICE_LINE_TYPE_DISTANCE,
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS
 } from "./constants";
-import CostService, {COST_TYPE_DISTANCE,} from "../../../models/quotations/Cost";
+import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import PriceInput from "../../../components/PriceInput";
@@ -212,6 +223,9 @@ export default {
   computed: {
     compLoading () {
       return this.isLoading
+    },
+    showAddQuotationLinesBlock() {
+      return this.costService.collection.length && !this.parentHasQuotationLines
     }
   },
   watch: {
@@ -235,7 +249,7 @@ export default {
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
       invoice_default_price_per_km: this.$store.getters.getInvoiceDefaultPricePerKm,
-      quotationLineType: INVOICE_LINE_TYPE_DISTANCE,
+      quotationLineType: COST_TYPE_DISTANCE,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),
     }
@@ -318,6 +332,9 @@ export default {
         })
         this.updateTotals()
         this.checkParentHasQuotationLines(this.quotationLinesParent)
+        if (this.costService.collection.length === 0) {
+          this.addCost()
+        }
         this.isLoading = false
       } catch(error) {
         this.errorToast(this.$trans('Error fetching distance costs'))

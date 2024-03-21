@@ -2,8 +2,8 @@
   <b-overlay :show="isLoading" rounded="sm">
     <b-button
       style="width: 100%"
-      :variant="hasChanges ? 'danger' : 'success'"
-      :disabled="hasChanges"
+      :variant="quotationLineService.collectionHasChanges ? 'danger' : 'success'"
+      :disabled="quotationLineService.collectionHasChanges"
       @click="backToChapters"
     >
       <b-icon-arrow-left-circle-fill></b-icon-arrow-left-circle-fill>
@@ -11,10 +11,9 @@
     </b-button>
     <details open>
       <summary class="flex-columns space-between">
-        <h6>{{ $trans('Quotation lines') }}</h6>
+        <h6>{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h6>
         <b-icon-chevron-down></b-icon-chevron-down>
       </summary>
-      <h3 class="quotation-line-header">{{ $trans('Quotation lines for chapter')}} <i>{{ chapter.name }}</i></h3>
       <p v-if="!quotationLineService.collection.length && !showForm">
         <i>{{ $trans("No quotation lines") }}</i>
       </p>
@@ -24,15 +23,17 @@
         :fields="fields"
         :items="quotationLineService.collection"
         responsive="md"
-        class="data-table"
+        class="line-table"
         v-if="!showForm && quotationLineService.collection.length"
       >
-        <template #cell(total)="data">
-          {{ data.item.total_dinero.toFormat('$0.00') }}
+        <template #cell(info)="data">
+          <b>{{ data.item.info }}</b><br/>
+          {{ $trans("Amount") }}: <b>{{ data.item.amount }}</b>
         </template>
-        <template #cell(vat)="data">
-          {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ Math.round(data.item.vat_type) }}%)
-        </template>.
+        <template #cell(total)="data">
+          {{ data.item.total_dinero.toFormat('$0.00') }}<br/>
+          {{ $trans("VAT") }} {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ Math.round(data.item.vat_type) }}%)
+        </template>
         <template #cell(icons)="data">
           <div
             class="h2 float-right"
@@ -183,7 +184,7 @@
       </footer>
 
       <b-container
-        v-if="!showForm && quotationLineService.collection.length"
+        v-if="showChangesBlock"
       >
         <b-row class="quotation-total">
           <b-col cols="7">
@@ -206,7 +207,7 @@
               class="btn btn-secondary"
               type="button"
 
-              :disabled="!hasChanges"
+              :disabled="!quotationLineService.collectionHasChanges"
             >
               {{ $trans('Discard changes') }}
             </b-button>
@@ -216,7 +217,7 @@
               class="btn btn-danger"
               type="button"
               variant="danger"
-              :disabled="!hasChanges"
+              :disabled="!quotationLineService.collectionHasChanges"
             >
               {{ $trans('Save changes') }}
             </b-button>
@@ -257,7 +258,8 @@ export default {
     'quotationLineDeleted',
     'backToChapters',
     'quotationLineAdded',
-    'quotationLineSubmitted'
+    'quotationLineSubmitted',
+    'quotationLinesLoaded'
   ],
   setup() {
     return { v$: useVuelidate() }
@@ -290,17 +292,17 @@ export default {
       vat: 0,
       isLoading: false,
       newItem: false,
-      hasChanges: false,
       fields: [
-        {key: 'info', label: this.$trans('Info')},
-        {key: 'amount', label: this.$trans('Amount')},
-        {key: 'vat', label: this.$trans('VAT')},
-        {key: 'total', label: this.$trans('Total')},
-        {key: 'icons', label: ''},
+        {key: 'info', label: this.$trans('Info'), thAttr: {width: '40%'}},
+        {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
+        {key: 'icons', label: '', thAttr: {width: '20%'}},
       ]
     }
   },
   computed: {
+    showChangesBlock() {
+      return !this.showForm && (this.quotationLineService.collection.length || this.quotationLineService.deletedItems.length) && this.quotationLineService.collectionHasChanges
+    },
     showForm() {
       return this.quotationLineService.isEdit || this.newItem
     },
@@ -317,7 +319,6 @@ export default {
   async created() {
     this.isLoading = true
 
-    this.quotationLineService.model = QuotationLineModel
     this.quotationLineService.modelDefaults = {
       amount: '0',
       price: '0.00',
@@ -335,7 +336,6 @@ export default {
   methods: {
     doEditCollectionItem() {
       this.quotationLineService.doEditCollectionItem()
-      this.hasChanges = true
     },
     editQuotationLine(item, index) {
       this.quotationLineService.editCollectionItem(item, index)
@@ -352,7 +352,6 @@ export default {
     deleteQuotationLine(index) {
       this.quotationLineService.deleteCollectionItem(index)
       this.updateChapterTotals()
-      this.hasChanges = true
       this.$emit('quotationLineDeleted')
       this.infoToast(this.$trans('Marked for delete'), this.$trans("Quotation line marked for delete"))
     },
@@ -371,7 +370,7 @@ export default {
         this.updateChapterTotals()
         const txt = quotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
         this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
-        this.hasChanges = true
+        this.quotationLineService.collectionHasChanges = true
       }
     },
     updateChapterTotals() {
@@ -379,31 +378,27 @@ export default {
       this.vat = this.quotationLineService.getItemsTotalVAT()
     },
     addQuotationLine() {
-      this.quotationLineService.editItem.type = this.INVOICE_LINE_TYPE_MANUAL
+      this.quotationLineService.editItem.cost_type = this.INVOICE_LINE_TYPE_MANUAL
       this.quotationLineService.editItem.price_text = this.quotationLineService.editItem.price_dinero.toFormat('$0.00')
       this.quotationLineService.addCollectionItem()
       this.updateChapterTotals()
       this.newItem = false
       this.quotationLineService.newEditItem()
-      this.hasChanges = true
       this.$emit('quotationLineAdded')
     },
     quotationLineAmountChanged() {
       this.quotationLineService.editItem.amount = this.quotationLineService.editItem.amount.replace(',', '.')
       this.quotationLineService.editItem.calcTotal()
-      this.hasChanges = true
       this.updateChapterTotals()
     },
     quotationLinePriceChanged(val) {
       this.quotationLineService.editItem.setPriceField('price', val)
       this.quotationLineService.editItem.calcTotal()
-      this.hasChanges = true
       this.updateChapterTotals()
     },
     changeVatTypeQuotationLine(vat_type) {
       this.quotationLineService.editItem.vat_type = vat_type
       this.quotationLineService.editItem.calcTotal()
-      this.hasChanges = true
       this.updateChapterTotals()
     },
     async submitQuotationLines() {
@@ -433,19 +428,16 @@ export default {
         ]
 
         try {
-          const data = await this.quotationLineService.list()
-          this.quotationLineService.collection = data.results.map((line) => new QuotationLineModel(line))
-          console.log(this.quotationLineService.collection)
+          await this.quotationLineService.loadCollection()
           this.isLoading = false
           this.updateChapterTotals()
+          this.$emit('quotationLinesLoaded', this.quotationLineService.collection)
         } catch(error) {
           console.log('error fetching quotation lines', error)
           this.errorToast(this.$trans('Error loading quotation lines'))
           this.isLoading = false
         }
         this.quotationLineService.listArgs = []
-        this.quotationLineService.deletedItems = []
-        this.hasChanges = false
       }
     }
   }

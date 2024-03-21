@@ -1,10 +1,13 @@
 <template>
   <details>
     <summary class="flex-columns space-between">
-      <h6>{{ $trans('Materials') }}</h6>
+      <h6>
+        {{ $trans('Materials') }}
+        <b-icon-check-circle v-if="parentHasQuotationLines"></b-icon-check-circle>
+      </h6>
       <b-icon-chevron-down></b-icon-chevron-down>
     </summary>
-    <b-overlay :show="compLoading" rounded="sm">
+    <b-overlay :show="compLoading" rounded="sm" v-if="!isLoading">
       <div
         v-for="(cost, index) in this.costService.collection"
         :key="index"
@@ -64,14 +67,17 @@
             style="width: 100px !important; float:left !important;"
             :value="Math.round(cost.amount_decimal)"
             @change="(amount) => changeAmount(cost, amount)"
+            :disabled="parentHasQuotationLines"
           ></b-form-input>
 
           <div style="width: 100px !important; float:right !important;">
             {{ $trans('VAT') }}
             <VAT
+              v-if="!parentHasQuotationLines"
               @vatChanged="(val) => changeVatType(cost, val)"
               style="width: 60px"
             />
+            <span v-else>{{ cost.vat_type }}%</span>
           </div>
         </b-form-group>
 
@@ -84,6 +90,7 @@
           <b-form-radio-group
             @change="updateTotals"
             v-model="cost.use_price"
+            v-if="!parentHasQuotationLines"
           >
             <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
               {{ $trans('Pur.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
@@ -104,6 +111,12 @@
               </p>
             </b-form-radio>
           </b-form-radio-group>
+          <b-form-input
+            v-else
+            :value="cost.price_dinero.toFormat('$0.00')"
+            disabled="disabled"
+          >
+          </b-form-input>
         </b-form-group>
 
         <b-container>
@@ -117,7 +130,7 @@
               </div>
             </b-col>
           </b-row>
-          <b-row>
+          <b-row v-if="!parentHasQuotationLines">
             <b-col cols="8"></b-col>
             <b-col cols="4">
               <b-button
@@ -138,7 +151,6 @@
         <b-row v-if="totalAmount">
           <b-col cols="12">
             <TotalRow
-              class="total-row"
               v-if="!compLoading"
               :items_total="totalAmount"
               :total="total_dinero"
@@ -147,7 +159,7 @@
             <hr/>
           </b-col>
         </b-row>
-        <b-row v-if="costService.collection.length">
+        <b-row v-if="costService.collection.length && !parentHasQuotationLines">
           <b-col cols="2"></b-col>
           <b-col cols="10">
             <b-button
@@ -171,13 +183,13 @@
             </b-button>
           </b-col>
         </b-row>
-        <b-row v-else>
-          <b-col cols="8"></b-col>
-          <b-col cols="4">
+        <b-row v-if="!costService.collection.length && !parentHasQuotationLines">
+          <b-col cols="6"></b-col>
+          <b-col cols="6">
             <b-button
               :disabled="compLoading"
               @click="addCost"
-              class="btn btn-primary"
+              class="btn btn-primary float-right"
               type="button"
             >
               {{ $trans("Add material") }}
@@ -185,11 +197,10 @@
           </b-col>
         </b-row>
 
-        <b-row v-if="costService.collection.length && false">
+        <b-row v-if="showAddQuotationLinesBlock">
           <b-col cols="12">
-            <hr v-if="!parentHasQuotationLines">
+            <hr/>
             <AddToQuotationLines
-              v-if="!parentHasQuotationLines"
               :useOnQuotationOptions="useOnQuotationOptions"
               @buttonClicked="createQuotationLinesClicked"
             />
@@ -208,9 +219,8 @@ import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
 import AmountDecimalInput from "../../../components/AmountDecimalInput.vue"
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
-import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/quotations/Cost";
+import {COST_TYPE_USED_MATERIALS, CostModel, CostService} from "@/models/quotations/Cost";
 import {
-  INVOICE_LINE_TYPE_USED_MATERIALS,
   USE_PRICE_OTHER,
   USE_PRICE_PURCHASE,
   USE_PRICE_SELLING
@@ -246,10 +256,6 @@ export default {
       type: ChapterModel,
       default: null
     },
-    loading: {
-      type: Boolean,
-      default: false
-    },
     quotationLinesParent: {
       type: [Array],
       default: null
@@ -262,7 +268,10 @@ export default {
   },
   computed: {
     compLoading () {
-      return this.loading || this.isLoading
+      return this.isLoading
+    },
+    showAddQuotationLinesBlock() {
+      return this.costService.collection.length && !this.parentHasQuotationLines
     }
   },
   data() {
@@ -282,10 +291,9 @@ export default {
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
       hasStoredData: false,
-      costType: COST_TYPE_USED_MATERIALS,
       getMaterialsDebounced: '',
       parentHasQuotationLines: false,
-      quotationLineType: INVOICE_LINE_TYPE_USED_MATERIALS,
+      quotationLineType: COST_TYPE_USED_MATERIALS,
       quotationLineService: new QuotationLineService(),
       materialService: new MaterialService(),
       inventoryService: new InventoryService(),
@@ -312,9 +320,8 @@ export default {
       this.updateTotals()
     },
     addCost() {
-      this.costService.collection.push({
-        material: null
-      })
+      this.costService.collection.push(new CostModel({material: null}))
+      this.costService.collectionHasChanges = true
     },
     deleteCost(index) {
       this.costService.deleteCollectionItem(index)
@@ -324,12 +331,12 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        this.infoToast(this.$trans('Created'), this.$trans('Materials costs have been updated'))
+        this.infoToast(this.$trans('Updated'), this.$trans('Materials costs have been updated'))
         this.isLoading = false
         await this.loadData()
       } catch(error) {
-        console.log('Error creating material costs', error)
-        this.errorToast(this.$trans('Error creating material costs'))
+        console.log('Error updating material costs', error)
+        this.errorToast(this.$trans('Error updating material costs'))
         this.isLoading = false
       }
     },
@@ -402,8 +409,8 @@ export default {
 
       try {
         let materialIds = []
-        const response = await this.costService.list()
-        const costs = response.results.map((cost) => {
+        await this.costService.loadCollection()
+        const costs = this.costService.collection.map((cost) => {
           cost.material_id = cost.material
           materialIds.push(cost.material)
           return new this.costService.model(cost)
@@ -412,6 +419,9 @@ export default {
         this.costService.collection = costs
         this.updateTotals()
         this.checkParentHasQuotationLines(this.quotationLinesParent)
+        if (this.costService.collection.length === 0) {
+          this.addCost()
+        }
         this.isLoading = false
       } catch(error) {
         this.errorToast(this.$trans('Error fetching material cost'))
@@ -477,7 +487,7 @@ export default {
       if (model) {
         return use_price === this.usePriceOptions.USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
       } else {
-        console.error('MODEL NOT FOUND for ', used_material)
+        console.error('MATERIAL MODEL NOT FOUND for ', used_material)
       }
     },
     updateTotals() {
