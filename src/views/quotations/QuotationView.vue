@@ -242,7 +242,6 @@
     </div>
 </template>
 <script>
-import orderModel from '@/models/orders/Order'
 
 export default {
   name: "QuotationView",
@@ -259,8 +258,6 @@ export default {
     }
   },
   async created() {
-    this.data = await orderModel.getWorkorderData(this.uuid)
-    this.companyLogo = this.data.member.companylogo_workorder_url ? this.data.member.companylogo_workorder_url : this.data.member.companylogo_url
   },
 }
 </script>

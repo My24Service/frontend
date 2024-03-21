@@ -189,7 +189,6 @@
 
 <script>
 import {useVuelidate} from "@vuelidate/core";
-import eventBus from '../../eventBus.js';
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
@@ -398,26 +397,6 @@ export default {
         this.isLoading = false
       }
     }
-  },
-  beforeDestroy() {
-    eventBus.$off('chapter-update')
-  },
-  mounted() {
-    eventBus.$on('chapter-update', (newChapter) => {
-      let quotation = this.quotation;
-      for (let i=0; i<quotation.chapters.length; i++) {
-        if (quotation.chapters[i].name === newChapter.name) {
-          quotation.chapters[i] = newChapter
-        }
-      }
-
-      this.quotation = {
-        ...quotation
-      }
-
-      this.loadChapterModel = newChapter
-    })
-
   },
 }
 </script>

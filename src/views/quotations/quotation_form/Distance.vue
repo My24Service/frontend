@@ -117,7 +117,7 @@
             <hr/>
           </b-col>
         </b-row>
-        <b-row v-if="costService.collection.length && !parentHasQuotationLines">
+        <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
           <b-col cols="2"></b-col>
           <b-col cols="10">
             <b-button
