@@ -29,6 +29,7 @@
       ref="search-modal"
       @do-search="handleSearchOk"
     />
+
     <b-modal
       id="delete-quotation-modal"
       ref="delete-quotation-modal"
@@ -57,7 +58,15 @@
           </div>
         </template>
         <template #cell(quotation_name)="data">
-          <router-link :to="{name: 'quotation-edit', params: {pk: data.item.id}}">{{ data.item.quotation_name }}</router-link>
+          <router-link
+            v-if="data.item.preliminary"
+            :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
+          >{{ data.item.quotation_name }}</router-link>
+          <router-link
+            v-else
+            :to="{name: 'quotation-detail',
+             params: {uuid: data.item.uuid}}"
+          >{{ data.item.quotation_name }}</router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -132,7 +141,6 @@ export default {
         {key: 'quotation_city', label: this.$trans('City')},
         {key: 'total', label: this.$trans('Total')},
         {key: 'vat', label: this.$trans('Vat')},
-        {key: 'accepted', label: this.$trans('Accepted')},
         {key: 'icons', label: ''},
       ]
     }

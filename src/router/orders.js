@@ -107,6 +107,18 @@ export default [
       },
     },
     {
+      name: 'order-add-quotation',
+      path: '/orders/orders/form-maintenance/:quotation_id',
+      components: {
+        'app-content': OrderForm,
+        'app-subnav': SubNavOrders
+      },
+      props: {
+        'app-content': route => ({...route.params, from_quotation: true}),
+        'app-subnav': true
+      },
+    },
+    {
       meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'order-view',
       path: '/orders/orders/view/:pk',

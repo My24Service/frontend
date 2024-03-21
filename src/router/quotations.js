@@ -4,9 +4,29 @@ import SubNavQuotations from '../components/SubNavQuotations.vue'
 import QuotationList from '../views/quotations/QuotationList.vue'
 import QuotationForm from '../views/quotations/QuotationForm.vue'
 import {AUTH_LEVELS} from "@/constants";
+import TheAppLayoutEmpty from "@/components/TheAppLayoutEmpty.vue";
+import QuotationView from "@/views/quotations/QuotationView.vue";
 
 
 export default [
+// orders
+{
+  component: TheAppLayoutEmpty,
+  path: '/quotations',
+  children: [
+    {
+      meta: { needsAuth: false },
+      name: 'quotation-view',
+      path: '/quotations/quotation/view/:uuid',
+      components: {
+        'app-content': QuotationView,
+      },
+      props: {
+        'app-content': route => ({...route.params})
+      },
+    },
+  ]
+},
 {
   path: '/quotations',
   component: TheAppLayout,
@@ -60,6 +80,19 @@ export default [
       },
       components: {
         'app-content': QuotationForm,
+        'app-subnav': SubNavQuotations
+      },
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+      name: 'quotation-detail',
+      path: '/quotations/quotations/detail/:uuid',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': QuotationView,
         'app-subnav': SubNavQuotations
       },
     },

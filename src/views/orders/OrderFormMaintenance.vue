@@ -5,6 +5,8 @@
       :pk="pk"
       :unaccepted="unaccepted"
       :maintenance="maintenance"
+      :from_quotation="from_quotation"
+      :quotation_id="quotation_id"
     />
     <OrderFormMaintenanceCustomer
       v-if="isCustomer && !hasBranches && !isBranchEmployee && !isStaff && !isSuperuser"
@@ -38,6 +40,14 @@ export default {
     maintenance: {
       type: [Boolean],
       default: false
+    },
+    from_quotation: {
+      type: [Boolean],
+      default: false
+    },
+    quotation_id: {
+      type: [String, Number],
+      default: null
     },
   },
   components: {

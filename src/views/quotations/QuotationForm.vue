@@ -1,5 +1,44 @@
 <template>
   <div class="app-page">
+    <b-modal
+      id="quotation-definitive-modal"
+      ref="quotation-definitive-modal"
+      v-bind:title="$trans('Make definitive?')"
+      @ok="doMakeDefinitive"
+    >
+      <p class="my-4">
+        {{ $trans("Are you sure you want to make this quotation definitive?") }}
+      </p>
+      <p>
+        <strong><i>{{ $trans("You won't be able to make changes after that") }}</i></strong>
+      </p>
+    </b-modal>
+
+    <b-modal ref="quotation-viewer" size="xl" v-b-modal.modal-scrollable>
+      <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
+        <b-spinner medium></b-spinner>
+      </div>
+      <iframe :src="quotationURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
+
+      <template #modal-footer="{ ok }">
+        <b-button class="btn button btn-secondary" @click="openQuotation()" target="_blank">
+          {{ $trans('Open in a new tab') }}
+        </b-button>
+        <b-button
+          class="btn button btn-danger"
+          @click="showMakeDefinitiveModal"
+          v-if="quotation.preliminary"
+          variant="danger"
+        >
+          {{ $trans('Make definitive') }}
+        </b-button>
+        <!-- Emulate built in modal footer ok and cancel button actions -->
+        <b-button @click="ok()" variant="primary">
+          close
+        </b-button>
+      </template>
+    </b-modal>
+
     <header>
       <div class="page-title">
         <h3>
@@ -15,9 +54,19 @@
           /
           <strong>{{ quotation.quotation_name }}</strong>
           <span class="dimmed">
-          <span v-if="!isEdit && !quotation.id">{{ $trans('new') }}</span>
-          <span v-if="isEdit && !quotation.id">{{ $trans('edit')}}</span>
-        </span>
+            <span v-if="!isEdit && !quotation.id">{{ $trans('new') }}</span>
+            <span v-if="isEdit && !quotation.id">{{ $trans('edit')}}</span>
+          </span>
+          <span v-if="quotation.id">
+            <b-link
+              class="btn btn-sm btn-primary"
+              @click.prevent="showQuotationDialog"
+              target="_blank"
+            >
+              <b-icon icon="file-earmark"></b-icon>
+              {{ $trans('View quotation') }}
+            </b-link>
+          </span>
         </h3>
         <div class="flex-columns">
           <b-button @click="cancelForm" type="button" variant="secondary">
@@ -218,7 +267,10 @@ export default {
       costService: new CostService(),
       quotationLineService: new QuotationLineService(),
 
-      quotationLines: []
+      quotationLines: [],
+
+      quotationURL: '',
+      iframeLoading: true,
     }
   },
   computed: {
@@ -236,6 +288,28 @@ export default {
     }
   },
   methods: {
+    iframeLoaded() {
+      this.iframeLoading = false;
+    },
+    openQuotation() {
+      window.open(this.getQuotationURL(), '_blank')
+    },
+    showMakeDefinitiveModal() {
+      this.$refs['quotation-definitive-modal'].show()
+    },
+    async doMakeDefinitive() {
+      await this.quotationService.makeDefinitive(this.quotation.id)
+      await this.$router.push({ name: 'quotation-list'})
+    },
+    getQuotationURL() {
+      const routeData = this.$router.resolve({ name: 'quotation-view', params: { uuid: this.quotation.uuid } });
+      return `${document.location.origin}/${routeData.href}`;
+    },
+    showQuotationDialog() {
+      this.iframeLoading = true;
+      this.quotationURL = this.getQuotationURL();
+      this.$refs['quotation-viewer'].show();
+    },
     // quotation lines
     quotationLinesCreated(quotationLines) {
       this.$refs['quotation-lines'].quotationLinesCreated(quotationLines)
@@ -313,7 +387,11 @@ export default {
         await this.quotationService.update(this.quotation.id, this.quotation)
         this.infoToast(this.$trans('Updated'), this.$trans('quotation has been updated'))
         this.isLoading = false
-        await this.$router.push({ name: 'quotation-list'})
+        if (this.quotation.preliminary) {
+          await this.$router.push({ name: 'preliminary-quotations'})
+        } else {
+          await this.$router.push({ name: 'quotation-list'})
+        }
       } catch(error) {
         console.log('error fetching quotation', error)
         this.errorToast(this.$trans('Error updating quotation'))
@@ -346,5 +424,20 @@ export default {
 <style scoped>
 .component-margin {
   margin-bottom: 10px;
+}
+
+.iframe-loader {
+  min-height: 720px
+}
+iframe {
+  min-height: 720px;
+  width: 100%;
+}
+.iframe-loader {
+  min-height: 720px
+}
+iframe {
+  min-height: 720px;
+  width: 100%;
 }
 </style>

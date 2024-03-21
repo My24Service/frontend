@@ -6,6 +6,7 @@ import {ChapterModel} from "@/models/quotations/Chapter";
 
 class QuotationModel {
   id
+  uuid
   description
   customer_id
   customer_relation
@@ -63,6 +64,11 @@ class QuotationService extends BaseModel {
     }
 
     return base
+  }
+
+  makeDefinitive(id) {
+    const url = `/quotation/quotation/${id}/make_definitive/`
+    return new this.axios.post(url, {}).then(response => response.data)
   }
 
   removeNullFields(obj) {

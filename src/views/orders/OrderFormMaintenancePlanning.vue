@@ -150,7 +150,7 @@
 
 
           <b-form-group
-            v-if="hasBranches"
+            v-if="hasBranches && !from_quotation"
             label-cols="3"
             v-bind:label="$trans('Branch')"
             label-for="order-branch-search"
@@ -488,7 +488,7 @@
             label-cols="3"
             label-class="dimmed">
 
-            <label class="col-form-label order-assignee" v-for="(person, index) in order.assigned_user_info">
+            <label class="col-form-label order-assignee" v-for="(person, index) in order.assigned_user_info" :key="index">
               <span v-if="index > 0">,</span>
               {{ person.full_name }}
             </label>
@@ -806,23 +806,22 @@ import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
 
-import orderNotAcceptedModel from '../../models/orders/OrderNotAccepted.js'
-import orderModel from '../../models/orders/Order.js'
-import customerModel from '../../models/customer/Customer.js'
-import engineerModel from '../../models/company/UserEngineer.js'
-import documentModel from '../../models/orders/Document.js'
+import {OrderNotAcceptedService} from '@/models/orders/OrderNotAccepted'
+import {OrderService, OrderModel} from '@/models/orders/Order'
+import {CustomerService} from '@/models/customer/Customer'
 import Assign from '../../models/mobile/Assign.js'
 import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
 import Collapse from '../../components/Collapse.vue'
-import {componentMixin} from "../../utils";
-import branchModel from "../../models/company/Branch";
-import {EquipmentService} from "../../models/equipment/equipment";
-import timeRegistrationModel from "../../models/company/TimeRegistration";
-import equipmentModel from "../../models/equipment/equipment";
-import locationModel from "../../models/equipment/location";
-import orderlineModel from "../../models/orders/Orderline";
-import infolineModel from "../../models/orders/Infoline";
+import {componentMixin} from "@/utils";
+import {BranchService} from "@/models/company/Branch";
+import {EquipmentService} from "@/models/equipment/equipment";
+import {QuotationService} from '@/models/quotations/Quotation.js'
+import {LocationService} from "@/models/equipment/location";
+import {OrderlineService} from "@/models/orders/Orderline";
+import {InfolineService} from "@/models/orders/Infoline";
 import CustomerCard from '../../components/CustomerCard.vue'
+import {EngineerService} from "@/models/company/UserEngineer";
+import {DocumentService} from "@/models/orders/Document";
 
 export default {
   mixins: [componentMixin],
@@ -847,6 +846,14 @@ export default {
     maintenance: {
       type: [Boolean],
       default: false
+    },
+    from_quotation: {
+      type: [Boolean],
+      default: false
+    },
+    quotation_id: {
+      type: [String, Number],
+      default: null
     },
   },
   watch: {
@@ -903,7 +910,7 @@ export default {
       ],
       submitClicked: false,
       countries: [],
-      order: orderModel.getFields(),
+      order: new OrderModel(),
       errorMessage: null,
       customers: [],
       customerSearch: '',
@@ -936,7 +943,17 @@ export default {
       deletedOrderlines: [],
       deletedInfolines: [],
 
-      equipmentService: new EquipmentService()
+      equipmentService: new EquipmentService(),
+      quotationService: new QuotationService(),
+      customerService: new CustomerService(),
+      orderService: new OrderService(),
+      orderNotAcceptedService: new OrderNotAcceptedService(),
+      engineerService: new EngineerService(),
+      branchService: new BranchService(),
+      locationService: new LocationService(),
+      orderlineService: new OrderlineService(),
+      infolineService: new InfolineService(),
+      documentService: new DocumentService()
     }
   },
   validations() {
@@ -1043,11 +1060,23 @@ export default {
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
     this.countries = await this.$store.dispatch('getCountries')
-    const { results } = await engineerModel.list()
+    const { results } = await this.engineerService.list()
     this.engineers = results
 
     if (this.isCreate) {
-      this.order = orderModel.getFields()
+      this.order = new OrderModel()
+
+      // create order from quotation
+      if (this.from_quotation) {
+        const quotation = await this.quotationService.detail(this.quotation_id)
+        const customer = await this.customerService.detail(quotation.customer_relation)
+        this.fillCustomer(customer)
+        this.order = {
+          ...this.order,
+          customer_relation: customer.id,
+          quotation: this.quotation_id
+        }
+      }
 
       if (this.maintenance) {
         this.isLoading = true
@@ -1056,7 +1085,7 @@ export default {
         if (data) {
           const {maintenanceEquipment, customer_pk, contract_pk} = data
 
-          const customer = await customerModel.detail(customer_pk)
+          const customer = await this.customerService.detail(customer_pk)
           this.fillCustomer(customer)
 
           for (const equipmentData of maintenanceEquipment) {
@@ -1096,13 +1125,13 @@ export default {
       try {
         if (!this.hasBranches) {
           const response = this.isPlanning || this.isStaff || this.isSuperuser ?
-            await equipmentModel.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
-            await equipmentModel.quickAddCustomerNonPlanning(this.newEquipmentName)
+            await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
+            await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
           this.equipment = response.id
           this.product = response.name
         } else {
-          const response = await equipmentModel.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
+          const response = await this.equipmentService.quickAddBranchPlanning(this.newEquipmentName, this.order.branch);
 
           this.equipment = response.id
           this.product = response.name
@@ -1115,9 +1144,9 @@ export default {
     async getEquipment(query) {
       try {
         if (this.hasBranches) {
-          this.equipmentSearch = await equipmentModel.searchBranch(query, this.order.branch)
+          this.equipmentSearch = await this.equipmentService.searchBranch(query, this.order.branch)
         } else {
-          this.equipmentSearch = await equipmentModel.searchCustomer(query, this.order.customer_relation)
+          this.equipmentSearch = await this.equipmentService.searchCustomer(query, this.order.customer_relation)
         }
 
       } catch(error) {
@@ -1153,13 +1182,13 @@ export default {
       try {
         if (!this.hasBranches) {
           const response = this.isPlanning || this.isStaff || this.isSuperuser ?
-            await locationModel.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
-            await locationModel.quickAddCustomerNonPlanning(this.newLocationName)
+            await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
+            await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
 
           this.equipment_location = response.id
           this.location = response.name
         } else {
-          const response = await locationModel.quickAddBranchPlanning(this.newLocationName, this.order.branch);
+          const response = await this.locationService.quickAddBranchPlanning(this.newLocationName, this.order.branch);
 
           this.equipment_location = response.id
           this.location = response.name
@@ -1172,9 +1201,9 @@ export default {
     async getLocation(query) {
       try {
         if (this.hasBranches) {
-          this.locationSearch = await locationModel.searchBranch(query, this.order.branch)
+          this.locationSearch = await this.locationService.searchBranch(query, this.order.branch)
         } else {
-          this.locationSearch = await locationModel.searchCustomer(query, this.order.customer_relation)
+          this.locationSearch = await this.locationService.searchCustomer(query, this.order.customer_relation)
         }
       } catch(error) {
         console.log('Error searching location', error)
@@ -1209,7 +1238,7 @@ export default {
       const deleted = this.documents.splice(index, 1)
       try {
         for (const document of deleted) {
-          await documentModel.delete(document.id)
+          await this.documentService.delete(document.id)
         }
       } catch(error) {
         console.log('Error deleting documents', error)
@@ -1367,7 +1396,7 @@ export default {
       await this.submitForm()
     },
     async reject() {
-      await orderNotAcceptedModel.setRejected(this.pk)
+      await this.orderNotAcceptedService.setRejected(this.pk)
       this.cancelForm()
     },
     async submitForm(e) {
@@ -1401,13 +1430,13 @@ export default {
           const infolines = this.order.infolines
           this.order.infolines = []
 
-          newOrder = await orderModel.insert(this.order)
+          newOrder = await this.orderService.insert(this.order)
 
           // add orderlines
           try {
             for (const orderline of orderlines) {
               orderline.order = newOrder.id
-              await orderlineModel.insert(orderline)
+              await this.orderlineService.insert(orderline)
             }
           } catch(error) {
             console.log('Error creating infolines', error)
@@ -1417,7 +1446,7 @@ export default {
           try {
             for (const infoline of infolines) {
               infoline.order = newOrder.id
-              await infolineModel.insert(infoline)
+              await this.infolineService.insert(infoline)
             }
           } catch(error) {
             console.log('Error creating infolines', error)
@@ -1438,7 +1467,7 @@ export default {
         try {
           for (const document of this.documents) {
             document.order = newOrder.id
-            await documentModel.insert(document)
+            await this.documentService.insert(document)
           }
 
           if (this.documents.length) {
@@ -1486,16 +1515,16 @@ export default {
         const infolines = this.order.infolines
         this.order.infolines = []
 
-        await orderModel.update(this.pk, this.order)
+        await this.orderService.update(this.pk, this.order)
 
         // orderlines create/update
         for (let orderline of orderlines) {
           orderline.order = this.pk
           if (orderline.id) {
-            await orderlineModel.update(orderline.id, orderline)
+            await this.orderlineService.update(orderline.id, orderline)
             // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
           } else {
-            await orderlineModel.insert(orderline)
+            await this.orderlineService.insert(orderline)
             // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
           }
         }
@@ -1503,7 +1532,7 @@ export default {
         // orderlines delete
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
-            await orderlineModel.delete(orderline.id)
+            await this.orderlineService.delete(orderline.id)
             // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
           }
         }
@@ -1512,17 +1541,17 @@ export default {
         for (let infoline of infolines) {
           infoline.order = this.pk
           if (infoline.id) {
-            await infolineModel.update(infoline.id, infoline)
+            await this.infolineService.update(infoline.id, infoline)
             // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
           } else {
-            await infolineModel.insert(infoline)
+            await this.infolineService.insert(infoline)
             // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
           }
         }
 
         for (const infoline of this.deletedInfolines) {
           if (infoline.id) {
-            await infolineModel.delete(infoline.id)
+            await this.infolineService.delete(infoline.id)
             // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
           }
         }
@@ -1540,7 +1569,7 @@ export default {
 
       if (this.acceptOrder) {
         try {
-          await orderNotAcceptedModel.setAccepted(this.pk)
+          await this.orderNotAcceptedService.setAccepted(this.pk)
 
           // assign engineers
           try {
@@ -1573,7 +1602,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.customers = await customerModel.search(query)
+        this.customers = await this.customerService.search(query)
         this.isLoading = false
       } catch(error) {
         console.warn('Error fetching customers', error)
@@ -1586,7 +1615,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.branches = await branchModel.search(query)
+        this.branches = await this.branchService.search(query)
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching branches', error)
@@ -1598,7 +1627,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.order = await orderModel.detail(this.pk)
+        this.order = await this.orderService.detail(this.pk)
         this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
         this.order.end_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
         this.isLoading = false

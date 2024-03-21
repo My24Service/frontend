@@ -189,4 +189,4 @@ class EngineerService extends BaseModel {
 }
 
 export default new EngineerService()
-export { EngineerUserModel, RateEngineerUserModel }
+export { EngineerUserModel, RateEngineerUserModel, EngineerService }
