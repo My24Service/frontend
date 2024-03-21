@@ -158,6 +158,9 @@ auth.setInterceptors(client)
 
 Vue.config.productionTip = false
 
+// tired of those "v$ already defined" warnings -_-
+Vue.config.silent = true
+
 Vue.prototype.$trans = (text) => {
   if (text in window.member_type_text) {
     return gettext(window.member_type_text[text])

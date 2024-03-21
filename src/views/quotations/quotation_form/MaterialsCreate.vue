@@ -177,13 +177,12 @@
               class="btn btn-danger"
               type="button"
               variant="danger"
-              v-if="costService.collection.length"
             >
               {{ $trans("Save material costs") }}
             </b-button>
           </b-col>
         </b-row>
-        <b-row v-if="!costService.collection.length && !parentHasQuotationLines">
+        <b-row v-if="(!costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
           <b-col cols="6"></b-col>
           <b-col cols="6">
             <b-button
@@ -231,7 +230,6 @@ import {MaterialService, MaterialModel} from "@/models/inventory/Material";
 import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
 import TotalsInputs from "../../../components/TotalsInputs";
-import {InventoryService} from '@/models/inventory/Inventory.js'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
@@ -296,7 +294,6 @@ export default {
       quotationLineType: COST_TYPE_USED_MATERIALS,
       quotationLineService: new QuotationLineService(),
       materialService: new MaterialService(),
-      inventoryService: new InventoryService(),
       fetchingMaterials: false,
     }
   },
@@ -343,7 +340,7 @@ export default {
     async selectMaterial(material, index) {
       try {
         this.isLoading = true
-        const data = await this.materialService.detail(material.material_id)
+        const data = await this.materialService.detail(material.id)
 
         this.materialModels.push(
           new MaterialModel({
@@ -351,19 +348,20 @@ export default {
             margin_perc: 0
           })
         )
-        data.material_id = data.id
+
+        data.material = data.id
         data.material_name = data.name
         delete data.id
-        delete data.name
+
+        const price = this.getPrice(
+          {...data, use_price: this.usePriceOptions.USE_PRICE_PURCHASE})
         this.costService.collection[index] = new this.costService.model({
           ...data,
           ...this.costService.getDefaultCostProps(),
           ...this.getDefaultProps(),
-          price: this.getPrice(
-            {...data, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
+          price,
           price_currency: this.getCurrency(
             {...data, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
-          material: data.material_id,
           amount_decimal: "0.00",
           cost_type: COST_TYPE_USED_MATERIALS,
           margin_perc: 0
@@ -377,13 +375,12 @@ export default {
       this.updateTotals()
     },
     materialLabel(material) {
-      const text = this.$trans('in stock')
-      return `${material.material_name}, ${text}: ${material.total_amount}`
+      return material.name
     },
     async getMaterials(query) {
       this.fetchingMaterials = true
       try {
-        this.materials = await this.inventoryService.getMaterials(query)
+        this.materials = await this.materialService.searchNoSupplier(query)
         this.fetchingMaterials = false
       } catch(error) {
         console.log('Error fetching materials', error)
@@ -411,7 +408,6 @@ export default {
         let materialIds = []
         await this.costService.loadCollection()
         const costs = this.costService.collection.map((cost) => {
-          cost.material_id = cost.material
           materialIds.push(cost.material)
           return new this.costService.model(cost)
         })
@@ -450,40 +446,40 @@ export default {
         chapter: this.chapter.id
       }
     },
-    getPrice(material) {
+    getPrice(material_cost) {
       let model
 
-      switch (material.use_price) {
+      switch (material_cost.use_price) {
         case this.usePriceOptions.USE_PRICE_PURCHASE:
-          model = this.materialModels.find((m) => m.id === material.material_id)
+          model = this.materialModels.find((m) => m.id === material_cost.material)
           return model.price_purchase_ex
         case this.usePriceOptions.USE_PRICE_SELLING:
-          model = this.materialModels.find((m) => m.id === material.material_id)
+          model = this.materialModels.find((m) => m.id === material_cost.material)
           return model.price_selling_ex
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return material.price
+          return material_cost.price
         default:
-          throw `unknown use price: ${material.use_price}`
+          throw `unknown use price: ${material_cost.use_price}`
       }
     },
-    getCurrency(material) {
+    getCurrency(material_cost) {
       let model
 
-      switch (material.use_price) {
+      switch (material_cost.use_price) {
         case this.usePriceOptions.USE_PRICE_PURCHASE:
-          model = this.materialModels.find((m) => m.id === material.material_id)
+          model = this.materialModels.find((m) => m.id === material_cost.material)
           return model.price_purchase_ex_currency
         case this.usePriceOptions.USE_PRICE_SELLING:
-          model = this.materialModels.find((m) => m.id === material.material_id)
+          model = this.materialModels.find((m) => m.id === material_cost.material)
           return model.price_selling_ex_currency
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return material.price_currency
+          return material_cost.price_currency
         default:
-          throw `unknown use price: ${material.use_price}`
+          throw `unknown use price: ${material_cost.use_price}`
       }
     },
     getMaterialPriceFor(used_material, use_price) {
-      const model = this.materialModels.find((m) => m.id === used_material.material_id)
+      const model = this.materialModels.find((m) => m.id === used_material.material)
       if (model) {
         return use_price === this.usePriceOptions.USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
       } else {
