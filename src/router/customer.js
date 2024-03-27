@@ -328,6 +328,6 @@ export default [
         'app-content': {},
         'app-subnav': true
       },
-    },
+    }
   ]
 }]

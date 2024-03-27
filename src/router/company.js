@@ -58,6 +58,10 @@ import BranchView from "../views/company/BranchView";
 import BudgetList from "../views/company/BudgetList";
 import BudgetView from "../views/company/BudgetView";
 
+import QuotationStatuscodeList from "@/views/company/statuscode/QuotationStatuscodeList";
+import StatuscodeForm from "@/views/company/statuscode/StatuscodeForm";
+import ActionForm from "@/views/company/statuscode/ActionForm";
+
 export default [
 {
   path: '/company',
@@ -680,6 +684,65 @@ export default [
         'app-subnav': {}
       },
     },
-
+    {
+      name: 'company-statuscodes-quotation',
+      path: '/company/statuscodes/quotation',
+      components: {
+        'app-content': QuotationStatuscodeList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-statuscodes-quotation-add',
+      path: '/company/statuscodes/quotation/form',
+      components: {
+        'app-content': StatuscodeForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: 'quotation'}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-statuscodes-quotation-edit',
+      path: '/company/statuscodes/quotation/form/:pk',
+      components: {
+        'app-content': StatuscodeForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: 'quotation'}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-statuscodes-action-quotation-add',
+      path: '/company/statuscodes/action/quotation/form',
+      components: {
+        'app-content': ActionForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: 'quotation'}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-statuscodes-action-quotation-edit',
+      path: '/company/statuscodes/action/quotation/form/:pk',
+      props: {
+        'app-content': route => ({...route.params, list_type: 'quotation'}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': ActionForm,
+        'app-subnav': SubNavCompany
+      },
+    }
   ]
 }]
