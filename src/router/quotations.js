@@ -74,7 +74,7 @@ export default [
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-edit',
-      path: '/quotations/quotations/form/:pk(\\d+)',
+      path: '/quotations/preliminary/form/:pk(\\d+)',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': true
@@ -87,7 +87,7 @@ export default [
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-detail',
-      path: '/quotations/quotations/detail/:uuid',
+      path: '/quotations/quotations/detail/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': true

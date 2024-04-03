@@ -4,6 +4,7 @@
       id="quotation-definitive-modal"
       ref="quotation-definitive-modal"
       v-bind:title="$trans('Make definitive?')"
+      v-if="!isView"
       @ok="doMakeDefinitive"
     >
       <p class="my-4">
@@ -53,7 +54,10 @@
           >{{ $trans('Quotations') }}</router-link>
           /
           <strong>{{ quotation.quotation_name }}</strong>
-          <span class="dimmed">
+          <span
+            class="dimmed"
+            v-if="!isView"
+          >
             <span v-if="!isEdit && !quotation.id">{{ $trans('new') }}</span>
             <span v-if="isEdit && !quotation.id">{{ $trans('edit')}}</span>
           </span>
@@ -68,7 +72,10 @@
             </b-link>
           </span>
         </h3>
-        <div class="flex-columns">
+        <div
+          class="flex-columns"
+          v-if="!isView"
+        >
           <b-button @click="cancelForm" type="button" variant="secondary">
             {{ $trans('Cancel') }}</b-button>
           <b-button
@@ -80,22 +87,38 @@
         </div>
       </div>
     </header>
-    <b-form v-if="!isLoading">
+    <b-form v-show="!isLoading">
       <div class="page-detail">
+
         <div class="flex-columns">
 
           <div class="panel col-1-3">
-            <Customer
+
+            <CustomerForm
+              v-show="!isView"
               :quotation-data="quotation"
-              :loading="isLoading"
               :customer="customer"
+              ref="customerFormComponent"
             />
+            <CustomerView
+              v-show="isView"
+              :quotation="quotation"
+            />
+
+            <div v-if="isView && quotation.statuses">
+              <hr/>
+              <StatusesComponent
+                :statuses="quotation.statuses"
+              />
+            </div>
+
           </div>
 
           <div class="panel col-1-3">
             <div v-if="loadChapterModel">
               <QuotationLine
                 :chapter="loadChapterModel"
+                :is-view="isView"
                 ref="quotation-lines"
                 @backToChapters="backToChapters"
                 @quotationLineAdded="quotationLineAdded"
@@ -107,12 +130,14 @@
               <QuotationData
                 v-if="quotation && quotation.customer_relation"
                 :quotation="quotation"
+                :is-view="isView"
                 ref="quotationDataComponent"
               />
 
               <DocumentsComponent
                 v-if="quotation && quotation.id"
                 :quotation="quotation"
+                :is-view="isView"
               />
 
             </div>
@@ -127,6 +152,7 @@
                 :customer="customer"
                 :chapter="loadChapterModel"
                 :quotationLinesParent="quotationLines"
+                :is-view="isView"
                 @quotationLinesCreated="quotationLinesCreated"
                 @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
@@ -137,6 +163,7 @@
                 :customer="customer"
                 :type="COST_TYPE_WORK_HOURS"
                 :quotationLinesParent="quotationLines"
+                :is-view="isView"
                 @quotationLinesCreated="quotationLinesCreated"
                 @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
@@ -147,6 +174,7 @@
                 :customer="customer"
                 :type="COST_TYPE_TRAVEL_HOURS"
                 :quotationLinesParent="quotationLines"
+                :is-view="isView"
                 @quotationLinesCreated="quotationLinesCreated"
                 @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
@@ -157,6 +185,7 @@
                 :chapter="loadChapterModel"
                 :customer="customer"
                 :quotationLinesParent="quotationLines"
+                :is-view="isView"
                 @quotationLinesCreated="quotationLinesCreated"
                 @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
@@ -166,6 +195,7 @@
                 :chapter="loadChapterModel"
                 :customer="customer"
                 :quotationLinesParent="quotationLines"
+                :is-view="isView"
                 @quotationLinesCreated="quotationLinesCreated"
                 @quotationLineSubmitted="quotationLineSubmitted"
                 class="component-margin"
@@ -176,6 +206,7 @@
               <Chapter
                 v-if="quotation.id"
                 :quotation="quotation"
+                :is-view="isView"
                 @chapterCreated="chapterCreated"
                 @loadChapterClicked="loadChapterClicked"
               />
@@ -195,7 +226,7 @@ import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {ChapterService} from "@/models/quotations/Chapter";
 
-import Customer from './quotation_form/Customer.vue'
+import CustomerForm from './quotation_form/CustomerForm.vue'
 import Hours from './quotation_form/Hours.vue'
 import Distance from './quotation_form/Distance.vue'
 import MaterialsCreate from './quotation_form/MaterialsCreate.vue'
@@ -211,6 +242,8 @@ import QuotationData from "@/views/quotations/quotation_form/QuotationData.vue";
 import Chapter from "@/views/quotations/quotation_form/Chapter.vue";
 import QuotationLine from "@/views/quotations/quotation_form/QuotationLine.vue";
 import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsComponent.vue";
+import CustomerView from "@/views/quotations/CustomerView.vue";
+import StatusesComponent from "@/components/StatusesComponent.vue";
 
 export default {
   name: 'QuotationForm',
@@ -219,11 +252,13 @@ export default {
     QuotationLine,
     Chapter,
     QuotationData,
-    Customer,
+    CustomerForm,
+    CustomerView,
     MaterialsCreate,
     Hours,
     Distance,
     CallOutCosts,
+    StatusesComponent,
   },
   setup() {
     return { v$: useVuelidate() }
@@ -238,6 +273,14 @@ export default {
       type: [String],
       default: null
     },
+    isView: {
+      type: [Boolean],
+      default: false
+    },
+    pk: {
+      type: [String, Number],
+      default: null
+    }
   },
   data () {
     return {
@@ -281,6 +324,7 @@ export default {
     }
   },
   async created() {
+    console.log(this.isView)
     if (this.isEdit || this.isNew) {
       this.quotationPK = this.$route.params.pk
       await this.loadQuotation()
@@ -366,6 +410,24 @@ export default {
       this.$router.go(-1)
     },
     async submitQuotation () {
+      const quotationDataComponent = this.$refs['quotationDataComponent'];
+      quotationDataComponent.isSubmitClicked = true
+      quotationDataComponent.v$.$touch()
+
+      if (quotationDataComponent.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
+        return
+      }
+
+      const customerFormComponent = this.$refs['customerFormComponent'];
+      customerFormComponent.isSubmitClicked = true
+      customerFormComponent.v$.$touch()
+
+      if (customerFormComponent.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
+        return
+      }
+
       if (!this.quotation.id) {
         this.isLoading = true
         const quotationData = this.$refs['quotationDataComponent'].getQuotationData()

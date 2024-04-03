@@ -20,7 +20,7 @@
       <b-table
         small
         :busy='isLoading'
-        :fields="fields"
+        :fields="isView ? fieldsView : fields"
         :items="quotationLineService.collection"
         responsive="md"
         class="line-table"
@@ -37,7 +37,7 @@
         <template #cell(icons)="data">
           <div
             class="h2 float-right"
-            v-if="data.item.id"
+            v-if="data.item.id && !isView"
           >
             <IconLinkEdit
               :method="function() { editQuotationLine(data.item, data.index) }"
@@ -171,7 +171,7 @@
 
       <footer
         class="modal-footer"
-        v-if="!showForm"
+        v-if="!showForm && !isView"
       >
         <b-button
           @click="newQuotationLine"
@@ -281,6 +281,10 @@ export default {
     chapter: {
       type: ChapterModel,
       default: null
+    },
+    isView: {
+      type: [Boolean],
+      default: false
     }
   },
   data () {
@@ -296,7 +300,11 @@ export default {
         {key: 'info', label: this.$trans('Info'), thAttr: {width: '40%'}},
         {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
         {key: 'icons', label: '', thAttr: {width: '20%'}},
-      ]
+      ],
+      fieldsView: [
+        {key: 'info', label: this.$trans('Info'), thAttr: {width: '60%'}},
+        {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
+      ],
     }
   },
   computed: {
@@ -304,7 +312,7 @@ export default {
       return !this.showForm && (this.quotationLineService.collection.length || this.quotationLineService.deletedItems.length) && this.quotationLineService.collectionHasChanges
     },
     showForm() {
-      return this.quotationLineService.isEdit || this.newItem
+      return !this.isView && (this.quotationLineService.isEdit || this.newItem)
     },
     quotationLinesHaveTotals() {
       return this.quotationLineService.collection.find((line) => line.price_text === '*')

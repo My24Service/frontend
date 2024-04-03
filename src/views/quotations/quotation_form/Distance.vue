@@ -1,5 +1,5 @@
 <template>
-  <details>
+  <details :open="isView ? 'open' : ''">
     <summary class="flex-columns space-between">
       <h6>
         {{ $trans('Distance') }}
@@ -219,6 +219,10 @@ export default {
       type: [Array],
       default: null
     },
+    isView: {
+      type: [Boolean],
+      default: false
+    }
   },
   computed: {
     compLoading () {

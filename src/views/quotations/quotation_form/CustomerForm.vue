@@ -1,7 +1,7 @@
 <template>
-  <b-form>
+  <div>
     <h3>{{ $trans('Customer') }}</h3>
-    <div>
+    <b-form>
       <b-form-group
         label-size="sm"
         label-class="p-sm-0"
@@ -167,8 +167,8 @@
           ></b-form-input>
         </b-form-group>
       </details>
-    </div>
-  </b-form>
+    </b-form>
+  </div>
 </template>
 
 <script>
@@ -188,8 +188,8 @@ import Chapter from './Chapter.vue'
 import TotalsInputs from "@/components/TotalsInputs";
 import {CustomerService} from "@/models/customer/Customer";
 
-
 export default {
+  name: "CustomerForm",
   mixins: [componentMixin],
   setup() {
     return { v$: useVuelidate() }
@@ -201,7 +201,7 @@ export default {
     QuotationData,
     CustomerDetail,
     Chapter,
-    TotalsInputs
+    TotalsInputs,
   },
   props: {
     pk: {
@@ -233,7 +233,7 @@ export default {
     return {
       isLoading: false,
       buttonDisabled: false,
-      submitClicked: false,
+      isSubmitClicked: false,
       countries: [],
       quotation: new QuotationModel({}),
       errorMessage: null,
@@ -267,9 +267,6 @@ export default {
   computed: {
     isCreate() {
       return !this.quotationData
-    },
-    isSubmitClicked() {
-      return this.submitClicked
     },
     compLoading () {
       return this.loading || this.isLoading
@@ -314,7 +311,6 @@ export default {
       this.buttonDisabled = true
 
       if (this.isCreate) {
-        this.submitClicked = true
         this.v$.$touch()
         const result = await this.v$.$validate()
         if (!result) {

@@ -16,6 +16,12 @@
         </p>
       </b-modal>
 
+      <div
+        v-if="!chapterService.collection.length && isView"
+      >
+        <p><i>{{ $trans('No chapters') }}</i></p>
+      </div>
+
       <b-table
         small
         :busy='isLoading'
@@ -36,7 +42,7 @@
         <template #cell(icons)="data">
           <div
             class="h2 float-right"
-            v-if="data.item.id"
+            v-if="data.item.id && !isView"
           >
             <IconLinkEdit
               :method="function() { editChapter(data.item, data.index) }"
@@ -120,7 +126,7 @@
 
       <footer
         class="modal-footer"
-        v-if="!showForm"
+        v-if="!showForm && !isView"
       >
         <b-button
           @click="newChapter"
@@ -157,13 +163,17 @@ export default {
       type: QuotationModel,
       default: null
     },
+    isView: {
+      type: [Boolean],
+      default: false
+    }
   },
   setup() {
     return { v$: useVuelidate() }
   },
   computed: {
     showForm() {
-      return this.chapterService.isEdit || this.newItem
+      return !this.isView && (this.chapterService.isEdit || this.newItem)
     },
   },
   data() {

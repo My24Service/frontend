@@ -249,19 +249,15 @@
           </ul>
           <h6 v-else class="dimmed">{{ $trans('Info lines') }}</h6>
 
-          <h6>
-            <b-icon-bar-chart-steps></b-icon-bar-chart-steps>
-            {{ $trans('Timeline') }}
-          </h6>
+          <div
+            v-if="order.statuses"
+          >
+            <hr/>
+            <StatusesComponent
+              :statuses="order.statuses"
+            />
+          </div>
 
-          <ul class="listing full-size" style="max-height: 75vh; overflow: auto;">
-            <li v-for="status in order.statuses.slice().reverse()" :key="status.id">
-              <div class="listing-item">
-                <small>{{ status.status }}</small>
-                <small class="dimmed">{{ status.created }}</small>
-              </div>
-            </li>
-          </ul>
 
         </div>
       </div>
@@ -386,13 +382,15 @@ import { PurchaseInvoiceService } from "../../models/orders/PurchaseInvoice";
 import IconLinkPlus from "@/components/IconLinkPlus.vue";
 import PriceInput from "@/components/PriceInput.vue";
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
+import StatusesComponent from "@/components/StatusesComponent.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    StatusesComponent,
     IconLinkPlus,
     PriceInput,
-    IconLinkDelete
+    IconLinkDelete,
   },
   data() {
     return {

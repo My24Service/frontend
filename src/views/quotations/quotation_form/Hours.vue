@@ -1,5 +1,5 @@
 <template>
-  <details>
+  <details :open="isView ? 'open' : ''">
     <summary class="flex-columns space-between">
       <h6>
         {{ getTitle() }}
@@ -22,13 +22,13 @@
             v-model="cost.amount_duration"
             @durationChanged="(duration) => changeDuration(cost, duration)"
             style="width: 100px !important; float:left !important;"
-            v-if="!parentHasQuotationLines"
+            v-if="!parentHasQuotationLines && !isView"
           />
           <span v-else>{{ cost.amount_duration }}</span>
           <div style="width: 100px !important; float:right !important;">
             {{ $trans('VAT') }}
             <VAT
-              v-if="!parentHasQuotationLines"
+              v-if="!parentHasQuotationLines && !isView"
               @vatChanged="(val) => changeVatType(cost, val)"
               style="width: 60px"
             />
@@ -44,7 +44,7 @@
           <b-form-radio-group
             @change="updateTotals"
             v-model="cost.use_price"
-            v-if="!parentHasQuotationLines"
+            v-if="!parentHasQuotationLines && !isView"
           >
             <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
               {{ $trans('Settings') }}
@@ -86,7 +86,7 @@
               </div>
             </b-col>
           </b-row>
-          <b-row v-if="!parentHasQuotationLines">
+          <b-row v-if="!parentHasQuotationLines && !isView">
             <b-col cols="8"></b-col>
             <b-col cols="4">
               <b-button
@@ -116,7 +116,7 @@
             <hr/>
           </b-col>
         </b-row>
-        <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
+        <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines && !isView">
           <b-col cols="2"></b-col>
           <b-col cols="10">
             <b-button
@@ -231,6 +231,10 @@ export default {
       type: [Array],
       default: null
     },
+    isView: {
+      type: [Boolean],
+      default: false
+    }
   },
   watch: {
     quotationLinesParent(newVal) {
@@ -245,7 +249,7 @@ export default {
       return this.type
     },
     showAddQuotationLinesBlock() {
-      return this.costService.collection.length && !this.parentHasQuotationLines
+      return this.costService.collection.length && !this.parentHasQuotationLines && !this.isView
     }
   },
   data() {

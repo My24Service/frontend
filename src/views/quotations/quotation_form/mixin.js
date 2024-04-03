@@ -13,6 +13,12 @@ let quotationMixin = {
     }
   },
   methods: {
+    checkValue(val) {
+      if (!val || val === '') {
+        return '-'
+      }
+      return val
+    },
     checkParentHasQuotationLines(quotationLines) {
       this.parentHasQuotationLines = !!quotationLines.find(
         (line) => line.cost_type === this.quotationLineType

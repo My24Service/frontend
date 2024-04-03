@@ -57,6 +57,17 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+        <template #cell(name)="data">
+          <router-link
+            v-if="data.item.preliminary"
+            :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
+          >{{ data.item.name }}</router-link>
+          <router-link
+            v-else
+            :to="{name: 'quotation-detail',
+             params: {pk: data.item.id}}"
+          >{{ data.item.name }}</router-link>
+        </template>
         <template #cell(quotation_name)="data">
           <router-link
             v-if="data.item.preliminary"
@@ -65,7 +76,7 @@
           <router-link
             v-else
             :to="{name: 'quotation-detail',
-             params: {uuid: data.item.uuid}}"
+             params: {pk: data.item.id}}"
           >{{ data.item.quotation_name }}</router-link>
         </template>
         <template #cell(icons)="data">
@@ -137,7 +148,8 @@ export default {
       isLoading: false,
       quotations: [],
       fields: [
-        {key: 'quotation_name', label: this.$trans('Name')},
+        {key: 'name', label: this.$trans('Name')},
+        {key: 'quotation_name', label: this.$trans('Customer')},
         {key: 'quotation_city', label: this.$trans('City')},
         {key: 'total', label: this.$trans('Total')},
         {key: 'vat', label: this.$trans('Vat')},

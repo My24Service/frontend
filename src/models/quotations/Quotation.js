@@ -7,6 +7,7 @@ import {ChapterModel} from "@/models/quotations/Chapter";
 class QuotationModel {
   id
   uuid
+  name
   description
   customer_id
   customer_relation
@@ -33,6 +34,7 @@ class QuotationModel {
 
   chapters = []
   images = []
+  statuses = []
 
   priceFields = ['vat', 'total']
 

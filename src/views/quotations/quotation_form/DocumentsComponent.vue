@@ -16,7 +16,7 @@
         small
         id="document-table"
         :busy='isLoading'
-        :fields="fields"
+        :fields="isView ? fieldsView : fields"
         :items="documentService.collection"
         responsive="md"
         class="data-table"
@@ -25,7 +25,7 @@
         <template #cell(icons)="data">
           <div
             class="h2 float-right"
-            v-if="data.item.id"
+            v-if="data.item.id && !isView"
           >
             <IconLinkEdit
               :method="function() { editDocument(data.item, data.index) }"
@@ -123,7 +123,7 @@
 
     <footer
       class="modal-footer"
-      v-if="!showForm"
+      v-if="!showForm && !isView"
     >
       <b-button
         @click="newDocument"
@@ -187,6 +187,10 @@ export default {
       type: QuotationModel,
       default: null
     },
+    isView: {
+      type: [Boolean],
+      default: false
+    }
   },
   data() {
     return {
@@ -194,6 +198,9 @@ export default {
       fields: [
         {key: 'name', label: this.$trans('Name')},
         {key: 'icons', label: ""},
+      ],
+      fieldsView: [
+        {key: 'name', label: this.$trans('Name')},
       ],
       documentService: new DocumentService(),
       newItem: false,
@@ -205,7 +212,7 @@ export default {
       return !this.showForm && (this.documentService.collection.length || this.documentService.deletedItems.length) && this.documentService.collectionHasChanges
     },
     showForm() {
-      return this.documentService.isEdit || this.newItem
+      return !this.isView && (this.documentService.isEdit || this.newItem)
     },
     isDocumentValid() {
       return this.documentService.editItem.file !== null

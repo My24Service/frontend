@@ -7,7 +7,7 @@
       {{ $trans('Quotations') }}
     </b-nav-item>
     <b-nav-item
-      :active="isActive('preliminary-quotations')"
+      :active="isActive('preliminary')"
       v-if="isStaff || isSuperuser || isPlanning"
       :to="{ name: 'preliminary-quotations' }">
       {{ $trans('Preliminary') }}
