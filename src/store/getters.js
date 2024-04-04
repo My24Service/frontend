@@ -16,6 +16,9 @@ export const getters = {
   getMemberPk: state => {
     return state.memberInfo.id
   },
+  getMemberInfo: state => {
+    return state.memberInfo
+  },
   getMemberHasApiUsers: state => {
     return state.memberInfo.has_api_users
   },

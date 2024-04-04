@@ -16,9 +16,8 @@ export default [
   path: '/quotations',
   children: [
     {
-      meta: { needsAuth: false },
       name: 'quotation-view',
-      path: '/quotations/quotation/view/:uuid',
+      path: '/quotations/quotations/view/:pk',
       components: {
         'app-content': QuotationView,
       },

@@ -222,8 +222,8 @@ export default {
         this.isLoading = false
       } catch(error) {
         this.isLoading = false
-        console.log('Error deleting quotation', error)
-        this.errorToast(this.$trans('Error deleting quotation'))
+        console.log('Error deleting chapter', error)
+        this.errorToast(this.$trans('Error deleting chapter'))
       }
     },
     async doEditChapter() {

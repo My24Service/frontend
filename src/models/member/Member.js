@@ -27,6 +27,7 @@ class MemberModel {
   activities
   info
   companylogo
+  companylogo_url
   companylogo_workorder
   data
   contract
@@ -38,6 +39,12 @@ class MemberModel {
   chamber_of_commerce
   vat_number
   equipment_qr_type
+
+  constructor(member) {
+    for (const [k, v] of Object.entries(member)) {
+      this[k] = v
+    }
+  }
 }
 
 class MemberService extends BaseModel {

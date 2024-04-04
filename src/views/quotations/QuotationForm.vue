@@ -317,14 +317,13 @@ export default {
   },
   computed: {
     isEdit () {
-      return !!this.$route?.params?.pk && !this.$route.params.is_new
+      return !this.isNew
     },
     isNew() {
-      return !!this.$route?.params?.is_new
+      return !this.pk
     }
   },
   async created() {
-    console.log(this.isView)
     if (this.isEdit || this.isNew) {
       this.quotationPK = this.$route.params.pk
       await this.loadQuotation()
@@ -345,7 +344,7 @@ export default {
       await this.$router.push({ name: 'quotation-list'})
     },
     getQuotationURL() {
-      const routeData = this.$router.resolve({ name: 'quotation-view', params: { uuid: this.quotation.uuid } });
+      const routeData = this.$router.resolve({ name: 'quotation-view', params: { pk: this.quotation.id } });
       return `${document.location.origin}/${routeData.href}`;
     },
     showQuotationDialog() {
@@ -394,11 +393,8 @@ export default {
       this.isLoading = true
 
       try {
-        const quotation = new QuotationModel(await this.quotationService.detail(this.quotationPK))
-        await this.getCustomer(quotation.customer_relation)
-
-
-        this.quotation = quotation
+        this.quotation = new QuotationModel(await this.quotationService.detail(this.quotationPK))
+        await this.getCustomer(this.quotation.customer_relation)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)

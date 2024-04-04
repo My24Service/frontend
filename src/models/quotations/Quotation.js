@@ -32,6 +32,8 @@ class QuotationModel {
   total
   total_currency
 
+  definitive_date
+
   chapters = []
   images = []
   statuses = []
