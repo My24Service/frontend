@@ -79,6 +79,14 @@
              params: {pk: data.item.id}}"
           >{{ data.item.quotation_name }}</router-link>
         </template>
+        <template #cell(status)="data">
+          <TableStatusInfo
+            :statusCodeService="quotationStatuscodeService"
+            :model="data.item"
+            :modelName="'quotation'"
+            :statusService="statusService"
+          />
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkDelete
@@ -110,6 +118,7 @@
 
 <script>
 import {QuotationService} from '@/models/quotations/Quotation.js'
+import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
@@ -120,6 +129,8 @@ import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
+import TableStatusInfo from '../../components/TableStatusInfo.vue'
+import { StatusService } from '@/models/quotations/Status.js'
 
 export default {
   name: 'QuotationList',
@@ -133,6 +144,7 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
+    TableStatusInfo
   },
   props: {
     orderPk: {
@@ -143,6 +155,8 @@ export default {
   data() {
     return {
       quotationService: new QuotationService(),
+      quotationStatuscodeService: new QuotationStatuscodeService(),
+      statusService: new StatusService(),
       searchQuery: null,
       quotationPk: null,
       isLoading: false,
@@ -153,6 +167,7 @@ export default {
         {key: 'quotation_city', label: this.$trans('City')},
         {key: 'total', label: this.$trans('Total')},
         {key: 'vat', label: this.$trans('Vat')},
+        {key: 'status', label: this.$trans('Status')},
         {key: 'icons', label: ''},
       ]
     }
