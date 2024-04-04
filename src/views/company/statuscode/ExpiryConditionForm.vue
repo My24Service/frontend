@@ -12,7 +12,6 @@
             id="action-condition-field"
             size="sm"
             v-model="form.num_days_model_field"
-            :state="v$.form.num_days_model_field.$error ? false : null"
             @input="handleInputChange"
           ></b-form-input>
           <b-form-invalid-feedback id="action-condition-value">
@@ -45,7 +44,6 @@
             id="action-condition-value"
             size="sm"
             v-model="form.num_days"
-            :state="v$.form.num_days.$error ? false : null"
             @input="handleInputChange"
           ></b-form-input>
           <b-form-invalid-feedback id="action-condition-value">
@@ -65,17 +63,7 @@ export default {
     return { v$: useVuelidate() };
   },
   validations() {
-    return {
-      form: {
-        num_days_model_field: {
-          required,
-        },
-        num_days: {
-          required,
-          integer
-        }
-      }
-    }
+    return {}
   },
   props: {
     statuscode: {
