@@ -51,6 +51,8 @@
             <dd>{{ order.service_number }}</dd>
             <dt>{{ $trans("Reference") }}</dt>
             <dd>{{ order.order_reference }}</dd>
+            <dt>{{ $trans("Remarks") }}</dt>
+            <dd>{{ order.remarks }}</dd>
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
             <dd v-if="!hasBranches" class="flex-columns">
               <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank"><b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}</b-link>
