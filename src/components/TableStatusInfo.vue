@@ -1,5 +1,10 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm" class="status">
+  <b-overlay
+    :show="isLoading"
+    rounded="sm"
+    class="status"
+    :title="model.last_status_full"
+  >
     <b-icon
       icon="circle-fill"
       class="color-icon"
@@ -60,7 +65,7 @@ export default {
     }
   },
   async created() {
-    this.loadStatusCodes()
+    await this.loadStatusCodes()
   },
   methods: {
     async loadStatusCodes () {
