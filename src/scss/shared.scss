@@ -866,3 +866,117 @@ html {
     }
   }
 }
+
+/* Dispatch view */
+.week {
+  .planning-head,
+  .planning-row {
+    > div {
+      display: grid;
+      gap: 1ex;
+      grid-template-columns: repeat(8, 1fr);
+      align-items: center;
+      user-select: none;
+      background-image: linear-gradient(transparent 50%, white 50%), linear-gradient(-90deg, #0000000d 1px, transparent 1px);
+      background-size: calc(100.5% / 8) 1rem;
+
+      > *:first-child {
+        grid-column: 1 / span 1 !important;
+        grid-row: 1;
+        text-align: start;
+      }
+    }
+  }
+  .planning-head {
+    [data-day] {
+      //display: flex;
+      //flex-direction: column;
+      //grid-row: 1;
+      //grid-column: 2 / span 1 !important;
+      display: grid;
+      gap: 1ex;
+      grid-template-columns: repeat(8, 1fr);
+      align-items: center;
+      > *:first-child {
+        grid-column: 1 / span 1 !important;
+        grid-row: 1;
+        text-align: end;
+      }
+      //> * {
+      //  flex: 1 0 50%;
+      //}
+      strong {
+        width: 2.4rem;
+        line-height: 2.4rem;
+        text-align: center;
+        border-radius: 50%;
+        &.today {
+          background-color: $primary;
+          color: white;
+          + small {
+            color: $primary;
+          }
+        }
+      }
+      small {
+        line-height: 2.2;
+      }
+    }
+  }
+  .planning-row {
+    > div {
+      height: auto;
+      //height: 3rem;
+    }
+    .order {
+      height: 3rem;
+      border-radius: 0.5ex;
+      margin: 0;
+      padding-inline: 2.2ex 1.5ex;
+      box-shadow: inset 0 0 0 1px #757a7c82, inset 0 0 0px 3px white, inset 1ex 0px var(--status-color);
+      white-space: nowrap;
+
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(2px);
+      position: relative;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all .5s, opacity .2s;
+      cursor: pointer;
+
+      .order-type {
+        color: var(--status-color);
+      }
+
+      &:hover {
+        transition: all .2s 0s;
+        height: auto;
+        width: fit-content;
+        overflow: auto;
+        z-index: 1;
+      }
+    }
+  }
+  &.loading {
+    .order {
+      opacity: .5;
+      transition-duration: .05s;
+    }
+  }
+}
+
+.dispatch-calendar.compact .order {
+  grid-row: 1;
+  &:hover {
+    background-color: var(--status-color);
+    color: white;
+    box-shadow: inset 0 0 0px 3px var(--status-color), inset 1ex 0px white;
+  }
+}
+
+.dispatch-calendar.wide .order {
+  &:hover {
+    display: flex;
+    flex-direction: column;
+  }
+}

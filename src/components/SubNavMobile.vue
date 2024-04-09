@@ -1,10 +1,19 @@
 <template>
   <div v-if="isLoaded">
     <b-nav-item
-      :active="isActive('dispatch')"
+      :active="this.$route.name === 'mobile-dispatch'"
       v-if="hasDispatch"
-      :to="{name: 'mobile-dispatch'}">
+      :to="{name: 'mobile-dispatch'}"
+    >
       {{ $trans('Dispatch') }}
+    </b-nav-item>
+
+    <b-nav-item
+      :active="this.$route.name === 'mobile-dispatch-new'"
+      v-if="hasDispatch && (isSuperuser || isStaff)"
+      :to="{name: 'mobile-dispatch-new'}"
+    >
+      {{ $trans('Dispatch new') }}
     </b-nav-item>
 
     <b-nav-item

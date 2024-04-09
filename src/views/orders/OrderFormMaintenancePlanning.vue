@@ -448,7 +448,11 @@
                 ></b-form-timepicker>
               </b-form-group>
             </div>
-            <div class="assign-engineer section" v-if="!hasBranches && (isCreate || (!isCreate && (unaccepted || !order.customer_order_accepted)))">
+
+            <div
+              class="assign-engineer section"
+              v-if="!hasBranches && order.customer_order_accepted"
+            >
 
             <div v-if="recommendedUsers.length > 0">
               <h6>{{ $trans('Recommended engineers') }}</h6>
@@ -478,11 +482,9 @@
               </multiselect>
             </b-form-group>
 
-
           </div>
 
           <b-form-group
-            v-if="!isCreate"
             v-bind:label="$trans('Assignee(s)')"
             label-for="order-assigned-to"
             label-cols="3"
@@ -495,6 +497,7 @@
           </b-form-group>
 
         </div>
+
         <div class="panel col-1-3">
           <h6 class="flex-columns space-between align-items-center">
             <span>{{ $trans('Documents') }}</span>

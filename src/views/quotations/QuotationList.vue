@@ -59,25 +59,23 @@
         </template>
         <template #cell(name)="data">
           <router-link
-            v-if="data.item.preliminary"
             :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
           >{{ data.item.name }}</router-link>
-          <router-link
-            v-else
-            :to="{name: 'quotation-detail',
-             params: {pk: data.item.id}}"
-          >{{ data.item.name }}</router-link>
+<!--          <router-link-->
+<!--            v-else-->
+<!--            :to="{name: 'quotation-detail',-->
+<!--             params: {pk: data.item.id}}"-->
+<!--          >{{ data.item.name }}</router-link>-->
         </template>
         <template #cell(quotation_name)="data">
           <router-link
-            v-if="data.item.preliminary"
             :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
           >{{ data.item.quotation_name }}</router-link>
-          <router-link
-            v-else
-            :to="{name: 'quotation-detail',
-             params: {pk: data.item.id}}"
-          >{{ data.item.quotation_name }}</router-link>
+<!--          <router-link-->
+<!--            v-else-->
+<!--            :to="{name: 'quotation-detail',-->
+<!--             params: {pk: data.item.id}}"-->
+<!--          >{{ data.item.quotation_name }}</router-link>-->
         </template>
         <template #cell(status)="data">
           <TableStatusInfo

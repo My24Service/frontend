@@ -15,6 +15,7 @@ import TripAvailability from '@/views/mobile/TripAvailability.vue'
 import TripAvailabilityDetail from '@/views/mobile/TripAvailabilityDetail.vue'
 import TripForm from '@/views/mobile/TripForm.vue'
 import AssignedOrderMaterial from '@/views/mobile/AssignedOrderMaterial.vue'
+import DispatchNew from "@/views/mobile/DispatchNew.vue";
 
 
 export default [
@@ -34,6 +35,18 @@ export default [
           'app-subnav': {}
         },
       },
+    {
+      name: 'mobile-dispatch-new',
+      path: '/mobile/dispatch-new',
+      components: {
+        'app-content': DispatchNew,
+        'app-subnav': SubNavMobile
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+    },
       {
         name: 'mobile-orders',
         path: '/mobile/orders',

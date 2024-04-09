@@ -3,7 +3,7 @@ import BaseModel from '@/models/base';
 import {use} from "chai";
 
 
-class AssignedOrder extends BaseModel {
+class AssignedOrderService extends BaseModel {
   fields = {
     "id": null,
     "engineer": null,
@@ -44,6 +44,7 @@ class AssignedOrder extends BaseModel {
   }
 }
 
-let assignedOrderModel = new AssignedOrder()
+let assignedOrderModel = new AssignedOrderService()
 
 export default assignedOrderModel
+export { AssignedOrderService }

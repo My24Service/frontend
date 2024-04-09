@@ -90,13 +90,17 @@ class My24 extends BaseModel {
   }
 
   getStatuscodeForOrder(statuscodes, order) {
-    const statuscode = this.getStatuscode(statuscodes, order.order_status)
-    if (!statuscode) {
-      // console.log(`no statuscode found for "${order.order_status}"`)
-      return
+    let statuscode = this.getStatuscode(statuscodes, order.order_status)
+    if (statuscode) {
+      return statuscode
     }
 
-    if (statuscode.color_for_assignedorders || order.assignedorder_status === null) {
+    statuscode = this.getStatuscode(statuscodes, order.last_status)
+    if (statuscode) {
+      return statuscode
+    }
+
+    if (statuscode && statuscode.color_for_assignedorders || order.assignedorder_status === null) {
       return statuscode
     }
 
@@ -147,7 +151,7 @@ class My24 extends BaseModel {
 
     const parts_always_allowed = [
       'form', 'view', 'info', 'company', 'activity', 'pictures',
-      'planning-users', 'employee-users', 'import', 'statuscodes'
+      'planning-users', 'employee-users', 'import', 'statuscodes',
     ]
     if (parts_always_allowed.indexOf(config.part) !== -1) {
       if (debug) console.debug(`allowed: part "${config.part}" in always allowed (${parts_always_allowed.join('/')})`)
@@ -161,6 +165,11 @@ class My24 extends BaseModel {
         if (debug) console.debug('allowed because member or staff and member', config.part)
         return true;
       }
+    }
+
+    // TODO remove when new dispatch (html and no canvas) live
+    if (config.part === 'dispatch-new') {
+      config.part = 'dispatch'
     }
 
     const contract_result = config.contract[config.module].indexOf(config.part) !== -1;
