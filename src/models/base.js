@@ -29,6 +29,8 @@ class BaseModel {
   modelDefaults = {}
   beforeEditModel
   collectionHasChanges = false
+  sortField = null
+  sortDesc = false
 
   // TODO: finish this for managing items in invoice form
   // TODO: also implement this for orderlines/infolines/etc
@@ -168,6 +170,11 @@ class BaseModel {
     this.listArgs = []
   }
 
+  setSorting(field, sortDesc) {
+    this.sortField = field
+    this.sortDesc = sortDesc
+  }
+
   getCsrfToken() {
     return this.axios.get('/get-csrf-token/').then((response) => response.data.token)
   }
@@ -219,6 +226,11 @@ class BaseModel {
       for (const arg of this.listArgs) {
         listArgs.push(arg)
       }
+    }
+
+    if (this.sortField !== null) {
+      listArgs.push(`sort_field=${this.sortField}`)
+      listArgs.push(`sort_dir=${this.sortDesc ? 'desc' : 'asc'}`)
     }
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`

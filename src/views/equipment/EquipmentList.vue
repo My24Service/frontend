@@ -86,6 +86,10 @@
         responsive="md"
         class="data-table"
         sort-icon-left
+        :no-local-sorting="true"
+        @sort-changed="sortingChanged"
+        :sort-by.sync="sortBy"
+        :sort-desc.sync="sortDesc"
       >
         <template #head(icons)="">
           <div class="float-right">
@@ -155,7 +159,6 @@
 </template>
 
 <script>
-import { EquipmentService } from '../../models/equipment/equipment.js'
 
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
@@ -164,8 +167,9 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {componentMixin} from "../../utils";
-import { EquipmentStateModel, EquipmentStateService } from "../../models/equipment/EquipmentState";
+import {componentMixin} from "@/utils";
+import { EquipmentStateModel, EquipmentStateService } from "@/models/equipment/EquipmentState";
+import { EquipmentService } from '@/models/equipment/equipment'
 import IconLinkPlus from "../../components/IconLinkPlus";
 
 export default {
@@ -216,44 +220,44 @@ export default {
         {key: 'name', label: this.$trans('Equipment'), sortable: true},
         {key: 'customer', label: this.$trans('Customer'), sortable: true},
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'name', label: this.$trans('Equipment')},
-        {key: 'customer', label: this.$trans('Customer')},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
-        {key: 'brand', label: this.$trans('Brand')},
-        {key: 'created', label: this.$trans('Created')},
+        {key: 'brand', label: this.$trans('Brand'), sortable: true},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchPlanning: [
-        {key: 'name', label: this.$trans('Equipment')},
-        {key: 'branch', label: this.$trans('Branch')},
-        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'name', label: this.$trans('Equipment'), sortable: true},
+        {key: 'branch', label: this.$trans('Branch'), sortable: true},
+        {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
-        {key: 'brand', label: this.$trans('Brand')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'brand', label: this.$trans('Brand'), sortable: true},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsCustomerNonPlanning: [
-        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'name', label: this.$trans('Equipment'), sortable: true},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchNonPlanning: [
-        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'name', label: this.$trans('Equipment'), sortable: true},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipment_pk: null,
       state: new EquipmentStateModel({}),
+      sortBy: 'name',
+      sortDesc: false,
     }
   },
   async created() {
@@ -279,6 +283,12 @@ export default {
     this.isLoading = false
   },
   methods: {
+    // sorting
+    async sortingChanged(ctx) {
+      this.equipmentService.setSorting(ctx.sortBy, ctx.sortDesc)
+      await this.loadData()
+    },
+    // add state
     showAddStateModal(id) {
       this.state.equipment = id
       this.$refs['add-state-modal'].show()
