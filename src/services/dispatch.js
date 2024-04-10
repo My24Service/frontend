@@ -1199,7 +1199,9 @@ class Dispatch {
       if (this.inStroke(spot.obj,mouseX, mouseY)) {
         this.canvas.style.cursor = "pointer"
         this.showInfo(
-          `${spot.order.order_info}\nOrder status: ${spot.order.order_status}\nAssigned order status: ${spot.order.assignedorder_status ?? ''}\n`, mouseX, mouseY
+          `${spot.order.order_info}
+          \nOrder status: ${spot.order.order_status}
+          \nAssigned order status: ${spot.order.assignedorder_status ?? ''}\n`, mouseX, mouseY
         )
         hit = true
         return

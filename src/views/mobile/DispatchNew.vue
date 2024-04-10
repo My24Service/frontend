@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="calendar2-week"></b-icon>
-          Dispatch &ndash; week <strong>{{ +this.startWeek }}</strong>
+          {{ $trans("Dispatch") }} &ndash; {{ $trans("week") }}<strong>{{ +this.startWeek }}</strong>
           {{ mode }}
         </h3>
         <div class="flex-columns">
@@ -43,11 +43,17 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="12">
+          <b-col cols="6">
             <strong>{{ $trans('Selected users') }}:</strong>&nbsp;
-            <span v-for="(user, index) in selectedUsers" :key="user.submodel_id">
-              {{ user.full_name }}
+            <span v-for="(user, index) in selectedUsers" :key="user.user_id">
+              {{ user.full_name }} {{ user.user_id }}
               <b-link class="px-1" @click.prevent="removeSelectedUser(index)">[ x ]</b-link>
+            </span>
+          </b-col>
+          <b-col cols="6">
+            <strong>{{ $trans('Already assigned users') }}:</strong>&nbsp;
+            <span v-for="user in alreadyAssignedUsers" :key="user.user_id">
+              {{ user.full_name }} {{ user.user_id }}
             </span>
           </b-col>
         </b-row>
@@ -98,10 +104,13 @@
       <hr/>
 
       <DispatchWeek
-        title="test"
+        v-if="loadDone"
         :startDate.sync="startDate"
         :orderClickHandler="openActionsModal"
         :mode="this.mode"
+        :is-assign-mode="assignMode"
+        :already-assigned-users="alreadyAssignedUsers"
+        @addSelectedUser="addSelectedUser"
       />
 
     </div>
@@ -254,12 +263,17 @@ import moment from 'moment/min/moment-with-locales'
 import DispatchWeek from './dispatch/DispatchWeek.vue'
 import {OrderService} from '@/models/orders/Order'
 import {AssignedOrderService} from '@/models/mobile/AssignedOrder'
-import { AssignService } from '../../models/mobile/Assign.js'
+import { AssignService } from '@/models/mobile/Assign'
 import SearchModal from '../../components/SearchModal.vue'
 import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from '@/constants';
 
 const memberNewDataSocket = new MemberNewDataSocket()
+
+class SelectedUser {
+  user_id
+  full_name
+}
 
 export default {
   name: 'DispatchNew',
@@ -287,6 +301,7 @@ export default {
       selectedOrders: [],
       selectedOrderIds: [],
       selectedUsers: [],
+      alreadyAssignedUsers: [],
       selectedOrder: null,
       selectedOrderUserId: null,
       assignedOrder: null,
@@ -301,9 +316,16 @@ export default {
       minDate: null,
       maxDate: null,
       statuscodes: null,
+      loadDone: false,
       assignedOrderService: new AssignedOrderService(),
       orderService: new OrderService(),
       assignService: new AssignService()
+    }
+  },
+  computed: {
+    isAssignMode: function() {
+      console.log(this.assignMode, this.selectedOrders.length)
+      return this.assignMode && this.selectedOrders.length > 0
     }
   },
   watch: {
@@ -403,6 +425,21 @@ export default {
         this.errorToast(this.$trans('Error fetching order'))
       }
     },
+    addSelectedUser(user) {
+      if (this.userAlreadyAssigned(user.user_id)) {
+        this.infoToast(this.$trans('Already assigned'), this.$trans('Order(s) already assigned'))
+        return
+      }
+      if (!this.userAlreadySelected(user.user_id)) {
+        this.selectedUsers.push(user)
+      }
+    },
+    userAlreadySelected(user_id) {
+      return this.selectedUsers.find(user => user.user_id === user_id)
+    },
+    userAlreadyAssigned(user_id) {
+      return this.alreadyAssignedUsers.find(user => user.user_id === user_id)
+    },
     async assignToUsers() {
       this.showOverlay = true
       this.buttonDisabled = true
@@ -489,12 +526,23 @@ export default {
     this.assignMode = this.assignModeProp
 
     if (this.assignMode) {
+      this.alreadyAssignedUsers = []
       this.selectedOrders = await this.$store.dispatch('getAssignOrders')
+      for (const order of this.selectedOrders) {
+        this.alreadyAssignedUsers.push(...order.assigned_user_info.map((userInfo) => {
+          return {
+            user_id: userInfo.user_id,
+            full_name: userInfo.full_name
+          }
+        }))
+      }
+      console.log(this.alreadyAssignedUsers)
     }
 
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
 
     this.mode = mode
+    this.loadDone = true
   },
   beforeDestroy() {
     memberNewDataSocket.removeOnmessageHandler(NEW_DATA_EVENTS.DISPATCH)

@@ -389,7 +389,7 @@ export default {
     },
     doAssign() {
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
-      this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
+      this.$router.push({name: 'mobile-dispatch-new', params: {assignModeProp: true}})
     },
     selectOrder(order) {
       for( let i=0; i<this.selectedOrders.length; i++) {

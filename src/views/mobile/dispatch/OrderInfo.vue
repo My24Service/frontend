@@ -1,16 +1,14 @@
 <template>
-  <div>
-    <table>
-      <tr>
-        <td>{{ $trans("Name") }}</td>
-        <td><strong>{{ order.order_name }} </strong></td>
-      </tr>
-      <tr>
-        <td>{{ $trans("Order type") }}</td>
-        <td><span> {{ order.order_type }} </span></td>
-      </tr>
+  <div class="user-data">
+    <dl>
+      <dt>{{ $trans('Name') }}</dt>
+      <dd><strong>{{ order.order_name }}</strong></dd>
+      <dt>{{ $trans('Date') }}</dt>
+      <dd><strong>{{ order_start }} - {{ order_end }}</strong></dd>
+      <dt>{{ $trans('Order type') }}</dt>
+      <dd><strong>{{ order.order_type }}</strong></dd>
 
-    </table>
+    </dl>
 
   </div>
 
@@ -21,6 +19,12 @@ export default {
   props: {
     order: {
       type: [Object]
+    },
+    order_start: {
+      type: [String]
+    },
+    order_end: {
+      type: [String]
     },
   }
 }

@@ -69,12 +69,12 @@ class My24 extends BaseModel {
 
   getStatuscode(statuscodes, status) {
     if (!status) {
-      console.log('getStatuscode: no status, return')
+      // console.debug('getStatuscode: no status, return')
       return null
     }
 
     if (!statuscodes) {
-      console.log('getStatuscode: no statuscodes, return')
+      // console.debug('getStatuscode: no statuscodes, return')
       return null
     }
 

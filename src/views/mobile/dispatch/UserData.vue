@@ -1,25 +1,21 @@
 <template>
-  <div>
+  <div :class="containerDivClass">
     <strong>{{ orders.full_name }}</strong>
     <span
       v-for="userData of this.personOrders"
       @click="clickHandler(userData.order.id, userData.assignedOrder.id)"
       :key="userData.order.order_id"
       :style="`grid-column: calc(${userData.layout.slot} + 2) / span ${userData.layout.days}; --status-color: ${userData.order_color}; --text-color: ${userData.order_textColor};`"
-      class="order">
+      :class="orderClass">
       <span>
         <span class="dimmed order-type">{{ userData.order.order_id }} </span>
         <strong>{{ userData.order.order_name }} </strong>
-        <span> {{ userData.order.order_type }} </span>
       </span>
-      <small>
-        <OrderInfo
-          :order="userData.order"
-        />
-      </small>
-
-      <small> {{ userData.order_start }} - {{ userData.order_end }} ({{ userData.layout.days }} days) </small>
-      <code>{{`grid-column: ${(userData.layout.slot)} / span ${+userData.layout.days};`}}</code>
+      <OrderInfo
+        :order="userData.order"
+        :order_start="userData.order_start"
+        :order_end="userData.order_end"
+      />
 
     </span>
   </div>
@@ -44,6 +40,21 @@ export default {
     },
     clickHandler: {
       type: Function
+    },
+    isAssignMode: {
+      type: Boolean,
+      default: false
+    },
+    alreadyAssigned: {
+      type: Boolean,
+    },
+  },
+  computed: {
+    containerDivClass: function() {
+      return this.alreadyAssigned ? 'already-assigned' : ''
+    },
+    orderClass: function() {
+      return this.isAssignMode ? 'order-assign-mode' : 'order'
     }
   },
   data () {
@@ -58,6 +69,10 @@ export default {
       this.personOrders = []
 
       for (const assignedOrder of this.orders.assignedorders) {
+        if (Object.keys(assignedOrder.order).length === 0) {
+          continue
+        }
+
         const orderObj = {
           ...assignedOrder.order,
           assignedorder_status: assignedOrder.last_status

@@ -17,15 +17,19 @@
 
       <li v-for="item of this.results.data" :key="item.id" class="planning-row">
 
-        <UserData
-          :orders="item"
-          :startDate="startDate"
-          v-if="item.assignedorders"
-          :clickHandler="handleOrderClick"/>
+          <UserData
+            @click.native="userClick(item.user_id, item.full_name)"
+            :orders="item"
+            :startDate="startDate"
+            v-if="item.assignedorders"
+            :is-assign-mode="isAssignMode"
+            :already-assigned="alreadyAssignedUsers.find(user => user.user_id === item.user_id)"
+            :clickHandler="handleOrderClick"
+          />
+          <div v-else>
+            <span class="dimmed">{{  item.full_name }}</span>
+          </div>
 
-        <div v-else>
-          <span class="dimmed">{{  item.full_name }}</span>
-        </div>
       </li>
     </ul>
   </section>
@@ -39,6 +43,7 @@ import UserData from './UserData.vue';
 export default {
   name: "DispatchWeek",
   components: {UserData},
+  emits: ['addSelectedUser'],
   props: {
     title: {
       type: [String],
@@ -51,20 +56,38 @@ export default {
     },
     orderClickHandler: {
       type: Function
-    }
+    },
+    isAssignMode: {
+      type: Boolean,
+      default: false
+    },
+    alreadyAssignedUsers: {
+      type: Array,
+    },
   },
   data() {
     return {
-      isLoading: true,
+      isLoading: false,
       results: [],
       url: '/company/dispatch-assignedorders-user-list-v4/',
       visibleOrders: [],
       displayWeekdays: [],
       statuscodes: null,
-      today: new Date(),
+      today: new Date()
     }
   },
   methods: {
+    userClick(user_id, full_name) {
+      if (!this.isAssignMode) {
+        return
+      }
+
+      this.$emit('addSelectedUser', {
+        user_id,
+        full_name
+      })
+    },
+
     async loadData () {
       this.isLoading = true
       const url = `${this.url}?start_date=${this.currentDate}`
@@ -76,7 +99,6 @@ export default {
     },
 
     makeDays () {
-
       let days = [];
 
       let start = moment(this.startDate)
@@ -134,8 +156,9 @@ export default {
     }
   },
   created() {
-    this.loadData();
+    console.log("isAssignMode", this.isAssignMode)
     this.makeDays();
+    this.loadData();
   },
   async mounted() {
     this.statuscodes = await this.$store.dispatch('getStatuscodes');
