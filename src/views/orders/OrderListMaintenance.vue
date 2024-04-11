@@ -143,7 +143,7 @@
               {{ $trans('Assign these orders') }}
               <b-badge
                 variant="success"
-              >{{ $trans("new") }}</b-badge>
+              >{{ $trans("beta") }}</b-badge>
             </b-button>
 
           </div>

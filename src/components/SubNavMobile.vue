@@ -16,7 +16,7 @@
       {{ $trans('Dispatch') }}
       <b-badge
         variant="success"
-      >{{ $trans("new") }}</b-badge>
+      >{{ $trans("beta") }}</b-badge>
     </b-nav-item>
 
     <b-nav-item
