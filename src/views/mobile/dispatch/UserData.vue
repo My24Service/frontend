@@ -7,10 +7,13 @@
       :key="userData.order.order_id"
       :style="`grid-column: calc(${userData.layout.slot} + 2) / span ${userData.layout.days}; --status-color: ${userData.order_color}; --text-color: ${userData.order_textColor};`"
       :class="orderClass">
-      <span>
-        <span class="dimmed order-type">{{ userData.order.order_id }} </span>
+      <span class="order-summary">
+        <span class="dimmed"><strong>{{ userData.order.order_id }}</strong></span>&nbsp;
         <strong>{{ userData.order.order_name }}</strong>
-        <strong>{{ userData.date_formatted }}</strong>
+        <p>{{ userData.assignedOrder.date_formatted }}</p>
+        <p v-if="userData.order.order_reference"><small><strong>{{ userData.order.order_reference }}</strong></small></p>
+        <p v-else><small><i>{{ $trans("No reference") }}</i></small></p>
+
       </span>
       <OrderInfo
         :order="userData.order"
@@ -87,7 +90,12 @@ export default {
         let start = moment(orderStartDate);
         let end = moment(orderEndDate);
         let days = end.diff(start, 'days') + 1;
-        let gridSlot = parseInt(start.diff(this.startDate, 'days'));
+
+        // use only year/month/day for diff
+        const sd = moment(this.startDate)
+        const diff = moment([start.year(), start.month(), start.date()])
+          .diff([sd.year(), sd.month(), sd.date()], 'days')
+        let gridSlot = parseInt(diff);
 
         if (gridSlot < 1) {
           days += gridSlot;

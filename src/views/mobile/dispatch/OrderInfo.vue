@@ -1,5 +1,5 @@
 <template>
-  <div class="user-data">
+  <div class="order-info">
     <dl>
       <dt>{{ $trans('Name') }}</dt>
       <dd><strong>{{ order.order_name }}</strong></dd>

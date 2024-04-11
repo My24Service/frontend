@@ -922,7 +922,7 @@ html {
   .planning-row {
     > div {
       width: 100%;
-      height: auto;
+      //height: auto;
     }
     .already-assigned {
       background-color: lightgray;
@@ -937,7 +937,6 @@ html {
       white-space: nowrap;
       backdrop-filter: blur(2px);
       position: relative;
-      //transition: all .5s, opacity .2s;
       cursor: pointer;
     }
 
@@ -948,17 +947,32 @@ html {
     }
 
     .order-wide {
-      height: auto;
+      height: 5.0rem;
 
       //width: min-content;
       overflow: hidden;
-      transition: all .2s 0s;
-      .user-data {
+      text-overflow: ellipsis;
+
+      transition: all .5s, opacity .2s;
+
+      .order-summary * {
+        line-height: 1.2em !important;
+        margin-bottom: 2px;
+      }
+
+      &:hover {
+        width: max-content;
+        height: fit-content;
+        transition: all .2s 0s;
+        z-index: 1;
+      }
+
+      .order-info {
         width: fit-content;
         text-align: left;
       }
 
-      .user-data * {
+      .order-info * {
         text-align: left;
         padding: 0;
         line-height: 1.2em !important;
