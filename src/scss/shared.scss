@@ -947,9 +947,8 @@ html {
     }
 
     .order-wide {
-      height: 5.0rem;
+      height: 6.0rem;
 
-      //width: min-content;
       overflow: hidden;
       text-overflow: ellipsis;
 
@@ -961,15 +960,20 @@ html {
       }
 
       &:hover {
-        width: max-content;
+        min-width: max-content;
         height: fit-content;
         transition: all .2s 0s;
         z-index: 1;
       }
 
       .order-info {
+        border-top: #dddddd 1px dotted;
         width: fit-content;
         text-align: left;
+
+        dt {
+          justify-content: left;
+        }
       }
 
       .order-info * {

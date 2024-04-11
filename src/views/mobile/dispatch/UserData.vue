@@ -8,17 +8,19 @@
       :style="`grid-column: calc(${userData.layout.slot} + 2) / span ${userData.layout.days}; --status-color: ${userData.order_color}; --text-color: ${userData.order_textColor};`"
       :class="orderClass">
       <span class="order-summary">
-        <span class="dimmed"><strong>{{ userData.order.order_id }}</strong></span>&nbsp;
-        <strong>{{ userData.order.order_name }}</strong>
-        <p>{{ userData.assignedOrder.date_formatted }}</p>
-        <p v-if="userData.order.order_reference"><small><strong>{{ userData.order.order_reference }}</strong></small></p>
-        <p v-else><small><i>{{ $trans("No reference") }}</i></small></p>
+        <p class="dimmed"><strong>{{ userData.order.order_id }}</strong></p>
+        <p><strong>{{ userData.order.order_name }}</strong></p>
+        <p><strong>{{ userData.order.order_city }}</strong></p>
+        <p class="order-type"><strong>{{ userData.order.order_type }}</strong></p>
+        <p v-if="userData.order.order_reference"><strong>{{ userData.order.order_reference }}</strong></p>
+        <p v-else><i>{{ $trans("No reference") }}</i></p>
 
       </span>
       <OrderInfo
         :order="userData.order"
         :order_start="userData.order_start"
         :order_end="userData.order_end"
+        :assigned-order="userData.assignedOrder"
       />
 
     </span>
