@@ -1483,7 +1483,7 @@ export default {
           this.buttonDisabled = false
         }
 
-        await this.assignEngineers()
+        await this.assignEngineers(newOrder.order_id)
 
         if (this.nextField === 'orders' || this.hasBranches) {
           this.$router.go(-1)
@@ -1557,7 +1557,7 @@ export default {
         }
 
         // assign engineers
-        await this.assignEngineers()
+        await this.assignEngineers(this.order.order_id)
 
         this.isLoading = false
         this.buttonDisabled = false
@@ -1571,10 +1571,10 @@ export default {
 
       this.$router.go(-1)
     },
-    async assignEngineers() {
+    async assignEngineers(order_id) {
       try {
         for (const engineer of this.selectedEngineers) {
-          await Assign.assignToUser(engineer.id, [this.order.order_id], true)
+          await Assign.assignToUser(engineer.id, [order_id], true)
         }
 
         if (this.selectedEngineers.length) {
