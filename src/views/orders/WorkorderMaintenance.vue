@@ -13,18 +13,18 @@
             </div>
             <div class="col-sm-6 panel panel-default">
               <div class="panel-body">
-                  <div class="row">
-                    <span class="pull-left col-sm-4"><b>{{ $trans('Service number') }}</b></span>
-                    <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.assigned_order_workorder_id }}</span>
-                    </span>
+                <div class="row">
+                  <div class="pull-left col-sm-4"><b>{{ $trans('Order ID') }}</b></div>
+                  <div class="col-sm-6 underline">
+                    <span class="pull-right">{{ data.order.order_id }}</span>
                   </div>
-                  <div class="row">
-                    <span class="pull-left col-sm-4"><b>{{ $trans('Order reference') }}</b></span>
-                    <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.order.order_reference }}&nbsp;</span>
-                    </span>
-                  </div>
+                </div>
+                <div class="row">
+                  <span class="pull-left col-sm-4"><b>{{ $trans('Order reference') }}</b></span>
+                  <span class="col-sm-6 underline">
+                      <span class="pull-right">{{ data.order.order_reference }}&nbsp;</span>
+                  </span>
+                </div>
               </div>
             </div>
         </div>
@@ -57,12 +57,6 @@
               </div>
             </div>
             <div class="col-sm-6">
-              <div class="row">
-                <div class="pull-left col-sm-6"><b>{{ $trans('Order number') }}</b></div>
-                <div class="col-sm-6 underline">
-                    <span class="pull-right">{{ data.order.order_id }}</span>
-                </div>
-              </div>
               <div class="row">
                 <span class="pull-left col-sm-6"><b>{{ $trans('Order type') }}</b></span>
                 <span class="col-sm-6 underline">
