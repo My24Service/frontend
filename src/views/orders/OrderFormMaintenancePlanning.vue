@@ -1483,22 +1483,7 @@ export default {
           this.buttonDisabled = false
         }
 
-        // assign engineers
-        try {
-          for (const engineer of this.selectedEngineers) {
-            await Assign.assignToUser(engineer.id, [newOrder.order_id], true)
-          }
-
-          if (this.selectedEngineers.length) {
-            this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
-          }
-        } catch(error) {
-          console.log('error assigning to users', error)
-          this.errorToast(this.$trans('Error assigning to users'))
-          this.isLoading = false
-          this.buttonDisabled = false
-          return
-        }
+        await this.assignEngineers()
 
         if (this.nextField === 'orders' || this.hasBranches) {
           this.$router.go(-1)
@@ -1560,6 +1545,20 @@ export default {
         }
 
         this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+
+        if (this.acceptOrder) {
+          try {
+            await this.orderNotAcceptedService.setAccepted(this.pk)
+            this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
+          } catch(error) {
+            console.log('Error accepting order', error)
+            this.errorToast(this.$trans('Error accepting order'))
+          }
+        }
+
+        // assign engineers
+        await this.assignEngineers()
+
         this.isLoading = false
         this.buttonDisabled = false
       } catch(error) {
@@ -1570,35 +1569,21 @@ export default {
         return
       }
 
-      if (this.acceptOrder) {
-        try {
-          await this.orderNotAcceptedService.setAccepted(this.pk)
-
-          // assign engineers
-          try {
-            for (const engineer of this.selectedEngineers) {
-              await Assign.assignToUser(engineer.id, [this.order.order_id], true)
-            }
-
-            if (this.selectedEngineers.length) {
-              this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
-            }
-          } catch (error) {
-            console.log('error assigning to users', error)
-            this.errorToast(this.$trans('Error assigning to users'))
-            this.isLoading = false
-            this.buttonDisabled = false
-            return
-          }
-
-          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
-        } catch(error) {
-          console.log('Error accepting order', error)
-          this.errorToast(this.$trans('Error accepting order'))
-        }
-      }
-
       this.$router.go(-1)
+    },
+    async assignEngineers() {
+      try {
+        for (const engineer of this.selectedEngineers) {
+          await Assign.assignToUser(engineer.id, [this.order.order_id], true)
+        }
+
+        if (this.selectedEngineers.length) {
+          this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
+        }
+      } catch (error) {
+        console.log('error assigning to users', error)
+        this.errorToast(this.$trans('Error assigning to users'))
+      }
     },
     async getCustomers(query) {
       if (query === '') return
