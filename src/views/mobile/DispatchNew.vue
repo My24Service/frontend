@@ -308,10 +308,8 @@ export default {
       assignedOrderPk: null,
       dispatch: null,
       showOverlay: false,
-      // startDate: moment(new Date()).weekday(1),
-      startDate: moment("2023-12-18"),
-      // mode: 'week'
-      startWeek: this.startWeek = moment("2023-12-18").format('w'),
+      startDate: moment(new Date()).weekday(1),
+      startWeek: moment(new Date()).format('w'),
       newData: false,
       minDate: null,
       maxDate: null,
@@ -537,6 +535,8 @@ export default {
         }))
       }
       console.log(this.alreadyAssignedUsers)
+    } else {
+      this.alreadyAssignedUsers = []
     }
 
     this.statuscodes = await this.$store.dispatch('getStatuscodes')

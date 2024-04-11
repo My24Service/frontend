@@ -23,6 +23,7 @@
             :startDate="startDate"
             v-if="item.assignedorders"
             :is-assign-mode="isAssignMode"
+            :mode="mode"
             :already-assigned="alreadyAssignedUsers.find(user => user.user_id === item.user_id)"
             :clickHandler="handleOrderClick"
           />
@@ -129,7 +130,6 @@ export default {
   },
   watch: {
     startDate(newStartDate, oldStartDate) {
-      console.log('startDate', this.startDate)
       this.loadData();
       this.makeDays();
     }
@@ -156,7 +156,6 @@ export default {
     }
   },
   created() {
-    console.log("isAssignMode", this.isAssignMode)
     this.makeDays();
     this.loadData();
   },

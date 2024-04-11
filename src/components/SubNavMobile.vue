@@ -10,10 +10,13 @@
 
     <b-nav-item
       :active="this.$route.name === 'mobile-dispatch-new'"
-      v-if="hasDispatch && (isSuperuser || isStaff)"
+      v-if="hasDispatch"
       :to="{name: 'mobile-dispatch-new'}"
     >
-      {{ $trans('Dispatch new') }}
+      {{ $trans('Dispatch') }}
+      <b-badge
+        variant="success"
+      >{{ $trans("new") }}</b-badge>
     </b-nav-item>
 
     <b-nav-item

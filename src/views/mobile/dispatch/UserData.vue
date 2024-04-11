@@ -9,7 +9,8 @@
       :class="orderClass">
       <span>
         <span class="dimmed order-type">{{ userData.order.order_id }} </span>
-        <strong>{{ userData.order.order_name }} </strong>
+        <strong>{{ userData.order.order_name }}</strong>
+        <strong>{{ userData.date_formatted }}</strong>
       </span>
       <OrderInfo
         :order="userData.order"
@@ -48,13 +49,16 @@ export default {
     alreadyAssigned: {
       type: Boolean,
     },
+    mode: {
+      type: String
+    },
   },
   computed: {
     containerDivClass: function() {
       return this.alreadyAssigned ? 'already-assigned' : ''
     },
     orderClass: function() {
-      return this.isAssignMode ? 'order-assign-mode' : 'order'
+      return this.isAssignMode || this.mode === 'compact' ? 'order-compact' : 'order-wide'
     }
   },
   data () {

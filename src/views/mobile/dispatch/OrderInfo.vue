@@ -3,8 +3,6 @@
     <dl>
       <dt>{{ $trans('Name') }}</dt>
       <dd><strong>{{ order.order_name }}</strong></dd>
-      <dt>{{ $trans('Date') }}</dt>
-      <dd><strong>{{ order_start }} - {{ order_end }}</strong></dd>
       <dt>{{ $trans('Order type') }}</dt>
       <dd><strong>{{ order.order_type }}</strong></dd>
 

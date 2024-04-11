@@ -138,6 +138,14 @@
               {{ $trans('Assign these orders') }}
             </b-button>
 
+            <b-button variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssignNew()">
+              <b-icon-person-lines-fill></b-icon-person-lines-fill>
+              {{ $trans('Assign these orders') }}
+              <b-badge
+                variant="success"
+              >{{ $trans("new") }}</b-badge>
+            </b-button>
+
           </div>
         </div>
 
@@ -388,6 +396,10 @@ export default {
       this.loadData()
     },
     doAssign() {
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
+    },
+    doAssignNew() {
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
       this.$router.push({name: 'mobile-dispatch-new', params: {assignModeProp: true}})
     },
