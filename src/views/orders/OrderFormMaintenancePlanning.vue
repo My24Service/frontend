@@ -451,7 +451,7 @@
 
             <div
               class="assign-engineer section"
-              v-if="!hasBranches && order.customer_order_accepted"
+              v-if="!hasBranches"
             >
 
             <div v-if="recommendedUsers.length > 0">
