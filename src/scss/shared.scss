@@ -877,8 +877,8 @@ html {
       grid-template-columns: repeat(8, 1fr);
       align-items: center;
       user-select: none;
-      //background-image: linear-gradient(transparent 50%, white 50%), linear-gradient(-90deg, #0000000d 1px, transparent 1px);
-      //background-size: calc(100.5% / 8) 1rem;
+      background-image: linear-gradient(#0000000d 1px, transparent 1px), linear-gradient(-90deg, #0000000d 2px, transparent 1px);
+      background-size: calc(100.5% / 8);
 
       > *:first-child {
         grid-column: 1 / span 1 !important;
@@ -889,10 +889,6 @@ html {
   }
   .planning-head {
     [data-day] {
-      //display: flex;
-      //flex-direction: column;
-      //grid-row: 1;
-      //grid-column: 2 / span 1 !important;
       display: grid;
       gap: 1ex;
       grid-template-columns: repeat(8, 1fr);
@@ -925,8 +921,8 @@ html {
   }
   .planning-row {
     > div {
+      width: 100%;
       height: auto;
-      //height: 3rem;
     }
     .already-assigned {
       background-color: lightgray;
@@ -939,7 +935,6 @@ html {
       padding-inline: 2.2ex 1.5ex;
       box-shadow: inset 0 0 0 1px #757a7c82, inset 0 0 0px 3px white, inset 1ex 0px var(--status-color);
       white-space: nowrap;
-      //background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(2px);
       position: relative;
       //transition: all .5s, opacity .2s;
@@ -950,7 +945,6 @@ html {
       height: 2.4rem;
       overflow: hidden;
       text-overflow: ellipsis;
-
     }
 
     .order-wide {

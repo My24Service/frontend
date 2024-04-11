@@ -21,7 +21,7 @@
             @click.native="userClick(item.user_id, item.full_name)"
             :orders="item"
             :startDate="startDate"
-            v-if="item.assignedorders"
+            v-if="item.assignedorders.length"
             :is-assign-mode="isAssignMode"
             :mode="mode"
             :already-assigned="alreadyAssignedUsers.find(user => user.user_id === item.user_id)"
