@@ -27,7 +27,7 @@
             :already-assigned="alreadyAssignedUsers.find(user => user.user_id === item.user_id)"
             :clickHandler="handleOrderClick"
           />
-          <div v-else>
+          <div v-if="!item.assignedorders.length && showUsersMode === 'all'">
             <span class="dimmed">{{  item.full_name }}</span>
           </div>
 
@@ -65,6 +65,9 @@ export default {
     alreadyAssignedUsers: {
       type: Array,
     },
+    showUsersMode: {
+      type: String
+    }
   },
   data() {
     return {

@@ -27,6 +27,15 @@
               :disabled="item.item === mode"
               @click="() => changeViewMode(item.item)">{{  item.name }}</b-button>
           </b-button-group>
+
+          <b-button-group>
+            <b-button
+              variant="primary"
+              v-for="item in this.showUsersOptions"
+              :key="item.name"
+              :disabled="item.item === showUsersMode"
+              @click="() => changeShowUsersMode(item.item)">{{  item.name }}</b-button>
+          </b-button-group>
         </div>
       </div>
     </header>
@@ -110,6 +119,7 @@
         :mode="this.mode"
         :is-assign-mode="assignMode"
         :already-assigned-users="alreadyAssignedUsers"
+        :show-users-mode="showUsersMode"
         @addSelectedUser="addSelectedUser"
       />
 
@@ -290,9 +300,14 @@ export default {
   data() {
     return {
       mode: null,
+      showUsersMode: null,
       modeOptions: [
         { item: 'compact', name: this.$trans('Compact') },
         { item: 'wide', name: this.$trans('Wide') },
+      ],
+      showUsersOptions: [
+        { item: 'all', name: this.$trans('All') },
+        { item: 'active', name: this.$trans('Active') },
       ],
       scrollTopButton: null,
       searchQuery: null,
@@ -330,6 +345,9 @@ export default {
     mode: function(val) {
       localStorage.setItem('displayMode', JSON.stringify(val))
     },
+    showUsersMode: function(val) {
+      localStorage.setItem('showUsersMode', JSON.stringify(val))
+    },
     startDate: function(val) {
       this.startWeek = moment(val).format('w');
     }
@@ -338,6 +356,9 @@ export default {
     // change view mode
     changeViewMode(mode) {
       this.mode = mode;
+    },
+    changeShowUsersMode(mode) {
+      this.showUsersMode = mode;
     },
     // dates
     clearAssignedorderDates() {
@@ -514,7 +535,10 @@ export default {
     memberNewDataSocket.getSocket()
 
     const displayMode = JSON.parse(localStorage.getItem('displayMode'))
-    const mode = displayMode ? displayMode : 'wide'
+    this.mode = displayMode ? displayMode : 'wide'
+
+    const showUsersMode = JSON.parse(localStorage.getItem('showUsersMode'))
+    this.showUsersMode = showUsersMode ? showUsersMode : 'active'
 
     const lang = this.$store.getters.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
@@ -534,14 +558,12 @@ export default {
           }
         }))
       }
-      console.log(this.alreadyAssignedUsers)
     } else {
       this.alreadyAssignedUsers = []
     }
 
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
 
-    this.mode = mode
     this.loadDone = true
   },
   beforeDestroy() {
