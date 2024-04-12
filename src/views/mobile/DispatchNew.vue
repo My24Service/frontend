@@ -500,8 +500,9 @@ export default {
       })
     },
     cancelAssign() {
-      this.selectedUsers = [];
-      this.selectedOrders = [];
+      this.selectedUsers = []
+      this.selectedOrders = []
+      this.alreadyAssignedUsers = []
       this.assignMode = false;
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
