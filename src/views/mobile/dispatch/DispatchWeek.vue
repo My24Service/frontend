@@ -15,10 +15,13 @@
         </div>
       </li>
 
-      <li v-for="item of this.results.data" :key="item.id" class="planning-row">
-
+      <li
+        v-for="item of this.results.data"
+        :key="item.id"
+        class="planning-row"
+        @click="userClick(item.user_id, item.full_name)"
+      >
           <UserData
-            @click.native="userClick(item.user_id, item.full_name)"
             :orders="item"
             :startDate="startDate"
             v-if="item.assignedorders.length"
@@ -27,9 +30,16 @@
             :already-assigned="alreadyAssignedUsers.find(user => user.user_id === item.user_id)"
             :clickHandler="handleOrderClick"
           />
-          <div v-if="!item.assignedorders.length && showUsersMode === 'all'">
-            <span class="dimmed">{{  item.full_name }}</span>
+          <div
+            v-else-if="showUser(item)"
+          >
+            <span
+              class="dimmed"
+            >
+              {{  item.full_name }}
+            </span>
           </div>
+        <div v-else></div>
 
       </li>
     </ul>
@@ -81,6 +91,9 @@ export default {
     }
   },
   methods: {
+    showUser(data) {
+      return this.isAssignMode || (!data.assignedorders.length && this.showUsersMode === 'all');
+    },
     userClick(user_id, full_name) {
       if (!this.isAssignMode) {
         return
