@@ -1,5 +1,5 @@
 <template>
-  <div class="order-info">
+  <div :class="infoClass">
     <dl>
       <dt>{{ $trans('Order ID') }}</dt>
       <dd><strong>{{ order.order_id }}</strong></dd>
@@ -25,9 +25,13 @@
 
 </template>
 <script>
+
 export default {
   name: "OrderInfo",
   props: {
+    gridSlot: {
+      type: String
+    },
     order: {
       type: [Object]
     },
@@ -40,6 +44,11 @@ export default {
     order_end: {
       type: [String]
     },
+  },
+  computed: {
+    infoClass: function() {
+      return parseInt(this.gridSlot) < 4 ? 'order-info right' : 'order-info left'
+    }
   }
 }
 </script>

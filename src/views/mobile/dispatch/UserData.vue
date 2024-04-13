@@ -1,7 +1,7 @@
 <template>
   <div :class="containerDivClass">
     <strong>{{ orders.full_name }}</strong>
-    <span
+    <div
       v-for="userData of this.personOrders"
       @click="clickHandler(userData.order.id, userData.assignedOrder.id)"
       :key="userData.order.order_id"
@@ -21,9 +21,10 @@
         :order_start="userData.order_start"
         :order_end="userData.order_end"
         :assigned-order="userData.assignedOrder"
+        :grid-slot="userData.layout.slot"
       />
 
-    </span>
+    </div>
   </div>
 </template>
 

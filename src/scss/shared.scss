@@ -959,17 +959,38 @@ html {
         margin-bottom: 2px;
       }
 
-      &:hover {
-        min-width: max-content;
-        height: fit-content;
-        transition: all .2s 0s;
-        z-index: 1;
-      }
+      //&:hover {
+      //  min-width: max-content;
+      //  height: fit-content;
+      //  transition: all .2s 0s;
+      //  z-index: 1;
+      //}
+
 
       .order-info {
-        border-top: #dddddd 1px dotted;
-        width: fit-content;
+        position: absolute;
+        width: max-content;
+        padding-top: 1ex;
+        padding-inline: 2ex;
+        box-shadow: inset 0 0 0 1px #757a7c82, inset 0 0 0px 3px white;
+        height: fit-content;
         text-align: left;
+        visibility: hidden;
+        top: 0;
+        transform: translateY(-20%);
+        background-color: white;
+
+        &.left {
+          right: min(418px, 110%);
+        }
+
+        &.right {
+          left: min(418px, 110%);
+        }
+
+        /* move to right */
+        //left:100%;
+        //margin-left:15px; /* and add a small left margin */
 
         dt {
           justify-content: left;
@@ -981,6 +1002,18 @@ html {
         padding: 0;
         line-height: 1.2em !important;
         overflow: hidden;
+      }
+
+      &:hover {
+        background-color: #dddddd;
+        transition: all .2s 0s;
+        overflow: visible;
+        z-index: 1;
+        .order-info {
+          visibility: visible;
+          z-index: 1;
+        }
+
       }
 
       .order-type {
@@ -996,6 +1029,7 @@ html {
     }
   }
 }
+
 
 //.dispatch-calendar.compact .order-compact {
 //  grid-row: 1;
