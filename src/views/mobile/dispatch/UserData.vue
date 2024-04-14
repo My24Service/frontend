@@ -9,10 +9,10 @@
       :class="orderClass">
       <span class="order-summary">
         <p class="dimmed"><strong>{{ userData.order.order_id }}</strong></p>
-        <p><strong>{{ userData.order.order_name }}</strong></p>
-        <p><strong>{{ userData.order.order_city }}</strong></p>
-        <p class="order-type"><strong>{{ userData.order.order_type }}</strong></p>
-        <p v-if="userData.order.order_reference"><strong>{{ userData.order.order_reference }}</strong></p>
+        <p><strong>{{ userData.order.order_name.substring(0, 16) }}</strong></p>
+        <p><strong>{{ userData.order.order_city.substring(0, 16) }}</strong></p>
+        <p class="order-type"><strong>{{ userData.order.order_type.substring(0, 16) }}</strong></p>
+        <p v-if="userData.order.order_reference"><strong>{{ userData.order.order_reference.substring(0, 16) }}</strong></p>
         <p v-else><i>{{ $trans("No reference") }}</i></p>
 
       </span>

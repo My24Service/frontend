@@ -981,11 +981,11 @@ html {
         background-color: white;
 
         &.left {
-          right: min(418px, 110%);
+          right: max(190px, 110%);
         }
 
         &.right {
-          left: min(418px, 110%);
+          left: min(190px, 110%);
         }
 
         /* move to right */
