@@ -400,13 +400,25 @@
                 label-for="start_time"
                 cols="4"
               >
-                <b-form-timepicker
+                <b-form-input
                   id="start_time"
-
                   v-model="order.start_time"
+                  type="text"
+                  placeholder="HH:mm"
+                ></b-form-input>
+                <b-form-timepicker
+                  v-model="order.start_time"
+                  button-only
+                  right
+                  locale="en"
+                  id="start_time"
                   :placeholder="$trans('Set time')"
                   :hour12=false
                 ></b-form-timepicker>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.order.start_time.$error : null">
+                  {{ $trans('Please enter a valid start time HH:mm') }}
+                </b-form-invalid-feedback>
               </b-form-group>
             </div>
             <div class="flex-columns">
@@ -431,21 +443,32 @@
                   {{ $trans('Please enter an end date') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-
               <b-form-group
                 :label="$trans('End time')"
                 label-class=""
                 label-for="end_time"
                 cols="4"
               >
-                <b-form-timepicker
+                <b-form-input
                   id="end_time"
-
                   v-model="order.end_time"
+                  type="text"
+                  placeholder="HH:mm"
+                ></b-form-input>
+                <b-form-timepicker
+                  v-model="order.end_time"
+                  button-only
+                  right
+                  locale="en"
+                  id="end_time"
                   class="mb-2"
                   :placeholder="$trans('Set time')"
                   :hour12=false
                 ></b-form-timepicker>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.order.end_time.$error : null">
+                  {{ $trans('Please enter a valid end time HH:mm') }}
+                </b-form-invalid-feedback>
               </b-form-group>
             </div>
 
@@ -804,7 +827,7 @@
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+import { required, helpers } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
@@ -825,6 +848,10 @@ import {InfolineService} from "@/models/orders/Infoline";
 import CustomerCard from '../../components/CustomerCard.vue'
 import {EngineerService} from "@/models/company/UserEngineer";
 import {DocumentService} from "@/models/orders/Document";
+
+const isCorrectTime = (value) => {
+  return !helpers.req(value) || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
+}
 
 export default {
   mixins: [componentMixin],
@@ -984,6 +1011,12 @@ export default {
           end_date: {
             required,
           },
+          start_time: {
+            isCorrectTime,
+          },
+          end_time: {
+            isCorrectTime,
+          }
         },
       }
     }
@@ -1637,5 +1670,4 @@ export default {
   width: auto;
   flex-grow: 1;
 }
-
 </style>
