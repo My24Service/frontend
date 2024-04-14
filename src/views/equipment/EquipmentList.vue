@@ -222,6 +222,7 @@ export default {
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
+        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
@@ -233,6 +234,7 @@ export default {
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
+        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
         {key: 'brand', label: this.$trans('Brand'), sortable: true},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
@@ -242,6 +244,7 @@ export default {
         {key: 'name', label: this.$trans('Equipment'), sortable: true},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
+        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
@@ -250,6 +253,7 @@ export default {
         {key: 'name', label: this.$trans('Equipment'), sortable: true},
         {key: 'location_name', label: this.$trans('Location')},
         {key: 'latest_state', label: this.$trans('State')},
+        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
