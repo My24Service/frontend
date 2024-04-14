@@ -982,10 +982,30 @@ html {
 
         &.left {
           right: max(190px, 110%);
+          &.order-info::after {
+            content: " ";
+            position: absolute;
+            top: 35%;
+            left: 100%;
+            margin-left: 0px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent transparent black;
+          }
         }
 
         &.right {
           left: min(190px, 110%);
+          &.order-info::after {
+            content: " ";
+            position: absolute;
+            top: 35%;
+            left: 0;
+            margin-left: -9px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent black transparent transparent;
+          }
         }
 
         /* move to right */
