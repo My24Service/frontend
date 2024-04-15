@@ -1,7 +1,7 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="container app-form">
-      <b-form>
+      <b-form v-if="member">
         <h2 v-if="isCreate">{{ $trans('New member') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit member') }}</h2>
         <b-row>
@@ -427,7 +427,7 @@ export default {
       ],
       equipmentQrTypes: EQUIPMENT_QR_TYPES,
       contracts: [],
-      member: new MemberModel(),
+      member: new MemberModel({}),
       orgCompanycode: null,
       isDeletedOptions: [
         {value: true, text: this.$trans('Is deleted')},
@@ -542,7 +542,7 @@ export default {
     if (!this.isCreate) {
       await this.loadData()
     } else {
-      this.member = new MemberModel()
+      this.member = new MemberModel({})
       this.member.country_code = 'NL'
       this.member.member_type = 'maintenance'
       this.member.contract = this.contracts[0].value
