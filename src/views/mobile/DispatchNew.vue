@@ -116,10 +116,11 @@
         v-if="loadDone"
         :startDate.sync="startDate"
         :orderClickHandler="openActionsModal"
-        :mode="this.mode"
+        :mode="mode"
         :is-assign-mode="assignMode"
         :already-assigned-users="alreadyAssignedUsers"
         :show-users-mode="showUsersMode"
+        ref="dispatchComponent"
         @addSelectedUser="addSelectedUser"
       />
 
@@ -381,8 +382,9 @@ export default {
       try {
         await this.assignedOrderService.updateDetailChangeDate(this.assignedOrderPk, this.assignedOrder)
         this.$refs['dispatch-change-date-modal'].hide();
+        this.refreshData()
         this.showOverlay = false
-        // this.dispatch.drawDispatch()
+
       } catch(error) {
         console.log('error updating assignedOrder dates', error)
         this.errorToast(this.$trans('Error updating dates'))
@@ -418,9 +420,9 @@ export default {
         this.$router.push({name: 'order-edit', params: {pk: this.selectedOrder.id}})
       })
     },
-    async openActionsModal(order_pk, assignedorder_pk) {
-      console.log({order_pk, assignedorder_pk});
+    async openActionsModal(userId, order_pk, assignedorder_pk) {
       this.assignedOrderPk = assignedorder_pk
+      this.selectedOrderUserId = userId
 
       try {
         this.showOverlay = true
@@ -475,6 +477,7 @@ export default {
 
         this.infoToast(this.$trans('Success'), this.$trans('Order(s) assigned'))
         this.cancelAssign()
+        this.refreshData()
         this.buttonDisabled = false
         this.showOverlay = false
       } catch (e) {
@@ -491,6 +494,7 @@ export default {
         try {
           await this.assignService.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
           this.infoToast(this.$trans('Success'), this.$trans('Order removed from planning'))
+          this.refreshData()
           this.showOverlay = false
         } catch (error) {
           console.log('error un-assigning', error)
@@ -528,6 +532,10 @@ export default {
       if (data.type === NEW_DATA_EVENTS.DISPATCH) {
         this.newData = true
       }
+    },
+    refreshData() {
+      this.$refs['dispatchComponent'].loadData()
+      this.$refs['dispatchComponent'].makeDays()
     }
   },
   async mounted() {

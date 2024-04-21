@@ -3,7 +3,7 @@
     <strong>{{ orders.full_name }}</strong>
     <div
       v-for="userData of this.personOrders"
-      @click="clickHandler(userData.order.id, userData.assignedOrder.id)"
+      @click="clickHandler(orders.user_id, userData.order.id, userData.assignedOrder.id)"
       :key="userData.order.order_id"
       :style="`grid-column: calc(${userData.layout.slot} + 2) / span ${userData.layout.days}; --status-color: ${userData.order_color}; --text-color: ${userData.order_textColor};`"
       :class="orderClass">
@@ -121,6 +121,7 @@ export default {
             slot: gridSlot, days, d: start.format('MMM DD') + '-' + end.format('MMM DD'),
           }
         }
+        console.log(order)
 
         this.personOrders.push(order)
       }

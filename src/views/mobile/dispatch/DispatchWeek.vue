@@ -140,8 +140,8 @@ export default {
       this.displayWeekdays = days;
     },
 
-    handleOrderClick (orderId, assignedOrderId) {
-      this.orderClickHandler(orderId, assignedOrderId)
+    handleOrderClick (userId, orderId, assignedOrderId) {
+      this.orderClickHandler(userId, orderId, assignedOrderId)
     }
   },
   watch: {
