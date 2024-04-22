@@ -35,10 +35,10 @@
                 size="sm"
                 @change="companyCodeChange"
                 v-model="member.companycode"
-                :state="member.companycode && member.companycode.length > 2 ? !v$.member.companycode.$error : undefined"
+                :state="member.companycode ? !v$.member.companycode.$invalid : undefined"
               ></b-form-input>
               <b-form-invalid-feedback
-                v-if="member.companycode && member.companycode !== ''"
+                v-if="member.companycode && member.companycode !== '' && !v$.member.companycode.minLength.$invalid"
                 :state="!v$.member.companycode.isUnique.$invalid">
                 {{ $trans('Company code is already in use') }}
               </b-form-invalid-feedback>
@@ -46,6 +46,11 @@
                 v-if="member.companycode === ''"
                 :state="v$.member.companycode.required">
                 {{ $trans('Company code is required') }}
+              </b-form-invalid-feedback>
+              <b-form-invalid-feedback
+                v-if="v$.member.companycode.minLength.$invalid"
+                :state="v$.member.companycode.minLength.$invalid">
+                {{ $trans('Company code must have at least 2 characters') }}
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
@@ -67,16 +72,24 @@
               <b-form-select v-model="member.member_type" :options="memberTypes" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
-          <b-col cols="2" role="group" v-if="!isRequest">
+          <b-col cols="2" role="group" v-if="showRequestedList">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Requested')"
-              label-for="member_is_requested"
             >
               <b-form-select v-model="member.is_requested" :options="isRequestedOptions" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
-          <b-col cols="1" role="group" v-if="isRequest">
+          <b-col cols="2" role="group" v-if="showDeletedList">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Deleted')"
+              label-for="member_is_deleted"
+            >
+              <b-form-select v-model="member.is_deleted" :options="isDeletedOptions" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+          <b-col cols="1" role="group" v-if="isRequest || (!showRequestedList && !showDeletedList)">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Branches?')"
@@ -264,7 +277,7 @@
               </b-form-checkbox>
             </b-form-group>
           </b-col>
-          <b-col cols="1" role="group">
+          <b-col cols="1" role="group" v-if="showRequestedList || showDeletedList">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Branches?')"
@@ -413,9 +426,8 @@
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import { url, email, required } from '@vuelidate/validators'
+import {url, email, required, minLength} from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
-import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
 import {
   MemberService,
@@ -426,8 +438,10 @@ import {
 } from '@/models/member/Member'
 import { ContractService } from '@/models/member/Contract'
 import {NO_IMAGE_URL} from "@/constants";
+import {componentMixin} from "@/utils";
 
 export default {
+  mixins: [componentMixin],
   setup() {
     return { v$: useVuelidate() }
   },
@@ -472,7 +486,6 @@ export default {
       fileWorkorderChanged: false,
       memberService: new MemberService(),
       contractService: new ContractService(),
-      checkCompanyCodeDebounced: null,
     }
   },
   validations() {
@@ -515,13 +528,14 @@ export default {
 
     if (this.isCreate) {
       const isUnique = (value) => {
-        if (value === '' || value.length < 3) return true
+        if (value === '' || value.length < 2) return undefined
 
-        return this.checkCompanyCodeDebounced(value)
+        return this.checkCompanyCode(value)
       }
 
       validations['member']['companycode'] = {
         required,
+        minLength: minLength(2),
         isUnique: helpers.withAsync(isUnique)
       }
 
@@ -530,15 +544,16 @@ export default {
       }
     } else {
       const isUnique = (value) => {
-        if (this.orgCompanycode === this.member.companycode || value === '' || value.length < 3) {
-          return true
+        if (this.orgCompanycode === this.member.companycode || value === '' || value.length < 2) {
+          return undefined
         }
 
-        return this.checkCompanyCodeDebounced(value)
+        return this.checkCompanyCode(value)
       }
 
       validations['member']['companycode'] = {
         required,
+        minLength: minLength(2),
         isUnique: helpers.withAsync(isUnique)
       }
     }
@@ -551,10 +566,15 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
+    },
+    showRequestedList() {
+      return this.isSuperuser && this.member.is_requested
+    },
+    showDeletedList() {
+      return this.isSuperuser && this.member.is_deleted
     }
   },
   async created() {
-    this.checkCompanyCodeDebounced = AwesomeDebouncePromise(this.checkCompanyCode, 500)
     this.isLoading = true
     this.countries = await this.$store.dispatch('getCountries')
 
