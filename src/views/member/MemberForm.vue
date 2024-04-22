@@ -28,21 +28,23 @@
               label-size="sm"
               v-bind:label="$trans('Company code')"
               label-for="member_companycode"
+              description="[companycode].my24service.com"
             >
               <b-form-input
                 id="member_companycode"
                 size="sm"
+                @change="companyCodeChange"
                 v-model="member.companycode"
-                :state="isSubmitClicked ? !v$.member.companycode.$error : null"
+                :state="member.companycode && member.companycode.length > 2 ? !v$.member.companycode.$error : undefined"
               ></b-form-input>
               <b-form-invalid-feedback
-                v-if="member.companycode !== ''"
-                :state="isSubmitClicked ? !v$.member.companycode.isUnique.$invalid : null">
+                v-if="member.companycode && member.companycode !== ''"
+                :state="!v$.member.companycode.isUnique.$invalid">
                 {{ $trans('Company code is already in use') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="member.companycode === ''"
-                :state="isSubmitClicked ? v$.member.companycode.required : null">
+                :state="v$.member.companycode.required">
                 {{ $trans('Company code is required') }}
               </b-form-invalid-feedback>
             </b-form-group>
@@ -65,13 +67,26 @@
               <b-form-select v-model="member.member_type" :options="memberTypes" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
-          <b-col cols="2" role="group">
+          <b-col cols="2" role="group" v-if="!isRequest">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Deleted?')"
-              label-for="member_is_deleted"
+              v-bind:label="$trans('Requested')"
+              label-for="member_is_requested"
             >
-              <b-form-select v-model="member.is_deleted" :options="isDeletedOptions" size="sm"></b-form-select>
+              <b-form-select v-model="member.is_requested" :options="isRequestedOptions" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+          <b-col cols="1" role="group" v-if="isRequest">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Branches?')"
+              label-for="member_has_branches"
+            >
+              <b-form-checkbox
+                id="member_has_branches"
+                v-model="member.has_branches"
+              >
+              </b-form-checkbox>
             </b-form-group>
           </b-col>
         </b-row>
@@ -222,7 +237,7 @@
             </b-form-group>
           </b-col>
         </b-row>
-        <b-row>
+        <b-row v-if="!isRequest">
           <b-col cols="1" role="group">
             <b-form-group
               label-size="sm"
@@ -400,8 +415,15 @@
 import { useVuelidate } from '@vuelidate/core'
 import { url, email, required } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
+import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import {MemberService, EQUIPMENT_QR_TYPES, MemberModel} from '@/models/member/Member'
+import {
+  MemberService,
+  EQUIPMENT_QR_TYPES,
+  MemberModel,
+  EQUIPMENT_QR_TYPE_MY24SERVICE,
+  EQUIPMENT_QR_TYPE_SHLTR
+} from '@/models/member/Member'
 import { ContractService } from '@/models/member/Contract'
 import {NO_IMAGE_URL} from "@/constants";
 
@@ -413,6 +435,10 @@ export default {
     pk: {
       type: [String, Number],
       default: null
+    },
+    isRequest: {
+      type: [Boolean],
+      default: false
     },
   },
   data() {
@@ -433,6 +459,10 @@ export default {
         {value: true, text: this.$trans('Is deleted')},
         {value: false, text: this.$trans('Not deleted')},
       ],
+      isRequestedOptions: [
+        {value: true, text: this.$trans('Is requested')},
+        {value: false, text: this.$trans('Is accepted')},
+      ],
       suppliers: [],
       current_image: NO_IMAGE_URL,
       upload_preview: NO_IMAGE_URL,
@@ -441,7 +471,8 @@ export default {
       fileChanged: false,
       fileWorkorderChanged: false,
       memberService: new MemberService(),
-      contractService: new ContractService()
+      contractService: new ContractService(),
+      checkCompanyCodeDebounced: null,
     }
   },
   validations() {
@@ -486,7 +517,7 @@ export default {
       const isUnique = (value) => {
         if (value === '' || value.length < 3) return true
 
-        return this.memberService.companycodeExists(value)
+        return this.checkCompanyCodeDebounced(value)
       }
 
       validations['member']['companycode'] = {
@@ -503,7 +534,7 @@ export default {
           return true
         }
 
-        return this.memberService.companycodeExists(value)
+        return this.checkCompanyCodeDebounced(value)
       }
 
       validations['member']['companycode'] = {
@@ -523,6 +554,7 @@ export default {
     }
   },
   async created() {
+    this.checkCompanyCodeDebounced = AwesomeDebouncePromise(this.checkCompanyCode, 500)
     this.isLoading = true
     this.countries = await this.$store.dispatch('getCountries')
 
@@ -542,7 +574,9 @@ export default {
     if (!this.isCreate) {
       await this.loadData()
     } else {
-      this.member = new MemberModel({})
+      this.member = new MemberModel({
+        www: 'https://'
+      })
       this.member.country_code = 'NL'
       this.member.member_type = 'maintenance'
       this.member.contract = this.contracts[0].value
@@ -550,6 +584,15 @@ export default {
     this.isLoading = false
   },
   methods: {
+    async checkCompanyCode(value) {
+      const result = await this.memberService.companycodeExists(value)
+      return result
+    },
+    async companyCodeChange() {
+      if (this.member.companycode && this.member.companycode.length > 2) {
+        this.v$.member.companycode.$touch()
+      }
+    },
     imageSelected(file) {
       const reader = new FileReader()
       reader.onload = (f) => {
@@ -608,10 +651,21 @@ export default {
       }
 
       if (this.isCreate) {
+        if (this.isRequest) {
+          this.member.equipment_qr_type = this.member.has_branches ? EQUIPMENT_QR_TYPE_SHLTR : EQUIPMENT_QR_TYPE_MY24SERVICE
+          this.member.has_api_users = false
+          this.member.is_requested = true
+          this.member.is_public = true
+          this.member.is_deleted = false
+        }
         this.isLoading = true
         try {
           await this.memberService.insert(this.member)
-          this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
+          if (this.isRequest) {
+            this.infoToast(this.$trans('Requested'), this.$trans('Request has been created'))
+          } else {
+            this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
+          }
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)

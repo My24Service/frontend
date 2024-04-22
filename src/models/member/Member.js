@@ -6,11 +6,16 @@ import BaseModel from '@/models/base'
 //     ('shltr', 'shltr'),
 // )
 
-export const EQUIPMENT_QR_TYPES = {
-  none: 'None',
-  my24service: 'My24Service',
-  shltr: 'SHLTR'
-}
+export const EQUIPMENT_QR_TYPE_NONE = 'none'
+export const EQUIPMENT_QR_TYPE_SHLTR = 'shltr'
+export const EQUIPMENT_QR_TYPE_MY24SERVICE = 'my24service'
+
+let EQUIPMENT_QR_TYPES = {}
+EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_NONE] = 'none'
+EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_MY24SERVICE] = 'My24Service'
+EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_SHLTR] = 'SHLTR'
+
+export {EQUIPMENT_QR_TYPES}
 
 class MemberModel {
   companycode
@@ -39,6 +44,7 @@ class MemberModel {
   chamber_of_commerce
   vat_number
   equipment_qr_type
+  is_requested = true
 
   constructor(member) {
     for (const [k, v] of Object.entries(member)) {
@@ -80,12 +86,10 @@ class MemberService extends BaseModel {
     return this.axios.get(`${this.url}me/`).then((response) => response.data)
   }
 
-  async getDeleted() {
-    const token = await this.getCsrfToken()
-    const headers = this.getHeaders(token)
-    const url = `${this.url}deleted/`
+  async getRequestedCount() {
+    const url = `${this.url}requested_count/`
 
-    return this.axios.get(url, headers).then((response) => response.data)
+    return this.axios.get(url).then((response) => response.data)
   }
 
   async updateMe(obj) {

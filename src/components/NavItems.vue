@@ -134,6 +134,7 @@
       to="/members/members"
       class="has-children">
       <b-icon icon="people"></b-icon> {{ $trans('Members') }}
+      <b-badge v-if="requestedCount > 0" variant="light">{{ requestedCount }}</b-badge>
     </b-nav-item>
     <SubNav v-if="isActive('members')">
       <router-view name="app-subnav"></router-view>
@@ -190,11 +191,14 @@ import { componentMixin } from '../utils.js'
 import SubNav from '@/components/SubNav';
 import SubNavCustomers from '@/components/SubNavCustomers';
 import SubNavInventory from '@/components/SubNavInventory';
+import {MemberService} from "@/models/member/Member";
 
 export default {
   mixins: [componentMixin],
   data() {
     return {
+      memberService: new MemberService(),
+      requestedCount: null
     }
   },
   methods: {
@@ -206,6 +210,10 @@ export default {
         return parts[parts.length] === item
       }
     }
+  },
+  async created() {
+    const result = await this.memberService.getRequestedCount()
+    this.requestedCount = result.count
   },
   computed: {
     showCustomerDashBoard() {

@@ -40,6 +40,8 @@ export default {
   },
   methods: {
     async checkVersion() {
+      // https://api.github.com/My24Service/frontend/releases
+      // const data = await axios.get('https://api.github.com/repos/OWNER/REPO/tags').then((response) => response.data)
       const data = await axios.get('/frontend-version/').then((response) => response.data)
 
       if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
