@@ -83,7 +83,7 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: AUTH_LEVELS.SUPERUSER },
+      meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
       name: 'member-request',
       path: '/members/members/form',
       components: {
