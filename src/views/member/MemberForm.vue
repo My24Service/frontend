@@ -76,6 +76,7 @@
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Requested')"
+              label-for="member_is_requested"
             >
               <b-form-select v-model="member.is_requested" :options="isRequestedOptions" size="sm"></b-form-select>
             </b-form-group>
@@ -486,6 +487,8 @@ export default {
       fileWorkorderChanged: false,
       memberService: new MemberService(),
       contractService: new ContractService(),
+      memberIsRequest: false,
+      isDeleted: false
     }
   },
   validations() {
@@ -544,7 +547,11 @@ export default {
       }
     } else {
       const isUnique = (value) => {
-        if (this.orgCompanycode === this.member.companycode || value === '' || value.length < 2) {
+        if (this.orgCompanycode === this.member.companycode) {
+          return true
+        }
+
+        if (value === '' || value.length < 2) {
           return undefined
         }
 
@@ -568,10 +575,10 @@ export default {
       return this.submitClicked
     },
     showRequestedList() {
-      return this.isSuperuser && this.member.is_requested
+      return this.isSuperuser && this.memberIsRequest
     },
     showDeletedList() {
-      return this.isSuperuser && this.member.is_deleted
+      return this.isSuperuser && this.isDeleted
     }
   },
   async created() {
@@ -593,6 +600,8 @@ export default {
 
     if (!this.isCreate) {
       await this.loadData()
+      this.memberIsRequest = this.member.is_requested
+      this.isDeleted = this.member.is_deleted
     } else {
       this.member = new MemberModel({
         www: 'https://'
