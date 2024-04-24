@@ -62,6 +62,9 @@ import QuotationStatuscodeList from "@/views/company/statuscode/QuotationStatusc
 import StatuscodeForm from "@/views/company/statuscode/StatuscodeForm";
 import ActionForm from "@/views/company/statuscode/ActionForm";
 
+import CustomerTemplateList from "@/views/company/template/CustomerTemplateList";
+import CustomerTemplateForm from "@/views/company/template/CustomerTemplateForm";
+
 export default [
 {
   path: '/company',
@@ -742,6 +745,42 @@ export default [
       components: {
         'app-content': ActionForm,
         'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'company-templates',
+      path: '/company/templates',
+      components: {
+        'app-content': CustomerTemplateList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-template-add',
+      path: '/company/template/form',
+      components: {
+        'app-content': CustomerTemplateForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-template-edit',
+      path: '/company/template/form/:pk',
+      components: {
+        'app-content': CustomerTemplateForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
       },
     }
   ]

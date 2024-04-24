@@ -1,7 +1,6 @@
 import BaseModel from '@/models/base'
 import priceMixin from "../../mixins/price";
 import { QuotationLineModel } from "./QuotationLine";
-import {ChapterModel} from "@/models/quotations/Chapter";
 
 
 class QuotationModel {
@@ -100,6 +99,11 @@ class QuotationService extends BaseModel {
     delete obj.modified
     obj = this.removeNullFields(obj)
     return obj
+  }
+
+  async search(query) {
+    const url = `${this.url}autocomplete/?q=${query}`
+    return this.axios.get(url).then((response) => response.data)
   }
 }
 
