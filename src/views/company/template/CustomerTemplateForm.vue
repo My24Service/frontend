@@ -9,10 +9,10 @@
           <strong>{{ template.name }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !template.id">{{ $trans("new") }}</span>
-            <span v-if="!isCreate && template.id">{{ $trans("edit") }}</span>
+            <span v-if="!isCreate && isEdit">{{ $trans("edit") }}</span>
           </span>
         </h3>
-        <div class="flex-columns">
+        <div class="flex-columns" v-if="isCreate || isEdit">
           <b-button @click="cancelForm" type="button" variant="secondary">
             {{ $trans("Cancel") }}</b-button
           >
@@ -20,12 +20,17 @@
             {{ $trans("Submit") }}</b-button
           >
         </div>
+        <div class="flex-columns" v-if="!isCreate && !isEdit">
+          <b-button @click="isEdit = true" type="button" variant="primary">
+            {{ $trans("Edit template") }}</b-button
+          >
+        </div>
       </div>
     </header>
     <b-overlay :show="isLoading" rounded="sm">
       <div class="page-detail">
         <div class="flex-columns">
-          <div class="panel">
+          <div class="panel" v-if="isCreate || isEdit">
             <h6>{{ $trans("Template") }}</h6>
             <b-form-group v-bind:label="$trans('Name')" label-for="template_name" label-cols="3">
               <b-form-input
@@ -69,7 +74,7 @@
                 {{ $trans("Please select a template type") }}
               </b-form-invalid-feedback>
             </b-form-group>
-            <b-form-group v-if="isCreate" v-bind:label="$trans('Choose template')" label-cols="3">
+            <b-form-group v-bind:label="$trans('Choose template')" label-cols="3">
               <b-form-file
                 v-model="file"
                 v-bind:placeholder="$trans('Choose a word document or drop it here...')"
@@ -82,7 +87,26 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </div>
-          <div class="panel" v-if="!isCreate">
+          <div class="panel" v-if="!isCreate && !isEdit">
+            <h6>{{ $trans("Template") }}</h6>
+            <b-row>
+              <b-col cols="3">
+                {{ $trans("Name") }}:
+              </b-col>
+              <b-col cols="6">
+                {{ template.name }}
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="3">
+                {{ $trans("Description") }}:
+              </b-col>
+              <b-col cols="6">
+                {{ template.description }}
+              </b-col>
+            </b-row>
+          </div>
+          <div class="panel" v-if="!isCreate && !isEdit">
             <h6>{{ $trans("Template preview") }}</h6>
             <b-form-group
               label-cols="3"
@@ -128,13 +152,6 @@
           </div>
         </div>
       </div>
-      <!-- <div class="page-detail pdf-priview">
-        <div class="flex-columns">
-          <div class="panel">
-            <canvas id="pdf-canvas"></canvas>
-          </div>
-        </div>
-      </div> -->
     </b-overlay>
   </div>
 </template>
@@ -192,6 +209,7 @@ export default {
   },
   data() {
     return {
+      isEdit: false,
       isSubmitClicked: false,
       customerTemplateService: new CustomerTemplateService(),
       file: null,
@@ -221,6 +239,7 @@ export default {
 
       try {
         this.template = await this.customerTemplateService.detail(this.pk);
+        this.file = this.template.filename
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching customer template", error);
@@ -229,10 +248,14 @@ export default {
       }
     },
     cancelForm() {
-      this.$router.go(-1);
+      if (this.isCreate) {
+        this.$router.go(-1);
+      } else {
+        this.isEdit = false;
+        this.loadData()
+      }
     },
     async getResults(query) {
-      this.result = ""
       this.fetchingResults = true;
       try {
         this.results = await this.service.search(query);
@@ -263,8 +286,26 @@ export default {
           this.errorToast(this.$trans("Error creating template"));
           this.isLoading = false;
         }
+      }
 
-        return;
+      if (this.isEdit) {
+        // Remove file if none was uploaded to to replace the existing one
+        if (!this.file.name) {
+          delete this.template.file
+        }
+
+        try {
+          await this.customerTemplateService.update(this.pk, this.template);
+          this.infoToast(this.$trans("Created"), this.$trans("Template has been updated"));
+          this.isLoading = false;
+          this.isEdit = false
+          this.template = {}
+          this.loadData()
+        } catch (error) {
+          console.log("Error creating template", error);
+          this.errorToast(this.$trans("Error creating template"));
+          this.isLoading = false;
+        }
       }
     },
     async previewPdf() {
@@ -281,11 +322,13 @@ export default {
           .then(blob => {
             const _url = window.URL.createObjectURL(blob);
             window.open(_url, "_blank");
+            this.isLoading = false;
           })
           .catch(err => {
-            console.log(err);
+            console.log("Error downloading template", err);
+            this.errorToast(this.$trans("Error downloading template"));
+            this.isLoading = false;
           });
-        this.isLoading = false;
       } catch (error) {
         console.log("Error downloading template", error);
         this.errorToast(this.$trans("Error downloading template"));
