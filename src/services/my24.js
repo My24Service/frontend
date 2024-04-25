@@ -127,6 +127,8 @@ class My24 extends BaseModel {
     const debug = true
     // console.log(config)
 
+    if (config.isSuperuser) return true
+
     // just pages like / and /no-access
     if (config.lenParts === 1) {
       if (debug) console.debug(`allowed: only one route part (${config.part})`)

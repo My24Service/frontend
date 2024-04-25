@@ -75,6 +75,11 @@
         {{ $trans('Statuscodes') }}
       </b-nav-item>
       <b-nav-item
+        :active="isActive('templates')"
+        :to="{ name: 'company-templates' }">
+        {{ $trans('Templates') }}
+      </b-nav-item>
+      <b-nav-item
         :active="isActive('budgets')"
         v-if="hasBranches"
         :to="{ name: 'company-budgets' }">
