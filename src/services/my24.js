@@ -153,7 +153,7 @@ class My24 extends BaseModel {
 
     const parts_always_allowed = [
       'form', 'view', 'info', 'company', 'activity', 'pictures',
-      'planning-users', 'employee-users', 'import', 'statuscodes',
+      'planning-users', 'employee-users', 'import', 'statuscodes', 'templates'
     ]
     if (parts_always_allowed.indexOf(config.part) !== -1) {
       if (debug) console.debug(`allowed: part "${config.part}" in always allowed (${parts_always_allowed.join('/')})`)
