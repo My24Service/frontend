@@ -761,7 +761,7 @@ export default [
     },
     {
       name: 'customer-template-add',
-      path: '/company/template/form',
+      path: '/company/templates/form',
       components: {
         'app-content': CustomerTemplateForm,
         'app-subnav':  SubNavCompany
@@ -773,7 +773,7 @@ export default [
     },
     {
       name: 'customer-template-edit',
-      path: '/company/template/form/:pk',
+      path: '/company/templates/form/:pk',
       components: {
         'app-content': CustomerTemplateForm,
         'app-subnav':  SubNavCompany
