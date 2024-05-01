@@ -137,10 +137,10 @@
       id="dispatch-change-date-modal"
       v-bind:title="$trans('Change date')"
       @ok="changeDateOk"
-      v-if="assignedOrder !== null"
+      v-if="selectedAssignedOrder !== null"
     >
       <form ref="change-date-form" @submit.stop.prevent="changeDateSubmit">
-        <b-container fluid>
+        <b-container fluid v-if="assignedOrder">
           <b-row role="group">
             <b-col size="6">
               <b-form-group
@@ -228,40 +228,55 @@
     <b-modal
       id="dispatch-order-actions-modal"
       ref="dispatch-order-actions-modal"
-      v-bind:title="`${$trans('Order')} ${selectedOrder && selectedOrder.order_id || '' }`"
+      v-bind:title="`${$trans('Order')} ${selectedAssignedOrder && selectedAssignedOrder.order.order_id || '' }`"
     >
       <template #default="">
-        {{ $trans('Order') }} {{ selectedOrder.order_id }}<br/>
-        {{ selectedOrder.order_name }}<br/>
-        {{ selectedOrder.order_address }}<br/>
-        {{ selectedOrder.order_postal }} {{ selectedOrder.order_city }}<br/>
-        {{ $trans('Order date') }}: {{ selectedOrder.order_date }}<br/>
-        <span v-if="assignedOrder && assignedOrder.assignedorder_date != ''">
-            {{ $trans('User date') }}: {{ assignedOrder.assignedorder_date }}<br/>
-        </span>
-        <span v-if="selectedOrder.order_reference != ''">
-            {{ $trans('Reference') }}: {{ selectedOrder.order_reference }}<br/>
+        {{ $trans('Order') }} {{ selectedAssignedOrder.order.order_id }}<br/>
+        {{ selectedAssignedOrder.order.order_name }}<br/>
+        {{ selectedAssignedOrder.order.order_address }}<br/>
+        {{ selectedAssignedOrder.order.order_postal }} {{ selectedAssignedOrder.order.order_city }}<br/>
+        {{ $trans('Order date') }}: {{ selectedAssignedOrder.order.order_date }}<br/>
+        {{ $trans("Assigned order date") }}: {{ selectedAssignedOrder.date_formatted }}<br/>
+        <span v-if="selectedAssignedOrder.order.order_reference != ''">
+            {{ $trans('Reference') }}: {{ selectedAssignedOrder.order.order_reference }}<br/>
         </span>
       </template>
       <template #modal-footer="{ cancel }">
-        <b-row>
-          <b-col cols="1" class="mx-1">
-            <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
-          </b-col>
-          <b-col cols="1" class="mx-1">
-            <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
-          </b-col>
-          <b-col cols="4" class="mx-1" v-if="assignedOrder">
-            <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
-          </b-col>
-          <b-col cols="4" class="mx-1" v-if="!assignedOrder">&nbsp;</b-col>
-          <b-col cols="2" class="mx-1">
-            <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
-          </b-col>
-          <b-col cols="2" class="mx-1">
-            <b-button size="sm" @click="cancel()">{{ $trans('Close') }}</b-button>
-          </b-col>
-        </b-row>
+        <b-container>
+          <b-row v-if="selectedOrderIsPartner">
+            <b-col cols="1" class="mx-2">
+              <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
+            </b-col>
+            <b-col cols="1" class="mx-2">
+              <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
+            </b-col>
+            <b-col cols="6" class="mx-1">
+              <div class="float-right">
+                <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
+              </div>
+            </b-col>
+          </b-row>
+          <b-row v-else>
+            <b-col cols="1" class="mx-2">
+              <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
+            </b-col>
+            <b-col cols="1" class="mx-2">
+              <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
+            </b-col>
+            <b-col cols="4" class="mx-2" v-if="selectedAssignedOrder">
+              <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
+            </b-col>
+            <b-col cols="2" class="mx-2" v-if="selectedAssignedOrder">
+              <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
+            </b-col>
+            <b-col cols="2" class="mx-1">
+              <div class="float-right">
+                <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
+              </div>
+            </b-col>
+          </b-row>
+        </b-container>
+
 
       </template>
     </b-modal>
@@ -273,7 +288,7 @@ import moment from 'moment/min/moment-with-locales'
 
 import DispatchWeek from './dispatch/DispatchWeek.vue'
 import {OrderService} from '@/models/orders/Order'
-import {AssignedOrderService} from '@/models/mobile/AssignedOrder'
+import {AssignedOrderChangeDatesModel, AssignedOrderService} from '@/models/mobile/AssignedOrder'
 import { AssignService } from '@/models/mobile/Assign'
 import SearchModal from '../../components/SearchModal.vue'
 import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
@@ -319,7 +334,9 @@ export default {
       selectedUsers: [],
       alreadyAssignedUsers: [],
       selectedOrder: null,
+      selectedAssignedOrder: null,
       selectedOrderUserId: null,
+      selectedOrderIsPartner: false,
       assignedOrder: null,
       assignedOrderPk: null,
       dispatch: null,
@@ -334,12 +351,6 @@ export default {
       assignedOrderService: new AssignedOrderService(),
       orderService: new OrderService(),
       assignService: new AssignService()
-    }
-  },
-  computed: {
-    isAssignMode: function() {
-      console.log(this.assignMode, this.selectedOrders.length)
-      return this.assignMode && this.selectedOrders.length > 0
     }
   },
   watch: {
@@ -363,10 +374,7 @@ export default {
     },
     // dates
     clearAssignedorderDates() {
-      this.assignedOrder.alt_start_date = null
-      this.assignedOrder.alt_end_date = null
-      this.assignedOrder.alt_start_time = null
-      this.assignedOrder.alt_end_time = null
+      this.assignedOrder = new AssignedOrderChangeDatesModel()
     },
     changeDate() {
       this.$refs['dispatch-order-actions-modal'].hide()
@@ -380,7 +388,7 @@ export default {
       this.showOverlay = true
 
       try {
-        await this.assignedOrderService.updateDetailChangeDate(this.assignedOrderPk, this.assignedOrder)
+        await this.assignedOrderService.updateDetailChangeDate(this.selectedAssignedOrder.id, this.assignedOrder)
         this.$refs['dispatch-change-date-modal'].hide();
         this.refreshData()
         this.showOverlay = false
@@ -420,25 +428,15 @@ export default {
         this.$router.push({name: 'order-edit', params: {pk: this.selectedOrder.id}})
       })
     },
-    async openActionsModal(userId, order_pk, assignedorder_pk) {
-      this.assignedOrderPk = assignedorder_pk
+    async openActionsModal(userId, order_pk, assignedorder, is_partner) {
+      this.selectedAssignedOrder = assignedorder
       this.selectedOrderUserId = userId
+      this.selectedOrderIsPartner = is_partner
 
       try {
         this.showOverlay = true
         this.selectedOrder = await this.orderService.detail(order_pk)
-
-        if (assignedorder_pk) {
-          this.assignedOrder = await this.assignedOrderService.getDetailChangeDate(assignedorder_pk)
-
-          this.assignedOrder.alt_start_date = this.$moment(this.assignedOrder.alt_start_date, 'DD/MM/YYYY').toDate()
-          this.assignedOrder.alt_end_date = this.$moment(this.assignedOrder.alt_end_date, 'DD/MM/YYYY').toDate()
-
-          this.minDate = this.assignedOrder.order_start_date
-          this.maxDate = this.assignedOrder.order_end_date
-        } else {
-          this.assignedOrder = null
-        }
+        this.assignedOrder = new AssignedOrderChangeDatesModel()
         this.showOverlay = false
         this.$refs['dispatch-order-actions-modal'].show();
       } catch (error) {
