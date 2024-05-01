@@ -324,8 +324,8 @@ export default {
       assignedOrderPk: null,
       dispatch: null,
       showOverlay: false,
-      startDate: moment(new Date()).weekday(1),
-      startWeek: moment(new Date()).format('w'),
+      startDate: null,
+      startWeek: null,
       newData: false,
       minDate: null,
       maxDate: null,
@@ -553,6 +553,8 @@ export default {
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
+    this.startDate = this.$moment().weekday(monday)
+    this.startWeek = this.startDate.format('w')
 
     this.assignMode = this.assignModeProp
 
