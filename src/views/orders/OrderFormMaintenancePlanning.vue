@@ -792,18 +792,26 @@
 
           <div class="info-lines section" v-if="!hasBranches">
             <h6>{{ $trans('Info lines') }}</h6>
-            <div class="flex-columns mt-3">
-              <b-form-input
-                id="order-infoline-info"
-                v-model="info"
-              ></b-form-input>
+            <div>
+              <b-form-group
+                v-bind:label="$trans('Info')"
+                label-for="order-infoline-info"
+                label-cols="3"
+              >
+                <b-form-textarea
+                  id="order-infoline-info"
+                  v-model="info"
+                ></b-form-textarea>
+              </b-form-group>
 
-              <b-button v-if="isEditInfoLine" @click="doEditInfoLine" class="btn btn-primary"  type="button" variant="warning">
-                {{ $trans('edit') }}
-              </b-button>
-              <b-button v-if="!isEditInfoLine" @click="addInfoLine" class="btn btn-primary"  type="button" variant="primary">
-                {{ $trans('add') }}
-              </b-button>
+              <b-form-group class="text-right">
+                <b-button v-if="isEditInfoLine" @click="doEditInfoLine" class="btn btn-primary"  type="button" variant="warning">
+                  {{ $trans('edit') }}
+                </b-button>
+                <b-button v-if="!isEditInfoLine" @click="addInfoLine" class="btn btn-primary"  type="button" variant="primary">
+                  {{ $trans('add') }}
+                </b-button>
+              </b-form-group>
             </div>
             <ul class="listing full-size mt-3">
               <li v-for="(item, index) of order.infolines" :key="index">

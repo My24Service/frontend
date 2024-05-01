@@ -3,7 +3,7 @@
     <strong>{{ orders.full_name }}</strong>
     <div
       v-for="userData of this.personOrders"
-      @click="clickHandler(orders.user_id, userData.order.id, userData.assignedOrder.id)"
+      @click="clickHandler(orders.user_id, userData.order.id, userData.assignedOrder, orders.is_partner)"
       :key="userData.order.order_id"
       :style="`grid-column: calc(${userData.layout.slot} + 2) / span ${userData.layout.days}; --status-color: ${userData.order_color}; --text-color: ${userData.order_textColor};`"
       :class="orderClass">
@@ -61,7 +61,14 @@ export default {
   },
   computed: {
     containerDivClass: function() {
-      return this.alreadyAssigned ? 'already-assigned' : ''
+      if (this.alreadyAssigned) {
+        return 'already-assigned'
+      }
+      if (this.orders.is_partner) {
+        return 'is-partner'
+      }
+
+      return ''
     },
     orderClass: function() {
       return this.isAssignMode || this.mode === 'compact' ? 'order-compact' : 'order-wide'
@@ -121,7 +128,6 @@ export default {
             slot: gridSlot, days, d: start.format('MMM DD') + '-' + end.format('MMM DD'),
           }
         }
-        console.log(order)
 
         this.personOrders.push(order)
       }
