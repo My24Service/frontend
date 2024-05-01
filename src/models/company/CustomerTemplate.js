@@ -47,8 +47,11 @@ class CustomerTemplateService extends BaseModel {
     const url = `${this.url}preview_template_pdf/`
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
+    headers.responseType = 'blob'
 
-    return this.axios.post(url, data, headers).then((response) => response.blob())
+    return this.axios.post(url, data, headers).then((response) => {
+      return new Blob([response.data], { type: 'application/pdf' })
+    });
   }
 }
 

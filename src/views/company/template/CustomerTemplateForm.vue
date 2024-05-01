@@ -317,18 +317,10 @@ export default {
       }
 
       try {
-        await this.customerTemplateService
-          .previewPdfTemplate(data)
-          .then(blob => {
-            const _url = window.URL.createObjectURL(blob);
-            window.open(_url, "_blank");
-            this.isLoading = false;
-          })
-          .catch(err => {
-            console.log("Error downloading template", err);
-            this.errorToast(this.$trans("Error downloading template"));
-            this.isLoading = false;
-          });
+        const blob = await this.customerTemplateService.previewPdfTemplate(data);
+        this.isLoading = false;
+        const _url = window.URL.createObjectURL(blob);
+        window.open(_url, "_blank");
       } catch (error) {
         console.log("Error downloading template", error);
         this.errorToast(this.$trans("Error downloading template"));
