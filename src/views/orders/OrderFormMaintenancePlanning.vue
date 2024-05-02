@@ -567,34 +567,28 @@
           </div>
           <h6>{{$trans('Order lines')}}</h6>
           <div class="order-lines section">
-            <b-row>
-              <b-col cols="12">
-                <b-table v-if="order.orderlines.length > 0" small :fields="orderLineFields" :items="order.orderlines" responsive="md">
-                  <template #cell()="data">
-                    {{ data.value }}
-                  </template>
-                  <template #cell(icons)="data">
-                    <div class="float-right">
-                      <b-link class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
-                        <b-icon-pencil></b-icon-pencil>
-                      </b-link>
-                      <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
-                        <b-icon-trash></b-icon-trash>
-                      </b-link>
-                    </div>
-                  </template>
-                </b-table>
-              </b-col>
-            </b-row>
+            <b-table v-if="order.orderlines.length > 0" small :fields="orderLineFields" :items="order.orderlines" responsive="md">
+              <template #cell(icons)="data">
+                <div class="float-right">
+                  <b-link class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
+                    <b-icon-pencil></b-icon-pencil>
+                  </b-link>
+                  <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
+                    <b-icon-trash></b-icon-trash>
+                  </b-link>
+                </div>
+              </template>
+            </b-table>
+
+            <hr v-if="order.orderlines.length > 0"/>
 
             <div v-if="usesEquipment">
               <!-- equipment -->
+              <h5 v-if="isEditOrderLine">{{ $trans("Edit") }}</h5>
+              <h5 v-else>{{ $trans("New") }}</h5>
               <b-form-group
                 v-bind:label="$trans('Equipment')"
-                cols="8">
-                <b-input-group
-                  class="flex-columns align-items-center space-between"
-                  >
+                cols="12">
                   <multiselect
                     id="maintenance-contract-equipment-name"
                     ref="multiselect_equipment"
@@ -616,7 +610,6 @@
                     @search-change="getEquipmentDebounced"
                     @select="selectEquipment"
                     :disabled="!equipmentFormSearchOk"
-                    style="max-width: 50%"
                   >
                     <span slot="noResult">
                       <h5>{{ $trans('No equipment found') }}</h5>
@@ -638,7 +631,7 @@
                     {{ product }}
                     <b-icon-check v-if="equipment"></b-icon-check>
                   </span>
-                </b-input-group>
+
               </b-form-group>
 
               <!-- equipment locations -->
@@ -646,7 +639,6 @@
                 v-bind:label="$trans('Location')"
                 cols="12"
                 >
-                <b-input-group class="flex-columns align-items-center space-between">
                   <multiselect
                     id="location-name"
                     ref="multiselect_location"
@@ -668,7 +660,6 @@
                     @search-change="getLocationDebounced"
                     @select="selectLocation"
                     :disabled="!equipmentFormSearchOk || locationSearchDisabled"
-                    style="max-width: 50%"
                   >
                     <span slot="noResult">
                       <h5>{{ $trans('No locations found') }}</h5>
@@ -690,8 +681,6 @@
                     {{ location }}
                     <b-icon-check v-if="equipment_location"></b-icon-check>
                   </span>
-
-                </b-input-group>
               </b-form-group>
 
               <!-- if maintenance: equipment amount -->
@@ -710,7 +699,6 @@
 
               <!-- else: equipment remarks -->
               <b-form-group v-else
-              label-cols="3"
               label-for="order-orderline-remarks"
               v-bind:label="$trans('Remarks')"
               >
@@ -790,13 +778,32 @@
             </b-form-group>
           </div>
 
+          <hr/>
+
           <div class="info-lines section" v-if="!hasBranches">
             <h6>{{ $trans('Info lines') }}</h6>
+            <b-table v-if="order.infolines.length > 0" small :fields="infoLineFields" :items="order.infolines" responsive="md">
+              <template #cell(icons)="data">
+                <div class="float-right">
+                  <b-link class="h5 mx-2" @click="editInfoLine(data.item, data.index)">
+                    <b-icon-pencil></b-icon-pencil>
+                  </b-link>
+                  <b-link class="h5 mx-2" @click.prevent="deleteInfoLine(data.index)">
+                    <b-icon-trash></b-icon-trash>
+                  </b-link>
+                </div>
+              </template>
+            </b-table>
+
+            <hr v-if="order.infolines.length > 0"/>
+
             <div>
+              <h5 v-if="isEditInfoLine">{{ $trans("Edit") }}</h5>
+              <h5 v-else>{{ $trans("New") }}</h5>
+
               <b-form-group
                 v-bind:label="$trans('Info')"
                 label-for="order-infoline-info"
-                label-cols="3"
               >
                 <b-form-textarea
                   id="order-infoline-info"
@@ -813,19 +820,7 @@
                 </b-button>
               </b-form-group>
             </div>
-            <ul class="listing full-size mt-3">
-              <li v-for="(item, index) of order.infolines" :key="index">
-                {{ item.info }}
-                <div class="float-right">
-                  <b-link class="h5 mx-2" @click="editInfoLine(item, index)">
-                    <b-icon-pencil></b-icon-pencil>
-                  </b-link>
-                  <b-link class="h5 mx-2" @click.prevent="deleteInfoLine(index)">
-                    <b-icon-trash></b-icon-trash>
-                  </b-link>
-                </div>
-              </li>
-            </ul>
+
           </div>
         </div>
       </div>
