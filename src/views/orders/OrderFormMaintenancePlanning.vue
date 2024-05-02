@@ -565,20 +565,41 @@
               </b-col>
             </b-row>
           </div>
-          <h6>{{$trans('Order lines')}}</h6>
+
           <div class="order-lines section">
-            <b-table v-if="order.orderlines.length > 0" small :fields="orderLineFields" :items="order.orderlines" responsive="md">
-              <template #cell(icons)="data">
-                <div class="float-right">
-                  <b-link class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
-                    <b-icon-pencil></b-icon-pencil>
-                  </b-link>
-                  <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
-                    <b-icon-trash></b-icon-trash>
-                  </b-link>
-                </div>
-              </template>
-            </b-table>
+            <h6>{{$trans('Order lines')}}</h6>
+            <b-container fluid="sm">
+              <b-row
+                v-for="(orderline, index) of order.orderlines"
+                :key="orderline.id"
+                no-gutters
+                style="padding-bottom: 10px"
+              >
+                <b-col cols="9">
+                  <b-container>
+                    <b-row>
+                      <b-col cols="12">{{ $trans("Product") }}: <b>{{ orderline.product }}</b></b-col>
+                    </b-row>
+                    <b-row>
+                      <b-col cols="12">{{ $trans("Location") }}: <b>{{ orderline.location }}</b></b-col>
+                    </b-row>
+                    <b-row>
+                      <b-col cols="12">{{ $trans("Remarks") }}: <b>{{ orderline.remarks }}</b></b-col>
+                    </b-row>
+                  </b-container>
+                </b-col>
+                <b-col cols="3">
+                  <div class="float-right">
+                    <b-link class="h5 mx-2" @click="editOrderLine(orderline, index)">
+                      <b-icon-pencil></b-icon-pencil>
+                    </b-link>
+                    <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(index)">
+                      <b-icon-trash></b-icon-trash>
+                    </b-link>
+                  </div>
+                </b-col>
+              </b-row>
+            </b-container>
 
             <hr v-if="order.orderlines.length > 0"/>
 
@@ -628,7 +649,7 @@
                   </multiselect>
 
                   <span>
-                    {{ product }}
+                    <strong>{{ product }}</strong>
                     <b-icon-check v-if="equipment"></b-icon-check>
                   </span>
 
@@ -678,7 +699,7 @@
                   </multiselect>
 
                   <span>
-                    {{ location }}
+                    <strong>{{ location }}</strong>
                     <b-icon-check v-if="equipment_location"></b-icon-check>
                   </span>
               </b-form-group>
@@ -782,18 +803,28 @@
 
           <div class="info-lines section" v-if="!hasBranches">
             <h6>{{ $trans('Info lines') }}</h6>
-            <b-table v-if="order.infolines.length > 0" small :fields="infoLineFields" :items="order.infolines" responsive="md">
-              <template #cell(icons)="data">
-                <div class="float-right">
-                  <b-link class="h5 mx-2" @click="editInfoLine(data.item, data.index)">
-                    <b-icon-pencil></b-icon-pencil>
-                  </b-link>
-                  <b-link class="h5 mx-2" @click.prevent="deleteInfoLine(data.index)">
-                    <b-icon-trash></b-icon-trash>
-                  </b-link>
-                </div>
-              </template>
-            </b-table>
+            <b-container fluid="sm">
+              <b-row
+                v-for="(infoline, index) of order.infolines"
+                :key="infoline.id"
+                no-gutters
+                style="padding-bottom: 10px"
+              >
+                <b-col cols="9">
+                  <b>{{ infoline.info }}</b>
+                </b-col>
+                <b-col cols="3">
+                  <div class="float-right">
+                    <b-link class="h5 mx-2" @click="editInfoLine(infoline, index)">
+                      <b-icon-pencil></b-icon-pencil>
+                    </b-link>
+                    <b-link class="h5 mx-2" @click.prevent="deleteInfoLine(index)">
+                      <b-icon-trash></b-icon-trash>
+                    </b-link>
+                  </div>
+                </b-col>
+              </b-row>
+            </b-container>
 
             <hr v-if="order.infolines.length > 0"/>
 
@@ -924,10 +955,7 @@ export default {
       isEditInfoLine: false,
 
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') },
-        { key: 'icons', label: '' }
+        { key: 'info', label: this.$trans('Orderline') },
       ],
       infoLineFields: [
         { key: 'info', label: this.$trans('Info') },
