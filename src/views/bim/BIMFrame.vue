@@ -2,7 +2,7 @@
   <div class='app-page'>
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="mouse2-fill"></b-icon> 3D Module</h3>
+        <h3><b-icon icon="mouse2-fill"></b-icon>{{ $trans("3D Module") }}</h3>
       </div>
     </header>
     <div class='page-detail'>

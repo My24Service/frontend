@@ -3,8 +3,8 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="box"></b-icon> 
-          <span class="backlink" @click="goBack">Materials</span> / {{  this.material.name }}
+          <b-icon icon="box"></b-icon>
+          <span class="backlink" @click="goBack">{{ $trans("Materials") }}</span> / {{  this.material.name }}
         </h3>
         <div class="flex-columns">
           <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
@@ -48,7 +48,7 @@
           <hr/>
           <img :src="material.image || NO_IMAGE_URL"  :alt="`${material.name} - ${$trans('Product image')}`"/>
         </div>
-        
+
         <div class="panel col-2-3">
           <h6>{{ $trans('Inventory') }}</h6>
           <b-table :fields="inventoryFields" :items="inventory" responsive="sm"></b-table>

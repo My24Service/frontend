@@ -3,8 +3,8 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="file-earmark-medical"></b-icon> 
-          <span class="backlink" @click="cancelForm">{{ $trans('Purchase orders') }}</span> / 
+          <b-icon icon="file-earmark-medical"></b-icon>
+          <span class="backlink" @click="cancelForm">{{ $trans('Purchase orders') }}</span> /
           <span v-if="isCreate">{{ $trans('New purchase order') }}</span>
           <span v-if="!isCreate">{{ $trans('Edit purchase order') }}</span>
         </h3>
@@ -20,7 +20,7 @@
     </header>
     <div class="page-detail">
       <b-overlay :show="isLoading" rounded="sm">
-        
+
           <b-form class="flex-columns">
             <div class="panel col-1-3">
               <h6>{{ $trans('Supplier') }}</h6>
@@ -107,7 +107,7 @@
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              
+
                 <b-form-group
                   label-size="sm"
                   label-cols="3"
@@ -126,7 +126,7 @@
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              
+
                 <b-form-group
                   label-size="sm"
                   label-cols="3"
@@ -145,7 +145,7 @@
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              
+
                 <b-form-group
                   label-size="sm"
                   label-cols="3"
@@ -164,7 +164,7 @@
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              
+
                 <b-form-group
                   label-size="sm"
                   label-cols="3"
@@ -196,7 +196,7 @@
                     v-model="purchaseOrder.order_reference"
                   ></b-form-input>
                 </b-form-group>
-              
+
                 <b-form-group
                   readonly
                   label-size="sm"
@@ -210,8 +210,8 @@
                     v-model="purchaseOrder.order_mobile"
                   ></b-form-input>
                 </b-form-group>
-              
-              
+
+
                 <b-form-group
                   label-size="sm"
                   label-cols="3"
@@ -224,7 +224,7 @@
                     v-model="purchaseOrder.order_tel"
                   ></b-form-input>
                 </b-form-group>
-              
+
                 <b-form-group
                   label-size="sm"
                   label-cols="3"
@@ -247,10 +247,10 @@
                     {{ $trans('Please enter a date') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-                
+
                 <hr>
 
-              
+
                   <b-form-group
                     label-size="sm"
                     label-cols="3"
@@ -263,7 +263,7 @@
                       rows="2"
                     ></b-form-textarea>
                   </b-form-group>
-                
+
                   <b-form-group
                     label-size="sm"
                     label-cols="3"
@@ -276,7 +276,7 @@
                       rows="2"
                     ></b-form-textarea>
                   </b-form-group>
-                
+
                   <b-form-group
                     label-size="sm"
                     label-cols="3"
@@ -289,7 +289,7 @@
                       rows="2"
                     ></b-form-textarea>
                   </b-form-group>
-                
+
             </div>
 
             <div class="panel col-2-3">
@@ -432,12 +432,12 @@
                 </footer>
               </div>
               <div v-else>
-                <h6>Products</h6>
-                <h3 class="dimmed">Select a supplier or reservation</h3>
+                <h6>{{ $trans("Products") }}</h6>
+                <h3 class="dimmed">{{ $trans("Select a supplier or reservation") }}</h3>
               </div>
             </div>
           </b-form>
-        
+
       </b-overlay>
     </div>
   </div>

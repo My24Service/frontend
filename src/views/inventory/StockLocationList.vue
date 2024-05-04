@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="bookshelf"></b-icon>Stock Locations
+          <b-icon icon="bookshelf"></b-icon>{{ $trans("Stock Locations") }}
         </h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">

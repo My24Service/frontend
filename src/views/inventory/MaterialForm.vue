@@ -3,9 +3,9 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="box"></b-icon> 
-          <span class="backlink" @click="cancelForm">Materials</span> / 
-          <span v-if="isCreate && !this.material.name" class="dimmed">(Material name)</span>
+          <b-icon icon="box"></b-icon>
+          <span class="backlink" @click="cancelForm">{{ $trans("Materials") }}</span> /
+          <span v-if="isCreate && !this.material.name" class="dimmed">({{ $trans("Material name") }}</span>
           <span v-else>{{this.material.name}}</span>
         </h3>
         <div class="flex-columns">
@@ -53,7 +53,7 @@
                   v-model="material.name_short"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -66,7 +66,7 @@
                   v-model="material.identifier"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -79,7 +79,7 @@
                   v-model="material.unit"
                 ></b-form-input>
               </b-form-group>
-          
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -109,7 +109,7 @@
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                 </multiselect>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -123,7 +123,7 @@
                   v-model="material.supplier_name"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -136,7 +136,7 @@
                   v-model="material.location"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -151,7 +151,7 @@
               </b-form-group>
 
 
-              <h6>Pricing</h6>
+              <h6>{{ $trans("Pricing") }}</h6>
 
               <b-form-group
                 label-size="sm"
@@ -165,7 +165,7 @@
                   size="sm"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -178,7 +178,7 @@
                   v-model="material.price_selling"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -191,7 +191,7 @@
                   v-model="material.price_selling_alt"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -204,7 +204,7 @@
                   v-model="material.price_purchase_ex"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -217,7 +217,7 @@
                   v-model="material.price_selling_ex"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"

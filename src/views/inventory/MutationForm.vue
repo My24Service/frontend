@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="arrow-left-right"></b-icon>Mutations</h3>
+        <h3><b-icon icon="arrow-left-right"></b-icon>{{ $trans("Mutations") }}</h3>
         <b-button-toolbar>
           <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
@@ -18,7 +18,7 @@
         <b-form class="flex-columns">
           <div class="panel col-1-3">
             <h6>{{ $trans('Add mutation') }}</h6>
-            
+
             <b-form-group
               label-size="sm"
               label-cols="12"
@@ -46,7 +46,7 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
             </b-form-group>
-            
+
 
             <b-form-group
               label-size="sm"
@@ -59,7 +59,7 @@
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          
+
             <div class="flex-columns">
               <b-form-group
                 label-cols="3"
@@ -78,7 +78,7 @@
                   {{ $trans('Please enter an amount') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
+
               <b-form-group
                 label-cols="3"
                 label-align="right"
@@ -88,7 +88,7 @@
                 <b-form-select v-model="mutation.mutation_type" :options="mutationTypes"></b-form-select>
               </b-form-group>
             </div>
-            
+
             <h6>{{ $trans(locationText)}}</h6>
             <b-form-group
               label-size="sm"
@@ -113,7 +113,7 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
             </b-form-group>
-          
+
             <b-form-group
               label-for="add-mutation-location-name"
             >

@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="box"></b-icon>
-          Materials
+          {{ $trans("Materials") }}
         </h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
@@ -49,7 +49,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>

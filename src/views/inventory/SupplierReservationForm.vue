@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-lock"></b-icon>
-          <span class="backlink" @click="cancelForm">{{ $trans('Reservations') }}</span> / 
+          <span class="backlink" @click="cancelForm">{{ $trans('Reservations') }}</span> /
           <span v-if="isCreate">{{ $trans('New reservation') }}</span>
           {{ this.pk }} <span v-if="!isCreate" class="dimmed">{{ $trans('edit') }}</span>
         </h3>
@@ -54,7 +54,7 @@
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                   </multiselect>
                 </b-form-group>
-                
+
                 <b-form-group
                 label-cols="12"
                   label-cols-md="3"
@@ -74,7 +74,7 @@
                     {{ $trans('Please select a supplier') }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              
+
                 <b-form-group
                   label-size="sm"
                   label-cols="12"
@@ -94,7 +94,7 @@
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              
+
                 <b-form-group
                   label-size="sm"
                   label-cols="12"
@@ -114,7 +114,7 @@
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              
+
                 <b-form-group
                   label-size="sm"
                   label-cols="12"
@@ -139,7 +139,7 @@
             <div class='panel col-1-3'>
               <div class="reservation-materials">
                 <h6>{{$trans('Add product(s)')}}</h6>
-                  
+
                   <b-form-group
                     label-size="sm"
                     v-bind:label="$trans('Search product')"
@@ -171,8 +171,8 @@
                       {{ $trans('Please select a product') }}
                     </b-form-invalid-feedback>
                   </b-form-group>
-            
-            
+
+
                   <b-form-group
                     label-size="sm"
                     v-bind:label="$trans('Name')"
@@ -185,9 +185,9 @@
                     readonly
                     :state="!v$.material.material.$error"
                     ></b-form-input>
-                    
+
                   </b-form-group>
-              
+
                   <b-form-group
                     label-size="sm"
                     label-cols="3"
@@ -206,7 +206,7 @@
                       {{ $trans('Please enter an amount') }}
                     </b-form-invalid-feedback>
                   </b-form-group>
-                
+
                   <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
@@ -218,7 +218,7 @@
                   rows="1"
                   ></b-form-textarea>
                 </b-form-group>
-                  
+
                 <footer class="modal-footer">
                   <b-button
                     @click="cancelEditMaterial"
@@ -251,7 +251,7 @@
                     {{ $trans('Add product') }}
                   </b-button>
                 </footer>
-              
+
               </div>
 
             </div>
@@ -274,7 +274,6 @@
                   </div>
                 </template>
               </b-table>
-              <!-- <b-button v-b-toggle.my-collapse>Add products</b-button> -->
             </div>
           </div>
         </b-form>

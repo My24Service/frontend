@@ -3,7 +3,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-lock"></b-icon>Reservations</h3>
+        <h3><b-icon icon="file-earmark-lock"></b-icon>{{ $trans("Reservations") }}</h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
             <ButtonLinkRefresh
@@ -14,7 +14,9 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <router-link :to="{name: 'supplier-reservation-add'}" class="btn primary">Add reservation</router-link>
+          <router-link :to="{name: 'supplier-reservation-add'}" class="btn primary">
+            {{ $trans("Add reservation") }}
+          </router-link>
         </b-button-toolbar>
       </div>
     </header>
@@ -57,11 +59,11 @@
         </template>
 
         <template #cell(id)="data">
-          
+
           <router-link :to="{name: 'supplier-reservation-view', params: {pk: data.item.id}}">
             {{ data.item.id }}. {{ data.item.supplier_view.name }}, {{ data.item.supplier_view.city }}
           </router-link>
-        
+
           <!-- TODO: delete this table probably
             <b-table
               id="supplier-reservation-materials-table"
@@ -86,7 +88,7 @@
               <span class="dimmed">
                 {{ data.item.materials[0].amount }} {{ data.item.materials[0].material_view.name }}
                 <small v-if="data.item.materials.length > 1" class="dimmed">
-                  and {{data.item.materials.length - 1 }} more
+                  {{ $trans("and") }} {{data.item.materials.length - 1 }} {{ $trans("more") }}
                 </small>
               </span>
             </span>

@@ -5,8 +5,8 @@
         <h3><b-icon icon="box-arrow-right"></b-icon>{{ $trans('Move materials') }}</h3>
         <div class="flex-columns" style="z-index:1000">
           <b-dropdown split :text="$trans('Submit')" class="m-2" variant="primary" @click="submitForm" :disabled="canSubmit">
-            <b-dropdown-item-button 
-              @click="submitFormBulk" 
+            <b-dropdown-item-button
+              @click="submitFormBulk"
               :disabled="canSubmit"
               title="Submit and move another material">
               {{ $trans('Bulk') }}
@@ -25,18 +25,18 @@
     </header>
     <div class="page-detail">
       <b-form class="flex-columns">
-        
+
         <div class="panel col-1-3">
-          <h6>Material</h6>
+          <h6>{{ $trans("Material") }}</h6>
 
             <div v-if="selectedMaterial.material_name">
               <h3>{{ selectedMaterial.material_name }}</h3>
               <dl>
-                <dt>In stock</dt>
+                <dt>{{ $trans("In stock") }}</dt>
                 <dd>{{ selectedMaterial.total_amount }}</dd>
-                <dt>Supplier</dt>
+                <dt>{{ $trans("Supplier") }}</dt>
                 <dd>{{ selectedMaterial.supplier_name }}</dd>
-                <dt v-if="selectedMaterial.material_identifier">Identifier</dt>
+                <dt v-if="selectedMaterial.material_identifier">{{ $trans("Identifier") }}</dt>
                 <dd v-if="selectedMaterial.material_identifier">{{ selectedMaterial.material_identifier }}</dd>
               </dl>
               <h6>{{$trans('Amount')}}</h6>
@@ -64,7 +64,7 @@
             <div v-else class="dimmed">
               <h3>
                 <span class='h1'><br><b-icon icon="box"></b-icon></span>
-                <br><br> Material</h3>
+                <br><br>{{ $trans("Material") }}</h3>
             </div>
             <b-form-group
               label-size="sm"
@@ -117,7 +117,6 @@
 
           <b-form-group
             label-size="sm"
-            v-bind:label="$trans('')"
             label-for="move-material-from-location-search"
             >
             <multiselect
@@ -133,7 +132,7 @@
               :limit="10"
               :max-height="600"
               :show-no-results="false"
-              
+
               @select="selectFromLocation"
               :custom-label="fromLocationLabel"
             >
@@ -268,7 +267,7 @@ export default {
     },
     canSubmit() {
       return !this.selectedFromLocationPk || !this.selectedToLocationPk;
-      
+
     }
   },
   created() {

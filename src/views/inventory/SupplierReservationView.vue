@@ -3,18 +3,18 @@
     <header>
       <div class='page-title'>
         <h3><b-icon icon="file-earmark-lock"></b-icon>
-          <router-link :to="{name:'supplier-reservation-list'}">Reservations</router-link> / {{this.pk}}
+          <router-link :to="{name:'supplier-reservation-list'}">{{ $trans("Reservations") }}</router-link> / {{this.pk}}
         </h3>
         <div class="flex-columns">
           <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
             {{ $trans('Back') }}</b-button>
-          <router-link class="btn primary" :to="{name: 'supplier-reservation-edit', params: {pk:this.pk}}">Edit</router-link>
+          <router-link class="btn primary" :to="{name: 'supplier-reservation-edit', params: {pk:this.pk}}">{{ $trans("Edit") }}</router-link>
         </div>
       </div>
     </header>
     <div class="page-details panel">
       <b-overlay :show="isLoading" rounded="sm">
-        
+
         <h3>{{ $trans('Reservation info') }}</h3>
         <b-row>
           <b-col cols="6">

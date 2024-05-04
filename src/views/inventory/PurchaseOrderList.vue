@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-medical"></b-icon> Purchase orders
+          <b-icon icon="file-earmark-medical"></b-icon>{{ $trans("Purchase orders") }}
         </h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
@@ -75,7 +75,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -85,9 +85,9 @@
           </div>
         </template>
         <template #cell(purchase_order_id)="data">
-          
+
             <router-link :to="{name: 'purchaseorder-view', params: {pk: data.item.id}}">{{ data.item.purchase_order_id }} {{ data.item.order_name }}</router-link>
-          
+
           <!--
           {{ data.item.order_address }}<br/>
           {{ data.item.order_country_code }}-{{ data.item.order_postal }} {{ data.item.order_city }}
@@ -108,7 +108,7 @@
 
         <template #cell(totals)="data">
           <div class="flex-columns">
-            <b-progress 
+            <b-progress
             :style="`--delay: ${data.index }`"
             :value="(data.item.total_entries/data.item.total_materials)*100"></b-progress>
             <small class="dimmed">{{ data.item.total_entries || 0 }} / {{ data.item.total_materials }}</small>

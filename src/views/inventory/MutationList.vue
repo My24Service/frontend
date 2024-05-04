@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="arrow-left-right"></b-icon>Mutations</h3>
+        <h3><b-icon icon="arrow-left-right"></b-icon>{{ $trans("Mutations") }}</h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
             <ButtonLinkRefresh
@@ -37,7 +37,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-           
+
           </div>
         </template>
         <template #table-busy>
