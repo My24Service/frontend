@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page">
+  <div class="app-page" v-if="order">
     <b-modal
       id="new-equipment-modal"
       ref="new-equipment-modal"
@@ -522,48 +522,12 @@
         </div>
 
         <div class="panel col-1-3">
-          <h6 class="flex-columns space-between align-items-center">
-            <span>{{ $trans('Documents') }}</span>
-            <router-link
-              class="button btn-sm btn-primary"
-              v-if="!isCreate"
-              :to="{name: 'order-documents', params : {'orderPk': pk}}">edit documents</router-link>
-          </h6>
-          <div class="order-documents section">
-            <div class="my-2" v-if="!isCreate && order.documents && order.documents.length > 0">
-              <ul class="listing">
-                <li v-for="doc in order.documents" :key="doc.url">
-                  <a class="listing-item" :href="doc.url" target="_blank">
-                    <span>{{ doc.name}}</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <b-form-group
-            v-if="isCreate"
-              v-bind:label="$trans('Choose files')"
-              label-cols="3">
-              <b-form-file
-                v-model="files"
-                multiple
-                v-bind:placeholder="$trans('Choose a file or drop it here...')"
-                @input="filesSelected"
-              ></b-form-file>
-            </b-form-group>
-
-            <b-row>
-              <b-col cols="12">
-                <b-table v-if="documents.length > 0" small :fields="documentFields" :items="documents" responsive="md">
-                  <template #cell(icons)="data">
-                    <div class="float-right">
-                      <b-link class="h5 mx-2" @click.prevent="deleteDocument(data.index)">
-                        <b-icon-trash></b-icon-trash>
-                      </b-link>
-                    </div>
-                  </template>
-                </b-table>
-              </b-col>
-            </b-row>
+          <div class="documents section">
+            <DocumentsComponent
+              :order="order"
+              :is-view="false"
+              ref="documents-component"
+            />
           </div>
 
           <div class="order-lines section">
@@ -881,7 +845,7 @@ import {OrderlineService} from "@/models/orders/Orderline";
 import {InfolineService} from "@/models/orders/Infoline";
 import CustomerCard from '../../components/CustomerCard.vue'
 import {EngineerService} from "@/models/company/UserEngineer";
-import {DocumentService} from "@/models/orders/Document";
+import DocumentsComponent from "./order_form/DocumentsComponent.vue";
 
 const isCorrectTime = (value) => {
   return !helpers.req(value) || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
@@ -893,6 +857,7 @@ export default {
     return { v$: useVuelidate() }
   },
   components: {
+    DocumentsComponent,
     Multiselect,
     OrderTypesSelect,
     Collapse,
@@ -922,14 +887,12 @@ export default {
   },
   watch: {
     startDate(val) {
-      console.info("WATCH: startDate", val)
-      if (new Date(this.endDate) < new Date(val)) {
+      if (this.endDate && new Date(this.endDate) < new Date(val)) {
         this.order.end_date = val
       }
     },
     endDate(val) {
-      console.info("WATCH: endDate", val)
-      if (new Date(val) < new Date(this.startDate)) {
+      if (this.startDate && new Date(val) < new Date(this.startDate)) {
         this.order.start_date = val
       }
     }
@@ -961,17 +924,13 @@ export default {
         { key: 'info', label: this.$trans('Info') },
         { key: 'icons', label: '' }
       ],
-      documentFields: [
-        { key: 'name', label: this.$trans('Name') },
-        { key: 'icons', label: '' }
-      ],
       recommendedUsers: [],
       recommendedUsersFields: [
         { key: 'full_name', label: this.$trans('Name') },
       ],
       submitClicked: false,
       countries: [],
-      order: new OrderModel(),
+      order: null,
       errorMessage: null,
       customers: [],
       customerSearch: '',
@@ -982,7 +941,6 @@ export default {
       engineers: [],
       selectedEngineers: [],
       files: [],
-      documents: [],
       orderPk: null,
       nextField: 'orders',
       nextFieldOptions: [
@@ -1014,7 +972,6 @@ export default {
       locationService: new LocationService(),
       orderlineService: new OrderlineService(),
       infolineService: new InfolineService(),
-      documentService: new DocumentService()
     }
   },
   validations() {
@@ -1100,11 +1057,17 @@ export default {
         companyCodesUseEquipments.indexOf(this.$store.getters.getMemberCompanycode) !== -1
     },
     startDate() {
-      console.warn("COMPUTED: startDate", typeof this.order.start_date, this.order.start_date)
+      if (!this.order) {
+        return
+      }
+
       return this.order.start_date
     },
     endDate() {
-      console.info("COMPUTED: endDate", this.order.end_date)
+      if (!this.order) {
+        return
+      }
+
       return this.order.end_date
     },
     isCreate() {
@@ -1285,32 +1248,6 @@ export default {
       this.location = option.name
     },
 
-    // documents
-    filesSelected(files) {
-      for (let i=0;i<files.length; i++) {
-        const reader = new FileReader()
-        reader.onload = (f) => {
-          const b64 = f.target.result
-          this.documents.push({
-            file: b64,
-            name: files[i].name,
-            description: ''
-          })
-        }
-
-        reader.readAsDataURL(files[i])
-      }
-    },
-    async deleteDocument(index) {
-      const deleted = this.documents.splice(index, 1)
-      try {
-        for (const document of deleted) {
-          await this.documentService.delete(document.id)
-        }
-      } catch(error) {
-        console.log('Error deleting documents', error)
-      }
-    },
     // order lines
     deleteOrderLine(index) {
       this.deletedOrderlines.push(this.order.orderlines[index])
@@ -1531,22 +1468,9 @@ export default {
         }
 
         // insert documents
-        try {
-          for (const document of this.documents) {
-            document.order = newOrder.id
-            await this.documentService.insert(document)
-          }
+        this.$refs['documents-component'].orderCreated(newOrder)
 
-          if (this.documents.length) {
-            this.infoToast(this.$trans('Created'), this.$trans('Document(s) added'))
-          }
-        } catch(error) {
-          console.log('Error creating documents', error)
-          this.errorToast(this.$trans('Error creating documents'))
-          this.isLoading = false
-          this.buttonDisabled = false
-        }
-
+        // engineers
         await this.assignEngineers(newOrder.order_id)
 
         if (this.nextField === 'orders' || this.hasBranches) {

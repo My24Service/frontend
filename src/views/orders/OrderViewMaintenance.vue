@@ -216,20 +216,13 @@
 
         <div class="panel col-1-3">
 
-          <h6 class="flex-columns space-between align-items-center">
-            <span><b-icon-paperclip></b-icon-paperclip> {{ $trans('Documents') }}</span>
-            <router-link :to="{name: 'order-documents', params : {'orderPk': pk}}" class="button btn-sm btn-primary">edit documents</router-link>
-          </h6>
-          <div class="my-2" v-if="order.documents.length > 0">
-            <ul class="listing">
-              <li v-for="doc in order.documents" :key="doc.url">
-                <a class="listing-item" :href="doc.url" target="_blank">
-                  <span>{{ doc.name}}</span>
-                </a>
-              </li>
-            </ul>
+          <div class="documents section">
+            <DocumentsComponent
+              v-if="order"
+              :order="order"
+              :is-view="true"
+            />
           </div>
-          <small v-else class="dimmed">{{ $trans('No Documents found') }}</small>
 
           <h6 v-if="order.orderlines.length">{{ $trans('Orderlines') }}</h6>
           <ul class="listing full-size" v-if="order.orderlines.length">
@@ -385,10 +378,12 @@ import IconLinkPlus from "@/components/IconLinkPlus.vue";
 import PriceInput from "@/components/PriceInput.vue";
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import StatusesComponent from "@/components/StatusesComponent.vue";
+import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    DocumentsComponent,
     StatusesComponent,
     IconLinkPlus,
     PriceInput,

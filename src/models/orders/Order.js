@@ -14,6 +14,7 @@ if (tomorrow.day() === 6) {
 }
 
 class OrderModel {
+  id
   order_id
   customer_id
   order_name
