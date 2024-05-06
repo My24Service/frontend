@@ -64,8 +64,8 @@
               <h2>{{ $trans('Modify import data') }}</h2>
               <div>
                 <ul>
-                  <li>country_code: NL, BE, DE, etc.</li>
-                  <li>external_identifier: {{ $trans("internal ID used by company ") }}</li>
+                  <li>{{ $trans("country_code: NL, BE, DE, etc.") }}</li>
+                  <li>{{ $trans("external_identifier") }}: {{ $trans("internal ID used by company ") }}</li>
                   <li>{{ $trans("Required fields") }}: {{ required.join(', ') }}</li>
                 </ul>
               </div>
