@@ -154,13 +154,13 @@
             <li><!-- FIXME -->
 
               <div class="headings">
-                <span class="order-id">order id</span>
-                <span class="order-type">type</span>
-                <span class="order-company-name">company</span>
-                <span class="order-start-date">start date</span>
-                <span class="order-assignees">people</span>
-                <span class="order-documents">Documents</span>
-                <span class="order-status">status</span>
+                <span class="order-id">{{ $trans("order id") }}</span>
+                <span class="order-type">{{ $trans("type") }}</span>
+                <span class="order-company-name">{{ $trans("company") }}</span>
+                <span class="order-start-date">{{ $trans("start date") }}</span>
+                <span class="order-assignees">{{ $trans("people") }}</span>
+                <span class="order-documents">{{ $trans("Documents") }}</span>
+                <span class="order-status">{{ $trans("status") }}</span>
               </div>
             </li>
             <section v-if="isLoading" class="text-center my-2 list-loading">

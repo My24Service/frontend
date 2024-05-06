@@ -58,7 +58,7 @@
       <div class="page-title">
         <h3 v-if="!pk">
           <b-icon icon="file-earmark-plus"></b-icon>
-          <router-link :to="{name:'order-list'}">Orders</router-link> /
+          <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
           <strong>new</strong>
         </h3>
         <h3 v-if="pk">

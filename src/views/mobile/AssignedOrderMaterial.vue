@@ -2,7 +2,7 @@
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
       <header>
-        <h3>Materials</h3>
+        <h3>{{ $trans("Materials") }}</h3>
       </header>
       <b-modal
         id="delete-assignedorder-material-modal"

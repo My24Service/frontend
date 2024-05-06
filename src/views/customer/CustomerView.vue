@@ -5,7 +5,7 @@
         <div class="page-title">
           <h3>
             <b-icon icon="building"></b-icon>
-            <span class="backlink" @click="goBack">Customers</span> / {{  customer.name }}
+            <span class="backlink" @click="goBack">{{ $trans("Customers") }}</span> / {{  customer.name }}
           </h3>
           <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
             <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit customer') }}
@@ -22,7 +22,6 @@
           <div class="panel col-2-3">
             <b-tabs>
               <b-tab :title="$trans('Orders')">
-                <!-- <h6>Orders</h6> -->
                 <div class="overflow-auto">
                   <ul class="listing order-list">
                     <li v-for="item in orders" :key="item.id">

@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="clipboard"></b-icon>
-          <span>Orders</span>
+          <span>{{ $trans("Orders") }}</span>
         </h3>
 
         <b-button-toolbar>
@@ -55,11 +55,11 @@
           <li><!-- FIXME -->
             <div class="headings">
               <span class="order-id"></span>
-              <span class="order-type">type</span>
-              <span class="order-company-name">company</span>
-              <span class="order-due-date">due date</span>
-              <span class="order-assignees">people</span>
-              <span class="order-status">status</span>
+              <span class="order-type">{{ $trans("type") }}</span>
+              <span class="order-company-name">{{ $trans("company") }}</span>
+              <span class="order-due-date">{{ $trans("due date") }}</span>
+              <span class="order-assignees">{{ $trans("people") }}</span>
+              <span class="order-status">{{ $trans("status") }}</span>
             </div>
           </li>
 

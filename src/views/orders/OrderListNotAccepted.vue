@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="clipboard"></b-icon>
-          <span>Orders</span>
+          <span>{{ $trans("Orders") }}</span>
         </h3>
 
       <b-button-toolbar>

@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
-          <router-link :to="{name: 'order-list'}">Orders</router-link> /
+          <router-link :to="{name: 'order-list'}">{{ $trans("Orders") }}</router-link> /
           <span>#<strong>{{ order.order_id }}</strong></span>
         </h3>
         <div class="flex-columns">

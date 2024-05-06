@@ -1,7 +1,7 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>Timesheets</h3>
+      <h3>{{ $trans("Timesheets") }}</h3>
     </header>
     <div class="panel">
       <UserHoursData

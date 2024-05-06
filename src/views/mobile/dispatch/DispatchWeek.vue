@@ -4,7 +4,7 @@
     <ul :class="`listing calendar week ${this.isLoading ? 'loading': ''}`">
       <li class="planning-head">
         <div class="weekdays">
-          <div><b-spinner v-if="this.isLoading" small></b-spinner> week <strong>{{ currentWeek }} </strong>({{ currentMonth }})</div>
+          <div><b-spinner v-if="this.isLoading" small></b-spinner>{{ $trans("week") }}<strong>{{ currentWeek }}</strong>({{ currentMonth }})</div>
           <span v-for="day of displayWeekdays" :key="day.date" :data-day="day.day">
             <h5>
               <strong v-if="day.date === todaysDate.date && day.month === todaysDate.month" class="today">{{ day.date }}</strong>
