@@ -47,11 +47,8 @@
       <span class="order-documents">
         <span v-if="order.documents.length" >
           <b-icon icon="paperclip"></b-icon>
+          {{ order.documents.length && order.documents.length }} {{ $trans("document") }}{{ order.documents.length === 1 ? '' : 's' }}
         </span>
-        <router-link
-          v-if="isLoaded && order.documents.length"
-          :to="{name: 'order-documents', params: {orderPk: order.id}}"
-          class="order-type">{{ order.documents.length && order.documents.length }} document{{ order.documents.length == 1 ? '' : 's' }}</router-link>
         <span v-else>&ndash;</span>
       </span>
       <span class="order-status">

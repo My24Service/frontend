@@ -4,7 +4,7 @@
         <div class="page-title">
           <h3>
             <b-icon icon="people"></b-icon>
-            <span class="backlink"  @click="cancelForm">People</span> / 
+            <span class="backlink"  @click="cancelForm">{{ $trans("People") }}</span> /
             <strong> {{ customeruser.username }}</strong>
             <span class="dimmed" v-if="isCreate && !customeruser.username">{{ $trans('(new)') }}</span>
             <span class="dimmed" v-if="!isCreate && !customeruser.username">{{ $trans('(edit)') }}</span>
@@ -21,7 +21,7 @@
         <div class="flex-columns">
           <div class="panel col-1-3">
             <h6>{{ $trans('User info')}}</h6>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -45,7 +45,7 @@
                   {{ $trans('Username is already in use') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -65,7 +65,7 @@
                   {{ $trans('Please enter a password') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -107,7 +107,7 @@
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -125,7 +125,7 @@
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -143,7 +143,7 @@
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -156,7 +156,7 @@
                 v-model="customeruser.customer_user.settings_group"
               ></b-form-input>
             </b-form-group>
-              
+
           </div>
           <div class="panel col-1-3">
             <h6>{{  $trans('Customer') }}</h6>
@@ -194,7 +194,7 @@
                   <b-icon icon="backspace"></b-icon>
               </b-button>
             </div>
-              
+
             <br>
             <b-form-group
               label-size="sm"

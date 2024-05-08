@@ -5,7 +5,7 @@
         <div class="page-title">
           <h3>
             <b-icon icon="people"></b-icon>
-            <span class="backlink"  @click="cancelForm">People</span> / 
+            <span class="backlink"  @click="cancelForm">{{ $trans("People") }}</span> /
             <strong> {{ salesuser.username }}</strong>
             <span class="dimmed" v-if="isCreate && !salesuser.username">{{ $trans('(new)') }}</span>
             <span class="dimmed" v-if="!isCreate && !salesuser.username">{{ $trans('(edit)') }}</span>
@@ -45,8 +45,8 @@
                   {{ $trans('Username is already in use') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
-            
+
+
               <b-form-group
                 label-cols="4"
                 v-bind:label="$trans('Password')"
@@ -65,10 +65,10 @@
                   {{ $trans('Please enter a password') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
-            
+
+
               <b-form-group
-                
+
                 label-cols="4"
                 v-bind:label="$trans('Confirm password')"
                 label-for="salesuser_password_again"
@@ -87,9 +87,9 @@
                   {{ $trans('Passwords do not match') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
+
           </div>
-        
+
           <div class="panel">
               <h6>{{ $trans('Personal details')}}</h6>
               <b-form-group
@@ -109,7 +109,7 @@
                   {{ $trans('Please enter a first name') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -127,7 +127,7 @@
                   {{ $trans('Please enter a last name') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -145,7 +145,7 @@
                   {{ $trans('Please enter a valid email address') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            
+
           </div>
 
           <div class="panel">
@@ -162,7 +162,7 @@
                   v-model="salesuser.sales_user.contract_hours_week"
                 ></b-form-input>
               </b-form-group>
-            
+
               <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -176,10 +176,10 @@
                 >
                 </b-form-checkbox>
               </b-form-group>
-            
+
           </div>
         </div>
-        
+
       </div>
     </div>
   </b-overlay>

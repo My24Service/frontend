@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>People</h3>
+        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
         <div>
           <b-button-toolbar class="flex-columns">
             <b-button-group>
@@ -14,11 +14,11 @@
                 v-bind:method="function() { showSearchModal() }"
               />
             </b-button-group>
-            <b-link :to="{name: 'employee-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add employee</b-link>
+            <b-link :to="{name: 'employee-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add employee") }}</b-link>
           </b-button-toolbar>
         </div>
       </div>
-    
+
     </header>
 
     <SearchModal
@@ -35,7 +35,7 @@
     >
       <p class="my-4">{{ $trans('Are you sure you want to delete this employee?') }}</p>
     </b-modal>
-    
+
 
     <div class="page-details panel">
       <PillsCompanyUsers />
@@ -50,7 +50,7 @@
         class="data-table"
         sort-icon-left
       >
-        
+
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;

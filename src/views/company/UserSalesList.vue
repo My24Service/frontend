@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>People</h3>
+        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
         <b-button-toolbar>
           <b-button-group>
             <ButtonLinkAdd
@@ -19,10 +19,10 @@
             />
           </b-button-group>
         </b-button-toolbar>
-        
+
       </div>
     </header>
-    
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -40,10 +40,10 @@
 
 
     <div class="page-details panel">
-      
+
       <PillsCompanyUsers />
-      <br>  
-      
+      <br>
+
       <b-table
         id="salesuser-table"
         small
@@ -54,7 +54,7 @@
         class="data-table"
         sort-icon-left
       >
-        
+
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;

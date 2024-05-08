@@ -6,14 +6,14 @@
       <div class='page-title'>
         <h3>
           <b-icon icon="people"></b-icon>
-          <span class="backlink" @click="goBack">People</span> / 
+          <span class="backlink" @click="goBack">{{ $trans("People") }}</span> /
           <strong>{{ engineer.full_name}}</strong>
         </h3>
-        
+
       </div>
     </header>
     <div class='page-details panel'>
-      
+
       <div v-if="this.companycode === 'grm'">
         <EngineerEventOrderForm
           v-if="engineer"

@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="people"></b-icon>People</h3>
+        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
         <b-button-toolbar class="flex-columns">
           <b-button-group class="mr-1">
-            
+
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -13,14 +13,14 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-            
+
           </b-button-group>
           <b-button @click="()=>{ downloadList()}" class="btn primary mr-1"><b-icon icon="save"></b-icon> {{$trans('Download')}}</b-button>
-          <b-link :to="{name: 'engineer-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add engineer</b-link>
+          <b-link :to="{name: 'engineer-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add engineer") }}</b-link>
         </b-button-toolbar>
       </div>
     </header>
-    
+
 
     <SearchModal
       id="search-modal"
@@ -55,7 +55,7 @@
         class="data-table"
         sort-icon-left
       >
-        
+
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;

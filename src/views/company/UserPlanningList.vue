@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>People</h3>
+        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
         <div>
           <b-button-toolbar>
             <b-button-group class="mr-1">
@@ -14,12 +14,12 @@
                 v-bind:method="function() { showSearchModal() }"
               />
             </b-button-group>
-            <b-link :to="{name: 'planninguser-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon> Add planner</b-link>
+            <b-link :to="{name: 'planninguser-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add planner") }}</b-link>
           </b-button-toolbar>
         </div>
       </div>
     </header>
-    
+
 
     <SearchModal
       id="search-modal"
@@ -37,10 +37,10 @@
     </b-modal>
 
     <div class="page-details panel">
-      
+
       <PillsCompanyUsers />
       <br>
-      
+
 
       <b-table
         id="planninguser-table"
@@ -52,7 +52,7 @@
         class="data-table"
         sort-icon-left
       >
-      
+
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
@@ -64,7 +64,7 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            
+
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
