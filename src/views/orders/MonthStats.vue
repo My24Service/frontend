@@ -2,11 +2,11 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-bar-graph-fill"></b-icon>Order Stats</h3>
+        <h3><b-icon icon="file-earmark-bar-graph-fill"></b-icon>{{ $trans("Order stats") }}</h3>
         <div class="flex-columns">
-          view 
-          <router-link class="btn button" to="./year-stats">year</router-link>
-          <router-link class="btn button" to="./month-stats" disabled>month</router-link>
+          {{ $trans("view") }}
+          <router-link class="btn button" to="./year-stats">{{ $trans("year") }}</router-link>
+          <router-link class="btn button" to="./month-stats" disabled>{{ $trans("month") }}</router-link>
         </div>
       </div>
     </header>

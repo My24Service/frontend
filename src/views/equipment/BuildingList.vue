@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3>Buildings</h3>
+        <h3>{{ $trans("Buildings") }}</h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
             <ButtonLinkRefresh

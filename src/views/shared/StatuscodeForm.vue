@@ -62,7 +62,7 @@
               rows="3"></b-form-textarea>
           </b-form-group>
 
-          <h6>Label</h6>
+          <h6>{{ $trans("Label") }}</h6>
           <b-form-group
             label-cols="3"
             label="Label preview"
@@ -103,7 +103,7 @@
         </div>
 
         <div class="panel">
-          <h6>Usage</h6>
+          <h6>{{ $trans("Usage") }}</h6>
           <b-form-group
             v-if="list_type === 'order'"
             label-cols="3"
@@ -140,7 +140,7 @@
             </b-form-checkbox>
           </b-form-group>
 
-          <h6>Workflow</h6>
+          <h6>{{ $trans("Workflow") }}</h6>
 
           <b-form-group
             v-if="list_type === 'order'"

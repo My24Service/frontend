@@ -5,7 +5,7 @@
       <div class='page-title' v-if="location">
         <h3>
           <b-icon icon="shop-window"></b-icon>
-          <span @click="goBack" class="backlink">Locations</span>
+          <span @click="goBack" class="backlink">{{ $trans("Locations") }}</span>
           / {{ location.name }}
         </h3>
         <router-link :to="{name: editLink, params: {pk: this.pk}}" class="btn primary">{{$trans('Edit location')}}</router-link>

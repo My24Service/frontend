@@ -5,7 +5,7 @@
         <div class="page-title">
             <h3>
               <b-icon icon="tools"></b-icon>
-              <span class="backlink" @click=cancelForm>Equipment</span> /
+              <span class="backlink" @click=cancelForm>{{ $trans("Equipment") }}</span> /
               <span v-if="isCreate && !equipment.name">{{ $trans('new') }}</span>
               <span v-if="!isCreate && !equipment.name"><span class="dimmed">{{ $trans('edit') }}</span></span>
               <span v-else>{{ equipment.name }}</span>
@@ -412,7 +412,7 @@
             </b-form-group>
         </div>
         <div class="panel col-1-3">
-          <h6>Usage</h6>
+          <h6>{{ $trans("Usage") }}</h6>
 
             <b-form-group
               label-size="sm"

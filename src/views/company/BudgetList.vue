@@ -38,7 +38,7 @@
         </b-container>
       </form>
     </b-modal>
-    
+
     <b-modal id="delete-modal"
       ref="delete-modal"
       v-bind:title="$trans('Delete?')"
@@ -55,7 +55,7 @@
 
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="credit-card2-front"></b-icon> Budgets</h3>
+        <h3><b-icon icon="credit-card2-front"></b-icon>{{ $trans("Budgets") }}</h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
             <ButtonLinkRefresh
@@ -66,7 +66,7 @@
             :method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <button 
+          <button
             class="btn primary"
             @click="showAddModal"
             >
@@ -90,7 +90,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #cell(year)="data">

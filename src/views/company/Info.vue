@@ -10,9 +10,9 @@
         <b-button-toolbar>
           <b-button @click="() => isEditing = !isEditing" class="btn btn-primary" type="button" variant="primary" v-show="!isEditing">
             <b-icon icon="pencil"></b-icon>
-            Edit
+            {{ $trans("Edit") }}
           </b-button>
-          <b-button type="button" @click="cancelForm" v-if="isEditing" variant="outline">Cancel</b-button>
+          <b-button type="button" @click="cancelForm" v-if="isEditing" variant="outline">{{ $trans("Cancel") }}</b-button>
           <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary" v-if="isEditing">
             <b-icon icon="save"></b-icon>
             {{ $trans('Save') }}
@@ -96,7 +96,7 @@
                 v-model="member.chamber_of_commerce"
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -226,7 +226,7 @@
                   {{ $trans('Please enter a valid email') }}
                 </b-form-invalid-feedback>
             </b-form-group>
-          
+
           </fieldset>
         </div>
 

@@ -59,13 +59,13 @@
         <h3 v-if="!pk">
           <b-icon icon="file-earmark-plus"></b-icon>
           <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
-          <strong>new</strong>
+          <strong>{{ $trans("new") }}</strong>
         </h3>
         <h3 v-if="pk">
           <b-icon icon="file-earmark-text-fill"></b-icon>
-          <router-link :to="{name:'order-list'}">Orders</router-link> /
+          <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
           <router-link :to="{name: 'order-view', pk:pk}">#<strong>{{ pk }}</strong></router-link>
-        / edit
+        / {{ $trans("edit") }}
         </h3>
 
         <div class="flex-columns">
@@ -327,7 +327,7 @@
           </details>
         </div>
         <div class="panel col-1-3">
-          <h6>Order details</h6>
+          <h6>{{ $trans("Order details") }}</h6>
           <b-form-group
             v-bind:label="$trans('Order type')"
             label-for="order_type"

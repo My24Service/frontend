@@ -4,22 +4,18 @@
         <div class='page-title'>
           <h3>
             <b-icon icon="shop"></b-icon>
-            <span class='backlink' @click="goBack">Branches</span> / 
+            <span class='backlink' @click="goBack">{{ $trans("Branches") }}</span> /
             <strong>{{ branch.name }}</strong>
           </h3>
           <router-link
           :to="{name: 'company-branch-edit', params: {pk: pk}}"
           class="btn"
-          >Edit branch</router-link>
+          >{{ $trans("Edit branch") }}</router-link>
         </div>
       </header>
       <div class='page-detail flex-columns'>
-        
-        
         <div class="customer-details panel col-1-3" v-if="!isBranchEmployee">
-            
           <CustomerCard :customer="branch"/>
-
         </div>
 
         <div class='panel col-2-3'>
@@ -142,9 +138,9 @@
               </span>
             </b-tab>
             <b-tab :title="$trans('Past orders')">
-              
+
               <div>
-              
+
               <SearchModal
                 id="search-modal"
                 ref="search-modal"
@@ -186,7 +182,7 @@
             </div>
             </b-tab>
             <template #tabs-end>
-              
+
             </template>
           </b-tabs>
         </div>

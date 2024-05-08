@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>Templates</h3>
+        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Templates") }}</h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{ name: 'customer-template-add' }">
-            <b-icon icon="file-earmark-plus"></b-icon> Add template
+            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add template") }}
           </router-link>
         </div>
       </div>

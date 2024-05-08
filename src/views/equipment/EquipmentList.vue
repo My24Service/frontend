@@ -58,7 +58,7 @@
       <div class='page-title'>
         <h3>
           <b-icon icon="tools"></b-icon>
-          Equipment
+          {{ $trans("Equipment") }}
         </h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
@@ -70,7 +70,7 @@
             v-bind:method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <router-link :to="{name: newLink}" class="btn">Add Equipment</router-link>
+          <router-link :to="{name: newLink}" class="btn">{{ $trans("Add Equipment") }}</router-link>
         </b-button-toolbar>
       </div>
     </header>

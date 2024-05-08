@@ -472,7 +472,7 @@
 
           <details v-if="used_materials.length > 0">
             <summary class="flex-columns space-between">
-              <h6>Used Materials</h6>
+              <h6>{{ $trans("Used materials") }}</h6>
               <b-icon-chevron-down></b-icon-chevron-down>
             </summary>
             <MaterialsComponent

@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="minecart-loaded"></b-icon>
-          <span class="backlink" @click="cancelForm">Actions</span> /
+          <span class="backlink" @click="cancelForm">{{ $trans("Actions") }}</span> /
           <strong>{{ action.name }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !action.name"> ({{ $trans("new") }})</span>

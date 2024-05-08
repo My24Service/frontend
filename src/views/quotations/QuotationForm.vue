@@ -35,7 +35,7 @@
         </b-button>
         <!-- Emulate built in modal footer ok and cancel button actions -->
         <b-button @click="ok()" variant="primary">
-          close
+          {{ $trans("close") }}
         </b-button>
       </template>
     </b-modal>

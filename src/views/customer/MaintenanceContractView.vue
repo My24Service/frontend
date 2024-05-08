@@ -8,7 +8,7 @@
           <span>{{ maintenanceContract.name }}</span>
         </h3>
         <b-button-toolbar>
-          <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">Edit contract</router-link>
+          <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">{{ $trans("Edit contract") }}</router-link>
         </b-button-toolbar>
       </div>
     </header>

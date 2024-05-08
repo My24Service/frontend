@@ -4,8 +4,8 @@
       <div class='page-title'>
         <h3>
           <b-icon icon="credit-card2-front"></b-icon>
-          <span class="backlink" @click="goBack">Budgets</span> / 
-          <strong>{{ budget.year }}</strong> 
+          <span class="backlink" @click="goBack">{{ $trans("Budgets") }}</span> /
+          <strong>{{ budget.year }}</strong>
         </h3>
         <h3 :title="`${budget.year} ${$trans('Budget size')}: ${formatDinero(budget.amount_dinero)}`">
           <small class="dimmed">{{ $trans('Budget size')}}</small>
@@ -15,14 +15,14 @@
     </header>
 
     <div class="page-detail">
-      
+
       <div v-if="isLoading" class="text-center panel">
         <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
         <strong>{{ $trans('Loading...') }}</strong>
       </div>
-      
+
       <div v-else class="flex-columns">
-        
+
         <div class="panel col-1-2">
           <h6 class="flex-columns" style="justify-content: space-between">
             <span>{{ $trans('Costs') }}</span>
@@ -31,10 +31,10 @@
 
           <b-progress>
             <b-progress-bar
-            :value="this.chartdataCosts.datasets[0].data[0]" 
+            :value="this.chartdataCosts.datasets[0].data[0]"
             :title="`${this.chartdataCosts.labels[0]}, ${this.chartdataCosts.labels[1]}`"></b-progress-bar>
           </b-progress>
-          
+
           <!-- <pie-chart
             id="pie-chart-costs"
             v-if="!isLoading"
@@ -43,16 +43,16 @@
           /> -->
           <hr/>
           <h6>{{ $trans('Costs breakdown') }}</h6>
-          
+
           <pie-chart
           id="pie-chart-costs-detail"
           v-if="!isLoading"
           :chart-data="chartdataCostsDetail"
           :options="options"
           />
-          
+
         </div>
-        
+
         <div class="panel col-1-2">
           <h6 class="flex-columns" style="justify-content: space-between">
             {{ $trans('Expected costs') }}
@@ -61,7 +61,7 @@
           <b-progress>
             <b-progress-bar
             style="--delay: 2"
-            :value="this.chartdataExpectedCosts.datasets[0].data[0]" 
+            :value="this.chartdataExpectedCosts.datasets[0].data[0]"
             :title="`${this.chartdataExpectedCosts.labels[0]}, ${this.chartdataExpectedCosts.labels[1]}`"></b-progress-bar>
           </b-progress>
 
@@ -72,9 +72,9 @@
             :options="options"
           />
           <hr/> -->
-          
+
           <h6>{{ $trans('Expected costs breakdown') }}</h6>
-          
+
           <pie-chart
             id="pie-chart-expected-costs-detail"
             v-if="!isLoading"
@@ -85,7 +85,7 @@
 
       </div>
     </div>
-    
+
   </div>
 </template>
 <script>

@@ -27,7 +27,7 @@
         </div>
       </div>
     </header>
-    <b-overlay :show="isLoading" rounded="sm">
+    <b-overlay rounded="sm">
       <div class="page-detail">
         <div class="flex-columns">
           <div class="panel" v-if="isCreate || isEdit">

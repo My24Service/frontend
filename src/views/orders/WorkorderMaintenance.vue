@@ -99,7 +99,7 @@
         <div class="row">
             <table class="table table-bordered">
                 <thead>
-                    <th>Date</th>
+                    <th>{{ $trans("Date") }}</th>
                     <th colspan="2">{{ $trans('Work hours') }}</th>
                     <th>{{ $trans('Engineer') }}</th>
                     <th colspan="2">{{ $trans('Travel time') }}</th>

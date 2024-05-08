@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3>  
+        <h3>
           <b-icon icon="minecart-loaded"></b-icon>
-          <span class="backlink" @click="cancelForm">Actions</span> /
+          <span class="backlink" @click="cancelForm">{{ $trans("Actions") }}</span> /
           <strong>{{ action.name  }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !action.name"> ({{ $trans('new') }})</span>
@@ -25,8 +25,8 @@
         </div>
       </div>
     </header>
-  
-    
+
+
       <div class="page-detail flex-columns">
         <div class="panel">
             <b-col>
@@ -319,7 +319,7 @@
             </b-row>
           </div>
         </div>
-        
+
 
       <b-modal
         id="delete-action-modal"

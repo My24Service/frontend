@@ -30,7 +30,7 @@
       <header>
         <div class='page-title'>
           <h3>
-            <b-icon icon="file-earmark-lock"></b-icon><router-link :to="{name: 'maintenance-contracts'}"> Maintenance Contracts </router-link> /
+            <b-icon icon="file-earmark-lock"></b-icon><router-link :to="{name: 'maintenance-contracts'}">{{ $trans("Maintenance contracts:) }}</router-link> /
             <span class="dimmed" v-if="isCreate && !maintenanceContractService.editItem.name">{{ $trans('new') }}</span>
             <span class="dimmed" v-if="!isCreate && !maintenanceContractService.editItem.name">{{ $trans('edit') }}</span>
             <span v-else>{{ maintenanceContractService.editItem.name }}</span>
@@ -124,7 +124,7 @@
               </b-form-input>
             </b-form-group>
 
-            <h6 v-if="customer.id">Customer</h6>
+            <h6 v-if="customer.id">{{ $trans("Customer") }}</h6>
             <CustomerCard
               :key="customer.id"
               v-if="customer.name"

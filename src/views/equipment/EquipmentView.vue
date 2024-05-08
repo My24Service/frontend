@@ -25,7 +25,7 @@
 
     <div class='page-detail flex-columns' v-if="equipment && !isLoading">
       <div class='panel sidebar col-1-3'>
-        <h6>Equipment details</h6>
+        <h6>{{ $trans("Equipment details") }}</h6>
         <dl>
           <dt>{{ $trans('Name') }}</dt>
           <dd>{{ equipment.name }}</dd>

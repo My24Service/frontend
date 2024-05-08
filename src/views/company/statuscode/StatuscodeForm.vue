@@ -71,7 +71,7 @@
             ></b-form-textarea>
           </b-form-group>
 
-          <h6>Label</h6>
+          <h6>{{ $trans("Label") }}</h6>
           <b-form-group label-cols="3" label="Label preview">
             <small
               class="statuscode-preview"

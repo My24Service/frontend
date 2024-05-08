@@ -22,7 +22,7 @@
       <div class='page-detail'>
         <div class='flex-columns'>
           <div class='panel'>
-            <h6>User info</h6>
+            <h6>{{ $trans("User info") }}</h6>
             <b-form-group
                 label-size="sm"
                 label-cols="4"
@@ -86,7 +86,7 @@
           </div>
 
           <div class='panel'>
-            <h6>Personal details</h6>
+            <h6>{{ $trans("Personal details") }}</h6>
             <b-form-group
               label-size="sm"
               label-cols="4"
@@ -195,7 +195,7 @@
           </div>
 
           <div class='panel'>
-            <h6>Work info</h6>
+            <h6>{{ $trans("Work info") }}</h6>
             <b-form-group
               label-size="sm"
               label-cols="4"

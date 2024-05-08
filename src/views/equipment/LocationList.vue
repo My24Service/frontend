@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="shop-window"></b-icon> Locations</h3>
+        <h3><b-icon icon="shop-window"></b-icon>{{ $trans("Locations") }}</h3>
         <b-button-toolbar>
           <b-button-group class="mr-1">
 

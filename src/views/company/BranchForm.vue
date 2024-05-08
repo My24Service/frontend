@@ -4,10 +4,10 @@
         <div class='page-title'>
           <h3>
             <b-icon icon="shop"></b-icon>
-            Branches /<strong>{{branch.name}}</strong>
-            <span class="dimmed" v-if="!branch.name">branch name</span>
+            {{ $trans("Branches") }} / <strong>{{branch.name}}</strong>
+            <span class="dimmed" v-if="!branch.name">{{ $trans("branch name") }}</span>
           </h3>
-          
+
           <b-button-toolbar>
             <b-button @click="cancelForm" type="button" variant="secondary">
               {{ $trans('Cancel') }}</b-button>
@@ -157,7 +157,7 @@
             </b-col>
           </b-row>
 
-          
+
         </b-overlay>
       </b-form>
     </div>

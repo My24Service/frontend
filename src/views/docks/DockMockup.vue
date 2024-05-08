@@ -4,17 +4,19 @@
       <div class='page-title'>
         <h3>
           <b-icon icon="truck"></b-icon>
-          Docks
+          {{ $trans("Docks") }}
         </h3>
       </div>
     </header>
     <div class='page-detail flex-columns'>
       <div class='panel'>
-        <h6>Door movements</h6>
+        <h6>{{ $trans("Door movements") }}</h6>
         <ul class='listing'>
           <li>
             <div class="headings">
-            <span>movement</span><span>date</span><span>duration</span>
+              <span>{{ $trans("movement") }}</span>
+              <span>{{ $trans("date") }}</span>
+              <span>{{ $trans("duration") }}</span>
           </div>
           </li>
           <li v-for="item in movements">
@@ -27,7 +29,7 @@
         </ul>
       </div>
       <div class='panel'>
-        <h6>Inventory</h6>
+        <h6>{{ $trans("Inventory") }}</h6>
         <ul class='listing'>
           <li v-for="item in inventory">
             <div class="listing-item">
@@ -39,7 +41,7 @@
         </ul>
       </div>
       <div class='panel'>
-        <h6>Inventory</h6>
+        <h6>{{ $trans("Inventory") }}</h6>
         <ul class='listing'>
           <li v-for="item in activity">
             <div class="listing-item">
@@ -60,7 +62,7 @@
   span {
     width: 5rem;
   }
-  
+
   span {text-align: end;}
 </style>
 
