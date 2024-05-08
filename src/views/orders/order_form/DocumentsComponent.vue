@@ -22,6 +22,11 @@
         class="data-table"
         v-else
       >
+        <template #cell(name)="data">
+          <b-link v-bind:href="data.item.url" target="_blank">
+            {{ data.item.name }} <b-icon-download font-scale=".8"></b-icon-download>
+          </b-link>
+        </template>
         <template #cell(icons)="data">
           <div
             class="h2 float-right"

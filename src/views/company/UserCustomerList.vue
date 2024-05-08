@@ -2,22 +2,22 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-      <h3><b-icon icon="people"></b-icon>People</h3>
-      <b-button-toolbar>
-        <b-button-group>
-          <ButtonLinkRefresh
-            v-bind:method="function() { loadData() }"
-            v-bind:title="$trans('Refresh')"
-          />
-          <ButtonLinkSearch
-            v-bind:method="function() { showSearchModal() }"
-          />
-        </b-button-group>
-        <b-link :to="{name: 'customeruser-add'}" class="btn primary" v-if="isStaff || isSuperuser">{{$trans('Add customer user')}}</b-link>
-      </b-button-toolbar>
-    </div>
+        <h3><b-icon icon="people"></b-icon>People</h3>
+        <b-button-toolbar>
+          <b-button-group>
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <b-link :to="{name: 'customeruser-add'}" class="btn primary" v-if="isStaff || isSuperuser">{{$trans('Add customer user')}}</b-link>
+        </b-button-toolbar>
+      </div>
     </header>
-    
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -34,7 +34,7 @@
     </b-modal>
 
     <div class="page-details panel">
-      
+
       <PillsCompanyUsers />
       <br>
 
@@ -48,13 +48,6 @@
         class="data-table"
         sort-icon-left
       >
-        
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
         <template #cell(full_name)="data">
           <router-link :to="{name:'customeruser-edit', params : {pk: data.item.id} }">{{ data.item.full_name }}</router-link>
         </template>

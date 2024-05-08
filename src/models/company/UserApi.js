@@ -1,18 +1,45 @@
 import BaseModel from '../../models/base'
 import moment from 'moment'
 
+class ApiUserUserModel {
+  id
+  username
+  first_name
+  last_name
+  full_name
+  email
+  password1
+  password2
+  password
+  date_joined
+  api_user
 
-class ApiUser extends BaseModel {
-  fields = {
-    'api_user': {
-      'name': null,
-      'token': null,
-      'expire_start_dt': moment(),
-      'token_is_revoked': false,
-      'expire_in_days': 365
-    },
+  constructor(user) {
+    for (const [k, v] of Object.entries(user)) {
+      if (k === 'api_user') {
+        this.api_user = new ApiUserModel(v)
+      } else {
+        this[k] = v
+      }
+    }
   }
+}
 
+class ApiUserModel {
+  name
+  token
+  expire_start_dt = moment()
+  token_is_revoked = false
+  expire_in_days = 365
+
+  constructor(user) {
+    for (const [k, v] of Object.entries(user)) {
+      this[k] = v
+    }
+  }
+}
+
+class ApiUserService extends BaseModel {
   url = '/company/apiuser/'
 
   preInsert(apiuser) {
@@ -41,6 +68,4 @@ class ApiUser extends BaseModel {
   }
 }
 
-let apiUserModel = new ApiUser()
-
-export default apiUserModel
+export {ApiUserService, ApiUserUserModel, ApiUserModel}
