@@ -62,9 +62,6 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #cell(full_name)="data">
-          <b-link :to="{name: 'engineer-detail', params: {pk: data.item.id}}">{{ data.item.full_name }}</b-link>
-        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit

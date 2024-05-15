@@ -7,7 +7,6 @@ import Settings from '../views/company/Settings.vue'
 
 import UserEngineerList from '../views/company/UserEngineerList.vue'
 import UserEngineerForm from '../views/company/UserEngineerForm.vue'
-import UserEngineerDetail from '../views/company/UserEngineerDetail.vue'
 
 import UserSalesList from '../views/company/UserSalesList.vue'
 import UserSalesForm from '../views/company/UserSalesForm.vue'
@@ -130,18 +129,6 @@ export default [
       props: {
         'app-content': {},
         'app-subnav': {}
-      },
-    },
-    {
-      name: 'engineer-detail',
-      path: '/company/engineer-users/detail/:pk',
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': {}
-      },
-      components: {
-        'app-content': UserEngineerDetail,
-        'app-subnav': SubNavCompany
       },
     },
     {
