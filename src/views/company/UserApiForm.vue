@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page" v-if="apiuser">
+  <div class="app-page" v-if="apiuser && !isLoading">
     <header>
       <div class="page-title">
         <h3>
@@ -153,10 +153,13 @@
 </template>
 
 <script>
-import {useVuelidate} from '@vuelidate/core'
-import {required} from '@vuelidate/validators'
+import moment from 'moment/min/moment-with-locales'
 
-import {ApiUserService, ApiUserUserModel} from '../../models/company/UserApi.js'
+import {useVuelidate} from '@vuelidate/core'
+import {email, helpers, required, sameAs} from '@vuelidate/validators'
+
+import {ApiUserService, ApiUserUserModel} from '@/models/company/UserApi'
+import {usernameExists} from "@/models/helpers";
 
 export default {
   setup() {
@@ -171,8 +174,11 @@ export default {
     },
   },
   validations() {
-    return {
+    let validations = {
       apiuser: {
+        username: {
+          required
+        },
         api_user: {
           name: {
             required
@@ -186,13 +192,57 @@ export default {
         }
       }
     }
+
+    if (this.isCreate) {
+      const isUniqueCreate = (value) => {
+        if (value === '') return true
+
+        return usernameExists(value)
+      }
+
+      validations.apiuser.username = {
+        required,
+        isUnique: helpers.withAsync(isUniqueCreate)
+      }
+
+      validations.apiuser.password1 = {
+        required
+      }
+
+      validations.apiuser.password2 = {
+        required,
+        sameAs: sameAs(this.apiuser.password1)
+      }
+    } else {
+      const isUniqueEdit = (value) => {
+        if (this.orgUsername === value || value === '' || value.length < 3) {
+          return true
+        }
+
+        return helpers.withAsync(usernameExists(value))
+      }
+
+      validations.apiuser.username = {
+        required,
+        isUnique: isUniqueEdit
+      }
+
+      validations.apiuser.password1 = {
+      }
+
+      validations.apiuser.password2 = {
+        sameAs: sameAs(this.apiuser.password1)
+      }
+    }
+
+    return validations
   },
   data () {
     return {
       isLoading: false,
       submitClicked: false,
       buttonDisabled: false,
-      apiuser: null,
+      apiuser: new ApiUserUserModel({}),
       orgUsername: null,
       apiUserService: new ApiUserService()
     }
@@ -206,6 +256,10 @@ export default {
     }
   },
   async created() {
+    const lang = this.$store.getters.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+
     if (!this.isCreate) {
       await this.loadData()
     } else {
@@ -233,10 +287,11 @@ export default {
 
       if (this.isCreate) {
         try {
+          this.apiuser.password = this.apiuser.password1
           await this.apiUserService.insert(this.apiuser)
           this.infoToast(this.$trans('Created'), this.$trans('API user has been created'))
           this.isLoading = false
-          this.cancelForm()
+          await this.$router.push({name: 'users-apiusers'})
         } catch(error) {
           this.errorToast(this.$trans('Error creating API user'))
           this.isLoading = false
@@ -246,13 +301,13 @@ export default {
         return
       }
 
-
       try {
         await this.apiUserService.update(this.pk, this.apiuser)
         this.infoToast(this.$trans('Updated'), this.$trans('API user has been updated'))
         this.isLoading = false
-        this.cancelForm()
+        await this.$router.push({name: 'users-apiusers'})
       } catch(error) {
+        console.log(error)
         this.errorToast(this.$trans('Error updating API user'))
         this.isLoading = false
         this.buttonDisabled = false
@@ -262,9 +317,8 @@ export default {
       this.isLoading = true
 
       try {
-        this.apiuser = await this.apiUserService.detail(this.pk)
-        this.apiuser.api_user.expire_start_dt = this.$moment(
-          this.apiuser.api_user.expire_start_dt, 'DD/MM/YYYY hh:mm:ss').toDate()
+        const apiuser = await this.apiUserService.detail(this.pk)
+        this.apiuser = new ApiUserUserModel(apiuser)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching apiuser', error)

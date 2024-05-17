@@ -22,6 +22,10 @@ class ApiUserUserModel {
         this[k] = v
       }
     }
+
+    if(!this.api_user) {
+      this.api_user = new ApiUserModel({})
+    }
   }
 }
 
@@ -57,7 +61,7 @@ class ApiUserService extends BaseModel {
       apiuser.api_user.expire_start_dt = moment(apiuser.api_user.expire_start_dt).format('YYYY-MM-DD')
     }
 
-    return order
+    return apiuser
   }
 
   async revoke(pk) {

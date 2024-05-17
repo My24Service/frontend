@@ -43,7 +43,7 @@ import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
 import EngineerEventList from "../views/company/EngineerEventList";
 
-import {AUTH_LEVELS} from "../constants";
+import {AUTH_LEVELS} from "@/constants";
 
 import UserEmployeeList from "../views/company/UserEmployeeList";
 import UserEmployeeForm from "../views/company/UserEmployeeForm";
