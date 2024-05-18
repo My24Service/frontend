@@ -182,10 +182,18 @@
             >
             <b-input-group>
               <b-form-input
+                v-if="!hasBranches"
                 v-model="order.order_name"
                 id="order_name"
 
-                :state="isSubmitClicked ? !v$.order.order_name.$error : null"
+                :state="isSubmitClicked ? !v$.order.customer_relation.$error : null"
+              ></b-form-input>
+              <b-form-input
+                v-else
+                v-model="order.order_name"
+                id="order_name"
+
+                :state="isSubmitClicked ? !v$.order.branch.$error : null"
               ></b-form-input>
               <b-input-group-append v-if="!hasBranches">
                 <b-form-input
@@ -198,9 +206,17 @@
                 </b-form-input>
               </b-input-group-append>
             </b-input-group>
+
             <b-form-invalid-feedback
-              :state="isSubmitClicked ? !v$.order.order_name.$error : null">
-              {{ !hasBranches ? $trans('Please enter the customer') : $trans('Please enter the branch') }}
+              v-if="!hasBranches"
+              :state="isSubmitClicked ? !v$.order.customer_relation.$error : null">
+              {{ $trans('Please select a customer') }}
+            </b-form-invalid-feedback>
+
+            <b-form-invalid-feedback
+              v-else
+              :state="isSubmitClicked ? !v$.order.branch.$error : null">
+              {{ $trans('Please select a branch') }}
             </b-form-invalid-feedback>
           </b-form-group>
 
@@ -371,16 +387,15 @@
 
           <!-- order start/end times -->
           <h6>{{ $trans('Planning') }}</h6>
-            <div class="flex-columns">
+          <b-container>
+            <b-row>
               <b-form-group
-                label-class=""
                 :label="$trans('Start date')"
                 label-for="start_date"
-                cols="6"
+                cols="2"
               >
                 <b-form-datepicker
                   id="start_date"
-                  class=""
                   v-model="order.start_date"
                   :placeholder="$trans('Select date')"
                   value="order.start_date"
@@ -394,18 +409,21 @@
                 </b-form-invalid-feedback>
               </b-form-group>
 
+              <b-col cols="2"></b-col>
+
               <b-form-group
-                label-class=""
                 :label="$trans('Start time')"
                 label-for="start_time"
-                cols="4"
+                cols="2"
               >
                 <b-form-input
                   id="start_time"
                   v-model="order.start_time"
                   type="text"
                   placeholder="HH:mm"
+                  class="time-input"
                 ></b-form-input>
+                <span style="float:left !important;"></span>
                 <b-form-timepicker
                   v-model="order.start_time"
                   button-only
@@ -415,18 +433,22 @@
                   :placeholder="$trans('Set time')"
                   :hour12=false
                 ></b-form-timepicker>
+
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.start_time.$error : null">
                   {{ $trans('Please enter a valid start time HH:mm') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            </div>
-            <div class="flex-columns">
+            </b-row>
+          </b-container>
+
+          <b-container>
+            <b-row>
               <b-form-group
                 label-class=""
                 v-bind:label="$trans('End date')"
                 label-for="end_date"
-                cols="6"
+                cols="2"
               >
                 <b-form-datepicker
                   id="end_date"
@@ -443,18 +465,23 @@
                   {{ $trans('Please enter an end date') }}
                 </b-form-invalid-feedback>
               </b-form-group>
+
+              <b-col cols="2"></b-col>
+
               <b-form-group
                 :label="$trans('End time')"
                 label-class=""
                 label-for="end_time"
-                cols="4"
+                cols="2"
               >
                 <b-form-input
                   id="end_time"
                   v-model="order.end_time"
                   type="text"
+                  class="time-input"
                   placeholder="HH:mm"
                 ></b-form-input>
+                <span style="float:left !important;"></span>
                 <b-form-timepicker
                   v-model="order.end_time"
                   button-only
@@ -470,7 +497,8 @@
                   {{ $trans('Please enter a valid end time HH:mm') }}
                 </b-form-invalid-feedback>
               </b-form-group>
-            </div>
+            </b-row>
+          </b-container>
 
             <div
               class="assign-engineer section"
@@ -567,7 +595,7 @@
 
             <hr v-if="order.orderlines.length > 0"/>
 
-            <div v-if="usesEquipment">
+            <div v-if="usesEquipment" v-show="(hasBranches && order.branch) || (!hasBranches && order.customer_relation)">
               <!-- equipment -->
               <h5 v-if="isEditOrderLine">{{ $trans("Edit") }}</h5>
               <h5 v-else>{{ $trans("New") }}</h5>
@@ -978,6 +1006,9 @@ export default {
     if (!this.hasBranches) {
       return {
         order: {
+          customer_relation: {
+            required,
+          },
           customer_id: {
             required,
           },
@@ -1011,6 +1042,9 @@ export default {
 
     return {
       order: {
+        branch: {
+          required,
+        },
         order_name: {
           required,
         },
@@ -1029,6 +1063,12 @@ export default {
         end_date: {
           required,
         },
+        start_time: {
+          isCorrectTime,
+        },
+        end_time: {
+          isCorrectTime,
+        }
       },
     }
   },
@@ -1624,5 +1664,9 @@ export default {
 .multiselect {
   width: auto;
   flex-grow: 1;
+}
+.time-input {
+  width: 100px !important;
+  float:left !important;
 }
 </style>
