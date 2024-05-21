@@ -1490,201 +1490,247 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
+      const orderlines = this.order.orderlines
+      this.order.orderlines = []
+
+      const infolines = this.order.infolines.filter((i) => i.info && i.info.replace(' ', '') !== '')
+      this.order.infolines = []
+
+      let errors = this.isCreate ? await this.handleCreate(orderlines, infolines) :
+        await this.handleUpdate(orderlines, infolines)
+
+      // TODO why is this if here? shouldn't be needed
+      if (this.order.id) {
+        const assignErrors = await this.assignEngineers(this.order.id)
+        errors = [...errors, ...assignErrors]
+      }
+
+      if (errors.length > 0) {
+        // TODO do we want this message? the errors in the form are obvious
+        this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+        this.errorToast(this.$trans('There were errors'))
+        console.log('There were errors', errors)
+        this.buttonDisabled = false
+        this.isLoading = false
+        return
+      }
+
+      // TODO do we want a message here?
+      this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+
+      this.buttonDisabled = false
+      this.isLoading = false
+
+      if (this.nextField === 'dispatch') {
+        await this.$router.push({name: 'mobile-dispatch'})
+        return
+      }
+
+      this.$router.go(-1)
+    },
+    async handleCreate(orderlines, infolines) {
       let errors = []
-      if (this.isCreate) {
-        const orderlines = this.order.orderlines
-        this.order.orderlines = []
 
-        const infolines = this.order.infolines
-        this.order.infolines = []
-
-        // don't insert again
-        if (!this.order.hasOwnProperty('apiOk') || !this.order.apiOk) {
-          try {
-             const newOrder = await this.orderService.insert(this.order)
-             this.order = {
-               ...this.order,
-              ...newOrder,
-              apiOk: true
-            }
-          } catch(error) {
-            errors.push(error)
-            this.order.apiOk = false
-            this.order.error = error
-            this.buttonDisabled = false
-            this.isLoading = false
-            console.log('Error creating order', error)
-            this.errorToast(this.$trans('Error creating order'))
-            return
+      // don't insert again when there's no error
+      if (!this.order.hasOwnProperty('apiOk') || !this.order.apiOk) {
+        try {
+          const newOrder = await this.orderService.insert(this.order)
+          this.order = {
+            ...this.order,
+            ...newOrder,
+            apiOk: true
           }
-        } else {
-          console.log("not resubmitting order")
+        } catch(error) {
+          errors.push(error)
+          this.order.apiOk = false
+          this.order.error = error
+          this.buttonDisabled = false
+          this.isLoading = false
+          console.log('Error creating order', error)
+          this.errorToast(this.$trans('Error creating order'))
+          return
         }
+      } else {
+        console.log("not resubmitting order")
+      }
 
-        // add orderlines
-        let processedOrderlines = []
-        for (const orderline of orderlines) {
-          // don't insert again
-          if (!orderline.hasOwnProperty('apiOk') || !orderline.apiOk) {
-            try {
-              if (!this.test) {
-                this.test = true
-              } else {
-                orderline.order = this.order.id
-              }
+      const [processedOrderlines, orderlineErrors] = this.handleOrderlines(orderlines)
+      this.order.orderlines = processedOrderlines
+      errors = [...errors, ...orderlineErrors]
 
+      const [processedInfolines, infolineErrors] = this.handleInfolines(infolines)
+      this.order.infolines = processedInfolines
+      errors = [...errors, ...infolineErrors]
+
+      // TODO do we want this message?
+      this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+
+      // TODO why is this if here? shouldn't be needed
+      // this document handling is only needed when creating an order
+      if (this.order.id) {
+        const documentErrors = await this.$refs['documents-component'].orderCreated(this.order.id)
+        errors = [...errors, ...documentErrors]
+      }
+
+      return errors
+    },
+    async handleUpdate(orderlines, infolines) {
+      let errors = []
+      delete this.order.customer_order_accepted
+
+      // don't update again when there's no error
+      if (!this.order.hasOwnProperty('apiOk') || !this.order.apiOk) {
+        try {
+          const updatedOrder = await this.orderService.update(this.pk, this.order)
+          this.order = {
+            ...this.order,
+            ...updatedOrder,
+            apiOk: true
+          }
+        } catch (error) {
+          errors.push(error)
+          this.order.apiOk = false
+          this.order.error = error
+          this.buttonDisabled = false
+          this.isLoading = false
+          console.log('Error updating order', error)
+          this.errorToast(this.$trans('Error updating order'))
+          return
+        }
+      }
+
+      // TODO do we want this message?
+      this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+
+      const [processedOrderlines, orderlineErrors] = this.handleOrderlines(orderlines)
+      this.order.orderlines = processedOrderlines
+      errors = [...errors, ...orderlineErrors]
+
+      const [processedInfolines, infolineErrors] = this.handleInfolines(infolines)
+      this.order.infolines = processedInfolines
+      errors = [...errors, ...infolineErrors]
+
+      if (this.acceptOrder) {
+        try {
+          await this.orderNotAcceptedService.setAccepted(this.pk)
+          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
+        } catch(error) {
+          console.log('Error accepting order', error)
+          this.errorToast(this.$trans('Error accepting order'))
+        }
+      }
+
+      return errors
+    },
+    async handleOrderlines(orderlines) {
+      let processedOrderlines = []
+      let errors = []
+
+      for (const orderline of orderlines) {
+        // don't insert again
+        if (!orderline.hasOwnProperty('apiOk') || !orderline.apiOk) {
+          try {
+            if (!this.test) {
+              this.test = true
+            } else {
+              orderline.order = this.order.id
+            }
+
+            if (orderline.id) {
+              let newOrderline = await this.orderlineService.update(orderline.id, orderline)
+              newOrderline.apiOk = true
+              processedOrderlines.push(newOrderline)
+            } else {
               let newOrderline = await this.orderlineService.insert(orderline)
               newOrderline.apiOk = true
               processedOrderlines.push(newOrderline)
+            }
+          } catch (error) {
+            errors.push(error)
+            console.log('Error handling orderline', error)
+            processedOrderlines.push({
+              ...orderline,
+              error: error,
+              apiOk: false
+            })
+          }
+        } else {
+          console.log("not resubmitting orderline")
+        }
+      }
+
+      if (!this.isCreate) {
+        for (const orderline of this.deletedOrderlines) {
+          if (orderline.id) {
+            try {
+              await this.orderlineService.delete(orderline.id)
             } catch (error) {
               errors.push(error)
-              console.log('Error creating infolines', error)
+              console.log('Error handling orderline', error)
               processedOrderlines.push({
                 ...orderline,
                 error: error,
                 apiOk: false
               })
             }
-          } else {
-            console.log("not resubmitting orderline")
           }
         }
-        this.order.orderlines = processedOrderlines
+      }
 
-        // add infolines
-        let processedInfolines = []
-        for (const infoline of infolines) {
-          // don't insert again
-          if (!infoline.hasOwnProperty('apiOk') || !infoline.apiOk) {
-            try {
-              infoline.order = this.order.id
+      return [processedOrderlines, errors]
+    },
+    async handleInfolines(infolines) {
+      let errors = []
+      let processedInfolines = []
+
+      for (const infoline of infolines) {
+        // don't insert again when there's no error
+        if (!infoline.hasOwnProperty('apiOk') || !infoline.apiOk) {
+          try {
+            infoline.order = this.order.id
+
+            if (infoline.id) {
+              let newInfoline = await this.infolineService.update(infoline.id, infoline)
+              newInfoline.apiOk = true
+              processedInfolines.push(newInfoline)
+            } else {
               let newInfoline = await this.infolineService.insert(infoline)
               newInfoline.apiOk = true
               processedInfolines.push(newInfoline)
+            }
+          } catch (error) {
+            errors.push(error)
+            console.log('Error handling infoline', error)
+            processedInfolines.push({
+              ...infoline,
+              error: error,
+              apiOk: false
+            })
+          }
+        } else {
+          console.log("not resubmitting infoline")
+        }
+      }
+
+      if (!this.isCreate) {
+        for (const infoline of this.deletedInfolines) {
+          if (infoline.id) {
+            try {
+              await this.infolineService.delete(infoline.id)
             } catch (error) {
               errors.push(error)
-              console.log('Error creating infolines', error)
+              console.log('Error deleting infoline', error)
               processedInfolines.push({
                 ...infoline,
                 error: error,
                 apiOk: false
               })
             }
-          } else {
-            console.log("not resubmitting infoline")
           }
         }
-        this.order.infolines = processedInfolines
-
-        this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
-
-        if (this.order.id) {
-          const documentErrors = await this.$refs['documents-component'].orderCreated(this.order.id)
-          errors = [...errors, ...documentErrors]
-        }
-
-        // engineers
-        if (this.order.id) {
-          const assignErrors = await this.assignEngineers(this.order.id)
-          errors = [...errors, ...assignErrors]
-        }
-
-        if (errors.length > 0) {
-          this.errorToast(this.$trans('There were errors creating order'))
-          console.log('There were errors creating order', errors)
-          this.buttonDisabled = false
-          this.isLoading = false
-          return
-        }
-
-        this.buttonDisabled = false
-        this.isLoading = false
-
-        if (this.nextField === 'orders' || this.hasBranches) {
-          this.$router.go(-1)
-        } else if (this.nextField === 'dispatch') {
-          await this.$router.push({name: 'mobile-dispatch'})
-        }
-
-        return
       }
 
-      // edit
-      try {
-        delete this.order.customer_order_accepted
-        const orderlines = this.order.orderlines
-        this.order.orderlines = []
-
-        const infolines = this.order.infolines
-        this.order.infolines = []
-
-        await this.orderService.update(this.pk, this.order)
-
-        // orderlines create/update
-        for (let orderline of orderlines) {
-          orderline.order = this.pk
-          if (orderline.id) {
-            await this.orderlineService.update(orderline.id, orderline)
-            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
-          } else {
-            await this.orderlineService.insert(orderline)
-            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
-          }
-        }
-
-        // orderlines delete
-        for (const orderline of this.deletedOrderlines) {
-          if (orderline.id) {
-            await this.orderlineService.delete(orderline.id)
-            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
-          }
-        }
-
-        // infolines create/update
-        for (let infoline of infolines) {
-          infoline.order = this.pk
-          if (infoline.id) {
-            await this.infolineService.update(infoline.id, infoline)
-            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
-          } else {
-            await this.infolineService.insert(infoline)
-            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
-          }
-        }
-
-        for (const infoline of this.deletedInfolines) {
-          if (infoline.id) {
-            await this.infolineService.delete(infoline.id)
-            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
-          }
-        }
-
-        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
-
-        if (this.acceptOrder) {
-          try {
-            await this.orderNotAcceptedService.setAccepted(this.pk)
-            this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
-          } catch(error) {
-            console.log('Error accepting order', error)
-            this.errorToast(this.$trans('Error accepting order'))
-          }
-        }
-
-        // assign engineers
-        await this.assignEngineers(this.order.order_id)
-
-        this.isLoading = false
-        this.buttonDisabled = false
-      } catch(error) {
-        console.log('Error updating order', error)
-        this.errorToast(this.$trans('Error updating order'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        return
-      }
-
-      this.$router.go(-1)
+      return [processedInfolines, errors]
     },
     async assignEngineers(order_id) {
       let errors = []
