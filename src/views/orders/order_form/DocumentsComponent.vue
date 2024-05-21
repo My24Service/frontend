@@ -12,37 +12,41 @@
       <p v-if="!documentService.collection.length">
         <i>{{ $trans("No documents") }}</i>
       </p>
-      <b-table
-        small
-        id="document-table"
-        :busy='isLoading'
-        :fields="isView ? fieldsView : fields"
-        :items="documentService.collection"
-        responsive="md"
-        class="data-table"
-        v-else
-      >
-        <template #cell(name)="data">
-          <b-link v-bind:href="data.item.url" target="_blank">
-            {{ data.item.name }} <b-icon-download font-scale=".8"></b-icon-download>
-          </b-link>
-        </template>
-        <template #cell(icons)="data">
-          <div
-            class="h2 float-right"
-            v-if="!isView"
-          >
-            <IconLinkEdit
-              :method="function() { editDocument(data.item, data.index) }"
-              v-bind:title="$trans('Edit')"
+      <b-container fluid="sm" v-else>
+        <b-row
+          v-for="(document, index) of documentService.collection"
+          :key="document.name"
+          no-gutters
+          style="padding-bottom: 10px"
+        >
+          <b-col :cols="isView ? 12 : 9">
+            <b-link v-bind:href="document.url" target="_blank">
+              {{ document.name }} <b-icon-download font-scale=".8"></b-icon-download>
+            </b-link>
+          </b-col>
+          <b-col cols="3" v-if="!isView">
+            <div
+              class="h2 float-right"
+            >
+              <IconLinkEdit
+                :method="function() { editDocument(document, index) }"
+                v-bind:title="$trans('Edit')"
+              />
+              <IconLinkDelete
+                v-bind:title="$trans('Delete')"
+                v-bind:method="function() { deleteDocument(index) }"
+              />
+            </div>
+          </b-col>
+          <b-col v-if="document.hasOwnProperty('apiOk')" cols="12">
+            <ApiResult
+              :error="document.error"
+              :success-message='$trans("Document created")'
             />
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { deleteDocument(data.index) }"
-            />
-          </div>
-        </template>
-      </b-table>
+          </b-col>
+        </b-row>
+      </b-container>
+
     </div>
 
     <!-- form -->
@@ -177,10 +181,14 @@ import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {DocumentModel, DocumentService} from "@/models/orders/Document";
 import {OrderModel} from "@/models/orders/Order"
+import {componentMixin} from "@/utils";
+import ApiResult from "@/components/ApiResult.vue";
 
 export default {
+  mixins: [componentMixin],
   name: "DocumentsComponent",
   components: {
+    ApiResult,
     IconLinkEdit,
     ButtonLinkAdd,
     ButtonLinkRefresh,
@@ -215,7 +223,7 @@ export default {
       ],
       documentService: new DocumentService(),
       newItem: false,
-      files: []
+      files: [],
     }
   },
   computed: {
@@ -237,11 +245,11 @@ export default {
     await this.loadData()
   },
   methods: {
-    orderCreated(order) {
+    async orderCreated(orderPk) {
       for (const document of this.documentService.collection) {
-        document.order = order.id
+        document.order = orderPk
       }
-      this.submitDocuments()
+      return await this.submitDocuments()
     },
     doEditCollectionItem() {
       this.documentService.doEditCollectionItem()
@@ -307,10 +315,11 @@ export default {
     },
     async submitDocuments() {
       if (this.documentService.collection.length === 0) {
-        return
+        return []
       }
 
       this.isLoading = true
+      let orderErrors = []
       for (const document of this.documentService.collection) {
         if (document.file && document.file.indexOf('http') !== -1) {
           delete document.file
@@ -318,25 +327,39 @@ export default {
 
         if (!document.order) {
           if (!this.order.id) {
-            console.log('no order to update documents')
-            this.errorToast(this.$trans('Error updating documents (no order)'))
-            return
+            orderErrors.push(`no order to update document: ${document.name}`)
+          } else {
+            document.order = this.order.id
           }
-
-          document.order = this.order.id
         }
       }
 
+      if (orderErrors.length > 0) {
+        console.log('no order to update documents', orderErrors)
+        this.errorToast(this.$trans('Error updating documents (no order)'))
+        return orderErrors
+      }
+
+      let errors = []
       try {
-        await this.documentService.updateCollection()
-        this.infoToast(this.$trans('Updated'), this.$trans('Documents have been updated'))
-        await this.loadData()
+        this.documentService.collection = await this.documentService.updateCollection()
+        errors = this.documentService.collection.filter((d) => d.error)
+
+        if (errors.length > 0) {
+          this.errorToast(this.$trans('Error updating documents'))
+        } else {
+          this.infoToast(this.$trans('Updated'), this.$trans('Documents have been updated'))
+        }
+        // await this.loadData()
       } catch (e) {
+        errors.push(e)
         console.log('error updating documents', e)
         this.errorToast(this.$trans('Error updating documents'))
       }
 
       this.isLoading = false
+
+      return errors
     },
 
   }

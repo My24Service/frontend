@@ -124,21 +124,46 @@ class BaseModel {
   }
 
   async updateCollection() {
+    let newCollection = []
     // create/update
     for (let item of this.collection) {
       if (item.id) {
-        await this.update(item.id, item)
+        try {
+          let newItem = await this.update(item.id, item)
+          newItem.apiOk = true
+          newCollection.push(newItem)
+        } catch (error) {
+          item.apiOk = false
+          item.error = error
+          newCollection.push(item)
+        }
       } else {
-        await this.insert(item)
+        try {
+          const newItem = await this.insert(item)
+          newItem.apiOk = true
+          newCollection.push(newItem)
+        } catch (error) {
+          item.apiOk = false
+          item.error = error
+          newCollection.push(item)
+        }
       }
     }
 
     // deleted items
     for (const item of this.deletedItems) {
       if (item.id) {
-        await this.delete(item.id)
+        try {
+          await this.delete(item.id)
+        } catch (error) {
+          // add to collection again on error (?)
+          item.error = error
+          newCollection.push(item)
+        }
       }
     }
+
+    return newCollection
   }
   // end TODO
 
