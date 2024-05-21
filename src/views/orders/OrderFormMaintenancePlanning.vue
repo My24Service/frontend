@@ -1425,6 +1425,10 @@ export default {
       // }
       // this.recommendedUsers = users
       this.fillCustomer(option)
+      if (this.usesEquipment) {
+        await this.getEquipment('')
+        await this.getLocation('')
+      }
     },
     fillCustomer(customer) {
       this.order.customer_relation = customer.id
@@ -1494,48 +1498,18 @@ export default {
       const orderlines = this.order.orderlines
       this.order.orderlines = []
 
-      const infolines = this.order.infolines.filter((i) => i.info && i.info.replace(' ', '') !== '')
+      // filter out empty infolines
+      const infolines = this.order.infolines.filter(
+        (i) => i.info && i.info.replace(' ', '') !== '')
       this.order.infolines = []
 
-      let errors = this.isCreate ? await this.handleCreate(orderlines, infolines) :
-        await this.handleUpdate(orderlines, infolines)
-
-      // TODO why is this if here? shouldn't be needed
-      if (this.order.id) {
-        const assignErrors = await this.assignEngineers(this.order.id)
-        errors = [...errors, ...assignErrors]
-      }
-
-      if (errors.length > 0) {
-        // TODO do we want this message? the errors in the form are obvious
-        this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
-        this.errorToast(this.$trans('There were errors'))
-        console.log('There were errors', errors)
-        this.buttonDisabled = false
-        this.isLoading = false
-        return
-      }
-
-      // TODO do we want a message here?
-      this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
-
-      this.buttonDisabled = false
-      this.isLoading = false
-
-      if (this.nextField === 'dispatch') {
-        await this.$router.push({name: 'mobile-dispatch'})
-        return
-      }
-
-      this.$router.go(-1)
-    },
-    async handleCreate(orderlines, infolines) {
       let errors = []
 
-      // don't insert again when there's no error
+      // don't handle again when there's no error
       if (!this.order.hasOwnProperty('apiOk') || !this.order.apiOk) {
         try {
-          const newOrder = await this.orderService.insert(this.order)
+          const newOrder = this.isCreate ? await this.orderService.insert(this.order) :
+            await this.orderService.update(this.pk, this.order)
           this.order = {
             ...this.order,
             ...newOrder,
@@ -1548,80 +1522,64 @@ export default {
           this.buttonDisabled = false
           this.isLoading = false
           console.log('Error creating order', error)
-          this.errorToast(this.$trans('Error creating order'))
+          // this.errorToast(this.$trans('Error creating order'))
           return
         }
       } else {
         console.log("not resubmitting order")
       }
 
-      const [processedOrderlines, orderlineErrors] = this.handleOrderlines(orderlines)
+      const [processedOrderlines, orderlineErrors] = await this.handleOrderlines(orderlines)
       this.order.orderlines = processedOrderlines
       errors = [...errors, ...orderlineErrors]
 
-      const [processedInfolines, infolineErrors] = this.handleInfolines(infolines)
+      const [processedInfolines, infolineErrors] = await this.handleInfolines(infolines)
       this.order.infolines = processedInfolines
       errors = [...errors, ...infolineErrors]
 
-      // TODO do we want this message?
-      this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+      // this document handling here is only needed when creating an order
+      if (this.isCreate) {
+        // TODO why is this if here? shouldn't be needed
+        // if (this.order.id) {
+          const documentErrors = await this.$refs['documents-component'].orderCreated(this.order.id)
+          errors = [...errors, ...documentErrors]
+        // }
+      }
 
       // TODO why is this if here? shouldn't be needed
-      // this document handling is only needed when creating an order
-      if (this.order.id) {
-        const documentErrors = await this.$refs['documents-component'].orderCreated(this.order.id)
-        errors = [...errors, ...documentErrors]
-      }
+      // if (this.order.id) {
+        const assignErrors = await this.assignEngineers(this.order.id)
+        errors = [...errors, ...assignErrors]
+      // }
 
-      return errors
-    },
-    async handleUpdate(orderlines, infolines) {
-      let errors = []
-      delete this.order.customer_order_accepted
-
-      // don't update again when there's no error
-      if (!this.order.hasOwnProperty('apiOk') || !this.order.apiOk) {
-        try {
-          const updatedOrder = await this.orderService.update(this.pk, this.order)
-          this.order = {
-            ...this.order,
-            ...updatedOrder,
-            apiOk: true
-          }
-        } catch (error) {
-          errors.push(error)
-          this.order.apiOk = false
-          this.order.error = error
-          this.buttonDisabled = false
-          this.isLoading = false
-          console.log('Error updating order', error)
-          this.errorToast(this.$trans('Error updating order'))
-          return
-        }
-      }
-
-      // TODO do we want this message?
-      this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
-
-      const [processedOrderlines, orderlineErrors] = this.handleOrderlines(orderlines)
-      this.order.orderlines = processedOrderlines
-      errors = [...errors, ...orderlineErrors]
-
-      const [processedInfolines, infolineErrors] = this.handleInfolines(infolines)
-      this.order.infolines = processedInfolines
-      errors = [...errors, ...infolineErrors]
-
-      if (this.acceptOrder) {
+      if (!this.isCreate && this.acceptOrder) {
         try {
           await this.orderNotAcceptedService.setAccepted(this.pk)
           this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
         } catch(error) {
+          errors.push(error)
           console.log('Error accepting order', error)
           this.errorToast(this.$trans('Error accepting order'))
         }
       }
 
-      return errors
+      if (errors.length > 0) {
+        // TODO do we want this message? the errors in the form are obvious
+        this.errorToast(this.$trans('There were errors'))
+        console.log('There were errors', errors)
+        this.buttonDisabled = false
+        this.isLoading = false
+        return
+      }
+
+      this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+
+      if (this.nextField === 'dispatch') {
+        await this.$router.push({name: 'mobile-dispatch'})
+        return
+      }
+
+      this.$router.go(-1)
     },
     async handleOrderlines(orderlines) {
       let processedOrderlines = []
