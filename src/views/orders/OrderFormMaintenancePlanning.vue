@@ -883,20 +883,20 @@ import Multiselect from 'vue-multiselect'
 import {OrderNotAcceptedService} from '@/models/orders/OrderNotAccepted'
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer'
-import Assign from '../../models/mobile/Assign.js'
-import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
-import Collapse from '../../components/Collapse.vue'
+import {AssignService} from '@/models/mobile/Assign'
+import OrderTypesSelect from '@/components/OrderTypesSelect'
+import Collapse from '@/components/Collapse'
 import {componentMixin} from "@/utils";
 import {BranchService} from "@/models/company/Branch";
 import {EquipmentService} from "@/models/equipment/equipment";
-import {QuotationService} from '@/models/quotations/Quotation.js'
+import {QuotationService} from '@/models/quotations/Quotation'
 import {LocationService} from "@/models/equipment/location";
 import {OrderlineService} from "@/models/orders/Orderline";
 import {InfolineService} from "@/models/orders/Infoline";
-import CustomerCard from '../../components/CustomerCard.vue'
+import CustomerCard from '@/components/CustomerCard'
 import {EngineerService} from "@/models/company/UserEngineer";
 import DocumentsComponent from "./order_form/DocumentsComponent.vue";
-import ApiResult from "@/components/ApiResult.vue";
+import ApiResult from "@/components/ApiResult";
 
 const isCorrectTime = (value) => {
   return !helpers.req(value) || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
@@ -1025,7 +1025,8 @@ export default {
       locationService: new LocationService(),
       orderlineService: new OrderlineService(),
       infolineService: new InfolineService(),
-      test: false
+      assignService: new AssignService(),
+      testErrors: []
     }
   },
   validations() {
@@ -1630,8 +1631,8 @@ export default {
         // don't insert again
         if (!orderline.hasOwnProperty('apiOk') || !orderline.apiOk) {
           try {
-            if (!this.test) {
-              this.test = true
+            if (this.testErrors.indexOf('orderlines') === -1) {
+              this.testErrors.push('orderlines')
             } else {
               orderline.order = this.order.id
             }
@@ -1687,7 +1688,11 @@ export default {
         // don't insert again when there's no error
         if (!infoline.hasOwnProperty('apiOk') || !infoline.apiOk) {
           try {
-            infoline.order = this.order.id
+            if (this.testErrors.indexOf('infolines') === -1) {
+              this.testErrors.push('infolines')
+            } else {
+              infoline.order = this.order.id
+            }
 
             if (infoline.id) {
               let newInfoline = await this.infolineService.update(infoline.id, infoline)
@@ -1738,7 +1743,12 @@ export default {
 
       for (const engineer of this.selectedEngineers) {
         try {
-          await Assign.assignToUser(engineer.id, [order_id], true)
+          if (this.testErrors.indexOf('assign') === -1) {
+            this.testErrors.push('assign')
+            delete engineer.id
+          }
+
+          await this.assignService.assignToUser(engineer.id, [order_id], true)
           newSelectedEngineers.push({
             ...engineer,
             apiOk: true
