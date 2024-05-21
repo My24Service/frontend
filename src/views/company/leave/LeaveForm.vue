@@ -1,0 +1,386 @@
+<template>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <router-link :to="{ name: 'leave-list' }">{{ $trans("Leaves") }}</router-link>
+          /
+          <span class="dimmed">
+            <span v-if="isCreate">{{ $trans("new") }}</span>
+            <span v-if="!isCreate">{{ $trans("edit") }}</span>
+          </span>
+        </h3>
+        <div class="flex-columns">
+          <b-button @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</b-button
+          >
+          <b-button @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</b-button
+          >
+        </div>
+      </div>
+    </header>
+    <b-overlay :show="isLoading" rounded="sm">
+      <div class="page-detail flex-columns">
+        <div class="panel">
+          <h6>{{ $trans("Request leave") }}</h6>
+          <b-form-group v-bind:label="$trans('Leave type')" label-for="leave_type" label-cols="3">
+            <b-form-select
+              v-model="leave.leave_type"
+              :options="leaveTypes"
+              value-field="id"
+              text-field="name"
+              :state="isSubmitClicked ? !v$.leave.leave_type.$error : null"
+            ></b-form-select>
+            <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.leave_type.$error : null">
+              {{ $trans("Please select a leave type") }}
+            </b-form-invalid-feedback>
+          </b-form-group>
+
+          <b-form-group
+            label-cols="3"
+            v-bind:label="$trans('Description')"
+            label-for="leave_description"
+          >
+            <b-form-textarea
+              id="leave_description"
+              v-model="leave.description"
+              rows="3"
+            ></b-form-textarea>
+          </b-form-group>
+          <div class="flex-columns">
+            <b-form-group :label="$trans('Start date')" label-for="start_date" cols="4">
+              <b-form-datepicker
+                id="start_date"
+                class=""
+                v-model="leave.start_date"
+                :placeholder="$trans('Select date')"
+                value="leave.start_date"
+                locale="nl"
+                @input="() => loadTotals(leave)"
+                :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
+                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+              ></b-form-datepicker>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
+              >
+                {{ $trans("Please enter a start date") }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+            <b-form-group :label="$trans('Whole day')" cols="4">
+              <b-form-checkbox
+                id="leave_start_date_is_whole_day"
+                v-model="leave.start_date_is_whole_day"
+                name="leave_start_date_is_whole_day"
+              ></b-form-checkbox>
+            </b-form-group>
+            <b-form-group
+              v-if="!leave.start_date_is_whole_day"
+              label-class=""
+              :label="$trans('Start time')"
+              label-for="start_time"
+              cols="4"
+            >
+              <b-form-input
+                id="start_time"
+                v-model="leave.start_time"
+                type="text"
+                placeholder="HH:mm"
+                @input="startTimeChanged"
+                :state="isSubmitClicked ? !startTimeInvalid : null"
+              ></b-form-input>
+              <b-form-timepicker
+                button-only
+                right
+                locale="en"
+                id="start_time"
+                :placeholder="$trans('Set time')"
+                :hour12="false"
+                :state="isSubmitClicked ? !startTimeInvalid : null"
+              ></b-form-timepicker>
+              <b-form-invalid-feedback :state="isSubmitClicked ? !startTimeInvalid : null">
+                {{ $trans("Please enter a valid start time HH:mm") }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </div>
+          <div class="flex-columns">
+            <b-form-group :label="$trans('End date')" label-for="end_date" cols="4">
+              <b-form-datepicker
+                id="end_date"
+                class=""
+                v-model="leave.end_date"
+                :placeholder="$trans('Select date')"
+                value="leave.end_date"
+                locale="nl"
+                @input="() => loadTotals(leave)"
+                :state="isSubmitClicked ? !v$.leave.end_date.$error : null"
+                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+              ></b-form-datepicker>
+              <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.end_date.$error : null">
+                {{ $trans("Please enter a end date") }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+            <b-form-group :label="$trans('Whole day')" cols="4">
+              <b-form-checkbox
+                id="leave_end_date_is_whole_day"
+                v-model="leave.end_date_is_whole_day"
+                name="leave_end_date_is_whole_day"
+              ></b-form-checkbox>
+            </b-form-group>
+            <b-form-group
+              v-if="!leave.end_date_is_whole_day"
+              label-class=""
+              :label="$trans('End time')"
+              label-for="end_time"
+              cols="4"
+            >
+              <b-form-input
+                id="end_time"
+                v-model="leave.end_time"
+                type="text"
+                placeholder="HH:mm"
+                @input="endTimeChanged"
+                :state="isSubmitClicked ? !endTimeInvalid : null"
+              ></b-form-input>
+              <b-form-timepicker
+                button-only
+                right
+                locale="en"
+                id="end_time"
+                :placeholder="$trans('Set time')"
+                :hour12="false"
+                :state="isSubmitClicked ? !endTimeInvalid : null"
+              ></b-form-timepicker>
+              <b-form-invalid-feedback :state="isSubmitClicked ? !endTimeInvalid : null">
+                {{ $trans("Please enter a valid end time HH:mm") }}
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </div>
+          <b-overlay :show="loadingTotals" rounded="sm">
+            <div class="flex-columns">
+              <b-form-group
+                label-class=""
+                :label="$trans('Total time')"
+                label-for="totla_time"
+                cols="4"
+              >
+                <b-form-input
+                  id="total_time"
+                  v-model="leave.total_time"
+                  placeholder="Total time"
+                  :readonly="true"
+                ></b-form-input>
+              </b-form-group>
+            </div>
+          </b-overlay>
+        </div>
+      </div>
+    </b-overlay>
+  </div>
+</template>
+<script>
+import moment from "moment";
+import { useVuelidate } from "@vuelidate/core";
+import { required } from "@vuelidate/validators";
+import { UserLeaveHoursService } from "@/models/company/UserLeaveHours.js";
+import { LeaveTypeService } from "@/models/company/LeaveType.js";
+
+const isCorrectTime = value => {
+  return /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(value);
+};
+
+export default {
+  setup() {
+    return { v$: useVuelidate() };
+  },
+  props: {
+    pk: {
+      type: [String, Number],
+      default: null
+    }
+  },
+  validations() {
+    return {
+      leave: {
+        leave_type: {
+          required
+        },
+        start_date: {
+          required
+        },
+        end_date: {
+          required
+        }
+      }
+    };
+  },
+  data() {
+    return {
+      leaveHoursService: new UserLeaveHoursService(),
+      leaveTypeService: new LeaveTypeService(),
+      isLoading: false,
+      loadingTotals: false,
+      submitClicked: false,
+      leave: {
+        leave_type: "",
+        start_date: moment().format("YYYY-MM-DD"),
+        end_date: moment().format("YYYY-MM-DD"),
+        start_date_is_whole_day: true,
+        end_date_is_whole_day: true,
+        start_time: moment().format("HH:mm"),
+        end_time: moment().format("HH:mm")
+      },
+      leaveTypes: [],
+      endTimeInvalid: true,
+      startTimeInvalid: true
+    };
+  },
+  computed: {
+    isCreate() {
+      return !this.pk;
+    },
+    isSubmitClicked() {
+      return this.submitClicked;
+    }
+  },
+  created() {
+    const lang = this.$store.getters.getCurrentLanguage;
+    this.$moment = moment;
+    this.$moment.locale(lang);
+
+    this.loadLeaveTypes();
+    this.loadTotals(this.leave);
+    if (!this.isCreate) {
+      this.loadData();
+    }
+  },
+  methods: {
+    async submitForm() {
+      this.startTimeInvalid = false;
+      this.endTimeInvalid = false;
+      this.submitClicked = true;
+      this.v$.$touch();
+      if (this.v$.$invalid) {
+        console.log("invalid?", this.v$.$invalid);
+        return;
+      }
+
+      if (!this.leave.start_date_is_whole_day && !isCorrectTime(this.leave.start_time)) {
+        this.startTimeInvalid = true;
+        return;
+      }
+
+      if (!this.leave.end_date_is_whole_day && !isCorrectTime(this.leave.end_time)) {
+        this.endTimeInvalid = true;
+        return;
+      }
+
+      this.isLoading = true;
+
+      if (this.isCreate) {
+        try {
+          await this.leaveHoursService.insert(this.leave);
+          this.infoToast(this.$trans("Created"), this.$trans("Leave has been created"));
+          this.isLoading = false;
+          this.$router.go(-1);
+        } catch (error) {
+          console.log("Error creating leave", error);
+          this.errorToast(this.$trans("Error creating leave"));
+          this.isLoading = false;
+        }
+
+        return;
+      }
+
+      try {
+        await this.leaveHoursService.update(this.pk, this.leave);
+        this.infoToast(this.$trans("Updated"), this.$trans("Leave has been updated"));
+        this.isLoading = false;
+        this.$router.go(-1);
+      } catch (error) {
+        console.log("Error updating leave", error);
+        this.errorToast(this.$trans("Error updating leave"));
+        this.isLoading = false;
+      }
+    },
+    async loadData() {
+      this.isLoading = true;
+
+      try {
+        this.leave = await this.leaveHoursService.detail(this.pk);
+        this.leave.start_time = `${this.leave.start_date_hours}:${this.leave.start_date_minutes}`;
+        this.leave.end_time = `${this.leave.end_date_hours}:${this.leave.end_date_minutes}`;
+        this.leave.start_date = this.$moment(this.leave.start_date, "DD/MM/YYYY").format(
+          "YYYY-MM-DD"
+        );
+        this.leave.end_date = this.$moment(this.leave.end_date, "DD/MM/YYYY").format("YYYY-MM-DD");
+        this.isLoading = false;
+      } catch (error) {
+        console.log("error fetching leave", error);
+        this.errorToast(this.$trans("Error loading leave"));
+        this.isLoading = false;
+      }
+    },
+    async loadLeaveTypes() {
+      this.isLoading = true;
+
+      try {
+        const data = await this.leaveTypeService.list();
+        this.leaveTypes = data.results;
+        this.isLoading = false;
+      } catch (error) {
+        console.log("error fetching leave types", error);
+        this.errorToast(this.$trans("Error loading leave types"));
+        this.isLoading = false;
+      }
+    },
+    async loadTotals(data) {
+      this.loadingTotals = true;
+
+      try {
+        const result = await this.leaveHoursService.getTotals(data);
+        this.loadingTotals = false;
+        this.leave.total_time = this.humanize(result);
+        console.log(result);
+      } catch (error) {
+        console.log("error fetching total", error);
+        this.loadingTotals = false;
+      }
+    },
+    startTimeChanged() {
+      if (!isCorrectTime(this.leave.start_time)) return;
+      const [hour, minute] = this.leave.start_time.split(":");
+      this.leave.start_date_hours = hour;
+      this.leave.start_date_minutes = minute;
+      this.loadTotals(this.leave);
+    },
+    endTimeChanged() {
+      if (!isCorrectTime(this.leave.end_time)) return;
+      const [hour, minute] = this.leave.end_time.split(":");
+      this.leave.end_date_hours = hour;
+      this.leave.end_date_minutes = minute;
+      this.loadTotals(this.leave);
+    },
+    cancelForm() {
+      this.$router.go(-1);
+    },
+    humanize(result) {
+      const hours = result.result.total_hours;
+      const minutes = result.result.total_minutes;
+
+      let humanReadableDuration = "";
+      if (hours > 0) {
+        humanReadableDuration += hours + " hour";
+        if (hours > 1) humanReadableDuration += "s";
+      }
+      if (minutes > 0) {
+        if (hours > 0) humanReadableDuration += " ";
+        humanReadableDuration += minutes + " minute";
+        if (minutes > 1) humanReadableDuration += "s";
+      }
+      return humanReadableDuration;
+    }
+  }
+};
+</script>

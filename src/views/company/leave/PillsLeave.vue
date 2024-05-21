@@ -1,0 +1,42 @@
+<template>
+  <div>
+    <b-nav pills>
+      <b-nav-item
+        :active="isActive('requests')"
+        :to="{ name: 'leave-requests' }">
+        {{ $trans('Leave requests') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('leaves')"
+        :to="{ name: 'leave-list' }">
+        {{ $trans('Leaves') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('types')"
+        :to="{ name: 'leave-types' }">
+        {{ $trans('Leave types') }}
+      </b-nav-item>
+    </b-nav>
+  </div>
+</template>
+<script>
+import { componentMixin } from '@/utils.js'
+
+export default {
+  name: 'PillsLeave',
+  mixins: [componentMixin],
+  data() {
+    return {
+      memberType: null,
+      hasApiUsers: false,
+    }
+  },
+  async created() {
+  },
+  methods: {
+    isActive(item) {
+      return this.$route.path.includes(item)
+    }
+  },
+}
+</script>

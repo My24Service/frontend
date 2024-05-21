@@ -46,16 +46,16 @@
         {{ $trans('Pictures') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('workhours')"
-        v-if="hasWorkhours"
-        :to="{ name: 'company-workhours' }">
-        {{ $trans('Work hours') }}
-      </b-nav-item>
-      <b-nav-item
         :active="isActive('time-registration')"
         v-if="hasTimeRegistration"
         :to="{ name: 'company-time-registration' }">
         {{ $trans('Time registration') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('leave')"
+        v-if="isPlanning || isStaff || isSuperuser"
+        :to="{ name: 'leave-requests' }">
+        {{ $trans('Leave') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('branches')"
