@@ -16,6 +16,11 @@
         :to="{ name: 'leave-types' }">
         {{ $trans('Leave types') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('unseen')"
+        :to="{ name: 'unseen-sick-leave' }">
+        {{ $trans('Unseen sick leaves') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>

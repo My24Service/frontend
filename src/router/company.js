@@ -68,6 +68,7 @@ import LeaveRequestsList from "@/views/company/leave/LeaveRequestsList";
 import LeaveList from "@/views/company/leave/LeaveList";
 import LeaveForm from "@/views/company/leave/LeaveForm";
 import LeaveTypes from "@/views/company/leave/LeaveTypes";
+import UnseenSickLeaveList from "@/views/company/leave/UnseenSickLeaveList";
 
 export default [
 {
@@ -828,6 +829,18 @@ export default [
       path: '/company/leave-types',
       components: {
         'app-content': LeaveTypes,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'unseen-sick-leave',
+      path: '/company/unseen-sick-leave',
+      components: {
+        'app-content': UnseenSickLeaveList,
         'app-subnav': SubNavCompany
       },
       props: {
