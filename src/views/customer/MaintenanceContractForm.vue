@@ -30,7 +30,7 @@
       <header>
         <div class='page-title'>
           <h3>
-            <b-icon icon="file-earmark-lock"></b-icon><router-link :to="{name: 'maintenance-contracts'}">{{ $trans("Maintenance contracts:") }}</router-link> /
+            <b-icon icon="file-earmark-lock"></b-icon><router-link :to="{name: 'maintenance-contracts'}">{{ $trans("Maintenance contracts") }}</router-link> /
             <span class="dimmed" v-if="isCreate && !maintenanceContractService.editItem.name">{{ $trans('new') }}</span>
             <span class="dimmed" v-if="!isCreate && !maintenanceContractService.editItem.name">{{ $trans('edit') }}</span>
             <span v-else>{{ maintenanceContractService.editItem.name }}</span>

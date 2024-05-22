@@ -306,6 +306,10 @@ export default {
       }
     },
     async submitDocuments() {
+      if (this.documentService.collection.length === 0) {
+        return
+      }
+
       this.isLoading = true
       for (const document of this.documentService.collection) {
         if (document.file && document.file.indexOf('http') !== -1) {

@@ -110,6 +110,11 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="apiuser-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -159,8 +164,9 @@ export default {
       isLoading: false,
       apiusers: [],
       apiuserFields: [
-        {key: 'api_user.name', label: this.$trans('Name'), sortable: true},
-        {key: 'token', label: this.$trans('Token'), sortable: true},
+        {key: 'username', label: this.$trans('Username')},
+        {key: 'api_user.name', label: this.$trans('Name')},
+        {key: 'token', label: this.$trans('Token')},
         {key: 'icons'}
       ],
     }

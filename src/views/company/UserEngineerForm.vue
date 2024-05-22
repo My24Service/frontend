@@ -7,8 +7,8 @@
           <b-icon icon="people"></b-icon>
           <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
           {{  engineer.username }}
-          <span class="dimmed" v-if="isCreate && !engineer.username">{{ $trans('(new)') }}</span>
-          <span class="dimmed" v-if="!isCreate && !engineer.username">{{ $trans('(edit)') }}</span>
+          <span class="dimmed" v-if="isCreate && !engineer.username">{{ $trans('new') }}</span>
+          <span class="dimmed" v-if="!isCreate && !engineer.username">{{ $trans('edit') }}</span>
           </h3>
           <div class='flex-columns'>
             <b-button @click="cancelForm" type="button" variant="secondary" class="outline">

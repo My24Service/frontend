@@ -8,8 +8,8 @@
             <b-icon icon="people"></b-icon>
             <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
             <strong>{{ employee.username }}</strong>
-            <span class="dimmed" v-if="isCreate && !employee.username">{{ $trans('(new)') }}</span>
-            <span class="dimmed" v-if="!isCreate && !employee.username">{{ $trans('(edit)') }}</span>
+            <span class="dimmed" v-if="isCreate && !employee.username">{{ $trans('new') }}</span>
+            <span class="dimmed" v-if="!isCreate && !employee.username">{{ $trans('edit') }}</span>
           </h3>
 
 
