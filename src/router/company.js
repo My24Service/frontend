@@ -69,6 +69,9 @@ import LeaveList from "@/views/company/leave/LeaveList";
 import LeaveForm from "@/views/company/leave/LeaveForm";
 import LeaveTypes from "@/views/company/leave/LeaveTypes";
 import UnseenSickLeaveList from "@/views/company/leave/UnseenSickLeaveList";
+import SickLeaveList from "@/views/company/leave/SickLeaveList";
+import SickLeaveForm from "@/views/company/leave/SickLeaveForm";
+
 
 export default [
 {
@@ -790,7 +793,7 @@ export default [
     },
     {
       name: 'leave-list',
-      path: '/company/leave/all',
+      path: '/company/leave',
       components: {
         'app-content': LeaveList,
         'app-subnav': SubNavCompany
@@ -838,7 +841,7 @@ export default [
     },
     {
       name: 'unseen-sick-leave',
-      path: '/company/sick/unseen',
+      path: '/company/sick-leave/unseen',
       components: {
         'app-content': UnseenSickLeaveList,
         'app-subnav': SubNavCompany
@@ -846,6 +849,42 @@ export default [
       props: {
         'app-content': route => ({...route.params }),
         'app-subnav': {}
+      },
+    },
+    {
+      name: 'sick-leave-list',
+      path: '/company/sick-leave',
+      components: {
+        'app-content': SickLeaveList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'sick-leave-list-add',
+      path: '/company/sick-leave/form',
+      components: {
+        'app-content': SickLeaveForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'sick-leave-list-edit',
+      path: '/company/sick-leave/form/:pk',
+      components: {
+        'app-content': SickLeaveForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
       },
     }
   ]

@@ -25,6 +25,50 @@
       <div class="page-detail flex-columns">
         <div class="panel">
           <h6>{{ $trans("Request leave") }}</h6>
+          <b-form-group
+            v-if="isCreate"
+            label-size="sm"
+            label-class="p-sm-0"
+            v-bind:label="$trans('Search existing user')"
+            label-for="user-search"
+          >
+            <multiselect
+              id="user-search"
+              track-by="id"
+              :placeholder="$trans('Type to search')"
+              open-direction="bottom"
+              :options="users"
+              :multiple="false"
+              :loading="compLoading"
+              :internal-search="false"
+              :options-limit="30"
+              :limit="10"
+              :max-height="600"
+              :hide-selected="true"
+              @search-change="getUsersDebounced"
+              @select="selectUser"
+              :custom-label="userLabel"
+            >
+              <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+            </multiselect>
+          </b-form-group>
+          <b-form-group
+            v-if="isCreate"
+            label-class=""
+            :label="$trans('User')"
+            label-for="user"
+            cols="3"
+          >
+            <b-form-input
+              id="total_time"
+              v-model="userName"
+              placeholder="User"
+              :readonly="true"
+            ></b-form-input>
+            <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.user.$error : null">
+              {{ $trans("Please select a user") }}
+            </b-form-invalid-feedback>
+          </b-form-group>
           <b-form-group v-bind:label="$trans('Leave type')" label-for="leave_type" label-cols="3">
             <b-form-select
               v-model="leave.leave_type"
@@ -37,7 +81,6 @@
               {{ $trans("Please select a leave type") }}
             </b-form-invalid-feedback>
           </b-form-group>
-
           <b-form-group
             label-cols="3"
             v-bind:label="$trans('Description')"
@@ -185,6 +228,10 @@ import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { UserLeaveHoursService } from "@/models/company/UserLeaveHours.js";
 import { LeaveTypeService } from "@/models/company/LeaveType.js";
+import { AllUserService } from "@/models/company/AllUser.js";
+import Multiselect from 'vue-multiselect'
+import AwesomeDebouncePromise from 'awesome-debounce-promise'
+
 
 const isCorrectTime = value => {
   return /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(value);
@@ -193,6 +240,9 @@ const isCorrectTime = value => {
 export default {
   setup() {
     return { v$: useVuelidate() };
+  },
+  components: {
+    Multiselect,
   },
   props: {
     pk: {
@@ -204,6 +254,9 @@ export default {
     return {
       leave: {
         leave_type: {
+          required
+        },
+        user: {
           required
         },
         start_date: {
@@ -219,10 +272,16 @@ export default {
     return {
       leaveHoursService: new UserLeaveHoursService(),
       leaveTypeService: new LeaveTypeService(),
+      allUserService: new AllUserService(),
       isLoading: false,
       loadingTotals: false,
       submitClicked: false,
+      compLoading: false,
+      users: [],
+      userName: "",
+      getUsersDebounced: null,
       leave: {
+        user: "",
         leave_type: "",
         start_date: moment().format("YYYY-MM-DD"),
         end_date: moment().format("YYYY-MM-DD"),
@@ -254,8 +313,29 @@ export default {
     if (!this.isCreate) {
       this.loadData();
     }
+    this.getUsersDebounced = AwesomeDebouncePromise(this.getUsers, 500)
   },
   methods: {
+    async selectUser(option) {
+      this.leave.user = option.id
+      this.userName = option.name
+    },
+    userLabel({ name }) {
+      return name
+    },
+    async getUsers (query) {
+      if (query === '') return
+      this.compLoading = true
+
+      try {
+        this.users = await this.allUserService.search(query)
+        this.compLoading = false
+      } catch(error) {
+        console.log('Error fetching users', error)
+        this.errorToast(this.$trans('Error fetching users'))
+        this.compLoading = false
+      }
+    },
     async submitForm() {
       this.startTimeInvalid = false;
       this.endTimeInvalid = false;
