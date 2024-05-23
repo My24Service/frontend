@@ -1,19 +1,32 @@
 <template>
-  <div class="app-grid">
-
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="receipt-cutoff"></b-icon>
+          {{$trans('Activity')}}
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+        </b-button-toolbar>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
       @do-search="handleSearchOk"
     />
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Activity')"
-      />
-
+    <div class="panel overflow-auto">
+      
       <b-table
         id="activity-table"
         small
@@ -24,29 +37,25 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
+        
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
+            <br>
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
+            <br>
           </div>
+        </template>
+        <template #cell(created)="data">
+          <small>{{  data.item.created }}</small>
         </template>
       </b-table>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Activity')"
+    />
   </div>
 </template>
 
@@ -73,9 +82,9 @@ export default {
       isLoading: false,
       activity: [],
       activityFields: [
-        {key: 'text', label: this.$trans('Activity'), sortable: true, thAttr: {width: '80%'}},
-        {key: 'created', label: this.$trans('Date'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'icons', thAttr: {width: '10%'}},
+        {key: 'text', label: this.$trans('Activity'), sortable: true},
+        {key: 'created', label: this.$trans('Date'), sortable: true},
+        {key: 'icons', label: ''},
       ],
     }
   },

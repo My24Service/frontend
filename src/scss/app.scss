@@ -1,11 +1,70 @@
 // Define variable defaults
 $my24: #ff9933;
 $primary: $my24;
+$secondary: #000;
 $navbar-light-color: $my24;
-$active-link: #222222;
+$active-link: #232c2fd9;
 $normal-link: #fff;
 $font-size-base: 0.9rem;
 
 // Then import Bootstrap an BootstrapVue SCSS files (order is important)
 @import 'node_modules/bootstrap/scss/bootstrap.scss';
 @import 'node_modules/bootstrap-vue/src/index.scss';
+
+html, body {
+  height: 100%;
+  background: #f6f7fa;
+}
+
+details {
+  padding: 1ex 2ex;
+  transition: all .25s;
+
+  &:hover, &:focus {
+    background-color: #fcfcff;
+    summary > * {
+      color: $active-link !important;
+    }
+  }
+  
+  &:not(:last-of-type) {
+    border-bottom: 1px solid #f8f9fa;
+  }
+
+  summary {
+    padding-block: 1rem;
+    user-select: none;
+
+    > * {
+      display: inline;
+      color: var(--text-color) !important;
+    }
+
+    > h6 {
+      margin-bottom: 0 !important;
+    }
+
+    > svg {
+      transition: all .25s ease;
+    }
+  }
+
+  &[open] {
+    background-color: #f8f9fa;
+    
+    summary {
+      > * {
+        color: $active-link !important;
+      }
+
+      > svg {
+        rotate: 180deg;
+      }
+    }
+  }
+}
+
+// TODO: fix markup?
+td .h2.float-right span a {
+  margin-inline-start: 1ex;
+}

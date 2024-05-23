@@ -1,12 +1,15 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <Collapse
-      :title="getTitle()"
-    >
+  <details>
+    <summary class="flex-columns space-between">
+      <h6>{{ getTitle() }}</h6>
+      <b-icon-chevron-down></b-icon-chevron-down>
+    </summary>
+
+    <b-overlay :show="isLoading" rounded="sm">
       <div
         class="costs-table"
         v-if="!isLoading && hasStoredData"
-      >
+        >
         <CostsTable
           :collection="costService.collection"
           :type="costType"
@@ -111,8 +114,8 @@
         />
 
       </b-container>
-    </Collapse>
-  </b-overlay>
+    </b-overlay>
+  </details>
 </template>
 
 <script>

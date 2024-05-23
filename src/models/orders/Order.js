@@ -14,12 +14,14 @@ if (tomorrow.day() === 6) {
 }
 
 class OrderModel {
+  id
+  order_id
   customer_id
   order_name
   order_address
   order_postal
   order_city
-  order_country_code
+  order_country_code = 'NL'
   customer_relation
   branch
   order_type
@@ -29,30 +31,28 @@ class OrderModel {
   order_email
   order_contact
   service_number
-  location
   start_date = tomorrow.toDate()
   start_time
   end_date = tomorrow.toDate()
   end_time
   order_date
-  // 'visibility': 'private',
   customer_remarks
   remarks
   required_users = 1
-  quotation
   statuses = []
   orderlines = []
-  infolines= []
-  workorder_documents = []
+  infolines = []
+  workorder_documents
+  customer_order_accepted
 
   workorder_pdf_url
-  workorder_pdf_url_partner = []
+  workorder_pdf_url_partner
 
-  reported_codes_extra_data = []
-
+  reported_codes_extra_data
 }
 
 class OrderService extends BaseModel {
+  model = OrderModel
   fields = {
     'customer_id': '',
     'order_name': '',
@@ -317,7 +317,23 @@ class OrderService extends BaseModel {
 
   async getAllForCustomer(customer_pk) {
     const baseUrl = `${this.url}all_for_customer_web/?customer_id=${customer_pk}`
+    const listArgs = this.getListArgs()
+    const url = `${baseUrl}&${listArgs.join('&')}`
 
+    const response = await this.axios.get(url)
+
+    if ('count' in response.data) {
+      this.count = response.data.count
+    }
+
+    if ('num_pages' in response.data) {
+      this.numPages = response.data.num_pages
+    }
+
+    return response.data
+  }
+
+  getListArgs() {
     const listArgs = []
 
     listArgs.push(`page=${this.currentPage}`)
@@ -336,6 +352,13 @@ class OrderService extends BaseModel {
       }
     }
 
+    return listArgs
+  }
+
+  async getAllForEquipmentLocation(equipment_id, location_id) {
+    const filter = equipment_id ? `equipment=${equipment_id}` : `location=${location_id}`
+    const baseUrl = `${this.url}all_for_equipment_location/?${filter}`
+    const listArgs = this.getListArgs()
     const url = `${baseUrl}&${listArgs.join('&')}`
 
     const response = await this.axios.get(url)

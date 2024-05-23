@@ -1,20 +1,22 @@
 <template>
   <div class="use-on-invoice-container">
-    <h4>{{ $trans("What to add as invoice lines")}}</h4>
+    <h5>{{ $trans("Add costs on infolines")}}</h5>
+
     <b-form-group>
-      <b-form-radio-group
-        v-model="useOnInvoiceSelected"
-        :options="useOnInvoiceOptions"
-      ></b-form-radio-group>
+      <div class="flex-columns">
+        <b-form-radio-group
+          v-model="useOnInvoiceSelected"
+          :options="useOnInvoiceOptions"
+        ></b-form-radio-group>
+        <b-button
+          @click="() => { createInvoiceLines() }"
+          class="btn btn-sm update-button"
+          type="button"
+        >
+          {{ $trans("Create invoice lines") }}
+        </b-button>
+      </div>
     </b-form-group>
-    <b-button
-      @click="() => { createInvoiceLines() }"
-      class="btn btn-primary update-button"
-      type="button"
-      variant="primary"
-    >
-      {{ $trans("Create invoice lines") }}
-    </b-button>
   </div>
 </template>
 

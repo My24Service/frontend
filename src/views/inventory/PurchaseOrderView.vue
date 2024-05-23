@@ -1,79 +1,88 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-detail">
-      <h3>{{ $trans('Purchase order info') }}</h3>
-      <b-row>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Supplier') }}:</strong></b-td>
-              <b-td>{{ purchaseOrder.order_name }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Address') }}:</strong></b-td>
-              <b-td>{{ purchaseOrder.order_address }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Country/Postal/city') }}:</strong></b-td>
-              <b-td>
-                {{ purchaseOrder.order_country_code }}-
-                {{ purchaseOrder.order_postal }} {{ purchaseOrder.order_city }}
-              </b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Contact') }}:</strong></b-td>
-              <b-td>{{ purchaseOrder.order_contact }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Tel') }}:</strong></b-td>
-              <b-td>{{ purchaseOrder.order_tel }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Mobile') }}:</strong></b-td>
-              <b-td>{{ purchaseOrder.order_mobile }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
-              <b-td>
-                <b-link class="px-1" v-bind:href="`mailto:${purchaseOrder.order_email}`">
-                  {{ purchaseOrder.order_email }}
-                </b-link>
-              </b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Expected entry date') }}:</strong></b-td>
-              <b-td>{{ purchaseOrder.expected_entry_date }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Order reference') }}:</strong></b-td>
-              <b-td>{{ purchaseOrder.order_reference }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="2"><strong>{{ $trans('Supplier remarks') }}</strong></b-col>
-        <b-col cols="10">{{ purchaseOrder.supplier_remarks}}</b-col>
-      </b-row>
-      <b-row class="my-2">
-        <b-col cols="2"><strong>{{ $trans('Status') }}</strong></b-col>
-        <b-col cols="10">
-          <div v-for="status in purchaseOrder.statuses" :key="status.id">
-            {{ status.created }} {{ status.status }}<br/>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row v-if="purchaseOrder.materials.length">
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-medical"></b-icon> 
+          <span class="backlink" @click="goBack">{{ $trans('Purchase orders') }}</span> / 
+          {{ purchaseOrder.purchase_order_id }} <span class="dimmed">{{ purchaseOrder.order_name }}</span>
+        </h3>
+        <div class="flex-columns">
+          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
+          {{ $trans('Back') }}</b-button>
+          <router-link :to="{name: 'purchaseorder-edit', params: {pk: this.pk}}" class="btn">
+            <b-icon icon="pencil"></b-icon>
+            {{ $trans('Edit purchase order') }}
+          </router-link>
+        </div>
+      </div>
+    </header>
+    <div class="page-detail flex-columns">
+      <div class="panel">
+        <h3><strong>{{ purchaseOrder.purchase_order_id }}</strong> <br/><small>{{ purchaseOrder.order_name }}</small>
+        </h3>
+        
+          <dl>
+            <dt>{{ $trans('Expected entry date') }}</dt>
+            <dd>{{ purchaseOrder.expected_entry_date }}</dd>
+
+            <dt>{{ $trans('Supplier') }}</dt>
+            <dd>{{ purchaseOrder.order_name }}</dd>
+          
+            <dt>{{ $trans('Address') }}</dt>
+            <dd>{{ purchaseOrder.order_address }}</dd>
+          
+            <dt>{{ $trans('Country/Postal/city') }}</dt>
+            <dd>
+              {{ purchaseOrder.order_country_code }}-
+              {{ purchaseOrder.order_postal }} {{ purchaseOrder.order_city }}
+            </dd>
+          
+            <dt>{{ $trans('Contact') }}</dt>
+            <dd>{{ purchaseOrder.order_contact }}</dd>
+          
+            <dt>{{ $trans('Tel') }}</dt>
+            <dd>{{ purchaseOrder.order_tel }}</dd>
+          </dl>
+      
+        
+          <dl>
+            <dt>{{ $trans('Mobile') }}</dt>
+            <dd>{{ purchaseOrder.order_mobile }}</dd>
+          
+            <dt>{{ $trans('Email') }}</dt>
+            <dd>
+              <b-link class="px-1" v-bind:href="`mailto:${purchaseOrder.order_email}`">
+                {{ purchaseOrder.order_email }}
+              </b-link>
+            </dd>
+
+            <dt>{{ $trans('Order reference') }}</dt>
+            <dd>{{ purchaseOrder.order_reference }}</dd>
+
+            <dt>{{ $trans('Supplier remarks') }}</dt>
+            <dd>{{ purchaseOrder.supplier_remarks}}</dd>
+          </dl>
+        
+
+        <h6>{{$trans('History')}}</h6>
+          
+          <ul class="listing">
+            <li v-for="status in purchaseOrder.statuses" :key="status.id">
+              <div class="listing-item">
+                <small>{{ status.created }}</small> <span>{{ status.status }}</span>
+              </div>
+            </li>
+          </ul>
+          
+        
+      </div>
+
+      <div class="panel col-2-3">
+        <b-row v-if="purchaseOrder.materials.length">
         <b-col cols="12">
-          <h4>{{ $trans('Products') }}</h4>
+          <h6>{{ $trans('Products') }}</h6>
           <b-table
-            dark
-            borderless
-            small
             id="purchaseorder-materials-table"
             :fields="materialFields"
             sort-by="material_view.name"
@@ -81,43 +90,36 @@
             responsive="sm"
           ></b-table>
           </b-col>
-      </b-row>
-      <b-row v-if="purchaseOrder.reservation_materials.length">
-        <b-col cols="12">
-          <h4>{{ $trans('Reserved products') }}</h4>
-          <b-table
-            dark
-            borderless
-            small
-            id="purchaseorder-reservation_materials-table"
-            :fields="materialFields"
-            sort-by="material_view.name"
-            :items="purchaseOrder.reservation_materials"
-            responsive="sm"
-          ></b-table>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="12">
-          <h4>{{ $trans('Entries') }}</h4>
-          <b-table
-            dark
-            borderless
-            small
-            id="purchaseorder-entries-table"
-            sort-by="purchase_order_material_view.name"
-            :fields="entryFields"
-            :items="purchaseOrder.entries"
-            responsive="sm"
-          ></b-table>
-        </b-col>
-      </b-row>
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
+        </b-row>
+
+        <b-row v-if="purchaseOrder.reservation_materials && purchaseOrder.reservation_materials.length">
+          <b-col cols="12">
+            <h6>{{ $trans('Reserved products') }}</h6>
+            <b-table
+              id="purchaseorder-reservation_materials-table"
+              :fields="materialFields"
+              sort-by="material_view.name"
+              :items="purchaseOrder.reservation_materials"
+              responsive="sm"
+            ></b-table>
+          </b-col>
+        </b-row>
+
+        <b-row v-if="purchaseOrder.entries && purchaseOrder.entries.length">
+          <b-col cols="12">
+            <h6>{{ $trans('Entries') }}</h6>
+            <b-table
+              id="purchaseorder-entries-table"
+              sort-by="purchase_order_material_view.name"
+              :fields="entryFields"
+              :items="purchaseOrder.entries"
+              responsive="sm"
+            ></b-table>
+          </b-col>
+        </b-row>
+      </div>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
@@ -135,7 +137,7 @@ export default {
         { key: 'remarks', label: this.$trans('Remarks') }
       ],
       entryFields: [
-        { key: 'material_view.name', label: this.$trans('Product') },
+        { key: 'material_name', label: this.$trans('Product') },
         { key: 'amount', label: this.$trans('Amount') },
         { key: 'entry_date', label: this.$trans('Date') },
       ]

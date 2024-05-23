@@ -1,7 +1,6 @@
 <template>
   <div class="app-grid">
-    <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
-
+    
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -18,12 +17,6 @@
     </b-modal>
 
     <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Document')"
-      />
-
       <b-table
         small
         :busy='isLoading'
@@ -46,7 +39,7 @@
                 <ButtonLinkAdd
                   router_name="customer-document-add"
                   v-bind:router_params="{customerPk: data.field.value}"
-                  v-bind:title="$trans('New document')"
+                  v-bind:title="$trans('Add document')"
                 />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
@@ -73,6 +66,11 @@
           </div>
         </template>
       </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Document')"
+      />
     </div>
   </div>
 </template>

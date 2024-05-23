@@ -1,80 +1,98 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New customer user') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit customer user') }}</h2>
-        <b-row>
-          <b-col cols="4" role="group">
+    <div class="app-page">
+      <header>
+        <div class="page-title">
+          <h3>
+            <b-icon icon="people"></b-icon>
+            <span class="backlink"  @click="cancelForm">{{ $trans("People") }}</span> /
+            <strong> {{ customeruser.username }}</strong>
+            <span class="dimmed" v-if="isCreate && !customeruser.username">{{ $trans('new') }}</span>
+            <span class="dimmed" v-if="!isCreate && !customeruser.username">{{ $trans('edit') }}</span>
+          </h3>
+          <div class='flex-columns'>
+            <b-button @click="cancelForm" type="button" variant="secondary" class="outline">
+              {{ $trans('Cancel') }}</b-button>
+            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+              {{ $trans('Submit') }}</b-button>
+          </div>
+        </div>
+      </header>
+      <form class="page-detail">
+        <div class="flex-columns">
+          <div class="panel col-1-3">
+            <h6>{{ $trans('User info')}}</h6>
+
+              <b-form-group
+                label-size="sm"
+                label-cols="4"
+                v-bind:label="$trans('Username')"
+                label-for="customeruser_username"
+              >
+                <b-form-input
+                  id="customeruser_username"
+                  size="sm"
+                  v-model="customeruser.username"
+                  :state="isSubmitClicked ? !v$.customeruser.username.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  v-if="customeruser.username === ''"
+                  :state="isSubmitClicked ? v$.customeruser.username.required : null">
+                  {{ $trans('Username is required') }}
+                </b-form-invalid-feedback>
+                <b-form-invalid-feedback
+                  v-if="customeruser.username !== '' && customeruser.username !== orgUsername"
+                  :state="isSubmitClicked ? !v$.customeruser.username.isUnique.$invalid : null">
+                  {{ $trans('Username is already in use') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+
+              <b-form-group
+                label-size="sm"
+                label-cols="4"
+                v-bind:label="$trans('Password')"
+                label-for="customeruser_password"
+              >
+                <b-form-input
+                  id="customeruser_password"
+                  size="sm"
+                  type="password"
+                  v-model="customeruser.password1"
+                  @blur="v$.customeruser.password1.$touch()"
+                  :state="isSubmitClicked && v$.customeruser.password1 ? !v$.customeruser.password1.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked && v$.customeruser.password1 ? !v$.customeruser.password1.$error : null">
+                  {{ $trans('Please enter a password') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+
+              <b-form-group
+                label-size="sm"
+                label-cols="4"
+                v-bind:label="$trans('Password again')"
+                label-for="customeruser_password_again"
+              >
+                <b-form-input
+                  id="customeruser_password_again"
+                  size="sm"
+                  type="password"
+                  v-model="customeruser.password2"
+                  @blur="v$.customeruser.password2.$touch()"
+                  :state="isSubmitClicked ? !v$.customeruser.password2.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  v-if="customeruser.password2 !== '' && customeruser.password2"
+                  :state="isSubmitClicked ? !v$.customeruser.password2.sameAs.$invalid : null">
+                  {{ $trans('Passwords do not match') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+          </div>
+
+          <div class="panel col-1-3">
+            <h6>{{ $trans('Personal details')}}</h6>
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Username')"
-              label-for="customeruser_username"
-            >
-              <b-form-input
-                id="customeruser_username"
-                size="sm"
-                v-model="customeruser.username"
-                :state="isSubmitClicked ? !v$.customeruser.username.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                v-if="customeruser.username === ''"
-                :state="isSubmitClicked ? v$.customeruser.username.required : null">
-                {{ $trans('Username is required') }}
-              </b-form-invalid-feedback>
-              <b-form-invalid-feedback
-                v-if="customeruser.username !== '' && customeruser.username !== orgUsername"
-                :state="isSubmitClicked ? !v$.customeruser.username.isUnique.$invalid : null">
-                {{ $trans('Username is already in use') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Password')"
-              label-for="customeruser_password"
-            >
-              <b-form-input
-                id="customeruser_password"
-                size="sm"
-                type="password"
-                v-model="customeruser.password1"
-                @blur="v$.customeruser.password1.$touch()"
-                :state="isSubmitClicked && v$.customeruser.password1 ? !v$.customeruser.password1.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked && v$.customeruser.password1 ? !v$.customeruser.password1.$error : null">
-                {{ $trans('Please enter a password') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Password again')"
-              label-for="customeruser_password_again"
-            >
-              <b-form-input
-                id="customeruser_password_again"
-                size="sm"
-                type="password"
-                v-model="customeruser.password2"
-                @blur="v$.customeruser.password2.$touch()"
-                :state="isSubmitClicked ? !v$.customeruser.password2.$error : null"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                v-if="customeruser.password2 !== '' && customeruser.password2"
-                :state="isSubmitClicked ? !v$.customeruser.password2.sameAs.$invalid : null">
-                {{ $trans('Passwords do not match') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('First name')"
               label-for="customeruser_first_name"
             >
@@ -89,10 +107,10 @@
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
+
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Last name')"
               label-for="customeruser_last_name"
             >
@@ -107,10 +125,10 @@
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
+
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Email')"
               label-for="customeruser_email"
             >
@@ -125,10 +143,10 @@
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
+
             <b-form-group
               label-size="sm"
+              label-cols="4"
               v-bind:label="$trans('Settings group')"
               label-for="customeruser_settings_group"
             >
@@ -138,46 +156,49 @@
                 v-model="customeruser.customer_user.settings_group"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              label-class="p-sm-0"
-              v-bind:label="$trans('Search customer')"
-              label-for="customeruser_customer_search"
-            >
-              <multiselect
-                id="customeruser_customer_search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="customers"
-                :multiple="false"
-                :loading="isLoading"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                :hide-selected="true"
-                @search-change="getCustomers"
-                @select="selectCustomer"
-                :custom-label="customerLabel"
+
+          </div>
+          <div class="panel col-1-3">
+            <h6>{{  $trans('Customer') }}</h6>
+            <div class='flex-columns'>
+              <b-form-group
+                label-size="sm"
+                label=""
+                label-for="customeruser_customer_search"
+                class="inline"
               >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="10" role="group">
+                <multiselect
+                  id="customeruser_customer_search"
+                  track-by="id"
+                  :placeholder="$trans('Type to search customer')"
+                  open-direction="bottom"
+                  :options="customers"
+                  :multiple="false"
+                  :loading="isLoading"
+                  :internal-search="false"
+                  :clear-on-select="true"
+                  :close-on-select="true"
+                  :options-limit="30"
+                  :limit="10"
+                  :max-height="600"
+                  :show-no-results="false"
+                  :hide-selected="true"
+                  @search-change="getCustomers"
+                  @select="selectCustomer"
+                  :custom-label="customerLabel"
+                >
+                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                </multiselect>
+              </b-form-group>
+              <b-button @click="clearCustomer" size="sm" type="button" variant="danger" :title="$trans('Clear customer')">
+                  <b-icon icon="backspace"></b-icon>
+              </b-button>
+            </div>
+
+            <br>
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Customer')"
+              label=""
               label-for="customeruser_customer"
             >
               <b-form-input
@@ -187,31 +208,17 @@
                 v-model="customer_info"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Clear')"
-              label-for="customeruser_customer_clear"
-            >
-              <b-button @click="clearCustomer" size="sm" type="button" variant="danger">
-                {{ $trans('Clear customer') }}</b-button>
-            </b-form-group>
-          </b-col>
-        </b-row>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
-          </footer>
+          </div>
         </div>
-      </b-form>
+      </form>
     </div>
-  </b-overlay>
 </template>
+
+<style scoped>
+.form-group.inline {
+  margin-bottom: 0;
+}
+</style>
 
 <script>
 import { useVuelidate } from '@vuelidate/core'

@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class Status extends BaseModel {
+class StatusService extends BaseModel {
   fields = {
     'order_id': null,
     'assignedorder_id': null,
@@ -12,6 +12,7 @@ class Status extends BaseModel {
 
 }
 
-let statusModel = new Status()
+let statusModel = new StatusService()
 
 export default statusModel
+export { StatusService }

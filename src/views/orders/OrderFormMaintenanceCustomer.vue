@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="order">
     <div class="container app-form">
       <b-form>
         <h2 v-if="isCreate">{{ $trans('New order') }}</h2>
@@ -385,40 +385,14 @@
           </Collapse>
         </div>
 
-        <div class="order-documents section" v-if="isCreate">
-          <Collapse
-            :title="$trans('Documents')"
-          >
-            <b-row>
-              <b-col cols="12" role="group">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Choose files')"
-                >
-                  <b-form-file
-                    v-model="files"
-                    multiple
-                    v-bind:placeholder="$trans('Choose a file or drop it here...')"
-                    @input="filesSelected"
-                  ></b-form-file>
-                </b-form-group>
-              </b-col>
-            </b-row>
-
-            <b-row>
-              <b-col cols="12">
-                <b-table v-if="documents.length > 0" small :fields="documentFields" :items="documents" responsive="md">
-                  <template #cell(icons)="data">
-                    <div class="float-right">
-                      <b-link class="h5 mx-2" @click.prevent="deleteDocument(data.index)">
-                        <b-icon-trash></b-icon-trash>
-                      </b-link>
-                    </div>
-                  </template>
-                </b-table>
-              </b-col>
-            </b-row>
-          </Collapse>
+        <div class="order-documents section">
+          <div class="documents section">
+            <DocumentsComponent
+              :order="order"
+              :is-view="false"
+              ref="documents-component"
+            />
+          </div>
         </div>
 
         <div class="mx-auto">
@@ -442,21 +416,22 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
 
-import orderModel from '@/models/orders/Order.js'
-import customerModel from '@/models/customer/Customer.js'
-import documentModel from '@/models/orders/Document.js'
+import {OrderService, OrderModel} from '@/models/orders/Order'
+
+import {CustomerService} from '@/models/customer/Customer.js'
 import accountModel from '@/models/account/Account.js'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import Collapse from '@/components/Collapse.vue'
-import infolineModel from "../../models/orders/Infoline";
-import orderlineModel from "../../models/orders/Orderline";
+import {OrderlineService} from "@/models/orders/Orderline";
+import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 
 export default {
   setup() {
     return { v$: useVuelidate() }
   },
   components: {
+    DocumentsComponent,
     OrderTypesSelect,
     Collapse
   },
@@ -498,19 +473,18 @@ export default {
         { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
-      documentFields: [
-        { key: 'name', label: this.$trans('Name') },
-        { key: 'icons', label: '' }
-      ],
       submitClicked: false,
       countries: [],
-      order: orderModel.getFields(),
+      order: null,
       errorMessage: null,
-      files: [],
-      documents: [],
       orderPk: null,
       customer: null,
       deletedOrderlines: [],
+
+      orderService: new OrderService(),
+      orderlineService: new OrderlineService(),
+      customerService: new CustomerService()
+
     }
   },
   validations() {
@@ -561,32 +535,6 @@ export default {
     }
   },
   methods: {
-    // documents
-    filesSelected(files) {
-      for (let i=0;i<files.length; i++) {
-        const reader = new FileReader()
-        reader.onload = (f) => {
-          const b64 = f.target.result
-          this.documents.push({
-            file: b64,
-            name: files[i].name,
-            description: ''
-          })
-        }
-
-        reader.readAsDataURL(files[i])
-      }
-    },
-    async deleteDocument(index) {
-      const deleted = this.documents.splice(index, 1)
-      try {
-        for (const document of deleted) {
-          await documentModel.delete(document.id)
-        }
-      } catch(error) {
-        console.log('Error deleting documents', error)
-      }
-    },
     // order lines
     deleteOrderLine(index) {
       this.deletedOrderlines.push(this.order.orderlines[index])
@@ -654,27 +602,20 @@ export default {
           const orderlines = this.order.orderlines
           this.order.orderlines = []
 
-          const newOrder = await orderModel.insert(this.order)
+          const newOrder = await this.orderService.insert(this.order)
 
           // add orderlines
           try {
             for (const orderline of orderlines) {
               orderline.order = newOrder.id
-              await orderlineModel.insert(orderline)
+              await this.orderlineService.insert(orderline)
             }
           } catch(error) {
             console.log('Error creating infolines', error)
           }
 
           // add documents
-          try {
-            for (const document of this.documents) {
-              document.order = newOrder.id
-              await documentModel.insert(document)
-            }
-          } catch(error) {
-            console.log('Error creating documents', error)
-          }
+          this.$refs['documents-component'].orderCreated(newOrder)
 
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
@@ -695,22 +636,22 @@ export default {
         const orderlines = this.order.orderlines
         this.order.orderlines = []
 
-        await orderModel.update(this.pk, this.order)
+        await this.orderService.update(this.pk, this.order)
 
         for (let orderline of orderlines) {
           orderline.order = this.pk
           if (orderline.id) {
-            await orderlineModel.update(orderline.id, orderline)
+            await this.orderlineService.update(orderline.id, orderline)
             // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
           } else {
-            await orderlineModel.insert(orderline)
+            await this.orderlineService.insert(orderline)
             // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
           }
         }
 
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
-            await orderlineModel.delete(orderline.id)
+            await this.orderlineService.delete(orderline.id)
             // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
           }
         }
@@ -727,7 +668,7 @@ export default {
       }
     },
     async loadOrder() {
-      const order = await orderModel.detail(this.pk)
+      const order = await this.orderService.detail(this.pk)
       this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
       this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
 
@@ -747,10 +688,10 @@ export default {
     try {
       this.countries = await this.$store.dispatch('getCountries')
       const user = await accountModel.getUserDetails()
-      const customer = await customerModel.detail(user.user.customer_user.customer)
+      const customer = await this.customerService.detail(user.user.customer_user.customer)
 
       if (this.isCreate) {
-        this.order = orderModel.getFields()
+        this.order = new OrderModel()
         this.order.customer_relation = customer.id
         this.order.customer_id = customer.customer_id
         this.order.order_name = customer.name
@@ -782,13 +723,6 @@ export default {
 <style scoped>
 div.section {
   padding-bottom: 20px;
-}
-div.section-header {
-  padding: 4px;
-  background-color: lightblue;
-}
-div.section-header-icon {
-  margin-top: -34px;
 }
 div.bottom {
   margin-bottom: 80px;

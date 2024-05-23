@@ -1,277 +1,130 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <div class="app-page" v-if="order">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <router-link :to="{name: 'order-list'}">{{ $trans("Orders") }}</router-link> /
+          <span>#<strong>{{ order.order_id }}</strong></span>
+        </h3>
+        <div class="flex-columns">
+          <router-link class="btn button outline" :to="{name:'order-edit', pk: pk}">
+            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit order') }}
+          </router-link>
+          <router-link class="btn" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
+              :to="{name: 'order-invoice-create', params: {uuid: order.uuid}}">
+            <b-icon-receipt-cutoff></b-icon-receipt-cutoff> {{ $trans('Create invoice') }}
+          </router-link>
+        </div>
+      </div>
+    </header>
 
-    <b-modal
-      v-if="purchaseInvoice && hasBranches"
-      id="delete-purchase-invoice-modal"
-      ref="delete-purchase-invoice-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDeletePurchaseInvoice"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this purchase invoice?') }}</p>
-    </b-modal>
+    <div class="page-detail">
 
-    <b-modal
-      v-if="purchaseInvoice && hasBranches"
-      id="add-purchase-invoice-modal"
-      ref="add-purchase-invoice-modal"
-      v-bind:title="$trans('Add purchase invoice')"
-      @ok="doAddPurchaseInvoice"
-    >
-      <form ref="add-purchase-invoice-form">
-        <b-container>
-          <b-row>
-            <b-col cols="6">
-              <b-form-group
-                v-bind:label="$trans('VAT')"
-                label-for="add-purchase-invoice-vat"
-              >
-                <PriceInput
-                  id="add-purchase-invoice-vat"
-                  v-model="purchaseInvoice.vat"
-                  :currency="purchaseInvoice.vat_currency"
-                  @priceChanged="(val) => vatChanged(val)"
-                />
-              </b-form-group>
-            </b-col>
-            <b-col cols="6">
-              <b-form-group
-                v-bind:label="$trans('Total')"
-                label-for="add-purchase-invoice-total"
-              >
-                <PriceInput
-                  id="add-purchase-invoice-total"
-                  v-model="purchaseInvoice.total"
-                  :currency="purchaseInvoice.total_currency"
-                  @priceChanged="(val) => totalChanged(val)"
-                />
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="4">
-              <b-form-group
-                v-bind:label="$trans('Reference')"
-                label-for="add-purchase-invoice-reference"
-              >
-                <b-form-input
-                  size="sm"
-                  id="add-purchase-invoice-reference"
-                  v-model="purchaseInvoice.reference"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="8">
-              <b-form-group
-                v-bind:label="$trans('Description')"
-                label-for="add-purchase-invoice-description"
-              >
-                <b-form-textarea
-                  id="add-purchase-invoice-description"
-                  v-model="purchaseInvoice.description"
-                  rows="1"
-                ></b-form-textarea>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
+      <div v-if="order" class="flex-columns wrap" >
 
-    <div class="app-detail" v-if="order">
-      <h3>{{ $trans('Order info') }}</h3>
-      <b-row>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Customer ID') }}:</strong></b-td>
-              <b-td>{{ order.customer_id }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Customer') }}:</strong></b-td>
-              <b-td>
-                <router-link :to="{name: 'customer-view', params: {pk: order.customer_relation}}">
+        <div class="panel col-1-3">
+          <h3>
+            <span><strong>{{ order.order_type }}</strong> <br><small>
+              <router-link :to="{name: 'customer-view', params: {pk: order.customer_relation}}">
                 {{ order.order_name }}
-                </router-link>
-              </b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Address') }}:</strong></b-td>
-              <b-td>{{ order.order_address }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Country/Postal/city') }}:</strong></b-td>
-              <b-td>
-                {{ order.order_country_code }}-
-                {{ order.order_postal }} {{ order.order_city }}
-              </b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Contact') }}:</strong></b-td>
-              <b-td>{{ order.order_contact }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Tel') }}:</strong></b-td>
-              <b-td>{{ order.order_tel }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Mobile') }}:</strong></b-td>
-              <b-td>{{ order.order_mobile }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
-              <b-td>
-                <b-link class="px-1" v-bind:href="`mailto:${order.order_email}`">
-                  {{ order.order_email }}
+              </router-link>
+            </small></span>
+          </h3>
+          <dl>
+            <dt>
+              <span v-if="order.assigned_user_info.length">{{ $trans('Assigned to') }}</span>
+            </dt>
+            <dd>
+              <span v-if="!order.assigned_user_info.length" class="dimmed">{{ $trans('Not assigned') }}</span>
+              <span
+                v-for="person in order.assigned_user_info"
+                class="order-assignee"
+                :key="person.full_name"
+              >{{ person.full_name }}</span>
+            </dd>
+            <dt>{{ $trans("Status") }}</dt>
+            <dd>{{ order.last_status }}</dd>
+            <dt>{{ $trans("Dates") }}</dt>
+            <dd>{{ order.order_date }}</dd>
+            <dt>{{ $trans("Service") }} &numero;</dt>
+            <dd>{{ order.service_number }}</dd>
+            <dt>{{ $trans("Reference") }}</dt>
+            <dd>{{ order.order_reference }}</dd>
+            <dt>{{ $trans("Remarks") }}</dt>
+            <dd>{{ order.remarks }}</dd>
+            <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
+            <dd v-if="!hasBranches" class="flex-columns">
+              <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank"><b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}</b-link>
+
+              <b-link class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+                <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+              </b-link>
+            </dd>
+            <dt>{{ $trans("Workorders partners") }}</dt>
+            <dd class="flex-columns">
+              <div v-for="workorder in order.workorder_pdf_url_partner" :key="workorder.companycode">
+                {{ workorder.companycode }}
+                <span v-if="workorder.via">({{ $trans("via") }} {{ workorder.via }})</span>
+                <b-link class="btn btn-sm btn-outline" :href="workorder.url" target="_blank" :title="$trans('Download PDF') + ' (' + workorder.url + ')'">
+                  <b-icon icon="file-earmark-pdf"></b-icon>
+
+                  {{ $trans('Download PDF') }}
                 </b-link>
-              </b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-        <b-col cols="6">
-          <b-table-simple>
-            <b-tr>
-              <b-td><strong>{{ $trans('Order id') }}:</strong></b-td>
-              <b-td>{{ order.order_id }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Date') }}:</strong></b-td>
-              <b-td>{{ order.order_date }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Service nbr.') }}:</strong></b-td>
-              <b-td>{{ order.service_number }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Order reference') }}:</strong></b-td>
-              <b-td>{{ order.order_reference }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Order type') }}:</strong></b-td>
-              <b-td>{{ order.order_type }}</b-td>
-            </b-tr>
-            <b-tr>
-              <b-td><strong>{{ $trans('Remarks') }}:</strong></b-td>
-              <b-td>{{ order.remarks }}</b-td>
-            </b-tr>
-          </b-table-simple>
-        </b-col>
-      </b-row>
-      <b-row v-if="order.orderlines.length">
-        <b-col cols="12">
-          <h4>{{ $trans('Orderlines') }}</h4>
-          <b-table
-            dark
-            borderless
-            small
-            id="orderline-table"
-            :fields="orderLineFields"
-            :items="order.orderlines"
-            responsive="sm"
-          ></b-table>
-          </b-col>
-      </b-row>
-      <b-row v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
-        <b-col cols="12">
-          <h4>{{ $trans('Infolines') }}</h4>
-          <b-table dark borderless small :fields="infoLineFields" :items="order.infolines" responsive="sm"></b-table>
-        </b-col>
-      </b-row>
-      <b-row class="my-2" v-if="order.customer_remarks != ''">
-          <b-col cols="2"><strong>{{ $trans('Customer remarks') }}</strong></b-col>
-          <b-col cols="9">{{ order.customer_remarks }}</b-col>
-      </b-row>
-      <b-row class="my-2">
-          <b-col cols="2"><strong>{{ $trans('Status') }}</strong></b-col>
-          <b-col cols="9">
-            <div v-for="status in order.statuses" :key="status.id">
-              {{ status.created }} {{ status.status }}<br/>
-            </div>
-          </b-col>
-      </b-row>
-      <b-row class="my-2">
-          <b-col cols="2"><strong>{{ $trans('Workorder online') }}</strong></b-col>
-          <b-col cols="9">
-            <b-link class="px-1" @click="openWorkorder()" target="_blank">
-              {{ $trans('Order') }} {{ order.order_id }}
-            </b-link>
-          </b-col>
-      </b-row>
-      <b-row class="my-2" v-if="order.workorder_pdf_url">
-          <b-col cols="2"><strong>{{ $trans('Download PDF') }}</strong></b-col>
-          <b-col cols="9">
-            <b-link class="px-1" :href="order.workorder_pdf_url" target="_blank">
-              {{ $trans('Order') }} {{ order.order_id }} |{{ order.workorder_pdf_url }}|
-            </b-link>
-          </b-col>
-      </b-row>
-      <b-row class="my-2" v-if="order.workorder_pdf_url_partner.length">
-        <b-col cols="2"><strong>{{ $trans('Workorder PDF partners') }}</strong></b-col>
-        <b-col cols="9">
-          <span v-for="pdf_data in order.workorder_pdf_url_partner" :key="pdf_data.companycode">
-              <b-link :href="pdf_data.url" target="_blank">
-                {{ pdf_data.companycode }} {{ $trans('Order') }} {{ order.order_id }}
-              </b-link>
-            </span>
-        </b-col>
-      </b-row>
-      <b-row class="my-2" v-if="order.workorder_documents.length > 0">
-        <b-col cols="12">
-          <h4>{{ $trans('Workorder documents') }}</h4>
-          <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents" responsive="sm">
-            <template #cell(url)="data">
-              <b-link class="px-1" :href="data.item.url" target="_blank">
-                {{ $trans('Order') }} {{ order.order_id }}
-              </b-link>
-            </template>
-          </b-table>
-        </b-col>
-      </b-row>
-      <b-row class="my-2" v-if="order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
-        <b-col cols="12">
-          <h4>{{ $trans('Workorder documents partner') }}</h4>
-          <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents_partners" responsive="sm">
-            <template #cell(url)="data">
-              <b-link class="px-1" :href="data.item.url" target="_blank">
-                {{ $trans('Order') }} {{ order.order_id }}
-              </b-link>
-            </template>
-          </b-table>
-        </b-col>
-      </b-row>
-      <b-row v-if="order.reported_codes_extra_data.length">
-        <b-col cols="12">
-          <h4>{{ $trans('Reported extra text') }}</h4>
-          <b-table
-            borderless
-            small
-            id="extra-data-table"
-            :fields="extraDataFields"
-            :items="order.reported_codes_extra_data"
-            responsive="sm"
-          ></b-table>
-        </b-col>
-      </b-row>
-      <b-row v-if="order.invoices.length">
-        <hr/>
-        <b-col cols="12">
-          <h4>{{ $trans('Invoices') }}</h4>
-          <b-container>
-            <b-row v-for="invoice of order.invoices" :key="invoice.uuid">
-              <b-col cols="12">
-                <router-link :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}">
+              </div>
+            </dd>
+            <dt v-if="order.customer_remarks">{{ $trans("Remarks") }}</dt>
+            <dd v-if="order.customer_remarks">{{ order.remarks }}</dd>
+          </dl>
+
+          <hr/>
+
+          <h6><b-icon-person></b-icon-person>{{ $trans("Contact") }}</h6>
+          <div class="flex-columns space-between" style="max-width: 60ch; margin-inline: auto">
+            <p>
+              {{ order.order_contact }}<br/>
+              <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/>
+              {{ order.order_tel }}<br/>
+              {{ order.order_mobile }}<br/>
+            </p>
+            <address>
+              <strong>{{ order.order_name }}</strong><br />
+              {{ order.order_address }}<br />
+              {{ order.order_postal }}<br />
+              {{ order.order_city }}, {{ order.order_country_code }}
+            </address>
+          </div>
+        </div>
+
+        <div class="panel col-1-3">
+          <h6>
+            <b-icon-receipt-cutoff></b-icon-receipt-cutoff>
+            {{ $trans('Invoices') }}
+          </h6>
+
+          <div v-if="order.invoices.length">
+            <ul class='listing'>
+              <li v-for="invoice of order.invoices" :key="invoice.uuid" >
+                <router-link
+                  :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}"
+                  target="_blank"
+                  class="listing-item"
+                  >
                   {{ $trans('Invoice') }} {{ invoice.invoice_id }}
-                </router-link><br/>
-              </b-col>
-            </b-row>
-          </b-container>
-        </b-col>
-      </b-row>
-      <b-row v-if="hasBranches">
-        <hr/>
-        <b-col cols="12">
-          <div class="purchase-invoices-table">
-            <h4>{{ $trans('Purchase invoices') }}</h4>
+                </router-link>
+              </li>
+            </ul>
+          </div>
+          <div v-else class="text-center p-3">
+            <small class="dimmed">{{ $trans('No invoice(s) for this order yet.')}}</small> <br><br>
+            <router-link class="btn btn-primary" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
+              :to="{name: 'order-invoice-create', params: {uuid: order.uuid}}">
+              <b-icon-receipt-cutoff></b-icon-receipt-cutoff> {{ $trans('Create invoice') }}
+            </router-link>
+          </div>
+
+          <div class="purchase-invoices-table" v-if="hasBranches">
+            <h6>{{ $trans('Purchase invoices') }}</h6>
             <b-table
               id="purchase-invoices-table"
               small
@@ -295,6 +148,12 @@
                   </b-button-toolbar>
                 </div>
               </template>
+              <template #cell(reference)="data">
+                {{ data.item.reference ? data.item.reference : '(n/a)'  }}
+              </template>
+              <template #cell(description)="data">
+                {{ data.item.description ? data.item.description : '(n/a)'  }}
+              </template>
               <template #cell(vat)="data">
                 {{ data.item.vat_dinero.toFormat('$0.00') }}
               </template>
@@ -310,40 +169,222 @@
                 </div>
               </template>
             </b-table>
-
           </div>
-        </b-col>
-      </b-row>
-      <footer class="modal-footer">
-        <b-button
-          v-if="!past && !isCustomer && !isBranchEmployee"
-          id="recreateWorkorderPdfButtonGotenberg"
-          @click="recreateWorkorderPdfGotenberg"
-          :disabled="buttonDisabled"
-          class="btn btn-danger"
-          type="button"
-          variant="secondary"
+          <h6 v-else class="dimmed">{{ $trans('Purchase invoices') }}</h6>
+
+          <h6 v-if="order.workorder_documents.length > 0">{{ $trans('Workorder documents') }}</h6>
+          <div v-if="order.workorder_documents.length > 0">
+            <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents" responsive="sm">
+              <template #cell(url)="data">
+                <b-link :href="data.item.url" target="_blank" class="flex-columns">
+                  {{ $trans('Order') }} {{ order.order_id }}
+                  <small class="dimmed">{{ data.item.name }}</small>
+                </b-link>
+              </template>
+
+            </b-table>
+          </div>
+          <h6 v-else class="dimmed">{{ $trans('Workorder documents') }}</h6>
+
+          <div v-if="order.workorder_documents_partners && order.workorder_documents_partners.length > 0">
+            <h6>{{ $trans('Workorder documents partner') }}</h6>
+            <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents_partners" responsive="sm">
+              <template #cell(url)="data">
+                <b-link :href="data.item.url" target="_blank"  class="flex-columns">
+                  {{ $trans('Order') }} {{ order.order_id }}
+                  <small class="dimmed">{{ data.item.name }}</small>
+                </b-link>
+              </template>
+            </b-table>
+          </div>
+          <h6 v-else class="dimmed">{{ $trans('Workorder documents partner') }}</h6>
+
+          <div v-if="order.reported_codes_extra_data.length">
+            <h6>{{ $trans('Reported extra text') }}</h6>
+            <b-table
+              borderless
+              small
+              id="extra-data-table"
+              :fields="extraDataFields"
+              :items="order.reported_codes_extra_data"
+              responsive="sm"
+            ></b-table>
+          </div>
+          <h6 v-else class="dimmed">{{ $trans('Reported extra text') }}</h6>
+
+        </div>
+
+        <div class="panel col-1-3">
+
+          <div class="documents section">
+            <DocumentsComponent
+              v-if="order"
+              :order="order"
+              :is-view="true"
+            />
+          </div>
+
+          <h6 v-if="order.orderlines.length">{{ $trans('Orderlines') }}</h6>
+          <ul class="listing full-size" v-if="order.orderlines.length">
+            <li v-for="line in order.orderlines" :key="line.id">
+              <div class="listing-item flex-columns">
+                <small>{{ line.product  }}</small>
+                <small>{{ line.location  }}</small>
+                <small>{{ line.remarks  }}</small>
+              </div>
+            </li>
+          </ul>
+          <h6 v-else class="dimmed">{{ $trans('Orderlines') }}</h6>
+
+          <ul class='listing full-size' v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
+            <h6>{{ $trans('Info lines') }}</h6>
+            <li v-for="item of order.infolines" :key="item.id">
+              {{ item.info }}
+            </li>
+          </ul>
+          <h6 v-else class="dimmed">{{ $trans('Info lines') }}</h6>
+
+          <div
+            v-if="order.statuses"
+          >
+            <hr/>
+            <StatusesComponent
+              :statuses="order.statuses"
+            />
+          </div>
+
+
+        </div>
+      </div>
+
+      <b-modal
+        v-if="purchaseInvoice && hasBranches"
+        id="delete-purchase-invoice-modal"
+        ref="delete-purchase-invoice-modal"
+        v-bind:title="$trans('Delete?')"
+        @ok="doDeletePurchaseInvoice"
         >
-          {{ $trans('Recreate workorder PDF') }}
-        </b-button>
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
+        <p class="my-4">{{ $trans('Are you sure you want to delete this purchase invoice?') }}</p>
+      </b-modal>
+
+      <b-modal
+        v-if="purchaseInvoice && hasBranches"
+        id="add-purchase-invoice-modal"
+        ref="add-purchase-invoice-modal"
+        v-bind:title="$trans('Add purchase invoice')"
+        @ok="doAddPurchaseInvoice"
+      >
+        <form ref="add-purchase-invoice-form">
+          <b-container>
+            <b-row>
+              <b-col cols="6">
+                <b-form-group
+                  v-bind:label="$trans('VAT')"
+                  label-for="add-purchase-invoice-vat"
+                >
+                  <PriceInput
+                    id="add-purchase-invoice-vat"
+                    v-model="purchaseInvoice.vat"
+                    :currency="purchaseInvoice.vat_currency"
+                    @priceChanged="(val) => vatChanged(val)"
+                  />
+                </b-form-group>
+              </b-col>
+              <b-col cols="6">
+                <b-form-group
+                  v-bind:label="$trans('Total')"
+                  label-for="add-purchase-invoice-total"
+                >
+                  <PriceInput
+                    id="add-purchase-invoice-total"
+                    v-model="purchaseInvoice.total"
+                    :currency="purchaseInvoice.total_currency"
+                    @priceChanged="(val) => totalChanged(val)"
+                  />
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="4">
+                <b-form-group
+                  v-bind:label="$trans('Reference')"
+                  label-for="add-purchase-invoice-reference"
+                >
+                  <b-form-input
+                    size="sm"
+                    id="add-purchase-invoice-reference"
+                    v-model="purchaseInvoice.reference"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="8">
+                <b-form-group
+                  v-bind:label="$trans('Description')"
+                  label-for="add-purchase-invoice-description"
+                >
+                  <b-form-textarea
+                    id="add-purchase-invoice-description"
+                    v-model="purchaseInvoice.description"
+                    rows="1"
+                  ></b-form-textarea>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </b-container>
+        </form>
+      </b-modal>
+
+      <b-modal ref="workorder-viewer" size="xl" v-b-modal.modal-scrollable>
+        <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
+          <b-spinner medium></b-spinner>
+        </div>
+        <iframe :src="this.workorderURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
+
+        <template #modal-footer="{ ok }">
+          <b-button class="btn button btn-secondary" @click="openWorkorder()" target="_blank">
+              {{ $trans('Open in a new tab') }}
+          </b-button>
+          <b-button
+            v-if="!past && !isCustomer && !isBranchEmployee"
+            id="recreateWorkorderPdfButtonGotenberg"
+            @click="recreateWorkorderPdfGotenberg"
+            :disabled="buttonDisabled"
+            class="btn btn-secondary"
+            type="button"
+            variant="secondary"
+          >
+          <b-spinner small v-if="isGeneratingPDF"></b-spinner>
+          {{ $trans('re-generate PDF (new)') }}
+
+          </b-button>
+          <b-link class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+            <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+          </b-link>
+          <!-- Emulate built in modal footer ok and cancel button actions -->
+          <b-button @click="ok()" variant="primary">
+            {{ $trans("close") }}
+          </b-button>
+        </template>
+      </b-modal>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
 import { OrderService } from '../../models/orders/Order.js'
 import { componentMixin } from '../../utils'
 import { PurchaseInvoiceService } from "../../models/orders/PurchaseInvoice";
-import IconLinkPlus from "../../components/IconLinkPlus";
-import PriceInput from "../../components/PriceInput";
-import IconLinkDelete from "../../components/IconLinkDelete";
+import IconLinkPlus from "@/components/IconLinkPlus.vue";
+import PriceInput from "@/components/PriceInput.vue";
+import IconLinkDelete from "@/components/IconLinkDelete.vue";
+import StatusesComponent from "@/components/StatusesComponent.vue";
+import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    DocumentsComponent,
+    StatusesComponent,
     IconLinkPlus,
     PriceInput,
     IconLinkDelete,
@@ -351,30 +392,32 @@ export default {
   data() {
     return {
       isLoading: false,
+      isGeneratingPDF: false,
       buttonDisabled: false,
       order: null,
+      workorderURL: '',
+      iframeLoading: true,
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') }
+        {key: 'product', label: this.$trans('Product')},
+        {key: 'location', label: this.$trans('Location')},
+        {key: 'remarks', label: this.$trans('Remarks')}
       ],
       infoLineFields: [
-        { key: 'info', label: this.$trans('Infolines') }
+        {key: 'info', label: this.$trans('Infolines')}
       ],
       workorderDocumentFields: [
-        { key: 'name', label: this.$trans('Name') },
-        { key: 'url', label: this.$trans('URL') },
+        {key: 'url', label: this.$trans('URL'),  thStyle: {display: 'none'}},
       ],
       extraDataFields: [
-        { key: 'statuscode', label: this.$trans('Status') },
-        { key: 'extra_data', label: this.$trans('Text') },
+        {key: 'statuscode', label: this.$trans('Status')},
+        {key: 'extra_data', label: this.$trans('Text')},
       ],
       purchaseInvoiceFields: [
-        { key: 'reference', label: this.$trans('Reference') },
-        { key: 'description', label: this.$trans('Description') },
-        { key: 'vat', label: this.$trans('VAT') },
-        { key: 'total', label: this.$trans('Total') },
-        { key: 'icons' },
+        {key: 'reference', label: this.$trans('Reference')},
+        {key: 'description', label: this.$trans('Description')},
+        {key: 'vat', label: this.$trans('VAT')},
+        {key: 'total', label: this.$trans('Total')},
+        {key: 'icons'},
       ],
       purchaseInvoice: null,
       deletePurchaseInvoicePk: null,
@@ -397,6 +440,39 @@ export default {
     },
   },
   methods: {
+    iframeLoaded() {
+        this.iframeLoading = false;
+    },
+    getWorkorderURL() {
+        this.isLoading = true;
+        const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } });
+        return `${document.location.origin}/${routeData.href}`;
+    },
+    showWorkorderDialog() {
+        this.iframeLoading = true;
+        this.workorderURL = this.getWorkorderURL();
+        this.$refs['workorder-viewer'].show();
+    },
+    async recreateWorkorderPdfGotenberg() {
+        this.isLoading = true;
+        this.buttonDisabled = true;
+        this.isGeneratingPDF = true;
+        try {
+            await this.orderService.recreateWorkorderPdfGotenberg(this.pk);
+            this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
+            await this.loadOrder();
+            this.isLoading = false;
+            this.buttonDisabled = false;
+            this.isGeneratingPDF = false;
+        }
+        catch (err) {
+            console.log('Error recreating workorder', err);
+            this.errorToast(this.$trans('Error recreating workorder'));
+            this.buttonDisabled = false;
+            this.isLoading = false;
+            this.isGeneratingPDF = false;
+        }
+    },
     // purchase invoices
     async doDeletePurchaseInvoice() {
       await this.purchaseInvoiceService.delete(this.deletePurchaseInvoicePk)
@@ -436,23 +512,6 @@ export default {
       const routeData = this.$router.resolve({ name: 'workorder-view', params: { uuid: this.order.uuid } })
       window.open(`${document.location.origin}/${routeData.href}`, '_blank')
     },
-    async recreateWorkorderPdfGotenberg() {
-      this.isLoading = true
-      this.buttonDisabled = true
-
-      try {
-        await this.orderService.recreateWorkorderPdfGotenberg(this.pk)
-        this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        await this.loadOrder()
-      } catch(err) {
-        console.log('Error recreating workorder', err)
-        this.errorToast(this.$trans('Error recreating workorder'))
-        this.buttonDisabled = false
-        this.isLoading = false
-      }
-    },
     goBack() {
       this.$router.go(-1)
     },
@@ -480,14 +539,30 @@ export default {
       }
     }
   },
-  created() {
-    this.loadOrder()
+  async created() {
+    await this.loadOrder();
   }
 }
 </script>
 
 <style scoped>
+
+.iframe-loader {
+  min-height: 720px
+}
+iframe {
+  min-height: 720px;
+  width: 100%;
+}
 .purchase-invoices-table {
   padding-top: 10px;
+}
+
+.iframe-loader {
+  min-height: 720px
+}
+iframe {
+  min-height: 720px;
+  width: 100%;
 }
 </style>

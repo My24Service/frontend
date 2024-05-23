@@ -5,6 +5,8 @@ import { QuotationLineModel } from "./QuotationLine";
 
 class QuotationModel {
   id
+  uuid
+  name
   description
   customer_id
   customer_relation
@@ -20,6 +22,7 @@ class QuotationModel {
   quotation_reference
   accepted = false
   preliminary
+  quotation_expire_days
 
   vat_type
   vat
@@ -28,17 +31,22 @@ class QuotationModel {
   total
   total_currency
 
+  definitive_date
+
+  chapters = []
+  images = []
+  statuses = []
+
   priceFields = ['vat', 'total']
 
-  constructor(invoiceData) {
-    for (const [k, v] of Object.entries(invoiceData)) {
+  constructor(quotationData) {
+    for (const [k, v] of Object.entries(quotationData)) {
       if (k === 'quotationlines') {
         this[k] = v.map((m) => new QuotationLineModel(m))
       } else {
         this[k] = v
       }
     }
-
     this.setPriceFields(this)
   }
 }
@@ -46,25 +54,6 @@ class QuotationModel {
 Object.assign(QuotationModel.prototype, priceMixin);
 
 class QuotationService extends BaseModel {
-  fields = {
-    customer_id: '',
-    customer_relation: null,
-    quotation_name: '',
-    quotation_city: '',
-    quotation_address: '',
-    quotation_postal: '',
-    quotation_country_code: '',
-    quotation_email: '',
-    quotation_tel: '',
-    quotation_mobile: '',
-    quotation_contact: '',
-    quotation_reference: '',
-    description: '',
-    total: 0.00,
-    vat: 0.00,
-    accepted: false
-  }
-
   url = '/quotation/quotation/'
   queryMode = 'all'
 
@@ -78,6 +67,11 @@ class QuotationService extends BaseModel {
     }
 
     return base
+  }
+
+  makeDefinitive(id) {
+    const url = `/quotation/quotation/${id}/make_definitive/`
+    return new this.axios.post(url, {}).then(response => response.data)
   }
 
   removeNullFields(obj) {
@@ -106,9 +100,11 @@ class QuotationService extends BaseModel {
     obj = this.removeNullFields(obj)
     return obj
   }
+
+  async search(query) {
+    const url = `${this.url}autocomplete/?q=${query}`
+    return this.axios.get(url).then((response) => response.data)
+  }
 }
 
-let quotationService = new QuotationService()
-
-export default quotationService
 export { QuotationService, QuotationModel }

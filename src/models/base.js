@@ -27,6 +27,10 @@ class BaseModel {
   editPk = null
   editItem = null
   modelDefaults = {}
+  beforeEditModel
+  collectionHasChanges = false
+  sortField = null
+  sortDesc = false
 
   // TODO: finish this for managing items in invoice form
   // TODO: also implement this for orderlines/infolines/etc
@@ -43,6 +47,7 @@ class BaseModel {
   deleteCollectionItem(index) {
     this.deletedItems.push(this.collection[index])
     this.collection.splice(index, 1)
+    this.collectionHasChanges = true
   }
   deleteCollectionItemByid(id) {
     const item = this.collection.find((m) => m.id === id)
@@ -52,8 +57,10 @@ class BaseModel {
 
     this.deletedItems.push(item)
     this.collection = this.collection.filter((m) => m.id !== id)
+    this.collectionHasChanges = true
   }
   editCollectionItem(item, index) {
+    this.beforeEditModel = {...item}
     this.editIndex = index
     this.isEdit = true
 
@@ -74,14 +81,38 @@ class BaseModel {
     const newItem = new this.model({
       ...this.editItem
     })
+
+    if (!this.collectionHasChanges) {
+      const changes = Object.entries(newItem).find(
+        ([k, v]) => k.indexOf('dinero') === -1 && k !== 'id' && this.beforeEditModel[k] !== v
+      )
+      console.log({changes})
+      this.collectionHasChanges = !!(changes && changes.length > 0)
+    }
+
     this.collection.splice(this.editIndex, 1, newItem)
     this.editIndex = null
     this.isEdit = false
     this.emptyCollectionItem()
   }
+
+  async doDirectEditCollectionItem() {
+    await this.update(this.editItem.id, this.editItem)
+    this.editIndex = null
+    this.isEdit = false
+    this.emptyCollectionItem()
+  }
+
   addCollectionItem() {
     this.collection.push(this.editItem)
     this.emptyCollectionItem()
+    this.collectionHasChanges = true
+  }
+
+  async addDirectCollectionItem() {
+    const newModel = await this.insert(this.editItem)
+    this.emptyCollectionItem()
+    return newModel
   }
 
   async emptyCollection() {
@@ -139,6 +170,11 @@ class BaseModel {
     this.listArgs = []
   }
 
+  setSorting(field, sortDesc) {
+    this.sortField = field
+    this.sortDesc = sortDesc
+  }
+
   getCsrfToken() {
     return this.axios.get('/get-csrf-token/').then((response) => response.data.token)
   }
@@ -192,6 +228,11 @@ class BaseModel {
       }
     }
 
+    if (this.sortField !== null) {
+      listArgs.push(`sort_field=${this.sortField}`)
+      listArgs.push(`sort_dir=${this.sortDesc ? 'desc' : 'asc'}`)
+    }
+
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
 
     const response = await this.axios.get(url)
@@ -205,6 +246,13 @@ class BaseModel {
     }
 
     return response.data
+  }
+
+  async loadCollection() {
+    const response = await this.list()
+    this.collection = response.results.map((c) => new this.model(c))
+    this.collectionHasChanges = false
+    this.deletedItems = []
   }
 
   getDetailUrl(pk) {

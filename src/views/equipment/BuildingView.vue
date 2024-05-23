@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm" v-if="building">
 
     <div class="app-detail">
       <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
@@ -92,15 +92,15 @@
 </template>
 
 <script>
-import orderPastModel from '../../models/orders/OrderPast.js'
+import { OrderPastService } from '../../models/orders/OrderPast.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import orderModel from '../../models/orders/Order.js'
+import { OrderService } from '../../models/orders/Order.js'
 import OrderStats from "../../components/OrderStats";
 import {componentMixin} from "../../utils";
-import buildingModel from "../../models/equipment/building";
+import { BuildingService } from "../../models/equipment/building";
 
 export default {
   mixins: [componentMixin],
@@ -116,9 +116,11 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderPastModel,
+      orderPastService: new OrderPastService(),
+      buildingService: new BuildingService(),
+      orderService: new OrderService(),
       buttonDisabled: false,
-      building: buildingModel.getFields(),
+      building: null,
       orders: [],
       orderPastFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -144,7 +146,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderPastModel.currentPage = val
+      this.orderPastService.currentPage = val
       this.loadData()
     }
   },
@@ -159,7 +161,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderPastModel.setSearchQuery(val)
+      this.orderPastService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -174,13 +176,13 @@ export default {
 
       await this.loadHistory()
 
-      this.building = await buildingModel.detail(this.pk)
+      this.building = await this.buildingService.detail(this.pk)
 
       try {
-        const orderTypeStatsData = await orderModel.getOrderTypesStatsBuilding(this.pk)
-        const monthsStatsData = await orderModel.getMonthsStatsBuilding(this.pk)
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsBuilding(this.pk)
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsBuilding(this.pk)
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsBuilding(this.pk)
+        const monthsStatsData = await this.orderService.getMonthsStatsBuilding(this.pk)
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsBuilding(this.pk)
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsBuilding(this.pk)
 
         this.$refs['order-stats'].render(
           orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
@@ -195,8 +197,8 @@ export default {
 
     async loadHistory() {
       try {
-        orderPastModel.addListArg(`building=${this.pk}`)
-        const results = await orderPastModel.list()
+        this.orderPastService.addListArg(`building=${this.pk}`)
+        const results = await this.orderPastService.list()
         this.orders = results.results
         this.isLoading = false
       } catch(error) {

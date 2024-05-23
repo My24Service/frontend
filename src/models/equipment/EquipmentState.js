@@ -21,4 +21,4 @@ class EquipmentStateService extends BaseModel {
 const equipmentStateService = new EquipmentStateService()
 
 export default equipmentStateService
-export  {EquipmentStateModel}
+export  {EquipmentStateModel, EquipmentStateService}

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-nav tabs>
+    <b-nav>
       <b-nav-item
         :active="isActive('equipment')"
         v-if="hasEquipment"

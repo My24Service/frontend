@@ -1,33 +1,49 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New supplier') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit supplier') }}</h2>
-        <b-row>
-          <b-col cols="1" role="group">
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="shop"></b-icon>
+          <span class="backlink" @click="cancelForm">{{ $trans('Suppliers') }}</span> /
+          {{ supplier.name }}
+          <span v-if="!isCreate" class="dimmed">{{ $trans('edit') }}</span>
+        </h3>
+        <div class="flex-columns">
+          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            {{ $trans('Cancel') }}
+          </b-button>
+          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            {{ $trans('Submit') }}
+          </b-button>
+        </div>
+      </div>
+    </header>
+    <section class="page-detail">
+      <b-overlay :show="isLoading" rounded="sm">
+        <b-form class="flex-columns">
+          <div class="panel">
+            <h6>{{  $trans('Supplier') }}</h6>
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Identifier')"
               label-for="supplier-identifier"
             >
               <b-form-input
                 id="supplier-identifier"
-                size="sm"
                 v-model="supplier.identifier"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
+        
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Name')"
               label-for="supplier-name"
             >
               <b-form-input
                 v-model="supplier.name"
                 id="supplier-name"
-                size="sm"
                 :state="isSubmitClicked ? !v$.supplier.name.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
@@ -35,17 +51,16 @@
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
+        
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Address')"
               label-for="supplier-address"
             >
               <b-form-input
                 v-model="supplier.address"
                 id="supplier-address"
-                size="sm"
                 :state="isSubmitClicked ? !v$.supplier.address.$error : null"
               ></b-form-input>
               <b-form-invalid-feedback
@@ -53,16 +68,15 @@
                 {{ $trans('Please enter an address') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="1" role="group">
+        
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Postal')"
               label-for="supplier-postal"
             >
               <b-form-input
                 id="supplier-postal"
-                size="sm"
                 v-model="supplier.postal"
                 :state="isSubmitClicked ? !v$.supplier.postal.$error : null"
               ></b-form-input>
@@ -71,16 +85,15 @@
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
+        
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('City')"
               label-for="supplier-city"
             >
               <b-form-input
                 id="supplier-city"
-                size="sm"
                 v-model="supplier.city"
                 :state="isSubmitClicked ? !v$.supplier.city.$error : null"
               ></b-form-input>
@@ -89,85 +102,72 @@
                 {{ $trans('Please enter the city') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
+
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Country')"
               label-for="supplier-city"
             >
               <b-form-select v-model="supplier.country_code" :options="countries" size="sm"></b-form-select>
             </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="4" role="group">
+          </div>
+
+          <div class="panel">
+            <h6>{{  $trans('Contact') }}</h6>
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Email')"
               label-for="supplier-email"
             >
               <b-form-input
                 id="supplier-email"
-                size="sm"
                 v-model="supplier.email"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
+          
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Tel.')"
               label-for="supplier-tel"
             >
               <b-form-input
                 id="supplier-tel"
-                size="sm"
                 v-model="supplier.tel"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
+          
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Mobile')"
               label-for="supplier-mobile"
             >
               <b-form-input
                 id="supplier-mobile"
-                size="sm"
                 v-model="supplier.mobile"
               ></b-form-input>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
+          
             <b-form-group
               label-size="sm"
+              label-cols="3"
               v-bind:label="$trans('Contact')"
               label-for="supplier-contact"
             >
-              <b-form-textarea
+              <b-form-input
                 id="supplier-contact"
                 v-model="supplier.contact"
                 rows="2"
-              ></b-form-textarea>
+              ></b-form-input>
             </b-form-group>
-          </b-col>
-        </b-row>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
-              {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-          </footer>
-        </div>
-      </b-form>
-    </div>
-  </b-overlay>
+          </div>
+        </b-form>
+      </b-overlay>
+    </section>
+  </div>
 </template>
 
 <script>

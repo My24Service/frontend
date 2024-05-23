@@ -1,138 +1,283 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <h3>{{ $trans('Chapters')}} </h3>
-    <div v-for="(chapter, index) in chapters" :key="chapter.id">
-      <Collapse
-        :title="chapter.name"
+    <details open>
+      <summary class="flex-columns space-between">
+        <h6>{{ $trans('Chapters') }}</h6>
+        <b-icon-chevron-down></b-icon-chevron-down>
+      </summary>
+      <b-modal
+        id="delete-chapter-modal"
+        ref="delete-chapter-modal"
+        v-bind:title="$trans('Delete?')"
+        @ok="doDelete"
       >
-        <b-row>
-          <b-col cols="6" class="chapter-description">
-            {{ chapter.description }}
-          </b-col>
-        </b-row>
-        <QuotationLine
-          :key="chapterKey"
-          :quotationData="quotationData"
-          :chapter="chapter"
-          @quotationLineSubmitted="quotationLineSubmitted"
-          @chapter-updated="() => loadData()"
-          @chapterDeleted="() => loadData()"
-        />
-      </Collapse>
-      <hr v-if="index !== chapters.length - 1">
-    </div>
+        <p class="my-4">
+          {{ $trans("Are you sure you want to delete this chapter, it's quotation lines and costs?") }}
+        </p>
+      </b-modal>
+
+      <div
+        v-if="!chapterService.collection.length && isView"
+      >
+        <p><i>{{ $trans('No chapters') }}</i></p>
+      </div>
+
+      <b-table
+        small
+        :busy='isLoading'
+        :fields="fields"
+        :items="chapterService.collection"
+        responsive="md"
+        class="data-table"
+        v-if="!showForm && chapterService.collection.length"
+      >
+        <template #cell(chapter)="data">
+          <h4>
+            <b-link @click="function() { loadChapter(data.item) }">
+              {{ data.item.name }}
+            </b-link>
+          </h4>
+          <p>{{ data.item.description }}</p>
+        </template>
+        <template #cell(icons)="data">
+          <div
+            class="h2 float-right"
+            v-if="data.item.id && !isView"
+          >
+            <IconLinkEdit
+              :method="function() { editChapter(data.item, data.index) }"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+
+      <div v-if="showForm">
+        <h3>{{ $trans("New chapter" )}}</h3>
+        <div>
+          <b-form-group
+            v-bind:label="$trans('Name')"
+            label-for="name"
+            label-cols="3"
+          >
+            <b-form-input
+              id="name"
+              size="sm"
+              v-model="chapterService.editItem.name"
+              :state="submitClicked ? !v$.chapterService.editItem.name.$error : null"
+            ></b-form-input>
+            <b-form-invalid-feedback
+              :state="submitClicked ? !v$.chapterService.editItem.name.$error : null">
+              {{ $trans('Please enter the chapter name') }}
+            </b-form-invalid-feedback>
+          </b-form-group>
+
+          <b-form-group
+            v-bind:label="$trans('Description')"
+            label-for="description"
+            label-cols="3"
+          >
+            <b-form-textarea
+              id="description"
+              size="sm"
+              v-model="chapterService.editItem.description"
+              placeholder="Chapter description"
+            ></b-form-textarea>
+          </b-form-group>
+
+          <footer class="modal-footer">
+            <b-button
+              :disabled="isLoading"
+              @click="cancelEditChapter"
+              class="btn btn-secondary update-button"
+              type="button"
+              size="sm"
+              variant="secondary"
+            >
+              {{ $trans('Cancel') }}
+            </b-button>
+            <b-button
+              v-if="chapterService.isEdit"
+              @click="doEditChapter"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="warning"
+            >
+              {{ $trans('Edit chapter') }}
+            </b-button>
+            <b-button
+              v-if="!chapterService.isEdit"
+              @click="addChapter"
+              class="btn btn-primary"
+              size="sm"
+              type="button"
+              variant="primary"
+            >
+              {{ $trans('Add chapter') }}
+            </b-button>
+          </footer>
+        </div>
+      </div>
+
+      <footer
+        class="modal-footer"
+        v-if="!showForm && !isView"
+      >
+        <b-button
+          @click="newChapter"
+          class="btn btn-primary update-button"
+          type="button"
+          variant="primary"
+        >
+          {{ $trans('New chapter') }}
+        </b-button>
+      </footer>
+    </details>
   </b-overlay>
 </template>
 <script>
-import quotationService from '@/models/quotations/Quotation.js'
-import QuotationLine from './QuotationLine.vue'
-import Collapse from "../../../components/Collapse";
-import { ChapterService } from '../../../models/quotations/Chapter.js'
-import eventBus from '../../../eventBus.js'
-
+import {QuotationModel} from '@/models/quotations/Quotation.js'
+import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
+import {useVuelidate} from "@vuelidate/core";
+import {required} from "@vuelidate/validators";
+import IconLinkDelete from "@/components/IconLinkDelete.vue";
+import IconLinkEdit from "@/components/IconLinkEdit.vue";
 
 export default {
-  name: 'Chapter',
+  name: 'ChapterComponent',
   components: {
-    Collapse,
-    QuotationLine
+    IconLinkEdit,
+    IconLinkDelete
   },
+  emits: [
+    'chapterCreated',
+    'loadChapterClicked'
+  ],
   props: {
-    quotationData: {
-      type: Object,
+    quotation: {
+      type: QuotationModel,
       default: null
     },
-    newChapter: {
-      type: Object,
-      default: null
+    isView: {
+      type: [Boolean],
+      default: false
     }
   },
-  mounted() {
-    eventBus.$on('edit-chapter-quotation-line', (chapterId) => {
-      for (let chapter of this.chapters) {
-        if (chapter.id === chapterId) {
-          chapter.new = true
-          continue
-        }
-        chapter.new = false
-      }
-      this.chapterKey += 1
-    })
-    eventBus.$on('cancel-edit-chapter-quotation-line', () => {
-      for (let chapter of this.chapters) {
-        chapter.new = false
-      }
-      this.chapterKey += 1
-    })
+  setup() {
+    return { v$: useVuelidate() }
   },
-  beforeDestroy() {
-    eventBus.$off('edit-chapter-quotation-line')
-    eventBus.$off('cancel-edit-chapter-quotation-line')
+  computed: {
+    showForm() {
+      return !this.isView && (this.chapterService.isEdit || this.newItem)
+    },
   },
   data() {
     return {
-      model: quotationService,
-      searchQuery: null,
-      quotationPk: null,
-      isLoading: false,
-      quotations: [],
-      chapters: [],
+      submitClicked: false,
       chapterService: new ChapterService(),
-      chapterKey: 0
+      newItem: false,
+      isLoading: false,
+      fields: [
+        {key: 'chapter', label: this.$trans('Chapter'), thAttr: {width: '80%'}},
+        {key: 'icons', label: '', thAttr: {width: '20%'}},
+      ],
+      hasChanges: false,
+      deletePk: null
     }
   },
-  created () {
-    this.model.currentPage = this.$route.query.page || 1
-    this.loadData()
+  async created () {
+    this.chapterService.model = ChapterModel
+    this.chapterService.addListArg(`quotation=${this.quotation.id}`)
+    await this.loadData()
+  },
+  validations() {
+    return {
+      chapterService: {
+        editItem: {
+          name: {
+            required
+          }
+        }
+      }
+    }
   },
   methods: {
-    async loadData() {
+    // delete
+    showDeleteModal(id) {
+      this.deletePk = id
+      this.$refs['delete-chapter-modal'].show()
+    },
+    async doDelete() {
       this.isLoading = true
-      this.chapterService.listArgs = [`quotation=${this.quotationData.id}`]
 
       try {
-        const data = await this.chapterService.list()
-        this.chapters = data.results
+        await this.chapterService.delete(this.deletePk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Chapter has been deleted'))
+        await this.loadData()
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching quotation chapters', error)
-        this.errorToast(this.$trans('Error loading quotation chapters'))
         this.isLoading = false
+        console.log('Error deleting chapter', error)
+        this.errorToast(this.$trans('Error deleting chapter'))
       }
-      this.chapterService.listArgs = []
     },
-    quotationLineSubmitted() {
-      this.loadData()
-      this.$emit('quotationLineSubmitted')
+    async doEditChapter() {
+      if (this.chapterService.editItem.id) {
+        this.isLoading = true
+        await this.chapterService.doDirectEditCollectionItem()
+        await this.loadData()
+        this.isLoading = false
+      } else {
+        this.chapterService.doEditCollectionItem()
+      }
+    },
+    editChapter(item, index) {
+      this.chapterService.editCollectionItem(item, index)
+    },
+    cancelEditChapter() {
+      this.chapterService.cancelEdit()
+      this.newItem = false
+    },
+    newChapter() {
+      this.chapterService.newEditItem()
+      this.newItem = true
+    },
+    async addChapter() {
+      this.submitClicked = true
+
+      this.v$.$touch()
+
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
+        return
+      }
+
+      this.chapterService.editItem.quotation = this.quotation.id
+      const newChapter = await this.chapterService.addDirectCollectionItem()
+
+      // emit created so the main form can load costs and lines
+      this.$emit('chapterCreated', newChapter)
+
+      this.v$.$reset()
+
+      await this.loadData()
+    },
+    loadChapter(chapter) {
+      this.$emit('loadChapterClicked', chapter)
+    },
+    async loadData() {
+      await this.chapterService.loadCollection()
+      if (this.chapterService.collection.length === 0) {
+        this.newChapter()
+      }
     }
   },
-  watch: {
-    '$route.name': {
-      handler: function(search) {
-        if (this.$route.name === 'preliminary-quotations') {
-          this.model.queryMode = 'preliminary'
-        } else {
-          this.model.queryMode = 'all'
-        }
-      },
-      deep: true,
-      immediate: true
-    },
-    newChapter: {
-      handler(newChapter) {
-        const chapter = {...newChapter}
-        if (chapter.name) {
-          chapter.new = true
-          this.$set(this.chapters, this.chapters.length, chapter)
-        }
-      },
-      deep: true
-    }
-  }
 }
 </script>
 <style scoped>
-.chapter-description {
-  margin-top: 20px;
-}
 </style>

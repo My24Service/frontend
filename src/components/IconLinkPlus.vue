@@ -10,10 +10,10 @@
     </span>
 
     <span v-if="type === 'tr'">
-      <b-link v-if="method" class="px-1" v-bind:title="title" v-on:click.native="method()">
+      <b-link v-if="method" v-bind:title="title" v-on:click.native="method()">
         <b-icon-plus class="edit-icon"></b-icon-plus>
       </b-link>
-      <router-link v-if="router_name" class="px-1" v-bind:title="title" :to="{name: router_name, params: router_params}">
+      <router-link v-if="router_name" v-bind:title="title" :to="{name: router_name, params: router_params}">
         <b-icon-plus class="edit-icon"></b-icon-plus>
       </router-link>
     </span>

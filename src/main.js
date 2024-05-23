@@ -20,8 +20,8 @@ import VueSpinners from 'vue-spinners/dist/vue-spinners.common'
 
 Vue.use(VueSpinners)
 
-// import VueCompositionAPI from '@vue/composition-api'
-// Vue.use(VueCompositionAPI)
+import VueCompositionAPI from '@vue/composition-api'
+Vue.use(VueCompositionAPI)
 
 import { BadgePlugin } from 'bootstrap-vue'
 Vue.use(BadgePlugin)
@@ -134,8 +134,9 @@ const defaultTheme = 'theme-default'
 const themes = {
   'shltr': 'theme-shltr',
   'shltr-installation': 'theme-shltr',
+  'wsmes': 'theme-shltr',
+  'wsmes-corporate': 'theme-shltr',
   'riedel': 'theme-shltr',
-  'az-fresh': 'theme-shltr',
   'amex': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
@@ -156,6 +157,9 @@ import accountModel from "./models/account/Account";
 auth.setInterceptors(client)
 
 Vue.config.productionTip = false
+
+// tired of those "v$ already defined" warnings -_-
+Vue.config.silent = true
 
 Vue.prototype.$trans = (text) => {
   if (text in window.member_type_text) {

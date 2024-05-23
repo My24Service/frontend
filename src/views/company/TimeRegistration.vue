@@ -1,16 +1,21 @@
 <template>
-  <div class="app-grid">
-    <TimeRegistrationData
-      ref="user-time-registration"
-      :user_id="user_id"
-    />
+  <div class="app-page">
+    <header>
+      <h3>{{ $trans("Time registration") }}</h3>
+    </header>
+    <div class='panel'>
+      <TimeRegistrationData
+        ref="user-time-registration"
+        :user_id="user_id"
+      />
+    </div>
   </div>
 </template>
 
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import { TimeRegistrationService } from "@/models/company/TimeRegistration";
+import { TimeRegistrationService } from "../../models/company/TimeRegistration";
 import TimeRegistrationData from "../../components/TimeRegistrationData.vue";
 
 export default {

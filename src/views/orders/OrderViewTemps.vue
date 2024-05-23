@@ -1,5 +1,21 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <div class='app-page'>
+
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <router-link :to="{name: 'order-list'}">{{ $trans("Orders") }}</router-link> /
+          <span>#<strong>{{ pk }}</strong></span>
+        </h3>
+        <div class="flex-columns">
+          <router-link class="btn button" :to="{name:'order-edit', pk: pk}">
+            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit order') }}
+          </router-link>
+        </div>
+      </div>
+    </header>
+
     <div class="app-detail">
       <h3>{{ $trans('Order info') }}</h3>
       <b-row>
@@ -113,12 +129,8 @@
           </b-link>
         </b-col>
       </b-row>
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
@@ -147,9 +159,6 @@ export default {
     },
   },
   methods: {
-    goBack() {
-      this.$router.go(-1)
-    },
     async loadOrder() {
       this.isLoading = true
 

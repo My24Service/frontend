@@ -1,9 +1,23 @@
 <template>
-  <div class="app-grid">
-
-    <div class="subnav-pills">
-      <PillsCompanyPartners />
-    </div>
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3><b-icon icon="person-square"></b-icon>{{ $trans('Partners') }}</h3>
+        <b-button-toolbar>
+          <b-button-group>
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'partner-request-add'}" class="btn">{{$trans('New partner request')}}</router-link>
+          
+        </b-button-toolbar>
+      </div>
+    </header>
 
     <SearchModal
       id="search-modal"
@@ -20,12 +34,9 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this partner request?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Request')"
-      />
+    <div class="page-detail panel">
+      <PillsCompanyPartners />
+      
 
       <b-table
         id="partnerRequestsSent-table"
@@ -39,21 +50,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="partner-request-add"
-                  v-bind:title="$trans('New partner request')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #cell(icons)="data">
@@ -72,6 +69,11 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Request')"
+      />
   </div>
 </template>
 

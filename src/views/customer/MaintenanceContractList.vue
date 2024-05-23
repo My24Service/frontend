@@ -1,6 +1,24 @@
 <template>
-  <div class="app-grid" v-if="!isLoading">
-
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3><b-icon icon="file-earmark-lock"></b-icon> {{ $trans('Maintenance contracts') }}</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'maintenance-contract-add'}" class="btn primary">
+            {{ $trans('Add contract') }}
+          </router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -16,12 +34,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this maintenance contract?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.maintenanceContractService"
-        :model_name="$trans('Contract')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="maintenance-contract-table"
@@ -33,27 +46,8 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="maintenance-contract-add"
-                  v-bind:title="$trans('New maintenance contract')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
@@ -71,23 +65,23 @@
           </router-link>
         </template>
         <template #cell(totals)="data">
-          <table class="totals">
-            <tr>
-              <td><strong>{{ $trans('Created orders') }}</strong></td>
-              <td>{{ data.item.created_orders}}</td>
-            </tr>
-            <tr>
-              <td><strong>{{ $trans('# equipment') }}</strong></td>
-              <td>{{ data.item.num_equipment}}</td>
-            </tr>
-            <tr>
-              <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
-              <td>{{ data.item.num_order_equipment}}</td>
-            </tr>
-          </table>
+          <strong v-if="data.item.created_orders">{{ data.item.created_orders}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('created orders') }}</small>
+          &nbsp;
+          <strong v-if="data.item.num_equipment">{{ data.item.num_equipment}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('contract equipment') }}</small>
+          &nbsp;
+          <strong v-if="data.item.num_order_equipment">{{ data.item.num_order_equipment}} </strong>
+          <span v-else class="dimmed">0 </span>
+          <small class="dimmed">{{ $trans('equipment in orders') }}</small>
         </template>
         <template #cell(customer_view_name)="data">
           {{ data.item.customer_view.name }}
+        </template>
+        <template #cell(created)="data">
+          <small>{{ data.item.created }}</small>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -103,30 +97,37 @@
           </div>
         </template>
       </b-table>
+
+      <Pagination
+        v-if="!isLoading && this.maintenanceContractService"
+        :model="this.maintenanceContractService"
+        :model_name="$trans('Contract')"
+      />
     </div>
+
   </div>
 </template>
 
 <script>
-import maintenanceContractService from '../../models/customer/MaintenanceContract.js'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
+import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import IconLinkEdit from "@/components/IconLinkEdit.vue";
 
 export default {
   name: 'MaintenanceContractList',
   components: {
     IconLinkDelete,
-    IconLinkEdit,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
     Pagination,
+    IconLinkEdit
   },
   props: {
     customer_pk: {
@@ -138,18 +139,17 @@ export default {
     return {
       customer: null,
       searchQuery: null,
-      isLoading: false,
+      isLoading: true,
       maintenanceContracts: [],
       maintenanceContractFields: [
         {key: 'name', label: this.$trans('Contract name'), sortable: true},
         {key: 'customer_view_name', label: this.$trans('Customer'), sortable: true},
         {key: 'sum_tariffs', label: this.$trans('Contract value'), sortable: true},
         {key: 'remarks', label: this.$trans('Remarks'), sortable: true},
-        {key: 'totals', label: this.$trans('Totals'), sortable: true},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'icons'}
       ],
-      maintenanceContractService,
+      maintenanceContractService: new MaintenanceContractService(),
     }
   },
   async created() {

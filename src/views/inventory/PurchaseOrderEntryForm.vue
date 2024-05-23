@@ -1,324 +1,341 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New entry') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit entry') }}</h2>
-        <b-row>
-          <b-col cols="12" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Purchase order')"
-              label-for="purchaseorder-entry-order-search"
-            >
-              <multiselect
-                id="purchaseorder-entry-order-search"
-                track-by="id"
-                :placeholder="$trans('Type to search')"
-                open-direction="bottom"
-                :options="purchaseOrders"
-                :multiple="false"
-                :internal-search="false"
-                :clear-on-select="true"
-                :close-on-select="true"
-                :options-limit="30"
-                :limit="10"
-                :max-height="600"
-                :show-no-results="false"
-                :hide-selected="true"
-                @search-change="getPurchaseOrders"
-                @select="selectPurchaseOrder"
-                :custom-label="purchaseOrderLabel"
-              >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="1" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Order ID')"
-              label-for="purchaseorder-entry-order-id"
-            >
-              <b-form-input
-                v-model="selectedPurchaseOrder.purchase_order_id"
-                id="purchaseorder-entry-order-id"
-                readonly
-                size="sm"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Supplier')"
-              label-for="purchaseorder-entry-supplier"
-            >
-              <b-form-input
-                v-model="selectedPurchaseOrder.order_name"
-                id="purchaseorder-entry-supplier"
-                readonly
-                size="sm"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('City')"
-              label-for="purchaseorder-entry-city"
-            >
-              <b-form-input
-                v-model="selectedPurchaseOrder.order_city"
-                id="purchaseorder-entry-city"
-                size="sm"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Expected entry date')"
-              label-for="purchaseorder-entry-expected_entry_date"
-            >
-              <b-form-input
-                v-model="selectedPurchaseOrder.expected_entry_date"
-                id="purchaseorder-entry-expected_entry_date"
-                size="sm"
-                readonly
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="3" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Default location')"
-              label-for="purchaseorder-entry-default-location"
-            >
-              <b-form-select
-                id="purchaseorder-entry-default-location"
-                v-model="defaultLocation"
-                :options="stockLocations"
-                size="sm"
-                value-field="id"
-                text-field="name"
-              ></b-form-select>
-            </b-form-group>
-          </b-col>
-        </b-row>
-
-        <div class="entry-materials">
-          <h4>{{ $trans('Products') }}</h4>
-          <b-row>
-            <b-col cols="12">
-              <b-table
-                v-if="purchaseorderEntries.length > 0"
-                small
-                :fields="entriesFields"
-                :items="purchaseorderEntries" responsive="md"
-              >
-                <template #cell(entry_date)="data">
-                  {{ formatEntryDate(data.item.entry_date) }}
-                </template>
-                <template #cell(icons)="data">
-                  <div class="float-right">
-                    <b-link class="h5 mx-2" @click="editEntry(data.item, data.index)">
-                      <b-icon-pencil></b-icon-pencil>
-                    </b-link>
-                    <b-link class="h5 mx-2" @click.prevent="deleteEntry(data.index)">
-                      <b-icon-trash></b-icon-trash>
-                    </b-link>
-                  </div>
-                </template>
-              </b-table>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="12" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Product')"
-                label-for="purchaseorder-entry-material-search"
-              >
-                <multiselect
-                  id="purchaseorder-entry-material-search"
-                  track-by="id"
-                  :placeholder="$trans('Type to search')"
-                  open-direction="bottom"
-                  :options="purchaseOrderMaterials"
-                  :multiple="false"
-                  :internal-search="true"
-                  :clear-on-select="true"
-                  :close-on-select="true"
-                  :options-limit="30"
-                  :limit="10"
-                  :max-height="600"
-                  :show-no-results="false"
-                  :hide-selected="true"
-                  @select="selectPurchaseOrderMaterial"
-                  :custom-label="purchaseOrderMaterialLabel"
+  <div class='app-page'>
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="receipt"></b-icon>
+          <span @click="cancelForm" class="backlink">{{ $trans('Entries') }}</span> / 
+          <span v-if="isCreate">{{ $trans('New entry') }}</span>
+          <span v-if="!isCreate">{{ $trans('Edit entry') }}</span>
+        </h3>
+        <b-button-toolbar>
+          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            {{ $trans('Cancel') }}
+          </b-button>
+          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            {{ $trans('Submit') }}
+          </b-button>
+        </b-button-toolbar>
+      </div>
+    </header>
+    <div class='page-details panel'>
+      <b-overlay :show="isLoading" rounded="sm">
+        <div class="container app-form">
+          <b-form>
+            
+            <b-row>
+              <b-col cols="12" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Purchase order')"
+                  label-for="purchaseorder-entry-order-search"
                 >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
-                <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
-                  {{ $trans('Please select a product') }}
-                </b-form-invalid-feedback>
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="3" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Name')"
-                label-for="purchaseorder-entry-material-name"
-              >
-                <b-form-input
-                  v-model="entry.purchase_order_material_view.name"
-                  id="purchaseorder-entry-material-name"
-                  readonly
-                  size="sm"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="1" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Ordered')"
-                label-for="purchaseorder-entry-material-amount"
-              >
-                <b-form-input
-                  v-model="entry.ordered_amount"
-                  id="purchaseorder-entry-material-amount"
-                  readonly
-                  size="sm"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="2" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Unit')"
-                label-for="purchaseorder-entry-material-unit"
-              >
-                <b-form-input
-                  v-model="entry.purchase_order_material_view.unit"
-                  id="purchaseorder-entry-material-unit"
-                  size="sm"
-                  readonly
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-            <b-col cols="1" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Entry')"
-                label-for="purchaseorder-entry-amount"
-              >
-                <b-form-input
-                  ref="amount"
-                  v-model="entry.amount"
-                  id="purchaseorder-entry-amount"
-                  size="sm"
-                  :state="isSubmitClicked ? !v$.entry.amount.$error : null"
-                ></b-form-input>
-                <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.entry.amount.$error : null">
-                  {{ $trans('Please enter an amount') }}
-                </b-form-invalid-feedback>
-              </b-form-group>
-            </b-col>
-            <b-col cols="2" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Date')"
-                label-for="purchaseorder-entry-date"
-              >
-                <b-form-datepicker
-                  id="purchaseorder-entry-date"
-                  size="sm"
-                  class="p-sm-0"
-                  v-model="entry.entry_date"
-                  v-bind:placeholder="$trans('Choose a date')"
-                  value="purchaseorderEntry.entry_date"
-                  locale="nl"
-                  :state="isSubmitClicked ? !v$.entry.entry_date.$error : null"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                ></b-form-datepicker>
-                <b-form-invalid-feedback
-                  :state="isSubmitClicked ? !v$.entry.entry_date.$error : null">
-                  {{ $trans('Please enter a date') }}
-                </b-form-invalid-feedback>
-              </b-form-group>
-            </b-col>
-            <b-col cols="3" role="group">
-              <b-form-group
-                label-size="sm"
-                v-bind:label="$trans('Move to location')"
-                label-for="purchaseorder-entry-location"
-              >
-                <b-form-select
-                  id="purchaseorder-entry-location"
-                  v-model="entry.stock_location"
-                  :options="stockLocations"
-                  size="sm"
-                  value-field="id"
-                  text-field="name"
-                ></b-form-select>
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <footer class="modal-footer">
-            <b-button
-              @click="cancelEditEntry"
-              class="btn btn-primary"
-              size="sm"
-              type="button"
-              variant="secondary"
-            >
-              {{ $trans('Cancel') }}
-            </b-button>
-            &nbsp;
-            <b-button
-              v-if="isEditEntry"
-              @click="doEditEntry"
-              class="btn btn-primary"
-              size="sm"
-              type="button"
-              variant="warning">
-              {{ $trans('Edit entry') }}
-            </b-button>
-            <b-button
-              v-if="!isEditEntry"
-              @click="addEntry"
-              class="btn btn-primary"
-              size="sm"
-              type="button"
-              variant="primary"
-              :disabled="!isEntryValid"
-            >
-              {{ $trans('Add entry') }}
-            </b-button>
-          </footer>
-        </div>
+                  <multiselect
+                    id="purchaseorder-entry-order-search"
+                    track-by="id"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="purchaseOrders"
+                    :multiple="false"
+                    :internal-search="false"
+                    :clear-on-select="true"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="false"
+                    :hide-selected="true"
+                    @search-change="getPurchaseOrders"
+                    @select="selectPurchaseOrder"
+                    :custom-label="purchaseOrderLabel"
+                  >
+                    <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  </multiselect>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="1" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Order ID')"
+                  label-for="purchaseorder-entry-order-id"
+                >
+                  <b-form-input
+                    v-model="selectedPurchaseOrder.purchase_order_id"
+                    id="purchaseorder-entry-order-id"
+                    readonly
+                    size="sm"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Supplier')"
+                  label-for="purchaseorder-entry-supplier"
+                >
+                  <b-form-input
+                    v-model="selectedPurchaseOrder.order_name"
+                    id="purchaseorder-entry-supplier"
+                    readonly
+                    size="sm"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('City')"
+                  label-for="purchaseorder-entry-city"
+                >
+                  <b-form-input
+                    v-model="selectedPurchaseOrder.order_city"
+                    id="purchaseorder-entry-city"
+                    size="sm"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Expected entry date')"
+                  label-for="purchaseorder-entry-expected_entry_date"
+                >
+                  <b-form-input
+                    v-model="selectedPurchaseOrder.expected_entry_date"
+                    id="purchaseorder-entry-expected_entry_date"
+                    size="sm"
+                    readonly
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3" role="group">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Default location')"
+                  label-for="purchaseorder-entry-default-location"
+                >
+                  <b-form-select
+                    id="purchaseorder-entry-default-location"
+                    v-model="defaultLocation"
+                    :options="stockLocations"
+                    size="sm"
+                    value-field="id"
+                    text-field="name"
+                  ></b-form-select>
+                </b-form-group>
+              </b-col>
+            </b-row>
 
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
-              {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-          </footer>
+            <div class="entry-materials">
+              <h4>{{ $trans('Products') }}</h4>
+              <b-row>
+                <b-col cols="12">
+                  <b-table
+                    v-if="purchaseorderEntries.length > 0"
+                    small
+                    :fields="entriesFields"
+                    :items="purchaseorderEntries" responsive="md"
+                  >
+                    <template #cell(entry_date)="data">
+                      {{ formatEntryDate(data.item.entry_date) }}
+                    </template>
+                    <template #cell(icons)="data">
+                      <div class="float-right">
+                        <b-link class="h5 mx-2" @click="editEntry(data.item, data.index)">
+                          <b-icon-pencil></b-icon-pencil>
+                        </b-link>
+                        <b-link class="h5 mx-2" @click.prevent="deleteEntry(data.index)">
+                          <b-icon-trash></b-icon-trash>
+                        </b-link>
+                      </div>
+                    </template>
+                  </b-table>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="12" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Product')"
+                    label-for="purchaseorder-entry-material-search"
+                  >
+                    <multiselect
+                      id="purchaseorder-entry-material-search"
+                      track-by="id"
+                      :placeholder="$trans('Type to search')"
+                      open-direction="bottom"
+                      :options="purchaseOrderMaterials"
+                      :multiple="false"
+                      :internal-search="true"
+                      :clear-on-select="true"
+                      :close-on-select="true"
+                      :options-limit="30"
+                      :limit="10"
+                      :max-height="600"
+                      :show-no-results="false"
+                      :hide-selected="true"
+                      @select="selectPurchaseOrderMaterial"
+                      :custom-label="purchaseOrderMaterialLabel"
+                    >
+                      <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                    </multiselect>
+                    <b-form-invalid-feedback
+                      :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
+                      {{ $trans('Please select a product') }}
+                    </b-form-invalid-feedback>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="3" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Name')"
+                    label-for="purchaseorder-entry-material-name"
+                  >
+                    <b-form-input
+                      v-model="entry.purchase_order_material_view.name"
+                      id="purchaseorder-entry-material-name"
+                      readonly
+                      size="sm"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="1" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Ordered')"
+                    label-for="purchaseorder-entry-material-amount"
+                  >
+                    <b-form-input
+                      v-model="entry.ordered_amount"
+                      id="purchaseorder-entry-material-amount"
+                      readonly
+                      size="sm"
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Unit')"
+                    label-for="purchaseorder-entry-material-unit"
+                  >
+                    <b-form-input
+                      v-model="entry.purchase_order_material_view.unit"
+                      id="purchaseorder-entry-material-unit"
+                      size="sm"
+                      readonly
+                    ></b-form-input>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="1" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Entry')"
+                    label-for="purchaseorder-entry-amount"
+                  >
+                    <b-form-input
+                      ref="amount"
+                      v-model="entry.amount"
+                      id="purchaseorder-entry-amount"
+                      size="sm"
+                      :state="isSubmitClicked ? !v$.entry.amount.$error : null"
+                    ></b-form-input>
+                    <b-form-invalid-feedback
+                      :state="isSubmitClicked ? !v$.entry.amount.$error : null">
+                      {{ $trans('Please enter an amount') }}
+                    </b-form-invalid-feedback>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Date')"
+                    label-for="purchaseorder-entry-date"
+                  >
+                    <b-form-datepicker
+                      id="purchaseorder-entry-date"
+                      size="sm"
+                      class="p-sm-0"
+                      v-model="entry.entry_date"
+                      v-bind:placeholder="$trans('Choose a date')"
+                      value="purchaseorderEntry.entry_date"
+                      locale="nl"
+                      :state="isSubmitClicked ? !v$.entry.entry_date.$error : null"
+                      :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    ></b-form-datepicker>
+                    <b-form-invalid-feedback
+                      :state="isSubmitClicked ? !v$.entry.entry_date.$error : null">
+                      {{ $trans('Please enter a date') }}
+                    </b-form-invalid-feedback>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="3" role="group">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Move to location')"
+                    label-for="purchaseorder-entry-location"
+                  >
+                    <b-form-select
+                      id="purchaseorder-entry-location"
+                      v-model="entry.stock_location"
+                      :options="stockLocations"
+                      size="sm"
+                      value-field="id"
+                      text-field="name"
+                    ></b-form-select>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+              <footer class="modal-footer">
+                <b-button
+                  @click="cancelEditEntry"
+                  class="btn btn-primary"
+                  size="sm"
+                  type="button"
+                  variant="secondary"
+                >
+                  {{ $trans('Cancel') }}
+                </b-button>
+                &nbsp;
+                <b-button
+                  v-if="isEditEntry"
+                  @click="doEditEntry"
+                  class="btn btn-primary"
+                  size="sm"
+                  type="button"
+                  variant="warning">
+                  {{ $trans('Edit entry') }}
+                </b-button>
+                <b-button
+                  v-if="!isEditEntry"
+                  @click="addEntry"
+                  class="btn btn-primary"
+                  size="sm"
+                  type="button"
+                  variant="primary"
+                  :disabled="!isEntryValid"
+                >
+                  {{ $trans('Add entry') }}
+                </b-button>
+              </footer>
+            </div>
+
+            <div class="mx-auto">
+              <footer class="modal-footer">
+                
+              </footer>
+            </div>
+          </b-form>
         </div>
-      </b-form>
+      </b-overlay>
     </div>
-  </b-overlay>
+
+  </div>
 </template>
 
 <script>

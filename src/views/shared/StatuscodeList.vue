@@ -1,5 +1,120 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Statuscodes") }}
+        </h3>
+        <div class="flex-columns">
+          <router-link class="btn button" :to="'/orders/statuscodes/form'">
+            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add statuscode") }}
+          </router-link>
+        </div>
+      </div>
+    </header>
+
+    <div class="panel overflow-auto">
+        <b-table
+          small
+          id="statuscode-table"
+          :busy='isLoading'
+          :fields="fields"
+          :items="statuscodes"
+          responsive="md"
+          class="data-table"
+        >
+          <template #table-busy>
+            <div class="text-center my-2">
+              <b-spinner class="align-middle"></b-spinner><br><br>
+              <strong>{{ $trans('loading statuscodes...') }}</strong>
+            </div>
+          </template>
+          <template #head(icons)="">
+            <div class="float-right">
+              <b-button-toolbar>
+                <b-button-group class="mr-1">
+                  <ButtonLinkRefresh
+                    v-bind:method="function() { loadData() }"
+                    v-bind:title="$trans('Refresh')"
+                  />
+                  <ButtonLinkSearch
+                    v-bind:method="function() { showSearchModal() }"
+                  />
+                </b-button-group>
+              </b-button-toolbar>
+            </div>
+          </template>
+          <template #cell(statuscode)="data">
+            <router-link :to="{name: linkEdit, params: {pk: data.item.id}}">{{ data.item.statuscode }} </router-link>
+          </template>
+          <template #cell(preview)="data">
+            <small class="statuscode-preview" :style="`--bg-color: ${data.item.color}; --text-color: ${data.item.text_color || 'black'}`">
+              {{  data.item.statuscode }}
+            </small>
+          </template>
+          <template #cell(color)="data">
+            <span v-bind:style="{ backgroundColor: data.item.color }">
+              <input type="color" name="" id="" :value="data.item.color" disabled/>
+            </span>
+            <div class="color_text">{{data.item.color }}</div>
+          </template>
+          <template #cell(text_color)="data">
+            <span v-bind:style="{ width: '10px', backgroundColor: data.item.text_color }">
+              <span v-if="data.item.text_color">
+                <input type="color" name="" id="" :value="data.item.text_color" disabled/>
+              </span>
+            </span>
+            <div class="color_text">{{data.item.text_color }}</div>
+          </template>
+          <template #cell(type)="data">
+            <div v-if="data.item.start_order">
+              <span class="statuscode_type">{{ $trans('Start order') }}</span>
+            </div>
+            <div v-if="data.item.end_order">
+              <span class="statuscode_type">{{ $trans('End order') }}</span>
+            </div>
+            <div v-if="data.item.after_end_order">
+              <span class="statuscode_type">{{ $trans('After end order') }}</span>
+            </div>
+          </template>
+          <template #cell(actions)="data">
+            <b-table
+              small
+              :fields="action_fields"
+              :items="data.item.actions"
+              responsive="md"
+              borderless
+              thead-class="d-none"
+            >
+              <template #cell(id)="data">
+                <router-link :to="{name: linkEditAction, params: {pk: data.item.id }}">
+                  {{ data.item.name }} ({{ data.item.type }})
+                </router-link>
+              </template>
+            </b-table>
+          </template>
+
+          <template #cell(icons)="data">
+            <div class="h2 float-right">
+              <IconLinkPlus
+                type="tr"
+                v-bind:title="$trans('Add action')"
+                v-bind:router_name="`${linkAddAction}`"
+                v-bind:router_params="{statuscode_pk: data.item.id}"
+              />
+              <IconLinkDelete
+                v-bind:title="$trans('Delete')"
+                v-bind:method="function() { showDeleteModal(data.item.id) }"
+              />
+            </div>
+          </template>
+        </b-table>
+      </div>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.statuscodeModel"
+        :model_name="$trans('Statuscode')"
+      />
 
     <SearchModal
       id="search-modal"
@@ -16,115 +131,12 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this statuscode?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.statuscodeModel"
-        :model_name="$trans('Statuscode')"
-      />
-      <b-table
-        small
-        id="statuscode-table"
-        :busy='isLoading'
-        :fields="fields"
-        :items="statuscodes"
-        tbody-tr-class="statuscode-row"
-        responsive="md"
-        class="data-table"
-      >
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :router_name="`${linkAdd}`"
-                  v-bind:title="`${titleAdd}`"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
-        <template #cell(color)="data">
-          <span v-bind:style="{ backgroundColor: data.item.color }">
-            <img width="12" :src="PIXEL_URL" />
-          </span>
-          <div class="color_text">{{data.item.color }}</div>
-        </template>
-        <template #cell(text_color)="data">
-          <span v-bind:style="{ width: '10px', backgroundColor: data.item.text_color }">
-            <img width="10" :src="PIXEL_URL" />
-          </span>
-          <div class="color_text">{{data.item.text_color }}</div>
-        </template>
-        <template #cell(type)="data">
-          <div v-if="data.item.start_order">
-            <span class="statuscode_type">{{ $trans('Start order') }}</span>
-          </div>
-          <div v-if="data.item.end_order">
-            <span class="statuscode_type">{{ $trans('End order') }}</span>
-          </div>
-          <div v-if="data.item.after_end_order">
-            <span class="statuscode_type">{{ $trans('After end order') }}</span>
-          </div>
-        </template>
-        <template #cell(actions)="data">
-          <b-table
-            small
-            :fields="action_fields"
-            :items="data.item.actions"
-            responsive="md"
-            borderless
-            thead-class="d-none"
-          >
-            <template #cell(id)="data">
-              <router-link :to="{name: linkEditAction, params: {pk: data.item.id }}">
-                {{ data.item.name }} ({{ data.item.type }})
-              </router-link>
-            </template>
-          </b-table>
-        </template>
-
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkPlus
-              type="tr"
-              v-bind:title="$trans('Add action')"
-              v-bind:router_name="`${linkAddAction}`"
-              v-bind:router_params="{statuscode_pk: data.item.id}"
-            />
-            <IconLinkEdit
-              v-bind:router_name="`${linkEdit}`"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-            />
-          </div>
-        </template>
-      </b-table>
-    </div>
   </div>
 </template>
 
 <script>
 import statuscodeOrderModel from '../../models/orders/Statuscode.js'
 import statuscodeTripModel from '../../models/mobile/TripStatuscode.js'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkPlus from '../../components/IconLinkPlus.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -142,7 +154,6 @@ export default {
     },
   },
   components: {
-    IconLinkEdit,
     IconLinkPlus,
     IconLinkDelete,
     ButtonLinkRefresh,
@@ -171,19 +182,18 @@ export default {
       fields: [],
       fieldsOrder: [
         {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '15%'}},
-        {key: 'color', label: this.$trans('Color'), thAttr: {width: '5%'}},
-        {key: 'text_color', label: this.$trans('Text color'), thAttr: {width: '10%'}},
-        {key: 'type', label: this.$trans('Type'), thAttr: {width: '10%'}},
-        {key: 'description', label: this.$trans('Description'), thAttr: {width: '25%'}},
+        {key: 'preview', label: this.$trans('Preview')},
+        {key: 'type', label: this.$trans('Type')},
+        {key: 'description', label: this.$trans('Description')},
         {key: 'actions', label: this.$trans('Actions'), thAttr: {width: '20%'}},
         {key: 'icons', thAttr: {width: '15%'}},
       ],
       fieldsTrip: [
-        {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '20%'}},
-        {key: 'color', label: this.$trans('Color'), thAttr: {width: '5%'}},
+        {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '15%'}},
+        {key: 'preview', label: this.$trans('Preview')},
         {key: 'start_trip', label: this.$trans('Start trip?'), thAttr: {width: '10%'}},
         {key: 'end_trip', label: this.$trans('End trip?'), thAttr: {width: '10%'}},
-        {key: 'description', label: this.$trans('Description'), thAttr: {width: '20%'}},
+        {key: 'description', label: this.$trans('Description')},
         {key: 'actions', label: this.$trans('Actions'), thAttr: {width: '20%'}},
         {key: 'icons', thAttr: {width: '15%'}},
       ],
