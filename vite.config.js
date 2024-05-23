@@ -10,10 +10,10 @@ export default defineConfig({
   //   sourcemap: true
   // },
   server: {
-    host: 'demo.my24service.com',
+    host: 'stormy.my24service-dev.com',
     port: 3000,
     hmr: {
-      host: "localhost",
+      host: "192.168.178.216",
       port: 3000
     }
   },
