@@ -778,7 +778,7 @@ export default [
     },
     {
       name: 'leave-requests',
-      path: '/company/leave-requests',
+      path: '/company/leave/requests',
       components: {
         'app-content': LeaveRequestsList,
         'app-subnav': SubNavCompany
@@ -790,7 +790,7 @@ export default [
     },
     {
       name: 'leave-list',
-      path: '/company/leaves',
+      path: '/company/leave/all',
       components: {
         'app-content': LeaveList,
         'app-subnav': SubNavCompany
@@ -826,7 +826,7 @@ export default [
     },
     {
       name: 'leave-types',
-      path: '/company/leave-types',
+      path: '/company/leave/types',
       components: {
         'app-content': LeaveTypes,
         'app-subnav': SubNavCompany
@@ -838,7 +838,7 @@ export default [
     },
     {
       name: 'unseen-sick-leave',
-      path: '/company/unseen-sick-leave',
+      path: '/company/sick/unseen',
       components: {
         'app-content': UnseenSickLeaveList,
         'app-subnav': SubNavCompany
