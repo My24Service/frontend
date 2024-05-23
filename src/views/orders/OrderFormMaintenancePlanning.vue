@@ -896,7 +896,6 @@ import Multiselect from 'vue-multiselect'
 import {OrderNotAcceptedService} from '@/models/orders/OrderNotAccepted'
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer'
-<<<<<<< HEAD
 import {AssignService} from '@/models/mobile/Assign'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
 import Collapse from '@/components/Collapse'
@@ -911,21 +910,6 @@ import CustomerCard from '@/components/CustomerCard'
 import {EngineerService} from "@/models/company/UserEngineer";
 import DocumentsComponent from "./order_form/DocumentsComponent.vue";
 import ApiResult from "@/components/ApiResult";
-=======
-import Assign from '../../models/mobile/Assign.js'
-import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
-import Collapse from '../../components/Collapse.vue'
-import {componentMixin} from "@/utils";
-import {BranchService} from "@/models/company/Branch";
-import {EquipmentService} from "@/models/equipment/equipment";
-import {QuotationService} from '@/models/quotations/Quotation.js'
-import {LocationService} from "@/models/equipment/location";
-import {OrderlineService} from "@/models/orders/Orderline";
-import {InfolineService} from "@/models/orders/Infoline";
-import CustomerCard from '../../components/CustomerCard.vue'
-import {EngineerService} from "@/models/company/UserEngineer";
-import DocumentsComponent from "./order_form/DocumentsComponent.vue";
->>>>>>> origin/develop-new
 
 const isCorrectTime = (value) => {
   return !helpers.req(value) || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
@@ -941,12 +925,8 @@ export default {
     Multiselect,
     OrderTypesSelect,
     Collapse,
-<<<<<<< HEAD
     CustomerCard,
     ApiResult,
-=======
-    CustomerCard
->>>>>>> origin/develop-new
   },
   props: {
     pk: {
@@ -1058,11 +1038,8 @@ export default {
       locationService: new LocationService(),
       orderlineService: new OrderlineService(),
       infolineService: new InfolineService(),
-<<<<<<< HEAD
       assignService: new AssignService(),
       testErrors: []
-=======
->>>>>>> origin/develop-new
     }
   },
   validations() {
@@ -1511,10 +1488,6 @@ export default {
       this.cancelForm()
     },
     async submitForm(e) {
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/develop-new
       if(e && e.target.value === 'dispatch') this.nextField = 'dispatch';
 
       this.submitClicked = true
@@ -1555,50 +1528,18 @@ export default {
             ...newOrder,
             apiOk: true
           }
-<<<<<<< HEAD
         } catch(error) {
           errors.push(error)
           this.order.apiOk = false
           this.order.error = error
-=======
-
-          // add infolines
-          try {
-            for (const infoline of infolines) {
-              infoline.order = newOrder.id
-              await this.infolineService.insert(infoline)
-            }
-          } catch(error) {
-            console.log('Error creating infolines', error)
-          }
-
-          this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
->>>>>>> origin/develop-new
           this.buttonDisabled = false
           this.isLoading = false
           console.log('Error creating order', error)
           // this.errorToast(this.$trans('Error creating order'))
           return
         }
-<<<<<<< HEAD
       } else {
         console.log("not resubmitting order")
-=======
-
-        // insert documents
-        this.$refs['documents-component'].orderCreated(newOrder)
-
-        // engineers
-        await this.assignEngineers(newOrder.order_id)
-
-        if (this.nextField === 'orders' || this.hasBranches) {
-          this.$router.go(-1)
-        } else if (this.nextField === 'dispatch') {
-          await this.$router.push({name: 'mobile-dispatch'})
-        }
-
-        return
->>>>>>> origin/develop-new
       }
 
       const [processedOrderlines, orderlineErrors] = await this.handleOrderlines(orderlines)
@@ -1609,7 +1550,6 @@ export default {
       this.order.infolines = processedInfolines
       errors = [...errors, ...infolineErrors]
 
-<<<<<<< HEAD
       // this document handling here is only needed when creating an order
       if (this.isCreate) {
         // TODO why is this if here? shouldn't be needed
@@ -1809,89 +1749,6 @@ export default {
       }
 
       return errors
-=======
-        await this.orderService.update(this.pk, this.order)
-
-        // orderlines create/update
-        for (let orderline of orderlines) {
-          orderline.order = this.pk
-          if (orderline.id) {
-            await this.orderlineService.update(orderline.id, orderline)
-            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
-          } else {
-            await this.orderlineService.insert(orderline)
-            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
-          }
-        }
-
-        // orderlines delete
-        for (const orderline of this.deletedOrderlines) {
-          if (orderline.id) {
-            await this.orderlineService.delete(orderline.id)
-            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
-          }
-        }
-
-        // infolines create/update
-        for (let infoline of infolines) {
-          infoline.order = this.pk
-          if (infoline.id) {
-            await this.infolineService.update(infoline.id, infoline)
-            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
-          } else {
-            await this.infolineService.insert(infoline)
-            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
-          }
-        }
-
-        for (const infoline of this.deletedInfolines) {
-          if (infoline.id) {
-            await this.infolineService.delete(infoline.id)
-            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
-          }
-        }
-
-        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
-
-        if (this.acceptOrder) {
-          try {
-            await this.orderNotAcceptedService.setAccepted(this.pk)
-            this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
-          } catch(error) {
-            console.log('Error accepting order', error)
-            this.errorToast(this.$trans('Error accepting order'))
-          }
-        }
-
-        // assign engineers
-        await this.assignEngineers(this.order.order_id)
-
-        this.isLoading = false
-        this.buttonDisabled = false
-      } catch(error) {
-        console.log('Error updating order', error)
-        this.errorToast(this.$trans('Error updating order'))
-        this.isLoading = false
-        this.buttonDisabled = false
-        return
-      }
-
-      this.$router.go(-1)
-    },
-    async assignEngineers(order_id) {
-      try {
-        for (const engineer of this.selectedEngineers) {
-          await Assign.assignToUser(engineer.id, [order_id], true)
-        }
-
-        if (this.selectedEngineers.length) {
-          this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
-        }
-      } catch (error) {
-        console.log('error assigning to users', error)
-        this.errorToast(this.$trans('Error assigning to users'))
-      }
->>>>>>> origin/develop-new
     },
     async getCustomers(query) {
       if (query === '') return
