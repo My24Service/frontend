@@ -349,6 +349,7 @@ export default {
           this.errorToast(this.$trans('Error updating documents'))
         } else {
           this.infoToast(this.$trans('Updated'), this.$trans('Documents have been updated'))
+          this.documentService.collectionHasChanges = false
         }
         // await this.loadData()
       } catch (e) {
