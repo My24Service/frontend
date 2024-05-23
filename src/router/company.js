@@ -802,7 +802,7 @@ export default [
     },
     {
       name: 'leave-list-add',
-      path: '/company/leaves/form',
+      path: '/company/leave/form',
       components: {
         'app-content': LeaveForm,
         'app-subnav':  SubNavCompany
@@ -814,7 +814,7 @@ export default [
     },
     {
       name: 'leave-edit',
-      path: '/company/leaves/form/:pk',
+      path: '/company/leave/form/:pk',
       components: {
         'app-content': LeaveForm,
         'app-subnav':  SubNavCompany
