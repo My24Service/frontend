@@ -1,12 +1,17 @@
 <template>
   <div>
-    <b-nav tabs>
-      <b-nav-item
+    <b-nav-item
+      :active="isActive('dashboard')"
+      v-if="showCustomerDashBoard"
+      :to="{name: 'customer-dashboard'}">
+      {{ $trans('Dashboard') }}
+    </b-nav-item>
+      <!-- <b-nav-item
         :active="isActive('customers')"
         v-if="hasCustomers"
         :to="{ name: 'customer-list' }">
         {{ $trans('Customers') }}
-      </b-nav-item>
+      </b-nav-item> -->
       <b-nav-item
         :active="isActive('maintenance-contracts') || isActive('maintenance-products')"
         v-if="hasMaintenanceContracts"
@@ -27,7 +32,7 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('import')"
-        v-if="hasUpload && false"
+        v-if="hasUpload"
         :to="{ name: 'customer-import-list' }">
         {{ $trans('Import') }}
       </b-nav-item>
@@ -37,7 +42,7 @@
 <!--        :to="{ name: 'maintenance-products-calendar' }">-->
 <!--        {{ $trans('Calendar') }}-->
 <!--      </b-nav-item>-->
-    </b-nav>
+
   </div>
 </template>
 
@@ -67,6 +72,9 @@ export default {
     },
     hasMaintenanceOrdersPerYear() {
       return this.hasAccessToModule('customers', 'maintenance-order-year')
+    },
+    showCustomerDashBoard() {
+      return !this.hasBranches && this.isCustomer
     },
     hasUpload() {
       return this.isStaff || this.isSuperuser

@@ -103,18 +103,15 @@
             </table>
         </div>
 
-      <b-row>
-        <b-col cols="10">
+        <div class='flex-columns space-between'>
           <span class="total-text">{{ $trans('Invoice total') }}</span>
-        </b-col>
-        <b-col cols="2">
+      
           <TotalsInputs
             :total="data.total_dinero"
             :is-final-total="true"
             :vat="data.vat_dinero"
           />
-        </b-col>
-      </b-row>
+        </div>
 
       <br/>
         <br/>

@@ -15,8 +15,6 @@ import OrderListNotAccepted from '../views/orders/OrderListNotAccepted.vue'
 import OrderListWorkorder from '../views/orders/OrderListWorkorder.vue'
 import OrderForm from '../views/orders/OrderForm.vue'
 import OrderView from '../views/orders/OrderView.vue'
-import DocumentList from '../views/orders/DocumentList.vue'
-import DocumentForm from '../views/orders/DocumentForm.vue'
 
 import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
@@ -177,46 +175,6 @@ export default [
         'app-content': OrderListWorkorder,
         'app-subnav': SubNavOrders
       }
-    },
-    // documents
-    {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
-      name: 'order-documents',
-      path: '/orders/orders/documents/:orderPk',
-      components: {
-        'app-content': DocumentList,
-        'app-subnav': SubNavOrders
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
-      name: 'order-document-add',
-      path: '/orders/orders/documents/form/:orderPk',
-      components: {
-        'app-content': DocumentForm,
-        'app-subnav': SubNavOrders
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
-      name: 'order-document-edit',
-      path: '/orders/orders/documents/edit/:pk',
-      components: {
-        'app-content': DocumentForm,
-        'app-subnav': SubNavOrders
-      },
-      props: {
-        'app-content': route => ({...route.params, edit: true}),
-        'app-subnav': true
-      },
     },
     // statuscodes
     {

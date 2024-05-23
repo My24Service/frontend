@@ -3,7 +3,14 @@ import BaseModel from '@/models/base';
 import {use} from "chai";
 
 
-class AssignedOrder extends BaseModel {
+class AssignedOrderChangeDatesModel {
+  alt_start_date
+  alt_start_time
+  alt_end_date
+  alt_end_time
+}
+
+class AssignedOrderService extends BaseModel {
   fields = {
     "id": null,
     "engineer": null,
@@ -19,6 +26,7 @@ class AssignedOrder extends BaseModel {
 
   url = '/mobile/assignedorder/'
 
+  // TODO this can be removed when only the html dispatch is used
   getDetailChangeDate(pk) {
     return this.axios.get(`${this.url}${pk}/detail_change_date/`).then((response) => response.data)
   }
@@ -44,6 +52,7 @@ class AssignedOrder extends BaseModel {
   }
 }
 
-let assignedOrderModel = new AssignedOrder()
+let assignedOrderModel = new AssignedOrderService()
 
 export default assignedOrderModel
+export { AssignedOrderService, AssignedOrderChangeDatesModel }

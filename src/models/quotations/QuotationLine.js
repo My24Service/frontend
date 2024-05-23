@@ -1,11 +1,9 @@
 import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
-import {CostModel} from "./Cost";
-import {toDinero} from "../../utils";
+import {toDinero} from "@/utils";
 
 class QuotationLineModel {
   id
-  type
   quotation
   chapter
   info
@@ -14,6 +12,7 @@ class QuotationLineModel {
   material
   material_name
   material_identifier
+  cost_type
 
   vat_type
   vat
@@ -27,8 +26,8 @@ class QuotationLineModel {
 
   priceFields = ['price', 'vat', 'total']
 
-  constructor(invoiceLine) {
-    for (const [k, v] of Object.entries(invoiceLine)) {
+  constructor(quotationLine) {
+    for (const [k, v] of Object.entries(quotationLine)) {
       this[k] = v
     }
 
@@ -44,26 +43,11 @@ class QuotationLineModel {
   }
 }
 
-
 Object.assign(QuotationLineModel.prototype, priceMixin);
 
 class QuotationLineService extends BaseModel {
   model = QuotationLineModel
   collection = []
-
-  fields = {
-    id: null,
-    quotation: null,
-    chapter: null,
-    info: null,
-    extra_description: null,
-    amount: null,
-    material_name: null,
-    material_identifier: null,
-    vat: null,
-    price: null,
-    price_currency: null,
-  }
 
   url = '/quotation/quotation-line/'
 
@@ -91,10 +75,11 @@ class QuotationLineService extends BaseModel {
 
   newModelFromCost(cost, description, type) {
     return new this.model({
-      type,
       extra_description: '',
       info: description,
+      cost_type: type,
       amount: cost.getAmount(),
+      vat_type: Math.round(cost.vat_type),
       vat: cost.vat,
       vat_currency: cost.vat_currency,
       price: cost.price,
@@ -107,7 +92,5 @@ class QuotationLineService extends BaseModel {
     })
   }
 }
-
-export default new QuotationLineService()
 
 export { QuotationLineService, QuotationLineModel }

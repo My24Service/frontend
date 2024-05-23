@@ -1,9 +1,13 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2 v-if="isCreate">{{ $trans('New picture') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit picture') }}</h2>
+    <div class="app-page">
+      <header>
+        <div class='page-title'>
+          <h2 v-if="isCreate">{{ $trans('New picture') }}</h2>
+          <h2 v-if="!isCreate">{{ $trans('Edit picture') }}</h2>
+        </div>
+      </header>
+      <b-form class="page-detail panel">
         <b-row>
           <b-col cols="12" role="group">
             <b-form-group

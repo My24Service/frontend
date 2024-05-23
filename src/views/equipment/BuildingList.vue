@@ -1,6 +1,25 @@
 <template>
-  <div class="mt-4 app-grid">
-
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3>{{ $trans("Buildings") }}</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+            v-bind:method="function() { loadData() }"
+            v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link
+            :to="newLink"
+            class="btn"
+            >{{ $trans('New building') }}</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
     <SearchModal
       id="search-modal"
       ref="search-modal"
@@ -16,12 +35,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this building?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('building')"
-      />
+    <div class="panel">
 
       <b-table
         id="building-table"
@@ -35,21 +49,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :router_name="newLink"
-                  v-bind:title="$trans('New building')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+
           </div>
         </template>
         <template #table-busy>
@@ -88,11 +88,16 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+        v-if="!isLoading"
+        :model="buildingService"
+        :model_name="$trans('building')"
+      />
   </div>
 </template>
 
 <script>
-import buildingModel from '../../models/equipment/building.js'
+import { BuildingService } from '../../models/equipment/building.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -139,7 +144,7 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: buildingModel,
+      buildingService: new BuildingService(),
       buildingPk: null,
       isLoading: false,
       buildings: [],
@@ -173,7 +178,7 @@ export default {
     }
   },
   created() {
-    buildingModel.resetListArgs()
+    this.buildingService.resetListArgs()
     if (this.hasBranches) {
       if (this.isEmployee) {
         this.fields = this.fieldsBranchNonPlanning
@@ -187,14 +192,14 @@ export default {
         this.fields = this.fieldsCustomerPlanning
       }
     }
-    this.model.currentPage = this.$route.query.page || 1
+    this.buildingService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.buildingService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -207,7 +212,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.buildingPk)
+        await this.buildingService.delete(this.buildingPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('building has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -220,7 +225,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.model.list()
+        const data = await this.buildingService.list()
         this.buildings = data.results
         this.isLoading = false
       } catch(error){

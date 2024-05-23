@@ -1,5 +1,6 @@
 <template>
   <div v-if="isLoaded">
+    
     <OrderViewMaintenance
       v-if="memberType === 'maintenance'"
       v-bind:pk="pk"
@@ -44,6 +45,11 @@ export default {
   components: {
     OrderViewMaintenance,
     OrderViewTemps,
+  },
+  methods: {
+    goBack() {
+      this.$router.go(-1)
+    }
   },
   async created() {
     // get member type

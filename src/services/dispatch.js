@@ -851,7 +851,7 @@ class Dispatch {
       return this.orderLineWidth
     }
 
-    // we have 4 rows of fontsize height plus 5 x padding
+    // we have 4 rows of fontsize height plus 4 x padding
     return 5 * this.getFontsize() + 6 * this.fontPaddingWide
   }
 
@@ -927,11 +927,26 @@ class Dispatch {
      *
      **/
 
+    // let linecount = 1
+    // if (order.order_name) {
+    //   linecount++
+    // }
+    // if (order.order_city) {
+    //   linecount++
+    // }
+    // linecount++
+    // if (order.order_reference) {
+    //   linecount++
+    // }
+
     const path = new Path2D()
     this.ctx.lineWidth = this.getOrderLineWidth()
+    // this.ctx.lineWidth = linecount * this.getFontsize() + ((linecount+1) * this.fontPaddingWide)
+    // 5 * this.getFontsize() + 6 * this.fontPaddingWide
+    // console.log(this.getOrderLineWidth())
     this.ctx.strokeStyle = color
-    path.moveTo(startX, yPos - 62)
-    path.lineTo(endX, yPos - 62)
+    path.moveTo(startX, yPos-62)
+    path.lineTo(endX, yPos-62)
     this.ctx.stroke(path)
 
     let textY = yPos + this.fontPaddingWide - this.getRowHeightInt() + 4
@@ -953,8 +968,6 @@ class Dispatch {
     textY += this.getFontsize() + this.fontPaddingWide
     if (order.order_reference) {
       this.setText(`${order.order_reference.slice(0, 20)}`, startX + 4, textY, endX - startX, text_color)
-    } else {
-      this.setText("", startX + 4, textY, endX - startX, text_color)
     }
 
     this.hotspots.push({
@@ -1185,9 +1198,10 @@ class Dispatch {
     this.hotspots.forEach(spot => {
       if (this.inStroke(spot.obj,mouseX, mouseY)) {
         this.canvas.style.cursor = "pointer"
-        // order_info comes from backend
         this.showInfo(
-          `${spot.order.order_info}\nOrder status: ${spot.order.order_status}\nAssigned order status: ${spot.order.assignedorder_status ?? ''}\n`, mouseX, mouseY
+          `${spot.order.order_info}
+          \nOrder status: ${spot.order.order_status}
+          \nAssigned order status: ${spot.order.assignedorder_status ?? ''}\n`, mouseX, mouseY
         )
         hit = true
         return
@@ -1218,7 +1232,7 @@ class Dispatch {
     this.tipCanvas.width = maxLen * (this.getFontsize()-8) + 10
     this.tipCanvas.height = lines.length * this.getFontsize() + 5
 
-    this.tipCanvas.style.left = (mouseX + 20) + "px"
+    this.tipCanvas.style.left = (mouseX + 60) + "px"
     this.tipCanvas.style.top = (mouseY) + "px"
     this.tipCtx.clearRect(0, 0, this.tipCanvas.width, this.tipCanvas.height)
 

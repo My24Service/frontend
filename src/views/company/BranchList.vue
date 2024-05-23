@@ -1,5 +1,5 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
 
     <SearchModal
       id="search-modal"
@@ -16,12 +16,31 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this branch?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Branch')"
-      />
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="shop"></b-icon>
+          {{  $trans('Branches') }}
+        </h3>
+        <b-button-toolbar>
+          <b-button-group>
+            <ButtonLinkRefresh
+            v-bind:method="function() { loadData() }"
+            v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link 
+            :to="{name: 'company-branch-add'}"
+            class="btn"
+            >{{ $trans('New branch') }}</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
+
+    <div class="page-detail panel">
 
       <b-table
         id="branch-table"
@@ -35,43 +54,41 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="company-branch-add"
-                  v-bind:title="$trans('New branch')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
+
         <template #cell(id)="data">
+
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
             {{ data.item.name }}, {{ data.item.city }}, {{ data.item.country_code }}
-          </router-link><br/>
+          </router-link>
+        </template>
+
+        <template #cell(contact)="data">
           <span v-if="data.item.contact && data.item.contact.trim() !== ''">
-              <b>{{ $trans('Contact') }}</b>: {{ data.item.contact }}<br/>
-          </span>
-          <span v-if="data.item.email">
-            {{ $trans('Email') }}: <b-link class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.email }}</b-link><br/>
-          </span>
-          <span v-if="data.item.mobile && data.item.mobile.trim() !== ''">
-              <b>{{ $trans('Mobile') }}</b>: {{ data.item.mobile }}<br/>
+            <span v-if="data.item.email">
+              <b-link class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.contact }} <b-icon icon="envelope"></b-icon></b-link>
+            </span>
+            <span v-else>
+              {{ data.item.contact }}
+            </span>
           </span>
         </template>
+        
+        <template #cell(tel)="data">
+          {{  data.item.tel }}
+          <span v-if="data.item.mobile && data.item.mobile.trim() !== ''">
+            &mdash; <b>{{ $trans('mobile') }}</b>: {{ data.item.mobile }}
+          </span>
+        </template>
+
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
@@ -87,6 +104,11 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Branch')"
+      />
   </div>
 </template>
 
@@ -119,12 +141,13 @@ export default {
       isLoading: false,
       branches: [],
       branchFields: [
-        {key: 'id', label: this.$trans('Branch'), sortable: true, thAttr: {width: '25%'}},
-        {key: 'tel', label: this.$trans('Tel.'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'address', label: this.$trans('Address'), sortable: true, thAttr: {width: '20%'}},
-        {key: 'country_code', label: this.$trans('Postal'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'city', label: this.$trans('City'), sortable: true, thAttr: {width: '20%'}},
-        {key: 'icons', thAttr: {width: '15%'}}
+        {key: 'id', label: this.$trans('Branch'), sortable: true, },
+        {key: 'contact', label: this.$trans('Contact'), sortable: true, },
+        {key: 'tel', label: this.$trans('Phone'), sortable: true, },
+        {key: 'address', label: this.$trans('Address'), sortable: true, },
+        {key: 'country_code', label: this.$trans('Postal'), sortable: true, },
+        {key: 'city', label: this.$trans('City'), sortable: true, },
+        {key: 'icons', }
       ],
     }
   },

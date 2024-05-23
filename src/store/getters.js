@@ -16,6 +16,9 @@ export const getters = {
   getMemberPk: state => {
     return state.memberInfo.id
   },
+  getMemberInfo: state => {
+    return state.memberInfo
+  },
   getMemberHasApiUsers: state => {
     return state.memberInfo.has_api_users
   },
@@ -82,7 +85,16 @@ export const getters = {
   getInvoiceDefaultTermOfPaymentDays(state) {
     return state.memberInfo.settings.invoice_default_term_of_payment_days
   },
+  getInvoiceDefaultPricePerKm(state) {
+    return state.memberInfo.settings.invoice_default_price_per_km
+  },
+  getQuotationDefaultExpireDays(state) {
+    return state.memberInfo.settings.quotation_default_expire_days
+  },
   getMaintenanceEquipment(state) {
     return state.maintenanceEquipment
+  },
+  getEquipmentQrType(state) {
+    return state.memberInfo.equipment_qr_type
   }
 }

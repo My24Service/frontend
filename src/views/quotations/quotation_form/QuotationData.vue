@@ -1,259 +1,179 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <h4>{{ $trans('Quotation data')}} </h4>
-    <b-row>
-      <b-col cols="2" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Reference')"
-          label-for="quotation_reference"
-        >
-          <b-form-input
-            v-model="quotation.quotation_reference"
-            id="quotation_reference"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-      </b-col>
-      <b-col cols="6" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Description')"
-          label-for="quotation_description"
-        >
-          <b-form-textarea
-            id="quotation_description"
-            v-model="quotation.description"
-            rows="1"
-          ></b-form-textarea>
-        </b-form-group>
-      </b-col>
-      <b-col cols="2" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Accepted')"
-          label-for="quotation_accepted"
-        >
-          <b-form-checkbox
-            id="quotation_accepted"
-            v-model="quotation.accepted"
-            value="true"
-            unchecked-value="false"
-          >
-          </b-form-checkbox>
-        </b-form-group>
-      </b-col>
-      <b-col cols="2" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Quotation expiry days')"
-          label-for="quotation_expiry"
-        >
-          <b-form-input
-            v-model="quotation.quotation_expire_days"
-            :type="'number'"
-            id="quotation_reference"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="3" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Signature name engineer')"
-          label-for="signature_name_engineer"
-        >
-          <b-form-input
-            v-model="quotation.signature_name_engineer"
-            id="signature_name_engineer"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Signature engineer')"
-          label-for="signature_engineer"
-        >
-          <b-form-file
-            id="signature_engineer"
-            accept="image/*"
-            :placeholder="$trans('Choose a file or drop it here...')"
-            @input="engineerImageSignatureSelected"
-          ></b-form-file>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <h3>{{ $trans('Current image') }}</h3>
-        <img width="200px" :src="engineer_signature_current_image" alt=""/>
-      </b-col>
-      <b-col cols="3">
-        <h3>{{ $trans('Upload preview') }}</h3>
-        <img width="200px" :src="engineer_signature_upload_preview" alt=""/>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col cols="3" role="group">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Signature name customer')"
-          label-for="signature_name_customer"
-        >
-          <b-form-input
-            v-model="quotation.signature_name_customer"
-            id="signature_name_customer"
-            size="sm"
-          ></b-form-input>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <b-form-group
-          label-size="sm"
-          v-bind:label="$trans('Signature customer')"
-          label-for="signature_customer"
-        >
-          <b-form-file
-            id="signature_customer"
-            accept="image/*"
-            :placeholder="$trans('Choose a file or drop it here...')"
-            @input="customerImageSignatureSelected"
-          ></b-form-file>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <h3>{{ $trans('Current image') }}</h3>
-        <img width="200px" :src="customer_signature_current_image" alt=""/>
-      </b-col>
-      <b-col cols="3">
-        <h3>{{ $trans('Upload preview') }}</h3>
-        <img width="200px" :src="customer_signature_upload_preview" alt=""/>
-      </b-col>
-    </b-row>
-  </b-overlay>
+  <details open>
+    <summary class="flex-columns space-between">
+      <h6>{{ $trans('Details') }}</h6>
+      <b-icon-chevron-down></b-icon-chevron-down>
+    </summary>
+
+    <div v-if="!isView">
+      <b-form-group
+        v-bind:label="$trans('Name')"
+        label-for="name"
+        label-cols="3"
+      >
+        <b-form-input
+          v-model="quotationData.name"
+          id="name"
+          size="sm"
+          :state="isSubmitClicked ? !v$.quotationData.name.$error: null"
+        ></b-form-input>
+        <b-form-invalid-feedback
+          :state="isSubmitClicked ? !v$.quotationData.name.$error : null">
+          {{ $trans('Please enter a quotation name') }}
+        </b-form-invalid-feedback>
+      </b-form-group>
+
+      <b-form-group
+        v-bind:label="$trans('Reference')"
+        label-for="quotation_reference"
+        label-cols="3"
+      >
+        <b-form-input
+          v-model="quotationData.quotation_reference"
+          id="quotation_reference"
+          size="sm"
+        ></b-form-input>
+      </b-form-group>
+
+      <b-form-group
+        label-cols="3"
+        v-bind:label="$trans('Expiry days')"
+        label-for="quotation_expiry"
+      >
+        <b-form-input
+          v-model="quotationData.quotation_expire_days"
+          :type="'number'"
+          id="quotation_reference"
+          size="sm"
+        ></b-form-input>
+      </b-form-group>
+
+      <b-form-group
+        label-cols="3"
+        v-bind:label="$trans('Description')"
+        label-for="quotation_description"
+      >
+        <b-form-textarea
+          id="quotation_description"
+          v-model="quotationData.description"
+          rows="1"
+        ></b-form-textarea>
+      </b-form-group>
+
+      <footer
+        class="modal-footer"
+        v-if="!quotation.id"
+      >
+        <i>{{ $trans('Save quotation to start adding chapters') }}</i>
+      </footer>
+    </div>
+    <div v-else>
+      <b-container>
+        <b-row>
+          <b-col cols="4">
+            {{ $trans('Name') }}
+          </b-col>
+          <b-col cols="8">
+            <p class="value">{{ checkValue(quotationData.name) }}</p>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4">
+            {{ $trans('Reference') }}
+          </b-col>
+          <b-col cols="8">
+            <p class="value">{{ checkValue(quotationData.quotation_reference) }}</p>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4">
+            {{ $trans('Expiry days') }}
+          </b-col>
+          <b-col cols="8">
+            <p class="value">{{ checkValue(quotationData.quotation_expire_days) }}</p>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4">
+            {{ $trans('Description') }}
+          </b-col>
+          <b-col cols="8">
+            <p class="value">{{ checkValue(quotationData.description) }}</p>
+          </b-col>
+        </b-row>
+      </b-container>
+    </div>
+
+  </details>
 </template>
 <script>
-import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useVuelidate} from "@vuelidate/core";
-import quotationService from '@/models/quotations/Quotation.js';
-import {NO_IMAGE_URL} from "../../../constants"
-
+import {QuotationModel} from '@/models/quotations/Quotation.js';
+import quotationMixin from "@/views/quotations/quotation_form/mixin";
+import {required} from "@vuelidate/validators";
 
 export default {
   name: 'QuotationDataForm',
+  mixins: [quotationMixin],
   setup() {
     return { v$: useVuelidate() }
   },
   validations() {
     return {
-      invoice: {}
+      quotationData: {
+        name: {
+          required,
+        },
+        quotation_expire_days: {
+          required,
+        },
+      }
     }
   },
   props: {
-    quotationData: {
-      type: Object,
+    quotation: {
+      type: QuotationModel,
       default: null
     },
-    submitQuotationLineform: {
-      type: Boolean,
+    isView: {
+      type: [Boolean],
       default: false
-    }
-  },
-  watch: {
-    quotationData: {
-      handler(newValue) {
-        this.quotation = newValue
-      },
-      deep: true
-    },
-    submitQuotationLineform (val) {
-      if (val) {
-        this.submitQuotation()
-      }
     }
   },
   data () {
     return {
       isLoading: false,
-      quotation: this.quotationData,
-      quotationService,
-      INVOICE_LINE_TYPE_MANUAL,
-      engineer_signature_current_image: NO_IMAGE_URL,
-      engineer_signature_upload_preview: NO_IMAGE_URL,
-      customer_signature_upload_preview: NO_IMAGE_URL,
-      customer_signature_current_image: NO_IMAGE_URL
+      isSubmitClicked: false,
+      quotationData: {
+        quotation_reference: null,
+        quotation_expire_days: null,
+        description: null,
+        name: null
+      }
     }
   },
   async created() {
-    this.isLoading = true
-    this.engineer_signature_current_image = this.quotation.signature_engineer ?
-      this.quotation.signature_engineer : NO_IMAGE_URL
-    this.customer_signature_current_image = this.quotation.signature_customer ?
-      this.quotation.signature_customer : NO_IMAGE_URL
-    this.isLoading = false
+    this.quotationData = {
+      quotation_reference: this.quotation.quotation_reference,
+      quotation_expire_days: this.quotation.quotation_expire_days,
+      description: this.quotation.description,
+      name: this.quotation.name,
+    }
+
+    if (!this.quotationData.quotation_expire_days) {
+      this.quotationData.quotation_expire_days = this.$store.getters.getQuotationDefaultExpireDays
+    }
   },
   methods: {
-    engineerImageSignatureSelected(file) {
-      const reader = new FileReader()
-      reader.onload = (f) => {
-        const b64 = f.target.result
-        this.engineer_signature_upload_preview = b64
-        this.quotation.signature_engineer = b64
-      }
-      reader.readAsDataURL(file)
+    getQuotationData() {
+      return this.quotationData
     },
-    customerImageSignatureSelected(file) {
-      const reader = new FileReader()
-      reader.onload = (f) => {
-        const b64 = f.target.result
-        this.customer_signature_upload_preview = b64
-        this.quotation.signature_customer = b64
-      }
-      reader.readAsDataURL(file)
-    },
-    async submitQuotation () {
-      this.isLoading = true
-      this.$emit('quotationSubmitted', true)
-
-      try {
-          await this.quotationService.update(this.quotation.id, this.quotation)
-          this.infoToast(this.$trans('Updated'), this.$trans('quotation has been updated'))
-          this.isLoading = false
-          this.$emit('quotationSubmitted', false)
-          this.$router.push({ name: 'quotation-list'})
-        } catch(error) {
-          console.log('error fetching quotation', error)
-          this.errorToast(this.$trans('Error updating quotation'))
-          this.isLoading = false
-          this.$emit('quotationSubmitted', false)
-      }
-    }
-  }
+  },
 }
 </script>
 <style scoped>
-.flex {
-  display : flex;
-  margin-top: auto;
-}
-.value-container {
-  padding-top: 4px;
-  padding-right: 4px;
-  padding-left: 4px;
-}
-.update-button {
-  margin-bottom: 8px;
-}
-.header {
-  font-size: 14px;
-  font-weight: bold;
-}
-.total-text {
-  font-weight: bold;
-}
-.quotation-total {
-  margin-bottom: 20px;
+p.value {
+  width: 100%;
+  border-bottom: 1px dotted gray;
 }
 </style>

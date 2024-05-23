@@ -25,7 +25,7 @@ class BranchService extends BaseModel {
   }
 }
 
-let branchModel = new BranchService()
+let branchService = new BranchService()
 
-export default branchModel
+export default branchService
 export { BranchService }

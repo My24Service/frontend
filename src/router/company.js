@@ -7,7 +7,6 @@ import Settings from '../views/company/Settings.vue'
 
 import UserEngineerList from '../views/company/UserEngineerList.vue'
 import UserEngineerForm from '../views/company/UserEngineerForm.vue'
-import UserEngineerDetail from '../views/company/UserEngineerDetail.vue'
 
 import UserSalesList from '../views/company/UserSalesList.vue'
 import UserSalesForm from '../views/company/UserSalesForm.vue'
@@ -44,7 +43,7 @@ import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
 import EngineerEventList from "../views/company/EngineerEventList";
 
-import {AUTH_LEVELS} from "../constants";
+import {AUTH_LEVELS} from "@/constants";
 
 import UserEmployeeList from "../views/company/UserEmployeeList";
 import UserEmployeeForm from "../views/company/UserEmployeeForm";
@@ -53,11 +52,23 @@ import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
 
 import TimeRegistration from '../views/company/TimeRegistration.vue'
-import SubNavCustomers from "../components/SubNavCustomers";
 import BranchView from "../views/company/BranchView";
 
 import BudgetList from "../views/company/BudgetList";
 import BudgetView from "../views/company/BudgetView";
+
+import QuotationStatuscodeList from "@/views/company/statuscode/QuotationStatuscodeList";
+import StatuscodeForm from "@/views/company/statuscode/StatuscodeForm";
+import ActionForm from "@/views/company/statuscode/ActionForm";
+
+import CustomerTemplateList from "@/views/company/template/CustomerTemplateList";
+import CustomerTemplateForm from "@/views/company/template/CustomerTemplateForm";
+
+import LeaveRequestsList from "@/views/company/leave/LeaveRequestsList";
+import LeaveList from "@/views/company/leave/LeaveList";
+import LeaveForm from "@/views/company/leave/LeaveForm";
+import LeaveTypes from "@/views/company/leave/LeaveTypes";
+import UnseenSickLeaveList from "@/views/company/leave/UnseenSickLeaveList";
 
 export default [
 {
@@ -124,18 +135,6 @@ export default [
       props: {
         'app-content': {},
         'app-subnav': {}
-      },
-    },
-    {
-      name: 'engineer-detail',
-      path: '/company/engineer-users/detail/:pk',
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': {}
-      },
-      components: {
-        'app-content': UserEngineerDetail,
-        'app-subnav': SubNavCompany
       },
     },
     {
@@ -649,7 +648,7 @@ export default [
       path: '/company/branches/:pk',
       components: {
         'app-content': BranchView,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': route => ({...route.params}),
@@ -674,13 +673,180 @@ export default [
       path: '/company/budgets/:pk',
       components: {
         'app-content': BudgetView,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
       },
     },
-
+    {
+      name: 'company-statuscodes-quotation',
+      path: '/company/statuscodes/quotation',
+      components: {
+        'app-content': QuotationStatuscodeList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-statuscodes-quotation-add',
+      path: '/company/statuscodes/quotation/form',
+      components: {
+        'app-content': StatuscodeForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: 'quotation'}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-statuscodes-quotation-edit',
+      path: '/company/statuscodes/quotation/form/:pk',
+      components: {
+        'app-content': StatuscodeForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: 'quotation'}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-statuscodes-action-quotation-add',
+      path: '/company/statuscodes/action/quotation/form',
+      components: {
+        'app-content': ActionForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: 'quotation'}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-statuscodes-action-quotation-edit',
+      path: '/company/statuscodes/action/quotation/form/:pk',
+      props: {
+        'app-content': route => ({...route.params, list_type: 'quotation'}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': ActionForm,
+        'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'company-templates',
+      path: '/company/templates',
+      components: {
+        'app-content': CustomerTemplateList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-template-add',
+      path: '/company/templates/form',
+      components: {
+        'app-content': CustomerTemplateForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-template-edit',
+      path: '/company/templates/form/:pk',
+      components: {
+        'app-content': CustomerTemplateForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'leave-requests',
+      path: '/company/leave/requests',
+      components: {
+        'app-content': LeaveRequestsList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'leave-list',
+      path: '/company/leave/all',
+      components: {
+        'app-content': LeaveList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'leave-list-add',
+      path: '/company/leave/form',
+      components: {
+        'app-content': LeaveForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'leave-edit',
+      path: '/company/leave/form/:pk',
+      components: {
+        'app-content': LeaveForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'leave-types',
+      path: '/company/leave/types',
+      components: {
+        'app-content': LeaveTypes,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'unseen-sick-leave',
+      path: '/company/sick/unseen',
+      components: {
+        'app-content': UnseenSickLeaveList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    }
   ]
 }]

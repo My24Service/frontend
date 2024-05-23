@@ -1,11 +1,20 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="subnav-pills">
-      <PillsCompanyCompany />
-    </div>
-    <div class="container app-form">
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="terminal"></b-icon>
+          {{ $trans('Settings') }}
+        </h3>
+      
+        <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            {{ $trans('Submit') }}
+        </b-button>
+      </div>
+
+    </header>
+    <div class='app-detail panel'>
       <b-form>
-        <h2>{{ $trans('Settings') }}</h2>
         <b-table-simple>
           <b-thead>
             <b-td><strong>{{ $trans('Key') }}:</strong></b-td>
@@ -15,48 +24,38 @@
             <template v-for = "(value, key, index) in settings">
               <b-tr :key="key">
                 <b-td>
-                  {{ index+1 }}: {{ key }}
+                  {{ index+1 }}: {{ key.split('_').join(' ') }}
                 </b-td>
                 <b-td class="border px-4 py-2">
-		              <b-form-checkbox
-		              	v-if="typeof value === 'boolean'"
+                  <b-form-checkbox
+                    v-if="typeof value === 'boolean'"
                     size="sm"
-		                v-model="settings[key]"
-		              >
-		              </b-form-checkbox>
+                    v-model="settings[key]"
+                  >
+                  </b-form-checkbox>
                   <b-form-input
-		              	v-if="typeof value !== 'boolean'"
+                    v-if="typeof value !== 'boolean'"
                     size="sm"
                     v-model="settings[key]"
                   ></b-form-input>
                 </b-td>
-                <b-td>
-                </b-td>
+                
               </b-tr>
             </template>
           </tbody>
         </b-table-simple>
 
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-          </footer>
-        </div>
+        
       </b-form>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
-import PillsCompanyCompany from "@/components/PillsCompanyCompany.vue"
+
 import memberModel from '@/models/member/Member.js'
 
-export default {
-  components: {
-    PillsCompanyCompany,
-  },
+export default {  
   data() {
     return {
       isLoading: false,

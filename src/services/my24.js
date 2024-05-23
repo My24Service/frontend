@@ -13,8 +13,8 @@ class My24 extends BaseModel {
   getParameterByName(name, url) {
     if (!url) url = window.location.href
     name = name.replace(/[\[\]]/g, '\\$&');
-    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-      results = regex.exec(url);
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
@@ -69,7 +69,12 @@ class My24 extends BaseModel {
 
   getStatuscode(statuscodes, status) {
     if (!status) {
-      // console.log('getStatuscode: no status, return')
+      // console.debug('getStatuscode: no status, return')
+      return null
+    }
+
+    if (!statuscodes) {
+      // console.debug('getStatuscode: no statuscodes, return')
       return null
     }
 
@@ -85,13 +90,17 @@ class My24 extends BaseModel {
   }
 
   getStatuscodeForOrder(statuscodes, order) {
-    const statuscode = this.getStatuscode(statuscodes, order.order_status)
-    if (!statuscode) {
-      // console.log(`no statuscode found for "${order.order_status}"`)
-      return
+    let statuscode = this.getStatuscode(statuscodes, order.order_status)
+    if (statuscode) {
+      return statuscode
     }
 
-    if (statuscode.color_for_assignedorders || order.assignedorder_status === null) {
+    statuscode = this.getStatuscode(statuscodes, order.last_status)
+    if (statuscode) {
+      return statuscode
+    }
+
+    if (statuscode && statuscode.color_for_assignedorders || order.assignedorder_status === null) {
       return statuscode
     }
 
@@ -118,6 +127,8 @@ class My24 extends BaseModel {
     const debug = true
     // console.log(config)
 
+    if (config.isSuperuser) return true
+
     // just pages like / and /no-access
     if (config.lenParts === 1) {
       if (debug) console.debug(`allowed: only one route part (${config.part})`)
@@ -142,7 +153,8 @@ class My24 extends BaseModel {
 
     const parts_always_allowed = [
       'form', 'view', 'info', 'company', 'activity', 'pictures',
-      'planning-users', 'employee-users', 'import'
+      'planning-users', 'employee-users', 'import', 'statuscodes',
+      'api-users'
     ]
     if (parts_always_allowed.indexOf(config.part) !== -1) {
       if (debug) console.debug(`allowed: part "${config.part}" in always allowed (${parts_always_allowed.join('/')})`)
@@ -156,6 +168,11 @@ class My24 extends BaseModel {
         if (debug) console.debug('allowed because member or staff and member', config.part)
         return true;
       }
+    }
+
+    // TODO remove when new dispatch (html and no canvas) live
+    if (config.part === 'dispatch-new') {
+      config.part = 'dispatch'
     }
 
     const contract_result = config.contract[config.module].indexOf(config.part) !== -1;

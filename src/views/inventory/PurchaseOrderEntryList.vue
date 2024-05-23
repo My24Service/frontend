@@ -1,5 +1,22 @@
 <template>
-  <div class="mt-4">
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3><b-icon icon="receipt"></b-icon>{{ $trans('Entries') }}</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link class="btn" :to="{name: 'purchaseorder-entry-add'}">{{ $trans('Add entry') }}</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
 
     <SearchModal
       id="search-modal"
@@ -16,13 +33,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this entry?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Entry')"
-      />
-
+    <div class="panel overflow-auto">
       <b-table
         id="purchaseorder-entry-table"
         small
@@ -35,28 +46,17 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="purchaseorder-entry-add"
-                  v-bind:title="$trans('New entry')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+            
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
+        </template>
+        <template #cell(order_id)="data">
+          <router-link :to="{name: 'purchaseorder-entry-edit', params: {pk: data.item.pk}}">{{data.item.order_id}}</router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -73,6 +73,11 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Entry')"
+    />
   </div>
 </template>
 

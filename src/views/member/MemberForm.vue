@@ -1,7 +1,7 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="container app-form">
-      <b-form>
+      <b-form v-if="member">
         <h2 v-if="isCreate">{{ $trans('New member') }}</h2>
         <h2 v-if="!isCreate">{{ $trans('Edit member') }}</h2>
         <b-row>
@@ -28,22 +28,29 @@
               label-size="sm"
               v-bind:label="$trans('Company code')"
               label-for="member_companycode"
+              description="[companycode].my24service.com"
             >
               <b-form-input
                 id="member_companycode"
                 size="sm"
+                @change="companyCodeChange"
                 v-model="member.companycode"
-                :state="isSubmitClicked ? !v$.member.companycode.$error : null"
+                :state="member.companycode ? !v$.member.companycode.$invalid : undefined"
               ></b-form-input>
               <b-form-invalid-feedback
-                v-if="member.companycode !== ''"
-                :state="isSubmitClicked ? !v$.member.companycode.isUnique.$invalid : null">
+                v-if="member.companycode && member.companycode !== '' && !v$.member.companycode.minLength.$invalid"
+                :state="!v$.member.companycode.isUnique.$invalid">
                 {{ $trans('Company code is already in use') }}
               </b-form-invalid-feedback>
               <b-form-invalid-feedback
                 v-if="member.companycode === ''"
-                :state="isSubmitClicked ? v$.member.companycode.required : null">
+                :state="v$.member.companycode.required">
                 {{ $trans('Company code is required') }}
+              </b-form-invalid-feedback>
+              <b-form-invalid-feedback
+                v-if="v$.member.companycode.minLength.$invalid"
+                :state="v$.member.companycode.minLength.$invalid">
+                {{ $trans('Company code must have at least 2 characters') }}
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
@@ -65,13 +72,35 @@
               <b-form-select v-model="member.member_type" :options="memberTypes" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
-          <b-col cols="2" role="group">
+          <b-col cols="2" role="group" v-if="showRequestedList">
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Deleted?')"
+              v-bind:label="$trans('Requested')"
+              label-for="member_is_requested"
+            >
+              <b-form-select v-model="member.is_requested" :options="isRequestedOptions" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group" v-if="showDeletedList">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Deleted')"
               label-for="member_is_deleted"
             >
               <b-form-select v-model="member.is_deleted" :options="isDeletedOptions" size="sm"></b-form-select>
+            </b-form-group>
+          </b-col>
+          <b-col cols="1" role="group" v-if="isRequest || (!showRequestedList && !showDeletedList)">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Branches?')"
+              label-for="member_has_branches"
+            >
+              <b-form-checkbox
+                id="member_has_branches"
+                v-model="member.has_branches"
+              >
+              </b-form-checkbox>
             </b-form-group>
           </b-col>
         </b-row>
@@ -167,7 +196,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="2" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Tel.')"
@@ -185,7 +214,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Email')"
@@ -203,7 +232,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="3" role="group">
+          <b-col cols="4" role="group">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Website (http://...)')"
@@ -221,6 +250,8 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
+        </b-row>
+        <b-row v-if="!isRequest">
           <b-col cols="1" role="group">
             <b-form-group
               label-size="sm"
@@ -247,7 +278,7 @@
               </b-form-checkbox>
             </b-form-group>
           </b-col>
-          <b-col cols="1" role="group">
+          <b-col cols="1" role="group" v-if="showRequestedList || showDeletedList">
             <b-form-group
               label-size="sm"
               v-bind:label="$trans('Branches?')"
@@ -258,6 +289,15 @@
                 v-model="member.has_branches"
               >
               </b-form-checkbox>
+            </b-form-group>
+          </b-col>
+          <b-col cols="2" role="group">
+            <b-form-group
+              label-size="sm"
+              v-bind:label="$trans('Equipment QR code type')"
+              label-for="member_country"
+            >
+              <b-form-select v-model="member.equipment_qr_type" :options="equipmentQrTypes" size="sm"></b-form-select>
             </b-form-group>
           </b-col>
         </b-row>
@@ -387,14 +427,22 @@
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import { url, email, required } from '@vuelidate/validators'
+import {url, email, required, minLength} from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import memberModel from '../../models/member/Member.js'
-import contractModel from '../../models/member/Contract.js'
-import {NO_IMAGE_URL} from "../../constants";
+import {
+  MemberService,
+  EQUIPMENT_QR_TYPES,
+  MemberModel,
+  EQUIPMENT_QR_TYPE_MY24SERVICE,
+  EQUIPMENT_QR_TYPE_SHLTR
+} from '@/models/member/Member'
+import { ContractService } from '@/models/member/Contract'
+import {NO_IMAGE_URL} from "@/constants";
+import {componentMixin} from "@/utils";
 
 export default {
+  mixins: [componentMixin],
   setup() {
     return { v$: useVuelidate() }
   },
@@ -402,6 +450,10 @@ export default {
     pk: {
       type: [String, Number],
       default: null
+    },
+    isRequest: {
+      type: [Boolean],
+      default: false
     },
   },
   data() {
@@ -414,12 +466,17 @@ export default {
         {value: 'temps', text: 'temps'},
         {value: 'maintenance', text: 'maintenance'},
       ],
+      equipmentQrTypes: EQUIPMENT_QR_TYPES,
       contracts: [],
-      member: memberModel.getFields(),
+      member: new MemberModel({}),
       orgCompanycode: null,
       isDeletedOptions: [
         {value: true, text: this.$trans('Is deleted')},
         {value: false, text: this.$trans('Not deleted')},
+      ],
+      isRequestedOptions: [
+        {value: true, text: this.$trans('Is requested')},
+        {value: false, text: this.$trans('Is accepted')},
       ],
       suppliers: [],
       current_image: NO_IMAGE_URL,
@@ -428,6 +485,10 @@ export default {
       upload_preview_workorder: NO_IMAGE_URL,
       fileChanged: false,
       fileWorkorderChanged: false,
+      memberService: new MemberService(),
+      contractService: new ContractService(),
+      memberIsRequest: false,
+      isDeleted: false
     }
   },
   validations() {
@@ -470,13 +531,14 @@ export default {
 
     if (this.isCreate) {
       const isUnique = (value) => {
-        if (value === '' || value.length < 3) return true
+        if (value === '' || value.length < 2) return undefined
 
-        return memberModel.companycodeExists(value)
+        return this.checkCompanyCode(value)
       }
 
       validations['member']['companycode'] = {
         required,
+        minLength: minLength(2),
         isUnique: helpers.withAsync(isUnique)
       }
 
@@ -485,15 +547,20 @@ export default {
       }
     } else {
       const isUnique = (value) => {
-        if (this.orgCompanycode === this.member.companycode || value === '' || value.length < 3) {
+        if (this.orgCompanycode === this.member.companycode) {
           return true
         }
 
-        return memberModel.companycodeExists(value)
+        if (value === '' || value.length < 2) {
+          return undefined
+        }
+
+        return this.checkCompanyCode(value)
       }
 
       validations['member']['companycode'] = {
         required,
+        minLength: minLength(2),
         isUnique: helpers.withAsync(isUnique)
       }
     }
@@ -506,6 +573,12 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
+    },
+    showRequestedList() {
+      return this.isSuperuser && this.memberIsRequest
+    },
+    showDeletedList() {
+      return this.isSuperuser && this.isDeleted
     }
   },
   async created() {
@@ -513,7 +586,7 @@ export default {
     this.countries = await this.$store.dispatch('getCountries')
 
     try {
-      const data = await contractModel.list()
+      const data = await this.contractService.list()
       for(let i=0;i<data.results.length; i++) {
         this.contracts.push({
           value: data.results[i].id,
@@ -527,8 +600,12 @@ export default {
 
     if (!this.isCreate) {
       await this.loadData()
+      this.memberIsRequest = this.member.is_requested
+      this.isDeleted = this.member.is_deleted
     } else {
-      this.member = memberModel.getFields()
+      this.member = new MemberModel({
+        www: 'https://'
+      })
       this.member.country_code = 'NL'
       this.member.member_type = 'maintenance'
       this.member.contract = this.contracts[0].value
@@ -536,6 +613,15 @@ export default {
     this.isLoading = false
   },
   methods: {
+    async checkCompanyCode(value) {
+      const result = await this.memberService.companycodeExists(value)
+      return result
+    },
+    async companyCodeChange() {
+      if (this.member.companycode && this.member.companycode.length > 2) {
+        this.v$.member.companycode.$touch()
+      }
+    },
     imageSelected(file) {
       const reader = new FileReader()
       reader.onload = (f) => {
@@ -594,10 +680,21 @@ export default {
       }
 
       if (this.isCreate) {
+        if (this.isRequest) {
+          this.member.equipment_qr_type = this.member.has_branches ? EQUIPMENT_QR_TYPE_SHLTR : EQUIPMENT_QR_TYPE_MY24SERVICE
+          this.member.has_api_users = false
+          this.member.is_requested = true
+          this.member.is_public = true
+          this.member.is_deleted = false
+        }
         this.isLoading = true
         try {
-          await memberModel.insert(this.member)
-          this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
+          await this.memberService.insert(this.member)
+          if (this.isRequest) {
+            this.infoToast(this.$trans('Requested'), this.$trans('Request has been created'))
+          } else {
+            this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
+          }
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
@@ -618,7 +715,7 @@ export default {
 
         this.isLoading = true
 
-        await memberModel.update(this.pk, this.member)
+        await this.memberService.update(this.pk, this.member)
         this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -634,7 +731,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.member = await memberModel.detail(this.pk)
+        this.member = await this.memberService.detail(this.pk)
         this.current_image = this.member.companylogo ? this.member.companylogo : NO_IMAGE_URL
         this.current_image_workorder = this.member.companylogo_workorder ? this.member.companylogo_workorder : NO_IMAGE_URL
         this.orgCompanycode = this.member.companycode

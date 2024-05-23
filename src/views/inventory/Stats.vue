@@ -1,92 +1,100 @@
 <template>
-  <div class="app-grid">
-    <b-row align-v="center">
-      <b-col cols="1">
-        <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
-          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
-      </b-col>
-      <b-col cols="10" class="text-center">
-        <h4>{{ $trans('Total sales in ' + year ) }}</h4>
-        <b-row>
-          <b-col cols="6">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Graph type')"
-              label-for="graph-type"
-            >
-              <b-form-select
-                id="graph-type"
-                v-model="currentMode"
-                :options="modes"
-                size="sm"
-              ></b-form-select>
-            </b-form-group>
-          </b-col>
-          <b-col cols="6">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Show')"
-              label-for="graph-field"
-            >
-              <b-form-radio-group
-                id="graph-field"
-                v-model="graphField"
-                :options="graphFieldOptions"
-                class="mb-3"
-                value-field="item"
-                text-field="name"
-              ></b-form-radio-group>
-            </b-form-group>
-          </b-col>
-        </b-row>
-      </b-col>
-      <b-col cols="1">
-        <div class="float-right">
-          <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3><b-icon icon="bar-chart-line-fill"></b-icon>{{ $trans('Total sales in ' + year ) }}</h3>
+      </div>
+    </header>
+    <div class="app-detail panel">
+      <b-row align-v="center">
+        <b-col cols="1">
+          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
+            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
           </b-link>
-        </div>
-      </b-col>
-    </b-row>
+        </b-col>
+        <b-col cols="10" class="text-center">
+        
+          <b-row>
+            <b-col cols="6">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Graph type')"
+                label-for="graph-type"
+              >
+                <b-form-select
+                  id="graph-type"
+                  v-model="currentMode"
+                  :options="modes"
+                  size="sm"
+                ></b-form-select>
+              </b-form-group>
+            </b-col>
+            <b-col cols="6">
+              <b-form-group
+                label-size="sm"
+                v-bind:label="$trans('Show')"
+                label-for="graph-field"
+              >
+                <b-form-radio-group
+                  id="graph-field"
+                  v-model="graphField"
+                  :options="graphFieldOptions"
+                  class="mb-3"
+                  value-field="item"
+                  text-field="name"
+                ></b-form-radio-group>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-col>
+        <b-col cols="1">
+          <div class="float-right">
+            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            </b-link>
+          </div>
+        </b-col>
+      </b-row>
 
-    <bar-chart
-      v-if="loaded && !isLoading && isBarChart"
-      :chart-data="chartdata"
-      :options="options"
-    />
+      <bar-chart
+        v-if="loaded && !isLoading && isBarChart"
+        :chart-data="chartdata"
+        :options="options"
+      />
 
-    <b-table
-      small
-      id="year-table"
-      :busy='isLoading'
-      :fields="tableFields"
-      :items="tableData"
-      responsive="md"
-      class="data-table"
-    >
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(sum_amount)="data">
-        {{ data.item.sum_amount }} ({{ data.item.amount_perc }}%)
-      </template>
-      <template #cell(sum_price_selling)="data">
-        {{ data.item.sum_price_selling.toFixed(2) }} EUR ({{ data.item.amount_selling_perc }}%)
-      </template>
-      <template #cell(sum_price_purchase)="data">
-        {{ data.item.sum_price_purchase.toFixed(2) }} EUR
-      </template>
-      <template #cell(profit)="data">
-        {{ data.item.profit.toFixed(2) }} EUR
-      </template>
-    </b-table>
+      <b-table
+        small
+        id="year-table"
+        :busy='isLoading'
+        :fields="tableFields"
+        :items="tableData"
+        responsive="md"
+        class="data-table"
+      >
+        <template #table-busy>
+          <div class="text-center my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(sum_amount)="data">
+          {{ data.item.sum_amount }} 
+          <span>({{ data.item.amount_perc }}%)</span>
+        </template>
+        <template #cell(sum_price_selling)="data">
+          &euro; {{ data.item.sum_price_selling.toFixed(2) }} 
+          <span>({{ data.item.amount_selling_perc }}%)</span>
+        </template>
+        <template #cell(sum_price_purchase)="data">
+          &euro; {{ data.item.sum_price_purchase.toFixed(2) }}
+        </template>
+        <template #cell(profit)="data">
+          &euro; {{ data.item.profit.toFixed(2) }}
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
-
 <script>
 import BarChart from "@/components/BarChart.vue"
 import totalSalesModel from '@/models/inventory/TotalSales.js'

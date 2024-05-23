@@ -1,5 +1,29 @@
 <template>
-  <div class="mt-4">
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+
+        <h3>
+          <b-icon icon="images"></b-icon> {{ $trans('Pictures') }}
+        </h3>
+        
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+            v-bind:method="function() { loadData() }"
+            v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+            v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'company-picture-add'}" class="btn">
+            <b-icon icon="image"></b-icon>
+            {{ $trans('Add picture') }}</router-link>
+        </b-button-toolbar>
+        
+      </div>
+    </header>
 
     <SearchModal
       id="search-modal"
@@ -16,12 +40,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this picture?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Picture')"
-      />
+    <div class="panel overflow-auto">
 
       <b-table
         id="picture-table"
@@ -33,25 +52,7 @@
         class="data-table"
         sort-icon-left
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="company-picture-add"
-                  v-bind:title="$trans('New picture')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
+        
         <template #table-busy>
           <div class="text-center text-danger my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
@@ -59,7 +60,9 @@
           </div>
         </template>
         <template #cell(picture)="data">
-          <img :src="data.item.picture || NO_IMAGE_URL" height="100" alt=""/>
+          <router-link :to="{name: 'company-picture-edit', params: {pk: data.item.id}}">
+            <img :src="data.item.picture || NO_IMAGE_URL" height="100" alt=""/>
+          </router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -75,10 +78,18 @@
           </div>
         </template>
       </b-table>
+
+      <Pagination
+        v-if="!isLoading"
+        :model="this.model"
+        :model_name="$trans('Picture')"
+      />
     </div>
   </div>
 </template>
-
+<style scoped>
+img {margin-inline: 0; height: 100%}
+</style>
 <script>
 import pictureModel from '@/models/company/Picture.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
@@ -108,10 +119,10 @@ export default {
       isLoading: false,
       pictures: [],
       fields: [
-        {key: 'picture', label: this.$trans('Picture'), sortable: true, thAttr: {width: '50%'}},
-        {key: 'name', label: this.$trans('Name'), sortable: true, thAttr: {width: '30%'}},
-        {key: 'created', label: this.$trans('Created'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'icons', thAttr: {width: '10%'}}
+        {key: 'picture', label: this.$trans('Picture'), sortable: true, },
+        {key: 'name', label: this.$trans('Name'), sortable: true, },
+        {key: 'created', label: this.$trans('Created'), sortable: true, },
+        {key: 'icons', label: '', thAttr: {width: '10%'}}
       ],
       NO_IMAGE_URL
     }

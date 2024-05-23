@@ -7,16 +7,16 @@
 // color-primary: #000000;
 //color-secondary: #FFFFFF;
 //color-text: #000000;
-//color-accent: #30BFBF;
+$color-accent: #30BFBF;
 //global-color-1cf88dd:
 
-$my24: #000000;
-$primary: #000000;
-$secondary: #30BFBF;
+$my24: #30BFBF;
+$primary: #000;
+$secondary: $my24;
 
-$navbar-light-color: #30BFBF;
-$active-link: #30BFBF;
-$normal-link: #30BFBF;
+$navbar-light-color: $secondary;
+$active-link: $secondary;
+$normal-link: $secondary;
 $font-size-base: 0.9rem;
 
 // Then import Bootstrap an BootstrapVue SCSS files (order is important)

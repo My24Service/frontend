@@ -1,6 +1,5 @@
 <template>
   <div>
-    <b-nav tabs>
       <b-nav-item
         :active="isActive('purchaseorders')"
         v-if="hasPurchaseOrders"
@@ -27,10 +26,11 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('supplier-reservations')"
-        v-if="hasSupplierReservations"
+        v-if="false && hasSupplierReservations"
         :to="{ name: 'supplier-reservation-list' }">
         {{ $trans('Reservations') }}
       </b-nav-item>
+
       <b-nav-item
         :active="isActive('stock-locations')"
         v-if="hasStockLocations"
@@ -61,7 +61,6 @@
         :to="{ name: 'inventory-stats-table' }">
         {{ $trans('Statistics table') }}
       </b-nav-item>
-    </b-nav>
   </div>
 </template>
 

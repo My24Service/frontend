@@ -1,24 +1,22 @@
 <template>
   <div>
-    <b-nav tabs>
-      <b-nav-item
-        :active="isActive('quotations')"
-        v-if="isStaff || isSuperuser || isPlanning"
-        :to="{ name: 'quotation-list' }">
-        {{ $trans('Quotations') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('preliminary-quotations')"
-        v-if="isStaff || isSuperuser || isPlanning"
-        :to="{ name: 'preliminary-quotations' }">
-        {{ $trans('Preliminary Quotations') }}
-      </b-nav-item>
-    </b-nav>
+    <b-nav-item
+      :active="isActive('quotations')"
+      v-if="isStaff || isSuperuser || isPlanning"
+      :to="{ name: 'quotation-list' }">
+      {{ $trans('Quotations') }}
+    </b-nav-item>
+    <b-nav-item
+      :active="isActive('preliminary')"
+      v-if="isStaff || isSuperuser || isPlanning"
+      :to="{ name: 'preliminary-quotations' }">
+      {{ $trans('Preliminary') }}
+    </b-nav-item>
   </div>
 </template>
 
 <script>
-import { componentMixin } from '../utils.js'
+import { componentMixin } from '@/utils'
 
 export default {
   mixins: [componentMixin],

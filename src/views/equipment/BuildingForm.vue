@@ -247,10 +247,10 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import buildingModel from '../../models/equipment/building.js'
+import { BuildingService, BuildingModel } from '../../models/equipment/building.js'
 import {componentMixin} from "../../utils";
-import customerModel from "../../models/customer/Customer";
-import branchModel from "../../models/company/Branch";
+import { CustomerService } from "../../models/customer/Customer";
+import { BranchService } from "../../models/company/Branch";
 
 export default {
   mixins: [componentMixin],
@@ -271,7 +271,10 @@ export default {
       isLoading: false,
       buttonDisabled: false,
       submitClicked: false,
-      building: buildingModel.getFields(),
+      branchService: new BranchService(),
+      building: new BuildingModel(),
+      buildingService: new BuildingService(),
+      customerService: new CustomerService(),
 
       getCustomersDebounced: null,
       customersSearch: [],
@@ -333,14 +336,14 @@ export default {
     if (!this.isCreate) {
       this.loadData()
     } else {
-      this.building = buildingModel.getFields()
+      this.building = new BuildingModel()
     }
   },
   methods: {
     // customers
     async getCustomers(query) {
       try {
-        this.customersSearch = await customerModel.search(query)
+        this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
         this.errorToast(this.$trans('Error fetching customers'))
@@ -357,7 +360,7 @@ export default {
     // branches
     async getBranches(query) {
       try {
-        this.branchesSearch = await branchModel.search(query)
+        this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
         this.errorToast(this.$trans('Error fetching branches'))
@@ -391,13 +394,13 @@ export default {
 
       if (this.isCreate) {
         try {
-          await buildingModel.insert(this.building)
+          await this.buildingService.insert(this.building)
           this.infoToast(this.$trans('Created'), this.$trans('building has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
           if (isBulk) {
-            let empty = buildingModel.getFields()
+            let empty = new BuildingModel()
             empty.branch = this.building.branch
             empty.customer = this.building.customer
             this.building = empty
@@ -417,7 +420,7 @@ export default {
       }
 
       try {
-        await buildingModel.update(this.pk, this.building)
+        await this.buildingService.update(this.pk, this.building)
         this.infoToast(this.$trans('Updated'), this.$trans('building has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -433,12 +436,12 @@ export default {
       this.isLoading = true
 
       try {
-        this.building = await buildingModel.detail(this.pk)
+        this.building = await this.buildingService.detail(this.pk)
         if (this.hasBranches && !this.isEmployee) {
-          this.branch = await branchModel.detail(this.building.branch)
+          this.branch = await this.branchService.detail(this.building.branch)
         }
         if (!this.hasBranches && !this.isCustomer) {
-          this.customer = await customerModel.detail(this.building.customer)
+          this.customer = await this.customerService.detail(this.building.customer)
         }
         this.isLoading = false
       } catch(error) {
