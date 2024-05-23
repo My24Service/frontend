@@ -117,15 +117,12 @@
     </header>
 
     <div class="page-detail">
-<<<<<<< HEAD
       <ApiResult
         class="app-detail"
         v-if="order.hasOwnProperty('apiOk')"
         :error="order.error"
         :success-message='$trans("Order created")'
       />
-=======
->>>>>>> origin/develop-new
       <div class="flex-columns">
         <div class="panel col-1-3">
           <h6>{{ $trans('Contact') }}</h6>
@@ -525,6 +522,7 @@
               v-bind:label="$trans('Assign to')"
               label-for="order-assign"
               label-cols="3"
+              v-if="asssignResult.length === 0"
             >
               <multiselect
                 v-model="selectedEngineers"
@@ -536,28 +534,37 @@
                 :options="engineers"
                 :multiple="true"
                 :taggable="true"
-                @tag="addEngineer"
                 :custom-label="engineerLabel"
                 >
               </multiselect>
             </b-form-group>
-<<<<<<< HEAD
-            <ul v-if="assignedEngineers.length > 0">
-              <li v-for="(engineer, index) of assignedEngineers" :key="index">
+            <div v-if="asssignResult.length > 0">
+              <h4>{{ $trans("Assign result") }}</h4>
+              <ul>
 
-              </li>
-            </ul>
-=======
-
->>>>>>> origin/develop-new
+                <li
+                  v-for="(engineer, index) of asssignResult"
+                  :key="index"
+                  :class="engineer.hasOwnProperty('apiOk') && engineer.apiOk ? 'text-success' : 'text-danger'"
+                >
+                  {{ engineer.full_name }}
+                  <span v-if="engineer.hasOwnProperty('apiOk') && engineer.apiOk">
+                    <b-icon icon="check-circle" />
+                  </span>
+                  <span v-else>
+                    <b-icon icon="exclamation-circle" />
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <b-form-group
             v-bind:label="$trans('Assignee(s)')"
             label-for="order-assigned-to"
             label-cols="3"
-            label-class="dimmed">
-
+            label-class="dimmed"
+          >
             <label class="col-form-label order-assignee" v-for="(person, index) in order.assigned_user_info" :key="index">
               <span v-if="index > 0">,</span>
               {{ person.full_name }}
@@ -607,15 +614,12 @@
                     </b-link>
                   </div>
                 </b-col>
-<<<<<<< HEAD
                 <b-col v-if="orderline.hasOwnProperty('apiOk')" cols="12">
                   <ApiResult
                     :error="orderline.error"
                     :success-message='$trans("Orderline created")'
                   />
                 </b-col>
-=======
->>>>>>> origin/develop-new
               </b-row>
             </b-container>
 
@@ -841,15 +845,12 @@
                     </b-link>
                   </div>
                 </b-col>
-<<<<<<< HEAD
                 <b-col v-if="infoline.hasOwnProperty('apiOk')" cols="12">
                   <ApiResult
                     :error="infoline.error"
                     :success-message='$trans("Infoline created")'
                   />
                 </b-col>
-=======
->>>>>>> origin/develop-new
               </b-row>
             </b-container>
 
@@ -1005,7 +1006,7 @@ export default {
       getBranchesDebounced: null,
       engineers: [],
       selectedEngineers: [],
-      assignedEngineers: [],
+      asssignResult: [],
       files: [],
       orderPk: null,
       nextField: 'orders',
@@ -1419,9 +1420,6 @@ export default {
     engineerLabel({ full_name }) {
       return full_name
     },
-    addEngineer(value) {
-      console.log(value)
-    },
 
     customerLabel({ name, address, city}) {
       return `${name} - ${address} - ${city}`
@@ -1709,6 +1707,10 @@ export default {
       return [processedInfolines, errors]
     },
     async assignEngineers(order_id) {
+      if (this.selectedEngineers.length === 0) {
+        return []
+      }
+
       let errors = []
       let newSelectedEngineers = []
 
@@ -1742,11 +1744,8 @@ export default {
         this.errorToast(this.$trans('There were errors assigning to users'))
       }
 
-      this.selectedEngineers = newSelectedEngineers.filter((e) => !e.apiOk)
-      this.assignedEngineers = newSelectedEngineers.filter((e) => e.apiOk)
-      if (!this.selectedEngineers) {
-        this.selectedEngineers = []
-      }
+      this.asssignResult = newSelectedEngineers
+      this.selectedEngineers = []
 
       return errors
     },
