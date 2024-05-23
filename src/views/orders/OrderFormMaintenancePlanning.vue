@@ -117,6 +117,15 @@
     </header>
 
     <div class="page-detail">
+<<<<<<< HEAD
+      <ApiResult
+        class="app-detail"
+        v-if="order.hasOwnProperty('apiOk')"
+        :error="order.error"
+        :success-message='$trans("Order created")'
+      />
+=======
+>>>>>>> origin/develop-new
       <div class="flex-columns">
         <div class="panel col-1-3">
           <h6>{{ $trans('Contact') }}</h6>
@@ -532,7 +541,15 @@
                 >
               </multiselect>
             </b-form-group>
+<<<<<<< HEAD
+            <ul v-if="assignedEngineers.length > 0">
+              <li v-for="(engineer, index) of assignedEngineers" :key="index">
 
+              </li>
+            </ul>
+=======
+
+>>>>>>> origin/develop-new
           </div>
 
           <b-form-group
@@ -590,6 +607,15 @@
                     </b-link>
                   </div>
                 </b-col>
+<<<<<<< HEAD
+                <b-col v-if="orderline.hasOwnProperty('apiOk')" cols="12">
+                  <ApiResult
+                    :error="orderline.error"
+                    :success-message='$trans("Orderline created")'
+                  />
+                </b-col>
+=======
+>>>>>>> origin/develop-new
               </b-row>
             </b-container>
 
@@ -815,6 +841,15 @@
                     </b-link>
                   </div>
                 </b-col>
+<<<<<<< HEAD
+                <b-col v-if="infoline.hasOwnProperty('apiOk')" cols="12">
+                  <ApiResult
+                    :error="infoline.error"
+                    :success-message='$trans("Infoline created")'
+                  />
+                </b-col>
+=======
+>>>>>>> origin/develop-new
               </b-row>
             </b-container>
 
@@ -861,6 +896,22 @@ import Multiselect from 'vue-multiselect'
 import {OrderNotAcceptedService} from '@/models/orders/OrderNotAccepted'
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer'
+<<<<<<< HEAD
+import {AssignService} from '@/models/mobile/Assign'
+import OrderTypesSelect from '@/components/OrderTypesSelect'
+import Collapse from '@/components/Collapse'
+import {componentMixin} from "@/utils";
+import {BranchService} from "@/models/company/Branch";
+import {EquipmentService} from "@/models/equipment/equipment";
+import {QuotationService} from '@/models/quotations/Quotation'
+import {LocationService} from "@/models/equipment/location";
+import {OrderlineService} from "@/models/orders/Orderline";
+import {InfolineService} from "@/models/orders/Infoline";
+import CustomerCard from '@/components/CustomerCard'
+import {EngineerService} from "@/models/company/UserEngineer";
+import DocumentsComponent from "./order_form/DocumentsComponent.vue";
+import ApiResult from "@/components/ApiResult";
+=======
 import Assign from '../../models/mobile/Assign.js'
 import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
 import Collapse from '../../components/Collapse.vue'
@@ -874,6 +925,7 @@ import {InfolineService} from "@/models/orders/Infoline";
 import CustomerCard from '../../components/CustomerCard.vue'
 import {EngineerService} from "@/models/company/UserEngineer";
 import DocumentsComponent from "./order_form/DocumentsComponent.vue";
+>>>>>>> origin/develop-new
 
 const isCorrectTime = (value) => {
   return !helpers.req(value) || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
@@ -889,7 +941,12 @@ export default {
     Multiselect,
     OrderTypesSelect,
     Collapse,
+<<<<<<< HEAD
+    CustomerCard,
+    ApiResult,
+=======
     CustomerCard
+>>>>>>> origin/develop-new
   },
   props: {
     pk: {
@@ -968,6 +1025,7 @@ export default {
       getBranchesDebounced: null,
       engineers: [],
       selectedEngineers: [],
+      assignedEngineers: [],
       files: [],
       orderPk: null,
       nextField: 'orders',
@@ -1000,6 +1058,11 @@ export default {
       locationService: new LocationService(),
       orderlineService: new OrderlineService(),
       infolineService: new InfolineService(),
+<<<<<<< HEAD
+      assignService: new AssignService(),
+      testErrors: []
+=======
+>>>>>>> origin/develop-new
     }
   },
   validations() {
@@ -1398,6 +1461,10 @@ export default {
       // }
       // this.recommendedUsers = users
       this.fillCustomer(option)
+      if (this.usesEquipment) {
+        await this.getEquipment('')
+        await this.getLocation('')
+      }
     },
     fillCustomer(customer) {
       this.order.customer_relation = customer.id
@@ -1444,7 +1511,10 @@ export default {
       this.cancelForm()
     },
     async submitForm(e) {
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/develop-new
       if(e && e.target.value === 'dispatch') this.nextField = 'dispatch';
 
       this.submitClicked = true
@@ -1465,26 +1535,32 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
 
-      let newOrder;
-      if (this.isCreate) {
+      const orderlines = this.order.orderlines
+      this.order.orderlines = []
+
+      // filter out empty infolines
+      const infolines = this.order.infolines.filter(
+        (i) => i.info && i.info.replace(' ', '') !== '')
+      this.order.infolines = []
+
+      let errors = []
+
+      // don't handle again when there's no error
+      if (!this.order.hasOwnProperty('apiOk') || !this.order.apiOk) {
         try {
-          const orderlines = this.order.orderlines
-          this.order.orderlines = []
-
-          const infolines = this.order.infolines
-          this.order.infolines = []
-
-          newOrder = await this.orderService.insert(this.order)
-
-          // add orderlines
-          try {
-            for (const orderline of orderlines) {
-              orderline.order = newOrder.id
-              await this.orderlineService.insert(orderline)
-            }
-          } catch(error) {
-            console.log('Error creating infolines', error)
+          const newOrder = this.isCreate ? await this.orderService.insert(this.order) :
+            await this.orderService.update(this.pk, this.order)
+          this.order = {
+            ...this.order,
+            ...newOrder,
+            apiOk: true
           }
+<<<<<<< HEAD
+        } catch(error) {
+          errors.push(error)
+          this.order.apiOk = false
+          this.order.error = error
+=======
 
           // add infolines
           try {
@@ -1497,15 +1573,17 @@ export default {
           }
 
           this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+>>>>>>> origin/develop-new
           this.buttonDisabled = false
           this.isLoading = false
-        } catch(error) {
           console.log('Error creating order', error)
-          this.errorToast(this.$trans('Error creating order'))
-          this.isLoading = false
-          this.buttonDisabled = false
+          // this.errorToast(this.$trans('Error creating order'))
           return
         }
+<<<<<<< HEAD
+      } else {
+        console.log("not resubmitting order")
+=======
 
         // insert documents
         this.$refs['documents-component'].orderCreated(newOrder)
@@ -1520,17 +1598,218 @@ export default {
         }
 
         return
+>>>>>>> origin/develop-new
       }
 
-      // edit
-      try {
-        delete this.order.customer_order_accepted
-        const orderlines = this.order.orderlines
-        this.order.orderlines = []
+      const [processedOrderlines, orderlineErrors] = await this.handleOrderlines(orderlines)
+      this.order.orderlines = processedOrderlines
+      errors = [...errors, ...orderlineErrors]
 
-        const infolines = this.order.infolines
-        this.order.infolines = []
+      const [processedInfolines, infolineErrors] = await this.handleInfolines(infolines)
+      this.order.infolines = processedInfolines
+      errors = [...errors, ...infolineErrors]
 
+<<<<<<< HEAD
+      // this document handling here is only needed when creating an order
+      if (this.isCreate) {
+        // TODO why is this if here? shouldn't be needed
+        // if (this.order.id) {
+          const documentErrors = await this.$refs['documents-component'].orderCreated(this.order.id)
+          errors = [...errors, ...documentErrors]
+        // }
+      }
+
+      // TODO why is this if here? shouldn't be needed
+      // if (this.order.id) {
+        const assignErrors = await this.assignEngineers(this.order.id)
+        errors = [...errors, ...assignErrors]
+      // }
+
+      if (!this.isCreate && this.acceptOrder) {
+        try {
+          await this.orderNotAcceptedService.setAccepted(this.pk)
+          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
+        } catch(error) {
+          errors.push(error)
+          console.log('Error accepting order', error)
+          this.errorToast(this.$trans('Error accepting order'))
+        }
+      }
+
+      if (errors.length > 0) {
+        // TODO do we want this message? the errors in the form are obvious
+        this.errorToast(this.$trans('There were errors'))
+        console.log('There were errors', errors)
+        this.buttonDisabled = false
+        this.isLoading = false
+        return
+      }
+
+      this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+
+      if (this.nextField === 'dispatch') {
+        await this.$router.push({name: 'mobile-dispatch'})
+        return
+      }
+
+      this.$router.go(-1)
+    },
+    async handleOrderlines(orderlines) {
+      let processedOrderlines = []
+      let errors = []
+
+      for (const orderline of orderlines) {
+        // don't insert again
+        if (!orderline.hasOwnProperty('apiOk') || !orderline.apiOk) {
+          try {
+            if (this.testErrors.indexOf('orderlines') === -1) {
+              this.testErrors.push('orderlines')
+            } else {
+              orderline.order = this.order.id
+            }
+
+            if (orderline.id) {
+              let newOrderline = await this.orderlineService.update(orderline.id, orderline)
+              newOrderline.apiOk = true
+              processedOrderlines.push(newOrderline)
+            } else {
+              let newOrderline = await this.orderlineService.insert(orderline)
+              newOrderline.apiOk = true
+              processedOrderlines.push(newOrderline)
+            }
+          } catch (error) {
+            errors.push(error)
+            console.log('Error handling orderline', error)
+            processedOrderlines.push({
+              ...orderline,
+              error: error,
+              apiOk: false
+            })
+          }
+        } else {
+          console.log("not resubmitting orderline")
+        }
+      }
+
+      if (!this.isCreate) {
+        for (const orderline of this.deletedOrderlines) {
+          if (orderline.id) {
+            try {
+              await this.orderlineService.delete(orderline.id)
+            } catch (error) {
+              errors.push(error)
+              console.log('Error handling orderline', error)
+              processedOrderlines.push({
+                ...orderline,
+                error: error,
+                apiOk: false
+              })
+            }
+          }
+        }
+      }
+
+      return [processedOrderlines, errors]
+    },
+    async handleInfolines(infolines) {
+      let errors = []
+      let processedInfolines = []
+
+      for (const infoline of infolines) {
+        // don't insert again when there's no error
+        if (!infoline.hasOwnProperty('apiOk') || !infoline.apiOk) {
+          try {
+            if (this.testErrors.indexOf('infolines') === -1) {
+              this.testErrors.push('infolines')
+            } else {
+              infoline.order = this.order.id
+            }
+
+            if (infoline.id) {
+              let newInfoline = await this.infolineService.update(infoline.id, infoline)
+              newInfoline.apiOk = true
+              processedInfolines.push(newInfoline)
+            } else {
+              let newInfoline = await this.infolineService.insert(infoline)
+              newInfoline.apiOk = true
+              processedInfolines.push(newInfoline)
+            }
+          } catch (error) {
+            errors.push(error)
+            console.log('Error handling infoline', error)
+            processedInfolines.push({
+              ...infoline,
+              error: error,
+              apiOk: false
+            })
+          }
+        } else {
+          console.log("not resubmitting infoline")
+        }
+      }
+
+      if (!this.isCreate) {
+        for (const infoline of this.deletedInfolines) {
+          if (infoline.id) {
+            try {
+              await this.infolineService.delete(infoline.id)
+            } catch (error) {
+              errors.push(error)
+              console.log('Error deleting infoline', error)
+              processedInfolines.push({
+                ...infoline,
+                error: error,
+                apiOk: false
+              })
+            }
+          }
+        }
+      }
+
+      return [processedInfolines, errors]
+    },
+    async assignEngineers(order_id) {
+      let errors = []
+      let newSelectedEngineers = []
+
+      for (const engineer of this.selectedEngineers) {
+        try {
+          if (this.testErrors.indexOf('assign') === -1) {
+            this.testErrors.push('assign')
+            delete engineer.id
+          }
+
+          await this.assignService.assignToUser(engineer.id, [order_id], true)
+          newSelectedEngineers.push({
+            ...engineer,
+            apiOk: true
+          })
+        } catch (error) {
+          newSelectedEngineers.push({
+            ...engineer,
+            apiOk: false,
+            error
+          })
+          errors.push(error)
+          console.log('error assigning to users', error)
+        }
+      }
+
+      if (errors.length === 0) {
+        this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
+      } else {
+        console.log('errors assigning to users', errors)
+        this.errorToast(this.$trans('There were errors assigning to users'))
+      }
+
+      this.selectedEngineers = newSelectedEngineers.filter((e) => !e.apiOk)
+      this.assignedEngineers = newSelectedEngineers.filter((e) => e.apiOk)
+      if (!this.selectedEngineers) {
+        this.selectedEngineers = []
+      }
+
+      return errors
+=======
         await this.orderService.update(this.pk, this.order)
 
         // orderlines create/update
@@ -1612,6 +1891,7 @@ export default {
         console.log('error assigning to users', error)
         this.errorToast(this.$trans('Error assigning to users'))
       }
+>>>>>>> origin/develop-new
     },
     async getCustomers(query) {
       if (query === '') return
