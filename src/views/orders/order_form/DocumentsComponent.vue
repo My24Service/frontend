@@ -12,6 +12,43 @@
       <p v-if="!documentService.collection.length">
         <i>{{ $trans("No documents") }}</i>
       </p>
+<<<<<<< HEAD
+      <b-container fluid="sm" v-else>
+        <b-row
+          v-for="(document, index) of documentService.collection"
+          :key="document.name"
+          no-gutters
+          style="padding-bottom: 10px"
+        >
+          <b-col :cols="isView ? 12 : 9">
+            <b-link v-bind:href="document.url" target="_blank">
+              {{ document.name }} <b-icon-download font-scale=".8"></b-icon-download>
+            </b-link>
+          </b-col>
+          <b-col cols="3" v-if="!isView">
+            <div
+              class="h2 float-right"
+            >
+              <IconLinkEdit
+                :method="function() { editDocument(document, index) }"
+                v-bind:title="$trans('Edit')"
+              />
+              <IconLinkDelete
+                v-bind:title="$trans('Delete')"
+                v-bind:method="function() { deleteDocument(index) }"
+              />
+            </div>
+          </b-col>
+          <b-col v-if="document.hasOwnProperty('apiOk')" cols="12">
+            <ApiResult
+              :error="document.error"
+              :success-message='$trans("Document created")'
+            />
+          </b-col>
+        </b-row>
+      </b-container>
+
+=======
       <b-table
         small
         id="document-table"
@@ -43,6 +80,7 @@
           </div>
         </template>
       </b-table>
+>>>>>>> origin/develop-new
     </div>
 
     <!-- form -->
@@ -177,10 +215,21 @@ import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {DocumentModel, DocumentService} from "@/models/orders/Document";
 import {OrderModel} from "@/models/orders/Order"
+<<<<<<< HEAD
+import {componentMixin} from "@/utils";
+import ApiResult from "@/components/ApiResult.vue";
+
+export default {
+  mixins: [componentMixin],
+  name: "DocumentsComponent",
+  components: {
+    ApiResult,
+=======
 
 export default {
   name: "DocumentsComponent",
   components: {
+>>>>>>> origin/develop-new
     IconLinkEdit,
     ButtonLinkAdd,
     ButtonLinkRefresh,
@@ -215,7 +264,11 @@ export default {
       ],
       documentService: new DocumentService(),
       newItem: false,
+<<<<<<< HEAD
+      files: [],
+=======
       files: []
+>>>>>>> origin/develop-new
     }
   },
   computed: {
@@ -237,11 +290,19 @@ export default {
     await this.loadData()
   },
   methods: {
+<<<<<<< HEAD
+    async orderCreated(orderPk) {
+      for (const document of this.documentService.collection) {
+        document.order = orderPk
+      }
+      return await this.submitDocuments()
+=======
     orderCreated(order) {
       for (const document of this.documentService.collection) {
         document.order = order.id
       }
       this.submitDocuments()
+>>>>>>> origin/develop-new
     },
     doEditCollectionItem() {
       this.documentService.doEditCollectionItem()
@@ -307,10 +368,18 @@ export default {
     },
     async submitDocuments() {
       if (this.documentService.collection.length === 0) {
+<<<<<<< HEAD
+        return []
+      }
+
+      this.isLoading = true
+      let orderErrors = []
+=======
         return
       }
 
       this.isLoading = true
+>>>>>>> origin/develop-new
       for (const document of this.documentService.collection) {
         if (document.file && document.file.indexOf('http') !== -1) {
           delete document.file
@@ -318,6 +387,35 @@ export default {
 
         if (!document.order) {
           if (!this.order.id) {
+<<<<<<< HEAD
+            orderErrors.push(`no order to update document: ${document.name}`)
+          } else {
+            document.order = this.order.id
+          }
+        }
+      }
+
+      if (orderErrors.length > 0) {
+        console.log('no order to update documents', orderErrors)
+        this.errorToast(this.$trans('Error updating documents (no order)'))
+        return orderErrors
+      }
+
+      let errors = []
+      try {
+        this.documentService.collection = await this.documentService.updateCollection()
+        errors = this.documentService.collection.filter((d) => d.error)
+
+        if (errors.length > 0) {
+          this.errorToast(this.$trans('Error updating documents'))
+        } else {
+          this.infoToast(this.$trans('Updated'), this.$trans('Documents have been updated'))
+          this.documentService.collectionHasChanges = false
+        }
+        // await this.loadData()
+      } catch (e) {
+        errors.push(e)
+=======
             console.log('no order to update documents')
             this.errorToast(this.$trans('Error updating documents (no order)'))
             return
@@ -332,11 +430,17 @@ export default {
         this.infoToast(this.$trans('Updated'), this.$trans('Documents have been updated'))
         await this.loadData()
       } catch (e) {
+>>>>>>> origin/develop-new
         console.log('error updating documents', e)
         this.errorToast(this.$trans('Error updating documents'))
       }
 
       this.isLoading = false
+<<<<<<< HEAD
+
+      return errors
+=======
+>>>>>>> origin/develop-new
     },
 
   }
