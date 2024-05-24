@@ -2,7 +2,12 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Unseen sick leaves") }}</h3>
+        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Sick leaves") }}</h3>
+        <div class="flex-columns">
+          <router-link class="btn button" :to="{ name: 'sick-leave-list-add' }">
+            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add sick leave") }}
+          </router-link>
+        </div>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -21,7 +26,7 @@
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner><br /><br />
-            <strong>{{ $trans("loading unseen sick leaves...") }}</strong>
+            <strong>{{ $trans("loading sick leaves...") }}</strong>
           </div>
         </template>
         <template #head(icons)="">
@@ -62,25 +67,32 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <b-link
-              :title="$trans('Seen')"
-              @click="() => showSeenModal(data.item.id)"
-            >
-              <b-icon-check-lg class="edit-icon"></b-icon-check-lg>
-            </b-link>
+            <IconLinkEdit
+              router_name="sick-leave-list-edit"
+              v-bind:router_params="{ pk: data.item.id }"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="
+                function() {
+                  showDeleteModal(data.item.id);
+                }
+              "
+            />
           </div>
         </template>
       </b-table>
     </div>
-    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Unseen sick leaves')" />
+    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Sick leaves')" />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
     <b-modal
-      id="seen-leave-modal"
-      ref="seen-leave-modal"
-      v-bind:title="$trans('Mark leave as seen')"
-      @ok="doSeen"
+      id="delete-sick-leave-modal"
+      ref="delete-sick-leave-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
     >
-      <p class="my-4">{{ $trans("Are you sure you want to mark this sick leave as seen") }}</p>
+      <p class="my-4">{{ $trans("Are you sure you want to delete this sick leave?") }}</p>
     </b-modal>
   </div>
 </template>
@@ -94,6 +106,7 @@ import Pagination from "../../../components/Pagination.vue";
 import PillsLeave from "./PillsLeave.vue";
 import { SickLeavesService } from "@/models/company/SickLeaves.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
+import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 
 export default {
   components: {
@@ -103,7 +116,8 @@ export default {
     SearchModal,
     Pagination,
     PillsLeave,
-    IconLinkEdit
+    IconLinkEdit,
+    IconLinkDelete
   },
   data() {
     return {
@@ -135,32 +149,32 @@ export default {
     showSearchModal() {
       this.$refs["search-modal"].show();
     },
-    showSeenModal(id) {
+    showDeleteModal() {
       this.leavePk = id;
-      this.$refs["seen-leave-modal"].show();
+      this.$refs["delete-sick-leave-modal"].show();
     },
-    async doSeen() {
+    async doDelete() {
        this.isLoading = true;
       try {
-        await this.sickLeavesService.setAsSeen(this.leavePk);
-        this.infoToast(this.$trans("Accepted"), this.$trans("Leave as been marked as seen"));
+        await this.sickLeavesService.delete(this.leavePk);
+        this.infoToast(this.$trans("Deleted"), this.$trans("Sick leave has been deleted"));
         this.loadData();
       } catch (error) {
         this.isLoading = false;
-        console.log("error accepting leave", error);
-        this.errorToast(this.$trans("Error accepting leave"));
+        console.log("error deleting sick leave", error);
+        this.errorToast(this.$trans("Error deleting sick leave"));
       }
     },
     async loadData() {
       this.isLoading = true;
 
       try {
-        const data = await this.sickLeavesService.getUnseenSickLeaves();
+        const data = await this.sickLeavesService.list();
         this.leaves = data.results;
         this.isLoading = false;
       } catch (error) {
-        console.log("error fetching unseen sick leave request", error);
-        this.errorToast(this.$trans("Error loading unseen sick leave request"));
+        console.log("error fetching sick leave request", error);
+        this.errorToast(this.$trans("Error loading sick leave request"));
         this.isLoading = false;
       }
     }

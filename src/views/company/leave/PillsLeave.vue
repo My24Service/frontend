@@ -7,7 +7,7 @@
         {{ $trans('Leave requests') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('leaves')"
+        :active="$route.name == 'leave-list'"
         :to="{ name: 'leave-list' }">
         {{ $trans('Leaves') }}
       </b-nav-item>
@@ -17,9 +17,14 @@
         {{ $trans('Leave types') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('unseen')"
+        :active="$route.name == 'unseen-sick-leave'"
         :to="{ name: 'unseen-sick-leave' }">
         {{ $trans('Unseen sick leaves') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="$route.name == 'sick-leave-list'"
+        :to="{ name: 'sick-leave-list' }">
+        {{ $trans('Sick leaves') }}
       </b-nav-item>
     </b-nav>
   </div>
