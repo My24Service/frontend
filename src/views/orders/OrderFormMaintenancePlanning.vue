@@ -1040,7 +1040,6 @@ export default {
       orderlineService: new OrderlineService(),
       infolineService: new InfolineService(),
       assignService: new AssignService(),
-      testErrors: []
     }
   },
   validations() {
@@ -1276,6 +1275,8 @@ export default {
         this.equipment_location = option.location.id
         this.location = option.location.name
         this.locationSearchDisabled = true
+      } else {
+        this.locationSearchDisabled = false
       }
     },
     // equipment locations
@@ -1583,7 +1584,11 @@ export default {
         return
       }
 
-      this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+      if (this.isCreate) {
+        this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+      } else {
+        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+      }
 
       if (this.nextField === 'dispatch') {
         await this.$router.push({name: 'mobile-dispatch'})
@@ -1600,11 +1605,7 @@ export default {
         // don't insert again
         if (!orderline.hasOwnProperty('apiOk') || !orderline.apiOk) {
           try {
-            if (this.testErrors.indexOf('orderlines') === -1) {
-              this.testErrors.push('orderlines')
-            } else {
-              orderline.order = this.order.id
-            }
+            orderline.order = this.order.id
 
             if (orderline.id) {
               let newOrderline = await this.orderlineService.update(orderline.id, orderline)
@@ -1657,11 +1658,7 @@ export default {
         // don't insert again when there's no error
         if (!infoline.hasOwnProperty('apiOk') || !infoline.apiOk) {
           try {
-            if (this.testErrors.indexOf('infolines') === -1) {
-              this.testErrors.push('infolines')
-            } else {
-              infoline.order = this.order.id
-            }
+            infoline.order = this.order.id
 
             if (infoline.id) {
               let newInfoline = await this.infolineService.update(infoline.id, infoline)
@@ -1716,11 +1713,6 @@ export default {
 
       for (const engineer of this.selectedEngineers) {
         try {
-          if (this.testErrors.indexOf('assign') === -1) {
-            this.testErrors.push('assign')
-            delete engineer.id
-          }
-
           await this.assignService.assignToUser(engineer.id, [order_id], true)
           newSelectedEngineers.push({
             ...engineer,
