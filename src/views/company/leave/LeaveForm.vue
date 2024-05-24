@@ -228,7 +228,7 @@ import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { UserLeaveHoursService } from "@/models/company/UserLeaveHours.js";
 import { LeaveTypeService } from "@/models/company/LeaveType.js";
-import { AllUserService } from "@/models/company/AllUser.js";
+import { UserListService } from "@/models/company/UserList.js";
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
@@ -272,7 +272,7 @@ export default {
     return {
       leaveHoursService: new UserLeaveHoursService(),
       leaveTypeService: new LeaveTypeService(),
-      allUserService: new AllUserService(),
+      userListService: new UserListService(),
       isLoading: false,
       loadingTotals: false,
       submitClicked: false,
@@ -328,7 +328,7 @@ export default {
       this.compLoading = true
 
       try {
-        this.users = await this.allUserService.search(query)
+        this.users = await this.userListService.search(query)
         this.compLoading = false
       } catch(error) {
         console.log('Error fetching users', error)

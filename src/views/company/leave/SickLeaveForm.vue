@@ -98,7 +98,7 @@ import moment from "moment";
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
-import { AllUserService } from "@/models/company/AllUser.js";
+import { UserListService } from "@/models/company/UserList.js";
 import { SickLeavesService } from "@/models/company/SickLeaves.js";
 import Multiselect from 'vue-multiselect'
 
@@ -130,7 +130,7 @@ export default {
   },
   data() {
     return {
-      allUserService: new AllUserService(),
+      userListService: new UserListService(),
       sickLeavesService: new SickLeavesService(),
       isLoading: false,
       compLoading: false,
@@ -215,7 +215,7 @@ export default {
       this.compLoading = true
 
       try {
-        this.users = await this.allUserService.search(query)
+        this.users = await this.userListService.search(query)
         this.compLoading = false
       } catch(error) {
         console.log('Error fetching users', error)
