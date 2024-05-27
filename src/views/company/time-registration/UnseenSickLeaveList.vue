@@ -6,9 +6,9 @@
       </div>
     </header>
     <div class="panel overflow-auto">
-      <div class="subnav-pills">
-        <PillsLeave />
-      </div>
+
+      <SubNav />
+
       <b-table
         small
         id="leave-table"
@@ -85,7 +85,7 @@ import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
-import PillsLeave from "./PillsLeave.vue";
+import SubNav from "./SubNav.vue";
 import { SickLeavesService } from "@/models/company/SickLeaves.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 
@@ -96,7 +96,7 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
-    PillsLeave,
+    SubNav,
     IconLinkEdit
   },
   data() {

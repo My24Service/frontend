@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <b-nav pills>
+  <div class="space">
+    <b-nav tabs>
       <b-nav-item
         :active="$route.name === 'company-time-registration'"
         :to="{ name: 'company-time-registration' }">
@@ -55,3 +55,8 @@ export default {
   },
 }
 </script>
+<style scoped>
+.space {
+  padding-bottom: 10px;
+}
+</style>

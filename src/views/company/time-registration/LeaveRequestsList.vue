@@ -6,9 +6,7 @@
       </div>
     </header>
     <div class="panel overflow-auto">
-      <div class="subnav-pills">
-        <PillsLeave />
-      </div>
+      <SubNav />
       <b-table
         small
         id="leave-table"
@@ -107,7 +105,7 @@ import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
-import PillsLeave from "./PillsLeave.vue";
+import SubNav from "./SubNav.vue";
 import { UserLeaveHoursService, UserLeaveHoursModel } from "@/models/company/UserLeaveHours.js";
 
 export default {
@@ -123,7 +121,7 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
-    PillsLeave
+    SubNav
   },
   data() {
     return {
