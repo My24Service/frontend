@@ -12,9 +12,7 @@
       </div>
     </header>
     <div class="panel overflow-auto">
-      <div class="subnav-pills">
-        <PillsLeave />
-      </div>
+      <SubNav />
       <b-table
         small
         id="leave-table"
@@ -73,7 +71,7 @@
     <Pagination
       v-if="!isLoading"
       :model="this.leaveTypeService"
-      :model_name="$trans('Leaves types')"
+      :model_name="$trans('Leave types')"
     />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
     <b-modal
@@ -124,7 +122,7 @@ import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
-import PillsLeave from "./PillsLeave.vue";
+import SubNav from "./SubNav.vue";
 import { LeaveTypeService } from "@/models/company/LeaveType.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 import { useVuelidate } from "@vuelidate/core";
@@ -141,7 +139,7 @@ export default {
     ButtonLinkAdd,
     SearchModal,
     Pagination,
-    PillsLeave,
+    SubNav,
     IconLinkEdit
   },
   computed: {

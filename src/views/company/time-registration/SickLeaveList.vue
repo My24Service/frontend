@@ -2,18 +2,16 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Leaves") }}</h3>
+        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Sick leave") }}</h3>
         <div class="flex-columns">
-          <router-link class="btn button" :to="{ name: 'leave-list-add' }">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add leave") }}
+          <router-link class="btn button" :to="{ name: 'sick-leave-list-add' }">
+            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add sick leave") }}
           </router-link>
         </div>
       </div>
     </header>
     <div class="panel overflow-auto">
-      <div class="subnav-pills">
-        <PillsLeave />
-      </div>
+      <PillsLeave />
       <b-table
         small
         id="leave-table"
@@ -23,12 +21,6 @@
         responsive="md"
         class="data-table"
       >
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner><br /><br />
-            <strong>{{ $trans("loading leave list...") }}</strong>
-          </div>
-        </template>
         <template #head(icons)="">
           <div class="float-right">
             <b-button-toolbar>
@@ -58,19 +50,17 @@
           }}</b-link>
         </template>
         <template #cell(date)="data">
-          <span v-if="data.item.start_date == data.item.end_date">
-            {{ data.item.start_date }} / {{ data.item.total_hours }}:{{ data.item.total_minutes }}
+          <span v-if="!data.item.end_date">
+            {{ data.item.start_date }}
           </span>
           <span v-else>
-            {{ data.item.start_date }} - {{ data.item.end_date }} / {{ data.item.total_hours }}:{{
-              data.item.total_minutes
-            }}
+            {{ data.item.start_date }} - {{ data.item.end_date }}
           </span>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              router_name="leave-edit"
+              router_name="sick-leave-list-edit"
               v-bind:router_params="{ pk: data.item.id }"
               v-bind:title="$trans('Edit')"
             />
@@ -86,56 +76,53 @@
         </template>
       </b-table>
     </div>
-    <Pagination v-if="!isLoading" :model="this.leaveHoursService" :model_name="$trans('Leaves')" />
-
+    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Sick leave')" />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
-
     <b-modal
-      id="delete-leave-modal"
-      ref="delete-leave-modal"
+      id="delete-sick-leave-modal"
+      ref="delete-sick-leave-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans("Are you sure you want to delete this leave?") }}</p>
+      <p class="my-4">{{ $trans("Are you sure you want to delete this sick leave?") }}</p>
     </b-modal>
   </div>
 </template>
 
 <script>
-import IconLinkPlus from "../../../components/IconLinkPlus.vue";
-import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
-import PillsLeave from "./PillsLeave.vue";
-import { UserLeaveHoursService, UserLeaveHoursModel } from "@/models/company/UserLeaveHours.js";
-import { LeaveTypeService } from "@/models/company/LeaveType.js";
+import PillsLeave from "./SubNav.vue";
+import { SickLeavesService } from "@/models/company/SickLeaves.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
+import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 
 export default {
   components: {
-    IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
     Pagination,
     PillsLeave,
-    IconLinkEdit
+    IconLinkEdit,
+    IconLinkDelete
   },
   data() {
     return {
-      leaveHoursService: new UserLeaveHoursService(),
+      sickLeavesService: new SickLeavesService(),
       searchQuery: null,
       leavePk: null,
       isLoading: false,
       leaves: [],
       fields: [
-        { key: "full_name", label: this.$trans("User"), thAttr: { width: "15%" } },
-        { key: "date", label: this.$trans("Date/hours") },
-        { key: "leave_type_name", label: this.$trans("Leave type") },
+        { key: "user_full_name", label: this.$trans("User"), thAttr: { width: "15%" } },
+        { key: "date", label: this.$trans("Date") },
+        { key: "created_by_fullname", label: this.$trans("Created by") },
+        { key: "created", label: this.$trans("Created") },
         { key: "last_status_full", label: this.$trans("Status") },
         { key: "icons", thAttr: { width: "15%" } }
       ]
@@ -148,40 +135,38 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs["search-modal"].hide();
-      this.leaveHoursService.setSearchQuery(val);
+      this.sickLeavesService.setSearchQuery(val);
       this.loadData();
     },
     showSearchModal() {
       this.$refs["search-modal"].show();
     },
-    // delete
-    showDeleteModal(id) {
+    showDeleteModal() {
       this.leavePk = id;
-      this.$refs["delete-leave-modal"].show();
+      this.$refs["delete-sick-leave-modal"].show();
     },
     async doDelete() {
-      this.isLoading = true;
+       this.isLoading = true;
       try {
-        await this.leaveHoursService.delete(this.leavePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Leave has been deleted"));
+        await this.sickLeavesService.delete(this.leavePk);
+        this.infoToast(this.$trans("Deleted"), this.$trans("Sick leave has been deleted"));
         this.loadData();
       } catch (error) {
-        console.log("error deleting leave", error);
-        this.errorToast(this.$trans("Error deleting leave"));
         this.isLoading = false;
+        console.log("error deleting sick leave", error);
+        this.errorToast(this.$trans("Error deleting sick leave"));
       }
     },
-    // rest
     async loadData() {
       this.isLoading = true;
 
       try {
-        const data = await this.leaveHoursService.list();
+        const data = await this.sickLeavesService.list();
         this.leaves = data.results;
         this.isLoading = false;
       } catch (error) {
-        console.log("error fetching leave requests", error);
-        this.errorToast(this.$trans("Error loading leave requests"));
+        console.log("error fetching sick leave request", error);
+        this.errorToast(this.$trans("Error loading sick leave request"));
         this.isLoading = false;
       }
     }

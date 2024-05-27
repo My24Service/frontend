@@ -51,7 +51,7 @@ import UserEmployeeForm from "../views/company/UserEmployeeForm";
 import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
 
-import TimeRegistration from '../views/company/TimeRegistration.vue'
+import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
 import BranchView from "../views/company/BranchView";
 
 import BudgetList from "../views/company/BudgetList";
@@ -64,13 +64,13 @@ import ActionForm from "@/views/company/statuscode/ActionForm";
 import CustomerTemplateList from "@/views/company/template/CustomerTemplateList";
 import CustomerTemplateForm from "@/views/company/template/CustomerTemplateForm";
 
-import LeaveRequestsList from "@/views/company/leave/LeaveRequestsList";
-import LeaveList from "@/views/company/leave/LeaveList";
-import LeaveForm from "@/views/company/leave/LeaveForm";
-import LeaveTypes from "@/views/company/leave/LeaveTypes";
-import UnseenSickLeaveList from "@/views/company/leave/UnseenSickLeaveList";
-import SickLeaveList from "@/views/company/leave/SickLeaveList";
-import SickLeaveForm from "@/views/company/leave/SickLeaveForm";
+import LeaveRequestsList from "@/views/company/time-registration/LeaveRequestsList";
+import LeaveList from "@/views/company/time-registration/LeaveList";
+import LeaveForm from "@/views/company/time-registration/LeaveForm";
+import LeaveTypes from "@/views/company/time-registration/LeaveTypes";
+import UnseenSickLeaveList from "@/views/company/time-registration/UnseenSickLeaveList";
+import SickLeaveList from "@/views/company/time-registration/SickLeaveList";
+import SickLeaveForm from "@/views/company/time-registration/SickLeaveForm";
 
 
 export default [
@@ -781,7 +781,7 @@ export default [
     },
     {
       name: 'leave-requests',
-      path: '/company/leave/requests',
+      path: '/company/time-registration/leave/requests',
       components: {
         'app-content': LeaveRequestsList,
         'app-subnav': SubNavCompany
@@ -793,7 +793,7 @@ export default [
     },
     {
       name: 'leave-list',
-      path: '/company/leave',
+      path: '/company/time-registration/leave',
       components: {
         'app-content': LeaveList,
         'app-subnav': SubNavCompany
@@ -805,7 +805,7 @@ export default [
     },
     {
       name: 'leave-list-add',
-      path: '/company/leave/form',
+      path: '/company/time-registration/leave/form',
       components: {
         'app-content': LeaveForm,
         'app-subnav':  SubNavCompany
@@ -817,7 +817,7 @@ export default [
     },
     {
       name: 'leave-edit',
-      path: '/company/leave/form/:pk',
+      path: '/company/time-registration/leave/form/:pk',
       components: {
         'app-content': LeaveForm,
         'app-subnav':  SubNavCompany
@@ -829,7 +829,7 @@ export default [
     },
     {
       name: 'leave-types',
-      path: '/company/leave/types',
+      path: '/company/time-registration/leave/types',
       components: {
         'app-content': LeaveTypes,
         'app-subnav': SubNavCompany
@@ -841,7 +841,7 @@ export default [
     },
     {
       name: 'unseen-sick-leave',
-      path: '/company/sick-leave/unseen',
+      path: '/company/time-registration/sick-leave/unseen',
       components: {
         'app-content': UnseenSickLeaveList,
         'app-subnav': SubNavCompany
@@ -853,7 +853,7 @@ export default [
     },
     {
       name: 'sick-leave-list',
-      path: '/company/sick-leave',
+      path: '/company/time-registration/sick-leave',
       components: {
         'app-content': SickLeaveList,
         'app-subnav': SubNavCompany
@@ -865,7 +865,7 @@ export default [
     },
     {
       name: 'sick-leave-list-add',
-      path: '/company/sick-leave/form',
+      path: '/company/time-registration/sick-leave/form',
       components: {
         'app-content': SickLeaveForm,
         'app-subnav':  SubNavCompany
@@ -877,7 +877,7 @@ export default [
     },
     {
       name: 'sick-leave-list-edit',
-      path: '/company/sick-leave/form/:pk',
+      path: '/company/time-registration/sick-leave/form/:pk',
       components: {
         'app-content': SickLeaveForm,
         'app-subnav':  SubNavCompany

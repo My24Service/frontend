@@ -1,9 +1,12 @@
 <template>
   <div class="app-page">
     <header>
-      <h3>{{ $trans("Time registration") }}</h3>
+      <div class="page-title">
+        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Time registration") }}</h3>
+      </div>
     </header>
     <div class='panel'>
+      <SubNav />
       <TimeRegistrationData
         ref="user-time-registration"
         :user_id="user_id"
@@ -15,8 +18,9 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import { TimeRegistrationService } from "../../models/company/TimeRegistration";
-import TimeRegistrationData from "../../components/TimeRegistrationData.vue";
+import { TimeRegistrationService } from "../../../models/company/TimeRegistration";
+import TimeRegistrationData from "../../../components/TimeRegistrationData.vue";
+import SubNav from "./SubNav";
 
 export default {
   name: "TimeRegistration",
@@ -36,7 +40,8 @@ export default {
     }
   },
   components: {
-    TimeRegistrationData
+    TimeRegistrationData,
+    SubNav
   },
   async created() {
     const lang = this.$store.getters.getCurrentLanguage

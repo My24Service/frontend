@@ -1,15 +1,20 @@
 <template>
-  <div>
-    <b-nav pills>
+  <div class="space">
+    <b-nav tabs>
+      <b-nav-item
+        :active="$route.name === 'company-time-registration'"
+        :to="{ name: 'company-time-registration' }">
+        {{ $trans('Time registration') }}
+      </b-nav-item>
       <b-nav-item
         :active="isActive('requests')"
         :to="{ name: 'leave-requests' }">
         {{ $trans('Leave requests') }}
       </b-nav-item>
       <b-nav-item
-        :active="$route.name == 'leave-list'"
+        :active="$route.name === 'leave-list'"
         :to="{ name: 'leave-list' }">
-        {{ $trans('Leaves') }}
+        {{ $trans('Leave') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('types')"
@@ -17,14 +22,14 @@
         {{ $trans('Leave types') }}
       </b-nav-item>
       <b-nav-item
-        :active="$route.name == 'unseen-sick-leave'"
+        :active="$route.name === 'unseen-sick-leave'"
         :to="{ name: 'unseen-sick-leave' }">
-        {{ $trans('Unseen sick leaves') }}
+        {{ $trans('Unseen sick leave') }}
       </b-nav-item>
       <b-nav-item
-        :active="$route.name == 'sick-leave-list'"
+        :active="$route.name === 'sick-leave-list'"
         :to="{ name: 'sick-leave-list' }">
-        {{ $trans('Sick leaves') }}
+        {{ $trans('Sick leave') }}
       </b-nav-item>
     </b-nav>
   </div>
@@ -50,3 +55,8 @@ export default {
   },
 }
 </script>
+<style scoped>
+.space {
+  padding-bottom: 10px;
+}
+</style>

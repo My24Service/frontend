@@ -23,7 +23,7 @@ class QuotationStatuscodeService extends BaseModel {
   url = '/statuscode/statuscode/'
 
   async list() {
-    this.addListArg('code_type=quotation')
+    this.setListArgs(['code_type=quotation'])
     return await super.list()
   }
 }
