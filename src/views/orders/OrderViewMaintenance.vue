@@ -38,10 +38,13 @@
             <dd>
               <span v-if="!order.assigned_user_info.length" class="dimmed">{{ $trans('Not assigned') }}</span>
               <span
-                v-for="person in order.assigned_user_info"
+                v-for="(person, index) in order.assigned_user_info"
                 class="order-assignee"
                 :key="person.full_name"
-              >{{ person.full_name }}</span>
+              >
+                <span v-if="index > 0">,</span>
+                {{ person.full_name }}
+              </span>
             </dd>
             <dt>{{ $trans("Status") }}</dt>
             <dd>{{ order.last_status }}</dd>
