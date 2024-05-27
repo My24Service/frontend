@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Unseen sick leaves") }}</h3>
+        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Unseen sick leave") }}</h3>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -18,12 +18,6 @@
         responsive="md"
         class="data-table"
       >
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner><br /><br />
-            <strong>{{ $trans("loading unseen sick leaves...") }}</strong>
-          </div>
-        </template>
         <template #head(icons)="">
           <div class="float-right">
             <b-button-toolbar>
@@ -72,7 +66,7 @@
         </template>
       </b-table>
     </div>
-    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Unseen sick leaves')" />
+    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Unseen sick leave')" />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
     <b-modal
       id="seen-leave-modal"

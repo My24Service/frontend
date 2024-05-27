@@ -73,7 +73,7 @@
     <Pagination
       v-if="!isLoading"
       :model="this.leaveTypeService"
-      :model_name="$trans('Leaves types')"
+      :model_name="$trans('Leave types')"
     />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
     <b-modal

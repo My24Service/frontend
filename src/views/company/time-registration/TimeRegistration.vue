@@ -4,6 +4,9 @@
       <h3>{{ $trans("Time registration") }}</h3>
     </header>
     <div class='panel'>
+      <div class="subnav-pills space">
+        <PillsLeave />
+      </div>
       <TimeRegistrationData
         ref="user-time-registration"
         :user_id="user_id"
@@ -15,8 +18,9 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import { TimeRegistrationService } from "../../models/company/TimeRegistration";
-import TimeRegistrationData from "../../components/TimeRegistrationData.vue";
+import { TimeRegistrationService } from "../../../models/company/TimeRegistration";
+import TimeRegistrationData from "../../../components/TimeRegistrationData.vue";
+import PillsLeave from "./PillsLeave";
 
 export default {
   name: "TimeRegistration",
@@ -36,7 +40,8 @@ export default {
     }
   },
   components: {
-    TimeRegistrationData
+    TimeRegistrationData,
+    PillsLeave
   },
   async created() {
     const lang = this.$store.getters.getCurrentLanguage
@@ -90,4 +95,7 @@ export default {
 </script>
 
 <style scoped>
+.space {
+  padding-bottom: 10px;
+}
 </style>

@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Sick leaves") }}</h3>
+        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Sick leave") }}</h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{ name: 'sick-leave-list-add' }">
             <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add sick leave") }}
@@ -23,12 +23,6 @@
         responsive="md"
         class="data-table"
       >
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner><br /><br />
-            <strong>{{ $trans("loading sick leaves...") }}</strong>
-          </div>
-        </template>
         <template #head(icons)="">
           <div class="float-right">
             <b-button-toolbar>
@@ -84,7 +78,7 @@
         </template>
       </b-table>
     </div>
-    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Sick leaves')" />
+    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Sick leave')" />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
     <b-modal
       id="delete-sick-leave-modal"

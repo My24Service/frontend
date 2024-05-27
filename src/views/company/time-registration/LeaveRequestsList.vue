@@ -2,12 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Leaves") }}</h3>
-        <div class="flex-columns">
-          <router-link class="btn button" :to="{ name: 'leave-list-add' }">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add leave") }}
-          </router-link>
-        </div>
+        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Leave") }}</h3>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -19,16 +14,10 @@
         id="leave-table"
         :busy="isLoading"
         :fields="fields"
-        :items="leaves"
+        :items="leaveRequests"
         responsive="md"
         class="data-table"
       >
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner><br /><br />
-            <strong>{{ $trans("loading leave list...") }}</strong>
-          </div>
-        </template>
         <template #head(icons)="">
           <div class="float-right">
             <b-button-toolbar>
@@ -52,11 +41,6 @@
             </b-button-toolbar>
           </div>
         </template>
-        <template #cell(full_name)="data">
-          <b-link :to="{ name: 'leave-edit', params: { pk: data.item.id } }">{{
-            data.item.full_name
-          }}</b-link>
-        </template>
         <template #cell(date)="data">
           <span v-if="data.item.start_date == data.item.end_date">
             {{ data.item.start_date }} / {{ data.item.total_hours }}:{{ data.item.total_minutes }}
@@ -69,41 +53,55 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="leave-edit"
-              v-bind:router_params="{ pk: data.item.id }"
-              v-bind:title="$trans('Edit')"
-            />
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="
-                function() {
-                  showDeleteModal(data.item.id);
-                }
-              "
-            />
+            <b-link
+              :title="$trans('Accept')"
+              @click="() => showAcceptModal(data.item.id)"
+            >
+              <b-icon-check-lg class="edit-icon"></b-icon-check-lg>
+            </b-link>
+            <b-link
+              :title="$trans('Reject')"
+              @click="() => showRejectModal(data.item.id)"
+            >
+              <b-icon-x-lg class="edit-icon"></b-icon-x-lg>
+            </b-link>
           </div>
         </template>
       </b-table>
     </div>
-    <Pagination v-if="!isLoading" :model="this.leaveHoursService" :model_name="$trans('Leaves')" />
-
+    <Pagination
+      v-if="!isLoading"
+      :model="this.leaveHoursService"
+      :model_name="$trans('Leave requests')"
+    />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
-
     <b-modal
-      id="delete-leave-modal"
-      ref="delete-leave-modal"
+      id="delete-statuscode-modal"
+      ref="delete-statuscode-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans("Are you sure you want to delete this leave?") }}</p>
+      <p class="my-4">{{ $trans("Are you sure you want to delete this statuscode?") }}</p>
+    </b-modal>
+    <b-modal
+      id="accept-leave-modal"
+      ref="accept-leave-modal"
+      v-bind:title="$trans('Accept request')"
+      @ok="doAccept"
+    >
+      <p class="my-4">{{ $trans("Are you sure you want to accept this leave request?") }}</p>
+    </b-modal>
+    <b-modal
+      id="reject-leave-modal"
+      ref="reject-leave-modal"
+      v-bind:title="$trans('Reject request')"
+      @ok="doAccept"
+    >
+      <p class="my-4">{{ $trans("Are you sure you want to reject this leave request?") }}</p>
     </b-modal>
   </div>
 </template>
-
 <script>
-import IconLinkPlus from "../../../components/IconLinkPlus.vue";
-import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
@@ -111,27 +109,30 @@ import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import PillsLeave from "./PillsLeave.vue";
 import { UserLeaveHoursService, UserLeaveHoursModel } from "@/models/company/UserLeaveHours.js";
-import { LeaveTypeService } from "@/models/company/LeaveType.js";
-import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 
 export default {
+  props: {
+    list_type: {
+      type: [String],
+      default: "order"
+    }
+  },
   components: {
-    IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     ButtonLinkAdd,
     SearchModal,
     Pagination,
-    PillsLeave,
-    IconLinkEdit
+    PillsLeave
   },
   data() {
     return {
+      statuscodeModel: null,
       leaveHoursService: new UserLeaveHoursService(),
       searchQuery: null,
       leavePk: null,
       isLoading: false,
-      leaves: [],
+      leaveRequests: [],
       fields: [
         { key: "full_name", label: this.$trans("User"), thAttr: { width: "15%" } },
         { key: "date", label: this.$trans("Date/hours") },
@@ -155,20 +156,36 @@ export default {
       this.$refs["search-modal"].show();
     },
     // delete
-    showDeleteModal(id) {
+    showAcceptModal(id) {
       this.leavePk = id;
-      this.$refs["delete-leave-modal"].show();
+      this.$refs["accept-leave-modal"].show();
     },
-    async doDelete() {
+    async doAccept() {
       this.isLoading = true;
       try {
-        await this.leaveHoursService.delete(this.leavePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Leave has been deleted"));
+        await this.leaveHoursService.acceptLeave(this.leavePk);
+        this.infoToast(this.$trans("Accepted"), this.$trans("Leave as been accepted"));
         this.loadData();
       } catch (error) {
-        console.log("error deleting leave", error);
-        this.errorToast(this.$trans("Error deleting leave"));
         this.isLoading = false;
+        console.log("error accepting leave", error);
+        this.errorToast(this.$trans("Error accepting leave"));
+      }
+    },
+    showRejectModal(id) {
+      this.leavePk = id;
+      this.$refs["reject-leave-modal"].show();
+    },
+    async doReject() {
+      this.isLoading = true;
+      try {
+        await this.leaveHoursService.doReject(this.leavePk);
+        this.infoToast(this.$trans("Rejected"), this.$trans("Leave as been rejected"));
+        this.loadData();
+      } catch (error) {
+        this.isLoading = false;
+        console.log("error rejecting leave", error);
+        this.errorToast(this.$trans("Error rejecting leave"));
       }
     },
     // rest
@@ -176,8 +193,8 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.leaveHoursService.list();
-        this.leaves = data.results;
+        const data = await this.leaveHoursService.getLeaveRequests();
+        this.leaveRequests = data.results;
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave requests", error);
@@ -195,5 +212,8 @@ export default {
 }
 .subnav-pills {
   margin-bottom: 20px;
+}
+.edit-icon {
+  margin-right: 20px;
 }
 </style>

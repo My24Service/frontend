@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-check-fill"></b-icon>
-          <router-link :to="{ name: 'leave-list' }">{{ $trans("Leaves") }}</router-link>
+          <router-link :to="{ name: 'leave-list' }">{{ $trans("Leave") }}</router-link>
           /
           <span class="dimmed">
             <span v-if="isCreate">{{ $trans("new") }}</span>

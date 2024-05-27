@@ -52,18 +52,6 @@
         {{ $trans('Time registration') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('leave')"
-        v-if="isPlanning || isStaff || isSuperuser"
-        :to="{ name: 'leave-requests' }">
-        {{ $trans('Leave') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('sick-leave')"
-        v-if="isPlanning || isStaff || isSuperuser"
-        :to="{ name: 'unseen-sick-leave' }">
-        {{ $trans('Sick leave') }}
-      </b-nav-item>
-      <b-nav-item
         :active="isActive('branches')"
         v-if="hasBranches"
         :to="{ name: 'company-branches' }">
