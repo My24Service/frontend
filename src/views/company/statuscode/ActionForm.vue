@@ -7,8 +7,8 @@
           <span class="backlink" @click="cancelForm">{{ $trans("Actions") }}</span> /
           <strong>{{ action.name }}</strong>
           <span class="dimmed">
-            <span v-if="isCreate && !action.name"> ({{ $trans("new") }})</span>
-            <span v-if="!isCreate"> ({{ $trans("edit") }})</span>
+            <span v-if="isCreate && !action.name">{{ $trans("new") }}</span>
+            <span v-if="!isCreate">{{ $trans("edit") }}</span>
           </span>
         </h3>
         <div class="flex-columns">

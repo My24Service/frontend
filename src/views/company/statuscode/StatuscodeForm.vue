@@ -133,6 +133,18 @@ import {
   QuotationStatuscodeModel
 } from "@/models/quotations/QuotationStatuscode.js";
 import ExpiryConditionForm from "./ExpiryConditionForm";
+import {
+  STATUSCODE_TYPE_LEAVE_HOURS,
+  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
+} from "../../../models/company/AbstractStatuscode";
+import {
+  LeaveStatuscodeModel,
+  LeaveStatuscodeService
+} from "../../../models/company/LeaveStatuscode";
+import {
+  SickLeaveStatuscodeModel,
+  SickLeaveStatuscodeService
+} from "../../../models/company/SickLeaveStatuscode";
 
 export default {
   setup() {
@@ -183,23 +195,31 @@ export default {
       return this.submitClicked;
     }
   },
-  created() {
+  async created() {
     this.statusCodeListLink = `company-statuscodes-${this.list_type}`;
 
     switch (this.list_type) {
-      case "order":
-        this.statuscodeModel = statuscodeOrderModel;
-        break;
-      case "quotation":
+      // case "order":
+      //   this.statuscodeModel = statuscodeOrderModel;
+      //   break;
+      case STATUSCODE_TYPE_QUOTATION:
         this.statuscodeService = new QuotationStatuscodeService();
         this.statuscode = new QuotationStatuscodeModel({});
+        break;
+      case STATUSCODE_TYPE_LEAVE_HOURS:
+        this.statuscodeService = new LeaveStatuscodeService();
+        this.statuscode = new LeaveStatuscodeModel({});
+        break;
+      case STATUSCODE_TYPE_SICK_LEAVE:
+        this.statuscodeService = new SickLeaveStatuscodeService();
+        this.statuscode = new SickLeaveStatuscodeModel({});
         break;
       default:
         throw `unknown list_type: ${this.list_type}`;
     }
 
     if (!this.isCreate) {
-      this.loadData();
+      await this.loadData();
     }
   },
   methods: {
