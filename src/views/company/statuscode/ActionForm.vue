@@ -334,6 +334,12 @@
               </b-col>
             </b-row>
           </div>
+
+          <div>
+            <a href="https://my24service.github.io/docs/#order-fields" target="_blank">
+              {{ $trans("documentation") }}
+            </a>
+          </div>
         </div>
 
         <b-modal
@@ -357,7 +363,8 @@ import { QuotationActionModel } from "../../../models/quotations/QuotationAction
 import {ActionService} from "../../../models/company/AbstractAction";
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
-  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
+  STATUSCODE_TYPE_QUOTATION,
+  STATUSCODE_TYPE_SICK_LEAVE
 } from "../../../models/company/AbstractStatuscode";
 import {LeaveActionModel} from "../../../models/company/LeaveAction";
 import {SickLeaveActionModel} from "../../../models/company/SickLeaveAction";
