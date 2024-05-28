@@ -566,7 +566,7 @@
             label-class="dimmed"
           >
             <label class="col-form-label order-assignee" v-for="(person, index) in order.assigned_user_info" :key="index">
-              <span v-if="index > 0">,</span>
+              <span v-if="index > 0"> - </span>
               {{ person.full_name }}
             </label>
           </b-form-group>

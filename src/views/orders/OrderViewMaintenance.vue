@@ -42,7 +42,7 @@
                 class="order-assignee"
                 :key="person.full_name"
               >
-                <span v-if="index > 0">,</span>
+                <span v-if="index > 0"> - </span>
                 {{ person.full_name }}
               </span>
             </dd>
