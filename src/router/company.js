@@ -669,7 +669,7 @@ export default [
     },
     {
       name: 'company-time-registration-detail',
-      path: '/company/time-registration/:user_id',
+      path: '/company/time-registration/detail/:user_id',
       components: {
         'app-content': TimeRegistration,
         'app-subnav': SubNavCompany
