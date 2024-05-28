@@ -47,6 +47,7 @@
         {{ $trans('Pictures') }}
       </b-nav-item>
       <b-nav-item
+        v-if="this.companyIsDemo"
         :active="isActive('statuscodes')"
         :to="{ name: 'company-statuscodes' }">
         {{ $trans('Statuscodes') }}

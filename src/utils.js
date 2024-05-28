@@ -178,6 +178,9 @@ let componentMixin = {
     hasBranches() {
       return this.$store.getters.getMemberHasBranches
     },
+    companyIsDemo() {
+      return this.$store.getters.getMemberCompanycode === 'demo'
+    }
   },
   methods: {
     translateHoursField(field) {
