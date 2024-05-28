@@ -57,9 +57,9 @@ import BranchView from "../views/company/BranchView";
 import BudgetList from "../views/company/BudgetList";
 import BudgetView from "../views/company/BudgetView";
 
-import QuotationStatuscodeList from "@/views/company/statuscode/QuotationStatuscodeList";
-import StatuscodeForm from "@/views/company/statuscode/StatuscodeForm";
-import ActionForm from "@/views/company/statuscode/ActionForm";
+import StatuscodeList from "../views/company/statuscode/StatuscodeList";
+import StatuscodeForm from "../views/company/statuscode/StatuscodeForm";
+import ActionForm from "../views/company/statuscode/ActionForm";
 
 import CustomerTemplateList from "@/views/company/template/CustomerTemplateList";
 import CustomerTemplateForm from "@/views/company/template/CustomerTemplateForm";
@@ -71,7 +71,77 @@ import LeaveTypes from "@/views/company/time-registration/LeaveTypes";
 import UnseenSickLeaveList from "@/views/company/time-registration/UnseenSickLeaveList";
 import SickLeaveList from "@/views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "@/views/company/time-registration/SickLeaveForm";
+import {
+  STATUSCODE_TYPE_LEAVE_HOURS,
+  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
+} from "../models/company/AbstractStatuscode";
 
+const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
+
+function createStatuscodeRoutes(type) {
+  return [
+    {
+      name: `company-statuscodes-${type}`,
+      path: `/company/statuscodes/${type}`,
+      components: {
+        'app-content': StatuscodeList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: `company-statuscodes-${type}-add`,
+      path: `/company/statuscodes/${type}/form`,
+      components: {
+        'app-content': StatuscodeForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: `company-statuscodes-${type}-edit`,
+      path: `/company/statuscodes/${type}/form/:pk`,
+      components: {
+        'app-content': StatuscodeForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: `company-statuscodes-action-${type}-add`,
+      path: `/company/statuscodes/action/${type}/form`,
+      components: {
+        'app-content': ActionForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: `company-statuscodes-action-${type}-edit`,
+      path: `/company/statuscodes/action/${type}/form/:pk`,
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': ActionForm,
+        'app-subnav': SubNavCompany
+      },
+    },
+  ]
+}
 
 export default [
 {
@@ -683,66 +753,23 @@ export default [
         'app-subnav': {}
       },
     },
+    // statuscodes
     {
-      name: 'company-statuscodes-quotation',
-      path: '/company/statuscodes/quotation',
+      name: 'company-statuscodes',
+      path: `/company/statuscodes`,
       components: {
-        'app-content': QuotationStatuscodeList,
+        'app-content': StatuscodeList,
         'app-subnav': SubNavCompany
       },
       props: {
-        'app-content': route => ({...route.params}),
+        'app-content': route => ({...route.params, list_type: DEFAULT_STATUSCODE_TYPE}),
         'app-subnav': true
       },
     },
-    {
-      name: 'company-statuscodes-quotation-add',
-      path: '/company/statuscodes/quotation/form',
-      components: {
-        'app-content': StatuscodeForm,
-        'app-subnav':  SubNavCompany
-      },
-      props: {
-        'app-content': route => ({...route.params, list_type: 'quotation'}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'company-statuscodes-quotation-edit',
-      path: '/company/statuscodes/quotation/form/:pk',
-      components: {
-        'app-content': StatuscodeForm,
-        'app-subnav':  SubNavCompany
-      },
-      props: {
-        'app-content': route => ({...route.params, list_type: 'quotation'}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'company-statuscodes-action-quotation-add',
-      path: '/company/statuscodes/action/quotation/form',
-      components: {
-        'app-content': ActionForm,
-        'app-subnav':  SubNavCompany
-      },
-      props: {
-        'app-content': route => ({...route.params, list_type: 'quotation'}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'company-statuscodes-action-quotation-edit',
-      path: '/company/statuscodes/action/quotation/form/:pk',
-      props: {
-        'app-content': route => ({...route.params, list_type: 'quotation'}),
-        'app-subnav': true
-      },
-      components: {
-        'app-content': ActionForm,
-        'app-subnav': SubNavCompany
-      },
-    },
+    ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),
+    ...createStatuscodeRoutes(STATUSCODE_TYPE_LEAVE_HOURS),
+    ...createStatuscodeRoutes(STATUSCODE_TYPE_SICK_LEAVE),
+    // templates
     {
       name: 'company-templates',
       path: '/company/templates',

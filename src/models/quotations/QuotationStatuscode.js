@@ -1,9 +1,9 @@
-import BaseModel from '@/models/base'
 import AbstractStatuscodeModel from '@/models/company/AbstractStatuscode.js'
+import {BaseStatuscodeService, STATUSCODE_TYPE_QUOTATION} from "../company/AbstractStatuscode";
 
 
 class QuotationStatuscodeModel extends AbstractStatuscodeModel {
-  code_type = "quotation"
+  code_type = STATUSCODE_TYPE_QUOTATION
   num_days
   num_days_operator
   num_days_model_field
@@ -19,13 +19,8 @@ class QuotationStatuscodeModel extends AbstractStatuscodeModel {
   }
 }
 
-class QuotationStatuscodeService extends BaseModel {
-  url = '/statuscode/statuscode/'
-
-  async list() {
-    this.setListArgs(['code_type=quotation'])
-    return await super.list()
-  }
+class QuotationStatuscodeService extends BaseStatuscodeService {
+  code_type = STATUSCODE_TYPE_QUOTATION
 }
 
 export { QuotationStatuscodeService, QuotationStatuscodeModel }

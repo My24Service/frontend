@@ -1,3 +1,5 @@
+import BaseModel from "../base";
+
 class AbstractActionModel {
   name
   address
@@ -14,4 +16,9 @@ class AbstractActionModel {
   override_status = false
 }
 
+class ActionService extends BaseModel {
+  url = '/statuscode/action/'
+}
+
 export default AbstractActionModel
+export { ActionService }

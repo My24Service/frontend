@@ -353,12 +353,14 @@
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 
-import actionOrderModel from "@/models/orders/Action.js";
-import partnerModel from "@/models/company/Partner.js";
+import { QuotationActionModel } from "../../../models/quotations/QuotationAction.js";
+import {ActionService} from "../../../models/company/AbstractAction";
 import {
-  QuotationActionService,
-  QuotationActionModel
-} from "@/models/quotations/QuotationAction.js";
+  STATUSCODE_TYPE_LEAVE_HOURS,
+  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
+} from "../../../models/company/AbstractStatuscode";
+import {LeaveActionModel} from "../../../models/company/LeaveAction";
+import {SickLeaveActionModel} from "../../../models/company/SickLeaveAction";
 
 export default {
   setup() {
@@ -389,8 +391,6 @@ export default {
   },
   data() {
     return {
-      actionModel: null,
-      actionService: null,
 
       isLoading: false,
       partners: [],
@@ -406,7 +406,8 @@ export default {
       ],
 
       submitClicked: false,
-      action: actionOrderModel.getFields(),
+      action: null,
+      actionService: new ActionService(),
       operators: ["=", "!=", "<", "<=", ">", ">=", "REGEXP", "NOTREGEXP", "CONTAINS"],
       querymodes: [
         { value: "and", text: this.$trans("must match all of the conditions") },
@@ -426,7 +427,17 @@ export default {
         {value: 'email', text: this.$trans('send email')},
         {value: 'send_sms', text: this.$trans('send sms')},
         {value: 'send_fcm', text: this.$trans('send FCM')},
-      ]
+      ],
+      actionTypesLeave: [
+        {value: 'email', text: this.$trans('send email')},
+        {value: 'send_sms', text: this.$trans('send sms')},
+        {value: 'send_fcm', text: this.$trans('send FCM')},
+      ],
+      actionTypesSickLeave: [
+        {value: 'email', text: this.$trans('send email')},
+        {value: 'send_sms', text: this.$trans('send sms')},
+        {value: 'send_fcm', text: this.$trans('send FCM')},
+      ],
     };
   },
   computed: {
@@ -439,17 +450,24 @@ export default {
   },
   async created() {
     switch (this.list_type) {
-      case "quotation":
+      case STATUSCODE_TYPE_QUOTATION:
         this.actionTypes = this.actionTypesQuotation;
-        this.actionService = new QuotationActionService();
         this.action = new QuotationActionModel({})
+        break;
+      case STATUSCODE_TYPE_LEAVE_HOURS:
+        this.actionTypes = this.actionTypesLeave;
+        this.action = new LeaveActionModel({})
+        break;
+      case STATUSCODE_TYPE_SICK_LEAVE:
+        this.actionTypes = this.actionTypesSickLeave;
+        this.action = new SickLeaveActionModel({})
         break;
       default:
         throw `unknown list_type: ${this.list_type}`;
     }
 
     if (!this.isCreate) {
-      this.loadData();
+      await this.loadData();
     }
   },
   methods: {

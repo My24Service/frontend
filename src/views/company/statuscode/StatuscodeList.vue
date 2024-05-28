@@ -23,12 +23,6 @@
         responsive="md"
         class="data-table"
       >
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner><br /><br />
-            <strong>{{ $trans("loading statuscodes...") }}</strong>
-          </div>
-        </template>
         <template #head(icons)="">
           <div class="float-right">
             <b-button-toolbar>
@@ -138,7 +132,7 @@
     </div>
     <Pagination
       v-if="!isLoading"
-      :model="this.statuscodeModel"
+      :model="this.statuscodeService"
       :model_name="$trans('Statuscode')"
     />
 
@@ -156,7 +150,7 @@
 </template>
 
 <script>
-import statuscodeOrderModel from "../../../models/orders/Statuscode.js";
+// import statuscodeOrderModel from "../../../models/orders/Statuscode.js";
 import IconLinkPlus from "../../../components/IconLinkPlus.vue";
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
@@ -166,13 +160,20 @@ import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import { PIXEL_URL } from "../../../constants";
 import PillsStatuscode from "./PillsStatuscode.vue";
-import { QuotationStatuscodeService } from "@/models/quotations/QuotationStatuscode.js";
+import { QuotationStatuscodeService } from "../../../models/quotations/QuotationStatuscode.js";
+import {
+  STATUSCODE_TYPE_LEAVE_HOURS,
+  STATUSCODE_TYPE_QUOTATION,
+  STATUSCODE_TYPE_SICK_LEAVE
+} from "../../../models/company/AbstractStatuscode";
+import {LeaveStatuscodeService} from "../../../models/company/LeaveStatuscode";
+import {SickLeaveStatuscodeService} from "../../../models/company/SickLeaveStatuscode";
 
 export default {
   props: {
     list_type: {
       type: [String],
-      default: "order"
+      default: STATUSCODE_TYPE_LEAVE_HOURS
     }
   },
   components: {
@@ -193,15 +194,14 @@ export default {
       linkEdit: null,
       linkAddAction: null,
       linkEditAction: null,
-      statuscodeModel: null,
+      statuscodeService: null,
 
       searchQuery: null,
       statuscodePk: null,
       isLoading: false,
       statuscodes: [],
       action_fields: [{ key: "id" }],
-      fields: [],
-      fieldsOrder: [
+      fields: [
         { key: "statuscode", label: this.$trans("Statuscode"), thAttr: { width: "15%" } },
         { key: "preview", label: this.$trans("Preview") },
         { key: "type", label: this.$trans("Type") },
@@ -219,27 +219,32 @@ export default {
     this.linkEditAction = `company-statuscodes-action-${this.list_type}-edit`
 
     switch (this.list_type) {
-      case "order":
-        (this.titleAdd = this.$trans("New statuscode")),
-          (this.statuscodeModel = statuscodeOrderModel);
-        this.fields = this.fieldsOrder;
+      // case "order":
+      //   (this.titleAdd = this.$trans("New statuscode")),
+      //     (this.statuscodeService = statuscodeOrderModel);
+      //   this.fields = this.fieldsOrder;
+      //   break;
+      case STATUSCODE_TYPE_QUOTATION:
+        this.statuscodeService = new QuotationStatuscodeService();
         break;
-      case "quotation":
-        this.statuscodeModel = new QuotationStatuscodeService();
-        this.fields = this.fieldsOrder;
+      case STATUSCODE_TYPE_LEAVE_HOURS:
+        this.statuscodeService = new LeaveStatuscodeService();
+        break;
+      case STATUSCODE_TYPE_SICK_LEAVE:
+        this.statuscodeService = new SickLeaveStatuscodeService();
         break;
       default:
         throw `unknown list_type: ${this.list_type}`;
     }
 
-    this.statuscodeModel.currentPage = this.$route.query.page || 1;
+    this.statuscodeService.currentPage = this.$route.query.page || 1;
     this.loadData();
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs["search-modal"].hide();
-      this.statuscodeModel.setSearchQuery(val);
+      this.statuscodeService.setSearchQuery(val);
       this.loadData();
     },
     showSearchModal() {
@@ -252,9 +257,9 @@ export default {
     },
     async doDelete() {
       try {
-        await this.statuscodeModel.delete(this.statuscodePk);
+        await this.statuscodeService.delete(this.statuscodePk);
         this.infoToast(this.$trans("Deleted"), this.$trans("Statuscode has been deleted"));
-        this.loadData();
+        await this.loadData();
       } catch (error) {
         console.log("error deleting statuscodes", error);
         this.errorToast(this.$trans("Error deleting statuscode"));
@@ -265,7 +270,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.statuscodeModel.list();
+        const data = await this.statuscodeService.list();
         this.statuscodes = data.results;
         this.isLoading = false;
       } catch (error) {

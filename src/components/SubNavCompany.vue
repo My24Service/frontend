@@ -2,6 +2,11 @@
   <div v-if="isLoaded">
     <b-nav>
       <b-nav-item
+        :active="isActive('time-registration')"
+        :to="{ name: 'company-time-registration' }">
+        {{ $trans('Time registration') }}
+      </b-nav-item>
+      <b-nav-item
         v-if="memberType === 'maintenance'"
         :active="isActive('users')"
         :to="getToRouteMaintenanceUsers">
@@ -12,11 +17,6 @@
         :active="isActive('users')"
         :to="getToRouteTempsUsers">
         {{ $trans('People') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('time-registration')"
-        :to="{ name: 'company-time-registration' }">
-        {{ $trans('Time registration') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('partners')"
@@ -48,7 +48,7 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('statuscodes')"
-        :to="{ name: 'company-statuscodes-quotation' }">
+        :to="{ name: 'company-statuscodes' }">
         {{ $trans('Statuscodes') }}
       </b-nav-item>
       <b-nav-item
