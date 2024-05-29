@@ -1,5 +1,5 @@
 <template>
-  <div class="space">
+  <div class="space" v-if="companyIsDemo">
     <b-nav tabs>
       <b-nav-item
         :active="$route.name === 'company-time-registration'"
