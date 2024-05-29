@@ -2,6 +2,7 @@
   <div v-if="isLoaded">
     <b-nav>
       <b-nav-item
+        v-if="!hasBranches"
         :active="isActive('time-registration')"
         :to="{ name: 'company-time-registration' }">
         {{ $trans('Time registration') }}
