@@ -32,8 +32,8 @@ class SickLeavesService extends BaseModel {
     return obj
   }
 
-  async getUnseenSickLeaves() {
-    this.url = `${this.url}all_unseen/`
+  async getUnconfirmedSickLeaves() {
+    this.url = `${this.url}all_unconfirmed/`
     const result = await this.list()
     this.url = '/company/user-sick-leave/admin/'
     return result
@@ -46,8 +46,8 @@ class SickLeavesService extends BaseModel {
     return this.axios.post(url, this.preInsert(data), headers).then(response => response.data)
   }
 
-  async setAsSeen(pk) {
-    const url = `${this.url}${pk}/set_seen/`
+  async setAsConfirmed(pk) {
+    const url = `${this.url}${pk}/set_confirmed/`
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 

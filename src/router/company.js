@@ -68,7 +68,7 @@ import LeaveRequestsList from "@/views/company/time-registration/LeaveRequestsLi
 import LeaveList from "@/views/company/time-registration/LeaveList";
 import LeaveForm from "@/views/company/time-registration/LeaveForm";
 import LeaveTypes from "@/views/company/time-registration/LeaveTypes";
-import UnseenSickLeaveList from "@/views/company/time-registration/UnseenSickLeaveList";
+import UnconfirmedSickLeaveList from "@/views/company/time-registration/UnconfirmedSickLeaveList";
 import SickLeaveList from "@/views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "@/views/company/time-registration/SickLeaveForm";
 import {
@@ -867,10 +867,10 @@ export default [
       },
     },
     {
-      name: 'unseen-sick-leave',
-      path: '/company/time-registration/sick-leave/unseen',
+      name: 'unconfirmed-sick-leave',
+      path: '/company/time-registration/sick-leave/unconfirmed',
       components: {
-        'app-content': UnseenSickLeaveList,
+        'app-content': UnconfirmedSickLeaveList,
         'app-subnav': SubNavCompany
       },
       props: {

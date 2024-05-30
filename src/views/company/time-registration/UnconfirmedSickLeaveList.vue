@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Unseen sick leave") }}</h3>
+        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Unconfirmed sick leave") }}</h3>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -57,8 +57,8 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <b-link
-              :title="$trans('Seen')"
-              @click="() => showSeenModal(data.item.id)"
+              :title="$trans('Confirm')"
+              @click="() => showConfirmModal(data.item.id)"
             >
               <b-icon-check-lg class="edit-icon"></b-icon-check-lg>
             </b-link>
@@ -66,15 +66,15 @@
         </template>
       </b-table>
     </div>
-    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Unseen sick leave')" />
+    <Pagination v-if="!isLoading" :model="this.sickLeavesService" :model_name="$trans('Unconfirmed sick leave')" />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
     <b-modal
-      id="seen-leave-modal"
-      ref="seen-leave-modal"
-      v-bind:title="$trans('Mark leave as seen')"
-      @ok="doSeen"
+      id="confirm-leave-modal"
+      ref="confirm-leave-modal"
+      v-bind:title="$trans('Mark leave as confirmed')"
+      @ok="doConfirm"
     >
-      <p class="my-4">{{ $trans("Are you sure you want to mark this sick leave as seen") }}</p>
+      <p class="my-4">{{ $trans("Are you sure you want to mark this sick leave as confirmed?") }}</p>
     </b-modal>
   </div>
 </template>
@@ -86,7 +86,7 @@ import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import SubNav from "./SubNav.vue";
-import { SickLeavesService } from "@/models/company/SickLeaves.js";
+import { SickLeavesService } from "@/models/company/SickLeave.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 
 export default {
@@ -129,32 +129,32 @@ export default {
     showSearchModal() {
       this.$refs["search-modal"].show();
     },
-    showSeenModal(id) {
+    showConfirmModal(id) {
       this.leavePk = id;
-      this.$refs["seen-leave-modal"].show();
+      this.$refs["confirm-leave-modal"].show();
     },
-    async doSeen() {
+    async doConfirm() {
        this.isLoading = true;
       try {
-        await this.sickLeavesService.setAsSeen(this.leavePk);
-        this.infoToast(this.$trans("Accepted"), this.$trans("Leave as been marked as seen"));
-        this.loadData();
+        await this.sickLeavesService.setAsConfirmed(this.leavePk);
+        this.infoToast(this.$trans("Accepted"), this.$trans("Leave as been marked as confirmed"));
+        await this.loadData();
       } catch (error) {
         this.isLoading = false;
-        console.log("error accepting leave", error);
-        this.errorToast(this.$trans("Error accepting leave"));
+        console.log("error confirming leave", error);
+        this.errorToast(this.$trans("Error confirming sick leave"));
       }
     },
     async loadData() {
       this.isLoading = true;
 
       try {
-        const data = await this.sickLeavesService.getUnseenSickLeaves();
+        const data = await this.sickLeavesService.getUnconfirmedSickLeaves();
         this.leaves = data.results;
         this.isLoading = false;
       } catch (error) {
-        console.log("error fetching unseen sick leave request", error);
-        this.errorToast(this.$trans("Error loading unseen sick leave request"));
+        console.log("error fetching unconfirmed sick leave request", error);
+        this.errorToast(this.$trans("Error loading unconfirmed sick leave request"));
         this.isLoading = false;
       }
     }
@@ -162,11 +162,4 @@ export default {
 };
 </script>
 <style scoped>
-.color_text {
-  font-weight: bold;
-  font-style: italic;
-}
-.subnav-pills {
-  margin-bottom: 20px;
-}
 </style>
