@@ -40,17 +40,17 @@ export default {
   },
   methods: {
     async checkVersion() {
+      // TODO implement this
       // https://api.github.com/My24Service/frontend/releases
       // const data = await axios.get('https://api.github.com/repos/OWNER/REPO/tags').then((response) => response.data)
-      const data = await axios.get('/frontend-version/').then((response) => response.data)
 
-      if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
-        this.newVersionAvailable = true
-        this.newVersion = data.version
-        this.message = `A new version is available`
-      } else {
+      // if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
+      //   this.newVersionAvailable = true
+      //   this.newVersion = data.version
+      //   this.message = `A new version is available`
+      // } else {
         this.newVersionAvailable = false
-      }
+      // }
     },
     versionToInt(version) {
       return parseInt(version.slice(1).replaceAll('.', ''))
