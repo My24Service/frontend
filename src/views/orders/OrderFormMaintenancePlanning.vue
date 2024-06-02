@@ -1560,8 +1560,8 @@ export default {
 
       // TODO why is this if here? shouldn't be needed
       // if (this.order.id) {
-        const assignErrors = await this.assignEngineers(this.order.id)
-        errors = [...errors, ...assignErrors]
+      const assignErrors = await this.assignEngineers(this.order.order_id)
+      errors = [...errors, ...assignErrors]
       // }
 
       if (!this.isCreate && this.acceptOrder) {
@@ -1711,16 +1711,16 @@ export default {
       let errors = []
       let newSelectedEngineers = []
 
-      for (const engineer of this.selectedEngineers) {
+      for (const user of this.selectedEngineers) {
         try {
-          await this.assignService.assignToUser(engineer.id, [order_id], true)
+          await this.assignService.assignToUser(user.id, [order_id], true)
           newSelectedEngineers.push({
-            ...engineer,
+            ...user,
             apiOk: true
           })
         } catch (error) {
           newSelectedEngineers.push({
-            ...engineer,
+            ...user,
             apiOk: false,
             error
           })
