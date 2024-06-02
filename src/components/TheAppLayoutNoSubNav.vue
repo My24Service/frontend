@@ -1,7 +1,8 @@
 <template>
   <div ref="app-layout">
-    <TheNav />
-    <router-view/>
+    <TheNavLoggedIn v-if="isLoggedIn" />
+    <TheNavLoggedOut v-if="!isLoggedIn" />
+    
     <div class="container main-app-container">
       <router-view :key="$route.fullPath" name="app-content"></router-view>
     </div>
@@ -9,15 +10,15 @@
 </template>
 
 <script>
-import TheNav from './TheNav.vue'
+
+import TheNavLoggedIn from './TheNavLoggedIn.vue'
+import TheNavLoggedOut from './TheNavLoggedOut.vue'
 
 export default {
   components: {
-    TheNav,
-    SubNav
+    TheNavLoggedIn,
+    TheNavLoggedOut,
   },
 }
 </script>
 
-<style scoped>
-</style>

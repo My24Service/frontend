@@ -1,8 +1,10 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <Collapse
-      :title="$trans('Distance')"
-    >
+  <details>
+    <summary class='flex-columns space-between'>
+      <h6>{{$trans('Distance')}}</h6>
+      <b-icon-chevron-down></b-icon-chevron-down>
+    </summary>
+    <b-overlay :show="isLoading" rounded="sm">
       <div
         class="costs-table"
         v-if="!isLoading && hasStoredData"
@@ -122,8 +124,8 @@
         />
 
       </b-container>
-    </Collapse>
-  </b-overlay>
+    </b-overlay>
+  </details>
 </template>
 
 <script>

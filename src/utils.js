@@ -178,6 +178,9 @@ let componentMixin = {
     hasBranches() {
       return this.$store.getters.getMemberHasBranches
     },
+    companyIsDemo() {
+      return this.$store.getters.getMemberCompanycode === 'demo'
+    }
   },
   methods: {
     translateHoursField(field) {
@@ -233,6 +236,12 @@ function toDinero(priceDecimal, currency) {
   }
 }
 
+function uuidv4() {
+  return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
+
 export {
   isEmpty,
   getIsStaff,
@@ -246,5 +255,6 @@ export {
   hasAccessRouteAuthLevel,
   getUserAuthLevel,
   componentMixin,
-  toDinero
+  toDinero,
+  uuidv4
 }

@@ -87,6 +87,7 @@ class EngineerModel {
   preferred_location
   hourly_rate
   hourly_rate_currency
+  hide_from_dispatch
 
   priceFields = ['hourly_rate']
 

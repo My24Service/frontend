@@ -1,29 +1,23 @@
 <template>
   <div v-if="isLoaded">
-    <b-nav tabs>
+    <b-nav>
       <b-nav-item
-        :active="isActive('dashboard')"
-        v-if="hasDashBoard"
-        :to="{ name: 'company-dashboard' }">
-        {{ $trans('Dashboard') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('company')"
-        v-if="hasCompany"
-        :to="{ name: 'company-info' }">
-        {{ $trans('Company') }}
+        v-if="!hasBranches"
+        :active="isActive('time-registration')"
+        :to="{ name: 'company-time-registration' }">
+        {{ $trans('Time registration') }}
       </b-nav-item>
       <b-nav-item
         v-if="memberType === 'maintenance'"
         :active="isActive('users')"
         :to="getToRouteMaintenanceUsers">
-        {{ $trans('Users') }}
+        {{ $trans('People') }}
       </b-nav-item>
       <b-nav-item
         v-if="memberType === 'temps'"
         :active="isActive('users')"
         :to="getToRouteTempsUsers">
-        {{ $trans('Users') }}
+        {{ $trans('People') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('partners')"
@@ -32,40 +26,48 @@
         {{ $trans('Partners') }}
       </b-nav-item>
       <b-nav-item
-        :active="isActive('activity')"
-        v-if="hasActivity"
-        :to="{ name: 'company-activity' }">
-        {{ $trans('Activity') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('pictures')"
-        v-if="hasPictures"
-        :to="{ name: 'company-pictures' }">
-        {{ $trans('Pictures') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('workhours')"
-        v-if="hasWorkhours"
-        :to="{ name: 'company-workhours' }">
-        {{ $trans('Work hours') }}
-      </b-nav-item>
-      <b-nav-item
-        :active="isActive('time-registration')"
-        v-if="hasTimeRegistration"
-        :to="{ name: 'company-time-registration' }">
-        {{ $trans('Time registration') }}
-      </b-nav-item>
-      <b-nav-item
         :active="isActive('branches')"
         v-if="hasBranches"
         :to="{ name: 'company-branches' }">
         {{ $trans('Branches') }}
       </b-nav-item>
       <b-nav-item
+        v-if="memberType === 'maintenance'"
+        :active="isActive('settings')"
+        :to="{ name: 'company-settings' }">
+        {{ $trans('Settings') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('company')"
+        :to="{ name: 'company-info' }">
+        {{ $trans('Info') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('pictures')"
+        :to="{ name: 'company-pictures' }">
+        {{ $trans('Pictures') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="this.companyIsDemo"
+        :active="isActive('statuscodes')"
+        :to="{ name: 'company-statuscodes' }">
+        {{ $trans('Statuscodes') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('templates')"
+        :to="{ name: 'company-templates' }">
+        {{ $trans('Templates') }}
+      </b-nav-item>
+      <b-nav-item
         :active="isActive('budgets')"
         v-if="hasBranches"
         :to="{ name: 'company-budgets' }">
         {{ $trans('Budgets') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="isActive('activity')"
+        :to="{ name: 'company-activity' }">
+        {{ $trans('Activity') }}
       </b-nav-item>
     </b-nav>
   </div>
@@ -121,30 +123,9 @@ export default {
     hasBranches() {
       return this.$store.getters.getMemberHasBranches
     },
-    hasDashBoard() {
-      return this.hasAccessToModule('company', 'dashboard')
-    },
-    hasTimeRegistration() {
-      return this.hasAccessToModule('company', 'time-registration')
-    },
-    hasCompany() {
-      return true
-    },
-    hasUsers() {
-      return true
-    },
     hasPartners() {
       return this.hasAccessToModule('company', 'partners')
     },
-    hasActivity() {
-      return true
-    },
-    hasPictures() {
-      return true
-    },
-    hasWorkhours() {
-      return this.hasAccessToModule('company', 'workhours')
-    }
   },
 }
 </script>

@@ -2,8 +2,6 @@
   <b-overlay :show="isLoading" rounded="sm">
     <div class="container app-form">
       <b-form>
-        <h2 v-if="isCreate">{{ $trans('New order') }}</h2>
-        <h2 v-if="!isCreate">{{ $trans('Edit order') }}</h2>
         <b-row>
           <b-col cols="4" role="group">
             <b-form-group

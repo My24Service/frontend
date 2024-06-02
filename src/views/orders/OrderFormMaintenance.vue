@@ -23,7 +23,7 @@
 import OrderFormMaintenancePlanning from "./OrderFormMaintenancePlanning.vue"
 import OrderFormMaintenanceCustomer from "./OrderFormMaintenanceCustomer.vue"
 import OrderFormMaintenanceEmployee from "./OrderFormMaintenanceEmployee.vue"
-import { componentMixin } from '@/utils'
+import { componentMixin } from '../../utils.js'
 
 export default {
   name: "OrderFormMaintenance",

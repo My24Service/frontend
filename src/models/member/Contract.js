@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class Contract extends BaseModel {
+class ContractService extends BaseModel {
   fields = {
     'name': '',
     'modules_text': '',
@@ -19,6 +19,7 @@ class Contract extends BaseModel {
 
 }
 
-let contractModel = new Contract()
+let contractModel = new ContractService()
 
 export default contractModel
+export { ContractService }

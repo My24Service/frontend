@@ -1,46 +1,50 @@
 <template>
-  <b-row align-h="center">
-    <LoginModal ref="login-modal-component" />
-    <b-col cols="4">
-      <div class="no-access">
-        <h3>{{ $trans('You are not allowed to see this') }}</h3>
-        <p v-if="!isLoggedIn" align="center">
-          {{ $trans('Please login') }}
-        </p>
-        <p>
-          <b-button @click="showLogin" type="button" variant="secondary">
-            {{ $trans('Log in') }}</b-button>
-        </p>
-        <p v-if="isLoggedIn" align="center">{{ $trans('You might not have enough rights') }}</p>
+  <div class='app-page'>
+    <h1><b-icon-lock></b-icon-lock></h1>
+    
+      <div class="panel no-access">
+        <div class="text-center" v-if="isLoggedIn">
+          <h3>{{ $trans('No access') }}</h3>
+          <p>{{ $trans('Your account level may not have permission to access this page.')}}</p>
+          <p>{{ $trans('Please contact the administrator.')}}</p>
+        </div>
+        <div v-else>
+          <h3 class="text-center">{{ $trans('Log in') }}</h3>
+          <div class="text-left">
+            <LoginForm />
+          </div>
+        </div>
       </div>
-    </b-col>
-  </b-row>
+</div>
 </template>
 
 <script>
-import LoginModal from "../../components/LoginModal";
+import LoginForm from "@/components/LoginForm";
 
 export default {
   name: 'NoAccess',
   components: {
-    LoginModal,
+    LoginForm
   },
   computed: {
     isLoggedIn() {
       return this.$store.getters.isLoggedIn
     },
   },
-  methods: {
-    showLogin() {
-      this.$refs['login-modal-component'].show()
-    }
-  }
 }
 </script>
 
 <style scoped>
-  .no-access {
-    padding-top: 120px;
+h1 {
+  color: #fffc;
+  text-align: center;
+  padding-block: 3rem 1rem;
+  font-size: 4rem;
+}
+.no-access {
+    padding: 3rem!important;
     text-align: center;
+    margin: -1rem auto 3rem!important;
+    inline-size: max-content;
   }
 </style>

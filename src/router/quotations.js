@@ -3,12 +3,30 @@ import SubNavQuotations from '../components/SubNavQuotations.vue'
 
 import QuotationList from '../views/quotations/QuotationList.vue'
 import QuotationForm from '../views/quotations/QuotationForm.vue'
-import DocumentList from '../views/quotations/DocumentList.vue'
-import DocumentForm from '../views/quotations/DocumentForm.vue'
-import {AUTH_LEVELS} from "../constants";
+import {AUTH_LEVELS} from "@/constants";
+import TheAppLayoutEmpty from "@/components/TheAppLayoutEmpty.vue";
+import QuotationView from "@/views/quotations/QuotationView.vue";
+import QuotationDetail from "@/views/quotations/QuotationDetail.vue";
 
 
 export default [
+// orders
+{
+  component: TheAppLayoutEmpty,
+  path: '/quotations',
+  children: [
+    {
+      name: 'quotation-view',
+      path: '/quotations/quotations/view/:pk',
+      components: {
+        'app-content': QuotationView,
+      },
+      props: {
+        'app-content': route => ({...route.params})
+      },
+    },
+  ]
+},
 {
   path: '/quotations',
   component: TheAppLayout,
@@ -29,7 +47,7 @@ export default [
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'preliminary-quotations',
-      path: '/quotations/quotations/preliminary-quotations',
+      path: '/quotations/preliminary',
       components: {
         'app-content': QuotationList,
         'app-subnav': SubNavQuotations
@@ -55,7 +73,7 @@ export default [
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-edit',
-      path: '/quotations/quotations/form/:pk(\\d+)',
+      path: '/quotations/preliminary/form/:pk(\\d+)',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': true
@@ -66,43 +84,17 @@ export default [
       },
     },
     {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE, AUTH_LEVELS.PLANNING] },
-      name: 'quotation-documents',
-      path: '/quotations/quotations/documents/:quotationPk',
-      components: {
-        'app-content': DocumentList,
-        'app-subnav': SubNavQuotations
-      },
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+      name: 'quotation-detail',
+      path: '/quotations/quotations/detail/:pk',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': true
       },
-    },
-    {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE, AUTH_LEVELS.PLANNING] },
-      name: 'quotation-document-add',
-      path: '/quotations/quotations/documents/form/:quotationPk',
       components: {
-        'app-content': DocumentForm,
+        'app-content': QuotationDetail,
         'app-subnav': SubNavQuotations
       },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
     },
-    {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE, AUTH_LEVELS.PLANNING] },
-      name: 'quotation-document-edit',
-      path: '/quotations/quotations/documents/edit/:pk',
-      components: {
-        'app-content': DocumentForm,
-        'app-subnav': SubNavQuotations
-      },
-      props: {
-        'app-content': route => ({...route.params, edit: true}),
-        'app-subnav': true
-      },
-    }
   ]
 }]

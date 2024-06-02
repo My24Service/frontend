@@ -1,5 +1,5 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
 
     <SearchModal
       id="search-modal"
@@ -16,13 +16,31 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this import?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.service"
-        :model_name="$trans('Import')"
-      />
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-arrow-down"></b-icon> {{ $trans("Imports") }}
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
 
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'customer-import-add'}" class="btn">
+            <b-icon icon="file-arrow-down"></b-icon>
+            {{$trans('Add import')}}
+          </router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
+
+    <div class="app-detail panel overflow-auto">
       <b-table
         small
         :busy='isLoading'
@@ -36,25 +54,6 @@
           <div class="text-center text-danger my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #head(icons)="data">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="customer-import-add"
-                  v-bind:title="$trans('New import')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
           </div>
         </template>
         <template #cell(icons)="data">
@@ -72,6 +71,13 @@
         </template>
       </b-table>
     </div>
+
+    <Pagination
+      v-if="!isLoading"
+      :model="this.service"
+      :model_name="$trans('Import')"
+    />
+
   </div>
 </template>
 

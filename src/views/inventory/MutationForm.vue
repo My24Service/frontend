@@ -1,19 +1,33 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="container app-form">
-      <b-form>
-        <h2>{{ $trans('Add mutation') }}</h2>
-        <b-row>
-          <b-col cols="6" role="group">
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3><b-icon icon="arrow-left-right"></b-icon>{{ $trans("Mutations") }}</h3>
+        <b-button-toolbar>
+          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            {{ $trans('Cancel') }}
+          </b-button>
+          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            {{ $trans('Submit') }}
+          </b-button>
+        </b-button-toolbar>
+      </div>
+    </header>
+    <div class="page-detail">
+      <b-overlay :show="isLoading" rounded="sm">
+        <b-form class="flex-columns">
+          <div class="panel col-1-3">
+            <h6>{{ $trans('Add mutation') }}</h6>
+
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Search product')"
+              label-cols="12"
               label-for="add-mutation-material-search"
             >
               <multiselect
                 id="add-mutation-material-search"
                 track-by="id"
-                :placeholder="$trans('Type to search')"
+                :placeholder="`${$trans('Select product')} ${$trans('(type to search)')}`"
                 open-direction="bottom"
                 :options="materials"
                 :multiple="false"
@@ -32,58 +46,53 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
             </b-form-group>
-          </b-col>
-          <b-col cols="6" role="group">
+
+
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Product')"
+              label-cols="12"
               label-for="add-mutation-material-name"
             >
-              <b-form-input
-                v-model="mutation.material_name"
-                id="add-mutation-material-name"
-                size="sm"
-                readonly
-              ></b-form-input>
+              <h3>{{ mutation.material_name || '&nbsp;' }}</h3>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.mutation.material.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="2" role="group">
+
+            <div class="flex-columns">
+              <b-form-group
+                label-cols="3"
+                v-bind:label="$trans('Amount')"
+                label-for="add-mutation-amount"
+              >
+                <b-form-input
+                  v-model="mutation.amount"
+                  id="add-mutation-amount"
+                  type="number"
+                  ref="amount"
+                  style="width: 6rem"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.mutation.amount.$error : null">
+                  {{ $trans('Please enter an amount') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+
+              <b-form-group
+                label-cols="3"
+                label-align="right"
+                v-bind:label="$trans('Type')"
+                label-for="add-mutation-mutation_type"
+              >
+                <b-form-select v-model="mutation.mutation_type" :options="mutationTypes"></b-form-select>
+              </b-form-group>
+            </div>
+
+            <h6>{{ $trans(locationText)}}</h6>
             <b-form-group
               label-size="sm"
-              v-bind:label="$trans('Amount')"
-              label-for="add-mutation-amount"
-            >
-              <b-form-input
-                v-model="mutation.amount"
-                id="add-mutation-amount"
-                size="sm"
-                ref="amount"
-              ></b-form-input>
-              <b-form-invalid-feedback
-                :state="isSubmitClicked ? !v$.mutation.amount.$error : null">
-                {{ $trans('Please enter an amount') }}
-              </b-form-invalid-feedback>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Type')"
-              label-for="add-mutation-mutation_type"
-            >
-              <b-form-select v-model="mutation.mutation_type" :options="mutationTypes" size="sm"></b-form-select>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              v-bind:label="$trans('Search location')"
+              label-cols="12"
               label-for="add-mutation-location-search"
             >
               <multiselect
@@ -104,17 +113,13 @@
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
             </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
+
             <b-form-group
-              label-size="sm"
-              v-bind:label="locationText"
               label-for="add-mutation-location-name"
             >
               <b-form-input
                 v-model="mutation.location_name"
                 id="add-mutation-location-name"
-                size="sm"
                 readonly
               ></b-form-input>
               <b-form-invalid-feedback
@@ -122,22 +127,11 @@
                 {{ $trans('Please select a location') }}
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-col>
-        </b-row>
-
-        <div class="mx-auto">
-          <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
-              {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Submit') }}
-            </b-button>
-          </footer>
-        </div>
-      </b-form>
+          </div>
+        </b-form>
+      </b-overlay>
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>

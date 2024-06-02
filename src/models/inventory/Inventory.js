@@ -1,7 +1,7 @@
 import BaseModel from '@/models/base'
 
 
-class Inventory extends BaseModel {
+class InventoryService extends BaseModel {
   fields = {
     'location': null,
     'material': null,
@@ -51,6 +51,7 @@ class Inventory extends BaseModel {
   }
 }
 
-let inventoryModel = new Inventory()
+let inventoryModel = new InventoryService()
 
 export default inventoryModel
+export { InventoryService }

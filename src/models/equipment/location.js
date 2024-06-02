@@ -1,5 +1,14 @@
 import BaseModel from '../base'
 
+class LocationModel {
+  customer
+  branch
+  name
+  building
+  created
+  modified
+}
+
 class LocationService extends BaseModel {
   fields = {
     'customer': null,
@@ -74,7 +83,7 @@ class LocationService extends BaseModel {
   }
 }
 
-const locationModel = new LocationService()
+const locationService = new LocationService()
 
-export default locationModel
-export { LocationService }
+export default locationService
+export { LocationService, LocationModel }

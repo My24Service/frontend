@@ -7,7 +7,6 @@ import Settings from '../views/company/Settings.vue'
 
 import UserEngineerList from '../views/company/UserEngineerList.vue'
 import UserEngineerForm from '../views/company/UserEngineerForm.vue'
-import UserEngineerDetail from '../views/company/UserEngineerDetail.vue'
 
 import UserSalesList from '../views/company/UserSalesList.vue'
 import UserSalesForm from '../views/company/UserSalesForm.vue'
@@ -44,7 +43,7 @@ import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
 import EngineerEventList from "../views/company/EngineerEventList";
 
-import {AUTH_LEVELS} from "../constants";
+import {AUTH_LEVELS} from "@/constants";
 
 import UserEmployeeList from "../views/company/UserEmployeeList";
 import UserEmployeeForm from "../views/company/UserEmployeeForm";
@@ -52,12 +51,97 @@ import UserEmployeeForm from "../views/company/UserEmployeeForm";
 import BranchList from "../views/company/BranchList";
 import BranchForm from "../views/company/BranchForm";
 
-import TimeRegistration from '../views/company/TimeRegistration.vue'
-import SubNavCustomers from "../components/SubNavCustomers";
+import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
 import BranchView from "../views/company/BranchView";
 
 import BudgetList from "../views/company/BudgetList";
 import BudgetView from "../views/company/BudgetView";
+
+import StatuscodeList from "../views/company/statuscode/StatuscodeList";
+import StatuscodeForm from "../views/company/statuscode/StatuscodeForm";
+import ActionForm from "../views/company/statuscode/ActionForm";
+
+import CustomerTemplateList from "@/views/company/template/CustomerTemplateList";
+import CustomerTemplateForm from "@/views/company/template/CustomerTemplateForm";
+
+import LeaveRequestsList from "@/views/company/time-registration/LeaveRequestsList";
+import LeaveList from "@/views/company/time-registration/LeaveList";
+import LeaveForm from "@/views/company/time-registration/LeaveForm";
+import LeaveTypes from "@/views/company/time-registration/LeaveTypes";
+import UnseenSickLeaveList from "@/views/company/time-registration/UnseenSickLeaveList";
+import SickLeaveList from "@/views/company/time-registration/SickLeaveList";
+import SickLeaveForm from "@/views/company/time-registration/SickLeaveForm";
+import {
+  STATUSCODE_TYPE_LEAVE_HOURS,
+  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
+} from "../models/company/AbstractStatuscode";
+
+const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
+
+function createStatuscodeRoutes(type) {
+  return [
+    {
+      name: `company-statuscodes-${type}`,
+      path: `/company/statuscodes/${type}`,
+      components: {
+        'app-content': StatuscodeList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: `company-statuscodes-${type}-add`,
+      path: `/company/statuscodes/${type}/form`,
+      components: {
+        'app-content': StatuscodeForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: `company-statuscodes-${type}-edit`,
+      path: `/company/statuscodes/${type}/form/:pk`,
+      components: {
+        'app-content': StatuscodeForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: `company-statuscodes-action-${type}-add`,
+      path: `/company/statuscodes/action/${type}/form`,
+      components: {
+        'app-content': ActionForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: `company-statuscodes-action-${type}-edit`,
+      path: `/company/statuscodes/action/${type}/form/:pk`,
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': ActionForm,
+        'app-subnav': SubNavCompany
+      },
+    },
+  ]
+}
 
 export default [
 {
@@ -124,18 +208,6 @@ export default [
       props: {
         'app-content': {},
         'app-subnav': {}
-      },
-    },
-    {
-      name: 'engineer-detail',
-      path: '/company/engineer-users/detail/:pk',
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': {}
-      },
-      components: {
-        'app-content': UserEngineerDetail,
-        'app-subnav': SubNavCompany
       },
     },
     {
@@ -597,7 +669,7 @@ export default [
     },
     {
       name: 'company-time-registration-detail',
-      path: '/company/time-registration/:user_id',
+      path: '/company/time-registration/detail/:user_id',
       components: {
         'app-content': TimeRegistration,
         'app-subnav': SubNavCompany
@@ -649,7 +721,7 @@ export default [
       path: '/company/branches/:pk',
       components: {
         'app-content': BranchView,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': route => ({...route.params}),
@@ -674,13 +746,173 @@ export default [
       path: '/company/budgets/:pk',
       components: {
         'app-content': BudgetView,
-        'app-subnav': SubNavCustomers
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
       },
     },
-
+    // statuscodes
+    {
+      name: 'company-statuscodes',
+      path: `/company/statuscodes`,
+      components: {
+        'app-content': StatuscodeList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params, list_type: DEFAULT_STATUSCODE_TYPE}),
+        'app-subnav': true
+      },
+    },
+    ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),
+    ...createStatuscodeRoutes(STATUSCODE_TYPE_LEAVE_HOURS),
+    ...createStatuscodeRoutes(STATUSCODE_TYPE_SICK_LEAVE),
+    // templates
+    {
+      name: 'company-templates',
+      path: '/company/templates',
+      components: {
+        'app-content': CustomerTemplateList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-template-add',
+      path: '/company/templates/form',
+      components: {
+        'app-content': CustomerTemplateForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'customer-template-edit',
+      path: '/company/templates/form/:pk',
+      components: {
+        'app-content': CustomerTemplateForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'leave-requests',
+      path: '/company/time-registration/leave/requests',
+      components: {
+        'app-content': LeaveRequestsList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'leave-list',
+      path: '/company/time-registration/leave',
+      components: {
+        'app-content': LeaveList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'leave-list-add',
+      path: '/company/time-registration/leave/form',
+      components: {
+        'app-content': LeaveForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'leave-edit',
+      path: '/company/time-registration/leave/form/:pk',
+      components: {
+        'app-content': LeaveForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'leave-types',
+      path: '/company/time-registration/leave/types',
+      components: {
+        'app-content': LeaveTypes,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'unseen-sick-leave',
+      path: '/company/time-registration/sick-leave/unseen',
+      components: {
+        'app-content': UnseenSickLeaveList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'sick-leave-list',
+      path: '/company/time-registration/sick-leave',
+      components: {
+        'app-content': SickLeaveList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': {}
+      },
+    },
+    {
+      name: 'sick-leave-list-add',
+      path: '/company/time-registration/sick-leave/form',
+      components: {
+        'app-content': SickLeaveForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'sick-leave-list-edit',
+      path: '/company/time-registration/sick-leave/form/:pk',
+      components: {
+        'app-content': SickLeaveForm,
+        'app-subnav':  SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params }),
+        'app-subnav': true
+      },
+    }
   ]
 }]

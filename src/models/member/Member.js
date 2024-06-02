@@ -1,7 +1,59 @@
 import BaseModel from '@/models/base'
 
+// EQUIPMENT_QR_TYPES = (
+//   ('none', 'none'),
+//     ('my24service', 'my24service'),
+//     ('shltr', 'shltr'),
+// )
 
-class Member extends BaseModel {
+export const EQUIPMENT_QR_TYPE_NONE = 'none'
+export const EQUIPMENT_QR_TYPE_SHLTR = 'shltr'
+export const EQUIPMENT_QR_TYPE_MY24SERVICE = 'my24service'
+
+let EQUIPMENT_QR_TYPES = {}
+EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_NONE] = 'none'
+EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_MY24SERVICE] = 'My24Service'
+EQUIPMENT_QR_TYPES[EQUIPMENT_QR_TYPE_SHLTR] = 'SHLTR'
+
+export {EQUIPMENT_QR_TYPES}
+
+class MemberModel {
+  companycode
+  name
+  address
+  postal
+  city
+  country_code
+  tel
+  fax
+  www
+  email
+  contacts
+  activities
+  info
+  companylogo
+  companylogo_url
+  companylogo_workorder
+  data
+  contract
+  is_deleted = false
+  member_type
+  is_public = true
+  has_api_users = false
+  has_branches = false
+  chamber_of_commerce
+  vat_number
+  equipment_qr_type
+  is_requested = true
+
+  constructor(member) {
+    for (const [k, v] of Object.entries(member)) {
+      this[k] = v
+    }
+  }
+}
+
+class MemberService extends BaseModel {
   fields = {
     'companycode': '',
     'name': '',
@@ -34,12 +86,10 @@ class Member extends BaseModel {
     return this.axios.get(`${this.url}me/`).then((response) => response.data)
   }
 
-  async getDeleted() {
-    const token = await this.getCsrfToken()
-    const headers = this.getHeaders(token)
-    const url = `${this.url}deleted/`
+  async getRequestedCount() {
+    const url = `${this.url}requested_count/`
 
-    return this.axios.get(url, headers).then((response) => response.data)
+    return this.axios.get(url).then((response) => response.data)
   }
 
   async updateMe(obj) {
@@ -72,8 +122,13 @@ class Member extends BaseModel {
     return this.axios.get(`/member/vat-types/`).then((response) => response.data)
   }
 
+  getOCIUrl() {
+    return this.axios.get(`${this.url}get_oci_url/`).then((response) => response.data)
+  }
+
 }
 
-let memberModel = new Member()
+let memberService = new MemberService()
 
-export default memberModel
+export default memberService
+export { MemberService, MemberModel }

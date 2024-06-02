@@ -1,8 +1,11 @@
 <template>
   <div class="my24-pagination">
     <span class="count-section">
-      {{ displayOrderRange }}
+      {{  this.model_name }}
+      <strong><b>{{  currentItemsStart }}</b> - <b>{{  currentItemsEnd }}</b></strong>
+      / {{  totalItems }}
     </span>
+    <br>
     <span class="pagination-section">
       <b-pagination
         v-if="this.model.count > this.model.perPage"
@@ -29,9 +32,13 @@ export default {
   },
   data() {
     return {
+      currentItemsStart: 0,
+      currentItemsEnd: 0,
+      totalItems: this.model.count,
       currentPage: this.model.currentPage,
     }
   },
+
   watch: {
     currentPage: function(val) {
       const query = {
@@ -41,31 +48,24 @@ export default {
       this.$router.push({ query }).catch(e => {})
     }
   },
-  computed: {
-    displayOrderRange() {
+  created() {
+    this.calculateOrderRange();
+  },
+  methods: {
+    calculateOrderRange() {
       const currentPage = parseInt(this.currentPage)
+      let start = 1;
+      let end = 2;
       if (this.model.count > this.model.perPage) {
-        const start = ((currentPage - 1) * this.model.perPage) + 1;
-        const end = start + this.model.perPage <= this.model.count ? start + this.model.perPage -1 : this.model.count
-
-        return `${ this.model_name } ${ start } - ${ end }, ${ this.$trans('total') } ${ this.model.count }`
+        start = ((currentPage - 1) * this.model.perPage) + 1;
+        end = start + this.model.perPage <= this.model.count ? start + this.model.perPage -1 : this.model.count
       } else {
-        const start = this.model.count > 0 ? 1 : 0
-        const end = this.model.count
-
-        return `${ this.model_name } ${start} - ${end} (${this.model.perPage} ${ this.$trans('per page') })`
+        start = this.model.count > 0 ? 1 : 0
+        end = this.model.count
       }
-    }
+      this.currentItemsStart = start;
+      this.currentItemsEnd = end;
+    }  
   },
 }
 </script>
-
-<style scoped>
-.my24-pagination {
-  padding-top: 8px;
-}
-.count-section {
-}
-.pagination-section {
-}
-</style>

@@ -1,28 +1,25 @@
 <template>
-  <div class="mt-4 app-grid">
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3><b-icon icon="shop-window"></b-icon>{{ $trans("Locations") }}</h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
 
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: newLink}" class="btn btn-primary">{{ $trans('Add location') }}</router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
 
-    <b-modal
-      id="delete-location-modal"
-      ref="delete-location-modal"
-      v-bind:title="$trans('Delete?')"
-      @ok="doDelete"
-    >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this location?') }}</p>
-    </b-modal>
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Location')"
-      />
-
+    <div class="panel overflow-auto">
       <b-table
         id="location-table"
         small
@@ -35,43 +32,35 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  :router_name="newLink"
-                  v-bind:title="$trans('New location')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
+
           </div>
         </template>
         <template #table-busy>
-          <div class="text-center text-danger my-2">
+          <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
         <template #cell(name)="data">
-          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
+          <router-link :to="{name: viewLink, params: {pk: parseInt(data.item.id)}}">
             {{ data.item.name }}
-          </router-link><br/>
+          </router-link>
         </template>
         <template #cell(customer)="data">
-          <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
-            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link><br/>
+          <!-- <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}"> -->
+            {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>
+          <!-- </router-link> -->
+        </template>
+        <template #cell(created)="data">
+          <small>{{ data.item.created }}</small>
+        </template>
+        <template #cell(modified)="data">
+          <small>{{ data.item.modified }}</small>
         </template>
         <template #cell(branch)="data">
           <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
-            {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-          </router-link><br/>
+            {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>
+          </router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -88,11 +77,31 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="locationService"
+      :model_name="$trans('Location')"
+    />
+
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <b-modal
+      id="delete-location-modal"
+      ref="delete-location-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">{{ $trans('Are you sure you want to delete this location?') }}</p>
+    </b-modal>
   </div>
 </template>
 
 <script>
-import locationModel from '../../models/equipment/location.js'
+import { LocationService } from '../../models/equipment/location.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -139,20 +148,20 @@ export default {
   data() {
     return {
       searchQuery: null,
-      model: locationModel,
+      locationService: new LocationService(),
       locationPk: null,
       isLoading: false,
       locations: [],
       fieldsCustomerPlanning: [
-        {key: 'customer', label: this.$trans('Customer')},
         {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'customer', label: this.$trans('Customer')},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchPlanning: [
-        {key: 'branch', label: this.$trans('Branch')},
         {key: 'name', label: this.$trans('Name'), sortable: true},
+        {key: 'branch', label: this.$trans('Branch')},
         {key: 'created', label: this.$trans('Created'), sortable: true},
         {key: 'modified', label: this.$trans('Modified'), sortable: true},
         {key: 'icons'}
@@ -173,7 +182,7 @@ export default {
     }
   },
   created() {
-    locationModel.resetListArgs()
+    this.locationService.resetListArgs()
     if (this.hasBranches) {
       if (this.isEmployee) {
         this.fields = this.fieldsBranchNonPlanning
@@ -187,14 +196,14 @@ export default {
         this.fields = this.fieldsCustomerPlanning
       }
     }
-    this.model.currentPage = this.$route.query.page || 1
+    this.locationService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.locationService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -207,7 +216,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.locationPk)
+        await this.locationService.delete(this.locationPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Location has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -220,7 +229,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.model.list()
+        const data = await this.locationService.list()
         this.locations = data.results
         this.isLoading = false
       } catch(error){

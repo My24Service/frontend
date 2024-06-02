@@ -1,9 +1,24 @@
 <template>
-  <div class="app-grid">
-
-    <div class="subnav-pills">
-      <PillsCompanyUsers />
-    </div>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
+        <b-button-toolbar>
+          <b-button-group>
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <b-link :to="{name: 'apiuser-add'}" class="btn primary" v-if="isStaff || isSuperuser">
+            {{$trans('Add API user')}}
+          </b-link>
+        </b-button-toolbar>
+      </div>
+    </header>
 
     <SearchModal
       id="search-modal"
@@ -17,7 +32,7 @@
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this API key?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to delete this API user?') }}</p>
     </b-modal>
 
     <b-modal
@@ -29,15 +44,13 @@
       <p class="my-4">{{ $trans('Are you sure you want to revoke this API key?') }}</p>
     </b-modal>
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('API key')"
-      />
+    <div class="page-details panel">
+
+      <PillsCompanyUsers />
+      <br>
 
       <b-table
-        id="customeruser-table"
+        id="apiuser-table"
         small
         :busy='isLoading'
         :fields="apiuserFields"
@@ -52,7 +65,7 @@
               <b-button-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="apiuser-add"
-                  v-bind:title="$trans('New API key')"
+                  v-bind:title="$trans('New API user')"
                 />
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
@@ -65,41 +78,43 @@
             </b-button-toolbar>
           </div>
         </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>getValidUntil
-        <template #cell(valid_until)="data">
-          {{ getValidUntil(data.item.api_user) }}
-        </template>
         <template #cell(token)="data">
-          <input
-            v-on:focus="$event.target.select()"
-            ref="clone"
-            readonly
-            size="60"
-            :value="data.item.api_user.token"/>
-          <b-link v-on:click.native="copyToken(data.item.token)">
-            <b-icon-back class="icon-th"></b-icon-back>
-          </b-link>
-        </template>
-        <template #cell(token_is_revoked)="data">
-          <span
-            v-if="data.item.api_user.token_is_revoked"
-          >
-            {{ $trans('Revoked') }}
-          </span>
-          <span
-            v-if="!data.item.api_user.token_is_revoked"
-          >
-            {{ $trans('Active') }}&nbsp;
-            <b-link v-on:click.native="function(){ showRevokeModal(data.item.id) }">{{ $trans('Revoke') }}</b-link>
-          </span>
+          <p>
+            <input
+              v-on:focus="$event.target.select()"
+              ref="clone"
+              readonly
+              size="60"
+              :value="data.item.api_user.token"
+            />
+            <b-link v-on:click.native="copyToken(data.item.token)">
+              <b-icon-back class="icon-th"></b-icon-back>
+            </b-link>
+          </p>
+          <br/>
+
+          <p>
+            <span
+              v-if="data.item.api_user.token_is_revoked"
+            >
+              {{ $trans('Revoked') }}
+            </span>
+            <span v-else>
+              {{ $trans('Active') }}&nbsp;-
+              <b-link v-on:click.native="function(){ showRevokeModal(data.item.id) }">{{ $trans('Revoke') }}</b-link>
+              <p>
+                {{ $trans("Valid until") }}: {{ getValidUntil(data.item.api_user) }}
+              </p>
+            </span>
+          </p>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
+            <IconLinkEdit
+              router_name="apiuser-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -108,6 +123,11 @@
         </template>
       </b-table>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="apiUserService"
+      :model_name="$trans('API user')"
+    />
   </div>
 </template>
 <script>
@@ -121,7 +141,7 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import apiUserModel from '../../models/company/UserApi.js'
+import {ApiUserService} from '../../models/company/UserApi.js'
 
 export default {
   name: 'UserApiList',
@@ -140,27 +160,26 @@ export default {
       pk: null,
       revokeId: null,
       searchQuery: null,
-      model: apiUserModel,
+      apiUserService: new ApiUserService(),
       isLoading: false,
       apiusers: [],
       apiuserFields: [
-        {key: 'api_user.name', label: this.$trans('Name'), sortable: true},
-        {key: 'token', label: this.$trans('Token'), sortable: true},
-        {key: 'valid_until', label: this.$trans('Valid until'), sortable: true},
-        {key: 'token_is_revoked', label: this.$trans('Revoked?'), sortable: true},
+        {key: 'username', label: this.$trans('Username')},
+        {key: 'api_user.name', label: this.$trans('Name')},
+        {key: 'token', label: this.$trans('Token')},
         {key: 'icons'}
       ],
     }
   },
   created() {
-    this.model.currentPage = this.$route.query.page || 1
+    this.apiUserService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.apiUserService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -173,7 +192,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.pk)
+        await this.apiUserService.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('API user has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -188,7 +207,7 @@ export default {
     },
     async doRevoke() {
       try {
-        await this.model.revoke(this.revokeId)
+        await this.apiUserService.revoke(this.revokeId)
         this.infoToast(this.$trans('Revoked'), this.$trans('API key has been revoked'))
         await this.loadData()
       } catch(error) {
@@ -209,7 +228,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.model.list()
+        const data = await this.apiUserService.list()
         this.apiusers = data.results
         this.isLoading = false
       } catch(error) {

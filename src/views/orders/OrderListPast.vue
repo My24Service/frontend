@@ -1,129 +1,135 @@
 <template>
-  <div class="app-grid" ref="order-list-past">
+  <div class="app-page" ref="order-list-past">
+    <header>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="clipboard"></b-icon>
+          <span>{{ $trans("Orders") }}</span>
+        </h3>
 
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+            <ButtonLinkSort
+              v-bind:method="function() { showSortModal() }"
+            />
+          </b-button-group>
+          <router-link class="btn button" :to="{name:'order-add'}">
+            <b-icon icon="clipboard-plus"></b-icon>  {{ $trans('Add Order') }}
+          </router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
 
-    <b-modal
-      v-if="!isCustomer && !isBranchEmployee"
-      id="change-status-modal"
-      ref="change-status-modal"
-      v-bind:title="$trans('Add status')"
-      @ok="changeStatus"
-    >
-      <form ref="change-status-form">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="4">
-              <b-form-group
-                v-bind:label="$trans('New status')"
-                label-for="change-status-status"
-              >
-                <b-form-select
-                  id="change-status-status"
-                  v-model="status.statuscode"
-                  :options="statuscodes"
-                  size="sm"
-                  value-field="statuscode"
-                  text-field="statuscode"
-                ></b-form-select>
-              </b-form-group>
-            </b-col>
-            <b-col size="8">
-              <b-form-group
-                v-bind:label="$trans('Extra text')"
-                label-for="change-status-extra-text"
-              >
-                <b-form-input
-                  size="sm"
-                  id="change-status-extra-text"
-                  v-model="status.extra_text"
-                ></b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
-
-    <OrderFilters
-      :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
-      @set-filter="setStatusFilter"
-      @remove-filter="removeStatusFilter"
-    />
-
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Order')"
+    <div class="app-detail panel">
+      <SearchModal
+        id="search-modal"
+        ref="search-modal"
+        @do-search="handleSearchOk"
       />
 
-      <b-table
-        id="order-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="orders"
-        responsive="md"
-        class="data-table"
-        tbody-tr-class="order-row"
-        v-bind:tbody-tr-attr="rowStyle"
+      <b-modal
+        v-if="!isCustomer && !isBranchEmployee"
+        id="change-status-modal"
+        ref="change-status-modal"
+        v-bind:title="$trans('Add status')"
+        @ok="changeStatus"
       >
-        <template #head(id)="">
-          <span class="text-info">{{ $trans('Order') }}</span>
-        </template>
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-                <ButtonLinkSort
-                  v-bind:method="function() { showSortModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(id)="data">
-          <OrderTableInfo
-            v-bind:order="data.item"
-          />
-        </template>
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkPlus
-              v-if="!isCustomer && !isBranchEmployee"
-              type="tr"
-              v-bind:title="$trans('Change status')"
-              v-bind:method="function() { showChangeStatusModal(data.item.id) }"
+        <form ref="change-status-form">
+          <b-container fluid>
+            <b-row role="group">
+              <b-col size="4">
+                <b-form-group
+                  v-bind:label="$trans('New status')"
+                  label-for="change-status-status"
+                >
+                  <b-form-select
+                    id="change-status-status"
+                    v-model="status.statuscode"
+                    :options="statuscodes"
+                    size="sm"
+                    value-field="statuscode"
+                    text-field="statuscode"
+                  ></b-form-select>
+                </b-form-group>
+              </b-col>
+              <b-col size="8">
+                <b-form-group
+                  v-bind:label="$trans('Extra text')"
+                  label-for="change-status-extra-text"
+                >
+                  <b-form-input
+                    size="sm"
+                    id="change-status-extra-text"
+                    v-model="status.extra_text"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </b-container>
+        </form>
+      </b-modal>
+
+      <OrderFilters
+        :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
+        @set-filter="setStatusFilter"
+        @remove-filter="removeStatusFilter"
+      />
+
+      <div class="overflow-auto">
+        <div class="flex-columns">
+          <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
+          <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+          <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
+          <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
+          <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
+        </div>
+        <hr/>
+
+        <ul class="listing order-list">
+            <li><!-- FIXME -->
+              <div class="headings">
+                <span class="order-id"></span>
+                <span class="order-type">{{ $trans("type") }}</span>
+                <span class="order-company-name">{{ $trans("company") }}</span>
+                <span class="order-due-date">{{ $trans("due date") }}</span>
+                <span class="order-assignees">{{ $trans("people") }}</span>
+                <span class="order-status">{{ $trans("status") }}</span>
+              </div>
+            </li>
+
+            <section v-if="isLoading" class="text-center my-2">
+              <b-spinner class="align-middle"></b-spinner><br>
+              <span>{{ $trans('loading orders') }}</span>
+            </section>
+
+            <li v-for="order in orders" :key="order.id">
+              <OrderTableInfo
+              :order="order"
+              :with-delete="false"
             />
-          </div>
-        </template>
-      </b-table>
+            </li>
+        </ul>
+      </div>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Order')"
+    />
   </div>
 </template>
 
 <script>
 import my24 from '../../services/my24.js'
-import statusModel from '../../models/orders/Status.js'
-import { OrderPastService } from '../../models/orders/OrderPast.js'
+import {StatusService} from '@/models/orders/Status'
+import { OrderPastService } from '@/models/orders/OrderPast'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -132,7 +138,7 @@ import IconLinkPlus from '../../components/IconLinkPlus.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderFilters from "../../components/OrderFilters"
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '../../utils'
+import { componentMixin } from '@/utils'
 
 export default {
   mixins: [componentMixin],
@@ -150,8 +156,9 @@ export default {
     return {
       searchQuery: null,
       model: new OrderPastService(),
+      statusService: new StatusService(),
       statuscodes: [],
-      isLoading: false,
+      isLoading: true,
       orders: [],
       fields: [
         {thAttr: {width: '95%'}, key: 'id', label: this.$trans('Order')},
@@ -209,7 +216,7 @@ export default {
       }
 
       try {
-        await statusModel.insert(status)
+        await this.statusService.insert(status)
         this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
         await this.loadData()
       } catch(error) {

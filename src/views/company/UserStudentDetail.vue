@@ -1,5 +1,5 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay rounded="sm">
     <div class="app-detail">
       <h3>{{ $trans('Student user details') }}</h3>
       <b-row>

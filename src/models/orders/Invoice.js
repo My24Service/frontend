@@ -57,6 +57,11 @@ class InvoiceService extends BaseModel {
     const url = `/order/invoice-detail/${uuid}/`
     return this.axios.get(url).then((response) => response.data)
   }
+
+  async search(query) {
+    const url = `${this.url}autocomplete/q=${query}`
+    return this.axios.get(url).then((response) => response.data)
+  }
 }
 
 const invoiceService = new InvoiceService()

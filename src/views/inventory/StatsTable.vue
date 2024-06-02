@@ -1,77 +1,82 @@
 <template>
-  <div class="app-grid">
+  <div class="app-page">
+    <header>
+      <div class='page-title'>
+        <h3><b-icon icon="bar-chart-line-fill"></b-icon>{{ $trans('Stats in ' + year ) }}</h3>
+      </div>
+    </header>
+
     <SearchModal
       id="search-modal"
       ref="search-modal"
       @do-search="handleSearchOk"
     />
-
-    <b-row align-v="center">
-      <b-col cols="1">
-        <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
-          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
-      </b-col>
-      <b-col cols="10" class="text-center">
-        <h4>{{ $trans('Stats in ' + year ) }}</h4>
-      </b-col>
-      <b-col cols="1">
-        <div class="float-right">
-          <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+    <div class='app-detail panel'>
+      <b-row align-v="center">
+        <b-col cols="1">
+          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
+            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
           </b-link>
-        </div>
-      </b-col>
-    </b-row>
+        </b-col>
+        
+        <b-col cols="1">
+          <div class="float-right">
+            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            </b-link>
+          </div>
+        </b-col>
+      </b-row>
 
-    <b-table
-      small
-      id="stats-table"
-      :busy='isLoading'
-      :fields="tableFields"
-      :items="tableData"
-      responsive="md"
-      class="data-table"
-    >
-      <template #head(icons)="">
-        <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
-              <ButtonLinkSearch
-                v-bind:method="function() { showSearchModal() }"
-              />
-              <ButtonLinkDownload
-                v-bind:method="function() { downloadList() }"
-                v-bind:title="$trans('Download')"
-              />
-            </b-button-group>
-          </b-button-toolbar>
-        </div>
-      </template>
-      <template #table-busy>
-        <div class="text-center text-danger my-2">
-          <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-          <strong>{{ $trans('Loading...') }}</strong>
-        </div>
-      </template>
-      <template #cell(num_sales)="data">
-        {{ data.item.num_sales }}
-      </template>
-      <template #cell(turnover)="data">
-        {{ data.item.turnover.toFixed(2) }} EUR
-      </template>
-      <template #cell(profit)="data">
-        {{ data.item.profit.toFixed(2) }} EUR
-      </template>
-      <template #cell(margin_product)="data">
-        {{ data.item.margin_product.toFixed(2) }} %
-      </template>
-      <template #cell(sum_inventory)="data">
-        <p v-for="(value, key, index) in data.item.sum_inventory" :key="index">
-        {{ inventoryHeaders[key] }}: {{ value }}
-        </p>
-      </template>
-    </b-table>
+      <b-table
+        small
+        id="stats-table"
+        :busy='isLoading'
+        :fields="tableFields"
+        :items="tableData"
+        responsive="md"
+        class="data-table"
+      >
+        <template #head(icons)="">
+          <div class="float-right">
+            <b-button-toolbar>
+              <b-button-group class="mr-1">
+                <ButtonLinkSearch
+                  v-bind:method="function() { showSearchModal() }"
+                />
+                <ButtonLinkDownload
+                  v-bind:method="function() { downloadList() }"
+                  v-bind:title="$trans('Download')"
+                />
+              </b-button-group>
+            </b-button-toolbar>
+          </div>
+        </template>
+        <template #table-busy>
+          <div class="text-center my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <template #cell(num_sales)="data">
+          {{ data.item.num_sales }}
+        </template>
+        <template #cell(turnover)="data">
+          &euro; {{ data.item.turnover.toFixed(2) }}
+        </template>
+        <template #cell(profit)="data">
+          &euro; {{ data.item.profit.toFixed(2) }}
+        </template>
+        <template #cell(margin_product)="data">
+          {{ data.item.margin_product.toFixed(2) }} %
+        </template>
+        <template #cell(sum_inventory)="data">
+          <span v-for="(value, key, index) in data.item.sum_inventory" :key="index">
+          {{ inventoryHeaders[key] }}: {{ value }}
+          </span>
+        </template>
+      </b-table>
+    </div>
   </div>
 </template>
 

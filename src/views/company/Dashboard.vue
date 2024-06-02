@@ -1,17 +1,15 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-grid">
-      <b-row align-h="center">
-        <h2>{{ $trans('Overall statistics')}}</h2>
-        <b-col cols="12">
-          <OrderStats
-            ref="order-stats"
-          />
-        </b-col>
-      </b-row>
+  <div class="app-page">
+    <header>
+      <h3>{{ $trans('Overall statistics')}}</h3>
+    </header>
+    <div class="panel">
+      <OrderStats
+        ref="order-stats"
+      />
     </div>
 
-    <div class="app-grid">
+    <div class="panel app-grid">
       <b-row align-v="center">
         <b-col cols="1">
           <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
@@ -149,7 +147,7 @@
       </b-row>
 
     </div>
-  </b-overlay>
+  </div>
 </template>
 
 <script>
@@ -257,18 +255,20 @@ export default {
 
         // STATUSES: pie & bar graph, percentages
         let pieGraphDataOrderStatuses = [], barGraphDataOrderStatuses = [], labelsOrderStatuses = [];
-        for (const [orderStatus, _data] of Object.entries(data.order_status_counts)) {
-          if (orderStatus === 'total') {
-            continue;
-          }
+        if (data.order_status_counts) {
+          for (const [orderStatus, _data] of Object.entries(data.order_status_counts)) {
+            if (orderStatus === 'total') {
+              continue;
+            }
 
-          if (_data.total === 0) {
-            continue;
-          }
+            if (_data.total === 0) {
+              continue;
+            }
 
-          labelsOrderStatuses.push(_data.text)
-          pieGraphDataOrderStatuses.push(_data.perc)
-          barGraphDataOrderStatuses.push(_data.total)
+            labelsOrderStatuses.push(_data.text)
+            pieGraphDataOrderStatuses.push(_data.perc)
+            barGraphDataOrderStatuses.push(_data.total)
+          }
         }
 
         this.pieChartdataOrderStatuses = {
@@ -301,18 +301,20 @@ export default {
 
         // ORDER TYPES: pie & bar graph, percentages
         let pieGraphDataOrderTypes = [], barGraphDataOrderTypes = [], labelsOrderTypes = [];
-        for (const [orderType, _data] of Object.entries(data.order_type_counts)) {
-          if (orderType === 'total') {
-            continue;
-          }
+        if (data.order_type_counts) {
+          for (const [orderType, _data] of Object.entries(data.order_type_counts)) {
+            if (orderType === 'total') {
+              continue;
+            }
 
-          if (_data.total === 0) {
-            continue;
-          }
+            if (_data.total === 0) {
+              continue;
+            }
 
-          labelsOrderTypes.push(_data.text)
-          pieGraphDataOrderTypes.push(_data.perc)
-          barGraphDataOrderTypes.push(_data.total)
+            labelsOrderTypes.push(_data.text)
+            pieGraphDataOrderTypes.push(_data.perc)
+            barGraphDataOrderTypes.push(_data.total)
+          }
         }
 
         this.pieChartdataOrderTypes = {
@@ -429,18 +431,20 @@ export default {
 
         // transactions: pie & bar graph, percentages
         let pieGraphDataTransactions = [], barGraphDataTransactions = [], labelsTransactions = [];
-        for (const [transaction, _data] of Object.entries(data.transactions)) {
-          if (transaction === 'total') {
-            continue;
-          }
+        if (data.transactions) {
+          for (const [transaction, _data] of Object.entries(data.transactions)) {
+            if (transaction === 'total') {
+              continue;
+            }
 
-          if (_data.total === 0) {
-            continue;
-          }
+            if (_data.total === 0) {
+              continue;
+            }
 
-          labelsTransactions.push(_data.text)
-          pieGraphDataTransactions.push(_data.perc)
-          barGraphDataTransactions.push(_data.total)
+            labelsTransactions.push(_data.text)
+            pieGraphDataTransactions.push(_data.perc)
+            barGraphDataTransactions.push(_data.total)
+          }
         }
 
         this.pieChartdataTransactions = {

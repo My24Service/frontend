@@ -123,6 +123,12 @@ class MaterialService extends BaseModel {
     return this.axios.get(url).then((response) => response.data)
   }
 
+  searchNoSupplier(query) {
+    const url = `${this.url}autocomplete/?q=${query}`
+
+    return this.axios.get(url).then((response) => response.data)
+  }
+
   getForSupplier(supplier) {
     return this.axios.get(`${this.url}?supplier_relation=${supplier}`).then((response) => response.data.results)
   }
@@ -151,5 +157,5 @@ class MaterialService extends BaseModel {
 
 let materialService = new MaterialService()
 
-export { MaterialModel }
+export { MaterialModel, MaterialService }
 export default materialService

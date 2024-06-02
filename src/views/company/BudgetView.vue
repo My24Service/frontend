@@ -1,67 +1,92 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-detail" v-if="budget && !isLoading">
-      <b-container>
-        <b-row>
-          <b-col cols="3"></b-col>
-          <b-col cols="6">
-            <h2>{{ $trans('Budget') }} {{ budget.year }} - {{ formatDinero(budget.amount_dinero) }}</h2>
-          </b-col>
-          <b-col cols="3"></b-col>
-        </b-row>
-        <b-row align-h="center">
-          <b-col cols="5">
-            <h3>{{ $trans('Costs') }} {{ formatDinero(costs_total_dinero) }}</h3>
-            <pie-chart
-              id="pie-chart-costs"
-              v-if="!isLoading"
-              :chart-data="chartdataCosts"
-              :options="options"
-            />
-          </b-col>
-          <b-col cols="5">
-            <h3>{{ $trans('Expected costs') }} {{ formatDinero(expected_costs_total_dinero) }}</h3>
-            <pie-chart
-              id="pie-chart-expected-costs"
-              v-if="!isLoading"
-              :chart-data="chartdataExpectedCosts"
-              :options="options"
-            />
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="12"><br/></b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="1"></b-col>
-          <b-col cols="6"><h3>{{ $trans('Costs detail') }}</h3></b-col>
-          <b-col cols="5"><h3>{{ $trans('Expected costs detail') }}</h3></b-col>
-        </b-row>
-        <b-row align-h="center">
-          <b-col cols="5">
-            <pie-chart
-              id="pie-chart-costs-detail"
-              v-if="!isLoading"
-              :chart-data="chartdataCostsDetail"
-              :options="options"
-            />
-          </b-col>
-          <b-col cols="7">
-            <pie-chart
-              id="pie-chart-expected-costs-detail"
-              v-if="!isLoading"
-              :chart-data="chartdataExpectedCostsDetail"
-              :options="options"
-            />
-          </b-col>
-        </b-row>
-      </b-container>
-      <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
-      </footer>
+  <div class="app-page" v-if="budget">
+    <header>
+      <div class='page-title'>
+        <h3>
+          <b-icon icon="credit-card2-front"></b-icon>
+          <span class="backlink" @click="goBack">{{ $trans("Budgets") }}</span> /
+          <strong>{{ budget.year }}</strong>
+        </h3>
+        <h3 :title="`${budget.year} ${$trans('Budget size')}: ${formatDinero(budget.amount_dinero)}`">
+          <small class="dimmed">{{ $trans('Budget size')}}</small>
+          {{ formatDinero(budget.amount_dinero) }}
+        </h3>
+      </div>
+    </header>
+
+    <div class="page-detail">
+
+      <div v-if="isLoading" class="text-center panel">
+        <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+        <strong>{{ $trans('Loading...') }}</strong>
+      </div>
+
+      <div v-else class="flex-columns">
+
+        <div class="panel col-1-2">
+          <h6 class="flex-columns" style="justify-content: space-between">
+            <span>{{ $trans('Costs') }}</span>
+            <span class="dimmed">{{ formatDinero(costs_total_dinero) }} / {{  formatDinero(budget.amount_dinero) }}</span>
+          </h6>
+
+          <b-progress>
+            <b-progress-bar
+            :value="this.chartdataCosts.datasets[0].data[0]"
+            :title="`${this.chartdataCosts.labels[0]}, ${this.chartdataCosts.labels[1]}`"></b-progress-bar>
+          </b-progress>
+
+          <!-- <pie-chart
+            id="pie-chart-costs"
+            v-if="!isLoading"
+            :chart-data="chartdataCosts"
+            :options="options"
+          /> -->
+          <hr/>
+          <h6>{{ $trans('Costs breakdown') }}</h6>
+
+          <pie-chart
+          id="pie-chart-costs-detail"
+          v-if="!isLoading"
+          :chart-data="chartdataCostsDetail"
+          :options="options"
+          />
+
+        </div>
+
+        <div class="panel col-1-2">
+          <h6 class="flex-columns" style="justify-content: space-between">
+            {{ $trans('Expected costs') }}
+            <span class="dimmed">{{ formatDinero(expected_costs_total_dinero) }}</span>
+          </h6>
+          <b-progress>
+            <b-progress-bar
+            style="--delay: 2"
+            :value="this.chartdataExpectedCosts.datasets[0].data[0]"
+            :title="`${this.chartdataExpectedCosts.labels[0]}, ${this.chartdataExpectedCosts.labels[1]}`"></b-progress-bar>
+          </b-progress>
+
+          <!-- <pie-chart
+            id="pie-chart-expected-costs"
+            v-if="!isLoading"
+            :chart-data="chartdataExpectedCosts"
+            :options="options"
+          />
+          <hr/> -->
+
+          <h6>{{ $trans('Expected costs breakdown') }}</h6>
+
+          <pie-chart
+            id="pie-chart-expected-costs-detail"
+            v-if="!isLoading"
+            :chart-data="chartdataExpectedCostsDetail"
+            :options="options"
+          />
+        </div>
+
+      </div>
     </div>
-  </b-overlay>
+
+  </div>
 </template>
 <script>
 import {BudgetService} from "../../models/company/Budget";
@@ -135,8 +160,8 @@ export default {
       let rest = this.budget.amount - this.costs.total
       let rest_dinero = toDinero(rest, this.$store.getters.getDefaultCurrency)
       let labels = [
-        `${this.$trans('Costs')} (${this.formatDinero(this.costs_total_dinero)})`,
-        `${this.$trans('Remaining')} (${this.formatDinero(rest_dinero)})`,
+        `${this.$trans('Costs')} ${this.formatDinero(this.costs_total_dinero)}`,
+        `${this.$trans('Remaining')} ${this.formatDinero(rest_dinero)}`,
       ]
 
       let colors = [
