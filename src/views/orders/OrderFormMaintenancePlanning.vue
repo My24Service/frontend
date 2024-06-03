@@ -1774,6 +1774,7 @@ export default {
         this.order = await this.orderService.detail(this.pk)
         this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
         this.order.end_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        this.order.order_type = this.order.order_type.trim()
         this.isLoading = false
       } catch(error) {
         console.warn('error fetching order', error)
