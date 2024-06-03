@@ -913,6 +913,10 @@ import DocumentsComponent from "./order_form/DocumentsComponent.vue";
 import ApiResult from "@/components/ApiResult";
 
 const isCorrectTime = (value) => {
+  if (!value || value === "") {
+    return true
+  }
+
   return !helpers.req(value) || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
 }
 
@@ -1499,7 +1503,7 @@ export default {
       // remove null fields
       const null_fields = ['start_time', 'end_time']
       for (let i=0; i<null_fields.length; i++) {
-        if (this.order[null_fields[i]] === null) {
+        if (this.order[null_fields[i]] === null || this.order[null_fields[i]] === "") {
           delete this.order[null_fields[i]]
         }
       }
@@ -1773,7 +1777,7 @@ export default {
       try {
         this.order = await this.orderService.detail(this.pk)
         this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.order.order_type = this.order.order_type.trim()
         this.isLoading = false
       } catch(error) {
