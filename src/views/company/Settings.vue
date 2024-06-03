@@ -6,7 +6,7 @@
           <b-icon icon="terminal"></b-icon>
           {{ $trans('Settings') }}
         </h3>
-      
+
         <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
         </b-button>
@@ -39,13 +39,13 @@
                     v-model="settings[key]"
                   ></b-form-input>
                 </b-td>
-                
+
               </b-tr>
             </template>
           </tbody>
         </b-table-simple>
 
-        
+
       </b-form>
     </div>
   </div>
@@ -55,7 +55,7 @@
 
 import memberModel from '@/models/member/Member.js'
 
-export default {  
+export default {
   data() {
     return {
       isLoading: false,
@@ -101,7 +101,7 @@ export default {
           	throw(`expecting a string, got: ${typeof value}`)
           }
 
-          newValues[key] = value.split(',')
+          newValues[key] = this.splitClean(value)
         } else {
         	newValues[key] = value
         }
@@ -109,6 +109,13 @@ export default {
 
       return newValues
   	},
+    splitClean(values) {
+      let result = []
+      for (let val of values.split(',')) {
+        result.push(val.trim())
+      }
+      return result
+    },
     async submitForm() {
       this.submitClicked = true
       this.buttonDisabled = true
