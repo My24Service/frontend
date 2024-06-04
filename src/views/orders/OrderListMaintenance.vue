@@ -117,7 +117,7 @@
 
           <div v-if="isActive('orders')">
             <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
-            <router-link class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+            <router-link v-if="!hasBranches" class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
             <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
             <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
             <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
