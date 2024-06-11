@@ -19,10 +19,10 @@
               <b-form-group
                 label-size="sm"
                 v-bind:label="$trans('File')"
-                label-for="equipment-import-file"
+                label-for="company-import-file"
               >
                 <b-form-file
-                  id="equipment-import-file"
+                  id="company-import-file"
                   v-model="file"
                   v-bind:placeholder="$trans('Choose a file or drop it here...')"
                   @input="fileSelected"
@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import {EquipmentImport, EquipmentImportService} from '@/models/company/Import'
+import {Import, ImportService} from '@/models/company/Import'
 
 export default {
   props: {
@@ -70,8 +70,8 @@ export default {
       file: null,
       current_file: null,
       base64data: null,
-      service: new EquipmentImportService(),
-      equipmentImport: new EquipmentImport({}),
+      service: new ImportService(),
+      import: new Import({}),
       allowed_extensions: [],
       isLoading: null
     }
@@ -81,10 +81,10 @@ export default {
     this.allowed_extensions = await this.service.fetchAllowedExtensions()
 
     if (this.isCreate) {
-      this.equipmentImport = new EquipmentImport({})
+      this.import = new Import({})
       this.isLoading = false
     } else {
-      this.equipmentImport = await this.service.detail(this.pk)
+      this.import = await this.service.detail(this.pk)
       this.isLoading = false
     }
   },
@@ -99,7 +99,7 @@ export default {
       reader.onload = (f) => {
         const b64 = f.target.result
         this.current_file = file.name
-        this.equipmentImport.file = b64
+        this.import.file = b64
       }
 
       reader.readAsDataURL(file)
@@ -107,11 +107,11 @@ export default {
     async submitForm() {
       try {
         if (this.isCreate) {
-          const created = await this.service.insert(this.equipmentImport)
-          await this.$router.push({name: 'equipment-import-preview', params: {pk: created.id}})
+          const created = await this.service.insert(this.import)
+          await this.$router.push({name: 'company-import-preview', params: {pk: created.id}})
         } else {
-          await this.service.update(this.pk, this.equipmentImport)
-          await this.$router.push({name: 'equipment-import-preview', params: {pk: this.pk}})
+          await this.service.update(this.pk, this.import)
+          await this.$router.push({name: 'company-import-preview', params: {pk: this.pk}})
         }
       } catch (e) {
         this.errorToast(this.$trans('Error importing file'))

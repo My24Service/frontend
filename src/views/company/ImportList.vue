@@ -8,8 +8,8 @@
     />
 
     <b-modal
-      id="delete-equipment-import-modal"
-      ref="delete-equipment-import-modal"
+      id="delete-company-import-modal"
+      ref="delete-company-import-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
@@ -32,7 +32,7 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <router-link :to="{name: 'equipment-import-add'}" class="btn">
+          <router-link :to="{name: 'company-import-add'}" class="btn">
             <b-icon icon="file-arrow-down"></b-icon>
             {{$trans('Add import')}}
           </router-link>
@@ -50,10 +50,15 @@
         class="data-table"
         sort-icon-left
       >
+        <template #cell(file)="data">
+          <router-link :to="{name: 'company-import-preview', params: {pk: data.item.id}}">
+            {{ data.item.file.split('/')[data.item.file.split('/').length-1] }}
+          </router-link>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              router_name="equipment-import-edit"
+              router_name="company-import-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -76,7 +81,7 @@
 </template>
 
 <script>
-import {EquipmentImportService} from '../../models/company/Import.js'
+import {ImportService} from '../../models/company/Import.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -101,14 +106,14 @@ export default {
       searchQuery: null,
       importPk: null,
       isLoading: false,
-      service: new EquipmentImportService(),
+      service: new ImportService(),
       imports: [],
       fields: [
         {key: 'file', label: this.$trans('File')},
-        {key: 'result_inserts', label: this.$trans('equipments created')},
+        {key: 'result_inserts', label: this.$trans('created')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
-        {key: 'icons'},
+        {key: 'icons', label: ''},
       ]
     }
   },
@@ -129,7 +134,7 @@ export default {
     // delete
     showDeleteModal(id) {
       this.importPk = id
-      this.$refs['delete-equipment-import-modal'].show()
+      this.$refs['delete-company-import-modal'].show()
     },
     async doDelete() {
       try {

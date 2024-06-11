@@ -77,7 +77,6 @@ import {
   STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
 } from "../models/company/AbstractStatuscode";
 import ImportList from "../views/company/ImportList";
-import SubNavEquipment from "../components/SubNavEquipment";
 
 import ImportForm from "../views/company/ImportForm";
 import ImportPreview from "../views/company/ImportPreview";
@@ -923,11 +922,11 @@ export default [
 
     // import
     {
-      name: 'equipment-import-list',
-      path: '/equipment/import',
+      name: 'company-import-list',
+      path: '/company/import',
       components: {
         'app-content': ImportList,
-        'app-subnav': SubNavEquipment
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': route => ({...route.params}),
@@ -935,11 +934,11 @@ export default [
       },
     },
     {
-      name: 'equipment-import-add',
-      path: '/equipment/import/form',
+      name: 'company-import-add',
+      path: '/company/import/form',
       components: {
         'app-content': ImportForm,
-        'app-subnav': SubNavEquipment
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': route => ({...route.params}),
@@ -947,11 +946,11 @@ export default [
       },
     },
     {
-      name: 'equipment-import-edit',
-      path: '/equipment/import/form/:pk',
+      name: 'company-import-edit',
+      path: '/company/import/form/:pk',
       components: {
         'app-content': ImportForm,
-        'app-subnav': SubNavEquipment
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': route => ({...route.params}),
@@ -959,11 +958,11 @@ export default [
       },
     },
     {
-      name: 'equipment-import-preview',
-      path: '/equipment/import/preview/:pk',
+      name: 'company-import-preview',
+      path: '/company/import/preview/:pk',
       components: {
         'app-content': ImportPreview,
-        'app-subnav': SubNavEquipment
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': route => ({...route.params}),

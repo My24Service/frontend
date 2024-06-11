@@ -60,8 +60,8 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('import')"
-        v-if="isPlanning || isStaff || isSuperuser"
-        :to="{ name: 'equipment-import-list' }">
+        v-if="isStaff || isSuperuser"
+        :to="{ name: 'company-import-list' }">
         {{ $trans('Import') }}
       </b-nav-item>
       <b-nav-item
