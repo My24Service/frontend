@@ -16,10 +16,12 @@
             <b-tabs
               pills
               card
-              v-for="(obj, index) in pills" :key="index"
-              v-model="activePill"
             >
-              <b-tab :title="obj.title">
+              <b-tab
+                v-for="(obj, index) in pills" :key="index"
+                v-model="activePill"
+                :title="obj.title"
+              >
                 <b-card-text>
                   <h4>{{ importData[obj.key].length }} {{ $trans("entries") }}</h4>
                   <b-table
@@ -52,7 +54,7 @@
 </template>
 
 <script>
-import {ImportService, testData} from "../../models/company/Import";
+import {ImportService} from "../../models/company/Import";
 import {componentMixin} from "../../utils";
 
 export default {
@@ -119,31 +121,27 @@ export default {
   async created() {
     this.isLoading = true
 
-    // this.importData = await this.service.previewImport(this.pk)
-    this.importData = testData
-    // let dataItems = []
+    this.importData = await this.service.previewImport(this.pk)
     for (const key of Object.keys(this.availablePills)) {
       if (this.importData.hasOwnProperty(key) && this.importData[key].length > 0) {
-        // dataItems.push(key)
         this.pills.push({
           title: this.availablePills[key],
           key
         })
       }
     }
-    console.log(this.pills)
 
-    // this.activePill = 1
     this.isLoading = false
   },
   methods: {
     async importAll() {
+      return
       const finalData = await this.service.doImport(this.pk)
       console.log(`final data: ${finalData}`)
       this.importData = finalData
     },
-    cancel() {
-      this.$router.go(-1)
+    async cancel() {
+      await this.$router.push({name: 'company-import-list'})
     },
     getFields(key) {
       switch (key) {
