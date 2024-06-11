@@ -61,20 +61,25 @@ import StatuscodeList from "../views/company/statuscode/StatuscodeList";
 import StatuscodeForm from "../views/company/statuscode/StatuscodeForm";
 import ActionForm from "../views/company/statuscode/ActionForm";
 
-import CustomerTemplateList from "@/views/company/template/CustomerTemplateList";
-import CustomerTemplateForm from "@/views/company/template/CustomerTemplateForm";
+import CustomerTemplateList from "../views/company/template/CustomerTemplateList";
+import CustomerTemplateForm from "../views/company/template/CustomerTemplateForm";
 
-import LeaveRequestsList from "@/views/company/time-registration/LeaveRequestsList";
-import LeaveList from "@/views/company/time-registration/LeaveList";
-import LeaveForm from "@/views/company/time-registration/LeaveForm";
-import LeaveTypes from "@/views/company/time-registration/LeaveTypes";
-import UnseenSickLeaveList from "@/views/company/time-registration/UnseenSickLeaveList";
-import SickLeaveList from "@/views/company/time-registration/SickLeaveList";
-import SickLeaveForm from "@/views/company/time-registration/SickLeaveForm";
+import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsList";
+import LeaveList from "../views/company/time-registration/LeaveList";
+import LeaveForm from "../views/company/time-registration/LeaveForm";
+import LeaveTypes from "../views/company/time-registration/LeaveTypes";
+import UnseenSickLeaveList from "../views/company/time-registration/UnseenSickLeaveList";
+import SickLeaveList from "../views/company/time-registration/SickLeaveList";
+import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
 } from "../models/company/AbstractStatuscode";
+import ImportList from "../views/company/ImportList";
+import SubNavEquipment from "../components/SubNavEquipment";
+
+import ImportForm from "../views/company/ImportForm";
+import ImportPreview from "../views/company/ImportPreview";
 
 const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
 
@@ -913,6 +918,56 @@ export default [
         'app-content': route => ({...route.params }),
         'app-subnav': true
       },
-    }
+    },
+
+    // import
+    {
+      name: 'equipment-import-list',
+      path: '/equipment/import',
+      components: {
+        'app-content': ImportList,
+        'app-subnav': SubNavEquipment
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'equipment-import-add',
+      path: '/equipment/import/form',
+      components: {
+        'app-content': ImportForm,
+        'app-subnav': SubNavEquipment
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'equipment-import-edit',
+      path: '/equipment/import/form/:pk',
+      components: {
+        'app-content': ImportForm,
+        'app-subnav': SubNavEquipment
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'equipment-import-preview',
+      path: '/equipment/import/preview/:pk',
+      components: {
+        'app-content': ImportPreview,
+        'app-subnav': SubNavEquipment
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
   ]
 }]
