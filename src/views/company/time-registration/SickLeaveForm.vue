@@ -99,7 +99,7 @@ import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { UserListService } from "@/models/company/UserList.js";
-import { SickLeavesService } from "@/models/company/SickLeaves.js";
+import { SickLeavesService } from "@/models/company/SickLeave.js";
 import Multiselect from 'vue-multiselect'
 
 

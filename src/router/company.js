@@ -43,7 +43,7 @@ import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
 import EngineerEventList from "../views/company/EngineerEventList";
 
-import {AUTH_LEVELS} from "@/constants";
+import {AUTH_LEVELS} from "../constants";
 
 import UserEmployeeList from "../views/company/UserEmployeeList";
 import UserEmployeeForm from "../views/company/UserEmployeeForm";
@@ -68,9 +68,10 @@ import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsL
 import LeaveList from "../views/company/time-registration/LeaveList";
 import LeaveForm from "../views/company/time-registration/LeaveForm";
 import LeaveTypes from "../views/company/time-registration/LeaveTypes";
-import UnseenSickLeaveList from "../views/company/time-registration/UnseenSickLeaveList";
+import UnconfirmedSickLeaveList from "../views/company/time-registration/UnconfirmedSickLeaveList";
 import SickLeaveList from "../views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
+
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
@@ -872,10 +873,10 @@ export default [
       },
     },
     {
-      name: 'unseen-sick-leave',
-      path: '/company/time-registration/sick-leave/unseen',
+      name: 'unconfirmed-sick-leave',
+      path: '/company/time-registration/sick-leave/unconfirmed',
       components: {
-        'app-content': UnseenSickLeaveList,
+        'app-content': UnconfirmedSickLeaveList,
         'app-subnav': SubNavCompany
       },
       props: {

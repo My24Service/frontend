@@ -22,14 +22,14 @@
         {{ $trans('Leave types') }}
       </b-nav-item>
       <b-nav-item
-        :active="$route.name === 'unseen-sick-leave'"
-        :to="{ name: 'unseen-sick-leave' }">
-        {{ $trans('Unseen sick leave') }}
-      </b-nav-item>
-      <b-nav-item
         :active="$route.name === 'sick-leave-list'"
         :to="{ name: 'sick-leave-list' }">
         {{ $trans('Sick leave') }}
+      </b-nav-item>
+      <b-nav-item
+        :active="$route.name === 'unconfirmed-sick-leave'"
+        :to="{ name: 'unconfirmed-sick-leave' }">
+        {{ $trans('Unconfirmed sick leave') }}
       </b-nav-item>
     </b-nav>
   </div>
