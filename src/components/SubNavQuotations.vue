@@ -12,6 +12,12 @@
       :to="{ name: 'preliminary-quotations' }">
       {{ $trans('Preliminary') }}
     </b-nav-item>
+    <b-nav-item
+      :active="isActive('sent')"
+      v-if="isStaff || isSuperuser || isPlanning"
+      :to="{ name: 'sent-quotations' }">
+      {{ $trans('Sent') }}
+    </b-nav-item>
   </div>
 </template>
 

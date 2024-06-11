@@ -87,6 +87,18 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
+            <router-link
+              class="px-1"
+              v-if="!data.item.preliminary"
+              :title="$trans('Send quotation')"
+              :to="{name: 'quotation-send',
+                query: {quotationId: data.item.id, quotationName: data.item.quotation_name}}"
+            >
+              <b-icon-mailbox
+                aria-hidden="true"
+                class="edit-icon"
+              ></b-icon-mailbox>
+            </router-link>
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -226,6 +238,8 @@ export default {
       handler: function(search) {
         if (this.$route.name === 'preliminary-quotations') {
           this.quotationService.queryMode = 'preliminary'
+        } else if(this.$route.name === 'sent-quotations') {
+          this.quotationService.queryMode = 'sent'
         } else {
           this.quotationService.queryMode = 'all'
         }

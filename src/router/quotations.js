@@ -7,6 +7,7 @@ import {AUTH_LEVELS} from "@/constants";
 import TheAppLayoutEmpty from "@/components/TheAppLayoutEmpty.vue";
 import QuotationView from "@/views/quotations/QuotationView.vue";
 import QuotationDetail from "@/views/quotations/QuotationDetail.vue";
+import SendQuotationForm from "@/views/quotations/SendQuotationForm.vue";
 
 
 export default [
@@ -59,6 +60,19 @@ export default [
     },
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+      name: 'sent-quotations',
+      path: '/quotations/sent',
+      components: {
+        'app-content': QuotationList,
+        'app-subnav': SubNavQuotations
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-add',
       path: '/quotations/quotations/form',
       components: {
@@ -80,6 +94,19 @@ export default [
       },
       components: {
         'app-content': QuotationForm,
+        'app-subnav': SubNavQuotations
+      },
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+      name: 'quotation-send',
+      path: '/quotations/send/form/',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': SendQuotationForm,
         'app-subnav': SubNavQuotations
       },
     },
