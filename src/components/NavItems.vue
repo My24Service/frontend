@@ -212,8 +212,10 @@ export default {
     }
   },
   async created() {
-    const result = await this.memberService.getRequestedCount()
-    this.requestedCount = result.count
+    if (this.showMembers) {
+      const result = await this.memberService.getRequestedCount()
+      this.requestedCount = result.count
+    }
   },
   computed: {
     showCustomerDashBoard() {

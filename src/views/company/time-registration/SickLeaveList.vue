@@ -96,7 +96,7 @@ import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import PillsLeave from "./SubNav.vue";
-import { SickLeavesService } from "@/models/company/SickLeaves.js";
+import { SickLeavesService } from "@/models/company/SickLeave.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 
