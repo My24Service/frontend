@@ -81,6 +81,15 @@
             </p>
             <p v-for="document in documents" :key="document.id">
               {{ document.name }}
+              <b-button
+                class="btn button btn-danger quotation-pdf-button"
+                @click="downloadPdf"
+                v-if="document.is_pdf"
+                :disabled="loadingPdf"
+              >
+                <b-spinner small v-if="loadingPdf"></b-spinner>
+                {{ $trans('Preview quotation pdf') }}
+              </b-button>
             </p>
           </div>
         </div>
@@ -92,6 +101,7 @@
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { OfferService } from "@/models/quotations/offer.js";
+import {QuotationService} from '@/models/quotations/Quotation'
 
 
 export default {
@@ -127,7 +137,10 @@ export default {
   data() {
     return {
       isEdit: false,
+      isLoading: false,
+      loadingPdf: false,
       isSubmitClicked: false,
+      quotationService: new QuotationService(),
       offerService: new OfferService(),
       recipients: [],
       offer: {
@@ -162,6 +175,20 @@ export default {
         if (!this.tagValidator(email)) return false
       }
       return emails.join(",")
+    },
+    async downloadPdf() {
+      this.loadingPdf = true;
+
+      try {
+        const blob = await this.quotationService.downloadPdf(this.$route.query.quotationId)
+        this.loadingPdf = false;
+        const _url = window.URL.createObjectURL(blob);
+        window.open(_url, "_blank");
+      } catch (error) {
+        console.log("Error downloading pdf", error);
+        this.errorToast(this.$trans("Error downloading pdf"));
+        this.loadingPdf = false;
+      }
     },
     async loadDocuments() {
       this.isLoading = true;
@@ -217,8 +244,10 @@ export default {
 .pdf-priview {
   margin-top: 20px;
 }
-
 .pdf-priview .panel {
   max-width: 70%;
+}
+.quotation-pdf-button {
+  margin-left: 20px;
 }
 </style>

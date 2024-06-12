@@ -76,6 +76,22 @@ class QuotationService extends BaseModel {
     return new this.axios.post(url, {}).then(response => response.data)
   }
 
+  generatePdf(id) {
+    const url = `/quotation/quotation/${id}/generate_definitive_pdf/`
+    return new this.axios.post(url, {}).then(response => response.data)
+  }
+
+  async downloadPdf(id) {
+    const url = `/quotation/quotation/${id}/download_definitive_pdf/`
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    headers.responseType = 'blob'
+
+    return this.axios.post(url, {}, headers).then((response) => {
+      return new Blob([response.data], { type: 'application/pdf' })
+    });
+  }
+
   removeNullFields(obj) {
     for (const [field, value] of Object.entries(obj)) {
       if (!value) {

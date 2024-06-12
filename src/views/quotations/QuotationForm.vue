@@ -33,6 +33,24 @@
         >
           {{ $trans('Make definitive') }}
         </b-button>
+        <b-button
+          class="btn button btn-danger"
+          @click="generatePdf"
+          v-if="!quotation.preliminary && !quotation.definitive_pdf_filename"
+          :disabled="loadingPdf"
+        >
+          <b-spinner small v-if="loadingPdf"></b-spinner>
+          {{ $trans('Generate pdf') }}
+        </b-button>
+        <b-button
+          class="btn button btn-danger"
+          @click="downloadPdf"
+          v-if="!quotation.preliminary && quotation.definitive_pdf_filename"
+          :disabled="loadingPdf"
+        >
+          <b-spinner small v-if="loadingPdf"></b-spinner>
+          {{ $trans('Download pdf') }}
+        </b-button>
         <!-- Emulate built in modal footer ok and cancel button actions -->
         <b-button @click="ok()" variant="primary">
           {{ $trans("close") }}
@@ -289,6 +307,7 @@ export default {
       COST_TYPE_EXTRA_WORK,
       COST_TYPE_ACTUAL_WORK,
       isLoading: false,
+      loadingPdf: false,
       submitClicked: false,
       errorMessage: null,
       quotationPK: null,
@@ -342,6 +361,33 @@ export default {
     async doMakeDefinitive() {
       await this.quotationService.makeDefinitive(this.quotation.id)
       await this.$router.push({ name: 'quotation-list'})
+    },
+    async generatePdf() {
+      this.loadingPdf = true
+
+      try {
+        await this.quotationService.generatePdf(this.quotation.id)
+        this.loadingPdf = false
+        this.errorToast(this.$trans('Success generating pdf'))
+      } catch(error) {
+        console.log('error generating pdf', error)
+        this.errorToast(this.$trans('Error generating pdf'))
+        this.loadingPdf = false
+      }
+    },
+    async downloadPdf() {
+      this.loadingPdf = true;
+
+      try {
+        const blob = await this.quotationService.downloadPdf(this.quotation.id)
+        this.loadingPdf = false;
+        const _url = window.URL.createObjectURL(blob);
+        window.open(_url, "_blank");
+      } catch (error) {
+        console.log("Error downloading pdf", error);
+        this.errorToast(this.$trans("Error downloading pdf"));
+        this.loadingPdf = false;
+      }
     },
     getQuotationURL() {
       const routeData = this.$router.resolve({ name: 'quotation-view', params: { pk: this.quotation.id } });
