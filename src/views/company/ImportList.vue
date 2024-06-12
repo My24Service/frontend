@@ -50,6 +50,11 @@
         class="data-table"
         sort-icon-left
       >
+        <template #cell(result_inserts)="data">
+          <span v-for="(inserts, model_type, index) of data.item.result_inserts" :key="index">
+            {{ model_type }}: {{ inserts }}
+          </span>
+        </template>
         <template #cell(file)="data">
           <router-link :to="{name: 'company-import-preview', params: {pk: data.item.id}}">
             {{ data.item.file.split('/')[data.item.file.split('/').length-1] }}
@@ -89,6 +94,8 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+
+// TODO display import_created per row somehow
 
 export default {
   name: 'ImportList',
@@ -146,7 +153,6 @@ export default {
         this.errorToast(this.$trans('Error deleting import'))
       }
     },
-    // rest
     async loadData() {
       this.isLoading = true
 

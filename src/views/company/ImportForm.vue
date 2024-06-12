@@ -14,8 +14,28 @@
       <div class="page-detail import-form">
         <b-form v-if="isCreate">
           <b-row>
-            <p><i>{{ $trans("Accepted file formats") }}: <b>{{ allowed_extensions.join(', ') }}</b></i></p>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                label-cols="3"
+                v-bind:label="$trans('Name')"
+                label-for="import_name"
+              >
+                <b-form-input
+                  id="import_name"
+                  size="sm"
+                  v-model="importModel.name"
+                  :state="isSubmitClicked ? !v$.importModel.name.$error : null"
+                ></b-form-input>
+                <b-form-invalid-feedback
+                  :state="isSubmitClicked ? !v$.importModel.name.$error : null">
+                  {{ $trans('Please enter a name') }}
+                </b-form-invalid-feedback>
+              </b-form-group>
+            </b-col>
+
             <b-col cols="8" role="group">
+              <p><i>{{ $trans("Accepted file formats") }}: <b>{{ allowed_extensions.join(', ') }}</b></i></p>
               <b-form-group
                 label-size="sm"
                 v-bind:label="$trans('File')"
@@ -52,8 +72,13 @@
 
 <script>
 import {Import, ImportService} from '@/models/company/Import'
+import { useVuelidate } from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 
 export default {
+  setup() {
+    return { v$: useVuelidate() }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -65,15 +90,25 @@ export default {
       return !this.pk
     },
   },
+  validations() {
+    return {
+      importModel: {
+        name: {
+          required
+        },
+      }
+    }
+  },
   data() {
     return {
       file: null,
       current_file: null,
       base64data: null,
       service: new ImportService(),
-      import: new Import({}),
+      importModel: new Import({}),
       allowed_extensions: [],
-      isLoading: null
+      isLoading: null,
+      isSubmitClicked: false
     }
   },
   async created() {
@@ -99,23 +134,25 @@ export default {
       reader.onload = (f) => {
         const b64 = f.target.result
         this.current_file = file.name
-        this.import.file = b64
+        this.importModel.file = b64
       }
 
       reader.readAsDataURL(file)
     },
     async submitForm() {
+      this.isSubmitClicked = true
       try {
         if (this.isCreate) {
-          const created = await this.service.insert(this.import)
+          const created = await this.service.insert(this.importModel)
           await this.$router.push({name: 'company-import-preview', params: {pk: created.id}})
         } else {
-          await this.service.update(this.pk, this.import)
+          await this.service.update(this.pk, this.importModel)
           await this.$router.push({name: 'company-import-preview', params: {pk: this.pk}})
         }
       } catch (e) {
         this.errorToast(this.$trans('Error importing file'))
         console.log(`Error importing file: ${e}`)
+        this.isSubmitClicked = false
       }
     },
     cancelForm() {

@@ -123,7 +123,7 @@ export default {
 
     this.importData = await this.service.previewImport(this.pk)
     for (const key of Object.keys(this.availablePills)) {
-      if (this.importData.hasOwnProperty(key) && this.importData[key].length > 0) {
+      if (this.importData.hasOwnProperty(key)) {
         this.pills.push({
           title: this.availablePills[key],
           key
@@ -135,10 +135,14 @@ export default {
   },
   methods: {
     async importAll() {
-      return
-      const finalData = await this.service.doImport(this.pk)
-      console.log(`final data: ${finalData}`)
-      this.importData = finalData
+      if (confirm(this.$trans("Import these records?"))) {
+        const finalData = await this.service.doImport(this.pk)
+        console.log(`final data: ${finalData}`)
+        this.importData = finalData
+
+        // TODO now what, list?
+      }
+
     },
     async cancel() {
       await this.$router.push({name: 'company-import-list'})
