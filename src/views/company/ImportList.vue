@@ -95,8 +95,6 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 
-// TODO display import_created per row somehow
-
 export default {
   name: 'ImportList',
   components: {

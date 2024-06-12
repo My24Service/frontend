@@ -25,6 +25,10 @@ class ImportService extends BaseModel {
     return this.axios.get(`${this.url}required/`).then((response) => response.data)
   }
 
+  fetchLookupFields() {
+    return this.axios.get(`${this.url}get_lookup_fields/`).then((response) => response.data)
+  }
+
   previewImport(pk) {
     return this.axios.get(`${this.url}${pk}/preview/`).then((response) => response.data)
   }
