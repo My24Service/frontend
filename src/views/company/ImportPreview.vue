@@ -25,7 +25,8 @@
                 <b-card-text>
                   <h4>{{ importData[obj.key].length }} {{ $trans("entries") }}</h4>
                   <p>
-                    {{ $trans("Existing records will be checked on") }}: <b><i>{{ lookupFields[obj.key].join(', ') }}</i></b>
+                    {{ $trans("Existing records will be checked on") }}:
+                    <b><i>{{ lookupFields[obj.key.split('__'[0])].join(', ') }}</i></b>
                   </p>
                   <b-table
                     small
@@ -152,20 +153,20 @@ export default {
       }
     }
 
-    console.log(this.lookupFields)
-
     this.isLoading = false
   },
   methods: {
     async importAll() {
       if (confirm(this.$trans("Import these records?"))) {
-        const finalData = await this.service.doImport(this.pk)
-        console.log(`final data: ${finalData}`)
-        this.importData = finalData
-
-        // TODO now what, list?
+        try {
+          await this.service.doImport(this.pk)
+          this.infoToast(this.$trans('Imported'), this.$trans('Data has been imported'))
+          await this.$router.push({name: 'company-import-list'})
+        } catch (error) {
+          console.log('Error importing data', error)
+          this.errorToast(this.$trans('Error importing data'))
+        }
       }
-
     },
     async cancel() {
       await this.$router.push({name: 'company-import-list'})

@@ -48,26 +48,43 @@
         :items="imports"
         responsive="md"
         class="data-table"
-        sort-icon-left
+        tbody-tr-class="listRow"
       >
         <template #cell(result_inserts)="data">
           <span v-for="(inserts, model_type, index) of data.item.result_inserts" :key="index">
-            {{ model_type }}: {{ inserts }}
+            {{ model_type }}: <b>{{ inserts }} {{ $trans("inserted") }}</b><br/>
+          </span>
+        </template>
+        <template #cell(name)="data">
+          <span v-if="!data.item.result_inserts">
+          <router-link
+            :to="{name: 'company-import-preview', params: {pk: data.item.id}}"
+          >
+            {{ data.item.name }}
+          </router-link>
+          </span>
+          <span v-else>
+            {{ data.item.name }}
           </span>
         </template>
         <template #cell(file)="data">
-          <router-link :to="{name: 'company-import-preview', params: {pk: data.item.id}}">
-            {{ data.item.file.split('/')[data.item.file.split('/').length-1] }}
-          </router-link>
+          {{ data.item.file.split('/')[data.item.file.split('/').length-1] }}
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
+            <span v-if="data.item.result_inserts">
+              <b-link v-bind:title="$trans('Revert import')" v-on:click="revertImport(data.item.id)">
+                <b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise>
+              </b-link>
+            </span>
             <IconLinkEdit
+              v-if="!data.item.result_inserts"
               router_name="company-import-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
             <IconLinkDelete
+              v-if="!data.item.result_inserts"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
@@ -114,8 +131,9 @@ export default {
       service: new ImportService(),
       imports: [],
       fields: [
+        {key: 'name', label: this.$trans('Name')},
         {key: 'file', label: this.$trans('File')},
-        {key: 'result_inserts', label: this.$trans('created')},
+        {key: 'result_inserts', label: this.$trans('Result')},
         {key: 'created', label: this.$trans('Created')},
         {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons', label: ''},
@@ -163,7 +181,27 @@ export default {
         this.errorToast(this.$trans('Error loading imports'))
         this.isLoading = false
       }
+    },
+    async revertImport(id) {
+      if (confirm(this.$trans("Revert this import? All created and related data will be deleted."))) {
+        try {
+          await this.service.revertImport(id)
+          this.infoToast(this.$trans('Reverted'), this.$trans('Import has been reverted'))
+          await this.$router.push({name: 'company-import-list'})
+        } catch (error) {
+          console.log('Error reverting import', error)
+          this.errorToast(this.$trans('Error reverting import'))
+        }
+      }
     }
   }
 }
 </script>
+<style>
+table td {
+  vertical-align: top !important;
+}
+table td a {
+  display: table-cell !important;
+}
+</style>

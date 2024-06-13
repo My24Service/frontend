@@ -34,7 +34,11 @@ class ImportService extends BaseModel {
   }
 
   doImport(pk) {
-    return this.axios.post(`${this.url}${pk}/do_import/`).then((response) => response.data)
+    return this.axios.post(`${this.url}${pk}/do/`).then((response) => response.data)
+  }
+
+  revertImport(pk) {
+    return this.axios.post(`${this.url}${pk}/revert/`).then((response) => response.data)
   }
 }
 

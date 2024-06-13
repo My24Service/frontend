@@ -11,13 +11,12 @@
         </div>
       </header>
 
-      <div class="page-detail import-form">
-        <b-form v-if="isCreate">
+      <div class="app-detail panel overflow-auto">
+        <b-form>
           <b-row>
             <b-col cols="4" role="group">
               <b-form-group
                 label-size="sm"
-                label-cols="3"
                 v-bind:label="$trans('Name')"
                 label-for="import_name"
               >
@@ -35,11 +34,11 @@
             </b-col>
 
             <b-col cols="8" role="group">
-              <p><i>{{ $trans("Accepted file formats") }}: <b>{{ allowed_extensions.join(', ') }}</b></i></p>
               <b-form-group
                 label-size="sm"
                 v-bind:label="$trans('File')"
                 label-for="company-import-file"
+                :description="`${$trans('Accepted file formats')}: ${allowed_extensions.join(', ')}`"
               >
                 <b-form-file
                   id="company-import-file"
@@ -62,6 +61,12 @@
               >
                 {{ $trans('Submit') }}
               </b-button>
+              <b-form-checkbox
+                v-if="!importModel.result_inserts"
+                v-model="continueToPreview"
+              >
+                {{ $trans("continue to preview") }}
+              </b-form-checkbox>
             </footer>
           </div>
         </b-form>
@@ -108,7 +113,8 @@ export default {
       importModel: new Import({}),
       allowed_extensions: [],
       isLoading: null,
-      isSubmitClicked: false
+      isSubmitClicked: false,
+      continueToPreview: true,
     }
   },
   async created() {
@@ -116,10 +122,10 @@ export default {
     this.allowed_extensions = await this.service.fetchAllowedExtensions()
 
     if (this.isCreate) {
-      this.import = new Import({})
+      this.importModel = new Import({})
       this.isLoading = false
     } else {
-      this.import = await this.service.detail(this.pk)
+      this.importModel = await this.service.detail(this.pk)
       this.isLoading = false
     }
   },
@@ -141,18 +147,42 @@ export default {
     },
     async submitForm() {
       this.isSubmitClicked = true
-      try {
-        if (this.isCreate) {
+
+      this.v$.$touch()
+      if (this.v$.$invalid) {
+        console.log('invalid?', this.v$.$invalid)
+        return
+      }
+
+      if (this.isCreate) {
+        try {
           const created = await this.service.insert(this.importModel)
-          await this.$router.push({name: 'company-import-preview', params: {pk: created.id}})
-        } else {
-          await this.service.update(this.pk, this.importModel)
-          await this.$router.push({name: 'company-import-preview', params: {pk: this.pk}})
+          this.importModel = new Import(created)
+        } catch (e) {
+          this.errorToast(this.$trans('Error creating import'))
+          console.log(`Error creating import: ${e}`)
+          this.isSubmitClicked = false
+          return
         }
-      } catch (e) {
-        this.errorToast(this.$trans('Error importing file'))
-        console.log(`Error importing file: ${e}`)
-        this.isSubmitClicked = false
+      } else {
+        try {
+          if (this.importModel.file.substring(0, 'http'.length) === 'http') {
+            delete this.importModel.file
+          }
+
+          await this.service.update(this.pk, this.importModel)
+        } catch (e) {
+          this.errorToast(this.$trans('Error updating import'))
+          console.log(`Error creating import: ${e}`)
+          this.isSubmitClicked = false
+          return
+        }
+      }
+
+      if (this.continueToPreview) {
+        await this.$router.push({name: 'company-import-preview', params: {pk: this.importModel.id}})
+      } else {
+        await this.$router.push({name: 'company-import-list'})
       }
     },
     cancelForm() {
