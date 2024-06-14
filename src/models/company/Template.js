@@ -1,6 +1,10 @@
 import BaseModel from '@/models/base'
 
-class CustomerTemplateModel {
+class TemplateModel {
+  constructor(param) {
+
+  }
+
   id
   name
   description
@@ -12,8 +16,8 @@ class CustomerTemplateModel {
 }
 
 
-class CustomerTemplateService extends BaseModel {
-  url = '/company/customer-template/'
+class TemplateService extends BaseModel {
+  url = '/company/template/'
   queryMode = 'all'
 
   removeNullFields(obj) {
@@ -55,4 +59,4 @@ class CustomerTemplateService extends BaseModel {
   }
 }
 
-export { CustomerTemplateService, CustomerTemplateModel }
+export { TemplateService, TemplateModel }
