@@ -5,7 +5,6 @@ import StatuscodeList from '@/views/shared/StatuscodeList.vue'
 import StatuscodeForm from '@/views/shared/StatuscodeForm.vue'
 import ActionForm from '@/views/shared/ActionForm.vue'
 
-import Dispatch from '@/views/mobile/Dispatch.vue'
 import OrderList from '@/views/orders/OrderList.vue'
 import AssignedFinished from '@/views/mobile/AssignedFinished.vue'
 import TimeSheet from '@/views/mobile/TimeSheet.vue'
@@ -15,8 +14,7 @@ import TripAvailability from '@/views/mobile/TripAvailability.vue'
 import TripAvailabilityDetail from '@/views/mobile/TripAvailabilityDetail.vue'
 import TripForm from '@/views/mobile/TripForm.vue'
 import AssignedOrderMaterial from '@/views/mobile/AssignedOrderMaterial.vue'
-import DispatchNew from "@/views/mobile/DispatchNew.vue";
-
+import Dispatch from "@/views/mobile/Dispatch.vue";
 
 export default [
 {
@@ -35,18 +33,6 @@ export default [
           'app-subnav': {}
         },
       },
-    {
-      name: 'mobile-dispatch-new',
-      path: '/mobile/dispatch-new',
-      components: {
-        'app-content': DispatchNew,
-        'app-subnav': SubNavMobile
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': {}
-      },
-    },
       {
         name: 'mobile-orders',
         path: '/mobile/orders',
