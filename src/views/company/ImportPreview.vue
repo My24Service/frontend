@@ -24,6 +24,10 @@
               >
                 <b-card-text>
                   <h4>{{ importData[obj.key].length }} {{ $trans("entries") }}</h4>
+                  <p>
+                    {{ $trans("Existing records will be checked on") }}:
+                    <b><i>{{ lookupFields[obj.key.split('__'[0])].join(', ') }}</i></b>
+                  </p>
                   <b-table
                     small
                     :fields="getFields(obj.key)"
@@ -31,6 +35,14 @@
                     responsive="md"
                     class="data-table"
                   >
+                    <template #cell(mode)="data">
+                      <span v-if="data.item.import_created" class="text-success">
+                        {{ $trans("insert" )}}
+                      </span>
+                      <span v-else class="text-warning">
+                        {{ $trans("update" )}}
+                      </span>
+                    </template>
                   </b-table>
                 </b-card-text>
               </b-tab>
@@ -87,6 +99,7 @@ export default {
         {key: 'city', label: this.$trans('City') },
         {key: 'country_code', label: this.$trans('Country') },
         {key: 'tel', label: this.$trans('Phone') },
+        {key: 'mode', label: ''},
       ],
       customersFields: [
         {key: 'name', label: this.$trans('Name') },
@@ -95,31 +108,39 @@ export default {
         {key: 'city', label: this.$trans('City') },
         {key: 'country_code', label: this.$trans('Country') },
         {key: 'tel', label: this.$trans('Phone') },
+        {key: 'mode', label: ''},
       ],
       equipmentFieldsBranches: [
         {key: 'customer_branch_view.name', label: this.$trans('Branch') },
         {key: 'name', label: this.$trans('Equipment') },
         {key: 'brand', label: this.$trans('Brand') },
         {key: 'location_name', label: this.$trans('Location')},
+        {key: 'mode', label: ''},
       ],
       equipmentFieldsCustomers: [
         {key: 'customer_branch_view.name', label: this.$trans('Customer') },
         {key: 'name', label: this.$trans('Equipment') },
         {key: 'brand', label: this.$trans('Brand') },
         {key: 'location_name', label: this.$trans('Location')},
+        {key: 'mode', label: ''},
       ],
       locationFieldsCustomers: [
         {key: 'name', label: this.$trans('Name') },
         {key: 'customer_branch_view.name', label: this.$trans('Customer')},
+        {key: 'mode', label: ''},
       ],
       locationFieldsBranches: [
         {key: 'name', label: this.$trans('Name') },
         {key: 'customer_branch_view.name', label: this.$trans('Branch')},
+        {key: 'mode', label: ''},
       ],
+      lookupFields: {}
     }
   },
   async created() {
     this.isLoading = true
+
+    const lookupFields = await this.service.fetchLookupFields()
 
     this.importData = await this.service.previewImport(this.pk)
     for (const key of Object.keys(this.availablePills)) {
@@ -128,6 +149,7 @@ export default {
           title: this.availablePills[key],
           key
         })
+        this.lookupFields[key] = lookupFields[key]
       }
     }
 
@@ -136,13 +158,15 @@ export default {
   methods: {
     async importAll() {
       if (confirm(this.$trans("Import these records?"))) {
-        const finalData = await this.service.doImport(this.pk)
-        console.log(`final data: ${finalData}`)
-        this.importData = finalData
-
-        // TODO now what, list?
+        try {
+          await this.service.doImport(this.pk)
+          this.infoToast(this.$trans('Imported'), this.$trans('Data has been imported'))
+          await this.$router.push({name: 'company-import-list'})
+        } catch (error) {
+          console.log('Error importing data', error)
+          this.errorToast(this.$trans('Error importing data'))
+        }
       }
-
     },
     async cancel() {
       await this.$router.push({name: 'company-import-list'})

@@ -67,16 +67,16 @@ export default {
   },
   methods: {
     hasEngineers() {
-      return this.memberType === 'maintenance' && this.hasAccessToModule('company', 'engineer-users')
+      return !this.hasBranches && this.memberType === 'maintenance' && this.hasAccessToModule('company', 'engineer-users')
     },
     hasStudents() {
       return this.memberType === 'temps' && this.hasAccessToModule('company', 'student-users')
     },
     hasSales() {
-      return this.hasAccessToModule('company', 'sales-users')
+      return !this.hasBranches &&  this.hasAccessToModule('company', 'sales-users')
     },
     hasCustomers() {
-      return this.hasAccessToModule('company', 'customer-users')
+      return !this.hasBranches && this.hasAccessToModule('company', 'customer-users')
     },
     isActive(item) {
       const parts = this.$route.path.split('/')

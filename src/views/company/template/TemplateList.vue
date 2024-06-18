@@ -75,7 +75,7 @@
     </div>
     <Pagination
       v-if="!isLoading"
-      :model="this.customerTemplateService"
+      :model="templateService"
       :model_name="$trans('Template')"
     />
     <SearchModal id="search-modal" ref="search-modal" @do-search="handleSearchOk" />
@@ -91,16 +91,13 @@
 </template>
 
 <script>
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkEdit from '../../../components/IconLinkEdit.vue'
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
-import {
-  CustomerTemplateService,
-  CustomerTemplateModel
-} from "@/models/company/CustomerTemplate.js";
+import { TemplateService } from "../../../models/company/Template.js";
 
 export default {
   components: {
@@ -115,7 +112,7 @@ export default {
     return {
       // type based variables
       titleAdd: null,
-      customerTemplateService: new CustomerTemplateService(),
+      templateService: new TemplateService(),
       searchQuery: null,
       templatePk: null,
       isLoading: false,
@@ -132,14 +129,14 @@ export default {
     };
   },
   created() {
-    this.customerTemplateService.currentPage = this.$route.query.page || 1;
+    this.templateService.currentPage = this.$route.query.page || 1;
     this.loadData();
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs["search-modal"].hide();
-      this.customerTemplateService.setSearchQuery(val);
+      this.templateService.setSearchQuery(val);
       this.loadData();
     },
     showSearchModal() {
@@ -152,9 +149,9 @@ export default {
     },
     async doDelete() {
       try {
-        await this.customerTemplateService.delete(this.templatePk);
+        await this.templateService.delete(this.templatePk);
         this.infoToast(this.$trans("Deleted"), this.$trans("Template has been deleted"));
-        this.loadData();
+        await this.loadData();
       } catch (error) {
         console.log("error deleting templates", error);
         this.errorToast(this.$trans("Error deleting template"));
@@ -165,7 +162,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.customerTemplateService.list();
+        const data = await this.templateService.list();
         this.templates = data.results;
         this.isLoading = false;
       } catch (error) {
@@ -178,9 +175,9 @@ export default {
       this.isLoading = true;
 
       try {
-        await this.customerTemplateService.setTemplateActive(id, {});
+        await this.templateService.setTemplateActive(id, {});
         this.isLoading = false;
-        this.loadData()
+        await this.loadData()
       } catch (error) {
         console.log("error setting template as active", error);
         this.errorToast(this.$trans("Error setting template as active"));
@@ -191,11 +188,4 @@ export default {
 };
 </script>
 <style scoped>
-.color_text {
-  font-weight: bold;
-  font-style: italic;
-}
-.subnav-pills {
-  margin-bottom: 20px;
-}
 </style>

@@ -129,14 +129,11 @@
                 :max-height="600"
                 :show-no-results="false"
                 :hide-selected="true"
-                @search-change="getResultsDebounced"
+                @search-change="searchPreviewDebounced"
                 @select="result => selectResult(result, index)"
                 :custom-label="result => result.name"
                 ref="searchTemplate"
               >
-                <span slot="noResult">
-                  {{ $trans("Oops! No elements found. Consider changing the search query.") }}
-                </span>
               </multiselect>
             </b-form-group>
             <b-row>
@@ -159,11 +156,11 @@
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import {
-  CustomerTemplateService,
-  CustomerTemplateModel
-} from "@/models/company/CustomerTemplate.js";
+  TemplateService,
+  TemplateModel
+} from "../../../models/company/Template.js";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
-import { QuotationService } from "@/models/quotations/Quotation.js";
+import { QuotationService } from "../../../models/quotations/Quotation.js";
 import Multiselect from "vue-multiselect";
 
 export default {
@@ -200,8 +197,8 @@ export default {
     };
   },
   created() {
-    this.getResultsDebounced = AwesomeDebouncePromise(this.getResults, 500);
-    this.template = new CustomerTemplateModel({});
+    this.searchPreviewDebounced = AwesomeDebouncePromise(this.searchPreview, 500);
+    this.template = new TemplateModel({});
 
     if (!this.isCreate) {
       this.loadData();
@@ -211,7 +208,7 @@ export default {
     return {
       isEdit: false,
       isSubmitClicked: false,
-      customerTemplateService: new CustomerTemplateService(),
+      templateService: new TemplateService(),
       file: null,
       template: {},
       templateTypes: [
@@ -220,8 +217,9 @@ export default {
       ],
       results: [],
       fetchingResults: false,
-      getResultsDebounced: "",
-      service: new QuotationService(),
+      searchPreviewDebounced: "",
+      // TODO make this dynamic based on template type (invoices, etc.)
+      quotationService: new QuotationService(),
       result: ""
     };
   },
@@ -238,11 +236,11 @@ export default {
       this.isLoading = true;
 
       try {
-        this.template = await this.customerTemplateService.detail(this.pk);
+        this.template = await this.templateService.detail(this.pk);
         this.file = this.template.filename
         this.isLoading = false;
       } catch (error) {
-        console.log("error fetching customer template", error);
+        console.log("error fetching template", error);
         this.errorToast(this.$trans("Error loading template"));
         this.isLoading = false;
       }
@@ -255,10 +253,10 @@ export default {
         this.loadData()
       }
     },
-    async getResults(query) {
+    async searchPreview(query) {
       this.fetchingResults = true;
       try {
-        this.results = await this.service.search(query);
+        this.results = await this.quotationService.search(query);
         this.fetchingResults = false;
       } catch (error) {
         console.log("Error fetching results", error);
@@ -277,7 +275,7 @@ export default {
 
       if (this.isCreate) {
         try {
-          await this.customerTemplateService.insert(this.template);
+          await this.templateService.insert(this.template);
           this.infoToast(this.$trans("Created"), this.$trans("Template has been created"));
           this.isLoading = false;
           this.$router.go(-1);
@@ -289,18 +287,18 @@ export default {
       }
 
       if (this.isEdit) {
-        // Remove file if none was uploaded to to replace the existing one
+        // Remove file if none was uploaded to replace the existing one
         if (!this.file.name) {
           delete this.template.file
         }
 
         try {
-          await this.customerTemplateService.update(this.pk, this.template);
+          await this.templateService.update(this.pk, this.template);
           this.infoToast(this.$trans("Created"), this.$trans("Template has been updated"));
           this.isLoading = false;
           this.isEdit = false
           this.template = {}
-          this.loadData()
+          await this.loadData()
         } catch (error) {
           console.log("Error creating template", error);
           this.errorToast(this.$trans("Error creating template"));
@@ -317,7 +315,7 @@ export default {
       }
 
       try {
-        const blob = await this.customerTemplateService.previewPdfTemplate(data);
+        const blob = await this.templateService.previewPdfTemplate(data);
         this.isLoading = false;
         const _url = window.URL.createObjectURL(blob);
         window.open(_url, "_blank");

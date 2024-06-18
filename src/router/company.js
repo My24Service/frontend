@@ -61,8 +61,8 @@ import StatuscodeList from "../views/company/statuscode/StatuscodeList";
 import StatuscodeForm from "../views/company/statuscode/StatuscodeForm";
 import ActionForm from "../views/company/statuscode/ActionForm";
 
-import CustomerTemplateList from "../views/company/template/CustomerTemplateList";
-import CustomerTemplateForm from "../views/company/template/CustomerTemplateForm";
+import TemplateList from "../views/company/template/TemplateList";
+import TemplateForm from "../views/company/template/TemplateForm";
 
 import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsList";
 import LeaveList from "../views/company/time-registration/LeaveList";
@@ -779,7 +779,7 @@ export default [
       name: 'company-templates',
       path: '/company/templates',
       components: {
-        'app-content': CustomerTemplateList,
+        'app-content': TemplateList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -791,7 +791,7 @@ export default [
       name: 'customer-template-add',
       path: '/company/templates/form',
       components: {
-        'app-content': CustomerTemplateForm,
+        'app-content': TemplateForm,
         'app-subnav':  SubNavCompany
       },
       props: {
@@ -803,7 +803,7 @@ export default [
       name: 'customer-template-edit',
       path: '/company/templates/form/:pk',
       components: {
-        'app-content': CustomerTemplateForm,
+        'app-content': TemplateForm,
         'app-subnav':  SubNavCompany
       },
       props: {
