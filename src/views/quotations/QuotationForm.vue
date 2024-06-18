@@ -89,6 +89,14 @@
               {{ $trans('View quotation') }}
             </b-link>
           </span>
+          <b-button
+            v-if="!quotation.preliminary"
+            @click="sendQuotation"
+            type="button"
+            variant="primary"
+          >
+            {{ $trans('Send quotation') }}
+          </b-button>
         </h3>
         <div
           class="flex-columns"
@@ -101,7 +109,8 @@
             type="button"
             variant="primary"
           >
-            {{ $trans('Submit') }}</b-button>
+            {{ $trans('Submit') }}
+          </b-button>
         </div>
       </div>
     </header>
@@ -357,6 +366,11 @@ export default {
     },
     showMakeDefinitiveModal() {
       this.$refs['quotation-definitive-modal'].show()
+    },
+    sendQuotation() {
+      this.$router.push({name: 'quotation-send',
+        query: {quotationId: this.quotation.id, quotationName: this.quotation.quotation_name}}
+      );
     },
     async doMakeDefinitive() {
       await this.quotationService.makeDefinitive(this.quotation.id)

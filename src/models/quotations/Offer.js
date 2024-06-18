@@ -24,6 +24,11 @@ class OfferService extends BaseModel {
     const url = `${this.url}get_documents/?quotationId=${quotationId}`
     return this.axios.get(url).then((response) => response.data)
   }
+
+  async getUnsetOffer(quotationId) {
+    const url = `${this.url}get_unsent_offer/?quotationId=${quotationId}`
+    return this.axios.get(url).then((response) => response.data)
+  }
 }
 
 export { OfferService, OfferModel }

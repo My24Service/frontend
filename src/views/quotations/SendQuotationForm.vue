@@ -11,7 +11,7 @@
           <strong>{{ $route.query.quotationName }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !offer.id">{{ $trans("new") }}</span>
-            <span v-if="!isCreate && isEdit">{{ $trans("edit") }}</span>
+            <span v-if="!isCreate">{{ $trans("resend") }}</span>
           </span>
         </h3>
         <div class="flex-columns">
@@ -116,7 +116,7 @@ export default {
   },
   computed: {
     isCreate() {
-      return !this.pk;
+      return !this.offer.id;
     }
   },
   validations() {
@@ -130,9 +130,7 @@ export default {
   },
   async created() {
     await this.loadDocuments()
-    if (!this.isCreate) {
-      this.loadData();
-    }
+    await this.loadData();
   },
   data() {
     return {
@@ -158,17 +156,17 @@ export default {
       this.isLoading = true;
 
       try {
-        this.template = await this.offerService.detail(this.pk);
-        this.file = this.template.filename
+        this.offer = await this.offerService.getUnsetOffer(this.$route.query.quotationId);
+        this.recipients = this.offer.recipients.split(",")
         this.isLoading = false;
       } catch (error) {
-        console.log("error fetching customer template", error);
-        this.errorToast(this.$trans("Error loading template"));
+        console.log("error fetching unsent offer", error);
+        this.errorToast(this.$trans("Error fetching unsent offer"));
         this.isLoading = false;
       }
     },
     cancelForm() {
-      this.$router.go(-1);
+      this.$router.push({name: 'sent-quotations'});
     },
     validateEmailRecipients(emails) {
       for (const email of emails) {
@@ -226,15 +224,38 @@ export default {
 
       if (this.isCreate) {
         try {
-          await this.offerService.insert(this.offer);
-          this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent to"));
+          this.offer = await this.offerService.insert(this.offer);
+          this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
           this.isLoading = false;
+
+          if (!this.offer.is_sent) {
+            this.errorToast(this.$trans("Error sending quotation"));
+            return;
+          }
           this.$router.go(-1);
+          this.$router.push({name: 'sent-quotations'});
         } catch (error) {
           console.log("Error sending quotation", error);
           this.errorToast(this.$trans("Error sending quotation"));
           this.isLoading = false;
         }
+      }
+
+      try {
+        this.offer = await this.offerService.update(
+          this.offer.id, this.offer
+        )
+        this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
+        this.isLoading = false
+        if (!this.offer.is_sent) {
+          this.errorToast(this.$trans("Error sending quotation"));
+          return;
+        }
+        this.$router.push({name: 'sent-quotations'});
+      } catch(error) {
+        console.log("Error sending quotation", error);
+        this.errorToast(this.$trans("Error sending quotation"));
+        this.isLoading = false;
       }
     },
   }
