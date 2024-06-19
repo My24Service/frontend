@@ -59,6 +59,12 @@
         {{ $trans('Templates') }}
       </b-nav-item>
       <b-nav-item
+        :active="isActive('import')"
+        v-if="isStaff || isSuperuser"
+        :to="{ name: 'company-import-list' }">
+        {{ $trans('Import') }}
+      </b-nav-item>
+      <b-nav-item
         :active="isActive('budgets')"
         v-if="hasBranches"
         :to="{ name: 'company-budgets' }">

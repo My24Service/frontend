@@ -43,7 +43,7 @@ import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
 import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
 import EngineerEventList from "../views/company/EngineerEventList";
 
-import {AUTH_LEVELS} from "@/constants";
+import {AUTH_LEVELS} from "../constants";
 
 import UserEmployeeList from "../views/company/UserEmployeeList";
 import UserEmployeeForm from "../views/company/UserEmployeeForm";
@@ -61,20 +61,25 @@ import StatuscodeList from "../views/company/statuscode/StatuscodeList";
 import StatuscodeForm from "../views/company/statuscode/StatuscodeForm";
 import ActionForm from "../views/company/statuscode/ActionForm";
 
-import CustomerTemplateList from "@/views/company/template/CustomerTemplateList";
-import CustomerTemplateForm from "@/views/company/template/CustomerTemplateForm";
+import TemplateList from "../views/company/template/TemplateList";
+import TemplateForm from "../views/company/template/TemplateForm";
 
-import LeaveRequestsList from "@/views/company/time-registration/LeaveRequestsList";
-import LeaveList from "@/views/company/time-registration/LeaveList";
-import LeaveForm from "@/views/company/time-registration/LeaveForm";
-import LeaveTypes from "@/views/company/time-registration/LeaveTypes";
-import UnseenSickLeaveList from "@/views/company/time-registration/UnseenSickLeaveList";
-import SickLeaveList from "@/views/company/time-registration/SickLeaveList";
-import SickLeaveForm from "@/views/company/time-registration/SickLeaveForm";
+import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsList";
+import LeaveList from "../views/company/time-registration/LeaveList";
+import LeaveForm from "../views/company/time-registration/LeaveForm";
+import LeaveTypes from "../views/company/time-registration/LeaveTypes";
+import UnconfirmedSickLeaveList from "../views/company/time-registration/UnconfirmedSickLeaveList";
+import SickLeaveList from "../views/company/time-registration/SickLeaveList";
+import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
+
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
 } from "../models/company/AbstractStatuscode";
+import ImportList from "../views/company/ImportList";
+
+import ImportForm from "../views/company/ImportForm";
+import ImportPreview from "../views/company/ImportPreview";
 
 const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
 
@@ -774,7 +779,7 @@ export default [
       name: 'company-templates',
       path: '/company/templates',
       components: {
-        'app-content': CustomerTemplateList,
+        'app-content': TemplateList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -786,7 +791,7 @@ export default [
       name: 'customer-template-add',
       path: '/company/templates/form',
       components: {
-        'app-content': CustomerTemplateForm,
+        'app-content': TemplateForm,
         'app-subnav':  SubNavCompany
       },
       props: {
@@ -798,7 +803,7 @@ export default [
       name: 'customer-template-edit',
       path: '/company/templates/form/:pk',
       components: {
-        'app-content': CustomerTemplateForm,
+        'app-content': TemplateForm,
         'app-subnav':  SubNavCompany
       },
       props: {
@@ -867,10 +872,10 @@ export default [
       },
     },
     {
-      name: 'unseen-sick-leave',
-      path: '/company/time-registration/sick-leave/unseen',
+      name: 'unconfirmed-sick-leave',
+      path: '/company/time-registration/sick-leave/unconfirmed',
       components: {
-        'app-content': UnseenSickLeaveList,
+        'app-content': UnconfirmedSickLeaveList,
         'app-subnav': SubNavCompany
       },
       props: {
@@ -913,6 +918,56 @@ export default [
         'app-content': route => ({...route.params }),
         'app-subnav': true
       },
-    }
+    },
+
+    // import
+    {
+      name: 'company-import-list',
+      path: '/company/import',
+      components: {
+        'app-content': ImportList,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-import-add',
+      path: '/company/import/form',
+      components: {
+        'app-content': ImportForm,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-import-edit',
+      path: '/company/import/form/:pk',
+      components: {
+        'app-content': ImportForm,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      name: 'company-import-preview',
+      path: '/company/import/preview/:pk',
+      components: {
+        'app-content': ImportPreview,
+        'app-subnav': SubNavCompany
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
   ]
 }]
