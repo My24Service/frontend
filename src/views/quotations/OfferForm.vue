@@ -98,21 +98,16 @@
   </div>
 </template>
 <script>
+import my24 from '../../services/my24.js'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
-import { OfferService } from "@/models/quotations/offer.js";
+import { OfferService, OfferModel } from "@/models/quotations/offer.js";
 import {QuotationService} from '@/models/quotations/Quotation'
 
 
 export default {
   setup() {
     return { v$: useVuelidate() };
-  },
-  props: {
-    pk: {
-      type: [String, Number],
-      default: null
-    }
   },
   computed: {
     isCreate() {
@@ -129,8 +124,9 @@ export default {
     };
   },
   async created() {
+    this.offer.quotation = this.$route.query.quotationId
     await this.loadDocuments()
-    await this.loadData();
+    await this.loadData()
   },
   data() {
     return {
@@ -141,9 +137,7 @@ export default {
       quotationService: new QuotationService(),
       offerService: new OfferService(),
       recipients: [],
-      offer: {
-        quotation: this.$route.query.quotationId
-      },
+      offer: new OfferModel({}),
       documents: [],
       recipientInvalid: false,
     };
@@ -156,7 +150,7 @@ export default {
       this.isLoading = true;
 
       try {
-        this.offer = await this.offerService.getUnsetOffer(this.$route.query.quotationId);
+        this.offer = await this.offerService.getUnsentOffer(this.offer.quotation);
         this.recipients = this.offer.recipients.split(",")
         this.isLoading = false;
       } catch (error) {
@@ -176,24 +170,20 @@ export default {
     },
     async downloadPdf() {
       this.loadingPdf = true;
-
-      try {
-        const blob = await this.quotationService.downloadPdf(this.$route.query.quotationId)
-        this.loadingPdf = false;
-        const _url = window.URL.createObjectURL(blob);
-        window.open(_url, "_blank");
-      } catch (error) {
-        console.log("Error downloading pdf", error);
-        this.errorToast(this.$trans("Error downloading pdf"));
-        this.loadingPdf = false;
-      }
+      my24.downloadItem(
+        `/api/quotation/quotation/${this.offer.quotation}/download_definitive_pdf/`,
+        'quotation.pdf',
+        function() {
+          this.loadingPdf = false;
+        }
+      )
     },
     async loadDocuments() {
       this.isLoading = true;
 
       try {
         const result = await this.offerService.getDocuments(
-          this.$route.query.quotationId
+          this.offer.quotation
         );
         this.documents = result
         this.isLoading = false;

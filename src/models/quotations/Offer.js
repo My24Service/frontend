@@ -8,8 +8,8 @@ class OfferModel {
   subject
   body
 
-  constructor(chapter) {
-    for (const [k, v] of Object.entries(chapter)) {
+  constructor(offer) {
+    for (const [k, v] of Object.entries(offer)) {
       this[k] = v
     }
   }
@@ -25,7 +25,7 @@ class OfferService extends BaseModel {
     return this.axios.get(url).then((response) => response.data)
   }
 
-  async getUnsetOffer(quotationId) {
+  async getUnsentOffer(quotationId) {
     const url = `${this.url}get_unsent_offer/?quotationId=${quotationId}`
     return this.axios.get(url).then((response) => response.data)
   }

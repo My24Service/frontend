@@ -7,7 +7,7 @@ import {AUTH_LEVELS} from "@/constants";
 import TheAppLayoutEmpty from "@/components/TheAppLayoutEmpty.vue";
 import QuotationView from "@/views/quotations/QuotationView.vue";
 import QuotationDetail from "@/views/quotations/QuotationDetail.vue";
-import SendQuotationForm from "@/views/quotations/SendQuotationForm.vue";
+import OfferForm from "@/views/quotations/OfferForm.vue";
 
 
 export default [
@@ -106,7 +106,7 @@ export default [
         'app-subnav': true
       },
       components: {
-        'app-content': SendQuotationForm,
+        'app-content': OfferForm,
         'app-subnav': SubNavQuotations
       },
     },
