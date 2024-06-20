@@ -1,5 +1,6 @@
 import BaseModel from '@/models/base';
 import {normalClient} from "@/services/api";
+import auth from '@/services/auth'
 
 class My24 extends BaseModel {
   getInitialData() {
@@ -20,9 +21,18 @@ class My24 extends BaseModel {
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
-  downloadItem(url, name, callback) {
-    normalClient
-      .get(url, { responseType: 'blob' })
+  downloadItem(url, name, callback, requestMethod='get') {
+    let headers = { responseType: 'blob' }
+    let client;
+
+    if (requestMethod === 'post') {
+      auth.setInterceptors(normalClient)
+      client = normalClient.post(url, {}, headers)
+    } else {
+      client = normalClient.get(url, headers)
+    }
+
+    client
       .then((response) => {
         const blob = new Blob([response.data], { type: response.data.type });
         const link = document.createElement('a');

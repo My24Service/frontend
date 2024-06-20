@@ -175,7 +175,8 @@ export default {
         'quotation.pdf',
         function() {
           this.loadingPdf = false;
-        }
+        }.bind(this),
+        'post'
       )
     },
     async loadDocuments() {

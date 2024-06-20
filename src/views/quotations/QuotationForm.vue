@@ -246,6 +246,7 @@
 </template>
 
 <script>
+import my24 from '../../services/my24.js'
 import {useVuelidate} from "@vuelidate/core";
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
@@ -391,17 +392,14 @@ export default {
     },
     async downloadPdf() {
       this.loadingPdf = true;
-
-      try {
-        const blob = await this.quotationService.downloadPdf(this.quotation.id)
-        this.loadingPdf = false;
-        const _url = window.URL.createObjectURL(blob);
-        window.open(_url, "_blank");
-      } catch (error) {
-        console.log("Error downloading pdf", error);
-        this.errorToast(this.$trans("Error downloading pdf"));
-        this.loadingPdf = false;
-      }
+      my24.downloadItem(
+        `/api/quotation/quotation/${this.offer.quotation}/download_definitive_pdf/`,
+        'quotation.pdf',
+        function() {
+          this.loadingPdf = false;
+        }.bind(this),
+        'post'
+      )
     },
     getQuotationURL() {
       const routeData = this.$router.resolve({ name: 'quotation-view', params: { pk: this.quotation.id } });
