@@ -105,15 +105,15 @@ export default {
   },
   computed: {
     getToRouteMaintenanceUsers() {
-      if (this.hasAccessToModule('company', 'engineer-users')) {
+      if (this.hasAccessToModule('company', 'engineer-users') && !this.hasBranches) {
         return { name: 'users-engineers' }
       }
 
-      if (this.hasAccessToModule('company', 'sales-users')) {
+      if (this.hasAccessToModule('company', 'sales-users') && !this.hasBranches) {
         return { name: 'users-salesusers' }
       }
 
-      if (this.hasAccessToModule('company', 'customer-users')) {
+      if (this.hasAccessToModule('company', 'customer-users') && !this.hasBranches) {
         return { name: 'users-customerusers' }
       }
 
