@@ -109,11 +109,11 @@ export default {
         return { name: 'users-engineers' }
       }
 
-      if (this.hasAccessToModule('company', 'sales-users')) {
+      if (this.hasAccessToModule('company', 'sales-users') && !this.hasBranches) {
         return { name: 'users-salesusers' }
       }
 
-      if (this.hasAccessToModule('company', 'customer-users')) {
+      if (this.hasAccessToModule('company', 'customer-users') && !this.hasBranches) {
         return { name: 'users-customerusers' }
       }
 
