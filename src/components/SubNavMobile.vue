@@ -9,17 +9,6 @@
     </b-nav-item>
 
     <b-nav-item
-      :active="this.$route.name === 'mobile-dispatch-new'"
-      v-if="hasDispatch"
-      :to="{name: 'mobile-dispatch-new'}"
-    >
-      {{ $trans('Dispatch') }}
-      <b-badge
-        variant="success"
-      >{{ $trans("beta") }}</b-badge>
-    </b-nav-item>
-
-    <b-nav-item
       :active="isActive('orders')"
       v-if="hasOrders"
       :to="{name: 'mobile-orders'}">

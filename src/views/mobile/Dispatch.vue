@@ -3,36 +3,128 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="person-lines-fill"></b-icon>
-          {{ $trans('Dispatch') }}
+          <b-icon icon="calendar2-week"></b-icon>
+          {{ $trans("Dispatch") }} &ndash; {{ $trans("week") }}<strong>{{ +this.startWeek }}</strong>
+          {{ mode }}
         </h3>
-        <div v-if="assignMode && selectedOrders.length > 0" class="flex-columns">
+        <div class="flex-columns">
+          <b-button @click="function() { showSearchModal() }">
+            <b-icon icon="search"></b-icon>
+            {{ $trans('search') }}
+          </b-button>
 
-          <span class="dimmed">{{ $trans('Selected orders') }}:</span>
-          <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-items">
-            {{ order.order_id }}
-            <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
-            <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
-          </span>
+          <b-button @click="function() { loadToday() }">
+            <b-icon icon="patch-exclamation-fill" v-if="newData" :title="$trans('dispatch changed, refresh now')"></b-icon>
+            <b-icon icon="arrow-repeat" v-else></b-icon>
+            {{ $trans('refresh') }}
+          </b-button>
 
-          <span class="dimmed">{{ $trans('Selected people') }}:</span>
-          <span v-for="(user, index) in selectedUsers" :key="user.submodel_id" class="selected-items">
-            {{ user.full_name }}
-            <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedUser(index)"></b-icon>
-            <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedUser(index)"></b-icon>
-          </span>
-          <b-button-toolbar>
-            <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-              {{ $trans('Assign') }}</b-button>
-          </b-button-toolbar>
+          <b-button-group>
+            <b-button
+              variant="primary"
+              v-for="item in this.modeOptions"
+              :key="item.name"
+              :disabled="item.item === mode"
+              @click="() => changeViewMode(item.item)">{{  item.name }}</b-button>
+          </b-button-group>
+
+          <b-button-group>
+            <b-button
+              variant="primary"
+              v-for="item in this.showUsersOptions"
+              :key="item.name"
+              :disabled="item.item === showUsersMode"
+              @click="() => changeShowUsersMode(item.item)">{{  item.name }}</b-button>
+          </b-button-group>
         </div>
       </div>
     </header>
-    <b-button @click="backToTop" id="btn-back-to-top">
-      <b-icon-arrow-up-circle-fill></b-icon-arrow-up-circle-fill>
-    </b-button>
+
+    <div class="panel">
+      <div class="heading" v-if="assignMode && selectedOrders.length > 0">
+        <b-row>
+          <b-col cols="12">
+            <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
+            <span v-for="(order, index) in selectedOrders" :key="order.id">
+              {{ order.order_id }}
+              <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
+            </span>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="6">
+            <strong>{{ $trans('Selected users') }}:</strong>&nbsp;
+            <span v-for="(user, index) in selectedUsers" :key="user.user_id">
+              {{ user.full_name }} {{ user.user_id }}
+              <b-link class="px-1" @click.prevent="removeSelectedUser(index)">[ x ]</b-link>
+            </span>
+          </b-col>
+          <b-col cols="6">
+            <strong>{{ $trans('Already assigned users') }}:</strong>&nbsp;
+            <span v-for="user in alreadyAssignedUsers" :key="user.user_id">
+              {{ user.full_name }} {{ user.user_id }}
+            </span>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="12">
+            <footer class="modal-footer">
+              <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
+                {{ $trans('Cancel') }}</b-button>
+              <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+                {{ $trans('Submit') }}</b-button>
+            </footer>
+          </b-col>
+        </b-row>
+      </div>
+
+      <div class="flex-columns" style="justify-content: space-between;">
+
+        <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
+          <b-icon icon="arrow-left-square-fill" font-scale="1.2"></b-icon> week {{ this.startWeek - 1 }}
+        </b-link>
+
+        <span class="flex-columns">
+          <b-link class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
+            <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
+          </b-link>
+          <b-form-datepicker
+            v-model="startDate"
+            size="sm"
+            placeholder="Start date"
+            locale="nl"
+            :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
+          ></b-form-datepicker>
+          <b-button @click="function() { loadToday() }" variant="primary" size="sm" style="color: white; white-space: nowrap;">
+            <b-icon icon="calendar2-date-fill"></b-icon>&nbsp;
+            {{ $trans('today') }}
+          </b-button>
+          <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
+            <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
+          </b-link>
+        </span>
+
+        <b-link class="" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
+          week {{ (+this.startWeek + 1) }}
+          <b-icon icon="arrow-right-square-fill" font-scale="1.2"></b-icon>
+        </b-link>
+
+      </div>
+      <hr/>
+
+      <DispatchWeek
+        v-if="loadDone"
+        :startDate.sync="startDate"
+        :orderClickHandler="openActionsModal"
+        :mode="mode"
+        :is-assign-mode="assignMode"
+        :already-assigned-users="alreadyAssignedUsers"
+        :show-users-mode="showUsersMode"
+        ref="dispatchComponent"
+        @addSelectedUser="addSelectedUser"
+      />
+
+    </div>
 
     <SearchModal
       id="search-modal"
@@ -41,14 +133,14 @@
     />
 
     <b-modal
-      id="dispatch-change-date-modal"
       ref="dispatch-change-date-modal"
+      id="dispatch-change-date-modal"
       v-bind:title="$trans('Change date')"
       @ok="changeDateOk"
-      v-if="assignedOrder !== null"
+      v-if="selectedAssignedOrder !== null"
     >
       <form ref="change-date-form" @submit.stop.prevent="changeDateSubmit">
-        <b-container fluid>
+        <b-container fluid v-if="assignedOrder">
           <b-row role="group">
             <b-col size="6">
               <b-form-group
@@ -136,134 +228,84 @@
     <b-modal
       id="dispatch-order-actions-modal"
       ref="dispatch-order-actions-modal"
-      v-bind:title="$trans('Order actions')"
+      v-bind:title="`${$trans('Order')} ${selectedAssignedOrder && selectedAssignedOrder.order.order_id || '' }`"
     >
       <template #default="">
-        {{ $trans('Order') }} {{ selectedOrder.order_id }}<br/>
-        {{ selectedOrder.order_name }}<br/>
-        {{ selectedOrder.order_address }}<br/>
-        {{ selectedOrder.order_postal }} {{ selectedOrder.order_city }}<br/>
-        {{ $trans('Order date') }}: {{ selectedOrder.order_date }}<br/>
-        <span v-if="assignedOrder && assignedOrder.assignedorder_date != ''">
-            {{ $trans('User date') }}: {{ assignedOrder.assignedorder_date }}<br/>
-        </span>
-        <span v-if="selectedOrder.order_reference != ''">
-            {{ $trans('Reference') }}: {{ selectedOrder.order_reference }}<br/>
+        {{ $trans('Order') }} {{ selectedAssignedOrder.order.order_id }}<br/>
+        {{ selectedAssignedOrder.order.order_name }}<br/>
+        {{ selectedAssignedOrder.order.order_address }}<br/>
+        {{ selectedAssignedOrder.order.order_postal }} {{ selectedAssignedOrder.order.order_city }}<br/>
+        {{ $trans('Order date') }}: {{ selectedAssignedOrder.order.order_date }}<br/>
+        {{ $trans("Assigned order date") }}: {{ selectedAssignedOrder.date_formatted }}<br/>
+        <span v-if="selectedAssignedOrder.order.order_reference != ''">
+            {{ $trans('Reference') }}: {{ selectedAssignedOrder.order.order_reference }}<br/>
         </span>
       </template>
-
       <template #modal-footer="{ cancel }">
-        <b-row>
-          <b-col cols="1" class="mx-1">
-            <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
-          </b-col>
-          <b-col cols="1" class="mx-1">
-            <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
-          </b-col>
-          <b-col cols="4" class="mx-1" v-if="assignedOrder">
-            <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
-          </b-col>
-          <b-col cols="4" class="mx-1" v-if="!assignedOrder">&nbsp;</b-col>
-          <b-col cols="2" class="mx-1">
-            <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
-          </b-col>
-          <b-col cols="2" class="mx-1">
-            <b-button size="sm" @click="cancel()">{{ $trans('Close') }}</b-button>
-          </b-col>
-        </b-row>
-
-      </template>
-    </b-modal>
-    <div class="panel">
-
-
-      <b-row class="py-2">
-        <b-col cols="1">
-          <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
-          &nbsp;
-          <b-link class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
-            <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
-          </b-link>
-        </b-col>
-        <b-col cols="10">
-          <b-row>
-            <b-col cols="2" class="my-auto">
-              <b-form-datepicker
-                v-model="startDate"
-                size="sm"
-                placeholder="Start date"
-                locale="nl"
-                :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
-              ></b-form-datepicker>
+        <b-container>
+          <b-row v-if="selectedOrderIsPartner">
+            <b-col cols="1" class="mx-2">
+              <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
             </b-col>
-            <b-col cols="6" class="my-auto">
-              <b-link @click="function() { loadToday() }">{{ $trans('today') }}</b-link>
-              |
-              <b-link @click="function() { showSearchModal() }">{{ $trans('search') }}</b-link>
-              |
-              <span v-if="newData && !showOverlay">
-                <b-link @click="function() { dispatch.drawDispatch() }">
-                  <span class="new-data">{{ $trans('dispatch changed, refresh now') }}</span></b-link>
-              </span>
-              <span v-if="!newData">
-                <b-link @click="function() { dispatch.drawDispatch() }">{{ $trans('refresh') }}</b-link>
-              </span>
+            <b-col cols="1" class="mx-2">
+              <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
             </b-col>
-            <b-col cols="4" class="float-right">
-              <b-form-checkbox
-                v-model="useOld"
-              >{{ $trans('use old') }}</b-form-checkbox>
-              <div>
-                <b-form-radio-group
-                  v-model="mode"
-                  :options="modeOptions"
-                  class="mb-1"
-                  value-field="item"
-                  text-field="name"
-                ></b-form-radio-group>
+            <b-col cols="6" class="mx-1">
+              <div class="float-right">
+                <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
               </div>
             </b-col>
           </b-row>
-        </b-col>
-        <b-col cols="1">
-          <div class="float-right">
-            <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
-              <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
-            </b-link>
-            &nbsp;
-            <b-link class="px-1" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
-          </div>
-        </b-col>
-      </b-row>
-      <b-overlay :show="showOverlay" rounded="sm">
-        <canvas ref="dispatch-canvas" class="dispatchCanvas" width=1080 height=300 @mousemove="mousemove" @click="click"></canvas>
-        <canvas id="tip" ref="dispatch-tip-canvas" width=200 height=100></canvas>
-      </b-overlay>
-    </div>
+          <b-row v-else>
+            <b-col cols="1" class="mx-2">
+              <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
+            </b-col>
+            <b-col cols="1" class="mx-2">
+              <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
+            </b-col>
+            <b-col cols="4" class="mx-2" v-if="selectedAssignedOrder">
+              <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
+            </b-col>
+            <b-col cols="2" class="mx-2" v-if="selectedAssignedOrder">
+              <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
+            </b-col>
+            <b-col cols="2" class="mx-1">
+              <div class="float-right">
+                <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
+              </div>
+            </b-col>
+          </b-row>
+        </b-container>
+
+
+      </template>
+    </b-modal>
   </div>
 </template>
 
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import Dispatch from '../../services/dispatch.js'
-import orderModel from '../../models/orders/Order.js'
-import assignedOrderModel from '../../models/mobile/AssignedOrder.js'
-import assign from '../../models/mobile/Assign.js'
+import DispatchWeek from './dispatch/DispatchWeek.vue'
+import {OrderService} from '@/models/orders/Order'
+import {AssignedOrderChangeDatesModel, AssignedOrderService} from '@/models/mobile/AssignedOrder'
+import { AssignService } from '@/models/mobile/Assign'
 import SearchModal from '../../components/SearchModal.vue'
 import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
-import {NEW_DATA_EVENTS} from '../../constants';
+import {NEW_DATA_EVENTS} from '@/constants';
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
+class SelectedUser {
+  user_id
+  full_name
+}
+
 export default {
-  name: 'DispatchComponent',
+  name: 'DispatchNew',
   components: {
     SearchModal,
+    DispatchWeek
   },
   props: {
     assignModeProp: {
@@ -274,9 +316,14 @@ export default {
   data() {
     return {
       mode: null,
+      showUsersMode: null,
       modeOptions: [
         { item: 'compact', name: this.$trans('Compact') },
         { item: 'wide', name: this.$trans('Wide') },
+      ],
+      showUsersOptions: [
+        { item: 'all', name: this.$trans('All') },
+        { item: 'active', name: this.$trans('Active') },
       ],
       scrollTopButton: null,
       searchQuery: null,
@@ -285,43 +332,49 @@ export default {
       selectedOrders: [],
       selectedOrderIds: [],
       selectedUsers: [],
+      alreadyAssignedUsers: [],
       selectedOrder: null,
+      selectedAssignedOrder: null,
       selectedOrderUserId: null,
+      selectedOrderIsPartner: false,
       assignedOrder: null,
       assignedOrderPk: null,
       dispatch: null,
       showOverlay: false,
       startDate: null,
+      startWeek: null,
       newData: false,
       minDate: null,
       maxDate: null,
-      useOld: true,
+      statuscodes: null,
+      loadDone: false,
+      assignedOrderService: new AssignedOrderService(),
+      orderService: new OrderService(),
+      assignService: new AssignService()
     }
   },
   watch: {
     mode: function(val) {
       localStorage.setItem('displayMode', JSON.stringify(val))
-      this.dispatch.setMode(val)
-      this.dispatch.drawDispatch()
+    },
+    showUsersMode: function(val) {
+      localStorage.setItem('showUsersMode', JSON.stringify(val))
     },
     startDate: function(val) {
-      this.dispatch.setStartDate(val)
-      this.dispatch.drawDispatch()
-    },
-    useOld: function(val) {
-      this.dispatch.drawDispatch()
+      this.startWeek = moment(val).format('w');
     }
   },
   methods: {
-    getUseOld() {
-      return this.useOld
+    // change view mode
+    changeViewMode(mode) {
+      this.mode = mode;
+    },
+    changeShowUsersMode(mode) {
+      this.showUsersMode = mode;
     },
     // dates
     clearAssignedorderDates() {
-      this.assignedOrder.alt_start_date = null
-      this.assignedOrder.alt_end_date = null
-      this.assignedOrder.alt_start_time = null
-      this.assignedOrder.alt_end_time = null
+      this.assignedOrder = new AssignedOrderChangeDatesModel()
     },
     changeDate() {
       this.$refs['dispatch-order-actions-modal'].hide()
@@ -332,30 +385,26 @@ export default {
       this.changeDateSubmit()
     },
     async changeDateSubmit() {
-        this.showOverlay = true
+      this.showOverlay = true
 
-        try {
-          await assignedOrderModel.updateDetailChangeDate(this.assignedOrderPk, this.assignedOrder)
-          this.$refs['dispatch-change-date-modal'].hide();
-          this.showOverlay = false
-          await this.dispatch.drawDispatch()
-        } catch(error) {
-          console.log('error updating assignedOrder dates', error)
-          this.errorToast(this.$trans('Error updating dates'))
-          this.showOverlay = false
-        }
-    },
-    // nav
-    backToTop() {
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
+      try {
+        await this.assignedOrderService.updateDetailChangeDate(this.selectedAssignedOrder.id, this.assignedOrder)
+        this.$refs['dispatch-change-date-modal'].hide();
+        this.refreshData()
+        this.showOverlay = false
+
+      } catch(error) {
+        console.log('error updating assignedOrder dates', error)
+        this.errorToast(this.$trans('Error updating dates'))
+        this.showOverlay = false
+      }
     },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
       setTimeout(() => {
-        this.dispatch.setSearchQuery(val)
-        this.dispatch.search()
+        // this.dispatch.setSearchQuery(val)
+        // this.dispatch.search()
       }, 500)
       this.loadData()
     },
@@ -364,7 +413,8 @@ export default {
     },
     // rest
     loadToday() {
-      this.dispatch.loadToday()
+      // this.dispatch.loadToday()
+      this.startDate = new Date();
     },
     viewOrder() {
       this.$refs['dispatch-order-actions-modal'].hide();
@@ -378,31 +428,36 @@ export default {
         this.$router.push({name: 'order-edit', params: {pk: this.selectedOrder.id}})
       })
     },
-    async openActionsModal(order_pk, assignedorder_pk) {
-      this.dispatch.hideTipCanvas()
-      this.assignedOrderPk = assignedorder_pk
+    async openActionsModal(userId, order_pk, assignedorder, is_partner) {
+      this.selectedAssignedOrder = assignedorder
+      this.selectedOrderUserId = userId
+      this.selectedOrderIsPartner = is_partner
 
       try {
         this.showOverlay = true
-        this.selectedOrder = await orderModel.detail(order_pk)
-
-        if (assignedorder_pk) {
-          this.assignedOrder = await assignedOrderModel.getDetailChangeDate(assignedorder_pk)
-
-          this.assignedOrder.alt_start_date = this.$moment(this.assignedOrder.alt_start_date, 'DD/MM/YYYY').toDate()
-          this.assignedOrder.alt_end_date = this.$moment(this.assignedOrder.alt_end_date, 'DD/MM/YYYY').toDate()
-
-          this.minDate = this.assignedOrder.order_start_date
-          this.maxDate = this.assignedOrder.order_end_date
-        } else {
-          this.assignedOrder = null
-        }
+        this.selectedOrder = await this.orderService.detail(order_pk)
+        this.assignedOrder = new AssignedOrderChangeDatesModel()
         this.showOverlay = false
         this.$refs['dispatch-order-actions-modal'].show();
       } catch (error) {
-          console.log('error fetching order', error)
-          this.errorToast(this.$trans('Error fetching order'))
+        console.log('error fetching order', error)
+        this.errorToast(this.$trans('Error fetching order'))
       }
+    },
+    addSelectedUser(user) {
+      if (this.userAlreadyAssigned(user.user_id)) {
+        this.infoToast(this.$trans('Already assigned'), this.$trans('Order(s) already assigned'))
+        return
+      }
+      if (!this.userAlreadySelected(user.user_id)) {
+        this.selectedUsers.push(user)
+      }
+    },
+    userAlreadySelected(user_id) {
+      return this.selectedUsers.find(user => user.user_id === user_id)
+    },
+    userAlreadyAssigned(user_id) {
+      return this.alreadyAssignedUsers.find(user => user.user_id === user_id)
     },
     async assignToUsers() {
       this.showOverlay = true
@@ -415,12 +470,12 @@ export default {
 
       try {
         for (const user_id of user_ids) {
-          await assign.assignToUser(user_id, this.selectedOrderIds, true)
+          await this.assignService.assignToUser(user_id, this.selectedOrderIds, true)
         }
 
         this.infoToast(this.$trans('Success'), this.$trans('Order(s) assigned'))
         this.cancelAssign()
-        await this.dispatch.drawDispatch()
+        this.refreshData()
         this.buttonDisabled = false
         this.showOverlay = false
       } catch (e) {
@@ -435,10 +490,10 @@ export default {
       this.$refs['dispatch-order-actions-modal'].hide();
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
-          await assign.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
+          await this.assignService.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
           this.infoToast(this.$trans('Success'), this.$trans('Order removed from planning'))
+          this.refreshData()
           this.showOverlay = false
-          await this.dispatch.drawDispatch()
         } catch (error) {
           console.log('error un-assigning', error)
           this.errorToast(this.$trans('Error un-assigning order'))
@@ -447,8 +502,9 @@ export default {
       })
     },
     cancelAssign() {
-      this.selectedUsers = [];
-      this.selectedOrders = [];
+      this.selectedUsers = []
+      this.selectedOrders = []
+      this.alreadyAssignedUsers = []
       this.assignMode = false;
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
@@ -459,45 +515,25 @@ export default {
       this.selectedUsers.splice(index, 1);
     },
     timeForwardWeek() {
-      this.dispatch.timeForwardWeek();
+      this.startDate = moment(this.startDate).add(1, 'w').toDate()
     },
     timeForward() {
-      this.dispatch.timeForward();
+      this.startDate = moment(this.startDate).add(1, 'd').toDate()
     },
     timeBackWeek() {
-      this.dispatch.timeBackWeek();
+      this.startDate = moment(this.startDate).subtract(1, 'w').toDate()
     },
     timeBack() {
-      this.dispatch.timeBack();
-    },
-    mousemove(e) {
-      this.dispatch.handleMouseMove(e);
-    },
-    click(e) {
-      this.dispatch.handleClick(e);
-    },
-    setHandlers() {
-      window.onscroll = (e) => {
-        this.dispatch.reOffset()
-
-        if (
-          document.body.scrollTop > 20 ||
-          document.documentElement.scrollTop > 20
-        ) {
-          this.scrollTopButton.style.display = "block"
-        } else {
-          this.scrollTopButton.style.display = "none"
-        }
-      }
-
-      window.onresize = (e) => {
-        this.dispatch.reOffset();
-      };
+      this.startDate = moment(this.startDate).subtract(1, 'd').toDate()
     },
     onNewData(data) {
       if (data.type === NEW_DATA_EVENTS.DISPATCH) {
         this.newData = true
       }
+    },
+    refreshData() {
+      this.$refs['dispatchComponent'].loadData()
+      this.$refs['dispatchComponent'].makeDays()
     }
   },
   async mounted() {
@@ -506,30 +542,38 @@ export default {
     memberNewDataSocket.getSocket()
 
     const displayMode = JSON.parse(localStorage.getItem('displayMode'))
-    const mode = displayMode ? displayMode : 'wide'
+    this.mode = displayMode ? displayMode : 'wide'
+
+    const showUsersMode = JSON.parse(localStorage.getItem('showUsersMode'))
+    this.showUsersMode = showUsersMode ? showUsersMode : 'active'
 
     const lang = this.$store.getters.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
+    this.startDate = this.$moment().weekday(monday)
+    this.startWeek = this.startDate.format('w')
 
-    this.scrollTopButton = document.getElementById('btn-back-to-top')
     this.assignMode = this.assignModeProp
 
     if (this.assignMode) {
+      this.alreadyAssignedUsers = []
       this.selectedOrders = await this.$store.dispatch('getAssignOrders')
+      for (const order of this.selectedOrders) {
+        this.alreadyAssignedUsers.push(...order.assigned_user_info.map((userInfo) => {
+          return {
+            user_id: userInfo.user_id,
+            full_name: userInfo.full_name
+          }
+        }))
+      }
+    } else {
+      this.alreadyAssignedUsers = []
     }
 
-    const statuscodes = await this.$store.dispatch('getStatuscodes')
-    // console.log(JSON.stringify(statuscodes))
-    const canvas = this.$refs['dispatch-canvas']
-    const tipCanvas = this.$refs['dispatch-tip-canvas']
+    this.statuscodes = await this.$store.dispatch('getStatuscodes')
 
-    this.dispatch = new Dispatch(canvas, tipCanvas, statuscodes, this, monday)
-    this.mode = mode
-    // this.dispatch.setMode(mode)
-    // this.startDate = this.dispatch.startDate.toDate()
-    this.setHandlers()
+    this.loadDone = true
   },
   beforeDestroy() {
     memberNewDataSocket.removeOnmessageHandler(NEW_DATA_EVENTS.DISPATCH)
@@ -538,27 +582,6 @@ export default {
 </script>
 
 <style scoped>
-span.new-data {
-  color: red;
-  font-style: italic;
-  font-weight: bold;
-}
-#tip {
-  background-color:white;
-  border:1px solid blue;
-  position:absolute;
-  left:-2000px;
-}
-.dispatchCanvas {
-  position: relative !important;
-  width: 1080px;
-}
-#btn-back-to-top {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  display: none;
-}
 .heading {
   position: sticky;
   top: 0;
@@ -566,4 +589,8 @@ span.new-data {
   opacity: .9;
   z-index: 1000;
 }
+.flex-columns a {
+  align-self: center;
+}
+
 </style>
