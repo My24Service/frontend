@@ -59,7 +59,7 @@
         </template>
         <template #cell(full_name)="data">
           <router-link :to="{name: 'employee-edit', params : {pk: data.item.id}}">
-          {{  data.item.full_name }}asd
+          {{  data.item.full_name }}
           </router-link>
         </template>
         <template #cell(icons)="data">

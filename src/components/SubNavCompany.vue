@@ -105,7 +105,7 @@ export default {
   },
   computed: {
     getToRouteMaintenanceUsers() {
-      if (this.hasAccessToModule('company', 'engineer-users')) {
+      if (this.hasAccessToModule('company', 'engineer-users') && !this.hasBranches()) {
         return { name: 'users-engineers' }
       }
 
