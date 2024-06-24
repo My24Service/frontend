@@ -1,5 +1,10 @@
 <template>
-  <div class="mt-4">
+  <div class="app-page">
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
 
     <b-modal
       id="delete-member-modal"
@@ -10,90 +15,115 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
     </b-modal>
 
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
+    <header>
+      <div class="page-title">
+        <h3>
+          {{ $trans("Members") }}
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="service"
-        :model_name="modelName"
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'member-add'}" class="btn">
+            {{$trans('Add member')}}
+          </router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
+
+    <div class="app-detail panel overflow-auto">
+
+      <b-modal
+        id="delete-member-modal"
+        ref="delete-member-modal"
+        v-bind:title="$trans('Delete?')"
+        @ok="doDelete"
+      >
+        <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
+      </b-modal>
+
+      <SearchModal
+        id="search-modal"
+        ref="search-modal"
+        @do-search="handleSearchOk"
       />
 
-      <b-table
-        id="member-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="members"
-        responsive="md"
-        class="data-table"
-        sort-icon-left
-      >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  v-if="isSuperuser && !requested && !deleted"
-                  router_name="member-add"
-                  v-bind:title="$trans('New member')"
-                />
-                <ButtonLinkAdd
-                  v-if="requested && !deleted"
-                  router_name="member-request"
-                  v-bind:title="$trans('Request new member')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(member_logo)="data">
-          <img :src="data.item.companylogo_url" width="100" alt=""/>
-        </template>
-        <template #cell(member_info)="data">
-          {{ $trans('Companycode') }}: {{ data.item.companycode }} <span v-if="!data.item.is_public">({{ $trans('private') }})</span> <br/>
-          {{ $trans('Name') }}: {{ data.item.name }}<br/>
-          {{ data.item.country_code }}-{{ data.item.postal }} {{ data.item.city }}<br/>
-          {{ data.item.email }}<br/>
-          <p v-if="data.item.has_api_users">
-            <strong>{{ $trans('Has API users') }}</strong>
-          </p>
-          <p v-if="data.item.has_branches">
-            <strong>{{ $trans('Has branches') }}</strong>
-          </p>
-        </template>
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="member-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
-            />
-            <IconLinkDelete
-              v-if="showDelete"
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
-            />
-          </div>
-        </template>
-      </b-table>
+      <div class="overflow-auto">
+        <Pagination
+          v-if="!isLoading"
+          :model="service"
+          :model_name="modelName"
+        />
+
+        <b-table
+          id="member-table"
+          small
+          :busy='isLoading'
+          :fields="fields"
+          :items="members"
+          responsive="md"
+          class="data-table"
+          sort-icon-left
+        >
+          <template #head(icons)="">
+            <div class="float-right">
+              <b-button-toolbar>
+                <b-button-group class="mr-1">
+                  <ButtonLinkAdd
+                    v-if="isSuperuser && !requested && !deleted"
+                    router_name="member-add"
+                    v-bind:title="$trans('New member')"
+                  />
+                  <ButtonLinkAdd
+                    v-if="requested && !deleted"
+                    router_name="member-request"
+                    v-bind:title="$trans('Request new member')"
+                  />
+                  <ButtonLinkRefresh
+                    v-bind:method="function() { loadData() }"
+                    v-bind:title="$trans('Refresh')"
+                  />
+                  <ButtonLinkSearch
+                    v-bind:method="function() { showSearchModal() }"
+                  />
+                </b-button-group>
+              </b-button-toolbar>
+            </div>
+          </template>
+          <template #cell(member_logo)="data">
+            <img :src="data.item.companylogo_url" width="100" alt=""/>
+          </template>
+          <template #cell(member_info)="data">
+            <router-link :to="{name: 'member-edit', params: {pk: data.item.id}}">
+              {{ $trans('Companycode') }}: {{ data.item.companycode }} <span v-if="!data.item.is_public">({{ $trans('private') }})</span> <br/>
+              {{ $trans('Name') }}: {{ data.item.name }}<br/>
+              {{ data.item.country_code }}-{{ data.item.postal }} {{ data.item.city }}<br/>
+              {{ data.item.email }}<br/>
+              <p v-if="data.item.has_api_users">
+                <strong>{{ $trans('Has API users') }}</strong>
+              </p>
+              <p v-if="data.item.has_branches">
+                <strong>{{ $trans('Has branches') }}</strong>
+              </p>
+            </router-link>
+          </template>
+          <template #cell(icons)="data">
+            <div class="h2 float-right">
+              <IconLinkDelete
+                v-bind:title="$trans('Delete')"
+                v-bind:method="function() { showDeleteModal(data.item.id) }"
+              />
+            </div>
+          </template>
+        </b-table>
+      </div>
     </div>
   </div>
 </template>
@@ -108,10 +138,12 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '@/utils'
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
+import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    ButtonLinkDownload,
     IconLinkDelete,
     IconLinkEdit,
     ButtonLinkRefresh,
