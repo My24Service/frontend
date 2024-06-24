@@ -45,6 +45,7 @@ class MemberModel {
   vat_number
   equipment_qr_type
   is_requested = true
+  has_mobile_activity_user_select = false
 
   constructor(member) {
     for (const [k, v] of Object.entries(member)) {
