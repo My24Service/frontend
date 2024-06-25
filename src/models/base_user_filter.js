@@ -13,13 +13,6 @@ class FilterCondition {
   is_exclude = false
   values_query_mode = QUERY_MODE_OR
 
-}
-
-class BaseUserFilter {
-  name
-  json_conditions = []
-  querymode
-
   constructor(obj) {
     for (const [k, v] of Object.entries(obj)) {
       if (this.hasOwnProperty(k)) {
@@ -29,8 +22,25 @@ class BaseUserFilter {
   }
 }
 
+class BaseUserFilterModel {
+  name
+  json_conditions = []
+  querymode
+
+  constructor(obj) {
+    for (const [k, v] of Object.entries(obj)) {
+      if (this.hasOwnProperty(k)) {
+        if (k === 'json_conditions') {
+          this[k] = v.map((condition) => new FilterCondition(condition))
+        }
+        this[k] = v
+      }
+    }
+  }
+}
+
 class BaseUserFilterService extends BaseModel {
-  model = BaseUserFilter
+  model = BaseUserFilterModel
 
   getFields() {
     return this.axios.get(`${this.url}get_fields/`).then((response) => response.data)
@@ -53,4 +63,4 @@ class BaseUserFilterService extends BaseModel {
 export const USER_FILTER_TYPE_ORDER = 'order'
 // export const USER_FILTER_TYPE_QUOTATION = 'quotation'
 
-export {BaseUserFilter, BaseUserFilterService, FilterCondition}
+export {BaseUserFilterModel, BaseUserFilterService, FilterCondition}

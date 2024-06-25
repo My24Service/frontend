@@ -121,7 +121,7 @@
     </div>
     <Pagination
       v-if="!isLoading"
-      :model="this.model"
+      :model="model"
       :model_name="$trans('Customer')"
     />
   </div>

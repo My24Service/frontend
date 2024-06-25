@@ -12,7 +12,10 @@ function createUserFilterRoutes(name_part, path_part, filter_type) {
         'app-subnav': SubNavOrders
       },
       props: {
-        'app-content': route => ({...route.params, type: filter_type}),
+        'app-content': () => ({
+          type: filter_type,
+          route_name_part: name_part,
+        }),
         'app-subnav': true
       },
     },
@@ -24,7 +27,10 @@ function createUserFilterRoutes(name_part, path_part, filter_type) {
         'app-subnav': SubNavOrders
       },
       props: {
-        'app-content': route => ({...route.params, type: filter_type}),
+        'app-content': () => ({
+          type: filter_type,
+          route_name_part: name_part,
+        }),
         'app-subnav': true
       },
     },
@@ -32,7 +38,11 @@ function createUserFilterRoutes(name_part, path_part, filter_type) {
       name: `${name_part}-filter-edit`,
       path: `/${path_part}/filter/form/:pk`,
       props: {
-        'app-content': route => ({...route.params, type: filter_type}),
+        'app-content': route => ({
+          ...route.params,
+          type: filter_type,
+          route_name_part: name_part,
+        }),
         'app-subnav': true
       },
       components: {
@@ -40,7 +50,6 @@ function createUserFilterRoutes(name_part, path_part, filter_type) {
         'app-subnav': SubNavOrders
       },
     },
-
   ]
 }
 

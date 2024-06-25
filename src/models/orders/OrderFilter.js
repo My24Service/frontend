@@ -1,10 +1,10 @@
-import {BaseUserFilter, BaseUserFilterService} from "../base_user_filter";
+import {BaseUserFilterModel, BaseUserFilterService} from "../base_user_filter";
 
-class OrderFilter extends BaseUserFilter {
+class OrderFilterModel extends BaseUserFilterModel {
 }
 
 class OrderFilterService extends BaseUserFilterService {
   url = '/order/filter/'
 }
 
-export {OrderFilter, OrderFilterService}
+export {OrderFilterModel, OrderFilterService}

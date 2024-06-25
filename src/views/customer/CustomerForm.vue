@@ -475,8 +475,7 @@ export default {
     }
 
     if (this.isCreate) {
-      const customerData = this.customerService.getFields()
-      this.customer = new CustomerModel(customerData)
+      this.customer = new CustomerModel({})
       const result = await this.customerService.getCustomerId()
       if (result.created) {
         this.customerIdCreated = true
