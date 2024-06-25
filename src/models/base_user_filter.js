@@ -45,6 +45,7 @@ class BaseUserFilterService extends BaseModel {
   }
 
   getSimpleList() {
+    // we could make separate calls to get the orders count of the filters
     return this.axios.get(`${this.url}simple_list/`).then((response) => response.data)
   }
 }

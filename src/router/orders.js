@@ -18,10 +18,14 @@ import OrderView from '../views/orders/OrderView.vue'
 
 import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
-import {AUTH_LEVELS} from "@/constants";
+import {AUTH_LEVELS} from "../constants";
 
 import InvoiceForm from "../views/orders/InvoiceForm";
 import InvoiceView from "../views/orders/InvoiceView";
+import UserFilterForm from "../views/shared/UserFilterForm";
+import {USER_FILTER_TYPE_ORDER} from "../models/base_user_filter";
+import UserFilterList from "../views/shared/UserFilterList";
+import {createUserFilterRoutes} from "./helpers";
 
 export default [
 // orders
@@ -278,6 +282,8 @@ export default [
         'app-subnav': SubNavOrders
       },
     },
+    // filters
+    ...createUserFilterRoutes('order', 'orders', USER_FILTER_TYPE_ORDER),
 
   ],
 }
