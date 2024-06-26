@@ -61,6 +61,8 @@ class QuotationService extends BaseModel {
     let base = ''
     if (this.queryMode === 'preliminary') {
       base = '/quotation/quotation/preliminary/'
+    } else if (this.queryMode === 'sent') {
+      base = '/quotation/quotation/sent/'
     } else {
       console.log(`unknown queryMode: ${this.queryMode}`)
       base = '/quotation/quotation/'
@@ -71,6 +73,11 @@ class QuotationService extends BaseModel {
 
   makeDefinitive(id) {
     const url = `/quotation/quotation/${id}/make_definitive/`
+    return new this.axios.post(url, {}).then(response => response.data)
+  }
+
+  generatePdf(id) {
+    const url = `/quotation/quotation/${id}/generate_definitive_pdf/`
     return new this.axios.post(url, {}).then(response => response.data)
   }
 
