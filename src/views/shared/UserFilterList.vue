@@ -64,7 +64,7 @@
       </b-table>
     </div>
     <Pagination
-      v-if="!isLoading"
+      v-if="!isLoading && service"
       :model="service"
       :model_name="$trans('Filter')"
     />
@@ -115,11 +115,11 @@ export default {
     }
   },
   created() {
-    this.service.currentPage = this.$route.query.page || 1
     if (this.type === USER_FILTER_TYPE_ORDER) {
       this.service = new OrderFilterService()
       this.model = OrderFilterModel
     }
+    this.service.currentPage = this.$route.query.page || 1
   },
   methods: {
     // search

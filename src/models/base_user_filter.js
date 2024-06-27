@@ -32,8 +32,9 @@ class BaseUserFilterModel {
       if (this.hasOwnProperty(k)) {
         if (k === 'json_conditions') {
           this[k] = v.map((condition) => new FilterCondition(condition))
+        } else {
+          this[k] = v
         }
-        this[k] = v
       }
     }
   }
@@ -57,6 +58,10 @@ class BaseUserFilterService extends BaseModel {
   getSimpleList() {
     // we could make separate calls to get the orders count of the filters
     return this.axios.get(`${this.url}simple_list/`).then((response) => response.data)
+  }
+
+  getExamples() {
+    return this.axios.get(`${this.url}get_examples/`).then((response) => response.data)
   }
 }
 
