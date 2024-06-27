@@ -101,7 +101,7 @@
 import my24 from '../../services/my24.js'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
-import { OfferService, OfferModel } from "@/models/quotations/offer.js";
+import { OfferService, OfferModel } from "@/models/quotations/Offer.js";
 import {QuotationService} from '@/models/quotations/Quotation'
 
 

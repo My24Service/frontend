@@ -40,28 +40,7 @@
 
     <div class="app-detail panel overflow-auto">
 
-      <b-modal
-        id="delete-member-modal"
-        ref="delete-member-modal"
-        v-bind:title="$trans('Delete?')"
-        @ok="doDelete"
-      >
-        <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
-      </b-modal>
-
-      <SearchModal
-        id="search-modal"
-        ref="search-modal"
-        @do-search="handleSearchOk"
-      />
-
       <div class="overflow-auto">
-        <Pagination
-          v-if="!isLoading"
-          :model="service"
-          :model_name="modelName"
-        />
-
         <b-table
           id="member-table"
           small
@@ -125,6 +104,11 @@
         </b-table>
       </div>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="service"
+      :model_name="modelName"
+    />
   </div>
 </template>
 
@@ -138,12 +122,10 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '@/utils'
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
-    ButtonLinkDownload,
     IconLinkDelete,
     IconLinkEdit,
     ButtonLinkRefresh,

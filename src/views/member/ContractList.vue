@@ -1,6 +1,5 @@
 <template>
-  <div class="mt-4">
-
+  <div class="app-page">
     <b-modal
       id="delete-contract-modal"
       ref="delete-contract-modal"
@@ -16,63 +15,63 @@
       @do-search="handleSearchOk"
     />
 
-    <div class="overflow-auto">
-      <Pagination
-        v-if="!isLoading"
-        :model="this.model"
-        :model_name="$trans('Contract')"
-      />
+    <header>
+      <div class="page-title">
+        <h3>
+          {{ $trans("Contracts") }}
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
 
-      <b-table
-        id="contract-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="contracts"
-        responsive="md"
-        class="data-table"
-        sort-icon-left
-      >
-        <template #head(icons)="">
-          <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
-                <ButtonLinkAdd
-                  router_name="contract-add"
-                  v-bind:title="$trans('New contract')"
-                />
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-              </b-button-group>
-            </b-button-toolbar>
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkEdit
-              router_name="contract-edit"
-              v-bind:router_params="{pk: data.item.id}"
-              v-bind:title="$trans('Edit')"
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
             />
-            <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
             />
-          </div>
-        </template>
-      </b-table>
+          </b-button-group>
+          <router-link :to="{name: 'contract-add'}" class="btn">
+            {{$trans('Add contract')}}
+          </router-link>
+        </b-button-toolbar>
+      </div>
+    </header>
+
+    <div class="app-detail panel overflow-auto">
+
+      <div class="overflow-auto">
+        <b-table
+          id="contract-table"
+          small
+          :busy='isLoading'
+          :fields="fields"
+          :items="contracts"
+          responsive="md"
+          class="data-table"
+          sort-icon-left
+        >
+          <template #cell(icons)="data">
+            <div class="h2 float-right">
+              <IconLinkEdit
+                router_name="contract-edit"
+                v-bind:router_params="{pk: data.item.id}"
+                v-bind:title="$trans('Edit')"
+              />
+              <IconLinkDelete
+                v-bind:title="$trans('Delete')"
+                v-bind:method="function() { showDeleteModal(data.item.id) }"
+              />
+            </div>
+          </template>
+        </b-table>
+      </div>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="this.model"
+      :model_name="$trans('Contract')"
+    />
   </div>
 </template>
 
