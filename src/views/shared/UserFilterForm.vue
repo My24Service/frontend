@@ -19,29 +19,6 @@
     <div class="page-detail">
       <div class='flex-columns'>
         <div class='panel col-1-2'>
-          <details>
-            <summary>
-              <h5>{{ $trans("Examples")}}</h5>
-            </summary>
-            <ul>
-              <li
-                v-for="(example, index) in examples"
-                :key="index"
-              >
-                <h6>{{ example.name }}</h6>
-                <p>{{ example.description }}</p>
-                <p>
-                  <b-link
-                    :title="$trans('load example')"
-                    @click="loadExample(example)"
-                  >
-                    {{ $trans("load example") }}
-                  </b-link>
-                </p>
-              </li>
-            </ul>
-          </details>
-
           <b-form-group
             label-cols="3"
             label-size="sm"
@@ -63,7 +40,7 @@
           <h6>{{ $trans("Conditions")}}</h6>
           <b-container v-for="(condition, index) in filter.json_conditions" :key="index">
             <b-row>
-              <b-col cols="4">
+              <b-col cols="3">
                 <b-form-group
                   label-size="sm"
                   :label="$trans('Case sensitive')"
@@ -75,7 +52,7 @@
                   ></b-form-checkbox>
                 </b-form-group>
               </b-col>
-              <b-col cols="2">
+              <b-col cols="3">
                 <b-form-group
                   label-size="sm"
                   :label="$trans('Exact')"
@@ -88,7 +65,7 @@
                     </b-form-checkbox>
                 </b-form-group>
               </b-col>
-              <b-col cols="2">
+              <b-col cols="3">
                 <b-form-group
                   label-size="sm"
                   :label="$trans('Exclude')"
@@ -96,6 +73,7 @@
                 >
                   <b-form-checkbox
                     id="filter_is_exclude"
+                    disabled
                     v-model="condition.is_exclude"
                   >
                   </b-form-checkbox>
@@ -116,7 +94,7 @@
               </b-col>
             </b-row>
             <b-row>
-              <b-col cols="4">
+              <b-col cols="6">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Field')"
@@ -129,7 +107,7 @@
                     size="sm"></b-form-select>
                 </b-form-group>
               </b-col>
-              <b-col cols="4">
+              <b-col cols="6">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Operator')"
@@ -142,7 +120,9 @@
                     size="sm"></b-form-select>
                 </b-form-group>
               </b-col>
-              <b-col cols="4">
+            </b-row>
+            <b-row>
+              <b-col cols="12">
                 <b-form-group
                   label-size="sm"
                   v-bind:label="$trans('Values')"
@@ -163,19 +143,37 @@
                     <b-link
                       :title="$trans('add value')"
                       @click="addConditionValue(condition)"
-                      >
-                        {{ $trans("add value") }}
+                    >
+                      {{ $trans("add value") }}
                     </b-link>
                   </div>
                 </b-form-group>
 
               </b-col>
+
             </b-row>
 
           </b-container>
         </div>
         <div class='panel col-1-2'>
-          <h6>HOI</h6>
+          <h5>{{ $trans("Examples")}}</h5>
+          <ul>
+            <li
+              v-for="(example, index) in examples"
+              :key="index"
+            >
+              <h6>{{ example.name }}</h6>
+              <p>{{ example.description }}</p>
+              <p>
+                <b-link
+                  :title="$trans('load example')"
+                  @click="loadExample(example)"
+                >
+                  {{ $trans("load example") }}
+                </b-link>
+              </p>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -183,12 +181,14 @@
 </template>
 
 <script>
-import { useVuelidate } from '@vuelidate/core'
-import { required } from '@vuelidate/validators'
+import {useVuelidate} from '@vuelidate/core'
+import {required} from '@vuelidate/validators'
 
 import {
-  FilterCondition, FilterExample,
-  QUERY_MODE_AND, QUERY_MODE_OR,
+  FilterCondition,
+  FilterExample,
+  QUERY_MODE_AND,
+  QUERY_MODE_OR,
   USER_FILTER_TYPE_ORDER
 } from "../../models/base_user_filter";
 import {OrderFilterModel, OrderFilterService} from "../../models/orders/OrderFilter";
@@ -277,7 +277,10 @@ export default {
   },
   methods: {
     loadExample(example) {
-
+      this.filter = new this.model({
+        name: example.name,
+        json_conditions: example.json_conditions
+      })
     },
     addConditionValue(condition) {
       condition.values.push('')

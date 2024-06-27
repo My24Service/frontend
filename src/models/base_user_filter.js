@@ -41,6 +41,7 @@ class FilterExample {
 }
 
 class BaseUserFilterModel {
+  id
   name
   json_conditions = []
   querymode

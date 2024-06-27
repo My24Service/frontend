@@ -41,7 +41,7 @@
     <div class="panel overflow-auto">
       <b-table
         small
-        id="statuscode-table"
+        id="filter-table"
         :busy='isLoading'
         :fields="fields"
         :items="filters"
@@ -52,6 +52,17 @@
           <router-link :to="{name: `${route_name_part}-filter-edit`, params: {pk: data.item.id}}">
             {{ data.item.name }}
           </router-link>
+        </template>
+        <template #cell(conditions)="data">
+          <ul>
+            <li v-for="(condition, index) in data.item.json_conditions" :key="index">
+              {{ condition.field }} {{ condition.operator }}
+              <span v-for="(value, value_index) in condition.values" :key="value_index">
+                <strong>{{ value }}</strong>
+                <span v-if="value_index < condition.values.length-1"> {{ condition.values_query_mode }} </span>
+              </span>
+            </li>
+          </ul>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -110,16 +121,17 @@ export default {
       fields: [
         {key: 'name', label: this.$trans('Name'), thAttr: {width: '20%'}},
         {key: 'conditions', label: this.$trans('Conditions'), thAttr: {width: '65%'}},
-        {key: 'icons', thAttr: {width: '15%'}},
+        {key: 'icons', label: '', thAttr: {width: '15%'}},
       ]
     }
   },
-  created() {
+  async created() {
     if (this.type === USER_FILTER_TYPE_ORDER) {
       this.service = new OrderFilterService()
       this.model = OrderFilterModel
     }
     this.service.currentPage = this.$route.query.page || 1
+    await this.loadData()
   },
   methods: {
     // search
