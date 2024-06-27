@@ -31,8 +31,19 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <router-link :to="{name: 'member-add'}" class="btn">
+          <router-link
+            v-if="isSuperuser && !requested && !deleted"
+            :to="{name: 'member-add'}"
+            class="btn"
+          >
             {{$trans('Add member')}}
+          </router-link>
+          <router-link
+            v-if="requested && !deleted"
+            :to="{name: 'member-request'}"
+            class="btn"
+          >
+            {{$trans('Request new member')}}
           </router-link>
         </b-button-toolbar>
       </div>
@@ -51,31 +62,6 @@
           class="data-table"
           sort-icon-left
         >
-          <template #head(icons)="">
-            <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-                  <ButtonLinkAdd
-                    v-if="isSuperuser && !requested && !deleted"
-                    router_name="member-add"
-                    v-bind:title="$trans('New member')"
-                  />
-                  <ButtonLinkAdd
-                    v-if="requested && !deleted"
-                    router_name="member-request"
-                    v-bind:title="$trans('Request new member')"
-                  />
-                  <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
-                  />
-                  <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
-                  />
-                </b-button-group>
-              </b-button-toolbar>
-            </div>
-          </template>
           <template #cell(member_logo)="data">
             <img :src="data.item.companylogo_url" width="100" alt=""/>
           </template>
