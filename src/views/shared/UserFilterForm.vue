@@ -19,6 +19,29 @@
     <div class="page-detail">
       <div class='flex-columns'>
         <div class='panel col-1-2'>
+          <details>
+            <summary>
+              <h5>{{ $trans("Examples")}}</h5>
+            </summary>
+            <ul>
+              <li
+                v-for="(example, index) in examples"
+                :key="index"
+              >
+                <h6>{{ example.name }}</h6>
+                <p>{{ example.description }}</p>
+                <p>
+                  <b-link
+                    :title="$trans('load example')"
+                    @click="loadExample(example)"
+                  >
+                    {{ $trans("load example") }}
+                  </b-link>
+                </p>
+              </li>
+            </ul>
+          </details>
+
           <b-form-group
             label-cols="3"
             label-size="sm"
@@ -164,7 +187,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import {
-  FilterCondition,
+  FilterCondition, FilterExample,
   QUERY_MODE_AND, QUERY_MODE_OR,
   USER_FILTER_TYPE_ORDER
 } from "../../models/base_user_filter";
@@ -216,6 +239,7 @@ export default {
         {value: QUERY_MODE_OR, text: this.$trans('or')},
       ],
       fields: [],
+      fieldsConfig: null,
       operators: []
     }
   },
@@ -234,14 +258,16 @@ export default {
       this.model = OrderFilterModel
     }
 
-    const fieldsConfig = await this.service.getFields()
+    // allowed filter fields, displaying normal and related in one list for now
+    this.fieldsConfig = await this.service.getFields()
+    this.fields = [...this.fieldsConfig.model, ...this.fieldsConfig.related]
 
-    this.fields = [...fieldsConfig.model, ...fieldsConfig.related]
+    // operators that are supported
     this.operators = await this.service.getOperators()
 
     if (this.isCreate) {
       const examplesData = await this.service.getExamples()
-      this.examples = examplesData.map((example) => new this.model(example))
+      this.examples = examplesData.map((example) => new FilterExample(example))
       this.filter = new this.model({json_conditions: [this.newCondition()]})
       console.log(this.filter)
     } else {
@@ -250,6 +276,9 @@ export default {
     this.isLoading = false
   },
   methods: {
+    loadExample(example) {
+
+    },
     addConditionValue(condition) {
       condition.values.push('')
     },

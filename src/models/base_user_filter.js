@@ -22,6 +22,24 @@ class FilterCondition {
   }
 }
 
+class FilterExample {
+  name
+  description
+  json_conditions
+
+  constructor(obj) {
+    for (const [k, v] of Object.entries(obj)) {
+      if (this.hasOwnProperty(k)) {
+        if (k === 'json_conditions') {
+          this[k] = v.map((condition) => new FilterCondition(condition))
+        } else {
+          this[k] = v
+        }
+      }
+    }
+  }
+}
+
 class BaseUserFilterModel {
   name
   json_conditions = []
@@ -68,4 +86,4 @@ class BaseUserFilterService extends BaseModel {
 export const USER_FILTER_TYPE_ORDER = 'order'
 // export const USER_FILTER_TYPE_QUOTATION = 'quotation'
 
-export {BaseUserFilterModel, BaseUserFilterService, FilterCondition}
+export {BaseUserFilterModel, BaseUserFilterService, FilterCondition, FilterExample}
