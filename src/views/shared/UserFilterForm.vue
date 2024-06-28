@@ -258,6 +258,7 @@ export default {
       valuesQueryModeDisabled: false,
       isExcludeDisabled: false,
       valuesNotDisabled: false,
+      nonTextFieldTypes: {}
     }
   },
   computed: {
@@ -278,6 +279,7 @@ export default {
     // allowed filter fields, displaying normal and related in one list for now
     this.fieldsConfig = await this.service.getFields()
     this.allFields = [...this.fieldsConfig.model, ...this.fieldsConfig.related]
+    this.nonTextFieldTypes = await this.service.getNonTextFieldTypes()
 
     // operators that are supported
     this.operators = await this.service.getOperators()

@@ -7,6 +7,10 @@ export const OPERATOR_MATCHES = 'MATCHES'
 export const OPERATOR_ONLY_MATCHES = 'ONLY_MATCHES'
 export const OPERATOR_EXCEPT_MATCHES = 'EXCEPT_MATCHES'
 
+export const FIELD_TYPE_BOOL = 'bool'
+export const FIELD_TYPE_DATE = 'date'
+export const FIELD_TYPE_DATETIME = 'datetime'
+
 class FilterCondition {
   filter
   field
@@ -82,6 +86,11 @@ class BaseUserFilterService extends BaseModel {
   getSimpleList() {
     // we could make separate calls to get the orders count of the filters
     return this.axios.get(`${this.url}simple_list/`).then((response) => response.data)
+  }
+
+  getNonTextFieldTypes() {
+    return this.axios.get(`${this.url}get_non_text_field_types/`).then((response) => response.data)
+
   }
 
   getExamples() {
