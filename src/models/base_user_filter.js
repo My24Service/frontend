@@ -3,6 +3,10 @@ import BaseModel from './base'
 export const QUERY_MODE_AND = 'and'
 export const QUERY_MODE_OR = 'or'
 
+export const OPERATOR_MATCHES = 'MATCHES'
+export const OPERATOR_ONLY_MATCHES = 'ONLY_MATCHES'
+export const OPERATOR_EXCEPT_MATCHES = 'EXCEPT_MATCHES'
+
 class FilterCondition {
   filter
   field
@@ -12,6 +16,7 @@ class FilterCondition {
   is_exact = false
   is_exclude = false
   values_query_mode = QUERY_MODE_OR
+  values_not = false
 
   constructor(obj) {
     for (const [k, v] of Object.entries(obj)) {

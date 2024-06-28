@@ -40,60 +40,6 @@
           <h6>{{ $trans("Conditions")}}</h6>
           <b-container v-for="(condition, index) in filter.json_conditions" :key="index">
             <b-row>
-              <b-col cols="3">
-                <b-form-group
-                  label-size="sm"
-                  :label="$trans('Case sensitive')"
-                  label-for="filter_is_case_sensitive"
-                >
-                  <b-form-checkbox
-                    id="filter_is_case_sensitive"
-                    v-model="condition.is_case_sensitive"
-                  ></b-form-checkbox>
-                </b-form-group>
-              </b-col>
-              <b-col cols="3">
-                <b-form-group
-                  label-size="sm"
-                  :label="$trans('Exact')"
-                  label-for="filter_is_exact"
-                >
-                  <b-form-checkbox
-                      id="filter_is_exact"
-                      v-model="condition.is_exact"
-                    >
-                    </b-form-checkbox>
-                </b-form-group>
-              </b-col>
-              <b-col cols="3">
-                <b-form-group
-                  label-size="sm"
-                  :label="$trans('Exclude')"
-                  label-for="filter_is_exclude"
-                >
-                  <b-form-checkbox
-                    id="filter_is_exclude"
-                    disabled
-                    v-model="condition.is_exclude"
-                  >
-                  </b-form-checkbox>
-                </b-form-group>
-              </b-col>
-              <b-col cols="3">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Values query mode')"
-                  label-for="filter_values_query_mode"
-                >
-                  <b-form-select
-                    id="filter_values_query_mode"
-                    v-model="condition.values_query_mode"
-                    :options="valuesQueryModes"
-                    size="sm"></b-form-select>
-                </b-form-group>
-              </b-col>
-            </b-row>
-            <b-row>
               <b-col cols="6">
                 <b-form-group
                   label-size="sm"
@@ -103,7 +49,8 @@
                   <b-form-select
                     id="filter_field"
                     v-model="condition.field"
-                    :options="fields"
+                    :options="allFields"
+                    @change="checkCondition(condition)"
                     size="sm"></b-form-select>
                 </b-form-group>
               </b-col>
@@ -116,8 +63,79 @@
                   <b-form-select
                     id="filter_operator"
                     v-model="condition.operator"
-                    :options="operators"
+                    :options="getOperators(condition.field)"
+                    size="sm"
+                    @change="checkCondition(condition)"
+                  ></b-form-select>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="3">
+                <b-form-group
+                  label-size="sm"
+                  :label="$trans('Case sensitive')"
+                  label-for="filter_is_case_sensitive"
+                >
+                  <b-form-checkbox
+                    id="filter_is_case_sensitive"
+                    v-model="condition.is_case_sensitive"
+                  ></b-form-checkbox>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2">
+                <b-form-group
+                  label-size="sm"
+                  :label="$trans('Exact')"
+                  label-for="filter_is_exact"
+                >
+                  <b-form-checkbox
+                      id="filter_is_exact"
+                      v-model="condition.is_exact"
+                    >
+                    </b-form-checkbox>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2">
+                <b-form-group
+                  label-size="sm"
+                  :label="$trans('Exclude')"
+                  label-for="filter_is_exclude"
+                >
+                  <b-form-checkbox
+                    id="filter_is_exclude"
+                    :disabled="isExcludeDisabled"
+                    v-model="condition.is_exclude"
+                  >
+                  </b-form-checkbox>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2">
+                <b-form-group
+                  label-size="sm"
+                  v-bind:label="$trans('Values')"
+                  label-for="filter_values_query_mode"
+                >
+                  <b-form-select
+                    :disabled="valuesQueryModeDisabled"
+                    id="filter_values_query_mode"
+                    v-model="condition.values_query_mode"
+                    :options="valuesQueryModes"
                     size="sm"></b-form-select>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3">
+                <b-form-group
+                  label-size="sm"
+                  :label="$trans('Values NOT')"
+                  label-for="filter_values_not"
+                >
+                  <b-form-checkbox
+                    id="filter_values_not"
+                    :disabled="valuesNotDisabled"
+                    v-model="condition.values_not"
+                  >
+                  </b-form-checkbox>
                 </b-form-group>
               </b-col>
             </b-row>
@@ -186,22 +204,18 @@ import {required} from '@vuelidate/validators'
 
 import {
   FilterCondition,
-  FilterExample,
+  FilterExample, OPERATOR_EXCEPT_MATCHES, OPERATOR_ONLY_MATCHES,
   QUERY_MODE_AND,
   QUERY_MODE_OR,
   USER_FILTER_TYPE_ORDER
 } from "../../models/base_user_filter";
 import {OrderFilterModel, OrderFilterService} from "../../models/orders/OrderFilter";
 
-// condition:
-// checkboxes for booleans
-// is_case_sensitive = false
-// is_exact = false
-// is_exclude = false
-// values_query_mode = QUERY_MODE_OR
-// | field | operator | list | value | [add value]
-// component for this?
-
+/*
+  TODO
+   2) when last_status is selected, provide example values of cleaned up statuses from settings
+   4) field types (string, bool, date, etc.)
+ */
 export default {
   name: "UserFilterForm",
   setup() {
@@ -238,9 +252,12 @@ export default {
         {value: QUERY_MODE_AND, text: this.$trans('and')},
         {value: QUERY_MODE_OR, text: this.$trans('or')},
       ],
-      fields: [],
+      allFields: [],
       fieldsConfig: null,
-      operators: []
+      operators: {},
+      valuesQueryModeDisabled: false,
+      isExcludeDisabled: false,
+      valuesNotDisabled: false,
     }
   },
   computed: {
@@ -260,7 +277,7 @@ export default {
 
     // allowed filter fields, displaying normal and related in one list for now
     this.fieldsConfig = await this.service.getFields()
-    this.fields = [...this.fieldsConfig.model, ...this.fieldsConfig.related]
+    this.allFields = [...this.fieldsConfig.model, ...this.fieldsConfig.related]
 
     // operators that are supported
     this.operators = await this.service.getOperators()
@@ -276,11 +293,52 @@ export default {
     this.isLoading = false
   },
   methods: {
+    getOperators(field) {
+      if (this.fieldsConfig.model.indexOf(field) !== -1) {
+        return this.operators.model
+      }
+
+      if (this.fieldsConfig.related.indexOf(field) !== -1) {
+        return this.operators.related
+      }
+
+      return []
+    },
+    checkCondition(condition) {
+      // model field or related?
+      if (this.fieldsConfig.model.indexOf(condition.field) !== -1) {
+        condition.values_query_mode = QUERY_MODE_OR
+        this.isExcludeDisabled = false
+        this.valuesNotDisabled = false
+        this.valuesQueryModeDisabled = true
+      } else {
+        // ONLY_MATCHES has is_exclude and values_not set to true
+        // EXCEPT_MATCHES has is_exclude set to false and values_not set to true
+        if (condition.operator === OPERATOR_ONLY_MATCHES) {
+          condition.is_exclude = true
+          condition.values_not = true
+          condition.values_query_mode = QUERY_MODE_AND
+          this.isExcludeDisabled = true
+          this.valuesNotDisabled = true
+          this.valuesQueryModeDisabled = true
+        }
+
+        else if (condition.operator === OPERATOR_EXCEPT_MATCHES) {
+          condition.is_exclude = false
+          condition.values_not = true
+          condition.values_query_mode = QUERY_MODE_AND
+          this.isExcludeDisabled = true
+          this.valuesNotDisabled = true
+          this.valuesQueryModeDisabled = true
+        }
+      }
+    },
     loadExample(example) {
       this.filter = new this.model({
         name: example.name,
         json_conditions: example.json_conditions
       })
+      this.checkCondition(this.filter.json_conditions[0])
     },
     addConditionValue(condition) {
       condition.values.push('')
