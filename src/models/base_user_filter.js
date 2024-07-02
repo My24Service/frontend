@@ -7,15 +7,43 @@ export const OPERATOR_MATCHES = 'MATCHES'
 export const OPERATOR_ONLY_MATCHES = 'ONLY_MATCHES'
 export const OPERATOR_EXCEPT_MATCHES = 'EXCEPT_MATCHES'
 
+export const FIELD_TYPE_CHAR = 'char'
 export const FIELD_TYPE_BOOL = 'bool'
 export const FIELD_TYPE_DATE = 'date'
 export const FIELD_TYPE_DATETIME = 'datetime'
+
+class FilterConditionValue {
+  char_value
+  date_value
+  datetime_value
+  bool_value
+
+  constructor(obj) {
+    switch (obj.type) {
+      case FIELD_TYPE_CHAR:
+        this.char_value = obj.value
+        break
+      case FIELD_TYPE_BOOL:
+        this.bool_value = obj.value
+        break;
+      case FIELD_TYPE_DATE:
+        this.date_value = obj
+        break;
+      case FIELD_TYPE_DATETIME:
+        this.datetime_value = obj
+        break;
+      default:
+        console.log('FilterConditionValue: Unknown field type', obj)
+        throw `FilterConditionValue: Unknown field type: ${obj.type}`
+    }
+  }
+}
 
 class FilterCondition {
   filter
   field
   operator
-  values
+  values = []
   is_case_sensitive = false
   is_exact = false
   is_exclude = false
@@ -25,22 +53,8 @@ class FilterCondition {
   constructor(obj) {
     for (const [k, v] of Object.entries(obj)) {
       if (this.hasOwnProperty(k)) {
-        this[k] = v
-      }
-    }
-  }
-}
-
-class FilterExample {
-  name
-  description
-  json_conditions
-
-  constructor(obj) {
-    for (const [k, v] of Object.entries(obj)) {
-      if (this.hasOwnProperty(k)) {
-        if (k === 'json_conditions') {
-          this[k] = v.map((condition) => new FilterCondition(condition))
+        if (k === 'values') {
+          this[k] = v.map((value) => new FilterConditionValue(value))
         } else {
           this[k] = v
         }
@@ -53,7 +67,7 @@ class BaseUserFilterModel {
   id
   name
   json_conditions = []
-  querymode
+  querymode = QUERY_MODE_OR
 
   constructor(obj) {
     for (const [k, v] of Object.entries(obj)) {
@@ -101,4 +115,4 @@ class BaseUserFilterService extends BaseModel {
 export const USER_FILTER_TYPE_ORDER = 'order'
 // export const USER_FILTER_TYPE_QUOTATION = 'quotation'
 
-export {BaseUserFilterModel, BaseUserFilterService, FilterCondition, FilterExample}
+export {BaseUserFilterModel, BaseUserFilterService, FilterCondition, FilterConditionValue}

@@ -37,140 +37,191 @@
             </b-form-invalid-feedback>
           </b-form-group>
 
+          <b-form-group
+            label-cols="3"
+            label-size="sm"
+            :label="$trans('Query mode')"
+            label-for="filter_querymode"
+          >
+            <b-form-select
+              id="filter_query_mode"
+              v-model="filter.querymode"
+              :options="queryModes"
+              size="sm"></b-form-select>
+          </b-form-group>
+
           <h6>{{ $trans("Conditions")}}</h6>
-          <b-container v-for="(condition, index) in filter.json_conditions" :key="index">
-            <b-row>
-              <b-col cols="6">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Field')"
-                  label-for="filter_field"
-                >
-                  <b-form-select
-                    id="filter_field"
-                    v-model="condition.field"
-                    :options="allFields"
-                    @change="checkCondition(condition)"
-                    size="sm"></b-form-select>
-                </b-form-group>
-              </b-col>
-              <b-col cols="6">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Operator')"
-                  label-for="filter_operator"
-                >
-                  <b-form-select
-                    id="filter_operator"
-                    v-model="condition.operator"
-                    :options="getOperators(condition.field)"
-                    size="sm"
-                    @change="checkCondition(condition)"
-                  ></b-form-select>
-                </b-form-group>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="3">
-                <b-form-group
-                  label-size="sm"
-                  :label="$trans('Case sensitive')"
-                  label-for="filter_is_case_sensitive"
-                >
-                  <b-form-checkbox
-                    id="filter_is_case_sensitive"
-                    v-model="condition.is_case_sensitive"
-                  ></b-form-checkbox>
-                </b-form-group>
-              </b-col>
-              <b-col cols="2">
-                <b-form-group
-                  label-size="sm"
-                  :label="$trans('Exact')"
-                  label-for="filter_is_exact"
-                >
-                  <b-form-checkbox
-                      id="filter_is_exact"
-                      v-model="condition.is_exact"
+          <div
+            class="condition-container rounded"
+            v-for="(condition, index) in filter.json_conditions"
+            :key="index"
+          >
+            <b-container>
+              <b-row>
+                <b-col cols="6">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Field')"
+                    label-for="filter_field"
+                  >
+                    <b-form-select
+                      id="filter_field"
+                      v-model="condition.field"
+                      :options="allFields"
+                      @change="checkCondition(condition)"
+                      size="sm"></b-form-select>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="6">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Operator')"
+                    label-for="filter_operator"
+                  >
+                    <b-form-select
+                      id="filter_operator"
+                      v-model="condition.operator"
+                      :options="getOperators(condition.field)"
+                      size="sm"
+                      @change="checkCondition(condition)"
+                    ></b-form-select>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="3">
+                  <b-form-group
+                    label-size="sm"
+                    :label="$trans('Case sensitive')"
+                    label-for="filter_is_case_sensitive"
+                  >
+                    <b-form-checkbox
+                      id="filter_is_case_sensitive"
+                      :disabled="isCaseDisabled"
+                      v-model="condition.is_case_sensitive"
+                    ></b-form-checkbox>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2">
+                  <b-form-group
+                    label-size="sm"
+                    :label="$trans('Exact')"
+                    label-for="filter_is_exact"
+                  >
+                    <b-form-checkbox
+                        id="filter_is_exact"
+                        :disabled="isExactDisabled"
+                        v-model="condition.is_exact"
+                      >
+                      </b-form-checkbox>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2">
+                  <b-form-group
+                    label-size="sm"
+                    :label="$trans('Exclude')"
+                    label-for="filter_is_exclude"
+                  >
+                    <b-form-checkbox
+                      id="filter_is_exclude"
+                      :disabled="isExcludeDisabled"
+                      v-model="condition.is_exclude"
                     >
                     </b-form-checkbox>
-                </b-form-group>
-              </b-col>
-              <b-col cols="2">
-                <b-form-group
-                  label-size="sm"
-                  :label="$trans('Exclude')"
-                  label-for="filter_is_exclude"
-                >
-                  <b-form-checkbox
-                    id="filter_is_exclude"
-                    :disabled="isExcludeDisabled"
-                    v-model="condition.is_exclude"
+                  </b-form-group>
+                </b-col>
+                <b-col cols="2">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Values')"
+                    label-for="filter_values_query_mode"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
-              </b-col>
-              <b-col cols="2">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Values')"
-                  label-for="filter_values_query_mode"
-                >
-                  <b-form-select
-                    :disabled="valuesQueryModeDisabled"
-                    id="filter_values_query_mode"
-                    v-model="condition.values_query_mode"
-                    :options="valuesQueryModes"
-                    size="sm"></b-form-select>
-                </b-form-group>
-              </b-col>
-              <b-col cols="3">
-                <b-form-group
-                  label-size="sm"
-                  :label="$trans('Values NOT')"
-                  label-for="filter_values_not"
-                >
-                  <b-form-checkbox
-                    id="filter_values_not"
-                    :disabled="valuesNotDisabled"
-                    v-model="condition.values_not"
+                    <b-form-select
+                      :disabled="valuesQueryModeDisabled"
+                      id="filter_values_query_mode"
+                      v-model="condition.values_query_mode"
+                      :options="queryModes"
+                      size="sm"></b-form-select>
+                  </b-form-group>
+                </b-col>
+                <b-col cols="3">
+                  <b-form-group
+                    label-size="sm"
+                    :label="$trans('Values NOT')"
+                    label-for="filter_values_not"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
-              </b-col>
-            </b-row>
+                    <b-form-checkbox
+                      id="filter_values_not"
+                      :disabled="isValuesNotDisabled"
+                      v-model="condition.values_not"
+                    >
+                    </b-form-checkbox>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="12">
+                  <b-form-group
+                    label-size="sm"
+                    v-bind:label="$trans('Values')"
+                    label-for="filter_operator"
+                  >
+                    <div v-for="(_, index) in condition.values" :key="index" class="flex-columns value-container">
+                      <b-form-input
+                        v-if="condition.fieldInputType === FIELD_TYPE_CHAR"
+                        id="filter_name"
+                        size="sm"
+                        v-model="condition.values[index].char_value"
+                      ></b-form-input>
+                      <b-form-checkbox
+                        v-if="condition.fieldInputType === FIELD_TYPE_BOOL"
+                        id="filter_values_not"
+                        v-model="condition.values[index].bool_value"
+                      ></b-form-checkbox>
+                      <b-link :title="$trans('delete')" @click="removeConditionValue(condition, index)">
+                        <b-icon-trash-fill class="edit-icon"></b-icon-trash-fill>
+                      </b-link>
+                      <br/>
+                    </div>
+                    <div class="float-right add-value">
+                      <b-link
+                        :title="$trans('add value')"
+                        @click="addConditionValue(condition)"
+                      >
+                        {{ $trans("add value") }}
+                      </b-link>
+                    </div>
+                  </b-form-group>
+                </b-col>
+              </b-row>
+              <b-row>
+                <b-col cols="12">
+                  <div class="h5 left">
+                    <b-link
+                      :title="$trans('remove condition')"
+                      @click="removeCondition(index)"
+                    >
+                      {{ $trans("remove condition") }}
+                    </b-link>
+                  </div>
+                </b-col>
+              </b-row>
+            </b-container>
+          </div>
+          <b-container>
             <b-row>
               <b-col cols="12">
-                <b-form-group
-                  label-size="sm"
-                  v-bind:label="$trans('Values')"
-                  label-for="filter_operator"
-                >
-                  <div v-for="(_, index) in condition.values" :key="index" class="flex-columns value-container">
-                    <b-form-input
-                      id="filter_name"
-                      size="sm"
-                      v-model="condition.values[index]"
-                    ></b-form-input>
-                    <b-link :title="$trans('delete')" @click="removeConditionValue(condition, index)">
-                      <b-icon-trash-fill class="edit-icon"></b-icon-trash-fill>
-                    </b-link>
-                    <br/>
-                  </div>
-                  <div class="float-right add-value">
-                    <b-link
-                      :title="$trans('add value')"
-                      @click="addConditionValue(condition)"
-                    >
-                      {{ $trans("add value") }}
-                    </b-link>
-                  </div>
-                </b-form-group>
-
+                <hr/>
+                <div class="h4 float-right">
+                  <b-link
+                    :title="$trans('add condition')"
+                    @click="addCondition()"
+                  >
+                    {{ $trans("add condition") }}
+                  </b-link>
+                </div>
               </b-col>
-
             </b-row>
-
           </b-container>
         </div>
         <div class='panel col-1-2'>
@@ -203,8 +254,10 @@ import {useVuelidate} from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
 
 import {
-  FilterCondition,
-  FilterExample, OPERATOR_EXCEPT_MATCHES, OPERATOR_ONLY_MATCHES,
+  FIELD_TYPE_BOOL,
+  FIELD_TYPE_CHAR, FIELD_TYPE_DATE, FIELD_TYPE_DATETIME,
+  FilterCondition, FilterConditionValue,
+  OPERATOR_EXCEPT_MATCHES, OPERATOR_ONLY_MATCHES,
   QUERY_MODE_AND,
   QUERY_MODE_OR,
   USER_FILTER_TYPE_ORDER
@@ -213,8 +266,9 @@ import {OrderFilterModel, OrderFilterService} from "../../models/orders/OrderFil
 
 /*
   TODO
-   2) when last_status is selected, provide example values of cleaned up statuses from settings
-   4) field types (string, bool, date, etc.)
+   - field types inputs
+   - when last_status is selected, provide example values of cleaned up statuses from settings
+   - somehow let the user choose what queryset to use (current orders, past orders, all orders)
  */
 export default {
   name: "UserFilterForm",
@@ -248,7 +302,7 @@ export default {
       model: null,
       filter: null,
       examples: [],
-      valuesQueryModes: [
+      queryModes: [
         {value: QUERY_MODE_AND, text: this.$trans('and')},
         {value: QUERY_MODE_OR, text: this.$trans('or')},
       ],
@@ -257,8 +311,13 @@ export default {
       operators: {},
       valuesQueryModeDisabled: false,
       isExcludeDisabled: false,
-      valuesNotDisabled: false,
-      nonTextFieldTypes: {}
+      isValuesNotDisabled: false,
+      isExactDisabled: false,
+      isCaseDisabled: false,
+      nonTextFieldTypes: {},
+      fieldInputType: FIELD_TYPE_CHAR,
+      FIELD_TYPE_CHAR,
+      FIELD_TYPE_BOOL
     }
   },
   computed: {
@@ -279,15 +338,16 @@ export default {
     // allowed filter fields, displaying normal and related in one list for now
     this.fieldsConfig = await this.service.getFields()
     this.allFields = [...this.fieldsConfig.model, ...this.fieldsConfig.related]
+    // TODO display right input for field types
     this.nonTextFieldTypes = await this.service.getNonTextFieldTypes()
 
     // operators that are supported
     this.operators = await this.service.getOperators()
 
     if (this.isCreate) {
-      const examplesData = await this.service.getExamples()
-      this.examples = examplesData.map((example) => new FilterExample(example))
+      this.examples = await this.service.getExamples()
       this.filter = new this.model({json_conditions: [this.newCondition()]})
+      this.checkCondition(this.filter.json_conditions[0])
       console.log(this.filter)
     } else {
       await this.loadData()
@@ -311,7 +371,7 @@ export default {
       if (this.fieldsConfig.model.indexOf(condition.field) !== -1) {
         condition.values_query_mode = QUERY_MODE_OR
         this.isExcludeDisabled = false
-        this.valuesNotDisabled = false
+        this.isValuesNotDisabled = false
         this.valuesQueryModeDisabled = true
       } else {
         // ONLY_MATCHES has is_exclude and values_not set to true
@@ -321,7 +381,7 @@ export default {
           condition.values_not = true
           condition.values_query_mode = QUERY_MODE_AND
           this.isExcludeDisabled = true
-          this.valuesNotDisabled = true
+          this.isValuesNotDisabled = true
           this.valuesQueryModeDisabled = true
         }
 
@@ -330,30 +390,102 @@ export default {
           condition.values_not = true
           condition.values_query_mode = QUERY_MODE_AND
           this.isExcludeDisabled = true
-          this.valuesNotDisabled = true
+          this.isValuesNotDisabled = true
           this.valuesQueryModeDisabled = true
         }
+      }
+
+      // input type
+      if (this.nonTextFieldTypes.hasOwnProperty(condition.field)) {
+        switch (this.nonTextFieldTypes[condition.field]) {
+          case FIELD_TYPE_BOOL:
+            condition.fieldInputType = FIELD_TYPE_BOOL;
+            this.isExactDisabled = true
+            this.isCaseDisabled = true
+            break;
+          case FIELD_TYPE_DATE:
+            condition.fieldInputType = FIELD_TYPE_DATE;
+            this.isExactDisabled = true
+            this.isCaseDisabled = true
+            break;
+          default:
+            throw `checkCondition: Unknown field type: ${condition.field}`
+        }
+      } else {
+        condition.fieldInputType = FIELD_TYPE_CHAR;
+        this.isExactDisabled = false
+        this.isCaseDisabled = false
       }
     },
     loadExample(example) {
       this.filter = new this.model({
         name: example.name,
-        json_conditions: example.json_conditions
+        json_conditions: example.json_conditions,
+        querymode: example.querymode
       })
       this.checkCondition(this.filter.json_conditions[0])
     },
     addConditionValue(condition) {
-      condition.values.push('')
+      let value
+      switch(this.fieldInputType) {
+        case FIELD_TYPE_CHAR:
+          value = {
+            type: FIELD_TYPE_CHAR,
+            value: ''
+          }
+          break
+        case FIELD_TYPE_BOOL:
+          value = {
+            type: FIELD_TYPE_BOOL,
+            value: true
+          }
+          break;
+        case FIELD_TYPE_DATE:
+          value = {
+            type: FIELD_TYPE_DATE,
+            value: new Date()
+          }
+          break;
+        case FIELD_TYPE_DATETIME:
+          value = {
+            type: FIELD_TYPE_DATETIME,
+            value: new Date()
+          }
+          break;
+        default:
+          value = {
+            type: FIELD_TYPE_CHAR,
+            value: ''
+          }
+          break
+      }
+      condition.values.push(value)
     },
     removeConditionValue(condition, index) {
       condition.values.splice(index, 1)
       if (condition.values.length === 0) {
-        condition.values.push('')
+        this.addConditionValue(condition)
+      }
+    },
+    removeCondition(index) {
+      if (confirm(this.$trans("Remove this condition?"))) {
+        this.filter.json_conditions.splice(index, 1)
+        if (this.filter.json_conditions.length === 0) {
+          this.addCondition()
+        }
       }
     },
     newCondition() {
-      return new FilterCondition({values: ['']})
+      let condition = new FilterCondition({
+        field: this.allFields[0],
+      })
+      this.addConditionValue(condition)
+      return condition
     },
+    addCondition() {
+      this.filter.json_conditions.push(this.newCondition())
+    },
+    // API
     async submitForm() {
       this.submitClicked = true
       this.v$.$touch()
@@ -417,5 +549,9 @@ div.add-value {
 }
 div.value-container {
   padding-bottom: 4px;
+}
+div.condition-container {
+  background: lightgray;
+  margin-bottom: 8px;
 }
 </style>
