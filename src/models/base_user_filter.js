@@ -12,6 +12,8 @@ export const FIELD_TYPE_BOOL = 'bool'
 export const FIELD_TYPE_DATE = 'date'
 export const FIELD_TYPE_DATETIME = 'datetime'
 
+export const BASE_QS_OPTION_ALL = 'all'
+
 class FilterConditionValue {
   char_value
   date_value
@@ -66,6 +68,7 @@ class FilterCondition {
 class BaseUserFilterModel {
   id
   name
+  base_qs = BASE_QS_OPTION_ALL
   json_conditions = []
   querymode = QUERY_MODE_OR
 
@@ -93,10 +96,6 @@ class BaseUserFilterService extends BaseModel {
     return this.axios.get(`${this.url}get_operators/`).then((response) => response.data)
   }
 
-  getQueryModeOptions() {
-    return this.axios.get(`${this.url}get_query_mode_options/`).then((response) => response.data)
-  }
-
   getSimpleList() {
     // we could make separate calls to get the orders count of the filters
     return this.axios.get(`${this.url}simple_list/`).then((response) => response.data)
@@ -104,11 +103,18 @@ class BaseUserFilterService extends BaseModel {
 
   getNonTextFieldTypes() {
     return this.axios.get(`${this.url}get_non_text_field_types/`).then((response) => response.data)
-
   }
 
   getExamples() {
     return this.axios.get(`${this.url}get_examples/`).then((response) => response.data)
+  }
+
+  getStatuscodesSettings() {
+    return this.axios.get(`${this.url}get_statuscodes_settings/`).then((response) => response.data)
+  }
+
+  getBaseQsOptions() {
+    return this.axios.get(`${this.url}get_base_qs_options/`).then((response) => response.data)
   }
 }
 

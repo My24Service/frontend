@@ -40,6 +40,19 @@
           <b-form-group
             label-cols="3"
             label-size="sm"
+            :label="$trans('Filter in')"
+            label-for="filter_base_qs"
+          >
+            <b-form-select
+              id="filter_base_qs"
+              v-model="filter.base_qs"
+              :options="baseQsOptions"
+              size="sm"></b-form-select>
+          </b-form-group>
+
+          <b-form-group
+            label-cols="3"
+            label-size="sm"
             :label="$trans('Query mode')"
             label-for="filter_querymode"
           >
@@ -315,6 +328,8 @@ export default {
       isExactDisabled: false,
       isCaseDisabled: false,
       nonTextFieldTypes: {},
+      statuscodesSettings: [],
+      baseQsOptions: [],
       fieldInputType: FIELD_TYPE_CHAR,
       FIELD_TYPE_CHAR,
       FIELD_TYPE_BOOL
@@ -344,11 +359,16 @@ export default {
     // operators that are supported
     this.operators = await this.service.getOperators()
 
+    // statuses that can be used
+    this.statuscodesSettings = await this.service.getStatuscodesSettings()
+
+    // filter in what queryset options
+    this.baseQsOptions = await this.service.getBaseQsOptions()
+
     if (this.isCreate) {
       this.examples = await this.service.getExamples()
       this.filter = new this.model({json_conditions: [this.newCondition()]})
       this.checkCondition(this.filter.json_conditions[0])
-      console.log(this.filter)
     } else {
       await this.loadData()
     }
@@ -418,12 +438,10 @@ export default {
       }
     },
     loadExample(example) {
-      this.filter = new this.model({
-        name: example.name,
-        json_conditions: example.json_conditions,
-        querymode: example.querymode
+      this.filter = new this.model(example.filter)
+      this.filter.json_conditions.forEach((condition) => {
+        this.checkCondition(condition)
       })
-      this.checkCondition(this.filter.json_conditions[0])
     },
     addConditionValue(condition) {
       let value
