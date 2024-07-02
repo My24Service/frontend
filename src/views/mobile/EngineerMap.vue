@@ -37,7 +37,8 @@ export default {
     service: new EngineerService(),
     locations: [],
     apikey: "x60nvtHOasls2goD-j1kZiVDZkyWUwS9WTR8vwrau5Y",
-    center: {lat: 52.085, lng: 5.62222}
+    center: {lat: 52.085, lng: 5.62222},
+    ui: null
   }),
   async created() {
     this.locations = await this.service.getLocations()
@@ -71,12 +72,13 @@ export default {
       new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
 
       // add UI
-      H.ui.UI.createDefault(map, maptypes);
+      const ui = H.ui.UI.createDefault(map, maptypes);
+
       // End rendering the initial map
 
       await this.loadData()
 
-      this.addInfoBubble(map)
+      this.addInfoBubble(map, ui)
     },
     addMarkerToGroup(group, coordinate, html) {
       const marker = new H.map.Marker(coordinate);
@@ -84,16 +86,7 @@ export default {
       marker.setData(html);
       group.addObject(marker);
     },
-    addInfoBubble(map) {
-      let markers = []
-
-      this.locations.forEach(function(pos) {
-        markers.push(new H.map.Marker({lat: pos.lat, lng: pos.lon}));
-      });
-
-      map.addObjects(markers);
-      return
-
+    addInfoBubble(map, ui) {
       const group = new H.map.Group();
       map.addObject(group);
 
@@ -109,10 +102,10 @@ export default {
         ui.addBubble(bubble);
       }, false);
 
-      for (let i = 0; i < this.locations.length; i++) {
-        this.addMarkerToGroup(group, {lat: this.locations[i].lat, lng: this.locations[i].lon},
-          '<div><b>' + this.locations[i].name + '</b></div>');
-      }
+      this.locations.forEach((location) => {
+        this.addMarkerToGroup(group, {lat: location.lat, lng: location.lon},
+          `<div><b>${location.name}</b></div>`);
+      })
     }
   }
 }
