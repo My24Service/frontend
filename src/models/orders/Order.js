@@ -44,6 +44,7 @@ class OrderModel {
   infolines = []
   workorder_documents
   customer_order_accepted
+  planning_remarks
 
   workorder_pdf_url
   workorder_pdf_url_partner
@@ -88,6 +89,7 @@ class OrderService extends BaseModel {
     'workorder_pdf_url_partner': '',
 
     'reported_codes_extra_data': [],
+    'planning_remarks': ''
   }
 
   url = '/order/order/'

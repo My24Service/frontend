@@ -558,7 +558,6 @@
               </ul>
             </div>
           </div>
-
           <b-form-group
             v-bind:label="$trans('Assignee(s)')"
             label-for="order-assigned-to"
@@ -570,7 +569,16 @@
               {{ person.full_name }}
             </label>
           </b-form-group>
-
+          <b-form-group
+            label-for="order-orderline-remarks"
+            v-bind:label="$trans('Planning remarks')"
+          >
+            <b-form-textarea
+              id="order-orderline-remarks"
+              v-model="order.planning_remarks"
+              rows="1"
+            ></b-form-textarea>
+          </b-form-group>
         </div>
 
         <div class="panel col-1-3">
@@ -980,6 +988,7 @@ export default {
       location: '',
       equipment_location: null,
       remarks: '',
+      planning_remarks: '',
 
       isEditOrderLine: false,
 
