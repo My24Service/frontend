@@ -36,7 +36,7 @@ export default {
   data: () => ({
     service: new EngineerService(),
     locations: [],
-    apikey: "lol",
+    apikey: "x60nvtHOasls2goD-j1kZiVDZkyWUwS9WTR8vwrau5Y",
     center: {lat: 52.085, lng: 5.62222}
   }),
   async created() {
@@ -49,10 +49,10 @@ export default {
     this.initializeHereMap();
   },
   methods: {
-    loadData() {
-
+    async loadData() {
+      this.locations = await this.service.getLocations()
     },
-    initializeHereMap() { // rendering map
+    async initializeHereMap() { // rendering map
       const mapContainer = this.$refs.hereMap;
       const H = window.H;
       // Obtain the default map types from the platform object
@@ -74,15 +74,26 @@ export default {
       H.ui.UI.createDefault(map, maptypes);
       // End rendering the initial map
 
+      await this.loadData()
+
       this.addInfoBubble(map)
     },
     addMarkerToGroup(group, coordinate, html) {
-      var marker = new H.map.Marker(coordinate);
+      const marker = new H.map.Marker(coordinate);
       // add custom data to the marker
       marker.setData(html);
       group.addObject(marker);
     },
     addInfoBubble(map) {
+      let markers = []
+
+      this.locations.forEach(function(pos) {
+        markers.push(new H.map.Marker({lat: pos.lat, lng: pos.lon}));
+      });
+
+      map.addObjects(markers);
+      return
+
       const group = new H.map.Group();
       map.addObject(group);
 
