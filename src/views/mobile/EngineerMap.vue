@@ -1,0 +1,111 @@
+<template>
+  <div class="app-page">
+    <header>
+      <div class="page-title">
+        <h3>
+          {{ $trans("Engineer locations") }}
+        </h3>
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+          </b-button-group>
+        </b-button-toolbar>
+      </div>
+    </header>
+
+    <div class="app-detail panel overflow-auto">
+      <div class="overflow-auto">
+        <div id="map">
+          <div id="mapContainer" style="height:600px;width:100%" ref="hereMap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
+import {EngineerService} from '@/models/company/UserEngineer'
+
+export default {
+  components: {
+    ButtonLinkRefresh
+  },
+  data: () => ({
+    service: new EngineerService(),
+    locations: [],
+    apikey: "pXCeqjMmjO59ZidmWe9MWhPfeWjQ5xMJLFGlq5YSLFs",
+    center: {lat: 52.085, lng: 5.62222}
+  }),
+  async created() {
+    this.locations = await this.service.getLocations()
+  },
+  mounted() {
+    this.platform = new window.H.service.Platform({
+      apikey: this.apikey
+    });
+    this.initializeHereMap();
+  },
+  methods: {
+    loadData() {
+
+    },
+    initializeHereMap() { // rendering map
+      const mapContainer = this.$refs.hereMap;
+      const H = window.H;
+      // Obtain the default map types from the platform object
+      var maptypes = this.platform.createDefaultLayers();
+
+      // Instantiate (and display) a map object:
+      var map = new H.Map(mapContainer, maptypes.vector.normal.map, {
+        zoom: 10,
+        center: this.center
+        // center object { lat: 40.730610, lng: -73.935242 }
+      });
+
+      addEventListener("resize", () => map.getViewPort().resize());
+
+      // add behavior control
+      new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+      // add UI
+      H.ui.UI.createDefault(map, maptypes);
+      // End rendering the initial map
+
+      this.addInfoBubble(map)
+    },
+    addMarkerToGroup(group, coordinate, html) {
+      var marker = new H.map.Marker(coordinate);
+      // add custom data to the marker
+      marker.setData(html);
+      group.addObject(marker);
+    },
+    addInfoBubble(map) {
+      const group = new H.map.Group();
+      map.addObject(group);
+
+      // add 'tap' event listener, that opens info bubble, to the group
+      group.addEventListener('tap', function (evt) {
+        // event target is the marker itself, group is a parent event target
+        // for all objects that it contains
+        const bubble = new H.ui.InfoBubble(evt.target.getGeometry(), {
+          // read custom data
+          content: evt.target.getData()
+        });
+        // show info bubble
+        ui.addBubble(bubble);
+      }, false);
+
+      for (let i = 0; i < this.locations.length; i++) {
+        this.addMarkerToGroup(group, {lat: this.locations[i].lat, lng: this.locations[i].lon},
+          '<div><b>' + this.locations[i].name + '</b></div>');
+      }
+    }
+  }
+}
+</script>
+<style scoped>
+
+</style>

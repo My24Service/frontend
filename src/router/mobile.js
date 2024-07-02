@@ -15,6 +15,7 @@ import TripAvailabilityDetail from '@/views/mobile/TripAvailabilityDetail.vue'
 import TripForm from '@/views/mobile/TripForm.vue'
 import AssignedOrderMaterial from '@/views/mobile/AssignedOrderMaterial.vue'
 import Dispatch from "@/views/mobile/Dispatch.vue";
+import EngineerMap from "@/views/mobile/EngineerMap.vue";
 
 export default [
 {
@@ -26,6 +27,18 @@ export default [
         path: '/mobile/dispatch',
         components: {
           'app-content': Dispatch,
+          'app-subnav': SubNavMobile
+        },
+        props: {
+          'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+      },
+      {
+        name: 'mobile-map',
+        path: '/mobile/map',
+        components: {
+          'app-content': EngineerMap,
           'app-subnav': SubNavMobile
         },
         props: {
