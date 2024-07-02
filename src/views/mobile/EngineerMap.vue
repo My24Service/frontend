@@ -36,7 +36,7 @@ export default {
   data: () => ({
     service: new EngineerService(),
     locations: [],
-    apikey: "pXCeqjMmjO59ZidmWe9MWhPfeWjQ5xMJLFGlq5YSLFs",
+    apikey: "lol",
     center: {lat: 52.085, lng: 5.62222}
   }),
   async created() {
