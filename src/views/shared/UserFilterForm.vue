@@ -110,7 +110,7 @@
                   >
                     <b-form-checkbox
                       id="filter_is_case_sensitive"
-                      :disabled="isCaseDisabled"
+                      :disabled="condition.isCaseDisabled"
                       v-model="condition.is_case_sensitive"
                     ></b-form-checkbox>
                   </b-form-group>
@@ -123,7 +123,7 @@
                   >
                     <b-form-checkbox
                         id="filter_is_exact"
-                        :disabled="isExactDisabled"
+                        :disabled="condition.isExactDisabled"
                         v-model="condition.is_exact"
                       >
                       </b-form-checkbox>
@@ -137,7 +137,7 @@
                   >
                     <b-form-checkbox
                       id="filter_is_exclude"
-                      :disabled="isExcludeDisabled"
+                      :disabled="condition.isExcludeDisabled"
                       v-model="condition.is_exclude"
                     >
                     </b-form-checkbox>
@@ -150,7 +150,7 @@
                     label-for="filter_values_query_mode"
                   >
                     <b-form-select
-                      :disabled="valuesQueryModeDisabled"
+                      :disabled="condition.valuesQueryModeDisabled"
                       id="filter_values_query_mode"
                       v-model="condition.values_query_mode"
                       :options="queryModes"
@@ -165,7 +165,7 @@
                   >
                     <b-form-checkbox
                       id="filter_values_not"
-                      :disabled="isValuesNotDisabled"
+                      :disabled="condition.isValuesNotDisabled"
                       v-model="condition.values_not"
                     >
                     </b-form-checkbox>
@@ -182,15 +182,15 @@
                     <div v-for="(_, index) in condition.values" :key="index" class="flex-columns value-container">
                       <b-form-input
                         v-if="condition.fieldInputType === FIELD_TYPE_CHAR"
-                        id="filter_name"
                         size="sm"
                         v-model="condition.values[index].char_value"
                       ></b-form-input>
                       <b-form-checkbox
                         v-if="condition.fieldInputType === FIELD_TYPE_BOOL"
-                        id="filter_values_not"
                         v-model="condition.values[index].bool_value"
-                      ></b-form-checkbox>
+                      >
+                        {{ condition.values[index].bool_value ? $trans("yes") : $trans("no") }}
+                      </b-form-checkbox>
                       <b-link :title="$trans('delete')" @click="removeConditionValue(condition, index)">
                         <b-icon-trash-fill class="edit-icon"></b-icon-trash-fill>
                       </b-link>
@@ -247,7 +247,7 @@
               v-for="(example, index) in examples"
               :key="index"
             >
-              <h6>{{ example.name }}</h6>
+              <h6>{{ example.filter.name }}</h6>
               <p>{{ example.description }}</p>
               <p>
                 <b-link
@@ -325,11 +325,6 @@ export default {
       allFields: [],
       fieldsConfig: null,
       operators: {},
-      valuesQueryModeDisabled: false,
-      isExcludeDisabled: false,
-      isValuesNotDisabled: false,
-      isExactDisabled: false,
-      isCaseDisabled: false,
       nonTextFieldTypes: {},
       statuscodesSettings: [],
       baseQsOptions: [],
@@ -356,16 +351,17 @@ export default {
     // allowed filter fields, displaying normal and related in one list for now
     this.fieldsConfig = await this.service.getFields()
     this.allFields = [...this.fieldsConfig.model, ...this.fieldsConfig.related]
-    // TODO display right input for field types
+
+    // field types
     this.nonTextFieldTypes = await this.service.getNonTextFieldTypes()
 
     // operators that are supported
     this.operators = await this.service.getOperators()
 
     // statuses that can be used
-    this.statuscodesSettings = await this.service.getStatuscodesSettings()
+    this.statuscodesSettings = await this.service.getStatuses()
 
-    // filter in what queryset options
+    // options to choose in what queryset to filter (orders has three; current, past, and all)
     this.baseQsOptions = await this.service.getBaseQsOptions()
 
     if (this.isCreate) {
@@ -393,9 +389,9 @@ export default {
       // model field or related?
       if (this.fieldsConfig.model.indexOf(condition.field) !== -1) {
         condition.values_query_mode = QUERY_MODE_OR
-        this.isExcludeDisabled = false
-        this.isValuesNotDisabled = false
-        this.valuesQueryModeDisabled = true
+        condition.isExcludeDisabled = false
+        condition.isValuesNotDisabled = false
+        condition.valuesQueryModeDisabled = true
       } else {
         // ONLY_MATCHES has is_exclude and values_not set to true
         // EXCEPT_MATCHES has is_exclude set to false and values_not set to true
@@ -403,18 +399,18 @@ export default {
           condition.is_exclude = true
           condition.values_not = true
           condition.values_query_mode = QUERY_MODE_AND
-          this.isExcludeDisabled = true
-          this.isValuesNotDisabled = true
-          this.valuesQueryModeDisabled = true
+          condition.isExcludeDisabled = true
+          condition.isValuesNotDisabled = true
+          condition.valuesQueryModeDisabled = true
         }
 
         else if (condition.operator === OPERATOR_EXCEPT_MATCHES) {
           condition.is_exclude = false
           condition.values_not = true
           condition.values_query_mode = QUERY_MODE_AND
-          this.isExcludeDisabled = true
-          this.isValuesNotDisabled = true
-          this.valuesQueryModeDisabled = true
+          condition.isExcludeDisabled = true
+          condition.isValuesNotDisabled = true
+          condition.valuesQueryModeDisabled = true
         }
       }
 
@@ -423,21 +419,21 @@ export default {
         switch (this.nonTextFieldTypes[condition.field]) {
           case FIELD_TYPE_BOOL:
             condition.fieldInputType = FIELD_TYPE_BOOL;
-            this.isExactDisabled = true
-            this.isCaseDisabled = true
+            condition.isExactDisabled = true
+            condition.isCaseDisabled = true
             break;
           case FIELD_TYPE_DATE:
             condition.fieldInputType = FIELD_TYPE_DATE;
-            this.isExactDisabled = true
-            this.isCaseDisabled = true
+            condition.isExactDisabled = true
+            condition.isCaseDisabled = true
             break;
           default:
             throw `checkCondition: Unknown field type: ${condition.field}`
         }
       } else {
         condition.fieldInputType = FIELD_TYPE_CHAR;
-        this.isExactDisabled = false
-        this.isCaseDisabled = false
+        condition.isExactDisabled = false
+        condition.isCaseDisabled = false
       }
     },
     loadExample(example) {
@@ -572,7 +568,7 @@ div.value-container {
   padding-bottom: 4px;
 }
 div.condition-container {
-  background: lightgray;
+  background: #f2f4f1;
   margin-bottom: 8px;
 }
 </style>
