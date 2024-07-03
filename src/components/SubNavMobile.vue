@@ -10,7 +10,7 @@
 
     <b-nav-item
       :active="isActive('map')"
-      v-if="!hasBranches && companyIsDemo"
+      v-if="!hasBranches"
       :to="{ name: 'mobile-map' }">
       {{ $trans('Map') }}
     </b-nav-item>
