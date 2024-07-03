@@ -113,6 +113,10 @@ class BaseUserFilterService extends BaseModel {
     return this.axios.get(`${this.url}get_statuses/`).then((response) => response.data)
   }
 
+  getStatusFields() {
+    return this.axios.get(`${this.url}get_status_fields/`).then((response) => response.data)
+  }
+
   getBaseQsOptions() {
     return this.axios.get(`${this.url}get_base_qs_options/`).then((response) => response.data)
   }

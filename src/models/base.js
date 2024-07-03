@@ -12,6 +12,7 @@ class BaseModel {
   listArgs = []
   queryArgs = []
   searchQuery = null
+  userFilter = null
   sort = null
 
   currentPage = 1
@@ -226,6 +227,10 @@ class BaseModel {
     this.searchQuery = query
   }
 
+  setUserFilter(userFilter) {
+    this.userFilter = userFilter
+  }
+
   setSort(sort) {
     this.sort = sort
   }
@@ -241,6 +246,10 @@ class BaseModel {
 
     if (this.searchQuery) {
       listArgs.push(`q=${this.searchQuery}`)
+    }
+
+    if (this.userFilter) {
+      listArgs.push(`user_filter=${this.userFilter}`)
     }
 
     if (this.sort) {

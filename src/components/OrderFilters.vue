@@ -2,12 +2,12 @@
   <div>
     <b-nav pills>
       <b-nav-item
-        :active="statuscode.statuscode === currentFilter"
-        @click="changeFilter(statuscode)"
-        v-for="statuscode in statuscodes"
-        :key="statuscode.id"
+        :active="filter.id === getCurrentFilter()"
+        @click="changeFilter(filter)"
+        v-for="filter in filters"
+        :key="filter.id"
       >
-        {{ statuscode.statuscode }}
+        {{ filter.name }}
       </b-nav-item>
     </b-nav>
   </div>
@@ -18,24 +18,33 @@ export default {
   name: "OrderFilters",
   components: {},
   props: {
-    statuscodes: {
+    filters: {
       type: Array,
       default: () => []
     }
   },
-  data() {
-    return {
-      currentFilter: null
-    }
-  },
   methods: {
-    changeFilter(statuscode) {
-      if (this.currentFilter !== statuscode.statuscode) {
-        this.currentFilter = statuscode.statuscode
-        this.$emit('set-filter', this.currentFilter)
+    getCurrentFilter() {
+      if (this.$route.query.hasOwnProperty('user_filter')) {
+        return parseInt(this.$route.query.user_filter)
+      }
+      return null
+    },
+    changeFilter(filter) {
+      if (this.getCurrentFilter() !== filter.id) {
+        const query = {
+          ...this.$route.query,
+          user_filter: filter.id,
+          page: 1
+        }
+        this.$router.push({ query }).catch(e => {})
       } else {
-        this.$emit('remove-filter', this.currentFilter)
-        this.currentFilter = null
+        const query = {
+          ...this.$route.query,
+          page: 1
+        }
+        delete query.user_filter
+        this.$router.push({ query }).catch(e => {})
       }
     }
   }

@@ -270,21 +270,21 @@ import {useVuelidate} from '@vuelidate/core'
 import {required} from '@vuelidate/validators'
 
 import {
+  FilterCondition,
   FIELD_TYPE_BOOL,
-  FIELD_TYPE_CHAR, FIELD_TYPE_DATE, FIELD_TYPE_DATETIME,
-  FilterCondition, FilterConditionValue,
-  OPERATOR_EXCEPT_MATCHES, OPERATOR_ONLY_MATCHES,
+  FIELD_TYPE_CHAR,
+  FIELD_TYPE_DATE, FIELD_TYPE_DATETIME,
+  OPERATOR_EXCEPT_MATCHES,
+  OPERATOR_ONLY_MATCHES,
   QUERY_MODE_AND,
   QUERY_MODE_OR,
   USER_FILTER_TYPE_ORDER
-} from "../../models/base_user_filter";
-import {OrderFilterModel, OrderFilterService} from "../../models/orders/OrderFilter";
+} from "@/models/base_user_filter";
+import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
 
 /*
   TODO
-   - field types inputs
    - when last_status is selected, provide example values of cleaned up statuses from settings
-   - somehow let the user choose what queryset to use (current orders, past orders, all orders)
  */
 export default {
   name: "UserFilterForm",
@@ -323,10 +323,11 @@ export default {
         {value: QUERY_MODE_OR, text: this.$trans('or')},
       ],
       allFields: [],
+      statusFields: [],
       fieldsConfig: null,
       operators: {},
       nonTextFieldTypes: {},
-      statuscodesSettings: [],
+      statuscodes: [],
       baseQsOptions: [],
       fieldInputType: FIELD_TYPE_CHAR,
       FIELD_TYPE_CHAR,
@@ -359,7 +360,10 @@ export default {
     this.operators = await this.service.getOperators()
 
     // statuses that can be used
-    this.statuscodesSettings = await this.service.getStatuses()
+    this.statuscodes = await this.service.getStatuses()
+
+    // status fields
+    this.statusFields = await this.service.getStatusFields()
 
     // options to choose in what queryset to filter (orders has three; current, past, and all)
     this.baseQsOptions = await this.service.getBaseQsOptions()
@@ -374,6 +378,9 @@ export default {
     this.isLoading = false
   },
   methods: {
+    isStatusField(field) {
+
+    },
     getOperators(field) {
       if (this.fieldsConfig.model.indexOf(field) !== -1) {
         return this.operators.model
