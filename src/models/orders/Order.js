@@ -45,6 +45,7 @@ class OrderModel {
   workorder_documents
   customer_order_accepted
   planning_remarks
+  order_email_extra
 
   workorder_pdf_url
   workorder_pdf_url_partner
@@ -89,7 +90,8 @@ class OrderService extends BaseModel {
     'workorder_pdf_url_partner': '',
 
     'reported_codes_extra_data': [],
-    'planning_remarks': ''
+    'planning_remarks': '',
+    'order_email_extra': ''
   }
 
   url = '/order/order/'
