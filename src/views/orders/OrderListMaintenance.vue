@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page" v-if="!isLoading">
+  <div class="app-page">
     <header>
       <!-- WIP -->
       <div class='search-form'>
@@ -28,6 +28,7 @@
       </div>
 
     </header>
+
     <div class="panel app-detail" ref="order-list-maintenance">
 
       <!-- FIXME sorting modal -->
