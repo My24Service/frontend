@@ -643,6 +643,27 @@ dl {
   margin-bottom: 1rem;
 }
 
+.filter-container {
+  display: flex;
+  gap: 0.5ex;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.filters-part {
+  align-items: center;
+  display: flex;
+  gap: 0.5ex;
+  margin: 0;
+}
+
+.filter-switch-part {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1ex;
+  justify-content: flex-start;
+}
+
 /* Company section */
 .company-image {
   position: relative;

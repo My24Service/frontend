@@ -109,19 +109,27 @@
       </b-modal>
 
       <div>
-        <div class="flex-columns order-filter-links">
+        <div class="order-filter-links">
 
-          <div v-if="isActive('orders')">
-            <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
-            <router-link v-if="!hasBranches" class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
-            <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
-            <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
-            <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
-            |
+          <div v-if="isActive('orders')" class="filter-container">
+            <div v-if="showSystemFilters" class="filters-part">
+              <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
+              <router-link v-if="!hasBranches" class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+              <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
+              <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
+              <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
+            </div>
             <OrderFilters
-              v-if="userFilters.length > 0"
+              v-if="!showSystemFilters"
               :filters="userFilters"
             />
+
+            <div class="filter-switch-part">
+              <b-form-checkbox v-model="showSystemFilters" name="check-button" switch>
+                <b>{{ showSystemFilters ? $trans("System filters") : $trans("User filters") }}</b>
+              </b-form-checkbox>
+            </div>
+
           </div>
           <div v-else></div>
 
@@ -281,6 +289,7 @@ export default {
         { key: 'info', label: this.$trans('Infolines') }
       ],
       filterService: new OrderFilterService(),
+      showSystemFilters: true
     }
   },
   async created() {
@@ -417,3 +426,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.filters-switch {
+  width: 100%;
+}
+</style>
