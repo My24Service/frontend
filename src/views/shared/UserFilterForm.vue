@@ -196,7 +196,10 @@
                       </b-link>
                       <br/>
                     </div>
-                    <div class="float-right add-value">
+                    <div
+                      class="float-right add-value"
+                      v-if="condition.fieldInputType !== FIELD_TYPE_BOOL"
+                    >
                       <b-link
                         :title="$trans('add value')"
                         @click="addConditionValue(condition)"
