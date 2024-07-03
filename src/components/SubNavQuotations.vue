@@ -15,7 +15,7 @@
     <b-nav-item
       :active="isActive('sent')"
       v-if="isStaff || isSuperuser || isPlanning"
-      :to="{ name: 'sent-quotations' }">
+      :to="{ name: 'quotations-sent' }">
       {{ $trans('Sent') }}
     </b-nav-item>
   </div>
