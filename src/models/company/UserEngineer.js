@@ -186,6 +186,10 @@ class EngineerService extends BaseModel {
     ]
     return this.axios.get(`${this.url}${pk}/stats_week_v2/?${params.join('&')}`).then((response) => response.data)
   }
+
+  getLocations() {
+    return this.axios.get(`${this.url}get_locations/`).then((response) => response.data)
+  }
 }
 
 export default new EngineerService()

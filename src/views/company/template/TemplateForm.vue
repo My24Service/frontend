@@ -141,7 +141,13 @@
                 {{ result.name }}
               </b-col>
               <b-col cols="3" v-if="result">
-                <b-button @click="previewPdf" type="button" variant="primary">
+                <b-button
+                  @click="previewPdf"
+                  type="button"
+                  variant="primary"
+                  :disabled="loadingPdf"
+                >
+                  <b-spinner small v-if="loadingPdf"></b-spinner>
                   {{ $trans("Preview pdf") }}
                 </b-button>
               </b-col>
@@ -208,6 +214,8 @@ export default {
     return {
       isEdit: false,
       isSubmitClicked: false,
+      loadingPdf: false,
+      isLoading: false,
       templateService: new TemplateService(),
       file: null,
       template: {},
@@ -307,7 +315,7 @@ export default {
       }
     },
     async previewPdf() {
-      this.isLoading = true;
+      this.loadingPdf = true;
       const data = {
         id: this.pk,
         uuid: this.result.uuid,
@@ -322,7 +330,7 @@ export default {
       } catch (error) {
         console.log("Error downloading template", error);
         this.errorToast(this.$trans("Error downloading template"));
-        this.isLoading = false;
+        this.loadingPdf = false;
       }
     },
     selectResult(result, index) {

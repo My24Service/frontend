@@ -1,5 +1,6 @@
 import BaseModel from '@/models/base';
 import {normalClient} from "@/services/api";
+import auth from '@/services/auth'
 
 class My24 extends BaseModel {
   getInitialData() {
@@ -20,9 +21,18 @@ class My24 extends BaseModel {
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
 
-  downloadItem(url, name, callback) {
-    normalClient
-      .get(url, { responseType: 'blob' })
+  downloadItem(url, name, callback, requestMethod='get') {
+    let headers = { responseType: 'blob' }
+    let client;
+
+    if (requestMethod === 'post') {
+      auth.setInterceptors(normalClient)
+      client = normalClient.post(url, {}, headers)
+    } else {
+      client = normalClient.get(url, headers)
+    }
+
+    client
       .then((response) => {
         const blob = new Blob([response.data], { type: response.data.type });
         const link = document.createElement('a');
@@ -154,7 +164,7 @@ class My24 extends BaseModel {
     const parts_always_allowed = [
       'form', 'view', 'info', 'company', 'activity', 'pictures',
       'planning-users', 'employee-users', 'import', 'statuscodes',
-      'api-users'
+      'api-users', 'map'
     ]
     if (parts_always_allowed.indexOf(config.part) !== -1) {
       if (debug) console.debug(`allowed: part "${config.part}" in always allowed (${parts_always_allowed.join('/')})`)

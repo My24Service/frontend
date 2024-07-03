@@ -31,8 +31,19 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <router-link :to="{name: 'member-add'}" class="btn">
+          <router-link
+            v-if="isSuperuser && !requested && !deleted"
+            :to="{name: 'member-add'}"
+            class="btn"
+          >
             {{$trans('Add member')}}
+          </router-link>
+          <router-link
+            v-if="requested && !deleted"
+            :to="{name: 'member-request'}"
+            class="btn"
+          >
+            {{$trans('Request new member')}}
           </router-link>
         </b-button-toolbar>
       </div>
@@ -40,28 +51,7 @@
 
     <div class="app-detail panel overflow-auto">
 
-      <b-modal
-        id="delete-member-modal"
-        ref="delete-member-modal"
-        v-bind:title="$trans('Delete?')"
-        @ok="doDelete"
-      >
-        <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
-      </b-modal>
-
-      <SearchModal
-        id="search-modal"
-        ref="search-modal"
-        @do-search="handleSearchOk"
-      />
-
       <div class="overflow-auto">
-        <Pagination
-          v-if="!isLoading"
-          :model="service"
-          :model_name="modelName"
-        />
-
         <b-table
           id="member-table"
           small
@@ -72,31 +62,6 @@
           class="data-table"
           sort-icon-left
         >
-          <template #head(icons)="">
-            <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-                  <ButtonLinkAdd
-                    v-if="isSuperuser && !requested && !deleted"
-                    router_name="member-add"
-                    v-bind:title="$trans('New member')"
-                  />
-                  <ButtonLinkAdd
-                    v-if="requested && !deleted"
-                    router_name="member-request"
-                    v-bind:title="$trans('Request new member')"
-                  />
-                  <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
-                  />
-                  <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
-                  />
-                </b-button-group>
-              </b-button-toolbar>
-            </div>
-          </template>
           <template #cell(member_logo)="data">
             <img :src="data.item.companylogo_url" width="100" alt=""/>
           </template>
@@ -125,6 +90,11 @@
         </b-table>
       </div>
     </div>
+    <Pagination
+      v-if="!isLoading"
+      :model="service"
+      :model_name="modelName"
+    />
   </div>
 </template>
 
@@ -138,12 +108,10 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '@/utils'
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
-    ButtonLinkDownload,
     IconLinkDelete,
     IconLinkEdit,
     ButtonLinkRefresh,

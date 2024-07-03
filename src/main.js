@@ -74,6 +74,9 @@ Vue.use(FormSelectPlugin)
 import { FormTextareaPlugin } from 'bootstrap-vue'
 Vue.use(FormTextareaPlugin)
 
+import { FormTagsPlugin } from 'bootstrap-vue'
+Vue.use(FormTagsPlugin)
+
 import { FormTimepickerPlugin } from 'bootstrap-vue'
 Vue.use(FormTimepickerPlugin)
 
