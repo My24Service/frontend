@@ -6,7 +6,6 @@
         @click="changeFilter(filter)"
         v-for="filter in filters"
         :key="filter.id"
-        variant="success"
       >
         {{ filter.name }}
       </b-nav-item>

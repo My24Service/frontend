@@ -588,21 +588,6 @@ dl {
   margin: 2rem 0;
 }
 
-.filter-item {
-  padding: 0 1.2ex;
-  border-radius: 2rem;
-  text-decoration: none !important;
-  transition: background .1s;
-  &:hover {
-    background-color: lighten($my24, 30%) !important;
-  }
-  &.router-link-active {
-    font-weight: bold;
-    color: white!important;
-    background-color: lighten($my24, 5%) !important;
-  }
-}
-
 .app-form {
   @extend .mx-auto;
   @extend .bg-light;

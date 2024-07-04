@@ -109,13 +109,23 @@
       </b-modal>
 
       <div>
-        <div class="order-filter-links">
-
-          <div v-if="isActive('orders')" class="filter-container">
-
+        <div class="order-filter-links" v-if="!isMobile()">
+          <div class="filter-container">
             <div class="filters-part">
-              <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('All') }}</router-link>
-              <router-link v-if="!hasBranches" class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
+              <b-nav pills>
+                <b-nav-item
+                  :active="isActive('orders')"
+                  :to="{name:'order-list'}"
+                >
+                  {{ $trans('All') }}
+                </b-nav-item>
+                <b-nav-item
+                  :active="isActive('orders-not-accepted')"
+                  :to="{name:'orders-not-accepted'}"
+                >
+                  {{ $trans('Not accepted') }}
+                </b-nav-item>
+              </b-nav>
             </div>
             <UserFilters
               route_name="order-list"
@@ -123,7 +133,6 @@
             />
 
           </div>
-          <div v-else></div>
 
           <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
             <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
@@ -398,8 +407,20 @@ export default {
         this.loadData()
       }
     },
-    isActive(item, subsection) {
+    isMobile() {
       const parts = this.$route.path.split('/')
+      parts.shift()
+      if (parts[0] === 'mobile') {
+        return true
+      }
+    },
+    isActive(item, subsection) {
+      if (this.$route.query.user_filter) {
+        return false
+      }
+
+      const parts = this.$route.path.split('/')
+      parts.shift()
       if(!subsection) {
         return parts[1] === item
       } else {
