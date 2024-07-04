@@ -441,7 +441,4 @@ export default {
 }
 </script>
 <style scoped>
-.filters-switch {
-  width: 100%;
-}
 </style>
