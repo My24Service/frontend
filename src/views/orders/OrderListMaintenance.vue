@@ -112,7 +112,8 @@
         <div class="order-filter-links">
 
           <div v-if="isActive('orders')" class="filter-container">
-            <div v-if="showSystemFilters" class="filters-part">
+
+            <div v-if="showFilterMode === 'system'" class="filters-part">
               <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
               <router-link v-if="!hasBranches" class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
               <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
@@ -120,14 +121,21 @@
               <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
             </div>
             <OrderFilters
-              v-if="!showSystemFilters"
+              v-if="showFilterMode === 'user'"
               :filters="userFilters"
             />
 
-            <div class="filter-switch-part">
-              <b-form-checkbox v-model="showSystemFilters" name="check-button" switch>
-                <b>{{ showSystemFilters ? $trans("System filters") : $trans("User filters") }}</b>
-              </b-form-checkbox>
+            <div class="filter-switch-part" v-if="userFilters.length > 0">
+              <b-button-group>
+                <b-button
+                  variant="primary"
+                  :disabled="showFilterMode === 'system'"
+                  @click="() => changeShowFilterMode('system')">{{  $trans("system") }}</b-button>
+              <b-button
+                variant="success"
+                :disabled="showFilterMode === 'user'"
+                @click="() => changeShowFilterMode('user')">{{  $trans("user") }}</b-button>
+              </b-button-group>
             </div>
 
           </div>
@@ -259,6 +267,30 @@ export default {
       default: 'all'
     },
   },
+  watch: {
+    showFilterMode: function(val) {
+      localStorage.setItem('orderFilterMode', JSON.stringify(val))
+      if (val === 'system') {
+        const query = {
+          ...this.$route.query,
+          page: 1
+        }
+        delete query.user_filter
+        this.$router.push({query}).catch(e => {
+        })
+      } else {
+        if (this.userFilters.length > 0) {
+          const query = {
+            ...this.$route.query,
+            user_filter:this.userFilters[0].id,
+            page: 1
+          }
+          this.$router.push({query}).catch(e => {
+          })
+        }
+      }
+    }
+  },
   data() {
     return {
       memberNewDataSocket: new MemberNewDataSocket(),
@@ -289,12 +321,20 @@ export default {
         { key: 'info', label: this.$trans('Infolines') }
       ],
       filterService: new OrderFilterService(),
-      showSystemFilters: true
+      showFilterMode: 'system',
+      showFilterModes: [
+        {value: 'system', text: this.$trans("system")},
+        {value: 'user', text: this.$trans("user")},
+      ]
     }
   },
   async created() {
     // set queryMode
     this.model.queryMode = this.queryMode
+
+    // filter mode
+    const filterMode = JSON.parse(localStorage.getItem('orderFilterMode'))
+    this.showFilterMode = filterMode ? filterMode : 'system'
 
     // reset searchQuery
     this.searchQuery = null
@@ -305,6 +345,9 @@ export default {
     await this.loadData()
   },
   methods: {
+    changeShowFilterMode(value) {
+      this.showFilterMode = value
+    },
     showSortModal() {
       this.$refs['sort-modal'].show()
     },
