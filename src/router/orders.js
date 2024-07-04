@@ -151,6 +151,19 @@ export default [
       props: {
         'app-content': route => ({...route.params, queryMode: 'unaccepted'}),
         'app-subnav': true
+      }
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
+      name: 'orders-workorders',
+      path: '/orders/orders-workorders',
+      components: {
+        'app-content': OrderList,
+        'app-subnav': SubNavOrders
+      },
+      props: {
+        'app-content': route => ({...route.params, queryMode: 'workorders'}),
+        'app-subnav': true
       },
     },
     // statuscodes

@@ -125,6 +125,12 @@
                 >
                   {{ $trans('Not accepted') }}
                 </b-nav-item>
+                <b-nav-item
+                  :active="isActive('orders-workorders')"
+                  :to="{name:'orders-workorders'}"
+                >
+                  {{ $trans('Workorders') }}
+                </b-nav-item>
               </b-nav>
             </div>
             <UserFilters

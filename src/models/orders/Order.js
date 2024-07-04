@@ -149,6 +149,8 @@ class OrderService extends BaseModel {
       base = '/order/order/get_within_range/'
     } else if (this.queryMode === 'unaccepted') {
       base = '/order/order/all_for_customer_not_accepted/'
+    } else if (this.queryMode === 'workorders') {
+      base = '/order/order/workorder_orders/'
     } else if (this.queryMode === 'all') {
       base = '/order/order/'
     } else {
