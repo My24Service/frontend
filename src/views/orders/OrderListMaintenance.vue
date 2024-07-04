@@ -118,6 +118,7 @@
               <router-link v-if="!hasBranches" class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
             </div>
             <UserFilters
+              route_name="order-list"
               :filters="userFilters"
             />
 

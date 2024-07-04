@@ -19,6 +19,10 @@ export default {
   name: "UserFilters",
   components: {},
   props: {
+    route_name: {
+      type: String,
+      default: null
+    },
     filters: {
       type: Array,
       default: () => []
@@ -38,14 +42,14 @@ export default {
           user_filter: filter.id,
           page: 1
         }
-        this.$router.push({ query }).catch(e => {})
+        this.$router.push({name: this.route_name, query }).catch(e => {})
       } else {
         const query = {
           ...this.$route.query,
           page: 1
         }
         delete query.user_filter
-        this.$router.push({ query }).catch(e => {})
+        this.$router.push({ name:this.route_name, query }).catch(e => {})
       }
     }
   }

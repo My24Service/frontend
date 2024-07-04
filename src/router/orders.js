@@ -145,9 +145,13 @@ export default [
       name: 'orders-not-accepted',
       path: '/orders/orders-not-accepted',
       components: {
-        'app-content': {queryMode: 'unaccepted'},
+        'app-content': OrderList,
         'app-subnav': SubNavOrders
-      }
+      },
+      props: {
+        'app-content': route => ({...route.params, queryMode: 'unaccepted'}),
+        'app-subnav': true
+      },
     },
     // statuscodes
     {
