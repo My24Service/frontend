@@ -9,22 +9,16 @@ import StatuscodeForm from '../views/shared/StatuscodeForm.vue'
 import ActionForm from '../views/shared/ActionForm.vue'
 
 import OrderList from '../views/orders/OrderList.vue'
-import OrderListPast from '../views/orders/OrderListPast.vue'
-import OrderListSales from '../views/orders/OrderListSales.vue'
-import OrderListNotAccepted from '../views/orders/OrderListNotAccepted.vue'
-import OrderListWorkorder from '../views/orders/OrderListWorkorder.vue'
 import OrderForm from '../views/orders/OrderForm.vue'
 import OrderView from '../views/orders/OrderView.vue'
 
 import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
-import {AUTH_LEVELS} from "../constants";
+import {AUTH_LEVELS} from "@/constants";
 
 import InvoiceForm from "../views/orders/InvoiceForm";
 import InvoiceView from "../views/orders/InvoiceView";
-import UserFilterForm from "../views/shared/UserFilterForm";
-import {USER_FILTER_TYPE_ORDER} from "../models/base_user_filter";
-import UserFilterList from "../views/shared/UserFilterList";
+import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";
 
 export default [
@@ -146,37 +140,12 @@ export default [
         'app-subnav': SubNavOrders
       },
     },
-	  {
-      meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
-	  	name: 'past-order-list',
-			path: '/orders/past-orders',
-			components: {
-			  'app-content': OrderListPast,
-			  'app-subnav': SubNavOrders
-			}
-	  },
-    {
-      name: 'order-list-sales',
-      path: '/orders/sales-orders',
-      components: {
-        'app-content': OrderListSales,
-        'app-subnav': SubNavOrders
-      }
-    },
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.CUSTOMER, AUTH_LEVELS.EMPLOYEE] },
       name: 'orders-not-accepted',
       path: '/orders/orders-not-accepted',
       components: {
-        'app-content': OrderListNotAccepted,
-        'app-subnav': SubNavOrders
-      }
-    },
-    {
-      name: 'workorder-orders',
-      path: '/orders/workorder-orders',
-      components: {
-        'app-content': OrderListWorkorder,
+        'app-content': {queryMode: 'unaccepted'},
         'app-subnav': SubNavOrders
       }
     },

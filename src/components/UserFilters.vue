@@ -16,7 +16,7 @@
 
 <script>
 export default {
-  name: "OrderFilters",
+  name: "UserFilters",
   components: {},
   props: {
     filters: {

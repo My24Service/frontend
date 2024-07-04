@@ -894,7 +894,6 @@ import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
 
-import {OrderNotAcceptedService} from '@/models/orders/OrderNotAccepted'
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer'
 import {AssignService} from '@/models/mobile/Assign'
@@ -1037,7 +1036,6 @@ export default {
       quotationService: new QuotationService(),
       customerService: new CustomerService(),
       orderService: new OrderService(),
-      orderNotAcceptedService: new OrderNotAcceptedService(),
       engineerService: new EngineerService(),
       branchService: new BranchService(),
       locationService: new LocationService(),
@@ -1487,7 +1485,7 @@ export default {
       await this.submitForm()
     },
     async reject() {
-      await this.orderNotAcceptedService.setRejected(this.pk)
+      await this.orderService.setRejected(this.pk)
       this.cancelForm()
     },
     async submitForm(e) {
@@ -1570,7 +1568,7 @@ export default {
 
       if (!this.isCreate && this.acceptOrder) {
         try {
-          await this.orderNotAcceptedService.setAccepted(this.pk)
+          await this.orderService.setAccepted(this.pk)
           this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
         } catch(error) {
           errors.push(error)

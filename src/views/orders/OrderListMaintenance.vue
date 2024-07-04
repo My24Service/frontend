@@ -113,30 +113,13 @@
 
           <div v-if="isActive('orders')" class="filter-container">
 
-            <div v-if="showFilterMode === 'system'" class="filters-part">
-              <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
+            <div class="filters-part">
+              <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('All') }}</router-link>
               <router-link v-if="!hasBranches" class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
-              <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
-              <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
-              <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
             </div>
-            <OrderFilters
-              v-if="showFilterMode === 'user'"
+            <UserFilters
               :filters="userFilters"
             />
-
-            <div class="filter-switch-part" v-if="userFilters.length > 0">
-              <b-button-group>
-                <b-button
-                  variant="primary"
-                  :disabled="showFilterMode === 'system'"
-                  @click="() => changeShowFilterMode('system')">{{  $trans("system") }}</b-button>
-              <b-button
-                variant="success"
-                :disabled="showFilterMode === 'user'"
-                @click="() => changeShowFilterMode('user')">{{  $trans("user") }}</b-button>
-              </b-button-group>
-            </div>
 
           </div>
           <div v-else></div>
@@ -231,7 +214,7 @@ import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import SearchForm from '../../components/SearchForm.vue'
 import SubNavOrders from '../../components/SubNavOrders.vue'
-import OrderFilters from "../../components/OrderFilters.vue"
+import UserFilters from "../../components/UserFilters.vue"
 import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '@/utils'
 import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "@/constants";
@@ -252,7 +235,7 @@ export default {
     ButtonLinkAdd,
     ButtonLinkSort,
     SearchModal,
-    OrderFilters,
+    UserFilters,
     Pagination,
     SearchForm,
     SubNavOrders
@@ -268,28 +251,6 @@ export default {
     },
   },
   watch: {
-    showFilterMode: function(val) {
-      localStorage.setItem('orderFilterMode', JSON.stringify(val))
-      if (val === 'system') {
-        const query = {
-          ...this.$route.query,
-          page: 1
-        }
-        delete query.user_filter
-        this.$router.push({query}).catch(e => {
-        })
-      } else {
-        if (this.userFilters.length > 0) {
-          const query = {
-            ...this.$route.query,
-            user_filter:this.userFilters[0].id,
-            page: 1
-          }
-          this.$router.push({query}).catch(e => {
-          })
-        }
-      }
-    }
   },
   data() {
     return {
@@ -321,20 +282,11 @@ export default {
         { key: 'info', label: this.$trans('Infolines') }
       ],
       filterService: new OrderFilterService(),
-      showFilterMode: 'system',
-      showFilterModes: [
-        {value: 'system', text: this.$trans("system")},
-        {value: 'user', text: this.$trans("user")},
-      ]
     }
   },
   async created() {
     // set queryMode
     this.model.queryMode = this.queryMode
-
-    // filter mode
-    const filterMode = JSON.parse(localStorage.getItem('orderFilterMode'))
-    this.showFilterMode = filterMode ? filterMode : 'system'
 
     // reset searchQuery
     this.searchQuery = null
@@ -345,9 +297,6 @@ export default {
     await this.loadData()
   },
   methods: {
-    changeShowFilterMode(value) {
-      this.showFilterMode = value
-    },
     showSortModal() {
       this.$refs['sort-modal'].show()
     },

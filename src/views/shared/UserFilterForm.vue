@@ -181,10 +181,22 @@
                   >
                     <div v-for="(_, index) in condition.values" :key="index" class="flex-columns value-container">
                       <b-form-input
-                        v-if="condition.fieldInputType === FIELD_TYPE_CHAR"
+                        v-if="condition.fieldInputType === FIELD_TYPE_CHAR && !isStatusField(condition.field)"
                         size="sm"
                         v-model="condition.values[index].char_value"
                       ></b-form-input>
+                      <multiselect
+                        v-if="condition.fieldInputType === FIELD_TYPE_CHAR && isStatusField(condition.field)"
+                        :placeholder="$trans('Type to search status..')"
+                        open-direction="bottom"
+                        :options="statuscodes"
+                        :multiple="false"
+                        :limit="10"
+                        :max-height="600"
+                        @select="selectStatus"
+                      >
+                        <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+                      </multiselect>
                       <b-form-checkbox
                         v-if="condition.fieldInputType === FIELD_TYPE_BOOL"
                         v-model="condition.values[index].bool_value"
@@ -281,6 +293,7 @@ import {
   USER_FILTER_TYPE_ORDER
 } from "@/models/base_user_filter";
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
+import Multiselect from "vue-multiselect";
 
 /*
   TODO
@@ -290,6 +303,9 @@ export default {
   name: "UserFilterForm",
   setup() {
     return { v$: useVuelidate() }
+  },
+  components: {
+    Multiselect,
   },
   validations() {
     return {
@@ -378,8 +394,11 @@ export default {
     this.isLoading = false
   },
   methods: {
+    selectStatus(val) {
+      console.log(val)
+    },
     isStatusField(field) {
-
+      return this.statusFields.indexOf(field) !== -1
     },
     getOperators(field) {
       if (this.fieldsConfig.model.indexOf(field) !== -1) {
