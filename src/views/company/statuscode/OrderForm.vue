@@ -18,24 +18,6 @@
       {{ $trans('Use in dispatch') }}
       </b-form-checkbox>
     </b-form-group>
-    <b-form-group
-      v-if="list_type === 'order'"
-      label-cols="3"
-      v-bind:label="$trans('Use as filter')"
-      label-for="statuscode_as_filter"
-      :description="$trans('Use this statuscode for filters in order lists.')"
-    >
-      <b-form-checkbox
-        button
-        button-variant="primary"
-        id="statuscode_as_filter"
-        v-model="statuscode.as_filter"
-      >
-        <b-icon icon="check" v-if="statuscode.as_filter"></b-icon>
-
-        {{ $trans('Use as filter') }}
-      </b-form-checkbox>
-    </b-form-group>
 
     <h6>{{ $trans("Workflow") }}</h6>
 

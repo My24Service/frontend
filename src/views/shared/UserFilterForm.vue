@@ -298,10 +298,6 @@ import {
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
 import Multiselect from "vue-multiselect";
 
-/*
-  TODO
-   - finish autocomplete for statuses
- */
 export default {
   name: "UserFilterForm",
   setup() {
