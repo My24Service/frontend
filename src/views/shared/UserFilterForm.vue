@@ -5,7 +5,7 @@
         <h3>
           <b-icon icon="filter-square"></b-icon>
           <span v-if="isCreate">{{ $trans('New filter') }}</span>
-          <span v-else>{{ $trans('Edit fitler') }}</span>
+          <span v-else>{{ $trans('Edit filter') }}</span>
         </h3>
         <div class="flex-columns">
           <b-button @click="cancelForm" type="button" variant="secondary outline">
