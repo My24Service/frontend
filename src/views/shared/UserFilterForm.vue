@@ -40,13 +40,13 @@
           <b-form-group
             label-cols="3"
             label-size="sm"
-            :label="$trans('Filter in')"
-            label-for="filter_base_qs"
+            :label="$trans('Predefined')"
+            label-for="filter_predefined"
           >
             <b-form-select
-              id="filter_base_qs"
-              v-model="filter.base_qs"
-              :options="baseQsOptions"
+              id="filter_predefined"
+              v-model="filter.predefined"
+              :options="predefinedOptions"
               size="sm"></b-form-select>
           </b-form-group>
 
@@ -193,9 +193,11 @@
                         :multiple="false"
                         :limit="10"
                         :max-height="600"
+                        :searchable="true"
+                        :show-labels="false"
+                        v-model="condition.values[index].char_value"
                         @select="selectStatus"
                       >
-                        <span slot="noResult">{{ $trans('Nothing found.') }}</span>
                       </multiselect>
                       <b-form-checkbox
                         v-if="condition.fieldInputType === FIELD_TYPE_BOOL"
@@ -285,7 +287,8 @@ import {
   FilterCondition,
   FIELD_TYPE_BOOL,
   FIELD_TYPE_CHAR,
-  FIELD_TYPE_DATE, FIELD_TYPE_DATETIME,
+  FIELD_TYPE_DATE,
+  FIELD_TYPE_DATETIME,
   OPERATOR_EXCEPT_MATCHES,
   OPERATOR_ONLY_MATCHES,
   QUERY_MODE_AND,
@@ -297,7 +300,7 @@ import Multiselect from "vue-multiselect";
 
 /*
   TODO
-   - when last_status is selected, provide example values of cleaned up statuses from settings
+   - finish autocomplete for statuses
  */
 export default {
   name: "UserFilterForm",
@@ -344,7 +347,7 @@ export default {
       operators: {},
       nonTextFieldTypes: {},
       statuscodes: [],
-      baseQsOptions: [],
+      predefinedOptions: [],
       fieldInputType: FIELD_TYPE_CHAR,
       FIELD_TYPE_CHAR,
       FIELD_TYPE_BOOL
@@ -365,7 +368,7 @@ export default {
       this.model = OrderFilterModel
     }
 
-    // allowed filter fields, displaying normal and related in one list for now
+    // allowed filter fields
     this.fieldsConfig = await this.service.getFields()
     this.allFields = [...this.fieldsConfig.model, ...this.fieldsConfig.related]
 
@@ -381,13 +384,12 @@ export default {
     // status fields
     this.statusFields = await this.service.getStatusFields()
 
-    // options to choose in what queryset to filter (orders has three; current, past, and all)
-    this.baseQsOptions = await this.service.getBaseQsOptions()
+    // predefined filters
+    this.predefinedOptions = await this.service.getPredefinedOptions()
 
     if (this.isCreate) {
       this.examples = await this.service.getExamples()
-      this.filter = new this.model({json_conditions: [this.newCondition()]})
-      this.checkCondition(this.filter.json_conditions[0])
+      this.filter = new this.model({json_conditions: []})
     } else {
       await this.loadData()
     }
@@ -513,9 +515,6 @@ export default {
     removeCondition(index) {
       if (confirm(this.$trans("Remove this condition?"))) {
         this.filter.json_conditions.splice(index, 1)
-        if (this.filter.json_conditions.length === 0) {
-          this.addCondition()
-        }
       }
     },
     newCondition() {
@@ -523,6 +522,7 @@ export default {
         field: this.allFields[0],
       })
       this.addConditionValue(condition)
+      this.checkCondition(condition)
       return condition
     },
     addCondition() {
@@ -585,7 +585,7 @@ export default {
   }
 }
 </script>
-
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>
 div.add-value {
   margin-right: 52px;
