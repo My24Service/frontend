@@ -193,7 +193,4 @@ export default {
 </script>
 
 <style scoped>
-.import-form {
-  padding-top: 50px;
-}
 </style>

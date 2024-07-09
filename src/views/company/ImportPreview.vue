@@ -23,7 +23,7 @@
                 :title="obj.title"
               >
                 <b-card-text>
-                  <h4>{{ importData[obj.key].length }} {{ $trans("entries") }}</h4>
+                  <h4>{{ importData[obj.key].import.length }} {{ $trans("entries") }}</h4>
                   <p>
                     {{ $trans("Existing records will be checked on") }}:
                     <b><i>{{ lookupFields[obj.key.split('__'[0])].join(', ') }}</i></b>
@@ -31,7 +31,7 @@
                   <b-table
                     small
                     :fields="getFields(obj.key)"
-                    :items="importData[obj.key]"
+                    :items="importData[obj.key].import"
                     responsive="md"
                     class="data-table"
                   >
@@ -90,6 +90,8 @@ export default {
         'branches': this.$trans("Branches"),
         'equipment': this.$trans("Equipment"),
         'locations': this.$trans("Locations"),
+        'materials': this.$trans("Materials"),
+        'suppliers': this.$trans("Suppliers"),
       },
       activePill: 0,
       branchesFields: [
@@ -132,6 +134,24 @@ export default {
       locationFieldsBranches: [
         {key: 'name', label: this.$trans('Name') },
         {key: 'customer_branch_view.name', label: this.$trans('Branch')},
+        {key: 'mode', label: ''},
+      ],
+      materialFields: [
+        {key: 'name', label: this.$trans('Name') },
+        {key: 'show_name', label: this.$trans('Name')},
+        {key: 'identifier', label: this.$trans('Identifier')},
+        {key: 'price_purchase_ex', label: this.$trans('Purchase price ex.')},
+        {key: 'price_selling_ex', label: this.$trans('Selling price ex.')},
+        {key: 'supplier_name', label: this.$trans('Supplier')},
+        {key: 'mode', label: ''},
+      ],
+      suppliersFields: [
+        {key: 'name', label: this.$trans('Name') },
+        {key: 'address', label: this.$trans('Address') },
+        {key: 'postal', label: this.$trans('Postal') },
+        {key: 'city', label: this.$trans('City') },
+        {key: 'country_code', label: this.$trans('Country') },
+        {key: 'tel', label: this.$trans('Phone') },
         {key: 'mode', label: ''},
       ],
       lookupFields: {}
@@ -189,6 +209,10 @@ export default {
           } else {
             return this.locationFieldsBranches
           }
+        case "materials":
+          return this.materialFields
+        case "suppliers":
+          return this.suppliersFields
         default:
           throw `Unknown field type: ${key} for has branches=${this.hasBranches}`
       }

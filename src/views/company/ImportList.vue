@@ -72,19 +72,19 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <span v-if="data.item.result_inserts">
+            <span v-if="Object.keys(data.item.result_inserts).length > 0">
               <b-link v-bind:title="$trans('Revert import')" v-on:click="revertImport(data.item.id)">
                 <b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise>
               </b-link>
             </span>
             <IconLinkEdit
-              v-if="!data.item.result_inserts"
+              v-if="Object.keys(data.item.result_inserts).length === 0"
               router_name="company-import-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
             <IconLinkDelete
-              v-if="!data.item.result_inserts"
+              v-if="Object.keys(data.item.result_inserts).length === 0"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
@@ -187,7 +187,8 @@ export default {
         try {
           await this.service.revertImport(id)
           this.infoToast(this.$trans('Reverted'), this.$trans('Import has been reverted'))
-          await this.$router.push({name: 'company-import-list'})
+          // await this.$router.push({name: 'company-import-list'})
+          await this.loadData()
         } catch (error) {
           console.log('Error reverting import', error)
           this.errorToast(this.$trans('Error reverting import'))
