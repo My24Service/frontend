@@ -40,13 +40,13 @@
           <b-form-group
             label-cols="3"
             label-size="sm"
-            :label="$trans('Predefined')"
-            label-for="filter_predefined"
+            :label="$trans('Base filter')"
+            label-for="filter_base_filter"
           >
             <b-form-select
-              id="filter_predefined"
-              v-model="filter.predefined"
-              :options="predefinedOptions"
+              id="filter_base_filter"
+              v-model="filter.base_filter"
+              :options="baseFilterOptions"
               size="sm"></b-form-select>
           </b-form-group>
 
@@ -343,7 +343,7 @@ export default {
       operators: {},
       nonTextFieldTypes: {},
       statuscodes: [],
-      predefinedOptions: [],
+      baseFilterOptions: [],
       fieldInputType: FIELD_TYPE_CHAR,
       FIELD_TYPE_CHAR,
       FIELD_TYPE_BOOL
@@ -380,8 +380,8 @@ export default {
     // status fields
     this.statusFields = await this.service.getStatusFields()
 
-    // predefined filters
-    this.predefinedOptions = await this.service.getPredefinedOptions()
+    // base filters
+    this.baseFilterOptions = await this.service.getBaseFilterOptions()
 
     if (this.isCreate) {
       this.examples = await this.service.getExamples()

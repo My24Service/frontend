@@ -12,7 +12,7 @@ export const FIELD_TYPE_BOOL = 'bool'
 export const FIELD_TYPE_DATE = 'date'
 export const FIELD_TYPE_DATETIME = 'datetime'
 
-export const PREDEFINED_OPTION_ALL = 'all'
+export const BASE_FILTER_OPTION_ALL = 'all'
 
 class FilterConditionValue {
   char_value
@@ -68,7 +68,7 @@ class FilterCondition {
 class BaseUserFilterModel {
   id
   name
-  predefined = PREDEFINED_OPTION_ALL
+  base_filter = BASE_FILTER_OPTION_ALL
   json_conditions = []
   querymode = QUERY_MODE_OR
 
@@ -117,8 +117,8 @@ class BaseUserFilterService extends BaseModel {
     return this.axios.get(`${this.url}get_status_fields/`).then((response) => response.data)
   }
 
-  getPredefinedOptions() {
-    return this.axios.get(`${this.url}get_predefined_options/`).then((response) => response.data)
+  getBaseFilterOptions() {
+    return this.axios.get(`${this.url}get_base_filter_options/`).then((response) => response.data)
   }
 }
 
