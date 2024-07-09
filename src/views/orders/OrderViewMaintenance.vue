@@ -230,16 +230,31 @@
           </div>
 
           <h6 v-if="order.orderlines.length">{{ $trans('Orderlines') }}</h6>
-          <ul class="listing full-size" v-if="order.orderlines.length">
-            <li v-for="line in order.orderlines" :key="line.id">
-              <div class="listing-item flex-columns">
-                <small>{{ line.product  }}</small>
-                <small>{{ line.location  }}</small>
-                <small>{{ line.remarks  }}</small>
-              </div>
-            </li>
-          </ul>
-          <h6 v-else class="dimmed">{{ $trans('Orderlines') }}</h6>
+          <b-table
+            id="orderlines-table"
+            small
+            :fields="orderLineFields"
+            :items="order.orderlines"
+            responsive="md"
+            class="data-table"
+          >
+          </b-table>
+          <h6
+            v-if="!order.orderlines.length"
+            class="dimmed"
+          >
+            {{ $trans('No orderlines') }}
+          </h6>
+
+          <!--          <ul class="listing full-size" v-if="order.orderlines.length">-->
+<!--            <li v-for="line in order.orderlines" :key="line.id">-->
+<!--              <div class="listing-item flex-columns">-->
+<!--                <small>{{ line.product  }}</small>-->
+<!--                <small>{{ line.location  }}</small>-->
+<!--                <small>{{ line.remarks  }}</small>-->
+<!--              </div>-->
+<!--            </li>-->
+<!--          </ul>-->
 
           <ul class='listing full-size' v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
             <h6>{{ $trans('Info lines') }}</h6>
@@ -384,10 +399,12 @@ import PriceInput from "@/components/PriceInput.vue";
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import StatusesComponent from "@/components/StatusesComponent.vue";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
+import ApiResult from "@/components/ApiResult.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    ApiResult,
     DocumentsComponent,
     StatusesComponent,
     IconLinkPlus,
