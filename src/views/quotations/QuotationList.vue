@@ -86,7 +86,7 @@
           />
         </template>
         <template #cell(icons)="data">
-          <div class="h2 float-right">
+          <div class="h2 quotation-icons">
             <router-link
               class="px-1"
               v-if="!data.item.preliminary"
@@ -238,7 +238,7 @@ export default {
       handler: function(search) {
         if (this.$route.name === 'preliminary-quotations') {
           this.quotationService.queryMode = 'preliminary'
-        } else if(this.$route.name === 'sent-quotations') {
+        } else if(this.$route.name === 'quotations-sent') {
           this.quotationService.queryMode = 'sent'
         } else {
           this.quotationService.queryMode = 'all'
@@ -250,3 +250,9 @@ export default {
   }
 }
 </script>
+<style scoped>
+.quotation-icons {
+  display: flex;
+  justify-content: flex-end;
+}
+</style>

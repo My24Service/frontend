@@ -60,7 +60,7 @@ export default [
     },
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
-      name: 'sent-quotations',
+      name: 'quotations-sent',
       path: '/quotations/sent',
       components: {
         'app-content': QuotationList,
@@ -100,7 +100,7 @@ export default [
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-send',
-      path: '/quotations/send/form/',
+      path: '/quotations/sent/form/',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': true

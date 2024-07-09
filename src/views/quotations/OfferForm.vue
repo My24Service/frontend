@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-check-fill"></b-icon>
-          <router-link :to="{ name: 'sent-quotations' }">
+          <router-link :to="{ name: 'quotations-sent' }">
             {{ $trans("Send quotation") }}
           </router-link>
           /
@@ -160,7 +160,7 @@ export default {
       }
     },
     cancelForm() {
-      this.$router.push({name: 'sent-quotations'});
+      this.$router.push({name: 'quotations-sent'});
     },
     validateEmailRecipients(emails) {
       for (const email of emails) {
@@ -224,7 +224,7 @@ export default {
             return;
           }
           this.$router.go(-1);
-          this.$router.push({name: 'sent-quotations'});
+          this.$router.push({name: 'quotations-sent'});
         } catch (error) {
           console.log("Error sending quotation", error);
           this.errorToast(this.$trans("Error sending quotation"));
@@ -242,7 +242,7 @@ export default {
           this.errorToast(this.$trans("Error sending quotation"));
           return;
         }
-        this.$router.push({name: 'sent-quotations'});
+        this.$router.push({name: 'quotations-sent'});
       } catch(error) {
         console.log("Error sending quotation", error);
         this.errorToast(this.$trans("Error sending quotation"));
