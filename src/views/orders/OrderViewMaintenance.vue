@@ -403,9 +403,9 @@ export default {
       workorderURL: '',
       iframeLoading: true,
       orderLineFields: [
-        {key: 'product', label: this.$trans('Product')},
-        {key: 'location', label: this.$trans('Location')},
-        {key: 'remarks', label: this.$trans('Remarks')}
+        {key: 'product', label: this.$trans('Product'), thAttr: {width: '30%'}},
+        {key: 'location', label: this.$trans('Location'), thAttr: {width: '30%'}},
+        {key: 'remarks', label: this.$trans('Remarks'), thAttr: {width: '40%'}}
       ],
       infoLineFields: [
         {key: 'info', label: this.$trans('Infolines')}
