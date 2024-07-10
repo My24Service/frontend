@@ -31,6 +31,12 @@
           to="/orders/year-stats">
           {{ $trans('Stats') }}
         </b-nav-item>
+        <b-nav-item
+          :active="isActive('orders', 'filter')"
+          v-if="isStaff || isSuperuser || isPlanning"
+          :to="{ name: 'order-filter-list' }">
+          {{ $trans('Filters') }}
+        </b-nav-item>
       </b-nav>
     </div>
 

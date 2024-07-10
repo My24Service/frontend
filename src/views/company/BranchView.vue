@@ -165,7 +165,7 @@
               </div>
               <br>
               <ul class='listing order-list'>
-                <li v-for="order in orders">
+                <li v-for="order in orders" :key="order.id">
                   <OrderTableInfo
                     v-bind:order="order"
                     />
@@ -191,7 +191,7 @@
 </template>
 
 <script>
-import orderPastModel from '../../models/orders/OrderPast.js'
+import {OrderService} from '../../models/orders/Order.js'
 import branchModel from '../../models/company/Branch.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -221,7 +221,7 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderPastModel,
+      orderService: new OrderService(),
       buttonDisabled: false,
       branch: branchModel.fields,
       orders: [],
@@ -265,7 +265,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderPastModel.currentPage = val
+      this.orderService.currentPage = val
       this.loadData()
     }
   },
@@ -273,7 +273,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      orderPastModel.setSearchQuery(val)
+      this.orderService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -337,7 +337,7 @@ export default {
 
     async loadHistory() {
       try {
-        const results = await orderPastModel.list()
+        const results = await this.orderService.list()
         this.orders = results.results
         this.isLoading = false
       } catch(error) {

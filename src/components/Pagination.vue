@@ -65,7 +65,7 @@ export default {
       }
       this.currentItemsStart = start;
       this.currentItemsEnd = end;
-    }  
+    }
   },
 }
 </script>
