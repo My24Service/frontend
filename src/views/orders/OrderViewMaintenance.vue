@@ -56,6 +56,8 @@
             <dd>{{ order.order_reference }}</dd>
             <dt>{{ $trans("Remarks") }}</dt>
             <dd>{{ order.remarks }}</dd>
+            <dt v-if="isPlanning">{{ $trans("Planning remarks") }}</dt>
+            <dd v-if="isPlanning">{{ order.planning_remarks }}</dd>
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
             <dd v-if="!hasBranches" class="flex-columns">
               <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank"><b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}</b-link>
@@ -228,16 +230,31 @@
           </div>
 
           <h6 v-if="order.orderlines.length">{{ $trans('Orderlines') }}</h6>
-          <ul class="listing full-size" v-if="order.orderlines.length">
-            <li v-for="line in order.orderlines" :key="line.id">
-              <div class="listing-item flex-columns">
-                <small>{{ line.product  }}</small>
-                <small>{{ line.location  }}</small>
-                <small>{{ line.remarks  }}</small>
-              </div>
-            </li>
-          </ul>
-          <h6 v-else class="dimmed">{{ $trans('Orderlines') }}</h6>
+          <b-table
+            id="orderlines-table"
+            small
+            :fields="orderLineFields"
+            :items="order.orderlines"
+            responsive="md"
+            class="data-table"
+          >
+          </b-table>
+          <h6
+            v-if="!order.orderlines.length"
+            class="dimmed"
+          >
+            {{ $trans('No orderlines') }}
+          </h6>
+
+          <!--          <ul class="listing full-size" v-if="order.orderlines.length">-->
+<!--            <li v-for="line in order.orderlines" :key="line.id">-->
+<!--              <div class="listing-item flex-columns">-->
+<!--                <small>{{ line.product  }}</small>-->
+<!--                <small>{{ line.location  }}</small>-->
+<!--                <small>{{ line.remarks  }}</small>-->
+<!--              </div>-->
+<!--            </li>-->
+<!--          </ul>-->
 
           <ul class='listing full-size' v-if="!isCustomer && !hasBranches && order.infolines.length > 0">
             <h6>{{ $trans('Info lines') }}</h6>
@@ -382,10 +399,12 @@ import PriceInput from "@/components/PriceInput.vue";
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import StatusesComponent from "@/components/StatusesComponent.vue";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
+import ApiResult from "@/components/ApiResult.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    ApiResult,
     DocumentsComponent,
     StatusesComponent,
     IconLinkPlus,
@@ -401,9 +420,9 @@ export default {
       workorderURL: '',
       iframeLoading: true,
       orderLineFields: [
-        {key: 'product', label: this.$trans('Product')},
-        {key: 'location', label: this.$trans('Location')},
-        {key: 'remarks', label: this.$trans('Remarks')}
+        {key: 'product', label: this.$trans('Product'), thAttr: {width: '30%'}},
+        {key: 'location', label: this.$trans('Location'), thAttr: {width: '30%'}},
+        {key: 'remarks', label: this.$trans('Remarks'), thAttr: {width: '40%'}}
       ],
       infoLineFields: [
         {key: 'info', label: this.$trans('Infolines')}

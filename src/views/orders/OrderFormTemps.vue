@@ -448,14 +448,12 @@ import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import Multiselect from 'vue-multiselect'
 
-import orderModel from '@/models/orders/Order.js'
+import orderService, {OrderService} from '@/models/orders/Order.js'
 import customerModel from '@/models/customer/Customer.js'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import orderlineModel from "../../models/orders/Orderline";
 import {componentMixin} from "@/utils";
-import orderNotAcceptedModel from "@/models/orders/OrderNotAccepted";
-import Assign from "@/models/mobile/Assign";
 
 export default {
   setup() {
@@ -506,7 +504,8 @@ export default {
       submitClicked: false,
       countries: [],
       orderTypes: [],
-      order: orderModel.getFields(),
+      order: new OrderModel({}),
+      service: new OrderService(),
       errorMessage: null,
       customers: [],
       customerSearch: '',
@@ -565,7 +564,7 @@ export default {
     this.orderTypes = await this.$store.dispatch('getOrderTypes')
 
     if (this.isCreate) {
-      this.order = orderModel.getFields()
+      this.order = new OrderModel({})
       await this.getCustomers('')
     } else {
       await this.loadOrder()
@@ -633,7 +632,7 @@ export default {
       await this.submitForm()
     },
     async reject() {
-      await orderNotAcceptedModel.setRejected(this.pk)
+      await this.orderService.setRejected(this.pk)
       this.cancelForm()
     },
     async submitForm() {
@@ -660,7 +659,7 @@ export default {
           const orderlines = this.order.orderlines
           this.order.orderlines = []
 
-          const newOrder = await orderModel.insert(this.order)
+          const newOrder = await this.orderService.insert(this.order)
 
           // add orderlines
           try {
@@ -677,7 +676,7 @@ export default {
           this.isLoading = false
 
           if (confirm((this.$trans('Do you want to add documents to this order?')))) {
-            this.$router.push({name: 'order-document-add', params: {orderPk: order.id}})
+            await this.$router.push({name: 'order-document-add', params: {orderPk: order.id}})
           } else {
             this.$router.go(-1)
           }
@@ -730,7 +729,7 @@ export default {
 
       if (this.acceptOrder) {
         try {
-          await orderNotAcceptedModel.setAccepted(this.pk)
+          await this.orderService.setAccepted(this.pk)
 
           this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
         } catch(error) {
@@ -756,7 +755,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.order = await orderModel.detail(this.pk)
+        this.order = await this.orderService.detail(this.pk)
         this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
         this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.isLoading = false

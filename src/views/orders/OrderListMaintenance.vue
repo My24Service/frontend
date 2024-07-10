@@ -28,12 +28,8 @@
       </div>
 
     </header>
+
     <div class="panel app-detail" ref="order-list-maintenance">
-      <OrderFilters
-        :statuscodes="statuscodes.filter(statuscode => statuscode.as_filter)"
-        @set-filter="setStatusFilter"
-        @remove-filter="removeStatusFilter"
-      />
 
       <!-- FIXME sorting modal -->
       <b-modal
@@ -113,16 +109,30 @@
       </b-modal>
 
       <div>
-        <div class="flex-columns order-filter-links">
+        <div class="order-filter-links" v-if="!isMobile()">
+          <div class="filter-container">
+            <div class="filters-part">
+              <b-nav pills>
+                <b-nav-item
+                  :active="isActive('orders')"
+                  :to="{name:'order-list'}"
+                >
+                  {{ $trans('All') }}
+                </b-nav-item>
+                <b-nav-item
+                  :active="isActive('orders-not-accepted')"
+                  :to="{name:'orders-not-accepted'}"
+                >
+                  {{ $trans('Not accepted') }}
+                </b-nav-item>
+              </b-nav>
+            </div>
+            <UserFilters
+              route_name="order-list"
+              :filters="userFilters"
+            />
 
-          <div v-if="isActive('orders')">
-            <router-link class="filter-item" :to="{name:'order-list'}">{{ $trans('Active') }}</router-link>
-            <router-link v-if="!hasBranches" class="filter-item" :to="{name:'orders-not-accepted'}">{{ $trans('Not accepted') }}</router-link>
-            <router-link class="filter-item" :to="{name:'past-order-list'}">{{ $trans('Past') }}</router-link>
-            <router-link class="filter-item" :to="{name:'order-list-sales'}">{{ $trans('Sales') }}</router-link>
-            <router-link class="filter-item" :to="{name:'workorder-orders'}">{{ $trans('Workorder') }}</router-link>
           </div>
-          <div v-else></div>
 
           <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
             <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
@@ -173,80 +183,6 @@
             </li>
           </ul>
         </div>
-
-  <!--
-        <b-table
-          id="order-table"
-          small
-          :busy='isLoading'
-          :fields="fields"
-          :items="orders"
-          responsive="md"
-          class="data-table"
-          v-bind:tbody-tr-attr="rowStyle"
-        >
-          <template #head(icons)="">
-            <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
-
-                  <ButtonLinkRefresh
-                    v-bind:method="function() { loadData() }"
-                    v-bind:title="$trans('Refresh')"
-                  />
-                  <ButtonLinkSearch
-                    v-bind:method="function() { showSearchModal() }"
-                  />
-                  <ButtonLinkSort
-                    v-bind:method="function() { showSortModal() }"
-                  />
-                </b-button-group>
-              </b-button-toolbar>
-            </div>
-          </template>
-          <template #table-busy>
-            <div class="text-center text-danger my-2">
-              <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-              <strong>{{ $trans('Loading...') }}</strong>
-            </div>
-          </template>
-          <template #cell(id)="data">
-            <OrderTableInfo
-              v-bind:order="data.item"
-            />
-          </template>
-          <template #cell(icons)="data">
-            <div class="h2 float-right">
-              <IconLinkEdit
-                router_name="order-edit"
-                v-bind:router_params="{pk: data.item.id}"
-                v-bind:title="$trans('Edit')"
-              />
-              <IconLinkPlus
-                v-if="!isCustomer && !isBranchEmployee"
-                type="tr"
-                v-bind:title="$trans('Change status')"
-                v-bind:method="function() { showChangeStatusModal(data.item.id) }"
-              />
-              <IconLinkDocuments
-                router_name="order-documents"
-                v-bind:router_params="{orderPk: data.item.id}"
-                v-bind:title="$trans('Documents')"
-              />
-              <IconLinkAssign
-                v-if="!isCustomer && !isBranchEmployee && dispatch"
-                v-bind:title="$trans('Assign')"
-                v-bind:method="function() { selectOrder(data.item) }"
-              />
-              <IconLinkDelete
-                v-if="!isCustomer && !isBranchEmployee"
-                v-bind:title="$trans('Delete')"
-                v-bind:method="function() { showDeleteModal(data.item.id) }"
-              />
-            </div>
-          </template>
-        </b-table>
-        -->
       </div>
     </div>
     <Pagination
@@ -288,11 +224,12 @@ import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import SearchForm from '../../components/SearchForm.vue'
 import SubNavOrders from '../../components/SubNavOrders.vue'
-import OrderFilters from "../../components/OrderFilters.vue"
+import UserFilters from "../../components/UserFilters.vue"
 import Pagination from "../../components/Pagination.vue"
 import { componentMixin } from '@/utils'
 import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
+import {OrderFilterService} from "@/models/orders/OrderFilter";
 
 export default {
   mixins: [componentMixin],
@@ -308,11 +245,11 @@ export default {
     ButtonLinkAdd,
     ButtonLinkSort,
     SearchModal,
-    OrderFilters,
+    UserFilters,
     Pagination,
     SearchForm,
     SubNavOrders
-},
+  },
   props: {
     dispatch: {
       type: [Boolean],
@@ -322,6 +259,8 @@ export default {
       type: [String],
       default: 'all'
     },
+  },
+  watch: {
   },
   data() {
     return {
@@ -336,6 +275,7 @@ export default {
         extra_text: ''
       },
       statuscodes: [],
+      userFilters: [],
       orderPk: null,
       isLoading: false,
       orders: [],
@@ -350,7 +290,8 @@ export default {
       ],
       infoLineFields: [
         { key: 'info', label: this.$trans('Infolines') }
-      ]
+      ],
+      filterService: new OrderFilterService(),
     }
   },
   async created() {
@@ -366,16 +307,6 @@ export default {
     await this.loadData()
   },
   methods: {
-    // filters
-    setStatusFilter(statuscode) {
-      this.model.addListArg(`last_status=${statuscode}`)
-      this.loadData()
-    },
-    removeStatusFilter(statuscode) {
-      console.log('removing', { statuscode })
-      this.model.removeListArg(`last_status=${statuscode}`)
-      this.loadData()
-    },
     showSortModal() {
       this.$refs['sort-modal'].show()
     },
@@ -451,8 +382,13 @@ export default {
     async loadData() {
       this.isLoading = true
 
+      // get filters
+      this.userFilters = await this.filterService.getSimpleList()
+
       await this.doFetchUnacceptedCountAndUpdateStore()
       this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
+
+      this.model.setUserFilter(this.$route.query.user_filter)
 
       try {
         const data = await this.model.list()
@@ -471,8 +407,20 @@ export default {
         this.loadData()
       }
     },
-    isActive(item, subsection) {
+    isMobile() {
       const parts = this.$route.path.split('/')
+      parts.shift()
+      if (parts[0] === 'mobile') {
+        return true
+      }
+    },
+    isActive(item, subsection) {
+      if (this.$route.query.user_filter) {
+        return false
+      }
+
+      const parts = this.$route.path.split('/')
+      parts.shift()
       if(!subsection) {
         return parts[1] === item
       } else {
@@ -492,3 +440,5 @@ export default {
   }
 }
 </script>
+<style scoped>
+</style>

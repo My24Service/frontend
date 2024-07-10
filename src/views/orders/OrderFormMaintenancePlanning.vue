@@ -517,7 +517,6 @@
                 <strong>{{ index + 1 }}</strong> {{ userData.full_name }}
               </span>
             </div>
-
             <b-form-group
               v-bind:label="$trans('Assign to')"
               label-for="order-assign"
@@ -558,7 +557,6 @@
               </ul>
             </div>
           </div>
-
           <b-form-group
             v-bind:label="$trans('Assignee(s)')"
             label-for="order-assigned-to"
@@ -570,7 +568,39 @@
               {{ person.full_name }}
             </label>
           </b-form-group>
-
+          <b-form-group
+            label-for="order-orderline-remarks"
+            v-bind:label="$trans('Planning remarks')"
+          >
+            <b-form-textarea
+              id="order-orderline-remarks"
+              v-model="order.planning_remarks"
+              rows="1"
+            ></b-form-textarea>
+          </b-form-group>
+          <b-form-group
+            v-bind:label="$trans('Order email extra')"
+            label-for="order-assign"
+          >
+            <multiselect
+              v-model="selectedSalesUsers"
+              id="order-assign"
+              track-by="id"
+              :max-height="600"
+              :placeholder="$trans('Type to search Sales user(s)')"
+              open-direction="bottom"
+              :options="salesUsers"
+              :multiple="true"
+              :taggable="true"
+              :custom-label="salesLabel"
+              :loading="searchingSalesUsers"
+              @search-change="getSalesUserDebounced"
+            >
+              <span slot="noResult">
+                {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+              </span>
+            </multiselect>
+          </b-form-group>
         </div>
 
         <div class="panel col-1-3">
@@ -894,7 +924,6 @@ import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
 
-import {OrderNotAcceptedService} from '@/models/orders/OrderNotAccepted'
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer'
 import {AssignService} from '@/models/mobile/Assign'
@@ -911,6 +940,7 @@ import CustomerCard from '@/components/CustomerCard'
 import {EngineerService} from "@/models/company/UserEngineer";
 import DocumentsComponent from "./order_form/DocumentsComponent.vue";
 import ApiResult from "@/components/ApiResult";
+import { UserListService } from "@/models/company/UserList.js";
 
 const isCorrectTime = (value) => {
   if (!value || value === "") {
@@ -980,8 +1010,10 @@ export default {
       location: '',
       equipment_location: null,
       remarks: '',
+      planning_remarks: '',
 
       isEditOrderLine: false,
+      userListService: new UserListService(),
 
       infoline_pk: null,
       info: '',
@@ -1003,6 +1035,8 @@ export default {
       order: null,
       errorMessage: null,
       customers: [],
+      salesUsers: [],
+      selectedSalesUsers: [],
       customerSearch: '',
       getCustomersDebounced: null,
       branches: [],
@@ -1037,13 +1071,14 @@ export default {
       quotationService: new QuotationService(),
       customerService: new CustomerService(),
       orderService: new OrderService(),
-      orderNotAcceptedService: new OrderNotAcceptedService(),
       engineerService: new EngineerService(),
       branchService: new BranchService(),
       locationService: new LocationService(),
       orderlineService: new OrderlineService(),
       infolineService: new InfolineService(),
       assignService: new AssignService(),
+      getSalesUserDebounced: null,
+      searchingSalesUsers: false
     }
   },
   validations() {
@@ -1169,6 +1204,7 @@ export default {
     this.$moment = moment
     this.$moment.locale(lang)
 
+    this.getSalesUserDebounced = AwesomeDebouncePromise(this.getSalesUsers, 500)
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
@@ -1314,6 +1350,20 @@ export default {
         this.errorToast(this.$trans('Error adding location'))
       }
     },
+    async getSalesUsers(query) {
+      if (query === '') return
+      this.salesUsers = []
+      this.searchingSalesUsers = true
+
+      try {
+        this.salesUsers = await this.userListService.search(query, 'sales_user')
+        this.searchingSalesUsers = false
+      } catch(error) {
+        console.log('Error fetching sales users', error)
+        this.errorToast(this.$trans('Error fetching sales users'))
+        this.searchingSalesUsers = false
+      }
+    },
     async getLocation(query) {
       try {
         if (this.hasBranches) {
@@ -1426,6 +1476,10 @@ export default {
       return full_name
     },
 
+    salesLabel({ email }) {
+      return email
+    },
+
     customerLabel({ name, address, city}) {
       return `${name} - ${address} - ${city}`
     },
@@ -1487,7 +1541,7 @@ export default {
       await this.submitForm()
     },
     async reject() {
-      await this.orderNotAcceptedService.setRejected(this.pk)
+      await this.orderService.setRejected(this.pk)
       this.cancelForm()
     },
     async submitForm(e) {
@@ -1513,6 +1567,11 @@ export default {
 
       const orderlines = this.order.orderlines
       this.order.orderlines = []
+
+      this.order.order_email_extra = []
+      this.selectedSalesUsers.forEach((user) => {
+        this.order.order_email_extra.push(user.email)
+      })
 
       // filter out empty infolines
       const infolines = this.order.infolines.filter(
@@ -1570,7 +1629,7 @@ export default {
 
       if (!this.isCreate && this.acceptOrder) {
         try {
-          await this.orderNotAcceptedService.setAccepted(this.pk)
+          await this.orderService.setAccepted(this.pk)
           this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
         } catch(error) {
           errors.push(error)
@@ -1779,6 +1838,13 @@ export default {
         this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
         this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.order.order_type = this.order.order_type.trim()
+
+        for (const email of this.order.order_email_extra) {
+          this.selectedSalesUsers.push({
+            'email': email
+          })
+        }
+
         this.isLoading = false
       } catch(error) {
         console.warn('error fetching order', error)
