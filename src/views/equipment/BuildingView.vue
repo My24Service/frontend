@@ -28,7 +28,7 @@
 
       <div>
         <b-row align-h="center">
-          <h3>{{ $trans("Past orders") }}</h3>
+          <h3>{{ $trans("Orders") }}</h3>
         </b-row>
         <SearchModal
           id="search-modal"
@@ -37,11 +37,11 @@
         />
 
         <b-pagination
-          v-if="this.orderPastModel.count > 20"
+          v-if="orderService.count > 20"
           class="pt-4"
           v-model="currentPage"
-          :total-rows="this.orderPastModel.count"
-          :per-page="this.orderPastModel.perPage"
+          :total-rows="orderService.count"
+          :per-page="orderService.perPage"
           aria-controls="customer-past-table"
         ></b-pagination>
 
@@ -49,7 +49,7 @@
           id="customer-past-table"
           small
           :busy='isLoading'
-          :fields="orderPastFields"
+          :fields="orderFields"
           :items="orders"
           responsive="md"
           class="data-table"
@@ -92,15 +92,14 @@
 </template>
 
 <script>
-import { OrderPastService } from '../../models/orders/OrderPast.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import { OrderService } from '../../models/orders/Order.js'
+import { OrderService } from '@/models/orders/Order'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "../../utils";
-import { BuildingService } from "../../models/equipment/building";
+import {componentMixin} from "@/utils";
+import { BuildingService } from "@/models/equipment/building";
 
 export default {
   mixins: [componentMixin],
@@ -116,13 +115,12 @@ export default {
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
-      orderPastService: new OrderPastService(),
       buildingService: new BuildingService(),
       orderService: new OrderService(),
       buttonDisabled: false,
       building: null,
       orders: [],
-      orderPastFields: [
+      orderFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
@@ -146,7 +144,7 @@ export default {
   },
   watch: {
     currentPage: function(val) {
-      this.orderPastService.currentPage = val
+      this.orderService.currentPage = val
       this.loadData()
     }
   },
@@ -161,7 +159,7 @@ export default {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.orderPastService.setSearchQuery(val)
+      this.orderService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -197,8 +195,8 @@ export default {
 
     async loadHistory() {
       try {
-        this.orderPastService.addListArg(`building=${this.pk}`)
-        const results = await this.orderPastService.list()
+        this.orderService.addListArg(`building=${this.pk}`)
+        const results = await this.orderService.list()
         this.orders = results.results
         this.isLoading = false
       } catch(error) {

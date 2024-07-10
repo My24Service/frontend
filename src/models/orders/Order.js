@@ -151,6 +151,8 @@ class OrderService extends BaseModel {
       base = '/order/order/dispatch_list_unassigned/'
     } else if (this.queryMode === 'range') {
       base = '/order/order/get_within_range/'
+    } else if (this.queryMode === 'unaccepted') {
+      base = '/order/order/all_for_customer_not_accepted/'
     } else if (this.queryMode === 'all') {
       base = '/order/order/'
     } else {
@@ -335,6 +337,27 @@ class OrderService extends BaseModel {
     }
 
     return response.data
+  }
+
+  async setAccepted(order_pk) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.url}${order_pk}/set_order_accepted/`
+
+    return new this.axios.post(url, {}, headers).then(response => response.data)
+  }
+
+  async setRejected(order_pk) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.url}${order_pk}/set_order_rejected/`
+
+    return new this.axios.post(url, {}, headers).then(response => response.data)
+  }
+
+  getUnacceptedCount() {
+    return new this.axios.get(`${this.url}all_for_customer_not_accepted_count/`)
+      .then(response => response.data)
   }
 
   getListArgs() {

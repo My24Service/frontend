@@ -1,7 +1,8 @@
 import moment from 'moment'
 
 import my24 from './services/my24'
-import orderNotAcceptedModel from './models/orders/OrderNotAccepted.js'
+import {OrderService} from './models/orders/Order.js'
+
 import {
   AUTH_LEVELS
 } from "./constants";
@@ -205,7 +206,8 @@ let componentMixin = {
       return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
     },
     async doFetchUnacceptedCountAndUpdateStore() {
-      const countResult = await orderNotAcceptedModel.getCount()
+      const service = new OrderService()
+      const countResult = await service.getUnacceptedCount()
       if (countResult && 'count' in countResult) {
         await this.$store.dispatch('setUnacceptedCount', countResult.count)
       }
