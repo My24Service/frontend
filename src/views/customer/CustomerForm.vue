@@ -284,6 +284,12 @@
               @priceChanged="(val) => customer.setCallOutCosts(val)"
             />
           </b-form-group>
+
+          <DocumentsComponent
+            v-if="customer.id"
+            :customer="customer"
+            :is-view="false"
+          />
         </div>
 
         <div class='panel col-1-3'>
@@ -373,8 +379,8 @@ import { required } from '@vuelidate/validators'
 
 import {CustomerModel, CustomerService} from '@/models/customer/Customer'
 import partnerModel from '../../models/company/Partner.js'
-import Collapse from '../../components/Collapse.vue'
 import PriceInput from "../../components/PriceInput";
+import DocumentsComponent from "@/views/customer/DocumentComponent.vue";
 
 export default {
   setup() {
@@ -388,6 +394,7 @@ export default {
   },
   components: {
     PriceInput,
+    DocumentsComponent
   },
   validations() {
     return {
