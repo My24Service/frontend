@@ -58,6 +58,8 @@
             <dd>{{ order.remarks }}</dd>
             <dt v-if="isPlanning">{{ $trans("Planning remarks") }}</dt>
             <dd v-if="isPlanning">{{ order.planning_remarks }}</dd>
+            <dt v-if="isPlanning || isEngineer">{{ $trans("Customer remarks") }}</dt>
+            <dd v-if="isPlanning || isEngineer">{{ order.customer_remarks }}</dd>
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
             <dd v-if="!hasBranches" class="flex-columns">
               <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank"><b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}</b-link>
@@ -78,10 +80,9 @@
                 </b-link>
               </div>
             </dd>
-            <dt v-if="order.customer_remarks">{{ $trans("Remarks") }}</dt>
-            <dd v-if="order.customer_remarks">{{ order.remarks }}</dd>
+            <dt v-if="isPlanning">{{ $trans("Order email extra") }}</dt>
+            <dd v-if="isPlanning">{{ order.order_email_extra.join(", ") }}</dd>
           </dl>
-
           <hr/>
 
           <h6><b-icon-person></b-icon-person>{{ $trans("Contact") }}</h6>
