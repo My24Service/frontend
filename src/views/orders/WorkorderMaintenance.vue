@@ -75,6 +75,12 @@
                     <span class="pull-right">{{ data.order.order_contact }}</span>
                 </span>
               </div>
+              <div class="row">
+                <span class="pull-left col-sm-6"><b>{{ $trans('Customer reference') }}</b></span>
+                <span class="col-sm-6 underline">
+                    <span class="pull-right">{{ data.order.customer_reference }}</span>
+                </span>
+              </div>
             </div>
         </div>
 
