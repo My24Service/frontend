@@ -5,9 +5,6 @@ import CustomerList from '../views/customer/CustomerList.vue'
 import CustomerForm from '../views/customer/CustomerForm.vue'
 import CustomerView from '../views/customer/CustomerView.vue'
 
-import DocumentList from '../views/customer/DocumentList.vue'
-import DocumentForm from '../views/customer/DocumentForm.vue'
-
 import MaintenanceContractList from '../views/customer/MaintenanceContractList.vue'
 import MaintenanceContractForm from '../views/customer/MaintenanceContractForm.vue'
 import MaintenanceContractView from '../views/customer/MaintenanceContractView.vue'
@@ -90,43 +87,6 @@ export default [
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
-      },
-    },
-    // documents
-    {
-      name: 'customer-documents',
-      path: '/customers/customers/documents/:customerPk',
-      components: {
-        'app-content': DocumentList,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'customer-document-add',
-      path: '/customers/customers/documents/form/:customerPk',
-      components: {
-        'app-content': DocumentForm,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'customer-document-edit',
-      path: '/customers/customers/documents/form/:pk',
-      components: {
-        'app-content': DocumentForm,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
       },
     },
     // maintenance contracts
