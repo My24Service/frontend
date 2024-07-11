@@ -214,6 +214,7 @@ export default {
       this.isLoading = true;
 
       if (this.isCreate) {
+        this.offer.quotation = this.$route.query.quotationId
         try {
           this.offer = await this.offerService.insert(this.offer);
           this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
@@ -230,6 +231,7 @@ export default {
           this.errorToast(this.$trans("Error sending quotation"));
           this.isLoading = false;
         }
+        return
       }
 
       try {

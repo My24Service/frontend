@@ -73,10 +73,10 @@
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Name')"
-          label-for="quotation-document-name"
+          label-for="customer-document-name"
         >
           <b-form-input
-            id="quotation-document-name"
+            id="customer-document-name"
             size="sm"
             v-model="documentService.editItem.name"
           ></b-form-input>
@@ -85,13 +85,25 @@
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Description')"
-          label-for="quotation-document-description"
+          label-for="customer-document-description"
         >
           <b-form-textarea
-            id="quotation-document-description"
+            id="customer-document-description"
             v-model="documentService.editItem.description"
             rows="1"
           ></b-form-textarea>
+        </b-form-group>
+
+        <b-form-group
+          label-cols="3"
+          v-bind:label="$trans('User can view document?')"
+          label-for="customer-document-user_can_view"
+        >
+          <b-form-checkbox
+            id="customer-document-user_can_view"
+            v-model="documentService.editItem.user_can_view"
+          >
+          </b-form-checkbox>
         </b-form-group>
       </b-form>
 
@@ -140,8 +152,7 @@
       v-if="showChangesBlock"
     >
       <b-row>
-        <b-col cols="2"></b-col>
-        <b-col cols="10">
+        <b-col cols="12">
           <b-button
             @click="loadData"
             :disabled="isLoading"
@@ -168,14 +179,13 @@
 </template>
 
 <script>
-
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
 import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
 import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
-import {DocumentModel, DocumentService} from "@/models/quotations/Document";
-import {QuotationModel} from "@/models/quotations/Quotation"
+import {DocumentModel, DocumentService} from "@/models/customer/Document.js";
+import {CustomerModel} from "@/models/customer/Customer"
 
 export default {
   name: "DocumentsComponent",
@@ -187,8 +197,8 @@ export default {
     IconLinkDelete
   },
   props: {
-    quotation: {
-      type: QuotationModel,
+    customer: {
+      type: CustomerModel,
       default: null
     },
     isView: {
@@ -223,7 +233,7 @@ export default {
     }
   },
   async created () {
-    this.documentService.setListArgs(`quotation=${this.quotation.id}`)
+    this.documentService.setListArgs(`customer=${this.customer.id}`)
     this.documentService.currentPage = this.$route.query.page || 1
     await this.loadData()
   },
@@ -269,7 +279,7 @@ export default {
           reader.onload = (f) => {
             const b64 = f.target.result
             this.documentService.collection.push(new DocumentModel({
-              quotation: this.quotation.id,
+              customer: this.customer.id,
               file: b64,
               name: files[i].name,
               description: ''
@@ -306,6 +316,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-</style>
