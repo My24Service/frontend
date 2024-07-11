@@ -26,11 +26,11 @@ class OrderModel {
   branch
   order_type
   order_reference
+  customer_reference
   order_tel
   order_mobile
   order_email
   order_contact
-  service_number
   start_date = tomorrow.toDate()
   start_time
   end_date = tomorrow.toDate()

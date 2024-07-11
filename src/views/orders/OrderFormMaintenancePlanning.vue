@@ -362,22 +362,30 @@
               :include-all="false"
             />
           </b-form-group>
-          <b-row>
 
-            <b-col cols="12" role="group">
-              <b-form-group
-                v-bind:label="$trans('Reference')"
-                label-for="order_reference"
-                label-cols="3">
-                  <b-form-input
-                  id="order_reference"
+          <b-form-group
+            v-bind:label="$trans('Reference')"
+            label-for="order_reference"
+            label-cols="3">
+              <b-form-input
+              id="order_reference"
 
-                  v-model="order.order_reference"
-                  >
-                  </b-form-input>
-              </b-form-group>
-            </b-col>
-          </b-row>
+              v-model="order.order_reference"
+              >
+              </b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            v-bind:label="$trans('Customer reference')"
+            label-for="customer_reference"
+            label-cols="3">
+            <b-form-input
+              id="customer_reference"
+
+              v-model="order.customer_reference"
+            >
+            </b-form-input>
+          </b-form-group>
 
           <b-form-group
             v-bind:label="$trans('Remarks')"

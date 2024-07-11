@@ -133,22 +133,22 @@
             />
 
           </div>
+        </div>
 
-          <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
-            <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
+        <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
+          <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
 
-            <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
+          <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
               {{ order.order_id }}
               <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
               <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
             </span>
 
-            <b-button variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
-              <b-icon-person-lines-fill></b-icon-person-lines-fill>
-              {{ $trans('Assign these orders') }}
-            </b-button>
+          <b-button variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
+            <b-icon-person-lines-fill></b-icon-person-lines-fill>
+            {{ $trans('Assign these orders') }}
+          </b-button>
 
-          </div>
         </div>
 
         <div class="overflow-auto">
