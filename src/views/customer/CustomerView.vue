@@ -251,9 +251,6 @@
                   </span>
                 </b-row>
               </b-tab>
-              <b-tab :title="$trans('Documents')">
-                <DocumentList :customerPk="this.pk"/>
-              </b-tab>
               <b-tab title="Insights" key="stats">
                 <OrderStats
                   v-if="!isLoading"
@@ -277,7 +274,6 @@ import CustomerCard from '../../components/CustomerCard.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import DocumentList from '../customer/DocumentList.vue'
 import {componentMixin} from "../../utils";
 import locationModel from "../../models/equipment/location";
 import equipmentModel from "../../models/equipment/equipment";
@@ -291,7 +287,6 @@ export default {
     SearchModal,
     OrderStats,
     CustomerDetail,
-    DocumentList
   },
   data() {
     return {
