@@ -44,8 +44,8 @@
               <b-col size="12">
                 <div>
                   <b-form-group :label="$trans('Sort')">
-                    <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
-                    <b-form-radio v-model="sortMode" value="start_date">{{ $trans('Start date') }}</b-form-radio>
+                    <b-form-radio v-model="sortMode" value="default">{{ $trans('Start date (default)') }}</b-form-radio>
+                    <b-form-radio v-model="sortMode" value="last_update">{{ $trans('Last update') }}</b-form-radio>
                   </b-form-group>
                 </div>
               </b-col>
@@ -323,7 +323,6 @@ export default {
       this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
     },
     selectOrder(order) {
-      console.log('hoi')
       for( let i=0; i<this.selectedOrders.length; i++) {
         if (this.selectedOrders[i].id === order.id) {
           return

@@ -50,8 +50,8 @@
             <dd>{{ order.last_status }}</dd>
             <dt>{{ $trans("Dates") }}</dt>
             <dd>{{ order.order_date }}</dd>
-            <dt>{{ $trans("Service") }} &numero;</dt>
-            <dd>{{ order.service_number }}</dd>
+            <dt>{{ $trans("Customer reference") }}</dt>
+            <dd>{{ order.customer_reference }}</dd>
             <dt>{{ $trans("Reference") }}</dt>
             <dd>{{ order.order_reference }}</dd>
             <dt>{{ $trans("Remarks") }}</dt>
@@ -60,12 +60,31 @@
             <dd v-if="isPlanning">{{ order.planning_remarks }}</dd>
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
             <dd v-if="!hasBranches" class="flex-columns">
-              <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank"><b-icon icon="file-earmark"></b-icon>{{ $trans('View workorder') }}</b-link>
+              <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank">
+                <b-icon icon="file-earmark"></b-icon>
+                {{ $trans('View workorder') }}
+              </b-link>
 
               <b-link class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
                 <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
               </b-link>
             </dd>
+            <dt>{{ $trans("Original order ID") }}</dt>
+            <dd class="flex-columns">
+              <div v-if="order.parent_order_data.companycode">
+                {{ order.parent_order_data.companycode }} - {{ order.parent_order_data.order_id}}
+              </div>
+            </dd>
+            <dt>{{ $trans("Partner order ID(s)") }}</dt>
+            <dd>
+              <div
+                v-for="data in order.copied_order_data"
+                :key="data.companycode"
+              >
+                {{ data.companycode }} - {{ data.order_id}}
+              </div>
+            </dd>
+
             <dt>{{ $trans("Workorders partners") }}</dt>
             <dd class="flex-columns">
               <div v-for="workorder in order.workorder_pdf_url_partner" :key="workorder.companycode">
