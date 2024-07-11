@@ -323,7 +323,6 @@ export default {
       this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
     },
     selectOrder(order) {
-      console.log('hoi')
       for( let i=0; i<this.selectedOrders.length; i++) {
         if (this.selectedOrders[i].id === order.id) {
           return
