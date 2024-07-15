@@ -955,7 +955,7 @@ const isCorrectTime = (value) => {
     return true
   }
 
-  return !helpers.req(value) || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)
+  return !helpers.req(value) || /^\d+:\d+$/.test(value)  || /^\d+:\d+:\d+$/.test(value)
 }
 
 export default {

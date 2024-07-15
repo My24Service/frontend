@@ -75,10 +75,10 @@
                   <b-form-group
                     label-size="sm"
                     v-bind:label="$trans('Field')"
-                    label-for="filter_field"
+                    :label-for="`filter_field_${index}`"
                   >
                     <b-form-select
-                      id="filter_field"
+                      :id="`filter_field_${index}`"
                       v-model="condition.field"
                       :options="allFields"
                       @change="checkCondition(condition)"
@@ -89,10 +89,10 @@
                   <b-form-group
                     label-size="sm"
                     v-bind:label="$trans('Operator')"
-                    label-for="filter_operator"
+                    :label-for="`filter_operator${index}`"
                   >
                     <b-form-select
-                      id="filter_operator"
+                      :id="`filter_operator${index}`"
                       v-model="condition.operator"
                       :options="getOperators(condition.field)"
                       size="sm"
@@ -106,10 +106,10 @@
                   <b-form-group
                     label-size="sm"
                     :label="$trans('Case sensitive')"
-                    label-for="filter_is_case_sensitive"
+                    :label-for="`filter_is_case_sensitive${index}`"
                   >
                     <b-form-checkbox
-                      id="filter_is_case_sensitive"
+                      :id="`filter_is_case_sensitive${index}`"
                       :disabled="condition.isCaseDisabled"
                       v-model="condition.is_case_sensitive"
                     ></b-form-checkbox>
@@ -119,10 +119,10 @@
                   <b-form-group
                     label-size="sm"
                     :label="$trans('Exact')"
-                    label-for="filter_is_exact"
+                    :label-for="`filter_is_exact${index}`"
                   >
                     <b-form-checkbox
-                        id="filter_is_exact"
+                        :id="`filter_is_exact${index}`"
                         :disabled="condition.isExactDisabled"
                         v-model="condition.is_exact"
                       >
@@ -133,10 +133,10 @@
                   <b-form-group
                     label-size="sm"
                     :label="$trans('Exclude')"
-                    label-for="filter_is_exclude"
+                    :label-for="`filter_is_exclude${index}`"
                   >
                     <b-form-checkbox
-                      id="filter_is_exclude"
+                      :id="`filter_is_exclude${index}`"
                       :disabled="condition.isExcludeDisabled"
                       v-model="condition.is_exclude"
                     >
@@ -147,11 +147,11 @@
                   <b-form-group
                     label-size="sm"
                     v-bind:label="$trans('Values')"
-                    label-for="filter_values_query_mode"
+                    :label-for="`filter_values_query_mode${index}`"
                   >
                     <b-form-select
                       :disabled="condition.valuesQueryModeDisabled"
-                      id="filter_values_query_mode"
+                      :id="`filter_values_query_mode${index}`"
                       v-model="condition.values_query_mode"
                       :options="queryModes"
                       size="sm"></b-form-select>
@@ -161,10 +161,10 @@
                   <b-form-group
                     label-size="sm"
                     :label="$trans('Values NOT')"
-                    label-for="filter_values_not"
+                    :label-for="`filter_values_not${index}`"
                   >
                     <b-form-checkbox
-                      id="filter_values_not"
+                      :id="`filter_values_not${index}`"
                       :disabled="condition.isValuesNotDisabled"
                       v-model="condition.values_not"
                     >

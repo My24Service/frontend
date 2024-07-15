@@ -90,7 +90,7 @@
             </b-link>
           </span>
           <b-button
-            v-if="!quotation.preliminary"
+            v-if="!quotation.preliminary && !isNew"
             @click="sendQuotation"
             type="button"
             variant="primary"

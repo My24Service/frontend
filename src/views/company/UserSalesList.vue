@@ -3,23 +3,27 @@
     <header>
       <div class="page-title">
         <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
-        <b-button-toolbar>
-          <b-button-group>
-            <ButtonLinkAdd
+        <div>
+          <b-button-toolbar>
+            <b-button-group class="mr-1">
+              <ButtonLinkRefresh
+                v-bind:method="function() { loadData() }"
+                v-bind:title="$trans('Refresh')"
+              />
+              <ButtonLinkSearch
+                v-bind:method="function() { showSearchModal() }"
+              />
+            </b-button-group>
+            <b-link
               v-if="isStaff || isSuperuser"
-              router_name="salesuser-add"
-              v-bind:title="$trans('New sales user')"
-            />
-            <ButtonLinkRefresh
-              v-bind:method="function() { loadData() }"
-              v-bind:title="$trans('Refresh')"
-            />
-            <ButtonLinkSearch
-              v-bind:method="function() { showSearchModal() }"
-            />
-          </b-button-group>
-        </b-button-toolbar>
-
+              :to="{name: 'salesuser-add'}"
+              class="btn primary"
+            >
+              <b-icon icon="person-plus"></b-icon>
+              {{ $trans("Add sales user") }}
+            </b-link>
+          </b-button-toolbar>
+        </div>
       </div>
     </header>
 
