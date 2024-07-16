@@ -429,7 +429,7 @@ export default {
         }
 
         else if (condition.operator === OPERATOR_EXCEPT_MATCHES) {
-          condition.is_exclude = false
+          condition.is_exclude = true
           condition.values_not = true
           condition.values_query_mode = QUERY_MODE_AND
           condition.isExcludeDisabled = true
