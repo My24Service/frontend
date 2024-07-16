@@ -567,6 +567,9 @@ export default {
       try {
         const data = await this.service.detail(this.pk)
         this.filter = new this.model(data)
+        this.filter.json_conditions.forEach((condition) => {
+          this.checkCondition(condition)
+        })
 
         this.isLoading = false
       } catch(error) {
