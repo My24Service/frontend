@@ -73,12 +73,12 @@
             </dd>
             <dt>{{ $trans("Original order ID") }}</dt>
             <dd class="flex-columns">
-              <div v-if="order.parent_order_data.companycode">
+              <div v-if="order.parent_order_data && order.parent_order_data.companycode">
                 {{ order.parent_order_data.companycode }} - {{ order.parent_order_data.order_id}}
               </div>
             </dd>
             <dt>{{ $trans("Partner order ID(s)") }}</dt>
-            <dd>
+            <dd v-if="order.copied_order_data">
               <div
                 v-for="data in order.copied_order_data"
                 :key="data.companycode"
