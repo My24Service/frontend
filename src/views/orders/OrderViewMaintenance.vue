@@ -78,12 +78,16 @@
               </div>
             </dd>
             <dt>{{ $trans("Partner order ID(s)") }}</dt>
-            <dd v-if="order.copied_order_data">
+            <dd>
               <div
-                v-for="data in order.copied_order_data"
-                :key="data.companycode"
-              >
-                {{ data.companycode }} - {{ data.order_id}}
+                v-if="order.copied_order_data"
+                >
+                <div
+                  v-for="data in order.copied_order_data"
+                  :key="data.companycode"
+                >
+                  {{ data.companycode }} - {{ data.order_id}}
+                </div>
               </div>
             </dd>
 
