@@ -58,8 +58,8 @@
             <dd>{{ order.remarks }}</dd>
             <dt v-if="isPlanning">{{ $trans("Planning remarks") }}</dt>
             <dd v-if="isPlanning">{{ order.planning_remarks }}</dd>
-            <dt v-if="isPlanning || isEngineer">{{ $trans("Customer remarks") }}</dt>
-            <dd v-if="isPlanning || isEngineer">{{ order.customer_remarks }}</dd>
+            <dt v-if="!isCustomer">{{ $trans("Customer remarks") }}</dt>
+            <dd v-if="!isCustomer">{{ order.customer_remarks }}</dd>
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
             <dd v-if="!hasBranches" class="flex-columns">
               <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank">
