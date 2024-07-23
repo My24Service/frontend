@@ -391,9 +391,11 @@ export default {
       }
     },
     async downloadPdf() {
+      const url =  `/api/quotation/quotation/${this.quotation.id}/download_definitive_pdf/`
       this.loadingPdf = true;
+
       my24.downloadItem(
-        `/api/quotation/quotation/${this.offer.quotation}/download_definitive_pdf/`,
+        url,
         'quotation.pdf',
         function() {
           this.loadingPdf = false;

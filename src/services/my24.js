@@ -41,13 +41,13 @@ class My24 extends BaseModel {
         link.click();
         URL.revokeObjectURL(link.href);
         link.remove()
-
-        if (callback) {
-          return callback()
-        }
-
       })
-      .catch(console.error);
+      .catch(console.error)
+      .finally(function () {
+        if (callback) {
+          callback()
+        }
+      });
   }
 
   status2color(statuscodes, status, text_color=false) {
