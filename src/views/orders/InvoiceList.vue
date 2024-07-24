@@ -1,0 +1,207 @@
+<template>
+  <div class="app-page">
+    <header>
+      <div class='search-form'>
+        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search invoices')}`"/>
+      </div>
+      <div class="page-title">
+        <h3>
+          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <span>{{ $trans("Invoices") }}</span>
+        </h3>
+
+        <b-button-toolbar>
+          <b-button-group class="mr-1">
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+          </b-button-group>
+        </b-button-toolbar>
+      </div>
+    </header>
+
+    <SearchModal
+      id="search-modal"
+      ref="search-modal"
+      @do-search="handleSearchOk"
+    />
+
+    <b-modal
+      id="delete-invoice-modal"
+      ref="delete-invoice-modal"
+      v-bind:title="$trans('Delete?')"
+      @ok="doDelete"
+    >
+      <p class="my-4">
+        {{ $trans('Are you sure you want to delete this invoice?') }}
+      </p>
+    </b-modal>
+
+    <div class="panel overflow-auto">
+      <b-table
+        small
+        id="document-table"
+        :busy='isLoading'
+        :fields="fields"
+        :items="invoices"
+        responsive="md"
+        class="data-table"
+      >
+        <template #table-busy>
+          <div class="text-center text-danger my-2">
+            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+            <strong>{{ $trans('Loading...') }}</strong>
+          </div>
+        </template>
+        <!-- <template #cell(quotation_name)="data">
+          <router-link
+            :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
+          >{{ data.item.invoice_id }}</router-link>
+        </template> -->
+        <template #cell(status)="data">
+          <TableStatusInfo
+            :statusCodeService="invoiceStatuscodeService"
+            :statuscodes="statuscodes"
+            :model="data.item"
+            :modelName="'invoice'"
+            :statusService="statusService"
+          />
+        </template>
+        <template #cell(icons)="data">
+          <div class="h2 invoice-icons">
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { showDeleteModal(data.item.id) }"
+            />
+          </div>
+        </template>
+      </b-table>
+      <Pagination
+        v-if="!isLoading"
+        :model="this.invoiceService"
+        :model_name="$trans('Invoice')"
+      />
+    </div>
+  </div>
+</template>
+<script>
+import {InvoiceService} from '@/models/orders/Invoice.js'
+import {InvoiceStatuscodeService} from '@/models/orders/InvoiceStatuscode.js'
+import IconLinkEdit from '@/components/IconLinkEdit.vue'
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
+import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
+import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
+import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
+import SearchModal from '@/components/SearchModal.vue'
+import Pagination from "@/components/Pagination.vue"
+import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
+import SearchForm from "@/components/SearchForm.vue";
+import TableStatusInfo from '../../components/TableStatusInfo.vue'
+import { InvoiceStatusService } from '@/models/orders/InvoiceStatus.js'
+
+export default {
+  name: 'InvoiceList',
+  components: {
+    SearchForm, ButtonLinkSort,
+    IconLinkEdit,
+    IconLinkDelete,
+    IconLinkDocuments,
+    ButtonLinkRefresh,
+    ButtonLinkSearch,
+    ButtonLinkAdd,
+    SearchModal,
+    Pagination,
+    TableStatusInfo
+  },
+  data() {
+    return {
+      invoiceService: new InvoiceService(),
+      invoiceStatuscodeService: new InvoiceStatuscodeService(),
+      statusService: new InvoiceStatusService(),
+      searchQuery: null,
+      invoicePk: null,
+      isLoading: false,
+      invoices: [],
+      statuscodes: [],
+      fields: [
+        {key: 'invoice_id', label: this.$trans('ID')},
+        {key: 'created_by_fullname', label: this.$trans('Created by')},
+        {key: 'term_of_payment_days', label: this.$trans('Term of payment')},
+        {key: 'total', label: this.$trans('Total')},
+        {key: 'vat', label: this.$trans('Vat')},
+        {key: 'status', label: this.$trans('Status')},
+        {key: 'icons', label: ''},
+      ]
+    }
+  },
+  created () {
+    this.invoiceService.currentPage = this.$route.query.page || 1
+    this.loadData()
+    this.loadStatusCodes()
+  },
+  methods: {
+    // search
+    handleSearchOk(val) {
+      this.$refs['search-modal'].hide()
+      this.invoiceService.setSearchQuery(val)
+      this.loadData()
+    },
+    showSearchModal() {
+      this.$refs['search-modal'].show()
+    },
+    // delete
+    showDeleteModal(id) {
+      this.invoicePk = id
+      this.$refs['delete-invoice-modal'].show()
+    },
+    async doDelete() {
+      this.isLoading = true
+
+      try {
+        await this.invoiceService.delete(this.invoicePk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Invoice has been deleted'))
+        this.isLoading = false
+        await this.loadData()
+      } catch(error) {
+        this.isLoading = false
+        console.log('Error deleting invoice', error)
+        this.errorToast(this.$trans('Error deleting invoice'))
+      }
+    },
+    async loadStatusCodes () {
+      this.isLoading = true;
+
+      try {
+        const data = await this.invoiceStatuscodeService.list();
+        this.statuscodes = data.results.map((statuscode) => {
+          if (statuscode.settings_key) {
+            statuscode.disabled = true
+          }
+          return statuscode
+        });
+        this.isLoading = false;
+      } catch (error) {
+        console.log("error fetching statuscodes", error);
+        this.errorToast(this.$trans("Error loading statuscodes"));
+        this.isLoading = false;
+      }
+    },
+    // rest
+    async loadData() {
+      this.isLoading = true
+
+      try {
+        const data = await this.invoiceService.list()
+        this.invoices = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching invoices', error)
+        this.errorToast(this.$trans('Error loading invoices'))
+        this.isLoading = false
+      }
+    }
+  }
+}
+</script>

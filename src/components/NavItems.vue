@@ -26,6 +26,12 @@
           {{ $trans('Statuscodes') }}
         </b-nav-item>
         <b-nav-item
+          :active="isActive('statuscodes')"
+          v-if="isStaff || isSuperuser || isPlanning"
+          :to="{ name: 'order-invoice-list' }">
+          {{ $trans('Invoices') }}
+        </b-nav-item>
+        <b-nav-item
           v-if="isActive('orders')"
           :active="isActive('orders','year-stats') || isActive('orders','month-stats')"
           to="/orders/year-stats">
