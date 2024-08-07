@@ -54,11 +54,12 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <!-- <template #cell(quotation_name)="data">
+        <template #cell(invoice_id)="data">
           <router-link
-            :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
-          >{{ data.item.invoice_id }}</router-link>
-        </template> -->
+            :to="{name: 'order-invoice-edit', params: {pk: data.item.id, uuid: data.item.order_uuid}}"
+          >#{{ data.item.invoice_id }}
+          </router-link>
+        </template>
         <template #cell(status)="data">
           <TableStatusInfo
             :statusCodeService="invoiceStatuscodeService"
@@ -74,6 +75,14 @@
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
+            <router-link
+              :title="$trans('Order')"
+              :to="{name:'order-view', params: {pk: data.item.order}}">
+              <b-icon-arrow-up-right-circle
+                aria-hidden="true"
+                class="edit-icon"
+              ></b-icon-arrow-up-right-circle>
+            </router-link>
           </div>
         </template>
       </b-table>
@@ -124,6 +133,7 @@ export default {
       invoicePk: null,
       isLoading: false,
       invoices: [],
+      order: null,
       statuscodes: [],
       fields: [
         {key: 'invoice_id', label: this.$trans('ID')},
@@ -136,10 +146,10 @@ export default {
       ]
     }
   },
-  created () {
+  async created () {
     this.invoiceService.currentPage = this.$route.query.page || 1
-    this.loadData()
-    this.loadStatusCodes()
+    await this.loadData()
+    await this.loadStatusCodes()
   },
   methods: {
     // search
@@ -205,3 +215,13 @@ export default {
   }
 }
 </script>
+<style scoped>
+.invoice-icons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.invoice-icons span {
+  margin-right: 10px;
+}
+</style>

@@ -268,6 +268,18 @@ export default [
         'app-subnav': SubNavOrders
       },
     },
+    {
+      name: 'order-invoice-edit',
+      path: '/orders/invoice/form/:pk/order/:uuid',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': InvoiceForm,
+        'app-subnav': SubNavOrders
+      },
+    },
     // filters
     ...createUserFilterRoutes('order', 'orders', USER_FILTER_TYPE_ORDER),
 
