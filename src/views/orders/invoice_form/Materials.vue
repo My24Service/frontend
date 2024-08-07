@@ -291,10 +291,10 @@ export default {
       let model
       switch (used_material.use_price) {
         case this.usePriceOptions.USE_PRICE_PURCHASE:
-          model = this.materialModels.find((m) => m.id === used_material.material_id)
+          model = this.materialModels.find((m) => m.id === used_material.id)
           return model.price_purchase_ex
         case this.usePriceOptions.USE_PRICE_SELLING:
-          model = this.materialModels.find((m) => m.id === used_material.material_id)
+          model = this.materialModels.find((m) => m.id === used_material.id)
           return model.price_selling_ex
         case this.usePriceOptions.USE_PRICE_OTHER:
           return used_material.price_other
