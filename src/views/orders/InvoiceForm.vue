@@ -21,6 +21,15 @@
                 {{ $trans('View Invoice') }}
               </b-link>
             </span>
+            <span>
+              <router-link
+                class="btn btn-sm btn-primary"
+                :to="{name:'order-view', params: {pk: order_pk}}">
+                <b-icon-arrow-up-right-circle
+                ></b-icon-arrow-up-right-circle>
+                {{ $trans('Order') }}
+              </router-link>
+            </span>
           </h3>
           <b-button-toolbar>
             <b-button @click="cancelForm" type="button" variant="outline">
@@ -597,6 +606,7 @@ export default {
     this.invoice_id = invoiceData.invoice_id
     this.order_pk = invoiceData.order_pk
     this.invoice.order = this.order_pk
+    this.invoice.invoice_id = this.invoice_id
 
     this.activity_totals = invoiceData.activity_totals
     this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
@@ -754,7 +764,7 @@ export default {
           this.isLoading = false
           await this.$router.push({
             name: 'order-invoice-edit',
-            params: {pk: this.invoice.id, uuid: this.uuid}
+            params: {pk: invoice.id, uuid: this.uuid}
           })
         } catch(error) {
           this.errorToast(this.$trans('Error creating invoice'))
