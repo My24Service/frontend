@@ -21,6 +21,12 @@
       <b-nav>
         <b-nav-item
           v-if="isActive('orders')"
+          :active="isActive('orders','invoices')"
+          to="/orders/invoices">
+          {{ $trans('Invoices') }}
+        </b-nav-item>
+        <b-nav-item
+          v-if="isActive('orders')"
           :active="isActive('orders','statuscodes')"
           to="/orders/statuscodes">
           {{ $trans('Statuscodes') }}

@@ -52,7 +52,7 @@
       </b-row>
       <b-row v-for="material in this.costService.collection" :key="material.id" class="material_row">
         <b-col cols="2" v-if="!material.is_partner">
-          {{ getFullname(material.user_id) }}
+          {{ getFullname(material.user) }}
         </b-col>
         <b-col cols="2" v-if="material.is_partner">
           {{ material.full_name }} ({{ material.partner_companycode }})
@@ -240,8 +240,8 @@ export default {
       this.emptyCollection()
       this.$emit('emptyCollectionClicked', this.invoiceLineType)
     },
-    getMaterialName(material_id) {
-      const material = this.materialModels.find((m) => m.id === material_id)
+    getMaterialName(usedMaterial) {
+      const material = this.materialModels.find((m) => m.id === usedMaterial.id)
       return material ? material.name : this.$trans("unknown")
     },
     async loadData() {
@@ -306,7 +306,7 @@ export default {
       return this.default_currency
     },
     getMaterialPriceFor(used_material, use_price) {
-      const model = this.materialModels.find((m) => m.id === used_material.material_id)
+      const model = this.materialModels.find((m) => m.id === used_material.id)
       if (model) {
         return use_price === this.usePriceOptions.USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
       } else {

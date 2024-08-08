@@ -62,7 +62,7 @@
         </b-row>
         <b-row v-for="distance in costService.collection" :key="distance.user_id" class="distance_row">
           <b-col cols="2" v-if="!distance.is_partner">
-            {{ getFullname(distance.user_id) }}
+            {{ getFullname(distance.user) }}
           </b-col>
           <b-col cols="2" v-if="distance.is_partner">
             {{ distance.full_name }} ({{ distance.partner_companycode }})

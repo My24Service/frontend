@@ -11,6 +11,16 @@
             /
             <span v-if="!isEdit">{{ $trans('New invoice') }}</span>
             <span v-if="isEdit">{{ $trans('Update invoice') }}</span>
+            <span v-if="isEdit">
+              <b-link
+                class="btn btn-sm btn-primary"
+                @click.prevent="showInvoiceDialog"
+                target="_blank"
+              >
+                <b-icon icon="file-earmark"></b-icon>
+                {{ $trans('View Invoice') }}
+              </b-link>
+            </span>
           </h3>
           <b-button-toolbar>
             <b-button @click="cancelForm" type="button" variant="outline">
@@ -27,6 +37,7 @@
           <div class="invoice-form-main">
             <h6>{{ $trans('Invoice recipient')}}</h6>
             <CustomerCard
+              v-if="customer"
               :customer="customer"
             />
 
@@ -209,7 +220,7 @@
 
             <hr/>
 
-            <b-container fluid>
+            <b-container fluid v-if="customer">
               <h5>{{ $trans("Prices for customer") }}</h5>
               <b-row>
                 <b-col cols="7" class="header">
@@ -315,67 +326,69 @@
             />
           </details>
 
-          <HoursComponent v-if="activity_totals.work_total !== '00:00'"
-            :order_pk="order_pk"
-            :type="COST_TYPE_WORK_HOURS"
-            :hours_total="activity_totals.work_total"
-            :user_totals="activity_totals.user_totals"
-            :engineer_models="engineer_models"
-            :customer="customer"
-            @invoiceLinesCreated="invoiceLinesCreated"
-            @emptyCollectionClicked="emptyCollectionClicked"
-            :invoiceLinesParent="invoiceLines"
-          />
+          <div v-if="order_pk">
+            <HoursComponent v-if="activity_totals.work_total !== '00:00'"
+              :order_pk="order_pk"
+              :type="COST_TYPE_WORK_HOURS"
+              :hours_total="activity_totals.work_total"
+              :user_totals="activity_totals.user_totals"
+              :engineer_models="engineer_models"
+              :customer="customer"
+              @invoiceLinesCreated="invoiceLinesCreated"
+              @emptyCollectionClicked="emptyCollectionClicked"
+              :invoiceLinesParent="invoiceLines"
+            />
 
-          <HoursComponent v-if="activity_totals.travel_total !== '00:00'"
-            :order_pk="order_pk"
-            :type="COST_TYPE_TRAVEL_HOURS"
-            :hours_total="activity_totals.travel_total"
-            :user_totals="activity_totals.user_totals"
-            :engineer_models="engineer_models"
-            :customer="customer"
-            @invoiceLinesCreated="invoiceLinesCreated"
-            @emptyCollectionClicked="emptyCollectionClicked"
-            :invoiceLinesParent="invoiceLines"
-          />
+            <HoursComponent v-if="activity_totals.travel_total !== '00:00'"
+              :order_pk="order_pk"
+              :type="COST_TYPE_TRAVEL_HOURS"
+              :hours_total="activity_totals.travel_total"
+              :user_totals="activity_totals.user_totals"
+              :engineer_models="engineer_models"
+              :customer="customer"
+              @invoiceLinesCreated="invoiceLinesCreated"
+              @emptyCollectionClicked="emptyCollectionClicked"
+              :invoiceLinesParent="invoiceLines"
+            />
 
-          <DistanceComponent v-if="activity_totals.distance_total > 0"
-            :order_pk="order_pk"
-            :customer="customer"
-            :user_totals="activity_totals.user_totals"
-            :engineer_models="engineer_models"
-            :distance_total="activity_totals.distance_total"
-            :invoice_default_price_per_km="invoice_default_price_per_km"
-            @invoiceLinesCreated="invoiceLinesCreated"
-            @emptyCollectionClicked="emptyCollectionClicked"
-            :invoiceLinesParent="invoiceLines"
-          />
+            <DistanceComponent v-if="activity_totals.distance_total > 0"
+              :order_pk="order_pk"
+              :customer="customer"
+              :user_totals="activity_totals.user_totals"
+              :engineer_models="engineer_models"
+              :distance_total="activity_totals.distance_total"
+              :invoice_default_price_per_km="invoice_default_price_per_km"
+              @invoiceLinesCreated="invoiceLinesCreated"
+              @emptyCollectionClicked="emptyCollectionClicked"
+              :invoiceLinesParent="invoiceLines"
+            />
 
-          <HoursComponent v-if="activity_totals.extra_work_total !== '00:00'"
-            :order_pk="order_pk"
-            :type="COST_TYPE_EXTRA_WORK"
-            :hours_total="activity_totals.extra_work_total"
-            :user_totals="activity_totals.user_totals"
-            :engineer_models="engineer_models"
-            :customer="customer"
-            @invoiceLinesCreated="invoiceLinesCreated"
-            @emptyCollectionClicked="emptyCollectionClicked"
-            :invoiceLinesParent="invoiceLines"
-          />
+            <HoursComponent v-if="activity_totals.extra_work_total !== '00:00'"
+              :order_pk="order_pk"
+              :type="COST_TYPE_EXTRA_WORK"
+              :hours_total="activity_totals.extra_work_total"
+              :user_totals="activity_totals.user_totals"
+              :engineer_models="engineer_models"
+              :customer="customer"
+              @invoiceLinesCreated="invoiceLinesCreated"
+              @emptyCollectionClicked="emptyCollectionClicked"
+              :invoiceLinesParent="invoiceLines"
+            />
 
-          <HoursComponent v-if="activity_totals.actual_work_total !== '00:00'"
-            :order_pk="order_pk"
-            :type="COST_TYPE_ACTUAL_WORK"
-            :hours_total="activity_totals.actual_work_total"
-            :user_totals="activity_totals.user_totals"
-            :engineer_models="engineer_models"
-            :customer="customer"
-            @invoiceLinesCreated="invoiceLinesCreated"
-            @emptyCollectionClicked="emptyCollectionClicked"
-            :invoiceLinesParent="invoiceLines"
-          />
+            <HoursComponent v-if="activity_totals.actual_work_total !== '00:00'"
+              :order_pk="order_pk"
+              :type="COST_TYPE_ACTUAL_WORK"
+              :hours_total="activity_totals.actual_work_total"
+              :user_totals="activity_totals.user_totals"
+              :engineer_models="engineer_models"
+              :customer="customer"
+              @invoiceLinesCreated="invoiceLinesCreated"
+              @emptyCollectionClicked="emptyCollectionClicked"
+              :invoiceLinesParent="invoiceLines"
+            />
+          </div>
 
-          <details>
+          <details v-if="order_pk">
             <summary class="flex-columns space-between">
               <h6>{{ $trans('Call out costs') }}</h6>
               <b-icon-chevron-down></b-icon-chevron-down>
@@ -394,11 +407,58 @@
         </div>
 
       </b-form>
+
+      <b-modal ref="invoice-viewer" size="xl" v-b-modal.modal-scrollable>
+        <div class="d-flex flex-row justify-content-center align-items-center iframe-loader"
+            v-if="iframeLoading">
+          <b-spinner medium></b-spinner>
+        </div>
+        <iframe
+          :src="this.invoiceURL"
+          style="min-height:720px; width: 100%;"
+          frameborder="0"
+          @load="iframeLoaded"
+          v-show="!iframeLoading">
+        </iframe>
+        <template #modal-footer="{ ok }">
+          <b-button class="btn button btn-secondary" @click="openInvoice()" target="_blank">
+              {{ $trans('Open in a new tab') }}
+          </b-button>
+          <b-button
+            v-if="!isCustomer && !isBranchEmployee"
+            id="recreateInvoicePdf"
+            @click="recreateInvoicePdf"
+            :disabled="isGeneratingPDF"
+            class="btn btn-secondary"
+            type="button"
+            variant="secondary"
+          >
+            <b-spinner small v-if="isGeneratingPDF"></b-spinner>
+            {{ $trans('re-generate PDF') }}
+          </b-button>
+          <b-button
+            v-if="!isCustomer && !isBranchEmployee && invoice.invoice_pdf_path"
+            @click="downloadPdf"
+            :disabled="loadingPdf"
+            type="button"
+            variant="primary"
+          >
+            <b-spinner small v-if="loadingPdf"></b-spinner>
+            <b-icon icon="file-earmark-pdf"></b-icon>
+            {{ $trans('Download PDF') }}
+          </b-button>
+          <!-- Emulate built in modal footer ok and cancel button actions -->
+          <b-button @click="ok()" variant="primary">
+            {{ $trans("close") }}
+          </b-button>
+        </template>
+      </b-modal>
     </div>
   </b-overlay>
 </template>
 
 <script>
+import my24 from '../../services/my24.js'
 import { InvoiceService, InvoiceModel } from '../../models/orders/Invoice.js'
 import { InvoiceLineService } from '../../models/orders/InvoiceLine.js'
 import {toDinero} from "../../utils";
@@ -470,7 +530,11 @@ export default {
       COST_TYPE_EXTRA_WORK,
       COST_TYPE_ACTUAL_WORK,
 
+      iframeLoading: false,
+      isGeneratingPDF: false,
+      loadingPdf: false,
       isLoading: false,
+      invoiceURL: '',
       invoiceLines: [],
       materialUpdating: false,
       submitClicked: false,
@@ -499,12 +563,12 @@ export default {
 
       engineer_models: [],
 
-      activity_totals: null,
+      activity_totals: {},
       extra_work_totals: null,
       actual_work_totals: null,
 
       material_models: null,
-      used_materials: null,
+      used_materials: [],
 
       customerPk: null,
       customer: null,
@@ -560,6 +624,56 @@ export default {
     this.isLoading = false
   },
   methods: {
+    async downloadPdf() {
+      const url =  `/api/order/invoice/${this.invoice.id}/download_pdf/`
+      this.loadingPdf = true;
+
+      my24.downloadItem(
+        url,
+        'invoice.pdf',
+        function() {
+          this.loadingPdf = false;
+        }.bind(this),
+        'post'
+      )
+    },
+    iframeLoaded() {
+        this.iframeLoading = false;
+    },
+    getInvoiceURL() {
+        const routeData = this.$router.resolve({
+          name: 'order-invoice-view', params: { uuid: this.invoice.uuid }
+        });
+        return `${document.location.origin}/${routeData.href}`;
+    },
+    showInvoiceDialog() {
+      this.iframeLoading = true;
+      this.invoiceURL = this.getInvoiceURL();
+      this.$refs['invoice-viewer'].show();
+    },
+    async recreateInvoicePdf() {
+        this.isLoading = true;
+        this.isGeneratingPDF = true;
+        try {
+            await this.invoiceService.recreateInvoicePdf(this.invoice.id);
+            this.infoToast(this.$trans('Success'), this.$trans('Invoice pdf recreated'));
+            await this.loadInvoice();
+            this.isLoading = false;
+            this.isGeneratingPDF = false;
+        }
+        catch (err) {
+            console.log('Error recreating invoice pdf', err);
+            this.errorToast(this.$trans('Error recreating invoice pdf'));
+            this.isLoading = false;
+            this.isGeneratingPDF = false;
+        }
+    },
+    openInvoice() {
+      const routeData = this.$router.resolve({
+        name: 'order-invoice-view', params: { uuid: this.invoice.uuid }
+      })
+      window.open(`${document.location.origin}/${routeData.href}`, '_blank')
+    },
     invoiceLineAdded() {
       this.invoiceLines = this.$refs['invoice-lines'].getInvoiceLines()
     },
@@ -705,9 +819,17 @@ export default {
 .total-text {
   font-weight: bold;
 }
-
 .listing { display: table; }
 .listing li:not(.text-right) { display: table-row;}
 .listing li:not(.text-right) span  {  display: table-cell;}
-
+.iframe-loader {
+  min-height: 720px
+}
+iframe {
+  min-height: 720px;
+  width: 100%;
+}
+.iframe-loader {
+  min-height: 720px
+}
 </style>

@@ -61,25 +61,16 @@
           <router-link
             :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
           >{{ data.item.name }}</router-link>
-<!--          <router-link-->
-<!--            v-else-->
-<!--            :to="{name: 'quotation-detail',-->
-<!--             params: {pk: data.item.id}}"-->
-<!--          >{{ data.item.name }}</router-link>-->
         </template>
         <template #cell(quotation_name)="data">
           <router-link
             :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
           >{{ data.item.quotation_name }}</router-link>
-<!--          <router-link-->
-<!--            v-else-->
-<!--            :to="{name: 'quotation-detail',-->
-<!--             params: {pk: data.item.id}}"-->
-<!--          >{{ data.item.quotation_name }}</router-link>-->
         </template>
         <template #cell(status)="data">
           <TableStatusInfo
             :statusCodeService="quotationStatuscodeService"
+            :statuscodes="statuscodes"
             :model="data.item"
             :modelName="'quotation'"
             :statusService="statusService"
@@ -156,12 +147,6 @@ export default {
     Pagination,
     TableStatusInfo
   },
-  props: {
-    orderPk: {
-      type: [String, Number],
-      default: null
-    },
-  },
   data() {
     return {
       quotationService: new QuotationService(),
@@ -171,6 +156,7 @@ export default {
       quotationPk: null,
       isLoading: false,
       quotations: [],
+      statuscodes: [],
       fields: [
         {key: 'name', label: this.$trans('Name')},
         {key: 'quotation_name', label: this.$trans('Customer')},
@@ -185,6 +171,7 @@ export default {
   created () {
     this.quotationService.currentPage = this.$route.query.page || 1
     this.loadData()
+    this.loadStatusCodes()
   },
   methods: {
     async createOrder(id) {
@@ -230,6 +217,24 @@ export default {
         console.log('error fetching quotations', error)
         this.errorToast(this.$trans('Error loading quotations'))
         this.isLoading = false
+      }
+    },
+    async loadStatusCodes () {
+      this.isLoading = true;
+
+      try {
+        const data = await this.quotationStatuscodeService.list();
+        this.statuscodes = data.results.map((statuscode) => {
+          if (statuscode.settings_key) {
+            statuscode.disabled = true
+          }
+          return statuscode
+        });
+        this.isLoading = false;
+      } catch (error) {
+        console.log("error fetching statuscodes", error);
+        this.errorToast(this.$trans("Error loading statuscodes"));
+        this.isLoading = false;
       }
     }
   },
