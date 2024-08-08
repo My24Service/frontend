@@ -62,6 +62,10 @@ class InvoiceService extends BaseModel {
     const url = `${this.url}autocomplete/q=${query}`
     return this.axios.get(url).then((response) => response.data)
   }
+
+  recreateInvoicePdf(pk) {
+    return this.axios.post(`${this.url}${pk}/recreate_pdf/?gotenberg=1`)
+  }
 }
 
 const invoiceService = new InvoiceService()

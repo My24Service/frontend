@@ -45,11 +45,14 @@ export default {
     modelName: {
       type: String,
       default: ""
+    },
+    statuscodes: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
     return{
-      statuscodes: [],
       statusCodeModel: null,
       statusColorCode: null,
       isLoading: false
@@ -65,29 +68,10 @@ export default {
     }
   },
   async created() {
-    await this.loadStatusCodes()
+    this.statusCodeModel = this.statusCodeComputed
+    this.statusColorCode = my24.status2color(this.statuscodes, this.statusCodeModel);
   },
   methods: {
-    async loadStatusCodes () {
-      this.isLoading = true;
-
-      try {
-        const data = await this.statusCodeService.list();
-        this.statuscodes = data.results.map((statuscode) => {
-          if (statuscode.settings_key) {
-            statuscode.disabled = true
-          }
-          return statuscode
-        });
-        this.statusCodeModel = this.statusCodeComputed
-        this.statusColorCode = my24.status2color(this.statuscodes, this.statusCodeModel);
-        this.isLoading = false;
-      } catch (error) {
-        console.log("error fetching statuscodes", error);
-        this.errorToast(this.$trans("Error loading statuscodes"));
-        this.isLoading = false;
-      }
-    },
     handleStatusChange(id, value) {
       this.changeStatus(id, value);
       this.statusColorCode = my24.status2color(this.statuscodes, value);
@@ -104,6 +88,15 @@ export default {
         console.log('Error creating status', error)
         this.errorToast(this.$trans('Error creating status'))
       }
+    }
+  },
+  watch: {
+    statuscodes: {
+      handler(newVal, oldVal) {
+        this.statusCodeModel = this.statusCodeComputed
+        this.statusColorCode = my24.status2color(this.statuscodes, this.statusCodeModel);
+      },
+      deep: true
     }
   }
 }

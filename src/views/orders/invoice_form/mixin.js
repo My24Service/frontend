@@ -61,7 +61,7 @@ let invoiceMixin = {
       if (!user) {
         console.log(`user: ${user_id} not found in ${this.engineer_models}`)
       }
-      return user.full_name
+      return !!user ? user.full_name : ""
     },
     createInvoiceLinesClicked(selected) {
       this.useOnInvoiceSelected = selected
