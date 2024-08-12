@@ -2,12 +2,12 @@
   <div class="app-page">
     <header>
       <div class='search-form'>
-        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search quotations')}`"/>
+        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search invoices')}`"/>
       </div>
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
-          <span>{{ $trans("Quotations") }}</span>
+          <span>{{ $trans("Invoices") }}</span>
         </h3>
 
         <b-button-toolbar>
@@ -17,9 +17,6 @@
               v-bind:title="$trans('Refresh')"
             />
           </b-button-group>
-          <router-link class="btn button" :to="{name:'quotation-add'}">
-            <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add quotation') }}
-          </router-link>
         </b-button-toolbar>
       </div>
     </header>
@@ -31,13 +28,13 @@
     />
 
     <b-modal
-      id="delete-quotation-modal"
-      ref="delete-quotation-modal"
+      id="delete-invoice-modal"
+      ref="delete-invoice-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
       <p class="my-4">
-        {{ $trans('Are you sure you want to delete this quotation?') }}
+        {{ $trans('Are you sure you want to delete this invoice?') }}
       </p>
     </b-modal>
 
@@ -47,7 +44,7 @@
         id="document-table"
         :busy='isLoading'
         :fields="fields"
-        :items="quotations"
+        :items="invoices"
         responsive="md"
         class="data-table"
       >
@@ -57,69 +54,49 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-        <template #cell(name)="data">
+        <template #cell(invoice_id)="data">
           <router-link
-            :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
-          >{{ data.item.name }}</router-link>
-        </template>
-        <template #cell(quotation_name)="data">
-          <router-link
-            :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
-          >{{ data.item.quotation_name }}</router-link>
+            :to="{name: 'order-invoice-edit', params: {pk: data.item.id, uuid: data.item.order_uuid}}"
+          >#{{ data.item.invoice_id }}
+          </router-link>
         </template>
         <template #cell(status)="data">
           <TableStatusInfo
-            :statusCodeService="quotationStatuscodeService"
+            :statusCodeService="invoiceStatuscodeService"
             :statuscodes="statuscodes"
             :model="data.item"
-            :modelName="'quotation'"
+            :modelName="'invoice'"
             :statusService="statusService"
           />
         </template>
         <template #cell(icons)="data">
-          <div class="h2 quotation-icons">
-            <router-link
-              class="px-1"
-              v-if="!data.item.preliminary"
-              :title="$trans('Send quotation')"
-              :to="{name: 'quotation-send',
-                query: {quotationId: data.item.id, quotationName: data.item.quotation_name}}"
-            >
-              <b-icon-mailbox
-                aria-hidden="true"
-                class="edit-icon"
-              ></b-icon-mailbox>
-            </router-link>
+          <div class="h2 invoice-icons">
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
-            <b-link
-              class="px-1"
-              v-if="!data.item.preliminary"
-              :title="$trans('Create order')"
-              @click="function() { createOrder(data.item.id) }"
-            >
+            <router-link
+              :title="$trans('Order')"
+              :to="{name:'order-view', params: {pk: data.item.order}}">
               <b-icon-arrow-up-right-circle
                 aria-hidden="true"
                 class="edit-icon"
               ></b-icon-arrow-up-right-circle>
-            </b-link>
+            </router-link>
           </div>
         </template>
       </b-table>
       <Pagination
         v-if="!isLoading"
-        :model="this.quotationService"
-        :model_name="$trans('Quotation')"
+        :model="this.invoiceService"
+        :model_name="$trans('Invoice')"
       />
     </div>
   </div>
 </template>
-
 <script>
-import {QuotationService} from '@/models/quotations/Quotation.js'
-import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
+import {InvoiceService} from '@/models/orders/Invoice.js'
+import {InvoiceStatuscodeService} from '@/models/orders/InvoiceStatuscode.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
@@ -131,10 +108,10 @@ import Pagination from "@/components/Pagination.vue"
 import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '../../components/TableStatusInfo.vue'
-import { StatusService } from '@/models/quotations/Status.js'
+import { InvoiceStatusService } from '@/models/orders/InvoiceStatus.js'
 
 export default {
-  name: 'QuotationList',
+  name: 'InvoiceList',
   components: {
     SearchForm, ButtonLinkSort,
     IconLinkEdit,
@@ -149,18 +126,19 @@ export default {
   },
   data() {
     return {
-      quotationService: new QuotationService(),
-      quotationStatuscodeService: new QuotationStatuscodeService(),
-      statusService: new StatusService(),
+      invoiceService: new InvoiceService(),
+      invoiceStatuscodeService: new InvoiceStatuscodeService(),
+      statusService: new InvoiceStatusService(),
       searchQuery: null,
-      quotationPk: null,
+      invoicePk: null,
       isLoading: false,
-      quotations: [],
+      invoices: [],
+      order: null,
       statuscodes: [],
       fields: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'quotation_name', label: this.$trans('Customer')},
-        {key: 'quotation_city', label: this.$trans('City')},
+        {key: 'invoice_id', label: this.$trans('ID')},
+        {key: 'created_by_fullname', label: this.$trans('Created by')},
+        {key: 'term_of_payment_days', label: this.$trans('Term of payment')},
         {key: 'total', label: this.$trans('Total')},
         {key: 'vat', label: this.$trans('Vat')},
         {key: 'status', label: this.$trans('Status')},
@@ -168,19 +146,16 @@ export default {
       ]
     }
   },
-  created () {
-    this.quotationService.currentPage = this.$route.query.page || 1
-    this.loadData()
-    this.loadStatusCodes()
+  async created () {
+    this.invoiceService.currentPage = this.$route.query.page || 1
+    await this.loadData()
+    await this.loadStatusCodes()
   },
   methods: {
-    async createOrder(id) {
-      await this.$router.push({name: 'order-add-quotation', params: {quotation_id: id}})
-    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.quotationService.setSearchQuery(val)
+      this.invoiceService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -188,42 +163,28 @@ export default {
     },
     // delete
     showDeleteModal(id) {
-      this.quotationPk = id
-      this.$refs['delete-quotation-modal'].show()
+      this.invoicePk = id
+      this.$refs['delete-invoice-modal'].show()
     },
     async doDelete() {
       this.isLoading = true
 
       try {
-        await this.quotationService.delete(this.quotationPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Quotation has been deleted'))
+        await this.invoiceService.delete(this.invoicePk)
+        this.infoToast(this.$trans('Deleted'), this.$trans('Invoice has been deleted'))
         this.isLoading = false
         await this.loadData()
       } catch(error) {
         this.isLoading = false
-        console.log('Error deleting quotation', error)
-        this.errorToast(this.$trans('Error deleting quotation'))
-      }
-    },
-    // rest
-    async loadData() {
-      this.isLoading = true
-
-      try {
-        const data = await this.quotationService.list()
-        this.quotations = data.results
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching quotations', error)
-        this.errorToast(this.$trans('Error loading quotations'))
-        this.isLoading = false
+        console.log('Error deleting invoice', error)
+        this.errorToast(this.$trans('Error deleting invoice'))
       }
     },
     async loadStatusCodes () {
       this.isLoading = true;
 
       try {
-        const data = await this.quotationStatuscodeService.list();
+        const data = await this.invoiceStatuscodeService.list();
         this.statuscodes = data.results.map((statuscode) => {
           if (statuscode.settings_key) {
             statuscode.disabled = true
@@ -236,28 +197,31 @@ export default {
         this.errorToast(this.$trans("Error loading statuscodes"));
         this.isLoading = false;
       }
-    }
-  },
-  watch: {
-    '$route.name': {
-      handler: function(search) {
-        if (this.$route.name === 'preliminary-quotations') {
-          this.quotationService.queryMode = 'preliminary'
-        } else if(this.$route.name === 'quotations-sent') {
-          this.quotationService.queryMode = 'sent'
-        } else {
-          this.quotationService.queryMode = 'all'
-        }
-      },
-      deep: true,
-      immediate: true
+    },
+    // rest
+    async loadData() {
+      this.isLoading = true
+
+      try {
+        const data = await this.invoiceService.list()
+        this.invoices = data.results
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching invoices', error)
+        this.errorToast(this.$trans('Error loading invoices'))
+        this.isLoading = false
+      }
     }
   }
 }
 </script>
 <style scoped>
-.quotation-icons {
+.invoice-icons {
   display: flex;
   justify-content: flex-end;
+}
+
+.invoice-icons span {
+  margin-right: 10px;
 }
 </style>

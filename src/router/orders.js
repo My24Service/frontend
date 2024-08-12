@@ -18,6 +18,7 @@ import {AUTH_LEVELS} from "@/constants";
 
 import InvoiceForm from "../views/orders/InvoiceForm";
 import InvoiceView from "../views/orders/InvoiceView";
+import InvoiceList from "../views/orders/InvoiceList";
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";
 
@@ -244,8 +245,32 @@ export default [
     },
     // invoices
     {
+      name: 'order-invoice-list',
+      path: '/orders/invoices',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': InvoiceList,
+        'app-subnav': SubNavOrders
+      },
+    },
+    {
       name: 'order-invoice-create',
       path: '/orders/invoice/form/:uuid',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': InvoiceForm,
+        'app-subnav': SubNavOrders
+      },
+    },
+    {
+      name: 'order-invoice-edit',
+      path: '/orders/invoice/form/:pk/order/:uuid',
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': true

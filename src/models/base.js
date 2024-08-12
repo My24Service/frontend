@@ -128,7 +128,7 @@ class BaseModel {
     let newCollection = []
     // create/update
     for (let item of this.collection) {
-      if (item.id) {
+      if (item.id && !item.new) {
         try {
           let newItem = await this.update(item.id, item)
           newItem.apiOk = true
