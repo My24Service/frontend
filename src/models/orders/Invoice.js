@@ -53,11 +53,11 @@ class InvoiceService extends BaseModel {
     return this.axios.get(url).then((response) => response.data)
   }
 
-  async getByUuid(uuid, createPDF=false) {
+  async getByUuid(uuid, createPDFHeader=null) {
     let headers = this.getHeaders()
 
-    if (createPDF) {
-      headers.headers['x-create-pdf'] = true
+    if (createPDFHeader) {
+      headers.headers['x-create-pdf'] = createPDFHeader
     }
 
     const url = `/order/invoice-detail/${uuid}/`
