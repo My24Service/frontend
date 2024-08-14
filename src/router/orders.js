@@ -40,6 +40,7 @@ export default [
         },
       },
       {
+        meta: { needsAuth: false },
         name: 'order-invoice-view',
         path: '/orders/invoice/view/:uuid',
         props: {
