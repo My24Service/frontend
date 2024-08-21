@@ -1,12 +1,6 @@
 <template>
   <div>
     <b-nav-item
-      :active="isActive('invoices')"
-      v-if="isStaff || isSuperuser || (hasStatuscodes && isPlanning)"
-      :to="{ name: 'order-invoice-list' }">
-      {{ $trans('Invoices') }}
-    </b-nav-item>
-    <b-nav-item
       :active="isActive('statuscodes')"
       v-if="isStaff || isSuperuser || (hasStatuscodes && isPlanning)"
       :to="{ name: 'order-statuscode-list' }">

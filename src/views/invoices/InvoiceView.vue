@@ -105,7 +105,7 @@
 
         <div class='flex-columns space-between'>
           <span class="total-text">{{ $trans('Invoice total') }}</span>
-      
+
           <TotalsInputs
             :total="data.total_dinero"
             :is-final-total="true"
@@ -120,7 +120,7 @@
     </div>
 </template>
 <script>
-import invoiceService from '../../models/orders/Invoice'
+import invoiceService from '../../models/invoices/Invoice'
 import TotalsInputs from "../../components/TotalsInputs";
 
 export default {

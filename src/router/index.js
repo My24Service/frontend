@@ -5,6 +5,7 @@ import TheIndexLayout from '../components/TheIndexLayout.vue'
 import store from '../store'
 import orders from './orders'
 import quotations from './quotations'
+import invoices from './invoices'
 import mobile from './mobile'
 import customer from './customer'
 import equipment from './equipment'
@@ -30,6 +31,7 @@ const routes = [
   ...bim,
   ...orders,
   ...quotations,
+  ...invoices,
   ...mobile,
   ...customer,
   ...equipment,

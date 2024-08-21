@@ -121,7 +121,7 @@
 <script>
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
-import invoiceLineService from "../../../models/orders/InvoiceLine";
+import invoiceLineService from "../../../models/invoices/InvoiceLine";
 import {
   INVOICE_LINE_TYPE_HOURS_TYPE_ACTUAL_WORK,
   INVOICE_LINE_TYPE_HOURS_TYPE_EXTRA_WORK,

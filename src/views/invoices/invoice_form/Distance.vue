@@ -131,7 +131,7 @@
 <script>
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
-import invoiceLineService from "../../../models/orders/InvoiceLine";
+import invoiceLineService from "../../../models/invoices/InvoiceLine";
 import {
   INVOICE_LINE_TYPE_DISTANCE,
   USE_PRICE_CUSTOMER,

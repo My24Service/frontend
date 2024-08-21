@@ -115,7 +115,7 @@
 <script>
 import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
-import invoiceLineService from "../../../models/orders/InvoiceLine";
+import invoiceLineService from "../../../models/invoices/InvoiceLine";
 import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/orders/Cost";
 import {
   INVOICE_LINE_TYPE_USED_MATERIALS,

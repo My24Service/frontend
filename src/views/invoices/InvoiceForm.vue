@@ -6,7 +6,7 @@
           <h3>
             <b-icon-receipt-cutoff></b-icon-receipt-cutoff>
               <router-link
-              :to="{name: 'order-invoice-list' }"
+              :to="{name: 'invoice-list' }"
             >{{ $trans('Invoices') }}</router-link>
             /
             <span v-if="!isEdit">{{ $trans('New invoice') }}</span>
@@ -468,8 +468,8 @@
 
 <script>
 import my24 from '../../services/my24.js'
-import { InvoiceService, InvoiceModel } from '../../models/orders/Invoice.js'
-import { InvoiceLineService } from '../../models/orders/InvoiceLine.js'
+import { InvoiceService, InvoiceModel } from '../../models/invoices/Invoice.js'
+import { InvoiceLineService } from '../../models/invoices/InvoiceLine.js'
 import {toDinero} from "../../utils";
 import PriceInput from "../../components/PriceInput";
 import materialService, {MaterialModel} from "../../models/inventory/Material";
@@ -652,7 +652,7 @@ export default {
     },
     getInvoiceURL() {
         const routeData = this.$router.resolve({
-          name: 'order-invoice-view', params: { uuid: this.invoice.uuid }
+          name: 'invoice-view', params: { uuid: this.invoice.uuid }
         });
         return `${document.location.origin}/${routeData.href}`;
     },
@@ -680,7 +680,7 @@ export default {
     },
     openInvoice() {
       const routeData = this.$router.resolve({
-        name: 'order-invoice-view', params: { uuid: this.invoice.uuid }
+        name: 'invoice-view', params: { uuid: this.invoice.uuid }
       })
       window.open(`${document.location.origin}/${routeData.href}`, '_blank')
     },
@@ -763,7 +763,7 @@ export default {
           this.infoToast(this.$trans('Created'), this.$trans('Invoice has been created'))
           this.isLoading = false
           await this.$router.push({
-            name: 'order-invoice-edit',
+            name: 'invoice-edit',
             params: {pk: invoice.id, uuid: this.uuid}
           })
         } catch(error) {

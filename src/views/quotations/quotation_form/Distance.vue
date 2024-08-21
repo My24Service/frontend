@@ -188,7 +188,7 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import {toDinero} from "@/utils";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import {ChapterModel} from "@/models/quotations/Chapter";
-import {USE_PRICE_CUSTOMER} from "@/views/orders/invoice_form/constants";
+import {USE_PRICE_CUSTOMER} from "@/views/quotations/quotation_form/constants";
 import {CustomerModel} from "@/models/customer/Customer";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
