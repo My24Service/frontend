@@ -318,8 +318,14 @@
               </b-col>
             </b-row>
           </div>
-        </div>
 
+          <div>
+            <a href="https://my24service.github.io/docs/#order-fields" target="_blank">
+              {{ $trans("documentation") }}
+            </a>
+          </div>
+
+        </div>
 
       <b-modal
         id="delete-action-modal"
