@@ -635,7 +635,7 @@ export default {
   },
   methods: {
     async downloadPdf() {
-      const url =  `/api/order/invoice/${this.invoice.id}/download_pdf/`
+      const url =  `/api/invoice/invoice/${this.invoice.id}/download_pdf/`
       this.loadingPdf = true;
 
       my24.downloadItem(
