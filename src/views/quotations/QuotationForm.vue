@@ -36,11 +36,11 @@
         <b-button
           class="btn button btn-danger"
           @click="generatePdf"
-          v-if="!quotation.preliminary && !quotation.definitive_pdf_filename"
+          v-if="!quotation.preliminary"
           :disabled="loadingPdf"
         >
           <b-spinner small v-if="loadingPdf"></b-spinner>
-          {{ $trans('Generate pdf') }}
+          {{ $trans('Regenerate pdf') }}
         </b-button>
         <b-button
           class="btn button btn-danger"
@@ -144,6 +144,7 @@
           <div class="panel col-1-3">
             <div v-if="loadChapterModel">
               <QuotationLine
+                :quotation="quotation"
                 :chapter="loadChapterModel"
                 :is-view="isView"
                 ref="quotation-lines"

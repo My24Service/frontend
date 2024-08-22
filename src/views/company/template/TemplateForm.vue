@@ -324,7 +324,7 @@ export default {
 
       try {
         const blob = await this.templateService.previewPdfTemplate(data);
-        this.isLoading = false;
+        this.loadingPdf = false;
         const _url = window.URL.createObjectURL(blob);
         window.open(_url, "_blank");
       } catch (error) {

@@ -123,7 +123,7 @@ export default {
       }
     };
   },
-  async created() {
+  async mounted() {
     this.offer.quotation = this.$route.query.quotationId
     await this.loadDocuments()
     await this.loadData()
@@ -151,6 +151,7 @@ export default {
 
       try {
         this.offer = await this.offerService.getUnsentOffer(this.offer.quotation);
+        this.offer.quotation = this.$route.query.quotationId
         this.recipients = this.offer.recipients.split(",")
         this.isLoading = false;
       } catch (error) {
@@ -219,12 +220,13 @@ export default {
         this.offer.quotation = this.$route.query.quotationId
         try {
           this.offer = await this.offerService.insert(this.offer);
-          this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
           this.isLoading = false;
 
           if (!this.offer.is_sent) {
             this.errorToast(this.$trans("Error sending quotation"));
             return;
+          } else {
+            this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
           }
           this.$router.go(-1);
           this.$router.push({name: 'quotations-sent'});
@@ -240,11 +242,13 @@ export default {
         this.offer = await this.offerService.update(
           this.offer.id, this.offer
         )
-        this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
+
         this.isLoading = false
         if (!this.offer.is_sent) {
           this.errorToast(this.$trans("Error sending quotation"));
           return;
+        } else {
+          this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
         }
         this.$router.push({name: 'quotations-sent'});
       } catch(error) {
