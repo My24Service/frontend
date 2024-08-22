@@ -114,7 +114,7 @@ import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
 import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
-import {InvoiceLineService} from "../../../models/orders/InvoiceLine";
+import {InvoiceLineService} from "../../../models/invoices/InvoiceLine";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
