@@ -169,7 +169,7 @@
   </b-overlay>
 </template>
 <script>
-import { InvoiceLineService } from '../../../models/orders/InvoiceLine.js'
+import { InvoiceLineService } from '../../../models/invoices/InvoiceLine.js'
 import PriceInput from "../../../components/PriceInput";
 import VAT from "./VAT";
 import invoiceMixin from "./mixin";

@@ -56,7 +56,7 @@
         </template>
         <template #cell(invoice_id)="data">
           <router-link
-            :to="{name: 'order-invoice-edit', params: {pk: data.item.id, uuid: data.item.order_uuid}}"
+            :to="{name: 'invoice-edit', params: {pk: data.item.id, uuid: data.item.order_uuid}}"
           >#{{ data.item.invoice_id }}
           </router-link>
         </template>
@@ -95,8 +95,8 @@
   </div>
 </template>
 <script>
-import {InvoiceService} from '@/models/orders/Invoice.js'
-import {InvoiceStatuscodeService} from '@/models/orders/InvoiceStatuscode.js'
+import {InvoiceService} from '@/models/invoices/Invoice.js'
+import {InvoiceStatuscodeService} from '@/models/invoices/InvoiceStatuscode.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
@@ -108,7 +108,7 @@ import Pagination from "@/components/Pagination.vue"
 import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '../../components/TableStatusInfo.vue'
-import { InvoiceStatusService } from '@/models/orders/InvoiceStatus.js'
+import { InvoiceStatusService } from '@/models/invoices/InvoiceStatus.js'
 
 export default {
   name: 'InvoiceList',
