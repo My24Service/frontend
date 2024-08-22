@@ -12,6 +12,7 @@ export default [
   path: '/invoices',
   children: [
     {
+      meta: { needsAuth: false },
       name: 'invoice-view',
       path: '/invoices/invoice/view/:uuid',
       props: {
