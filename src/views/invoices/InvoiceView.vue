@@ -140,8 +140,10 @@ export default {
       type: String
     }
   },
-  async created() {
-    const data = await invoiceService.getByUuid(this.uuid)
+  async mounted() {
+    const createPDFHeader = this.$route.query.create_pdf
+    const data = await invoiceService.getByUuid(this.uuid, createPDFHeader)
+
     this.data = new invoiceService.model(data)
     this.companyLogo = this.data.member.companylogo_url
   },
