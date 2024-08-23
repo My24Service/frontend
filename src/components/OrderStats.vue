@@ -172,7 +172,6 @@ export default {
   watch: {
     dataIn: {
       handler(newValue) {
-        console.log('hoi')
         this.render(newValue.orderTypeStatsData,
           newValue.monthsStatsData,
           newValue.orderTypesMonthStatsData,
@@ -190,7 +189,6 @@ export default {
       return this.colorsOrderTypes[txt]
     },
     render(orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats) {
-      console.log(orderTypeStatsData, 'hoi')
       const threshold = .07
       this.isLoading = true
 
@@ -243,7 +241,7 @@ export default {
         }
       }
       // console.log('left out year', this.leftOutYear)
-      console.log(datasetsYear)
+
       this.chartdataCountsYearOrdertypesBar = {
         labels: labelsYear,
         datasets: datasetsYear
