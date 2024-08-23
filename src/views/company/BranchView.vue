@@ -1,6 +1,6 @@
 <template>
-  <div class="app-page">
-    <header>
+  <div class="app-page" v-show="branch">
+    <header v-if="branch">
         <div class='page-title'>
           <h3>
             <b-icon icon="shop"></b-icon>
@@ -14,8 +14,8 @@
         </div>
       </header>
       <div class='page-detail flex-columns'>
-        <div class="customer-details panel col-1-3" v-if="!isBranchEmployee">
-          <CustomerCard :customer="branch"/>
+        <div class="branch-details panel col-1-3" v-if="!isBranchEmployee">
+          <BranchCard :branch="branch"/>
         </div>
 
         <div class='panel col-2-3'>
@@ -24,7 +24,7 @@
               <b-tab title="Insights" disabled></b-tab>
               <b-tab title="Equipment" disabled></b-tab>
               <b-tab title="Locations" disabled></b-tab>
-              <b-tab title="Past orders" disabled></b-tab>
+              <b-tab title="Orders" disabled></b-tab>
             </b-tabs>
             <b-spinner class="align-middle"></b-spinner><br><br>&nbsp;&nbsp;
             <strong>{{ $trans('Loading...') }}</strong>
@@ -38,7 +38,7 @@
             </b-tab>
             <b-tab :title="$trans('Equipment')">
                 <b-table
-                  id="customer-equipment-table"
+                  id="equipment-table"
                   small
                   :busy='isLoading'
                   :fields="equipmentFields"
@@ -172,12 +172,12 @@
                 </li>
               </ul>
               <b-pagination
-                v-if="this.orderPastModel.count > 20"
+                v-if="orderService.count > 20"
                 class="pt-4"
                 v-model="currentPage"
-                :total-rows="this.orderPastModel.count"
-                :per-page="this.orderPastModel.perPage"
-                aria-controls="customer-past-table"
+                :total-rows="orderService.count"
+                :per-page="orderService.perPage"
+                aria-controls="orders-table"
               ></b-pagination>
             </div>
             </b-tab>
@@ -196,14 +196,13 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "../../utils";
-import CustomerDetail from '../../components/CustomerDetail.vue'
-import CustomerCard from '../../components/CustomerCard.vue'
+import {componentMixin} from "@/utils";
+import BranchCard from '../../components/BranchCard.vue'
 
-import {BranchService} from '../../models/company/Branch.js'
-import {OrderService} from '../../models/orders/Order.js'
-import {LocationService} from "../../models/equipment/location";
-import {EquipmentService} from "../../models/equipment/equipment";
+import {BranchService, BranchModel} from '@/models/company/Branch'
+import {OrderService} from '@/models/orders/Order'
+import {LocationService} from "@/models/equipment/location";
+import {EquipmentService} from "@/models/equipment/equipment";
 
 export default {
   mixins: [componentMixin],
@@ -213,8 +212,7 @@ export default {
     OrderTableInfo,
     SearchModal,
     OrderStats,
-    CustomerDetail,
-    CustomerCard
+    BranchCard
 },
   data() {
     return {
@@ -226,7 +224,7 @@ export default {
       locationService: new LocationService(),
       equipmentService: new EquipmentService(),
       buttonDisabled: false,
-      branch: this.branchService.fields,
+      branch: null,
       orders: [],
       orderPastFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -347,6 +345,7 @@ export default {
 
     async loadHistory() {
       try {
+        this.orderService.setListArgs(`branch=${this.pk}`)
         const results = await this.orderService.list()
         this.orders = results.results
         this.isLoading = false

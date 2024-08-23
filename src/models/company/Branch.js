@@ -1,5 +1,17 @@
 import BaseModel from '../base'
 
+class BranchModel {
+  name
+  address
+  postal
+  city
+  country_code = 'NL'
+  tel
+  email
+  contact
+  mobile
+
+}
 
 class BranchService extends BaseModel {
   fields = {
@@ -28,4 +40,4 @@ class BranchService extends BaseModel {
 let branchService = new BranchService()
 
 export default branchService
-export { BranchService }
+export { BranchService, BranchModel }
