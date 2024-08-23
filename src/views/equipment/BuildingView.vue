@@ -20,7 +20,7 @@
       </b-row>
 
       <OrderStats
-        v-if="!isLoading"
+        :data-in="statsData"
         ref="order-stats"
       />
 
@@ -96,9 +96,10 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import { OrderService } from '@/models/orders/Order'
 import OrderStats from "../../components/OrderStats";
 import {componentMixin} from "@/utils";
+
+import { OrderService } from '@/models/orders/Order'
 import { BuildingService } from "@/models/equipment/building";
 
 export default {
@@ -134,6 +135,7 @@ export default {
           active: true
         },
       ],
+      statsData: null
     }
   },
   props: {
@@ -182,9 +184,12 @@ export default {
         const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsBuilding(this.pk)
         const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsBuilding(this.pk)
 
-        this.$refs['order-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-        )
+        this.statsData = {
+          orderTypeStatsData,
+          monthsStatsData,
+          orderTypesMonthStatsData,
+          countsYearOrdertypeStats
+        }
 
       } catch(error) {
         console.log('error fetching building detail data', error)

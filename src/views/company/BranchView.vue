@@ -32,7 +32,7 @@
           <b-tabs v-else>
             <b-tab :title="$trans('Insights')">
               <OrderStats
-                v-if="!isLoading"
+                :data-in="statsData"
                 ref="order-stats"
               />
             </b-tab>
@@ -191,19 +191,19 @@
 </template>
 
 <script>
-import {OrderService} from '../../models/orders/Order.js'
-import branchModel from '../../models/company/Branch.js'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import orderModel from '../../models/orders/Order.js'
 import OrderStats from "../../components/OrderStats";
 import {componentMixin} from "../../utils";
-import locationModel from "../../models/equipment/location";
-import equipmentModel from "../../models/equipment/equipment";
 import CustomerDetail from '../../components/CustomerDetail.vue'
 import CustomerCard from '../../components/CustomerCard.vue'
+
+import {BranchService} from '../../models/company/Branch.js'
+import {OrderService} from '../../models/orders/Order.js'
+import {LocationService} from "../../models/equipment/location";
+import {EquipmentService} from "../../models/equipment/equipment";
 
 export default {
   mixins: [componentMixin],
@@ -222,8 +222,11 @@ export default {
       searchQuery: null,
       isLoading: false,
       orderService: new OrderService(),
+      branchService: new BranchService(),
+      locationService: new LocationService(),
+      equipmentService: new EquipmentService(),
       buttonDisabled: false,
-      branch: branchModel.fields,
+      branch: this.branchService.fields,
       orders: [],
       orderPastFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -255,6 +258,7 @@ export default {
         {key: 'created', label: this.$trans('Created')},
         {key: 'icons', label: ""}
       ],
+      statsData: null
     }
   },
   props: {
@@ -290,43 +294,49 @@ export default {
 
       try {
         if (!this.isBranchEmployee) {
-          this.branch = await branchModel.detail(this.pk)
+          this.branch = await this.branchService.detail(this.pk)
 
-          const orderTypeStatsData = await orderModel.getOrderTypesStatsBranch(this.pk)
-          const monthsStatsData = await orderModel.getMonthsStatsBranch(this.pk)
-          const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsBranch(this.pk)
-          const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsBranch(this.pk)
+          const orderTypeStatsData = await this.orderService.getOrderTypesStatsBranch(this.pk)
+          const monthsStatsData = await this.orderService.getMonthsStatsBranch(this.pk)
+          const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsBranch(this.pk)
+          const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsBranch(this.pk)
 
-          locationModel.setListArgs(`branch=${this.pk}`)
-          let data = await locationModel.list()
+          this.statsData = {
+            orderTypeStatsData,
+            monthsStatsData,
+            orderTypesMonthStatsData,
+            countsYearOrdertypeStats
+          }
+
+          this.locationService.setListArgs(`branch=${this.pk}`)
+          let data = await this.locationService.list()
           this.locations = data.results
 
-          equipmentModel.setListArgs(`branch=${this.pk}`)
-          data = await equipmentModel.list()
+          this.equipmentService.setListArgs(`branch=${this.pk}`)
+          data = await this.equipmentService.list()
           this.equipment = data.results
-
-          this.$refs['order-stats'].render(
-            orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-          )
 
           this.isLoading = false
           return
         }
 
-        const orderTypeStatsData = await orderModel.getOrderTypesStatsBranch()
-        const monthsStatsData = await orderModel.getMonthsStatsBranch()
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsBranch()
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsBranch()
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsBranch()
+        const monthsStatsData = await this.orderService.getMonthsStatsBranch()
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsBranch()
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsBranch()
 
-        let data = await locationModel.list()
+        this.statsData = {
+          orderTypeStatsData,
+          monthsStatsData,
+          orderTypesMonthStatsData,
+          countsYearOrdertypeStats
+        }
+
+        let data = await this.locationService.list()
         this.locations = data.results
 
-        data = await equipmentModel.list()
+        data = await this.equipmentService.list()
         this.equipment = data.results
-
-        this.$refs['order-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-        )
 
       } catch(error) {
         console.log('error fetching branch detail data', error)

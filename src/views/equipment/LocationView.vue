@@ -59,9 +59,10 @@
               aria-controls="customer-past-table"
             ></b-pagination>
           </b-tab>
-          <b-tab :title="$trans('Insights')" @click="renderStats">
+          <b-tab key="stats" :title="$trans('Insights')" @click="renderStats">
             <OrderStats
-            ref="order-stats"
+              :data-in="statsData"
+              ref="order-stats"
             />
           </b-tab>
         </b-tabs>
@@ -75,9 +76,10 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import { OrderService } from '../../models/orders/Order.js'
 import OrderStats from "../../components/OrderStats";
 import {componentMixin} from "../../utils";
+
+import { OrderService } from '../../models/orders/Order.js'
 import { LocationService } from "../../models/equipment/location";
 
 export default {
@@ -112,7 +114,8 @@ export default {
         },
       ],
       locationService: new LocationService(),
-      orderService: new OrderService()
+      orderService: new OrderService(),
+      statsData: null
     }
   },
   props: {
@@ -145,10 +148,13 @@ export default {
         const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsEquipment(this.pk)
         const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsEquipment(this.pk)
 
-        this.$refs['order-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-        )
-
+        this.statsData = {
+          orderTypeStatsData,
+          monthsStatsData,
+          orderTypesMonthStatsData,
+          countsYearOrdertypeStats
+        }
+        // this.isLoading = false
       } catch(error) {
         console.log('error fetching location stats', error)
         this.errorToast(`${this.$trans('Error fetching location insights:')} ${error}`)

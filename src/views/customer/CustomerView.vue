@@ -251,9 +251,9 @@
                   </span>
                 </b-row>
               </b-tab>
-              <b-tab title="Insights" key="stats">
+              <b-tab title="Insights" key="stats" @click="loadOrderStats">
                 <OrderStats
-                  v-if="!isLoading"
+                  :data-in="statsData"
                   ref="order-stats"
                 />
               </b-tab>
@@ -267,17 +267,18 @@
 </template>
 
 <script>
-import maintenanceContractModel from '../../models/customer/MaintenanceContract.js'
-import { OrderService } from '../../models/orders/Order.js'
-import customerModel from '../../models/customer/Customer.js'
 import CustomerCard from '../../components/CustomerCard.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "../../utils";
-import locationModel from "../../models/equipment/location";
-import equipmentModel from "../../models/equipment/equipment";
+import {componentMixin} from "@/utils";
 import CustomerDetail from "../../components/CustomerDetail";
+
+import {MaintenanceContractService} from '@/models/customer/MaintenanceContract'
+import { OrderService } from '@/models/orders/Order'
+import {CustomerModel, CustomerService} from '@/models/customer/Customer'
+import {LocationService} from "@/models/equipment/location";
+import {EquipmentService} from "@/models/equipment/equipment";
 
 export default {
   mixins: [componentMixin],
@@ -294,8 +295,12 @@ export default {
       searchQuery: null,
       isLoading: false,
       orderService: new OrderService(),
+      maintenanceContractService: new MaintenanceContractService(),
+      customerService: new CustomerService(),
+      locationService: new LocationService(),
+      equipmentService: new EquipmentService(),
       buttonDisabled: false,
-      customer: customerModel.fields,
+      customer: new CustomerModel({}),
       orders: [],
       orderFields: [
         { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
@@ -334,6 +339,7 @@ export default {
         {key: 'icons', label: ""}
       ],
       equipmentFields: [],
+      statsData: null
     }
   },
   props: {
@@ -349,6 +355,31 @@ export default {
     }
   },
   methods: {
+    async loadOrderStats() {
+      if (!this.isCustomer) {
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer(this.pk)
+        const monthsStatsData = await this.orderService.getMonthsStatsCustomer(this.pk)
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer(this.pk)
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer(this.pk)
+        this.statsData = {
+          orderTypeStatsData,
+          monthsStatsData,
+          orderTypesMonthStatsData,
+          countsYearOrdertypeStats
+        }
+      } else {
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer()
+        const monthsStatsData = await this.orderService.getMonthsStatsCustomer()
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer()
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer()
+        this.statsData = {
+          orderTypeStatsData,
+          monthsStatsData,
+          orderTypesMonthStatsData,
+          countsYearOrdertypeStats
+        }
+      }
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
@@ -370,23 +401,14 @@ export default {
 
         if (!this.isCustomer) {
           await this.loadMaintenanceContracts()
-          this.customer = await customerModel.detail(this.pk)
+          this.customer = await this.customerService.detail(this.pk)
 
-          const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer(this.pk)
-          const monthsStatsData = await this.orderService.getMonthsStatsCustomer(this.pk)
-          const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer(this.pk)
-          const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer(this.pk)
-
-          this.$refs['order-stats'].render(
-            orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-          )
-
-          locationModel.setListArgs(`customer=${this.pk}`)
-          let data = await locationModel.list()
+          this.locationService.setListArgs(`customer=${this.pk}`)
+          let data = await this.locationService.list()
           this.locations = data.results
 
-          equipmentModel.setListArgs(`customer=${this.pk}`)
-          data = await equipmentModel.list()
+          this.equipmentService.setListArgs(`customer=${this.pk}`)
+          data = await this.equipmentService.list()
           this.equipment = data.results
 
           this.isLoading = false
@@ -394,19 +416,10 @@ export default {
           return
         }
 
-        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer()
-        const monthsStatsData = await this.orderService.getMonthsStatsCustomer()
-        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer()
-        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer()
-
-        this.$refs['order-stats'].render(
-          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-        )
-
-        let data = await locationModel.list()
+        let data = await this.locationService.list()
         this.locations = data.results
 
-        data = await equipmentModel.list()
+        data = await this.equipmentService.list()
         this.equipment = data.results
 
         this.isLoading = false
@@ -423,8 +436,8 @@ export default {
 
     async loadMaintenanceContracts() {
       try {
-        maintenanceContractModel.setListArgs(`customer=${this.pk}`)
-        const data = await maintenanceContractModel.list()
+        this.maintenanceContractService.setListArgs(`customer=${this.pk}`)
+        const data = await this.maintenanceContractService.list()
         this.maintenanceContracts = data.results
       } catch(error) {
         console.log('error fetching maintenance contracts', error)

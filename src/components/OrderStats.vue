@@ -6,8 +6,8 @@
     <b-row>
       <b-col cols="12">
         <bar-chart
+          v-if="chartdataCountsYearOrdertypesBar"
           id="bar-chart-order-types-year"
-          v-if="!isLoading"
           :chart-data="chartdataCountsYearOrdertypesBar"
           :options="optionsStacked"
         />
@@ -21,7 +21,6 @@
       <b-col cols="12">
         <bar-chart
           id="bar-chart-order-types-month"
-          v-if="!isLoading"
           :chart-data="chartdataCountsOrderTypesBar"
           :options="optionsStacked"
         />
@@ -35,7 +34,6 @@
       <b-col cols="6">
         <bar-chart
           id="bar-chart-order-types"
-          v-if="!isLoading"
           :chart-data="chartdataCountsBar"
           :options="options"
         />
@@ -43,7 +41,6 @@
       <b-col cols="6">
         <pie-chart
           id="pie-chart-order-types"
-          v-if="!isLoading"
           :chart-data="chartdataCountsPie"
           :options="pieOptions"
         />
@@ -57,7 +54,6 @@
       <b-col cols="6">
         <bar-chart
           id="bar-chart-order-types"
-          v-if="!isLoading"
           :chart-data="chartdataOrderTypesBar"
           :options="options"
         />
@@ -65,7 +61,6 @@
       <b-col cols="6">
         <pie-chart
           id="pie-chart-order-types"
-          v-if="!isLoading"
           :chart-data="chartdataOrderTypesPie"
           :options="pieOptions"
         />
@@ -90,17 +85,22 @@ export default {
     PieChart,
     ChartJsPluginDataLabels,
   },
+  props: {
+    dataIn: {
+      type: [Object]
+    }
+  },
   name: "OrderStats",
   data() {
     return {
       isLoading: false,
-      chartdataOrderTypesBar: {},
-      chartdataOrderTypesPie: {},
-      chartdataCountsOrderTypesBar: {},
-      chartdataCountsOrderTypesPie: {},
-      chartdataCountsBar: {},
-      chartdataCountsPie: {},
-      chartdataCountsYearOrdertypesBar: {},
+      chartdataOrderTypesBar: null,
+      chartdataOrderTypesPie: null,
+      chartdataCountsOrderTypesBar: null,
+      chartdataCountsOrderTypesPie: null,
+      chartdataCountsBar: null,
+      chartdataCountsPie: null,
+      chartdataCountsYearOrdertypesBar: null,
       colors: {},
       colorsOrderTypes: {},
       options: {
@@ -169,6 +169,18 @@ export default {
       },
     }
   },
+  watch: {
+    dataIn: {
+      handler(newValue) {
+        console.log('hoi')
+        this.render(newValue.orderTypeStatsData,
+          newValue.monthsStatsData,
+          newValue.orderTypesMonthStatsData,
+          newValue.countsYearOrdertypeStats)
+      },
+      deep: true
+    }
+  },
   methods: {
     getRandomColorOrderType(txt) {
       if (!(txt in this.colorsOrderTypes)) {
@@ -178,7 +190,9 @@ export default {
       return this.colorsOrderTypes[txt]
     },
     render(orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats) {
+      console.log(orderTypeStatsData, 'hoi')
       const threshold = .07
+      this.isLoading = true
 
       // first graph, year
       let datasetsYear = [], labelsYear = []
@@ -229,7 +243,7 @@ export default {
         }
       }
       // console.log('left out year', this.leftOutYear)
-
+      console.log(datasetsYear)
       this.chartdataCountsYearOrdertypesBar = {
         labels: labelsYear,
         datasets: datasetsYear
@@ -369,13 +383,15 @@ export default {
       }
 
 
+      this.isLoading = false
     }
   },
   async mounted () {
     const lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-}
+
+  }
 }
 </script>
 

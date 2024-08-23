@@ -5,6 +5,7 @@
     </header>
     <div class="panel">
       <OrderStats
+        :data-in="statsData"
         ref="order-stats"
       />
     </div>
@@ -155,7 +156,7 @@ import BarChart from "../../components/BarChart.vue"
 import PieChart from "../../components/PieChart.vue"
 import OrderStats from "../../components/OrderStats.vue"
 import dashboardModel from '../../models/company/Dashboard.js'
-import orderModel from "../../models/orders/Order";
+import {OrderService} from "@/models/orders/Order";
 
 let d = new Date()
 
@@ -200,10 +201,9 @@ export default {
               let datasets = ctx.chart.data.datasets;
               if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
                 let sum = datasets[0].data.reduce((a, b) => a + b, 0);
-                let percentage = Math.round((value / sum) * 100) + '%';
-                return percentage;
+                return Math.round((value / sum) * 100) + '%';
               } else {
-                return percentage;
+                return "";
               }
             },
             color: '#fff',
@@ -212,6 +212,8 @@ export default {
       },
       isLoading: false,
       year: d.getYear() + 1900,
+      statsData: null,
+      orderService: new OrderService()
     }
   },
   created() {
@@ -476,15 +478,16 @@ export default {
         }
 
         if (this.hasBranches) {
-          const orderTypeStatsData = await orderModel.getOrderTypesStatsBranch()
-          const monthsStatsData = await orderModel.getMonthsStatsBranch()
-          const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsBranch()
-          const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsBranch()
+          const orderTypeStatsData = await this.orderService.getOrderTypesStatsBranch()
+          const monthsStatsData = await this.orderService.getMonthsStatsBranch()
+          const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsBranch()
+          const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsBranch()
 
-          if ('order-stats' in this.$refs && typeof this.$refs['order-stats'].render === "function") {
-            this.$refs['order-stats'].render(
-              orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-            )
+          this.statsData = {
+            orderTypeStatsData,
+            monthsStatsData,
+            orderTypesMonthStatsData,
+            countsYearOrdertypeStats
           }
 
           this.isLoading = false
@@ -492,15 +495,16 @@ export default {
           return
         }
 
-        const orderTypeStatsData = await orderModel.getOrderTypesStatsCustomer()
-        const monthsStatsData = await orderModel.getMonthsStatsCustomer()
-        const orderTypesMonthStatsData = await orderModel.getOrderTypesMonthsStatsCustomer()
-        const countsYearOrdertypeStats = await orderModel.getCountsYearOrdertypeStatsCustomer()
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer()
+        const monthsStatsData = await this.orderService.getMonthsStatsCustomer()
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer()
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer()
 
-        if ('order-stats' in this.$refs && typeof this.$refs['order-stats'].render === "function") {
-          this.$refs['order-stats'].render(
-            orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats
-          )
+        this.statsData = {
+          orderTypeStatsData,
+          monthsStatsData,
+          orderTypesMonthStatsData,
+          countsYearOrdertypeStats
         }
 
         this.isLoading = false
