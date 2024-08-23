@@ -1,56 +1,99 @@
 <template>
-  <div class="app-page" v-show="branch">
-    <header v-if="branch">
-        <div class='page-title'>
-          <h3>
-            <b-icon icon="shop"></b-icon>
-            <span class='backlink' @click="goBack">{{ $trans("Branches") }}</span> /
-            <strong>{{ branch.name }}</strong>
-          </h3>
-          <router-link
-          :to="{name: 'company-branch-edit', params: {pk: pk}}"
-          class="btn"
-          >{{ $trans("Edit branch") }}</router-link>
-        </div>
-      </header>
-      <div class='page-detail flex-columns'>
-        <div class="branch-details panel col-1-3" v-if="!isBranchEmployee">
-          <BranchCard :branch="branch"/>
-        </div>
-
-        <div class='panel col-2-3'>
-          <div class="text-center" v-if="isLoading">
-            <b-tabs>
-              <b-tab title="Insights" disabled></b-tab>
-              <b-tab title="Equipment" disabled></b-tab>
-              <b-tab title="Locations" disabled></b-tab>
-              <b-tab title="Orders" disabled></b-tab>
-            </b-tabs>
-            <b-spinner class="align-middle"></b-spinner><br><br>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
+  <b-overlay :show="isLoading" rounded="sm">
+    <div class="app-page">
+        <header v-if="branch">
+          <div class='page-title'>
+            <h3>
+              <b-icon icon="shop"></b-icon>
+              <span class='backlink' @click="goBack">{{ $trans("Branches") }}</span> /
+              <strong>{{ branch.name }}</strong>
+            </h3>
+            <router-link
+            :to="{name: 'company-branch-edit', params: {pk: pk}}"
+            class="btn"
+            >{{ $trans("Edit branch") }}</router-link>
           </div>
-          <b-tabs v-else>
-            <b-tab :title="$trans('Insights')">
-              <OrderStats
-                :data-in="statsData"
-                ref="order-stats"
-              />
-            </b-tab>
-            <b-tab :title="$trans('Equipment')">
+        </header>
+        <div class='page-detail flex-columns'>
+          <div class="branch-details panel col-1-3" v-if="!isBranchEmployee">
+            <BranchCard :branch="branch"/>
+          </div>
+
+          <div class='panel col-2-3'>
+            <b-tabs>
+              <b-tab :title="$trans('Insights')">
+                <OrderStats
+                  :data-in="statsData"
+                  ref="order-stats"
+                />
+              </b-tab>
+              <b-tab :title="$trans('Equipment')">
+                  <b-table
+                    id="equipment-table"
+                    small
+                    :busy='isLoading'
+                    :fields="equipmentFields"
+                    :items="equipment"
+                    responsive="md"
+                    class="data-table"
+                  >
+                    <template #cell(icons)="data">
+                      <div class="h2 float-right">
+                        <span class="button-container">
+                          <b-button
+                            :to="{name: 'equipment-equipment-edit', params: {pk: data.item.id}}"
+                            class="btn btn-outline-secondary"
+                            size="sm"
+                            type="button"
+                            variant="outline-secondary"
+                          >
+                            {{ $trans('Edit') }}
+                          </b-button>
+                        </span>
+                      </div>
+                    </template>
+                  </b-table>
+
+                  <b-row align-h="end">
+                    <span class="button-container">
+                      <b-button
+                        class="btn btn-outline-secondary"
+                        :to="{name: 'equipment-equipment-add'}"
+                        size="sm"
+                        type="button"
+                        variant="outline-secondary"
+                      >
+                        {{ $trans('New') }}
+                      </b-button>
+                    </span>
+                    <span class="button-container">
+                      <b-button
+                        class="btn btn-outline-secondary"
+                        :to="{name: 'equipment-equipment-list'}"
+                        size="sm"
+                        type="button"
+                        variant="outline-secondary"
+                      >
+                        {{ $trans('Manage >>') }}
+                      </b-button>
+                    </span>
+                  </b-row>
+              </b-tab>
+              <b-tab :title="$trans('Locations')">
                 <b-table
-                  id="equipment-table"
-                  small
-                  :busy='isLoading'
-                  :fields="equipmentFields"
-                  :items="equipment"
-                  responsive="md"
-                  class="data-table"
-                >
+                    id="branch-location-table"
+                    small
+                    :busy='isLoading'
+                    :fields="locationFields"
+                    :items="locations"
+                    responsive="md"
+                    class="data-table"
+                  >
                   <template #cell(icons)="data">
                     <div class="h2 float-right">
                       <span class="button-container">
                         <b-button
-                          :to="{name: 'equipment-equipment-edit', params: {pk: data.item.id}}"
+                          :to="{name: 'equipment-location-edit', params: {pk: data.item.id}}"
                           class="btn btn-outline-secondary"
                           size="sm"
                           type="button"
@@ -62,132 +105,81 @@
                     </div>
                   </template>
                 </b-table>
-
-                <b-row align-h="end">
-                  <span class="button-container">
-                    <b-button
-                      class="btn btn-outline-secondary"
-                      :to="{name: 'equipment-equipment-add'}"
-                      size="sm"
-                      type="button"
-                      variant="outline-secondary"
-                    >
-                      {{ $trans('New') }}
-                    </b-button>
-                  </span>
-                  <span class="button-container">
-                    <b-button
-                      class="btn btn-outline-secondary"
-                      :to="{name: 'equipment-equipment-list'}"
-                      size="sm"
-                      type="button"
-                      variant="outline-secondary"
-                    >
-                      {{ $trans('Manage >>') }}
-                    </b-button>
-                  </span>
-                </b-row>
-            </b-tab>
-            <b-tab :title="$trans('Locations')">
-              <b-table
-                  id="branch-location-table"
-                  small
-                  :busy='isLoading'
-                  :fields="locationFields"
-                  :items="locations"
-                  responsive="md"
-                  class="data-table"
-                >
-                <template #cell(icons)="data">
-                  <div class="h2 float-right">
-                    <span class="button-container">
-                      <b-button
-                        :to="{name: 'equipment-location-edit', params: {pk: data.item.id}}"
-                        class="btn btn-outline-secondary"
-                        size="sm"
-                        type="button"
-                        variant="outline-secondary"
-                      >
-                        {{ $trans('Edit') }}
-                      </b-button>
-                    </span>
-                  </div>
-                </template>
-              </b-table>
-              <span class="button-container">
-                <b-button
-                  class="btn btn-outline-secondary"
-                  :to="{name: 'equipment-location-add'}"
-                  size="sm"
-                  type="button"
-                  variant="outline-secondary"
-                >
-                  {{ $trans('New') }}
-                </b-button>
-              </span>
-              <span class="button-container">
-                <b-button
-                  class="btn btn-outline-secondary"
-                  :to="{name: 'equipment-location-list'}"
-                  size="sm"
-                  type="button"
-                  variant="outline-secondary"
-                >
-                  {{ $trans('Manage >>') }}
-                </b-button>
-              </span>
-            </b-tab>
-            <b-tab :title="$trans('Past orders')">
-
-              <div>
-
-              <SearchModal
-                id="search-modal"
-                ref="search-modal"
-                @do-search="handleSearchOk"
-              />
-
-              <div class='flex-columns' style="justify-content: space-between;">
-                <span></span>
-                <span>
-                <b-button-toolbar>
-                  <b-button-group class="mr-1">
-                    <ButtonLinkRefresh
-                      v-bind:method="function() { loadData() }"
-                      v-bind:title="$trans('Refresh')"
-                    />
-                    <ButtonLinkSearch
-                      v-bind:method="function() { showSearchModal() }"
-                    />
-                  </b-button-group>
-                </b-button-toolbar>
+                <span class="button-container">
+                  <b-button
+                    class="btn btn-outline-secondary"
+                    :to="{name: 'equipment-location-add'}"
+                    size="sm"
+                    type="button"
+                    variant="outline-secondary"
+                  >
+                    {{ $trans('New') }}
+                  </b-button>
                 </span>
-              </div>
-              <br>
-              <ul class='listing order-list'>
-                <li v-for="order in orders" :key="order.id">
-                  <OrderTableInfo
-                    v-bind:order="order"
-                    />
-                </li>
-              </ul>
-              <b-pagination
-                v-if="orderService.count > 20"
-                class="pt-4"
-                v-model="currentPage"
-                :total-rows="orderService.count"
-                :per-page="orderService.perPage"
-                aria-controls="orders-table"
-              ></b-pagination>
-            </div>
-            </b-tab>
-            <template #tabs-end>
+                <span class="button-container">
+                  <b-button
+                    class="btn btn-outline-secondary"
+                    :to="{name: 'equipment-location-list'}"
+                    size="sm"
+                    type="button"
+                    variant="outline-secondary"
+                  >
+                    {{ $trans('Manage >>') }}
+                  </b-button>
+                </span>
+              </b-tab>
+              <b-tab :title="$trans('Past orders')">
 
-            </template>
-          </b-tabs>
-        </div>
+                <div>
+
+                <SearchModal
+                  id="search-modal"
+                  ref="search-modal"
+                  @do-search="handleSearchOk"
+                />
+
+                <div class='flex-columns' style="justify-content: space-between;">
+                  <span></span>
+                  <span>
+                  <b-button-toolbar>
+                    <b-button-group class="mr-1">
+                      <ButtonLinkRefresh
+                        v-bind:method="function() { loadData() }"
+                        v-bind:title="$trans('Refresh')"
+                      />
+                      <ButtonLinkSearch
+                        v-bind:method="function() { showSearchModal() }"
+                      />
+                    </b-button-group>
+                  </b-button-toolbar>
+                  </span>
+                </div>
+                <br>
+                <ul class='listing order-list'>
+                  <li v-for="order in orders" :key="order.id">
+                    <OrderTableInfo
+                      v-bind:order="order"
+                      />
+                  </li>
+                </ul>
+                <b-pagination
+                  v-if="orderService.count > 20"
+                  class="pt-4"
+                  v-model="currentPage"
+                  :total-rows="orderService.count"
+                  :per-page="orderService.perPage"
+                  aria-controls="orders-table"
+                ></b-pagination>
+              </div>
+              </b-tab>
+              <template #tabs-end>
+
+              </template>
+            </b-tabs>
+          </div>
+      </div>
     </div>
-  </div>
+  </b-overlay>
 </template>
 
 <script>
