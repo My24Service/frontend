@@ -760,7 +760,6 @@ export default {
     },
     refreshData() {
       this.$refs['dispatchComponent'].loadData()
-      this.$refs['dispatchComponent'].makeDays()
     }
   },
   async mounted() {

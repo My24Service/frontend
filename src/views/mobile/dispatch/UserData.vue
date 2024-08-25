@@ -84,8 +84,10 @@ export default {
   },
   methods: {
     cleanTime(time) {
-      const p = time.split(':')
-      return `${p[0]}:${p[1]}`
+      if (time) {
+        const p = time.split(':')
+        return `${p[0]}:${p[1]}`
+      }
     },
     getTimeText(assignedOrder) {
       const result = this.getTime(assignedOrder)
