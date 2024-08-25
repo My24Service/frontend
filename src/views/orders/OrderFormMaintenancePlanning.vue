@@ -595,7 +595,7 @@
               id="order-assign"
               track-by="id"
               :max-height="600"
-              :placeholder="$trans('Type to search Sales user(s)')"
+              :placeholder="$trans('Type to search sales user(s)')"
               open-direction="bottom"
               :options="salesUsers"
               :multiple="true"

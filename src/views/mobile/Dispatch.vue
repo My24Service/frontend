@@ -145,10 +145,10 @@
             <b-col size="6">
               <b-form-group
                 v-bind:label="$trans('Start date')"
-                label-for="alt-start-date"
+                label-for="dates-order-start-date"
               >
                 <b-form-datepicker
-                  id="alt-start-date"
+                  id="dates-order-start-date"
                   size="sm"
                   class="p-sm-0"
                   v-model="assignedOrder.alt_start_date"
@@ -164,16 +164,13 @@
             <b-col size="6">
               <b-form-group
                 v-bind:label="$trans('Start time')"
-                label-for="alt-start-time"
+                label-for="dates-order-start-time"
               >
-                <b-form-timepicker
-                  id="alt-start-time"
-                  size="sm"
-                  v-model="assignedOrder.alt_start_time"
-                  class="mb-2"
-                  v-bind:placeholder="$trans('Choose a time')"
-                  :hour12=false
-                ></b-form-timepicker>
+                <TimeInput
+                  id="dates-order-start-time"
+                  :time-in="assignedOrder.start_time"
+                  @timeChanged="(val) => assignedOrder.alt_start_time = val"
+                />
               </b-form-group>
             </b-col>
           </b-row>
@@ -181,10 +178,10 @@
             <b-col size="6">
               <b-form-group
                 v-bind:label="$trans('End date')"
-                label-for="alt-end-date"
+                label-for="dates-order-end-date"
               >
                 <b-form-datepicker
-                  id="alt-end-date"
+                  id="dates-order-end-date"
                   size="sm"
                   class="p-sm-0"
                   v-model="assignedOrder.alt_end_date"
@@ -200,16 +197,13 @@
             <b-col size="6">
               <b-form-group
                 v-bind:label="$trans('End time')"
-                label-for="alt-end-time"
+                label-for="dates-order-end-time"
               >
-                <b-form-timepicker
-                  id="alt-end-time"
-                  size="sm"
-                  v-model="assignedOrder.alt_end_time"
-                  class="mb-2"
-                  v-bind:placeholder="$trans('Choose a time')"
-                  :hour12=false
-                ></b-form-timepicker>
+                <TimeInput
+                  id="dates-order-end-time"
+                  :time-in="assignedOrder.end_time"
+                  @timeChanged="(val) => assignedOrder.alt_end_time = val"
+                />
               </b-form-group>
             </b-col>
           </b-row>
@@ -223,6 +217,145 @@
           </b-row>
         </b-container>
       </form>
+    </b-modal>
+
+    <b-modal
+      ref="dispatch-split-order-modal"
+      id="dispatch-split-order-modal"
+      :title="$trans('Split order')"
+      :hide-footer="true"
+      v-if="selectedAssignedOrder&& selectedOrder"
+    >
+      <form ref="split-order-form">
+        <p>
+          <b>{{ $trans("Order") }}</b>:
+          {{ selectedOrder.order_id }} {{ selectedOrder.order_date }}
+        </p>
+        <p>
+          <b>{{ $trans("Currently assigned") }}</b>:
+          {{ selectedOrder.assigned_user_info.map((d) => d.full_name).join(', ') }}
+        </p>
+        <b-container fluid v-if="assignedOrder">
+          <b-row role="group">
+            <b-col size="12">
+              <b-form-group
+                v-bind:label="$trans('Engineer')"
+                label-for="split-order-engineer"
+              >
+                <multiselect
+                  v-model="selectedEngineers"
+                  track-by="id"
+                  :max-height="600"
+                  :placeholder="$trans('Type to search engineers')"
+                  open-direction="bottom"
+                  :options="engineers"
+                  :multiple="true"
+                  :custom-label="engineerLabel"
+                  :loading="searchingEngineers"
+                  @search-change="getEngineersDebounced"
+                >
+                  <span slot="noResult">
+                    {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                  </span>
+                </multiselect>
+
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row role="group">
+            <b-col size="6">
+              <b-form-group
+                v-bind:label="$trans('Start date')"
+                label-for="split-order-start-date"
+              >
+                <b-form-datepicker
+                  id="split-order-start-date"
+                  size="sm"
+                  class="p-sm-0"
+                  v-model="assignedOrder.alt_start_date"
+                  :placeholder="$trans('Choose a date')"
+                  locale="nl"
+                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  :min="minDate"
+                  :max="maxDate"
+                  value-as-date
+                ></b-form-datepicker>
+              </b-form-group>
+            </b-col>
+            <b-col size="6">
+              <b-form-group
+                v-bind:label="$trans('Start time')"
+                label-for="split-order-start-time"
+              >
+                <TimeInput
+                  id="split-order-start-time"
+                  :time-in="assignedOrder.start_time"
+                  @timeChanged="(val) => assignedOrder.alt_start_time = val"
+                />
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col size="6">
+              <b-form-group
+                v-bind:label="$trans('End date')"
+                label-for="split-order-end-date"
+              >
+                <b-form-datepicker
+                  id="split-order-end-date"
+                  size="sm"
+                  class="p-sm-0"
+                  v-model="assignedOrder.alt_end_date"
+                  v-bind:placeholder="$trans('Choose a date')"
+                  locale="nl"
+                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  :min="minDate"
+                  :max="maxDate"
+                  value-as-date
+                ></b-form-datepicker>
+              </b-form-group>
+            </b-col>
+            <b-col size="6">
+              <b-form-group
+                v-bind:label="$trans('End time')"
+                label-for="split-order-end-time"
+              >
+                <TimeInput
+                  id="split-order-end-time"
+                  :time-in="assignedOrder.end_time"
+                  @timeChanged="(val) => assignedOrder.alt_end_time = val"
+                />
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col size="6"></b-col>
+            <b-col size="6" class="text-right">
+              <b-link class="px-1" title="clear" v-on:click.native="clearAssignedorderSplit()">
+                {{ $trans('clear') }}
+              </b-link>
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+      <footer class="modal-footer">
+        <b-button
+          @click="cancelSplitOrder"
+          class="btn btn-secondary"
+          type="button"
+          variant="secondary"
+        >
+          {{ $trans('Cancel') }}</b-button>
+        <b-button
+          @click="splitOrderSubmit"
+          :disabled="selectedEngineers.length <= 0"
+          class="btn btn-primary"
+          type="button"
+          variant="primary"
+        >
+          {{ $trans('Submit') }}</b-button>
+      </footer>
+
     </b-modal>
 
     <b-modal
@@ -257,20 +390,17 @@
             </b-col>
           </b-row>
           <b-row v-else>
-            <b-col cols="1" class="mx-2">
-              <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
+            <b-col cols="8">
+              <div class="flex-columns" style="justify-content: space-between;">
+                <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
+                <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
+                <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
+                <b-button size="sm" variant="primary" @click="splitOrder">{{ $trans('Split') }}</b-button>
+              </div>
             </b-col>
-            <b-col cols="1" class="mx-2">
-              <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
-            </b-col>
-            <b-col cols="4" class="mx-2" v-if="selectedAssignedOrder">
-              <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
-            </b-col>
-            <b-col cols="2" class="mx-2" v-if="selectedAssignedOrder">
-              <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
-            </b-col>
-            <b-col cols="2" class="mx-1">
-              <div class="float-right">
+            <b-col cols="4" v-if="selectedAssignedOrder">
+              <div class="flex-columns" style="justify-content: space-between;">
+                <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
                 <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
               </div>
             </b-col>
@@ -288,11 +418,19 @@ import moment from 'moment/min/moment-with-locales'
 
 import DispatchWeek from './dispatch/DispatchWeek.vue'
 import {OrderService} from '@/models/orders/Order'
-import {AssignedOrderChangeDatesModel, AssignedOrderService} from '@/models/mobile/AssignedOrder'
+import {
+  AssignedOrderChangeDatesModel,
+  AssignedOrderModel,
+  AssignedOrderService
+} from '@/models/mobile/AssignedOrder'
 import { AssignService } from '@/models/mobile/Assign'
 import SearchModal from '../../components/SearchModal.vue'
 import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from '@/constants';
+import Multiselect from "vue-multiselect";
+import AwesomeDebouncePromise from "awesome-debounce-promise";
+import {UserListService} from "@/models/company/UserList";
+import TimeInput from "@/components/TimeInput.vue";
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
@@ -304,8 +442,10 @@ class SelectedUser {
 export default {
   name: 'DispatchNew',
   components: {
+    Multiselect,
     SearchModal,
-    DispatchWeek
+    DispatchWeek,
+    TimeInput
   },
   props: {
     assignModeProp: {
@@ -350,7 +490,12 @@ export default {
       loadDone: false,
       assignedOrderService: new AssignedOrderService(),
       orderService: new OrderService(),
-      assignService: new AssignService()
+      assignService: new AssignService(),
+      engineers: [],
+      selectedEngineers: [],
+      getEngineersDebounced: null,
+      searchingEngineers: false,
+      userListService: new UserListService(),
     }
   },
   watch: {
@@ -365,6 +510,27 @@ export default {
     }
   },
   methods: {
+    // get engineers
+    async getEngineers(query) {
+      if (query === '') return
+      this.engineers = []
+      this.searchingEngineers = true
+
+      try {
+        const result = await this.userListService.search(query, 'engineer')
+        const already_assigned = this.selectedOrder.assigned_user_info.map((d) => d.user_id)
+        this.engineers = result.filter((engineer) => already_assigned.indexOf(parseInt(engineer.id)) === -1)
+        this.searchingEngineers = false
+      } catch(error) {
+        console.log('Error fetching engineers', error)
+        this.errorToast(this.$trans('Error fetching engineers'))
+        this.searchingEngineers = false
+      }
+    },
+    engineerLabel({ name }) {
+      return name
+    },
+
     // change view mode
     changeViewMode(mode) {
       this.mode = mode;
@@ -373,10 +539,19 @@ export default {
       this.showUsersMode = mode;
     },
     // dates
+    getNewAssignedorderModelDates() {
+      return new AssignedOrderModel({
+        alt_start_date: this.$moment(this.selectedAssignedOrder.start_date, 'YYYY-MM-DD').toDate(),
+        alt_end_date: this.$moment(this.selectedAssignedOrder.end_date, 'YYYY-MM-DD').toDate(),
+        start_time: this.selectedAssignedOrder.start_time,
+        end_time: this.selectedAssignedOrder.end_time,
+      })
+    },
     clearAssignedorderDates() {
-      this.assignedOrder = new AssignedOrderChangeDatesModel()
+      this.assignedOrder = this.getNewAssignedorderModelDates()
     },
     changeDate() {
+      this.assignedOrder = this.getNewAssignedorderModelDates()
       this.$refs['dispatch-order-actions-modal'].hide()
       this.$refs['dispatch-change-date-modal'].show()
     },
@@ -396,6 +571,57 @@ export default {
       } catch(error) {
         console.log('error updating assignedOrder dates', error)
         this.errorToast(this.$trans('Error updating dates'))
+        this.showOverlay = false
+      }
+    },
+    // split order (create new assignedOrder model)
+    getNewAssignedorderModelSplit() {
+      return new AssignedOrderModel({
+        order: this.selectedOrder.id,
+        alt_start_date: this.$moment(this.selectedAssignedOrder.start_date, 'YYYY-MM-DD').toDate(),
+        alt_end_date: this.$moment(this.selectedAssignedOrder.end_date, 'YYYY-MM-DD').toDate(),
+        start_time: this.selectedAssignedOrder.start_time,
+        end_time: this.selectedAssignedOrder.end_time,
+      })
+    },
+    clearAssignedorderSplit() {
+      this.assignedOrder = this.getNewAssignedorderModelSplit()
+    },
+    splitOrder() {
+      this.assignedOrder = this.getNewAssignedorderModelSplit()
+      this.$refs['dispatch-order-actions-modal'].hide()
+      this.$refs['dispatch-split-order-modal'].show()
+    },
+    cancelSplitOrder() {
+      this.$refs['dispatch-split-order-modal'].hide()
+    },
+    async splitOrderSubmit() {
+      this.showOverlay = true
+
+      try {
+        // check date types
+        if (this.assignedOrder.alt_start_date !== null && typeof this.assignedOrder.alt_start_date === 'object') {
+          this.assignedOrder.alt_start_date = moment(this.assignedOrder.alt_start_date).format('YYYY-MM-DD')
+        }
+
+        if (this.assignedOrder.alt_end_date !== null && typeof this.assignedOrder.alt_end_date === 'object') {
+          this.assignedOrder.alt_end_date = moment(this.assignedOrder.alt_end_date).format('YYYY-MM-DD')
+        }
+
+        for (const user of this.selectedEngineers) {
+          const obj = {
+            ...this.assignedOrder,
+            engineer: user.submodel_id
+          }
+          await this.assignedOrderService.insert(obj)
+        }
+        this.$refs['dispatch-split-order-modal'].hide();
+        this.infoToast(this.$trans('Success'), this.$trans('Order split'))
+        this.refreshData()
+        this.showOverlay = false
+      } catch(error) {
+        console.log('error creating assignedOrder', error)
+        this.errorToast(this.$trans('Error splitting order'))
         this.showOverlay = false
       }
     },
@@ -436,7 +662,6 @@ export default {
       try {
         this.showOverlay = true
         this.selectedOrder = await this.orderService.detail(order_pk)
-        this.assignedOrder = new AssignedOrderChangeDatesModel()
         this.showOverlay = false
         this.$refs['dispatch-order-actions-modal'].show();
       } catch (error) {
@@ -541,6 +766,8 @@ export default {
     memberNewDataSocket.setOnmessageHandler(this.onNewData)
     memberNewDataSocket.getSocket()
 
+    this.getEngineersDebounced = AwesomeDebouncePromise(this.getEngineers, 500)
+
     const displayMode = JSON.parse(localStorage.getItem('displayMode'))
     this.mode = displayMode ? displayMode : 'wide'
 
@@ -592,5 +819,4 @@ export default {
 .flex-columns a {
   align-self: center;
 }
-
 </style>
