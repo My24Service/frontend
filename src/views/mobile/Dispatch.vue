@@ -1,416 +1,418 @@
 <template>
-  <div class="app-page">
-    <header>
-      <div class="page-title">
-        <h3>
-          <b-icon icon="calendar2-week"></b-icon>
-          {{ $trans("Dispatch") }} &ndash; {{ $trans("week") }}<strong>{{ +this.startWeek }}</strong>
-          {{ mode }}
-        </h3>
-        <div class="flex-columns">
-          <b-button @click="function() { showSearchModal() }">
-            <b-icon icon="search"></b-icon>
-            {{ $trans('search') }}
-          </b-button>
+  <b-overlay :show="showOverlay" rounded="sm">
+    <div class="app-page">
+      <header>
+        <div class="page-title">
+          <h3>
+            <b-icon icon="calendar2-week"></b-icon>
+            {{ $trans("Dispatch") }} &ndash; {{ $trans("week") }}<strong>{{ +this.startWeek }}</strong>
+            {{ mode }}
+          </h3>
+          <div class="flex-columns">
+            <b-button @click="function() { showSearchModal() }">
+              <b-icon icon="search"></b-icon>
+              {{ $trans('search') }}
+            </b-button>
 
-          <b-button @click="function() { loadToday() }">
-            <b-icon icon="patch-exclamation-fill" v-if="newData" :title="$trans('dispatch changed, refresh now')"></b-icon>
-            <b-icon icon="arrow-repeat" v-else></b-icon>
-            {{ $trans('refresh') }}
-          </b-button>
+            <b-button @click="function() { loadToday() }">
+              <b-icon icon="patch-exclamation-fill" v-if="newData" :title="$trans('dispatch changed, refresh now')"></b-icon>
+              <b-icon icon="arrow-repeat" v-else></b-icon>
+              {{ $trans('refresh') }}
+            </b-button>
 
-          <b-button-group>
-            <b-button
-              variant="primary"
-              v-for="item in this.modeOptions"
-              :key="item.name"
-              :disabled="item.item === mode"
-              @click="() => changeViewMode(item.item)">{{  item.name }}</b-button>
-          </b-button-group>
+            <b-button-group>
+              <b-button
+                variant="primary"
+                v-for="item in this.modeOptions"
+                :key="item.name"
+                :disabled="item.item === mode"
+                @click="() => changeViewMode(item.item)">{{  item.name }}</b-button>
+            </b-button-group>
 
-          <b-button-group>
-            <b-button
-              variant="primary"
-              v-for="item in this.showUsersOptions"
-              :key="item.name"
-              :disabled="item.item === showUsersMode"
-              @click="() => changeShowUsersMode(item.item)">{{  item.name }}</b-button>
-          </b-button-group>
+            <b-button-group>
+              <b-button
+                variant="primary"
+                v-for="item in this.showUsersOptions"
+                :key="item.name"
+                :disabled="item.item === showUsersMode"
+                @click="() => changeShowUsersMode(item.item)">{{  item.name }}</b-button>
+            </b-button-group>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
 
-    <div class="panel">
-      <div class="heading" v-if="assignMode && selectedOrders.length > 0">
-        <b-row>
-          <b-col cols="12">
-            <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
-            <span v-for="(order, index) in selectedOrders" :key="order.id">
-              {{ order.order_id }}
-              <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
-            </span>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="6">
-            <strong>{{ $trans('Selected users') }}:</strong>&nbsp;
-            <span v-for="(user, index) in selectedUsers" :key="user.user_id">
-              {{ user.full_name }} {{ user.user_id }}
-              <b-link class="px-1" @click.prevent="removeSelectedUser(index)">[ x ]</b-link>
-            </span>
-          </b-col>
-          <b-col cols="6">
-            <strong>{{ $trans('Already assigned users') }}:</strong>&nbsp;
-            <span v-for="user in alreadyAssignedUsers" :key="user.user_id">
-              {{ user.full_name }} {{ user.user_id }}
-            </span>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="12">
-            <footer class="modal-footer">
-              <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
-                {{ $trans('Cancel') }}</b-button>
-              <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-                {{ $trans('Submit') }}</b-button>
-            </footer>
-          </b-col>
-        </b-row>
-      </div>
+      <div class="panel">
+        <div class="heading" v-if="assignMode && selectedOrders.length > 0">
+          <b-row>
+            <b-col cols="12">
+              <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
+              <span v-for="(order, index) in selectedOrders" :key="order.id">
+                {{ order.order_id }}
+                <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
+              </span>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="6">
+              <strong>{{ $trans('Selected users') }}:</strong>&nbsp;
+              <span v-for="(user, index) in selectedUsers" :key="user.user_id">
+                {{ user.full_name }} {{ user.user_id }}
+                <b-link class="px-1" @click.prevent="removeSelectedUser(index)">[ x ]</b-link>
+              </span>
+            </b-col>
+            <b-col cols="6">
+              <strong>{{ $trans('Already assigned users') }}:</strong>&nbsp;
+              <span v-for="user in alreadyAssignedUsers" :key="user.user_id">
+                {{ user.full_name }} {{ user.user_id }}
+              </span>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12">
+              <footer class="modal-footer">
+                <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
+                  {{ $trans('Cancel') }}</b-button>
+                <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+                  {{ $trans('Submit') }}</b-button>
+              </footer>
+            </b-col>
+          </b-row>
+        </div>
 
-      <div class="flex-columns" style="justify-content: space-between;">
+        <div class="flex-columns" style="justify-content: space-between;">
 
-        <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
-          <b-icon icon="arrow-left-square-fill" font-scale="1.2"></b-icon> week {{ this.startWeek - 1 }}
-        </b-link>
-
-        <span class="flex-columns">
-          <b-link class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
-            <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
+          <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
+            <b-icon icon="arrow-left-square-fill" font-scale="1.2"></b-icon> week {{ this.startWeek - 1 }}
           </b-link>
-          <b-form-datepicker
-            v-model="startDate"
-            size="sm"
-            placeholder="Start date"
-            locale="nl"
-            :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
-          ></b-form-datepicker>
-          <b-button @click="function() { loadToday() }" variant="primary" size="sm" style="color: white; white-space: nowrap;">
-            <b-icon icon="calendar2-date-fill"></b-icon>&nbsp;
-            {{ $trans('today') }}
-          </b-button>
-          <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
-            <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
-          </b-link>
-        </span>
 
-        <b-link class="" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
-          week {{ (+this.startWeek + 1) }}
-          <b-icon icon="arrow-right-square-fill" font-scale="1.2"></b-icon>
-        </b-link>
+          <span class="flex-columns">
+            <b-link class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
+              <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
+            </b-link>
+            <b-form-datepicker
+              v-model="startDate"
+              size="sm"
+              placeholder="Start date"
+              locale="nl"
+              :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
+            ></b-form-datepicker>
+            <b-button @click="function() { loadToday() }" variant="primary" size="sm" style="color: white; white-space: nowrap;">
+              <b-icon icon="calendar2-date-fill"></b-icon>&nbsp;
+              {{ $trans('today') }}
+            </b-button>
+            <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
+              <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
+            </b-link>
+          </span>
+
+          <b-link class="" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
+            week {{ (+this.startWeek + 1) }}
+            <b-icon icon="arrow-right-square-fill" font-scale="1.2"></b-icon>
+          </b-link>
+
+        </div>
+        <hr/>
+
+        <DispatchWeek
+          v-if="loadDone"
+          :startDate.sync="startDate"
+          :orderClickHandler="openActionsModal"
+          :mode="mode"
+          :is-assign-mode="assignMode"
+          :already-assigned-users="alreadyAssignedUsers"
+          :show-users-mode="showUsersMode"
+          ref="dispatchComponent"
+          @addSelectedUser="addSelectedUser"
+        />
 
       </div>
-      <hr/>
 
-      <DispatchWeek
-        v-if="loadDone"
-        :startDate.sync="startDate"
-        :orderClickHandler="openActionsModal"
-        :mode="mode"
-        :is-assign-mode="assignMode"
-        :already-assigned-users="alreadyAssignedUsers"
-        :show-users-mode="showUsersMode"
-        ref="dispatchComponent"
-        @addSelectedUser="addSelectedUser"
+      <SearchModal
+        id="search-modal"
+        ref="search-modal"
+        @do-search="handleSearchOk"
       />
 
-    </div>
-
-    <SearchModal
-      id="search-modal"
-      ref="search-modal"
-      @do-search="handleSearchOk"
-    />
-
-    <b-modal
-      ref="dispatch-change-date-modal"
-      id="dispatch-change-date-modal"
-      v-bind:title="$trans('Change date')"
-      @ok="changeDateOk"
-      v-if="selectedAssignedOrder !== null"
-    >
-      <form ref="change-date-form" @submit.stop.prevent="changeDateSubmit">
-        <b-container fluid v-if="assignedOrder">
-          <b-row role="group">
-            <b-col size="6">
-              <b-form-group
-                v-bind:label="$trans('Start date')"
-                label-for="dates-order-start-date"
-              >
-                <b-form-datepicker
-                  id="dates-order-start-date"
-                  size="sm"
-                  class="p-sm-0"
-                  v-model="assignedOrder.alt_start_date"
-                  v-bind:placeholder="$trans('Choose a date')"
-                  locale="nl"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  :min="minDate"
-                  :max="maxDate"
-                  value-as-date
-                ></b-form-datepicker>
-              </b-form-group>
-            </b-col>
-            <b-col size="6">
-              <b-form-group
-                v-bind:label="$trans('Start time')"
-                label-for="dates-order-start-time"
-              >
-                <TimeInput
-                  id="dates-order-start-time"
-                  :time-in="assignedOrder.start_time"
-                  @timeChanged="(val) => assignedOrder.alt_start_time = val"
-                />
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col size="6">
-              <b-form-group
-                v-bind:label="$trans('End date')"
-                label-for="dates-order-end-date"
-              >
-                <b-form-datepicker
-                  id="dates-order-end-date"
-                  size="sm"
-                  class="p-sm-0"
-                  v-model="assignedOrder.alt_end_date"
-                  v-bind:placeholder="$trans('Choose a date')"
-                  locale="nl"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  :min="minDate"
-                  :max="maxDate"
-                  value-as-date
-                ></b-form-datepicker>
-              </b-form-group>
-            </b-col>
-            <b-col size="6">
-              <b-form-group
-                v-bind:label="$trans('End time')"
-                label-for="dates-order-end-time"
-              >
-                <TimeInput
-                  id="dates-order-end-time"
-                  :time-in="assignedOrder.end_time"
-                  @timeChanged="(val) => assignedOrder.alt_end_time = val"
-                />
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col size="6"></b-col>
-            <b-col size="6" class="text-right">
-              <b-link class="px-1" title="clear" v-on:click.native="clearAssignedorderDates()">
-                {{ $trans('clear') }}
-              </b-link>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
-
-    <b-modal
-      ref="dispatch-split-order-modal"
-      id="dispatch-split-order-modal"
-      :title="$trans('Split order')"
-      :hide-footer="true"
-      v-if="selectedAssignedOrder&& selectedOrder"
-    >
-      <form ref="split-order-form">
-        <p>
-          <b>{{ $trans("Order") }}</b>:
-          {{ selectedOrder.order_id }} {{ selectedOrder.order_date }}
-        </p>
-        <p>
-          <b>{{ $trans("Currently assigned") }}</b>:
-          {{ selectedOrder.assigned_user_info.map((d) => d.full_name).join(', ') }}
-        </p>
-        <b-container fluid v-if="assignedOrder">
-          <b-row role="group">
-            <b-col size="12">
-              <b-form-group
-                v-bind:label="$trans('Engineer')"
-                label-for="split-order-engineer"
-              >
-                <multiselect
-                  v-model="selectedEngineers"
-                  track-by="id"
-                  :max-height="600"
-                  :placeholder="$trans('Type to search engineers')"
-                  open-direction="bottom"
-                  :options="engineers"
-                  :multiple="true"
-                  :custom-label="engineerLabel"
-                  :loading="searchingEngineers"
-                  @search-change="getEngineersDebounced"
+      <b-modal
+        ref="dispatch-change-date-modal"
+        id="dispatch-change-date-modal"
+        v-bind:title="$trans('Change date')"
+        @ok="changeDateOk"
+        v-if="selectedAssignedOrder !== null"
+      >
+        <form ref="change-date-form" @submit.stop.prevent="changeDateSubmit">
+          <b-container fluid v-if="assignedOrder">
+            <b-row role="group">
+              <b-col size="6">
+                <b-form-group
+                  v-bind:label="$trans('Start date')"
+                  label-for="dates-order-start-date"
                 >
-                  <span slot="noResult">
-                    {{ $trans('Oops! No elements found. Consider changing the search query.') }}
-                  </span>
-                </multiselect>
+                  <b-form-datepicker
+                    id="dates-order-start-date"
+                    size="sm"
+                    class="p-sm-0"
+                    v-model="assignedOrder.alt_start_date"
+                    v-bind:placeholder="$trans('Choose a date')"
+                    locale="nl"
+                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    :min="minDate"
+                    :max="maxDate"
+                    value-as-date
+                  ></b-form-datepicker>
+                </b-form-group>
+              </b-col>
+              <b-col size="6">
+                <b-form-group
+                  v-bind:label="$trans('Start time')"
+                  label-for="dates-order-start-time"
+                >
+                  <TimeInput
+                    id="dates-order-start-time"
+                    :time-in="assignedOrder.start_time"
+                    @timeChanged="(val) => assignedOrder.alt_start_time = val"
+                  />
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col size="6">
+                <b-form-group
+                  v-bind:label="$trans('End date')"
+                  label-for="dates-order-end-date"
+                >
+                  <b-form-datepicker
+                    id="dates-order-end-date"
+                    size="sm"
+                    class="p-sm-0"
+                    v-model="assignedOrder.alt_end_date"
+                    v-bind:placeholder="$trans('Choose a date')"
+                    locale="nl"
+                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    :min="minDate"
+                    :max="maxDate"
+                    value-as-date
+                  ></b-form-datepicker>
+                </b-form-group>
+              </b-col>
+              <b-col size="6">
+                <b-form-group
+                  v-bind:label="$trans('End time')"
+                  label-for="dates-order-end-time"
+                >
+                  <TimeInput
+                    id="dates-order-end-time"
+                    :time-in="assignedOrder.end_time"
+                    @timeChanged="(val) => assignedOrder.alt_end_time = val"
+                  />
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col size="6"></b-col>
+              <b-col size="6" class="text-right">
+                <b-link class="px-1" title="clear" v-on:click.native="clearAssignedorderDates()">
+                  {{ $trans('clear') }}
+                </b-link>
+              </b-col>
+            </b-row>
+          </b-container>
+        </form>
+      </b-modal>
 
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row role="group">
-            <b-col size="6">
-              <b-form-group
-                v-bind:label="$trans('Start date')"
-                label-for="split-order-start-date"
-              >
-                <b-form-datepicker
-                  id="split-order-start-date"
-                  size="sm"
-                  class="p-sm-0"
-                  v-model="assignedOrder.alt_start_date"
-                  :placeholder="$trans('Choose a date')"
-                  locale="nl"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  :min="minDate"
-                  :max="maxDate"
-                  value-as-date
-                ></b-form-datepicker>
-              </b-form-group>
-            </b-col>
-            <b-col size="6">
-              <b-form-group
-                v-bind:label="$trans('Start time')"
-                label-for="split-order-start-time"
-              >
-                <TimeInput
-                  id="split-order-start-time"
-                  :time-in="assignedOrder.start_time"
-                  @timeChanged="(val) => assignedOrder.alt_start_time = val"
-                />
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col size="6">
-              <b-form-group
-                v-bind:label="$trans('End date')"
-                label-for="split-order-end-date"
-              >
-                <b-form-datepicker
-                  id="split-order-end-date"
-                  size="sm"
-                  class="p-sm-0"
-                  v-model="assignedOrder.alt_end_date"
-                  v-bind:placeholder="$trans('Choose a date')"
-                  locale="nl"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  :min="minDate"
-                  :max="maxDate"
-                  value-as-date
-                ></b-form-datepicker>
-              </b-form-group>
-            </b-col>
-            <b-col size="6">
-              <b-form-group
-                v-bind:label="$trans('End time')"
-                label-for="split-order-end-time"
-              >
-                <TimeInput
-                  id="split-order-end-time"
-                  :time-in="assignedOrder.end_time"
-                  @timeChanged="(val) => assignedOrder.alt_end_time = val"
-                />
-              </b-form-group>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col size="6"></b-col>
-            <b-col size="6" class="text-right">
-              <b-link class="px-1" title="clear" v-on:click.native="clearAssignedorderSplit()">
-                {{ $trans('clear') }}
-              </b-link>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-      <footer class="modal-footer">
-        <b-button
-          @click="cancelSplitOrder"
-          class="btn btn-secondary"
-          type="button"
-          variant="secondary"
-        >
-          {{ $trans('Cancel') }}</b-button>
-        <b-button
-          @click="splitOrderSubmit"
-          :disabled="selectedEngineers.length <= 0"
-          class="btn btn-primary"
-          type="button"
-          variant="primary"
-        >
-          {{ $trans('Submit') }}</b-button>
-      </footer>
+      <b-modal
+        ref="dispatch-split-order-modal"
+        id="dispatch-split-order-modal"
+        :title="$trans('Split order')"
+        :hide-footer="true"
+        v-if="selectedAssignedOrder&& selectedOrder"
+      >
+        <form ref="split-order-form">
+          <p>
+            <b>{{ $trans("Order") }}</b>:
+            {{ selectedOrder.order_id }} {{ selectedOrder.order_date }}
+          </p>
+          <p>
+            <b>{{ $trans("Currently assigned") }}</b>:
+            {{ selectedOrder.assigned_user_info.map((d) => d.full_name).join(', ') }}
+          </p>
+          <b-container fluid v-if="assignedOrder">
+            <b-row role="group">
+              <b-col size="12">
+                <b-form-group
+                  v-bind:label="$trans('Engineer')"
+                  label-for="split-order-engineer"
+                >
+                  <multiselect
+                    v-model="selectedEngineers"
+                    track-by="id"
+                    :max-height="600"
+                    :placeholder="$trans('Type to search engineers')"
+                    open-direction="bottom"
+                    :options="engineers"
+                    :multiple="true"
+                    :custom-label="engineerLabel"
+                    :loading="searchingEngineers"
+                    @search-change="getEngineersDebounced"
+                  >
+                    <span slot="noResult">
+                      {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                    </span>
+                  </multiselect>
 
-    </b-modal>
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row role="group">
+              <b-col size="6">
+                <b-form-group
+                  v-bind:label="$trans('Start date')"
+                  label-for="split-order-start-date"
+                >
+                  <b-form-datepicker
+                    id="split-order-start-date"
+                    size="sm"
+                    class="p-sm-0"
+                    v-model="assignedOrder.alt_start_date"
+                    :placeholder="$trans('Choose a date')"
+                    locale="nl"
+                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    :min="minDate"
+                    :max="maxDate"
+                    value-as-date
+                  ></b-form-datepicker>
+                </b-form-group>
+              </b-col>
+              <b-col size="6">
+                <b-form-group
+                  v-bind:label="$trans('Start time')"
+                  label-for="split-order-start-time"
+                >
+                  <TimeInput
+                    id="split-order-start-time"
+                    :time-in="assignedOrder.start_time"
+                    @timeChanged="(val) => assignedOrder.alt_start_time = val"
+                  />
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col size="6">
+                <b-form-group
+                  v-bind:label="$trans('End date')"
+                  label-for="split-order-end-date"
+                >
+                  <b-form-datepicker
+                    id="split-order-end-date"
+                    size="sm"
+                    class="p-sm-0"
+                    v-model="assignedOrder.alt_end_date"
+                    v-bind:placeholder="$trans('Choose a date')"
+                    locale="nl"
+                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    :min="minDate"
+                    :max="maxDate"
+                    value-as-date
+                  ></b-form-datepicker>
+                </b-form-group>
+              </b-col>
+              <b-col size="6">
+                <b-form-group
+                  v-bind:label="$trans('End time')"
+                  label-for="split-order-end-time"
+                >
+                  <TimeInput
+                    id="split-order-end-time"
+                    :time-in="assignedOrder.end_time"
+                    @timeChanged="(val) => assignedOrder.alt_end_time = val"
+                  />
+                </b-form-group>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col size="6"></b-col>
+              <b-col size="6" class="text-right">
+                <b-link class="px-1" title="clear" v-on:click.native="clearAssignedorderSplit()">
+                  {{ $trans('clear') }}
+                </b-link>
+              </b-col>
+            </b-row>
+          </b-container>
+        </form>
+        <footer class="modal-footer">
+          <b-button
+            @click="cancelSplitOrder"
+            class="btn btn-secondary"
+            type="button"
+            variant="secondary"
+          >
+            {{ $trans('Cancel') }}</b-button>
+          <b-button
+            @click="splitOrderSubmit"
+            :disabled="selectedEngineers.length <= 0"
+            class="btn btn-primary"
+            type="button"
+            variant="primary"
+          >
+            {{ $trans('Submit') }}</b-button>
+        </footer>
 
-    <b-modal
-      id="dispatch-order-actions-modal"
-      ref="dispatch-order-actions-modal"
-      v-bind:title="`${$trans('Order')} ${selectedAssignedOrder && selectedAssignedOrder.order.order_id || '' }`"
-    >
-      <template #default="">
-        {{ $trans('Order') }} {{ selectedAssignedOrder.order.order_id }}<br/>
-        {{ selectedAssignedOrder.order.order_name }}<br/>
-        {{ selectedAssignedOrder.order.order_address }}<br/>
-        {{ selectedAssignedOrder.order.order_postal }} {{ selectedAssignedOrder.order.order_city }}<br/>
-        {{ $trans('Order date') }}: {{ selectedAssignedOrder.order.order_date }}<br/>
-        {{ $trans("Assigned order date") }}: {{ selectedAssignedOrder.date_formatted }}<br/>
-        <span v-if="selectedAssignedOrder.order.order_reference != ''">
-            {{ $trans('Reference') }}: {{ selectedAssignedOrder.order.order_reference }}<br/>
-        </span>
-      </template>
-      <template #modal-footer="{ cancel }">
-        <b-container>
-          <b-row v-if="selectedOrderIsPartner">
-            <b-col cols="1" class="mx-2">
-              <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
-            </b-col>
-            <b-col cols="1" class="mx-2">
-              <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
-            </b-col>
-            <b-col cols="6" class="mx-1">
-              <div class="float-right">
-                <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
-              </div>
-            </b-col>
-          </b-row>
-          <b-row v-else>
-            <b-col cols="8">
-              <div class="flex-columns" style="justify-content: space-between;">
+      </b-modal>
+
+      <b-modal
+        id="dispatch-order-actions-modal"
+        ref="dispatch-order-actions-modal"
+        v-bind:title="`${$trans('Order')} ${selectedAssignedOrder && selectedAssignedOrder.order.order_id || '' }`"
+      >
+        <template #default="">
+          {{ $trans('Order') }} {{ selectedAssignedOrder.order.order_id }}<br/>
+          {{ selectedAssignedOrder.order.order_name }}<br/>
+          {{ selectedAssignedOrder.order.order_address }}<br/>
+          {{ selectedAssignedOrder.order.order_postal }} {{ selectedAssignedOrder.order.order_city }}<br/>
+          {{ $trans('Order date') }}: {{ selectedAssignedOrder.order.order_date }}<br/>
+          {{ $trans("Assigned order date") }}: {{ selectedAssignedOrder.date_formatted }}<br/>
+          <span v-if="selectedAssignedOrder.order.order_reference != ''">
+              {{ $trans('Reference') }}: {{ selectedAssignedOrder.order.order_reference }}<br/>
+          </span>
+        </template>
+        <template #modal-footer="{ cancel }">
+          <b-container>
+            <b-row v-if="selectedOrderIsPartner">
+              <b-col cols="1" class="mx-2">
                 <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
+              </b-col>
+              <b-col cols="1" class="mx-2">
                 <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
-                <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
-                <b-button size="sm" variant="primary" @click="splitOrder">{{ $trans('Split') }}</b-button>
-              </div>
-            </b-col>
-            <b-col cols="4" v-if="selectedAssignedOrder">
-              <div class="flex-columns" style="justify-content: space-between;">
-                <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
-                <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
-              </div>
-            </b-col>
-          </b-row>
-        </b-container>
+              </b-col>
+              <b-col cols="6" class="mx-1">
+                <div class="float-right">
+                  <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
+                </div>
+              </b-col>
+            </b-row>
+            <b-row v-else>
+              <b-col cols="8">
+                <div class="flex-columns" style="justify-content: space-between;">
+                  <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
+                  <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
+                  <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
+                  <b-button size="sm" variant="primary" @click="splitOrder">{{ $trans('Split') }}</b-button>
+                </div>
+              </b-col>
+              <b-col cols="4" v-if="selectedAssignedOrder">
+                <div class="flex-columns" style="justify-content: space-between;">
+                  <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
+                  <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
+                </div>
+              </b-col>
+            </b-row>
+          </b-container>
 
 
-      </template>
-    </b-modal>
-  </div>
+        </template>
+      </b-modal>
+    </div>
+  </b-overlay>
 </template>
 
 <script>
