@@ -519,9 +519,9 @@ export default {
       this.searchingEngineers = true
 
       try {
-        const result = await this.userListService.search(query, 'engineer')
-        const already_assigned = this.selectedOrder.assigned_user_info.map((d) => d.user_id)
-        this.engineers = result.filter((engineer) => already_assigned.indexOf(parseInt(engineer.id)) === -1)
+        this.engineers = await this.userListService.search(query, 'engineer')
+        // const already_assigned = this.selectedOrder.assigned_user_info.map((d) => d.user_id)
+        // this.engineers = result.filter((engineer) => already_assigned.indexOf(parseInt(engineer.id)) === -1)
         this.searchingEngineers = false
       } catch(error) {
         console.log('Error fetching engineers', error)
