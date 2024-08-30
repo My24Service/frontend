@@ -126,9 +126,10 @@ class BaseModel {
 
   async updateCollection() {
     let newCollection = []
+
     // create/update
     for (let item of this.collection) {
-      if (item.id) {
+      if (item.id && !item.new) {
         try {
           let newItem = await this.update(item.id, item)
           newItem.apiOk = true
@@ -137,6 +138,7 @@ class BaseModel {
           item.apiOk = false
           item.error = error
           newCollection.push(item)
+          throw new Error(error)
         }
       } else {
         try {
@@ -147,6 +149,7 @@ class BaseModel {
           item.apiOk = false
           item.error = error
           newCollection.push(item)
+          throw new Error(error)
         }
       }
     }
@@ -160,6 +163,7 @@ class BaseModel {
           // add to collection again on error (?)
           item.error = error
           newCollection.push(item)
+          throw new Error(error)
         }
       }
     }

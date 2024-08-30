@@ -10,6 +10,27 @@ class AssignedOrderChangeDatesModel {
   alt_end_time
 }
 
+class AssignedOrderModel {
+  id
+  engineer
+  student_user
+  order
+  alt_start_date
+  alt_start_time
+  alt_end_date
+  alt_end_time
+  start_date
+  start_time
+  end_date
+  end_time
+
+  constructor(obj) {
+    for (const [k, v] of Object.entries(obj)) {
+      this[k] = v
+    }
+  }
+}
+
 class AssignedOrderService extends BaseModel {
   fields = {
     "id": null,
@@ -26,23 +47,20 @@ class AssignedOrderService extends BaseModel {
 
   url = '/mobile/assignedorder/'
 
-  // TODO this can be removed when only the html dispatch is used
-  getDetailChangeDate(pk) {
-    return this.axios.get(`${this.url}${pk}/detail_change_date/`).then((response) => response.data)
+  getDate(d) {
+    // check date types
+    if (d !== null && typeof d === 'object') {
+      return moment(d).format('YYYY-MM-DD')
+    }
+    return d
   }
 
   async updateDetailChangeDate(pk, data) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    // check date types
-    if (data.alt_start_date !== null && typeof data.alt_start_date === 'object') {
-      data.alt_start_date = moment(data.alt_start_date).format('YYYY-MM-DD')
-    }
-
-    if (data.alt_end_date !== null && typeof data.alt_end_date === 'object') {
-      data.alt_end_date = moment(data.alt_end_date).format('YYYY-MM-DD')
-    }
+    data.alt_start_date = this.getDate(data.alt_start_date)
+    data.alt_end_date = this.getDate(data.alt_end_date)
 
     return this.axios.patch(`${this.url}${pk}/detail_change_date/`, data, headers).then((response) => response.data)
   }
@@ -55,4 +73,4 @@ class AssignedOrderService extends BaseModel {
 let assignedOrderModel = new AssignedOrderService()
 
 export default assignedOrderModel
-export { AssignedOrderService, AssignedOrderChangeDatesModel }
+export { AssignedOrderService, AssignedOrderChangeDatesModel, AssignedOrderModel }

@@ -8,7 +8,9 @@
       :style="`grid-column: calc(${userData.layout.slot} + 2) / span ${userData.layout.days}; --status-color: ${userData.order_color}; --text-color: ${userData.order_textColor};`"
       :class="orderClass">
       <span class="order-summary">
-        <p class="dimmed"><strong>{{ userData.order.order_id }}</strong></p>
+        <p>
+          <strong class="dimmed">{{ userData.order.order_id }}</strong>{{ getTimeText(userData.assignedOrder) }}
+        </p>
         <p><strong>{{ userData.order.order_name.substring(0, 16) }}</strong></p>
         <p><strong>{{ userData.order.order_city.substring(0, 16) }}</strong></p>
         <p class="order-type"><strong>{{ userData.order.order_type.substring(0, 16) }}</strong></p>
@@ -80,8 +82,32 @@ export default {
       personOrders: null
     }
   },
-
   methods: {
+    cleanTime(time) {
+      if (time) {
+        const p = time.split(':')
+        return `${p[0]}:${p[1]}`
+      }
+    },
+    getTimeText(assignedOrder) {
+      const result = this.getTime(assignedOrder)
+      if (result) {
+        return ` ${result}`
+      }
+    },
+    getTime(assignedOrder) {
+      const start_time = this.cleanTime(assignedOrder.start_time)
+      const end_time = this.cleanTime(assignedOrder.end_time)
+
+      if (start_time && end_time) {
+        return `${start_time}-${end_time}`
+      } else if (start_time) {
+        return start_time
+      } else if (end_time) {
+        return end_time
+      }
+
+    },
     loadData () {
       this.personOrders = []
 

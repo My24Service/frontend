@@ -16,8 +16,6 @@ import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
 import {AUTH_LEVELS} from "@/constants";
 
-import InvoiceForm from "../views/orders/InvoiceForm";
-import InvoiceView from "../views/orders/InvoiceView";
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";
 
@@ -36,16 +34,6 @@ export default [
         },
         props: {
           'app-content': route => ({...route.params})
-        },
-      },
-      {
-        name: 'order-invoice-view',
-        path: '/orders/invoice/view/:uuid',
-        props: {
-          'app-content': route => ({...route.params}),
-        },
-        components: {
-          'app-content': InvoiceView,
         },
       },
   ]
@@ -240,19 +228,6 @@ export default [
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
-      },
-    },
-    // invoices
-    {
-      name: 'order-invoice-create',
-      path: '/orders/invoice/form/:uuid',
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-      components: {
-        'app-content': InvoiceForm,
-        'app-subnav': SubNavOrders
       },
     },
     // filters

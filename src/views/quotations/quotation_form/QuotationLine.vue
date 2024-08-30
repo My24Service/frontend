@@ -183,7 +183,7 @@
 
       <footer
         class="modal-footer"
-        v-if="!showForm && !isView"
+        v-if="!showForm && !isView && quotation.preliminary"
       >
         <b-button
           @click="newQuotationLine"

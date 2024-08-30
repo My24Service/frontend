@@ -10,7 +10,7 @@
 
     <b-nav-item
       :active="isActive('map')"
-      v-if="!hasBranches"
+      v-if="!hasBranches && hasMap"
       :to="{ name: 'mobile-map' }">
       {{ $trans('Map') }}
     </b-nav-item>
@@ -115,6 +115,10 @@ export default {
     }
   },
   computed: {
+    hasMap() {
+      const notHasMap = ['viavandalen']
+      return notHasMap.indexOf(this.$store.getters.getMemberCompanycode) === -1
+    },
     hasDispatch() {
       return this.hasAccessToModule('mobile', 'dispatch')
     },
@@ -133,9 +137,6 @@ export default {
     hasAssignedFinished() {
       return this.hasAccessToModule('mobile', 'assigned-finished')
     },
-    hasTimesheet() {
-      return this.hasAccessToModule('mobile', 'timesheet')
-    },
     hasTrips() {
       return this.hasAccessToModule('mobile', 'trips')
     },
@@ -145,9 +146,6 @@ export default {
     hasTripStatuscodes() {
       return this.hasAccessToModule('mobile', 'trip-statuscodes')
     },
-    hasAssignedorderMaterials() {
-      return this.hasAccessToModule('mobile', 'assignedorder-materials')
-    }
   },
 }
 </script>

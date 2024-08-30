@@ -46,7 +46,7 @@ class InvoiceService extends BaseModel {
     term_of_payment_days: null,
   }
 
-  url = '/order/invoice/'
+  url = '/invoice/invoice/'
 
   async getData(uuid) {
     const url = `${this.url}data/${uuid}/`
@@ -60,7 +60,7 @@ class InvoiceService extends BaseModel {
       headers.headers['x-create-pdf'] = createPDFHeader
     }
 
-    const url = `/order/invoice-detail/${uuid}/`
+    const url = `/invoice/invoice-detail/${uuid}/`
     return this.axios.get(url, headers).then((response) => response.data)
   }
 

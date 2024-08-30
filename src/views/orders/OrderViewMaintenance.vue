@@ -12,7 +12,7 @@
             <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit order') }}
           </router-link>
           <router-link class="btn" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
-              :to="{name: 'order-invoice-create', params: {uuid: order.uuid}}">
+              :to="{name: 'invoice-create', params: {uuid: order.uuid}}">
             <b-icon-receipt-cutoff></b-icon-receipt-cutoff> {{ $trans('Create invoice') }}
           </router-link>
         </div>
@@ -58,8 +58,8 @@
             <dd>{{ order.remarks }}</dd>
             <dt v-if="isPlanning">{{ $trans("Planning remarks") }}</dt>
             <dd v-if="isPlanning">{{ order.planning_remarks }}</dd>
-            <dt v-if="isPlanning || isEngineer">{{ $trans("Customer remarks") }}</dt>
-            <dd v-if="isPlanning || isEngineer">{{ order.customer_remarks }}</dd>
+            <dt v-if="!isCustomer">{{ $trans("Customer remarks") }}</dt>
+            <dd v-if="!isCustomer">{{ order.customer_remarks }}</dd>
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
             <dd v-if="!hasBranches" class="flex-columns">
               <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank">
@@ -135,8 +135,7 @@
             <ul class='listing'>
               <li v-for="invoice of order.invoices" :key="invoice.uuid" >
                 <router-link
-                  :to="{name: 'order-invoice-view', params: {uuid: invoice.uuid}}"
-                  target="_blank"
+                  :to="{name: 'invoice-edit', params: {pk: invoice.id, uuid: order.uuid}}"
                   class="listing-item"
                   >
                   {{ $trans('Invoice') }} {{ invoice.invoice_id }}
@@ -147,7 +146,7 @@
           <div v-else class="text-center p-3">
             <small class="dimmed">{{ $trans('No invoice(s) for this order yet.')}}</small> <br><br>
             <router-link class="btn btn-primary" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
-              :to="{name: 'order-invoice-create', params: {uuid: order.uuid}}">
+              :to="{name: 'invoice-create', params: {uuid: order.uuid}}">
               <b-icon-receipt-cutoff></b-icon-receipt-cutoff> {{ $trans('Create invoice') }}
             </router-link>
           </div>

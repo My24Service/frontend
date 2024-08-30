@@ -40,6 +40,18 @@
       </b-nav>
     </div>
 
+    <b-nav-item
+      :active="isActive('invoices')"
+      v-if="hasInvoices && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
+      class="has-children"
+      to="/invoices/invoices">
+      <b-icon icon="receipt-cutoff"></b-icon>
+      {{ $trans('Invoices') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('invoices') || isActive('invoices', 'invoices')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+
     <!-- equipment -->
     <b-nav-item
       :active="isActive('equipment')"
@@ -266,6 +278,9 @@ export default {
     },
     hasQuotations() {
       return this.hasAccessToModule('quotations')
+    },
+    hasInvoices() {
+      return this.hasAccessToModule('invoices')
     },
     hasCompany() {
       return this.hasAccessToModule('company')

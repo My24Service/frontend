@@ -105,7 +105,7 @@
 
         <div class='flex-columns space-between'>
           <span class="total-text">{{ $trans('Invoice total') }}</span>
-      
+
           <TotalsInputs
             :total="data.total_dinero"
             :is-final-total="true"
@@ -120,7 +120,7 @@
     </div>
 </template>
 <script>
-import invoiceService from '../../models/orders/Invoice'
+import invoiceService from '../../models/invoices/Invoice'
 import TotalsInputs from "../../components/TotalsInputs";
 
 export default {
@@ -140,8 +140,10 @@ export default {
       type: String
     }
   },
-  async created() {
-    const data = await invoiceService.getByUuid(this.uuid)
+  async mounted() {
+    const createPDFHeader = this.$route.query.create_pdf
+    const data = await invoiceService.getByUuid(this.uuid, createPDFHeader)
+
     this.data = new invoiceService.model(data)
     this.companyLogo = this.data.member.companylogo_url
   },
