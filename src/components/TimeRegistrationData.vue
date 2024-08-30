@@ -101,6 +101,7 @@
         <!-- Some complicated rendering logic here -->
 <!--        {{ date_list_moment[index] }} {{ index }}-->
         <router-link
+          :key="index"
           v-if="activeDateQueryMode === 'month' && data.item.user_id"
           class="px-1"
           :to="{
@@ -110,10 +111,16 @@
           }">
           {{ data.item[dataField] }}
         </router-link>
-        <span v-if="activeDateQueryMode === 'month' && !data.item.user_id">{{ data.item[dataField] }}</span>
+        <span
+          :key="index"
+          v-if="activeDateQueryMode === 'month' && !data.item.user_id"
+        >
+          {{ data.item[dataField] }}
+        </span>
 
         <router-link
           v-if="activeDateQueryMode === 'year' && data.item.user_id"
+          :key="index"
           class="px-1"
           :to="{
             name: 'company-time-registration-detail',
@@ -122,10 +129,16 @@
           }">
           {{ data.item[dataField] }}
         </router-link>
-        <span v-if="activeDateQueryMode === 'year' && !data.item.user_id">{{ data.item[dataField] }}</span>
+        <span
+          :key="index"
+          v-if="activeDateQueryMode === 'year' && !data.item.user_id"
+        >
+          {{ data.item[dataField] }}
+        </span>
 
         <router-link
           v-if="activeDateQueryMode === 'week' && data.item.user_id"
+          :key="index"
           class="px-1"
           :to="{
             name: 'company-time-registration-detail',
@@ -134,7 +147,12 @@
           }">
           {{ data.item[dataField] }}
         </router-link>
-        <span v-if="activeDateQueryMode === 'week' && !data.item.user_id">{{ data.item[dataField] }}</span>
+        <span
+          :key="index"
+          v-if="activeDateQueryMode === 'week' && !data.item.user_id"
+        >
+          {{ data.item[dataField] }}
+        </span>
       </template>
     </b-table>
 

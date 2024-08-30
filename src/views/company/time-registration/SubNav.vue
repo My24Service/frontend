@@ -1,5 +1,5 @@
 <template>
-  <div class="space" v-if="companyIsDemo">
+  <div class="space" v-if="hasNav">
     <b-nav tabs>
       <b-nav-item
         :active="$route.name === 'company-time-registration'"
@@ -38,7 +38,7 @@
 import { componentMixin } from '@/utils.js'
 
 export default {
-  name: 'PillsLeave',
+  name: 'SubNav',
   mixins: [componentMixin],
   data() {
     return {
@@ -53,6 +53,12 @@ export default {
       return this.$route.path.includes(item)
     }
   },
+  computed: {
+    hasNav() {
+      const has = ['demo', 'viavandalen']
+      return has.indexOf(this.$store.getters.getMemberCompanycode);
+    },
+  }
 }
 </script>
 <style scoped>
