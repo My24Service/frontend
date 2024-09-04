@@ -18,7 +18,12 @@
       </header>
 
       <div class="page-detail">
-
+        <ApiResult
+          class="app-detail"
+          v-if="member.hasOwnProperty('apiOk')"
+          :error="member.error"
+          :success-message='$trans("Member created")'
+        />
         <div class="container app-detail">
           <b-form v-if="member">
             <b-row>
@@ -472,8 +477,10 @@ import {
 import { ContractService } from '@/models/member/Contract'
 import {NO_IMAGE_URL} from "@/constants";
 import {componentMixin} from "@/utils";
+import ApiResult from "@/components/ApiResult.vue";
 
 export default {
+  components: {ApiResult},
   mixins: [componentMixin],
   setup() {
     return { v$: useVuelidate() }
@@ -722,6 +729,7 @@ export default {
         this.isLoading = true
         try {
           await this.memberService.insert(this.member)
+          this.member.apiOk = true
           if (this.isRequest) {
             this.infoToast(this.$trans('Requested'), this.$trans('Request has been created'))
           } else {
@@ -733,6 +741,8 @@ export default {
         } catch(error) {
           console.log('Error creating member', error)
           this.errorToast(this.$trans('Error creating member'))
+          this.member.apiOk = false
+          this.member.error = error
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -748,6 +758,7 @@ export default {
         this.isLoading = true
 
         await this.memberService.update(this.pk, this.member)
+        this.member.apiOk = true
         this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -755,6 +766,8 @@ export default {
       } catch(error) {
         console.log('Error updating member', error)
         this.errorToast(this.$trans('Error updating member'))
+        this.member.apiOk = false
+        this.member.error = error
         this.isLoading = false
         this.buttonDisabled = false
       }
