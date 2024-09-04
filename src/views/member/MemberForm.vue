@@ -398,6 +398,7 @@
                   label-size="sm"
                   v-bind:label="$trans('Company logo')"
                   label-for="member_companylogo"
+                  :description="`${$trans('Accepted file formats')}: ${allowed_extensions.join(', ')}`"
                 >
                   <b-form-file
                     id="member_companylogo"
@@ -527,7 +528,8 @@ export default {
       memberService: new MemberService(),
       contractService: new ContractService(),
       memberIsRequest: false,
-      isDeleted: false
+      isDeleted: false,
+      allowed_extensions: ['png', 'jpg', 'jpeg'],
     }
   },
   validations() {
@@ -652,9 +654,12 @@ export default {
     this.isLoading = false
   },
   methods: {
+    getExtension(filename) {
+      const parts = filename.split('.')
+      return parts[parts.length-1].toLowerCase()
+    },
     async checkCompanyCode(value) {
-      const result = await this.memberService.companycodeExists(value)
-      return result
+      return await this.memberService.companycodeExists(value)
     },
     async companyCodeChange() {
       if (this.member.companycode && this.member.companycode.length > 2) {
@@ -662,6 +667,10 @@ export default {
       }
     },
     imageSelected(file) {
+      const extension = this.getExtension(file.name)
+      if (this.allowed_extensions.indexOf(extension) === -1) {
+        return
+      }
       const reader = new FileReader()
       reader.onload = (f) => {
         const b64 = f.target.result

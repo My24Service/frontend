@@ -135,6 +135,10 @@ export default {
       return parts[parts.length-1].toLowerCase()
     },
     fileSelected(file) {
+      const extension = this.getExtension(file.name)
+      if (this.allowed_extensions.indexOf(extension) === -1) {
+        return
+      }
       const reader = new FileReader()
 
       reader.onload = (f) => {
