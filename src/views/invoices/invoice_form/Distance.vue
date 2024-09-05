@@ -53,12 +53,12 @@
               :text='$trans("Rate")'
             />
           </b-col>
-          <b-col cols="1">
+          <b-col cols="3">
             <HeaderCell
               :text='$trans("VAT type")'
             />
           </b-col>
-          <b-col cols="2" />
+          <b-col cols="3" />
         </b-row>
         <b-row v-for="distance in costService.collection" :key="distance.user_id" class="distance_row">
           <b-col cols="2" v-if="!distance.is_partner">
@@ -103,10 +103,10 @@
               </b-form-radio>
             </b-form-radio-group>
           </b-col>
-          <b-col cols="1">
+          <b-col cols="3">
             <VAT @vatChanged="(val) => changeVatType(distance, val)" />
           </b-col>
-          <b-col cols="2">
+          <b-col cols="3">
             <TotalsInputs
               :total="distance.total_dinero"
               :vat="distance.vat_dinero"

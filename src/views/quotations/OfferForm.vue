@@ -8,7 +8,7 @@
             {{ $trans("Send quotation") }}
           </router-link>
           /
-          <strong>{{ $route.query.quotationName }}</strong>
+          <strong>{{ quotation.quotation_name }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !offer.id">{{ $trans("new") }}</span>
             <span v-if="!isCreate">{{ $trans("resend") }}</span>
@@ -102,7 +102,7 @@ import my24 from '../../services/my24.js'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { OfferService, OfferModel } from "@/models/quotations/Offer.js";
-import {QuotationService} from '@/models/quotations/Quotation'
+import {QuotationService, QuotationModel} from '@/models/quotations/Quotation'
 
 
 export default {
@@ -127,6 +127,7 @@ export default {
     this.offer.quotation = this.$route.query.quotationId
     await this.loadDocuments()
     await this.loadData()
+    await this.loadQuotation()
   },
   data() {
     return {
@@ -139,6 +140,7 @@ export default {
       recipients: [],
       offer: new OfferModel({}),
       documents: [],
+      quotation: {},
       recipientInvalid: false,
     };
   },
@@ -181,6 +183,23 @@ export default {
         }.bind(this),
         'post'
       )
+    },
+    async loadQuotation() {
+      this.isLoading = true
+
+      try {
+        this.quotation = new QuotationModel(
+          await this.quotationService.detail(this.$route.query.quotationId)
+        )
+        if (!this.recipients.includes(this.quotation.quotation_email)) {
+          this.recipients.push(this.quotation.quotation_email)
+        }
+        this.isLoading = false
+      } catch(error) {
+        console.log('error fetching quotation', error)
+        this.errorToast(this.$trans('Error fetching quotation'))
+        this.isLoading = false
+      }
     },
     async loadDocuments() {
       this.isLoading = true;
