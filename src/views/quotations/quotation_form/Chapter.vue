@@ -39,7 +39,7 @@
           </h4>
           <p>{{ data.item.description }}</p>
         </template>
-        <template #cell(icons)="data">
+        <template #cell(icons)="data" v-if="quotation.preliminary">
           <div
             class="h2 float-right"
             v-if="data.item.id && !isView"
@@ -126,7 +126,7 @@
 
       <footer
         class="modal-footer"
-        v-if="!showForm && !isView"
+        v-if="!showForm && !isView && quotation.preliminary"
       >
         <b-button
           @click="newChapter"

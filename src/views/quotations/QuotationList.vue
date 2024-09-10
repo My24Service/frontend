@@ -83,7 +83,7 @@
               v-if="!data.item.preliminary"
               :title="$trans('Send quotation')"
               :to="{name: 'quotation-send',
-                query: {quotationId: data.item.id, quotationName: data.item.quotation_name}}"
+                query: {quotationId: data.item.id}}"
             >
               <b-icon-mailbox
                 aria-hidden="true"

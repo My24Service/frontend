@@ -1226,14 +1226,17 @@ export default {
 
       // create order from quotation
       if (this.from_quotation) {
+        this.isLoading = true
         const quotation = await this.quotationService.detail(this.quotation_id)
         const customer = await this.customerService.detail(quotation.customer_relation)
         this.fillCustomer(customer)
         this.order = {
           ...this.order,
           customer_relation: customer.id,
-          quotation: this.quotation_id
+          quotation: this.quotation_id,
+          order_reference: quotation.quotation_reference
         }
+        this.isLoading = false
       }
 
       if (this.maintenance) {

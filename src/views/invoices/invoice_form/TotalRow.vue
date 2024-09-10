@@ -1,12 +1,12 @@
 <template>
   <b-row>
-    <b-col cols="8">
+    <b-col cols="6">
       <span class="total-text">{{ $trans('Total') }}</span>
     </b-col>
-    <b-col cols="2">
+    <b-col cols="3">
       <span class="total-text items-total">{{ items_total }}</span>
     </b-col>
-    <b-col cols="2">
+    <b-col cols="3">
       <TotalsInputs
         :total="total"
         :is-final-total="true"
