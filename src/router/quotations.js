@@ -9,7 +9,6 @@ import QuotationView from "@/views/quotations/QuotationView.vue";
 import QuotationDetail from "@/views/quotations/QuotationDetail.vue";
 import OfferForm from "@/views/quotations/OfferForm.vue";
 
-
 export default [
 // orders
 {

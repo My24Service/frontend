@@ -106,7 +106,7 @@ export default {
   computed: {
     hasStatuscodes() {
       const has = ['demo', 'viavandalen']
-      return has.indexOf(this.$store.getters.getMemberCompanycode);
+      return has.indexOf(this.$store.getters.getMemberCompanycode) !== -1;
     },
     getToRouteMaintenanceUsers() {
       if (this.hasAccessToModule('company', 'engineer-users') && !this.hasBranches) {
