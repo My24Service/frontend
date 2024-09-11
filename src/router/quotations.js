@@ -73,7 +73,7 @@ export default [
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-add',
-      path: '/quotations/quotations/form',
+      path: '/quotations/preliminary/form',
       components: {
         'app-content': QuotationForm,
         'app-subnav': SubNavQuotations
@@ -86,6 +86,19 @@ export default [
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotation-edit',
+      path: '/quotations/quotations/form/:pk(\\d+)',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': QuotationForm,
+        'app-subnav': SubNavQuotations
+      },
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+      name: 'quotation-edit-preliminary',
       path: '/quotations/preliminary/form/:pk(\\d+)',
       props: {
         'app-content': route => ({...route.params}),

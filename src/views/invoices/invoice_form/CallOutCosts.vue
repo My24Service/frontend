@@ -28,7 +28,7 @@
             :text='$trans("Amount")'
           />
         </b-col>
-        <b-col cols="6">
+        <b-col cols="5">
           <HeaderCell
             :text='$trans("Rate")'
           />
@@ -38,7 +38,7 @@
             :text='$trans("VAT type")'
           />
         </b-col>
-        <b-col cols="2" />
+        <b-col cols="3" />
       </b-row>
       <b-row>
         <b-col cols="2">
@@ -48,7 +48,7 @@
             size="sm"
           ></b-form-input>
         </b-col>
-        <b-col cols=6>
+        <b-col cols="5">
           <b-form-radio-group
             @change="updateTotals"
             v-model="coc_item.use_price"
@@ -78,7 +78,7 @@
         <b-col cols="2">
           <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />
         </b-col>
-        <b-col cols="2">
+        <b-col cols="3">
           <TotalsInputs
             :total="coc_item.total_dinero"
             :vat="coc_item.vat_dinero"

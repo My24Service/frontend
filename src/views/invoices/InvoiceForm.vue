@@ -54,6 +54,18 @@
 
             <h6>{{ $trans('Invoice data')}}</h6>
             <b-form-group
+              v-bind:label="$trans('ID')"
+              label-for="invoice_id"
+              label-cols="5"
+            >
+              <b-form-input
+                disabled
+                v-model="invoice.invoice_id"
+                id="invoice_id"
+                size="sm"
+              ></b-form-input>
+            </b-form-group>
+            <b-form-group
               label-cols="5"
               v-bind:label="$trans('Reference')"
               label-for="invoice_reference"
@@ -558,6 +570,7 @@ export default {
 
       invoice_id: null,
       order_pk: null,
+      order_reference: null,
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
@@ -607,6 +620,7 @@ export default {
     this.order_pk = invoiceData.order_pk
     this.invoice.order = this.order_pk
     this.invoice.invoice_id = this.invoice_id
+    this.invoice.reference = invoiceData.order_reference
 
     this.activity_totals = invoiceData.activity_totals
     this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
@@ -635,12 +649,12 @@ export default {
   },
   methods: {
     async downloadPdf() {
-      const url =  `/api/invoice/invoice/${this.invoice.id}/download_pdf/`
+      const url =  `/api/invoice/invoice/${this.invoice.id}/download_pdf_from_template/`
       this.loadingPdf = true;
 
       my24.downloadItem(
         url,
-        'invoice.pdf',
+        `invoice-${this.invoice.invoice_id}.pdf`,
         function() {
           this.loadingPdf = false;
         }.bind(this),
@@ -650,15 +664,26 @@ export default {
     iframeLoaded() {
         this.iframeLoading = false;
     },
-    getInvoiceURL() {
-        const routeData = this.$router.resolve({
-          name: 'invoice-view', params: { uuid: this.invoice.uuid }
-        });
-        return `${document.location.origin}/${routeData.href}`;
+    async downloadPdfBlob() {
+      this.iframeLoading = true;
+
+      try {
+        const response = await this.invoiceService.downloadPdfBlob(this.invoice.id)
+        const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+        this.invoiceURL = URL.createObjectURL(pdfBlob);
+        this.iframeLoading = false
+      } catch(error) {
+        console.log(`error fetching invoice pdf, ${error}`)
+        this.errorToast(
+          this.$trans(
+            'Error fetching invoice pdf, Check if there is an active template or try to regenerate'
+          )
+        )
+        this.iframeLoading = false
+      }
     },
     showInvoiceDialog() {
-      this.iframeLoading = true;
-      this.invoiceURL = this.getInvoiceURL();
+      this.downloadPdfBlob()
       this.$refs['invoice-viewer'].show();
     },
     async recreateInvoicePdf() {
@@ -667,7 +692,8 @@ export default {
         try {
             await this.invoiceService.recreateInvoicePdf(this.invoice.id);
             this.infoToast(this.$trans('Success'), this.$trans('Invoice pdf recreated'));
-            await this.loadInvoice();
+            await this.loadInvoice()
+            await this.downloadPdfBlob()
             this.isLoading = false;
             this.isGeneratingPDF = false;
         }

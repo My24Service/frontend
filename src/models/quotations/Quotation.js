@@ -81,6 +81,13 @@ class QuotationService extends BaseModel {
     return new this.axios.post(url, {}).then(response => response.data)
   }
 
+  downloadPdfBlob(id) {
+    const url = `/quotation/quotation/${id}/download_definitive_pdf/`
+    return new this.axios.post(url, {}, {
+      responseType: 'arraybuffer'
+    })
+  }
+
   removeNullFields(obj) {
     for (const [field, value] of Object.entries(obj)) {
       if (!value) {
