@@ -59,12 +59,12 @@
         </template>
         <template #cell(name)="data">
           <router-link
-            :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
+            :to="{name: quotationEditRoute(data.item), params: {pk: data.item.id}}"
           >{{ data.item.name }}</router-link>
         </template>
         <template #cell(quotation_name)="data">
           <router-link
-            :to="{name: 'quotation-edit', params: {pk: data.item.id}}"
+            :to="{name: quotationEditRoute(data.item), params: {pk: data.item.id}}"
           >{{ data.item.quotation_name }}</router-link>
         </template>
         <template #cell(status)="data">
@@ -174,6 +174,9 @@ export default {
     this.loadStatusCodes()
   },
   methods: {
+    quotationEditRoute(quotation) {
+      return quotation.preliminary ? 'quotation-edit-preliminary': 'quotation-edit'
+    },
     async createOrder(id) {
       await this.$router.push({name: 'order-add-quotation', params: {quotation_id: id}})
     },

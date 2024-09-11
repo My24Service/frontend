@@ -355,7 +355,7 @@ export default {
     }
   },
   async created() {
-    if (this.isEdit || this.isNew) {
+    if (this.isEdit) {
       this.quotationPK = this.$route.params.pk
       await this.loadQuotation()
     }
@@ -516,7 +516,7 @@ export default {
         this.isLoading = true
         try {
           const newQuotation = await this.quotationService.insert(quotation)
-          await this.$router.push({ name: 'quotation-edit', params: {pk: newQuotation.id }})
+          await this.$router.push({ name: 'quotation-edit-preliminary', params: {pk: newQuotation.id }})
           this.isLoading = false
         } catch(error) {
           console.log('error creating quotation', error)

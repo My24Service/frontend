@@ -325,7 +325,7 @@ export default {
           this.infoToast(this.$trans('Created'), this.$trans('Quotation has been created'))
           this.buttonDisabled = false
           this.isLoading = false
-          await this.$router.push({ name: 'quotation-edit', params: { pk: quotation.id, is_new: true } })
+          await this.$router.push({ name: 'quotation-edit-preliminary', params: { pk: quotation.id, is_new: true } })
         } catch(error) {
           console.log('Error creating quotation', error)
           this.errorToast(this.$trans('Error creating quotation'))
