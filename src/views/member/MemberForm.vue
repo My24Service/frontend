@@ -18,7 +18,12 @@
       </header>
 
       <div class="page-detail">
-
+        <ApiResult
+          class="app-detail"
+          v-if="member.hasOwnProperty('apiOk')"
+          :error="member.error"
+          :success-message='$trans("Member created")'
+        />
         <div class="container app-detail">
           <b-form v-if="member">
             <b-row>
@@ -393,6 +398,7 @@
                   label-size="sm"
                   v-bind:label="$trans('Company logo')"
                   label-for="member_companylogo"
+                  :description="`${$trans('Accepted file formats')}: ${allowed_extensions.join(', ')}`"
                 >
                   <b-form-file
                     id="member_companylogo"
@@ -472,8 +478,10 @@ import {
 import { ContractService } from '@/models/member/Contract'
 import {NO_IMAGE_URL} from "@/constants";
 import {componentMixin} from "@/utils";
+import ApiResult from "@/components/ApiResult.vue";
 
 export default {
+  components: {ApiResult},
   mixins: [componentMixin],
   setup() {
     return { v$: useVuelidate() }
@@ -520,7 +528,8 @@ export default {
       memberService: new MemberService(),
       contractService: new ContractService(),
       memberIsRequest: false,
-      isDeleted: false
+      isDeleted: false,
+      allowed_extensions: ['png', 'jpg', 'jpeg'],
     }
   },
   validations() {
@@ -645,9 +654,12 @@ export default {
     this.isLoading = false
   },
   methods: {
+    getExtension(filename) {
+      const parts = filename.split('.')
+      return parts[parts.length-1].toLowerCase()
+    },
     async checkCompanyCode(value) {
-      const result = await this.memberService.companycodeExists(value)
-      return result
+      return await this.memberService.companycodeExists(value)
     },
     async companyCodeChange() {
       if (this.member.companycode && this.member.companycode.length > 2) {
@@ -655,6 +667,10 @@ export default {
       }
     },
     imageSelected(file) {
+      const extension = this.getExtension(file.name)
+      if (this.allowed_extensions.indexOf(extension) === -1) {
+        return
+      }
       const reader = new FileReader()
       reader.onload = (f) => {
         const b64 = f.target.result
@@ -722,6 +738,7 @@ export default {
         this.isLoading = true
         try {
           await this.memberService.insert(this.member)
+          this.member.apiOk = true
           if (this.isRequest) {
             this.infoToast(this.$trans('Requested'), this.$trans('Request has been created'))
           } else {
@@ -733,6 +750,8 @@ export default {
         } catch(error) {
           console.log('Error creating member', error)
           this.errorToast(this.$trans('Error creating member'))
+          this.member.apiOk = false
+          this.member.error = error
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -748,6 +767,7 @@ export default {
         this.isLoading = true
 
         await this.memberService.update(this.pk, this.member)
+        this.member.apiOk = true
         this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -755,6 +775,8 @@ export default {
       } catch(error) {
         console.log('Error updating member', error)
         this.errorToast(this.$trans('Error updating member'))
+        this.member.apiOk = false
+        this.member.error = error
         this.isLoading = false
         this.buttonDisabled = false
       }

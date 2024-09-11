@@ -16,8 +16,15 @@
           <b-button @click="cancelForm" type="button" variant="secondary">
             {{ $trans("Cancel") }}</b-button
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <b-button
+            @click="submitForm"
+            type="button"
+            variant="primary"
+            :disabled="isLoading"
+          >
+            <b-spinner small v-if="isLoading"></b-spinner>
+            {{ $trans("Submit") }}
+          </b-button
           >
         </div>
         <div class="flex-columns" v-if="!isCreate && !isEdit">
@@ -27,7 +34,7 @@
         </div>
       </div>
     </header>
-    <b-overlay rounded="sm">
+    <b-overlay rounded="sm" :show="isLoading">
       <div class="page-detail">
         <div class="flex-columns">
           <div class="panel" v-if="isCreate || isEdit">
@@ -85,6 +92,19 @@
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.template.file.$error : null">
                 {{ $trans("Please select a file") }}
               </b-form-invalid-feedback>
+            </b-form-group>
+            <b-form-group
+              label-cols="3"
+              v-bind:label="$trans('Set template as active')"
+              class="template_active"
+              label-for="template_active"
+            >
+              <b-form-checkbox
+                id="template_active"
+                v-model="template.is_active"
+                rows="3"
+              >
+              </b-form-checkbox>
             </b-form-group>
           </div>
           <div class="panel" v-if="!isCreate && !isEdit">
@@ -339,12 +359,14 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style>
 .pdf-priview {
   margin-top: 20px;
 }
-
 .pdf-priview .panel {
   max-width: 70%;
+}
+.template_active .col-form-label {
+  padding: 0 10px;
 }
 </style>

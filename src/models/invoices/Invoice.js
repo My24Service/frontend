@@ -72,6 +72,13 @@ class InvoiceService extends BaseModel {
   recreateInvoicePdf(pk) {
     return this.axios.post(`${this.url}${pk}/recreate_pdf/?gotenberg=1`)
   }
+
+  downloadPdfBlob(id) {
+    const url = `/invoice/invoice/${id}/download_pdf_from_template/`
+    return new this.axios.post(url, {}, {
+      responseType: 'arraybuffer'
+    })
+  }
 }
 
 const invoiceService = new InvoiceService()

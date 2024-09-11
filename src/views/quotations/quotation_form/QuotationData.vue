@@ -7,6 +7,18 @@
 
     <div v-if="!isView">
       <b-form-group
+        v-bind:label="$trans('ID')"
+        label-for="quotation_id"
+        label-cols="3"
+      >
+        <b-form-input
+          disabled
+          v-model="quotationData.quotation_id"
+          id="quotation_id"
+          size="sm"
+        ></b-form-input>
+      </b-form-group>
+      <b-form-group
         v-bind:label="$trans('Name')"
         label-for="name"
         label-cols="3"
@@ -158,6 +170,7 @@ export default {
       quotation_expire_days: this.quotation.quotation_expire_days,
       description: this.quotation.description,
       name: this.quotation.name,
+      quotation_id: this.quotation.quotation_id
     }
 
     if (!this.quotationData.quotation_expire_days) {
