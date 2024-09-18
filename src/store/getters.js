@@ -96,5 +96,8 @@ export const getters = {
   },
   getEquipmentQrType(state) {
     return state.memberInfo.equipment_qr_type
-  }
+  },
+  getMemberUsesEquipment(state) {
+    return state.memberInfo.settings.order_uses_equipment
+  },
 }
