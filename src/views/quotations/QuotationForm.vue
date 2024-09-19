@@ -273,7 +273,7 @@ import QuotationLine from "@/views/quotations/quotation_form/QuotationLine.vue";
 import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsComponent.vue";
 import CustomerView from "@/views/quotations/CustomerView.vue";
 import StatusesComponent from "@/components/StatusesComponent.vue";
-import TotalRowVue from './quotation_form/TotalRow.vue';
+import QuotationView from "@/views/quotations/QuotationView.vue";
 
 export default {
   name: 'QuotationForm',
@@ -289,6 +289,7 @@ export default {
     Distance,
     CallOutCosts,
     StatusesComponent,
+    QuotationView,
   },
   setup() {
     return { v$: useVuelidate() }
@@ -376,8 +377,17 @@ export default {
       );
     },
     async doMakeDefinitive() {
-      await this.quotationService.makeDefinitive(this.quotation.id)
-      await this.$router.push({ name: 'quotation-list'})
+      this.isLoading = true
+
+      try {
+        await this.quotationService.makeDefinitive(this.quotation.id)
+        this.errorToast(this.$trans('Success making quotation definitive'))
+        this.isLoading = false
+        await this.$router.push({ name: 'quotation-view', params: {pk: this.quotation.id }})
+      } catch(error) {
+        this.errorToast(this.$trans('Error making quotation definitive'))
+        this.isLoading = false
+      }
     },
     async generatePdf() {
       this.loadingPdf = true
@@ -395,7 +405,7 @@ export default {
       }
     },
     async downloadPdf() {
-      const url =  `/api/quotation/quotation/${this.quotation.id}/download_definitive_pdf/`
+      const url = `/api/quotation/quotation/${this.quotation.id}/download_definitive_pdf/`
       this.loadingPdf = true;
 
       my24.downloadItem(
