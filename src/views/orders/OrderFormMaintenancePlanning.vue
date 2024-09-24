@@ -1174,14 +1174,7 @@ export default {
       }
     },
     usesEquipment() {
-      const companyCodesUseEquipments = [
-        'demo',
-        'stormy',
-        'shltr-installation',
-        'wmses'
-      ]
-      return this.hasBranches || this.isEditEquipment ||
-        companyCodesUseEquipments.indexOf(this.$store.getters.getMemberCompanycode) !== -1
+      return this.$store.getters.getMemberUsesEquipment
     },
     startDate() {
       if (!this.order) {
