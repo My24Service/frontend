@@ -139,7 +139,7 @@
             </div>
 
             <div class="panel"
-                :class="{'col-1-3': !loadChapterModel, 'col-1-2': loadChapterModel}">
+                :class="{'col-1-3': !loadChapterModel, 'col-1-2 fixed-position': loadChapterModel}">
               <div v-if="loadChapterModel">
                 <QuotationLine
                   :quotation="quotation"
@@ -567,5 +567,9 @@ iframe {
 iframe {
   min-height: 720px;
   width: 100%;
+}
+.fixed-position .position-relative {
+  position: fixed !important;
+  width: 40%;
 }
 </style>

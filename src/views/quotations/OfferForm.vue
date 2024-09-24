@@ -48,7 +48,7 @@
                 separator=" "
               ></b-form-tags>
               <template #invalid-feedback>
-                You must provide at least 1 email recipient
+                {{ $trans("You must provide at least 1 email recipient") }}
               </template>
             </b-form-group>
             <b-form-group
