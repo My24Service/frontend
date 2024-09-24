@@ -4,15 +4,15 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-check-fill"></b-icon>
-          <router-link :to="{ name: 'quotations-sent' }">
-            {{ $trans("Send quotation") }}
+          <router-link :to="{ name: 'invoices-sent' }">
+            {{ $trans("Send invoice") }}
           </router-link>
           /
-          <router-link :to="{name: 'quotation-view', params: {pk: quotation.id}}">
-            <strong>{{ quotation.quotation_name }}</strong>
+          <router-link :to="{name: 'invoice-view', params: {uuid: invoice.uuid}}">
+            <strong>{{ invoice.invoice_id }}</strong>
           </router-link>
           <span class="dimmed">
-            <span v-if="isCreate && !offer.id">{{ $trans("new") }}</span>
+            <span v-if="isCreate && !email.id">{{ $trans("new") }}</span>
             <span v-if="!isCreate">{{ $trans("resend") }}</span>
           </span>
         </h3>
@@ -48,49 +48,49 @@
                 separator=" "
               ></b-form-tags>
               <template #invalid-feedback>
-                {{ $trans("You must provide at least 1 email recipient") }}
+                You must provide at least 1 email recipient
               </template>
             </b-form-group>
             <b-form-group
               v-bind:label="$trans('Subject')"
-              label-for="offer_subject"
+              label-for="email_subject"
               label-cols="3">
               <b-form-input
                 autofocus
-                id="offer_subject"
+                id="email_subject"
                 size="sm"
-                v-model="offer.subject"
-                :state="isSubmitClicked ? !v$.offer.subject.$error : null"
+                v-model="email.subject"
+                :state="isSubmitClicked ? !v$.email.subject.$error : null"
               ></b-form-input>
-              <b-form-invalid-feedback :state="isSubmitClicked ? !v$.offer.subject.$error : null">
+              <b-form-invalid-feedback :state="isSubmitClicked ? !v$.email.subject.$error : null">
                 {{ $trans("Please enter the email subject") }}
               </b-form-invalid-feedback>
             </b-form-group>
             <b-form-group
               label-cols="3"
               v-bind:label="$trans('Body')"
-              label-for="offer_body"
+              label-for="email_body"
             >
               <b-form-textarea
-                id="offer_body"
-                v-model="offer.body"
+                id="email_body"
+                v-model="email.body"
                 rows="3"
               ></b-form-textarea>
             </b-form-group>
             <h6>{{ $trans("Attachments") }}</h6>
             <p v-if="!documents.length">
-              {{ $trans("No attached documents to this quotation") }}
+              {{ $trans("No attached documents to this invoice") }}
             </p>
             <p v-for="document in documents" :key="document.id">
               {{ document.name }}
               <b-button
-                class="btn button btn-danger quotation-pdf-button"
+                class="btn button btn-danger invoice-pdf-button"
                 @click="downloadPdf"
                 v-if="document.is_pdf"
                 :disabled="loadingPdf"
               >
                 <b-spinner small v-if="loadingPdf"></b-spinner>
-                {{ $trans('Preview quotation pdf') }}
+                {{ $trans('Preview invoice pdf') }}
               </b-button>
             </p>
           </div>
@@ -103,8 +103,8 @@
 import my24 from '../../services/my24.js'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
-import { OfferService, OfferModel } from "@/models/quotations/Offer.js";
-import {QuotationService, QuotationModel} from '@/models/quotations/Quotation'
+import { EmailService, EmailModel } from "@/models/invoices/Email.js";
+import { InvoiceService, InvoiceModel } from '../../models/invoices/Invoice.js'
 
 
 export default {
@@ -113,12 +113,12 @@ export default {
   },
   computed: {
     isCreate() {
-      return !this.offer.id;
+      return !this.email.id;
     }
   },
   validations() {
     return {
-      offer: {
+      email: {
         subject: {
           required
         }
@@ -126,10 +126,10 @@ export default {
     };
   },
   async mounted() {
-    this.offer.quotation = this.$route.query.quotationId
+    this.email.invoice = this.$route.query.invoiceId
     await this.loadDocuments()
     await this.loadData()
-    await this.loadQuotation()
+    await this.loadInvoice()
   },
   data() {
     return {
@@ -137,12 +137,12 @@ export default {
       isLoading: false,
       loadingPdf: false,
       isSubmitClicked: false,
-      quotationService: new QuotationService(),
-      offerService: new OfferService(),
+      invoiceService: new InvoiceService(),
+      emailService: new EmailService(),
       recipients: [],
-      offer: new OfferModel({}),
+      email: new EmailModel({}),
       documents: [],
-      quotation: {},
+      invoice: {},
       recipientInvalid: false,
     };
   },
@@ -154,13 +154,13 @@ export default {
       this.isLoading = true;
 
       try {
-        this.offer = await this.offerService.getUnsentOffer(this.offer.quotation);
-        this.offer.quotation = this.$route.query.quotationId
-        this.recipients = this.offer.recipients.split(",")
+        this.email = await this.emailService.getUnsentEmail(this.email.invoice);
+        this.email.invoice = this.$route.query.invoiceId
+        this.recipients = this.email.recipients.split(",")
         this.isLoading = false;
       } catch (error) {
-        console.log("error fetching unsent offer", error);
-        this.errorToast(this.$trans("Error fetching unsent offer"));
+        console.log("error fetching unsent email", error);
+        this.errorToast(this.$trans("Error fetching unsent email"));
         this.isLoading = false;
       }
     },
@@ -174,32 +174,32 @@ export default {
       return emails.join(",")
     },
     async downloadPdf() {
-      const url =  `/api/quotation/quotation/${this.offer.quotation}/download_definitive_pdf/`
+      const url =  `/api/invoice/invoice/${this.email.invoice}/download_pdf_from_template/`
       this.loadingPdf = true;
 
       my24.downloadItem(
         url,
-        'quotation.pdf',
+        'invoice.pdf',
         function() {
           this.loadingPdf = false;
         }.bind(this),
         'post'
       )
     },
-    async loadQuotation() {
+    async loadInvoice() {
       this.isLoading = true
 
       try {
-        this.quotation = new QuotationModel(
-          await this.quotationService.detail(this.$route.query.quotationId)
+        this.invoice = new InvoiceModel(
+          await this.invoiceService.detail(this.$route.query.invoiceId)
         )
-        if (!this.recipients.includes(this.quotation.quotation_email)) {
-          this.recipients.push(this.quotation.quotation_email)
+        if (!this.recipients.includes(this.invoice.invoice_email)) {
+          this.recipients.push(this.invoice.invoice_email)
         }
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching quotation', error)
-        this.errorToast(this.$trans('Error fetching quotation'))
+        console.log('error fetching invoice', error)
+        this.errorToast(this.$trans('Error fetching invoice'))
         this.isLoading = false
       }
     },
@@ -207,8 +207,8 @@ export default {
       this.isLoading = true;
 
       try {
-        const result = await this.offerService.getDocuments(
-          this.offer.quotation
+        const result = await this.emailService.getDocuments(
+          this.email.invoice
         );
         this.documents = result
         this.isLoading = false;
@@ -234,47 +234,47 @@ export default {
         return
       }
 
-      this.offer.recipients = validatedEmails
+      this.email.recipients = validatedEmails
       this.isLoading = true;
 
       if (this.isCreate) {
-        this.offer.quotation = this.$route.query.quotationId
+        this.email.invoice = this.$route.query.invoiceId
         try {
-          this.offer = await this.offerService.insert(this.offer);
+          this.email = await this.emailService.insert(this.email);
           this.isLoading = false;
 
-          if (!this.offer.is_sent) {
-            this.errorToast(this.$trans("Error sending quotation"));
+          if (!this.email.is_sent) {
+            this.errorToast(this.$trans("Error sending invoice"));
             return;
           } else {
-            this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
+            this.infoToast(this.$trans("Sent"), this.$trans("Invoice has been sent"));
           }
           this.$router.go(-1);
-          this.$router.push({name: 'quotations-sent'});
+          this.$router.push({name: 'invoices-sent'});
         } catch (error) {
-          console.log("Error sending quotation", error);
-          this.errorToast(this.$trans("Error sending quotation"));
+          console.log("Error sending invoice", error);
+          this.errorToast(this.$trans("Error sending invoice"));
           this.isLoading = false;
         }
         return
       }
 
       try {
-        this.offer = await this.offerService.update(
-          this.offer.id, this.offer
+        this.email = await this.emailService.update(
+          this.email.id, this.email
         )
 
         this.isLoading = false
-        if (!this.offer.is_sent) {
-          this.errorToast(this.$trans("Error sending quotation"));
+        if (!this.email.is_sent) {
+          this.errorToast(this.$trans("Error sending invoice"));
           return;
         } else {
-          this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
+          this.infoToast(this.$trans("Sent"), this.$trans("Invoice have been sent"));
         }
-        this.$router.push({name: 'quotations-sent'});
+        this.$router.push({name: 'invoices-sent'});
       } catch(error) {
-        console.log("Error sending quotation", error);
-        this.errorToast(this.$trans("Error sending quotation"));
+        console.log("Error sending invoice", error);
+        this.errorToast(this.$trans("Error sending invoice"));
         this.isLoading = false;
       }
     },
@@ -288,7 +288,7 @@ export default {
 .pdf-priview .panel {
   max-width: 70%;
 }
-.quotation-pdf-button {
+.invoice-pdf-button {
   margin-left: 20px;
 }
 </style>
