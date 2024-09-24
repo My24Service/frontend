@@ -56,7 +56,13 @@
         </template>
         <template #cell(invoice_id)="data">
           <router-link
+            v-if="data.item.preliminary"
             :to="{name: 'invoice-edit', params: {pk: data.item.id, uuid: data.item.order_uuid}}"
+          >#{{ data.item.invoice_id }}
+          </router-link>
+          <router-link
+            v-else
+            :to="{name: 'invoice-view', params: {uuid: data.item.uuid}}"
           >#{{ data.item.invoice_id }}
           </router-link>
         </template>
@@ -71,6 +77,18 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 invoice-icons">
+            <router-link
+              class="px-1"
+              v-if="!data.item.preliminary"
+              :title="$trans('Send invoice')"
+              :to="{name: 'invoice-send',
+                query: {invoiceId: data.item.id}}"
+            >
+              <b-icon-mailbox
+                aria-hidden="true"
+                class="edit-icon"
+              ></b-icon-mailbox>
+            </router-link>
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
@@ -152,6 +170,9 @@ export default {
     await this.loadStatusCodes()
   },
   methods: {
+    invoiceEditRoute(invoice) {
+      return invoice.preliminary ? 'invoice-edit': 'invoice-view'
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
@@ -211,6 +232,21 @@ export default {
         this.errorToast(this.$trans('Error loading invoices'))
         this.isLoading = false
       }
+    }
+  },
+  watch: {
+    '$route.name': {
+      handler: function(search) {
+        if (this.$route.name === 'preliminary-invoices') {
+          this.invoiceService.queryMode = 'preliminary'
+        } else if(this.$route.name === 'invoices-sent') {
+          this.invoiceService.queryMode = 'sent'
+        } else {
+          this.invoiceService.queryMode = 'all'
+        }
+      },
+      deep: true,
+      immediate: true
     }
   }
 }

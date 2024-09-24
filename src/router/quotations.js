@@ -10,23 +10,6 @@ import QuotationDetail from "@/views/quotations/QuotationDetail.vue";
 import OfferForm from "@/views/quotations/OfferForm.vue";
 
 export default [
-// orders
-{
-  component: TheAppLayoutEmpty,
-  path: '/quotations',
-  children: [
-    {
-      name: 'quotation-view',
-      path: '/quotations/quotations/view/:pk',
-      components: {
-        'app-content': QuotationView,
-      },
-      props: {
-        'app-content': route => ({...route.params})
-      },
-    },
-  ]
-},
 {
   path: '/quotations',
   component: TheAppLayout,
@@ -50,6 +33,19 @@ export default [
       path: '/quotations/preliminary',
       components: {
         'app-content': QuotationList,
+        'app-subnav': SubNavQuotations
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+      name: 'quotation-view',
+      path: '/quotations/quotations/view/:pk',
+      components: {
+        'app-content': QuotationView,
         'app-subnav': SubNavQuotations
       },
       props: {
