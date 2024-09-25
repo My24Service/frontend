@@ -679,7 +679,8 @@ export default {
     }
   },
   async created() {
-    this.countries = await this.$store.dispatch('getCountries')
+    // this.countries = await this.$store.dispatch('getCountries')
+    this.countries = ['NL', 'BE', 'DE']
 
     if (!this.isRegister) {
       if (!this.isCreate) {
