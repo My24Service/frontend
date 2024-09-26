@@ -307,8 +307,12 @@ export default {
         this.errorToast(this.$trans('Success generating pdf'))
       } catch(error) {
         console.log('error generating pdf', error)
-        this.errorToast(this.$trans('Error generating pdf'))
         this.loadingPdf = false
+        if (error.response?.data?.template_error) {
+          this.errorToast(error.response.data.template_error)
+          return
+        }
+        this.errorToast(this.$trans('Error generating pdf'))
       }
     },
     iframeLoaded() {
