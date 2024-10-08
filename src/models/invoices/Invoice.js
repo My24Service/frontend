@@ -36,6 +36,7 @@ Object.assign(InvoiceModel.prototype, priceMixin);
 class InvoiceService extends BaseModel {
   model = InvoiceModel
   collection = []
+  queryMode = 'all'
 
   fields = {
     id: null,
@@ -47,6 +48,25 @@ class InvoiceService extends BaseModel {
   }
 
   url = '/invoice/invoice/'
+
+  getListUrl() {
+    let base = ''
+    if (this.queryMode === 'preliminary') {
+      base = '/invoice/invoice/preliminary/'
+    } else if (this.queryMode === 'sent') {
+      base = '/invoice/invoice/sent/'
+    } else {
+      console.log(`unknown queryMode: ${this.queryMode}`)
+      base = '/invoice/invoice/'
+    }
+
+    return base
+  }
+
+  makeDefinitive(id) {
+    const url = `/invoice/invoice/${id}/make_definitive/`
+    return new this.axios.post(url, {}).then(response => response.data)
+  }
 
   async getData(uuid) {
     const url = `${this.url}data/${uuid}/`
@@ -65,7 +85,7 @@ class InvoiceService extends BaseModel {
   }
 
   async search(query) {
-    const url = `${this.url}autocomplete/q=${query}`
+    const url = `${this.url}autocomplete/?q=${query}`
     return this.axios.get(url).then((response) => response.data)
   }
 

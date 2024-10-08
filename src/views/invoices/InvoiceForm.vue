@@ -1,6 +1,20 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
+      <b-modal
+        id="invoice-definitive-modal"
+        ref="invoice-definitive-modal"
+        v-bind:title="$trans('Make definitive?')"
+        v-if="!isView"
+        @ok="doMakeDefinitive"
+      >
+        <p class="my-4">
+          {{ $trans("Are you sure you want to make this invoice definitive?") }}
+        </p>
+        <p>
+          <strong><i>{{ $trans("You won't be able to make changes after that") }}</i></strong>
+        </p>
+      </b-modal>
       <header>
         <div class="page-title">
           <h3>
@@ -442,8 +456,13 @@
           v-show="!iframeLoading">
         </iframe>
         <template #modal-footer="{ ok }">
-          <b-button class="btn button btn-secondary" @click="openInvoice()" target="_blank">
-              {{ $trans('Open in a new tab') }}
+          <b-button
+            class="btn button btn-danger"
+            @click="showMakeDefinitiveModal"
+            v-if="invoice.preliminary"
+            variant="danger"
+          >
+            {{ $trans('Make definitive') }}
           </b-button>
           <b-button
             v-if="!isCustomer && !isBranchEmployee"
@@ -458,7 +477,7 @@
             {{ $trans('re-generate PDF') }}
           </b-button>
           <b-button
-            v-if="!isCustomer && !isBranchEmployee && invoice.invoice_pdf_path"
+            v-if="!isCustomer && !isBranchEmployee && invoice.invoice_pdf_from_docx_filename"
             @click="downloadPdf"
             :disabled="loadingPdf"
             type="button"
@@ -648,6 +667,22 @@ export default {
     this.isLoading = false
   },
   methods: {
+    async doMakeDefinitive() {
+      this.isLoading = true
+
+      try {
+        await this.invoiceService.makeDefinitive(this.invoice.id)
+        this.errorToast(this.$trans('Success making invoice definitive'))
+        this.isLoading = false
+        await this.$router.push({ name: 'invoice-view', params: {uuid: this.invoice.uuid }})
+      } catch(error) {
+        this.errorToast(this.$trans('Error making invoice definitive'))
+        this.isLoading = false
+      }
+    },
+    showMakeDefinitiveModal() {
+      this.$refs['invoice-definitive-modal'].show()
+    },
     async downloadPdf() {
       const url =  `/api/invoice/invoice/${this.invoice.id}/download_pdf_from_template/`
       this.loadingPdf = true;

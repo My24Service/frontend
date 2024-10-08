@@ -135,9 +135,16 @@
             <ul class='listing'>
               <li v-for="invoice of order.invoices" :key="invoice.uuid" >
                 <router-link
+                  v-if="invoice.preliminary"
                   :to="{name: 'invoice-edit', params: {pk: invoice.id, uuid: order.uuid}}"
                   class="listing-item"
                   >
+                  {{ $trans('Invoice') }} {{ invoice.invoice_id }}
+                </router-link>
+                <router-link
+                  v-else
+                  :to="{name: 'invoice-view', params: {uuid: invoice.uuid}}"
+                >
                   {{ $trans('Invoice') }} {{ invoice.invoice_id }}
                 </router-link>
               </li>
