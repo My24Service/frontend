@@ -15,7 +15,7 @@
         <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
           <b-spinner medium></b-spinner>
         </div>
-        <iframe :src="quotationURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
+        <iframe :src="`${quotationURL}#toolbar=0&navpanes=0&scrollbar=0`" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
 
         <template #modal-footer="{ ok }">
           <b-button

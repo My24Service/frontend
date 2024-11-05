@@ -59,12 +59,12 @@
         </template>
         <template #cell(name)="data">
           <router-link
-            :to="{name: quotationEditRoute(data.item), params: {pk: data.item.id}}"
+            :to="{name: getRowDataRoute(data.item), params: {pk: data.item.id}}"
           >{{ data.item.name }}</router-link>
         </template>
         <template #cell(quotation_name)="data">
           <router-link
-            :to="{name: quotationEditRoute(data.item), params: {pk: data.item.id}}"
+            :to="{name: getRowDataRoute(data.item), params: {pk: data.item.id}}"
           >{{ data.item.quotation_name }}</router-link>
         </template>
         <template #cell(status)="data">
@@ -78,19 +78,15 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 quotation-icons">
-            <router-link
-              class="px-1"
-              v-if="!data.item.preliminary"
-              :title="$trans('Send quotation')"
-              :to="{name: 'quotation-send',
-                query: {quotationId: data.item.id}}"
-            >
-              <b-icon-mailbox
-                aria-hidden="true"
-                class="edit-icon"
-              ></b-icon-mailbox>
-            </router-link>
+            <IconLinkEdit
+              v-if="!data.item.preliminary && !data.item.is_sent"
+              class="edit-icon"
+              router_name="quotation-edit"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
             <IconLinkDelete
+              v-if="!data.item.is_sent"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
@@ -105,6 +101,18 @@
                 class="edit-icon"
               ></b-icon-arrow-up-right-circle>
             </b-link>
+            <router-link
+              class="px-1"
+              v-if="!data.item.preliminary"
+              :title="$trans('Send quotation')"
+              :to="{name: 'quotation-send',
+                query: {quotationId: data.item.id}}"
+            >
+              <b-icon-mailbox
+                aria-hidden="true"
+                class="edit-icon"
+              ></b-icon-mailbox>
+            </router-link>
           </div>
         </template>
       </b-table>
@@ -175,16 +183,12 @@ export default {
     this.loadStatusCodes()
   },
   methods: {
-    quotationEditRoute(quotation) {
-      if (quotation.is_sent) {
+    getRowDataRoute(quotation) {
+      if (!quotation.preliminary) {
         return 'quotation-view'
       }
 
-      if (quotation.preliminary) {
-        return 'quotation-edit-preliminary'
-      }
-
-      return 'quotation-edit'
+      return 'quotation-edit-preliminary'
     },
     async createOrder(id) {
       await this.$router.push({name: 'order-add-quotation', params: {quotation_id: id}})
