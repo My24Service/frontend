@@ -85,7 +85,7 @@ class InvoiceService extends BaseModel {
   }
 
   async search(query) {
-    const url = `${this.url}autocomplete/q=${query}`
+    const url = `${this.url}autocomplete/?q=${query}`
     return this.axios.get(url).then((response) => response.data)
   }
 

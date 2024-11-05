@@ -125,6 +125,14 @@
                 {{ template.description }}
               </b-col>
             </b-row>
+            <b-row>
+              <b-col cols="3">
+                {{ $trans("Type") }}:
+              </b-col>
+              <b-col cols="6">
+                {{ template.template_type }}
+              </b-col>
+            </b-row>
           </div>
           <div class="panel" v-if="!isCreate && !isEdit">
             <h6>{{ $trans("Template preview") }}</h6>
@@ -187,6 +195,7 @@ import {
 } from "../../../models/company/Template.js";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import { QuotationService } from "../../../models/quotations/Quotation.js";
+import { InvoiceService } from '../../../models/invoices/Invoice.js'
 import Multiselect from "vue-multiselect";
 
 export default {
@@ -240,14 +249,14 @@ export default {
       file: null,
       template: {},
       templateTypes: [
-        //{ value: "invoice", text: this.$trans("Invoice") },
+        { value: "invoice", text: this.$trans("Invoice") },
         { value: "quotation", text: this.$trans("Quotation") }
       ],
       results: [],
       fetchingResults: false,
       searchPreviewDebounced: "",
       // TODO make this dynamic based on template type (invoices, etc.)
-      quotationService: new QuotationService(),
+      templateTypeService: "",
       result: ""
     };
   },
@@ -266,6 +275,7 @@ export default {
       try {
         this.template = await this.templateService.detail(this.pk);
         this.file = this.template.filename
+        this.selectTemplateTypeService(this.template.template_type)
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching template", error);
@@ -281,10 +291,19 @@ export default {
         this.loadData()
       }
     },
+    selectTemplateTypeService(templateType) {
+      if (templateType === 'quotation') {
+        this.templateTypeService = new QuotationService()
+      } else if(templateType === 'invoice') {
+        this.templateTypeService = new InvoiceService()
+      } else {
+        throw("Invalid template type")
+      }
+    },
     async searchPreview(query) {
       this.fetchingResults = true;
       try {
-        this.results = await this.quotationService.search(query);
+        this.results = await this.templateTypeService.search(query);
         this.fetchingResults = false;
       } catch (error) {
         console.log("Error fetching results", error);

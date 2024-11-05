@@ -9,7 +9,7 @@
       <b-icon-arrow-left-circle-fill></b-icon-arrow-left-circle-fill>
       {{ $trans("Back to quotation and chapters") }}
     </b-button>
-    <details open>
+    <details open class="overflow">
       <summary class="flex-columns space-between">
         <h6>{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h6>
         <b-icon-chevron-down></b-icon-chevron-down>
@@ -489,5 +489,10 @@ export default {
 }
 .total-text {
   font-weight: bold;
+}
+.overflow {
+  overflow: auto;
+  max-height: 650px;
+  position: relative;
 }
 </style>

@@ -396,6 +396,11 @@ export default {
       } catch(error) {
         this.errorToast(this.$trans('Error making quotation definitive'))
         this.isLoading = false
+        if (error.response?.data?.template_error) {
+          this.errorToast(error.response.data.template_error)
+          return
+        }
+        this.errorToast(this.$trans('Error generating pdf'))
       }
     },
     async generatePdf() {
@@ -409,8 +414,12 @@ export default {
         this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
       } catch(error) {
         console.log('error generating pdf', error)
-        this.errorToast(this.$trans('Error creating PDF'))
         this.loadingPdf = false
+        if (error.response?.data?.template_error) {
+          this.errorToast(error.response.data.template_error)
+        } else {
+          this.errorToast(this.$trans('Error creating PDF'))
+        }
       }
     },
     async downloadPdf() {
@@ -628,5 +637,6 @@ iframe {
 .fixed-position .position-relative {
   position: fixed !important;
   width: 40%;
+  overflow: hidden;
 }
 </style>
