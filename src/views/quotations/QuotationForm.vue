@@ -11,12 +11,9 @@
         <p class="my-4">
           {{ $trans("Are you sure you want to make this quotation definitive?") }}
         </p>
-        <p>
-          <strong><i>{{ $trans("You won't be able to make changes after that") }}</i></strong>
-        </p>
       </b-modal>
 
-      <b-modal ref="quotation-viewer" size="xl" v-b-modal.modal-scrollable>
+      <b-modal ref="quotation-viewer" size="xl" v-b-modal.modal-scrollable :title="viewerTitle">
         <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
           <b-spinner medium></b-spinner>
         </div>
@@ -34,10 +31,11 @@
           <b-button
             class="btn button btn-danger"
             @click="generatePdf"
+            v-if="!quotation.preliminary"
             :disabled="loadingPdf"
           >
             <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Regenerate pdf') }}
+            {{ $trans('Recreate PDF') }}
           </b-button>
           <b-button
             class="btn button btn-danger"
@@ -46,7 +44,7 @@
             :disabled="loadingPdf"
           >
             <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Download pdf') }}
+            {{ $trans('Download PDF') }}
           </b-button>
           <!-- Emulate built in modal footer ok and cancel button actions -->
           <b-button @click="ok()" variant="primary">
@@ -68,7 +66,7 @@
               v-else
             >{{ $trans('Quotations') }}</router-link>
             /
-            <strong>{{ quotation.quotation_name }}</strong>
+            <strong v-if="isEdit">{{ quotation.quotation_name }}</strong>
             <span
               class="dimmed"
               v-if="!isView"
@@ -107,6 +105,14 @@
               variant="primary"
             >
               {{ $trans('Submit') }}
+            </b-button>
+            <b-button
+              @click="submitQuotationAndRecreate"
+              type="button"
+              variant="primary"
+              v-if="isEdit && !quotation.preliminary"
+            >
+              {{ $trans('Submit and recreate PDF') }}
             </b-button>
           </div>
         </div>
@@ -348,7 +354,10 @@ export default {
     }
   },
   computed: {
-    isEdit () {
+    viewerTitle() {
+      return this.quotation.preliminary ? this.$trans("PDF preview") : this.$trans("Definitive PDF")
+    },
+    isEdit() {
       return !this.isNew
     },
     isNew() {
@@ -397,10 +406,10 @@ export default {
         await this.loadQuotation()
         await this.downloadPdfBlob()
         this.loadingPdf = false
-        this.errorToast(this.$trans('Success generating pdf'))
+        this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
       } catch(error) {
         console.log('error generating pdf', error)
-        this.errorToast(this.$trans('Error generating pdf'))
+        this.errorToast(this.$trans('Error creating PDF'))
         this.loadingPdf = false
       }
     },
@@ -427,21 +436,40 @@ export default {
         this.iframeLoading = false
       } catch(error) {
         console.log(`error fetching quotation pdf, ${error}`)
-        this.errorToast(
+        this.infoToast(
+          this.$trans('No PDF'),
           this.$trans(
-            'Error fetching quotation pdf. Check if there is an active template or try to regenerate'
+            'Error fetching definitive PDF. Check if there is an active template or try to recreate.'
           )
         )
         this.iframeLoading = false
       }
     },
-    getQuotationURL() {
-      const routeData = this.$router.resolve({ name: 'quotation-view', params: { pk: this.quotation.id } });
-      return `${document.location.origin}/${routeData.href}`;
+    async downloadPreviewPdfBlob() {
+      this.iframeLoading = true;
+
+      try {
+        const response = await this.quotationService.downloadPreviewPdfBlob(this.quotation.id)
+        const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+        this.quotationURL = URL.createObjectURL(pdfBlob);
+        this.iframeLoading = false
+      } catch(error) {
+        console.log(`error fetching quotation pdf, ${error}`)
+        this.infoToast(
+          this.$trans('No PDF'),
+          this.$trans(
+            'Error fetching preview PDF. Check if there is an active template.'
+          )
+        )
+        this.iframeLoading = false
+      }
     },
-    showQuotationDialog() {
-      //this.quotationURL = this.getQuotationURL();
-      this.downloadPdfBlob()
+    async showQuotationDialog() {
+      if (this.quotation.preliminary) {
+        await this.downloadPreviewPdfBlob()
+      } else {
+        await this.downloadPdfBlob()
+      }
       this.$refs['quotation-viewer'].show();
     },
     // quotation lines
@@ -497,29 +525,27 @@ export default {
     cancelForm() {
       this.$router.go(-1)
     },
-    async submitQuotation () {
-      const quotationDataComponent = this.$refs['quotationDataComponent'];
-      quotationDataComponent.isSubmitClicked = true
-      quotationDataComponent.v$.$touch()
-
-      if (quotationDataComponent.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
+    async submitQuotationAndRecreate() {
+      const quotation = this.submitGetQuotationData()
+      if (!quotation) {
         return
       }
 
-      const customerFormComponent = this.$refs['customerFormComponent'];
-      customerFormComponent.isSubmitClicked = true
-      customerFormComponent.v$.$touch()
-
-      if (customerFormComponent.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
-        return
+      this.isLoading = true
+      try {
+        await this.quotationService.updateAndRecreate(this.quotation.id, quotation)
+        this.infoToast(this.$trans('Updated and recreated'), this.$trans('Quotation has been updated and the PDF recreated'))
+        this.isLoading = false
+      } catch(error) {
+        console.log('error updating quotation', error)
+        this.errorToast(this.$trans('Error updating quotation'))
+        this.isLoading = false
       }
-
-      const quotationData = this.$refs['quotationDataComponent'].getQuotationData()
-      const quotation = {
-        ...this.quotation,
-        ...quotationData
+    },
+    async submitQuotation() {
+      const quotation = this.submitGetQuotationData()
+      if (!quotation) {
+        return
       }
 
       if (!this.quotation.id) {
@@ -538,14 +564,45 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.update(this.quotation.id, quotation)
-        this.infoToast(this.$trans('Updated'), this.$trans('quotation has been updated'))
+        this.infoToast(this.$trans('Updated'), this.$trans('Quotation has been updated'))
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching quotation', error)
+        console.log('error updating quotation', error)
         this.errorToast(this.$trans('Error updating quotation'))
         this.isLoading = false
       }
-    }
+    },
+    submitGetQuotationData() {
+      const quotationDataComponent = this.$refs['quotationDataComponent']
+      let quotationData = {}
+      if (quotationDataComponent) {
+        quotationDataComponent.isSubmitClicked = true
+        quotationDataComponent.v$.$touch()
+
+        if (quotationDataComponent.v$.$invalid) {
+          console.log('invalid?', this.v$.$invalid)
+          return
+        }
+
+        quotationData = this.$refs['quotationDataComponent'].getQuotationData()
+      }
+
+      const customerFormComponent = this.$refs['customerFormComponent']
+      if (customerFormComponent) {
+        customerFormComponent.isSubmitClicked = true
+        customerFormComponent.v$.$touch()
+
+        if (customerFormComponent.v$.$invalid) {
+          console.log('invalid?', this.v$.$invalid)
+          return
+        }
+      }
+
+      return {
+        ...this.quotation,
+        ...quotationData
+      }
+    },
   },
 }
 </script>

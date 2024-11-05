@@ -30,6 +30,9 @@
       <div class="page-detail">
         <div class="flex-columns">
           <div class="panel">
+            <p class="text-center">
+              <strong><i>{{ $trans("Quotations can't be changed after having been sent") }}</i></strong>
+            </p>
             <h6>{{ $trans("Email") }}</h6>
             <b-form-group
               :label="$trans('Email recipients')"

@@ -18,7 +18,7 @@
           label-cols="3"
           v-bind:label="$trans('Material')"
           label-for="material-search"
-          v-if="!cost.material"
+          v-if="!cost.material && !parentHasQuotationLines"
         >
           <multiselect
             id="material-search"
@@ -44,7 +44,9 @@
             <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
           </multiselect>
         </b-form-group>
-        <p v-else>
+        <p
+          v-if="cost.material && !parentHasQuotationLines"
+        >
           <b-form-group
             label-cols="3"
             v-bind:label="$trans('Material')"
@@ -157,6 +159,11 @@
               :total_vat="totalVAT_dinero"
             />
             <hr/>
+          </b-col>
+        </b-row>
+        <b-row v-if="parentHasQuotationLines">
+          <b-col cols="12">
+            <i><strong>{{ $trans("Delete existing material quotation lines if you want to add or change items") }}</strong></i>
           </b-col>
         </b-row>
         <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">

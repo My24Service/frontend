@@ -116,6 +116,11 @@
             <hr/>
           </b-col>
         </b-row>
+        <b-row v-if="parentHasQuotationLines">
+          <b-col cols="12">
+            <i><strong>{{ $trans("Delete existing hours quotation lines if you want to add or change items") }}</strong></i>
+          </b-col>
+        </b-row>
         <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines && !isView">
           <b-col cols="4"></b-col>
           <b-col cols="8">
@@ -397,7 +402,7 @@ export default {
           throw `getPrice: unknown use_price for quotation: ${activity.use_price}`
       }
     },
-    getCurrency(activity) {
+    getCurrency(_activity) {
       return this.default_currency
     },
     updateTotals() {
@@ -415,7 +420,7 @@ export default {
       )
       this.totalAmount = totalAmount ? Math.round(totalAmount / 3600) : 0
     },
-    getDescriptionUserTotalsQuotationLine(cost) {
+    getDescriptionUserTotalsQuotationLine(_cost) {
       return this.getTitle()
     },
     getDescriptionOnlyTotalQuotationLine() {

@@ -106,6 +106,11 @@
           <hr/>
         </b-col>
       </b-row>
+      <b-row v-if="parentHasQuotationLines">
+        <b-col cols="12">
+          <i><strong>{{ $trans("Delete existing call out cost quotation lines if you want to add or change items") }}</strong></i>
+        </b-col>
+      </b-row>
       <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
         <b-col cols="4"></b-col>
         <b-col cols="8">
@@ -328,16 +333,6 @@ export default {
         chapter: this.chapter.id
       }
     },
-    getEngineerRateFor(obj, usePrice) {
-      switch (usePrice) {
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
-          return this.customer.hourly_rate_engineer_dinero
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return toDinero(this.default_hourly_rate, this.default_currency)
-        default:
-          throw `getEngineerRateFor: unknown usePrice for work hours: ${usePrice}`
-      }
-    },
     getPrice(activity) {
       switch (activity.use_price) {
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
@@ -350,7 +345,7 @@ export default {
           throw `getPrice: unknown use_price for quotation: ${activity.use_price}`
       }
     },
-    getCurrency(activity) {
+    getCurrency(_activity) {
       return this.default_currency
     },
     updateTotals() {
@@ -367,7 +362,7 @@ export default {
         0
       )
     },
-    getDescriptionUserTotalsQuotationLine(cost) {
+    getDescriptionUserTotalsQuotationLine(_cost) {
       return `${this.$trans("Call out costs")}`
     },
     getDescriptionOnlyTotalQuotationLine() {

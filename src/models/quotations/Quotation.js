@@ -32,6 +32,7 @@ class QuotationModel {
   total_currency
 
   definitive_date
+  is_sent
 
   chapters = []
   images = []
@@ -81,8 +82,22 @@ class QuotationService extends BaseModel {
     return new this.axios.post(url, {}).then(response => response.data)
   }
 
+  async updateAndRecreate(pk, obj) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+
+    return this.axios.patch(`${this.url}${pk}/?recreate=1`, this.preUpdate(obj), headers).then((response) => response.data)
+  }
+
   downloadPdfBlob(id) {
     const url = `/quotation/quotation/${id}/download_definitive_pdf/`
+    return new this.axios.post(url, {}, {
+      responseType: 'arraybuffer'
+    })
+  }
+
+  downloadPreviewPdfBlob(id) {
+    const url = `/quotation/quotation/${id}/generate_preview_pdf/`
     return new this.axios.post(url, {}, {
       responseType: 'arraybuffer'
     })

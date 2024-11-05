@@ -24,7 +24,7 @@
             :disabled="loadingPdf"
           >
             <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Regenerate pdf') }}
+            {{ $trans('Recreate PDF') }}
           </b-button>
           <b-button
             class="btn button btn-danger"
@@ -33,7 +33,7 @@
             :disabled="loadingPdf"
           >
             <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Download pdf') }}
+            {{ $trans('Download PDF') }}
           </b-button>
           <!-- Emulate built in modal footer ok and cancel button actions -->
           <b-button @click="ok()" variant="primary">
@@ -58,7 +58,7 @@
                 target="_blank"
               >
                 <b-icon icon="file-earmark"></b-icon>
-                {{ $trans('View pdf') }}
+                {{ $trans('View PDF') }}
               </b-link>
             </span>
             <b-button
@@ -276,7 +276,7 @@ export default {
   },
   async created() {
     this.isLoading = true
-    this.loadQuotation()
+    await this.loadQuotation()
   },
   methods: {
     async doDelete() {
@@ -304,10 +304,10 @@ export default {
         await this.quotationService.generatePdf(this.quotation.id)
         await this.downloadPdfBlob()
         this.loadingPdf = false
-        this.errorToast(this.$trans('Success generating pdf'))
+        this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
       } catch(error) {
-        console.log('error generating pdf', error)
-        this.errorToast(this.$trans('Error generating pdf'))
+        console.log('error creating pdf', error)
+        this.errorToast(this.$trans('Error creating PDF'))
         this.loadingPdf = false
       }
     },
@@ -332,9 +332,10 @@ export default {
         this.iframeLoading = false
       } catch(error) {
         console.log(`error fetching quotation pdf, ${error}`)
-        this.errorToast(
+        this.infoToast(
+          this.$trans('No PDF'),
           this.$trans(
-            'Error fetching quotation pdf. Check if there is an active template or try to regenerate'
+            'Error fetching definitive PDF. Check if there is an active template or try to recreate.'
           )
         )
         this.iframeLoading = false
@@ -354,7 +355,6 @@ export default {
       )
     },
     showQuotationDialog() {
-      //this.quotationURL = this.getQuotationURL();
       this.downloadPdfBlob()
       this.$refs['quotation-viewer'].show();
     },

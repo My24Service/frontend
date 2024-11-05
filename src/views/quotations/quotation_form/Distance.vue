@@ -117,6 +117,11 @@
             <hr/>
           </b-col>
         </b-row>
+        <b-row v-if="parentHasQuotationLines">
+          <b-col cols="12">
+            <i><strong>{{ $trans("Delete existing distance quotation lines if you want to add or change items") }}</strong></i>
+          </b-col>
+        </b-row>
         <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
           <b-col cols="4"></b-col>
           <b-col cols="8">
@@ -374,7 +379,7 @@ export default {
           throw `getPrice: unknown use_price: ${distance.use_price}`
       }
     },
-    getCurrency(activity) {
+    getCurrency(_activity) {
       return this.default_currency
     },
     updateTotals() {
@@ -391,7 +396,7 @@ export default {
         0
       )
     },
-    getDescriptionUserTotalsQuotationLine(cost) {
+    getDescriptionUserTotalsQuotationLine(_cost) {
       return `${this.$trans("distance")}`
     },
     getDescriptionOnlyTotalQuotationLine() {

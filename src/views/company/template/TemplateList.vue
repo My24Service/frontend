@@ -54,6 +54,9 @@
             >{{ data.item.name }}
           </router-link>
         </template>
+        <template #cell(is_active)="data">
+          <b-icon-check v-if="data.item.is_active"></b-icon-check>
+        </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit

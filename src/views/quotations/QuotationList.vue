@@ -176,7 +176,15 @@ export default {
   },
   methods: {
     quotationEditRoute(quotation) {
-      return quotation.preliminary ? 'quotation-edit-preliminary': 'quotation-view'
+      if (quotation.is_sent) {
+        return 'quotation-view'
+      }
+
+      if (quotation.preliminary) {
+        return 'quotation-edit-preliminary'
+      }
+
+      return 'quotation-edit'
     },
     async createOrder(id) {
       await this.$router.push({name: 'order-add-quotation', params: {quotation_id: id}})

@@ -153,7 +153,7 @@ export default {
       try {
         await documentService.delete(this.documentPk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Document has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting document', error)
