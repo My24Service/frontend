@@ -200,7 +200,7 @@
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
-import CostService from "@/models/orders/Cost"
+import {CostService} from "@/models/orders/Cost"
 import {MemberModel} from "@/models/member/Member"
 import TotalsInputs from "@/components/TotalsInputs.vue";
 import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsComponent.vue";

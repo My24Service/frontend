@@ -263,7 +263,7 @@ class CostService extends BaseModel {
   }
 }
 
-export { CostModel }
+export { CostModel, CostService }
 
 export default CostService
 

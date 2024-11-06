@@ -64,8 +64,8 @@
 </template>
 
 <script>
-import {QuotationModel, QuotationService} from "@/models/quotations/Quotation";
 import my24 from "@/services/my24";
+import {QuotationModel, QuotationService} from "@/models/quotations/Quotation";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 
 export default {
@@ -83,6 +83,8 @@ export default {
     viewerTitle() {
       if (this.quotation) {
         return this.quotation.preliminary ? this.$trans("PDF preview") : this.$trans("Definitive PDF")
+      } else {
+        return ''
       }
     },
   },
