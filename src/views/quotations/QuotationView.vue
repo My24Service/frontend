@@ -1,46 +1,12 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
-      <b-modal
-        id="delete-quotation-modal"
-        ref="delete-quotation-modal"
-        v-bind:title="$trans('Delete?')"
-        @ok="doDelete"
-      >
-        <p class="my-4">
-          {{ $trans('Are you sure you want to delete this quotation?') }}
-        </p>
-      </b-modal>
-      <b-modal ref="quotation-viewer" size="xl" v-b-modal.modal-scrollable>
-        <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
-          <b-spinner medium></b-spinner>
-        </div>
-        <iframe :src="`${quotationURL}#toolbar=0&navpanes=0&scrollbar=0`" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
-
-        <template #modal-footer="{ ok }">
-          <b-button
-            class="btn button btn-danger"
-            @click="generatePdf"
-            :disabled="loadingPdf"
-          >
-            <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Recreate PDF') }}
-          </b-button>
-          <b-button
-            class="btn button btn-danger"
-            @click="downloadPdf"
-            v-if="quotation.definitive_pdf_filename"
-            :disabled="loadingPdf"
-          >
-            <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Download PDF') }}
-          </b-button>
-          <!-- Emulate built in modal footer ok and cancel button actions -->
-          <b-button @click="ok()" variant="primary">
-            {{ $trans("close") }}
-          </b-button>
-        </template>
-      </b-modal>
+      <QuotationPDFViewer
+        :quotation-in="quotation"
+        :is-view="true"
+        v-if="quotation"
+        ref="quotation-viewer"
+      />
 
       <header v-if="quotation">
         <div class="page-title">
@@ -73,13 +39,6 @@
           <div
             class="flex-columns"
           >
-            <b-button
-              @click="() => showDeleteModal(quotation.id)"
-              type="button"
-              variant="danger"
-            >
-              {{ $trans('Delete') }}
-            </b-button>
           </div>
         </div>
       </header>
@@ -90,7 +49,7 @@
             <div class="container pdf-container">
               <div class="row">
                   <div class="col-sm-2 logo">
-                      <img class="thumbnail" :src="member.companylogo_url" style="border:0; max-height: 120px; max-width: 120px" :alt="member.name" />
+                      <img class="thumbnail" :src="member.companylogo" style="border:0; max-height: 120px; max-width: 120px" :alt="member.name" />
                   </div>
 
                   <div class="col-sm-4 info">
@@ -238,7 +197,6 @@
   </b-overlay>
 </template>
 <script>
-import my24 from '../../services/my24.js'
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
@@ -247,19 +205,19 @@ import {MemberModel} from "@/models/member/Member"
 import TotalsInputs from "@/components/TotalsInputs.vue";
 import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsComponent.vue";
 import StatusesComponent from "@/components/StatusesComponent.vue";
+import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
 
 export default {
   name: "QuotationView",
   components: {
+    QuotationPDFViewer,
     TotalsInputs,
     DocumentsComponent,
     StatusesComponent
   },
   data() {
     return {
-      loadingPdf: false,
       isLoading: false,
-      iframeLoading: false,
       quotation: null,
       member: new MemberModel(this.$store.getters.getMemberInfo),
       quotationURL: '',
@@ -279,46 +237,6 @@ export default {
     await this.loadQuotation()
   },
   methods: {
-    async doDelete() {
-      this.isLoading = true
-
-      try {
-        await this.quotationService.delete(this.quotationPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Quotation has been deleted'))
-        this.isLoading = false
-        this.$router.push({ name: 'quotation-list'})
-      } catch(error) {
-        this.isLoading = false
-        console.log('Error deleting quotation', error)
-        this.errorToast(this.$trans('Error deleting quotation'))
-      }
-    },
-    showDeleteModal(id) {
-      this.quotationPk = id
-      this.$refs['delete-quotation-modal'].show()
-    },
-    async generatePdf() {
-      this.loadingPdf = true
-
-      try {
-        await this.quotationService.generatePdf(this.quotation.id)
-        await this.downloadPdfBlob()
-        this.loadingPdf = false
-        this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
-      } catch(error) {
-        console.log('error creating pdf', error)
-        this.loadingPdf = false
-        if (error.response?.data?.template_error) {
-          this.errorToast(error.response.data.template_error)
-        } else {
-          this.errorToast(this.$trans('Error creating PDF'))
-        }
-      }
-    },
-    iframeLoaded() {
-      this.iframeLoading = false;
-      URL.revokeObjectURL(this.quotationURL);
-    },
     sendQuotation() {
       this.$router.push({name: 'quotation-send',
         query: {
@@ -326,40 +244,7 @@ export default {
         }}
       );
     },
-    async downloadPdfBlob() {
-      this.iframeLoading = true;
-
-      try {
-        const response = await this.quotationService.downloadPdfBlob(this.quotation.id)
-        const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-        this.quotationURL = URL.createObjectURL(pdfBlob);
-        this.iframeLoading = false
-      } catch(error) {
-        console.log(`error fetching quotation pdf, ${error}`)
-        this.infoToast(
-          this.$trans('No PDF'),
-          this.$trans(
-            'Error fetching definitive PDF. Check if there is an active template or try to recreate.'
-          )
-        )
-        this.iframeLoading = false
-      }
-    },
-    async downloadPdf() {
-      const url =  `/api/quotation/quotation/${this.quotation.id}/download_definitive_pdf/`
-      this.loadingPdf = true;
-
-      my24.downloadItem(
-        url,
-        `quotation-${this.quotation.quotation_id}.pdf`,
-        function() {
-          this.loadingPdf = false;
-        }.bind(this),
-        'post'
-      )
-    },
     showQuotationDialog() {
-      this.downloadPdfBlob()
       this.$refs['quotation-viewer'].show();
     },
     async loadQuotation() {

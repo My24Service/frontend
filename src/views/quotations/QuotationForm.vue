@@ -1,57 +1,12 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
-      <b-modal
-        id="quotation-definitive-modal"
-        ref="quotation-definitive-modal"
-        v-bind:title="$trans('Make definitive?')"
-        v-if="!isView"
-        @ok="doMakeDefinitive"
-      >
-        <p class="my-4">
-          {{ $trans("Are you sure you want to make this quotation definitive?") }}
-        </p>
-      </b-modal>
-
-      <b-modal ref="quotation-viewer" size="xl" v-b-modal.modal-scrollable :title="viewerTitle">
-        <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
-          <b-spinner medium></b-spinner>
-        </div>
-        <iframe :src="`${quotationURL}#toolbar=0&navpanes=0&scrollbar=0`" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
-
-        <template #modal-footer="{ ok }">
-          <b-button
-            class="btn button btn-danger"
-            @click="showMakeDefinitiveModal"
-            v-if="quotation.preliminary"
-            variant="danger"
-          >
-            {{ $trans('Make definitive') }}
-          </b-button>
-          <b-button
-            class="btn button btn-danger"
-            @click="generatePdf"
-            v-if="!quotation.preliminary"
-            :disabled="loadingPdf"
-          >
-            <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Recreate PDF') }}
-          </b-button>
-          <b-button
-            class="btn button btn-danger"
-            @click="downloadPdf"
-            v-if="quotation.definitive_pdf_filename"
-            :disabled="loadingPdf"
-          >
-            <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Download PDF') }}
-          </b-button>
-          <!-- Emulate built in modal footer ok and cancel button actions -->
-          <b-button @click="ok()" variant="primary">
-            {{ $trans("close") }}
-          </b-button>
-        </template>
-      </b-modal>
+      <QuotationPDFViewer
+        :quotation-in="quotation"
+        :is-view="isView"
+        v-if="quotation"
+        ref="quotation-viewer"
+      />
 
       <header>
         <div class="page-title">
@@ -253,7 +208,6 @@
 </template>
 
 <script>
-import my24 from '../../services/my24.js'
 import {useVuelidate} from "@vuelidate/core";
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
@@ -280,10 +234,12 @@ import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsCompo
 import CustomerView from "@/views/quotations/CustomerView.vue";
 import StatusesComponent from "@/components/StatusesComponent.vue";
 import QuotationView from "@/views/quotations/QuotationView.vue";
+import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
 
 export default {
   name: 'QuotationForm',
   components: {
+    QuotationPDFViewer,
     DocumentsComponent,
     QuotationLine,
     Chapter,
@@ -326,7 +282,6 @@ export default {
       COST_TYPE_EXTRA_WORK,
       COST_TYPE_ACTUAL_WORK,
       isLoading: false,
-      loadingPdf: false,
       submitClicked: false,
       errorMessage: null,
       quotationPK: null,
@@ -337,26 +292,16 @@ export default {
       invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
       customerPk: null,
       customer: null,
-
       loadChapterModel: null,
-
       customerService: new CustomerService(),
-
       quotationService: new QuotationService(),
       chapterService: new ChapterService(),
       costService: new CostService(),
       quotationLineService: new QuotationLineService(),
-
       quotationLines: [],
-
-      quotationURL: '',
-      iframeLoading: true,
     }
   },
   computed: {
-    viewerTitle() {
-      return this.quotation.preliminary ? this.$trans("PDF preview") : this.$trans("Definitive PDF")
-    },
     isEdit() {
       return !this.isNew
     },
@@ -371,13 +316,6 @@ export default {
     }
   },
   methods: {
-    iframeLoaded() {
-      this.iframeLoading = false;
-      URL.revokeObjectURL(this.quotationURL);
-    },
-    showMakeDefinitiveModal() {
-      this.$refs['quotation-definitive-modal'].show()
-    },
     sendQuotation() {
       this.$router.push({name: 'quotation-send',
         query: {
@@ -385,100 +323,7 @@ export default {
         }}
       );
     },
-    async doMakeDefinitive() {
-      this.isLoading = true
-
-      try {
-        await this.quotationService.makeDefinitive(this.quotation.id)
-        this.errorToast(this.$trans('Success making quotation definitive'))
-        this.isLoading = false
-        await this.$router.push({ name: 'quotation-view', params: {pk: this.quotation.id }})
-      } catch(error) {
-        this.errorToast(this.$trans('Error making quotation definitive'))
-        this.isLoading = false
-        if (error.response?.data?.template_error) {
-          this.errorToast(error.response.data.template_error)
-          return
-        }
-        this.errorToast(this.$trans('Error generating pdf'))
-      }
-    },
-    async generatePdf() {
-      this.loadingPdf = true
-
-      try {
-        await this.quotationService.generatePdf(this.quotation.id)
-        await this.loadQuotation()
-        await this.downloadPdfBlob()
-        this.loadingPdf = false
-        this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
-      } catch(error) {
-        console.log('error generating pdf', error)
-        this.loadingPdf = false
-        if (error.response?.data?.template_error) {
-          this.errorToast(error.response.data.template_error)
-        } else {
-          this.errorToast(this.$trans('Error creating PDF'))
-        }
-      }
-    },
-    async downloadPdf() {
-      const url = `/api/quotation/quotation/${this.quotation.id}/download_definitive_pdf/`
-      this.loadingPdf = true;
-
-      my24.downloadItem(
-        url,
-        `quotation-${this.quotation.quotation_id}.pdf`,
-        function() {
-          this.loadingPdf = false;
-        }.bind(this),
-        'post'
-      )
-    },
-    async downloadPdfBlob() {
-      this.iframeLoading = true;
-
-      try {
-        const response = await this.quotationService.downloadPdfBlob(this.quotation.id)
-        const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-        this.quotationURL = URL.createObjectURL(pdfBlob);
-        this.iframeLoading = false
-      } catch(error) {
-        console.log(`error fetching quotation pdf, ${error}`)
-        this.infoToast(
-          this.$trans('No PDF'),
-          this.$trans(
-            'Error fetching definitive PDF. Check if there is an active template or try to recreate.'
-          )
-        )
-        this.iframeLoading = false
-      }
-    },
-    async downloadPreviewPdfBlob() {
-      this.iframeLoading = true;
-
-      try {
-        const response = await this.quotationService.downloadPreviewPdfBlob(this.quotation.id)
-        const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-        this.quotationURL = URL.createObjectURL(pdfBlob);
-        this.iframeLoading = false
-      } catch(error) {
-        console.log(`error fetching quotation pdf, ${error}`)
-        this.infoToast(
-          this.$trans('No PDF'),
-          this.$trans(
-            'Error fetching preview PDF. Check if there is an active template.'
-          )
-        )
-        this.iframeLoading = false
-      }
-    },
     async showQuotationDialog() {
-      if (this.quotation.preliminary) {
-        await this.downloadPreviewPdfBlob()
-      } else {
-        await this.downloadPdfBlob()
-      }
       this.$refs['quotation-viewer'].show();
     },
     // quotation lines
@@ -513,7 +358,6 @@ export default {
       this.loadChapterModel = chapter
     },
 
-    // customer
     async getCustomer(pk) {
       const customerData = await this.customerService.detail(pk)
       this.customer = new CustomerModel(customerData)
@@ -618,21 +462,6 @@ export default {
 <style scoped>
 .component-margin {
   margin-bottom: 10px;
-}
-
-.iframe-loader {
-  min-height: 720px
-}
-iframe {
-  min-height: 720px;
-  width: 100%;
-}
-.iframe-loader {
-  min-height: 720px
-}
-iframe {
-  min-height: 720px;
-  width: 100%;
 }
 .fixed-position .position-relative {
   position: fixed !important;

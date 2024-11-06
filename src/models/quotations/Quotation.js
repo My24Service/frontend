@@ -23,6 +23,7 @@ class QuotationModel {
   accepted = false
   preliminary
   quotation_expire_days
+  definitive_pdf_filename
 
   vat_type
   vat
