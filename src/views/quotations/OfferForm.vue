@@ -129,9 +129,8 @@ export default {
     };
   },
   async mounted() {
-    this.offer.quotation = this.$route.query.quotationId
-    await this.loadDocuments()
     await this.loadData()
+    await this.loadDocuments()
     await this.loadQuotation()
   },
   data() {
