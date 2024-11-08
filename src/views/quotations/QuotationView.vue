@@ -13,8 +13,8 @@
           <h3>
             <b-icon icon="file-earmark-check-fill"></b-icon>
             <router-link
-              :to="{name: 'quotation-list' }"
-            >{{ $trans('Quotations') }}</router-link>
+              :to="{name: 'quotations-sent' }"
+            >{{ $trans('Sent') }}</router-link>
             /
             <strong>{{ quotation.quotation_name }}</strong>
             <span>
@@ -180,7 +180,7 @@
                   <DocumentsComponent
                     v-if="quotation && quotation.id"
                     :quotation="quotation"
-                    :is-view="isView"
+                    :is-view="true"
                   />
                 </div>
                 <div class="col-6">

@@ -185,6 +185,9 @@ export default {
   methods: {
     getRowDataRoute(quotation) {
       if (!quotation.preliminary) {
+        if (quotation.is_sent) {
+          return 'quotations-sent-view'
+        }
         return 'quotation-view'
       }
 

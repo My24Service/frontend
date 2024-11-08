@@ -104,10 +104,10 @@
 </template>
 <script>
 import my24 from '../../services/my24.js'
-import { useVuelidate } from "@vuelidate/core";
-import { required } from "@vuelidate/validators";
-import { OfferService, OfferModel } from "@/models/quotations/Offer.js";
-import {QuotationService, QuotationModel} from '@/models/quotations/Quotation'
+import {useVuelidate} from "@vuelidate/core";
+import {required} from "@vuelidate/validators";
+import {OfferModel, OfferService} from "@/models/quotations/Offer.js";
+import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 
 
 export default {
@@ -210,10 +210,9 @@ export default {
       this.isLoading = true;
 
       try {
-        const result = await this.offerService.getDocuments(
+        this.documents = await this.offerService.getDocuments(
           this.offer.quotation
-        );
-        this.documents = result
+        )
         this.isLoading = false;
       } catch (error) {
         console.log("Error fetching documents", error);
@@ -253,7 +252,7 @@ export default {
             this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
           }
           this.$router.go(-1);
-          this.$router.push({name: 'quotations-sent'});
+          await this.$router.push({name: 'quotations-sent'});
         } catch (error) {
           console.log("Error sending quotation", error);
           this.errorToast(this.$trans("Error sending quotation"));
@@ -274,7 +273,7 @@ export default {
         } else {
           this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
         }
-        this.$router.push({name: 'quotations-sent'});
+        await this.$router.push({name: 'quotations-sent'});
       } catch(error) {
         console.log("Error sending quotation", error);
         this.errorToast(this.$trans("Error sending quotation"));
