@@ -99,6 +99,13 @@ class InvoiceService extends BaseModel {
       responseType: 'arraybuffer'
     })
   }
+
+  downloadPreviewPdfBlob(id) {
+    const url = `/invoice/invoice/${id}/generate_preview_pdf/`
+    return new this.axios.post(url, {}, {
+      responseType: 'arraybuffer'
+    })
+  }
 }
 
 const invoiceService = new InvoiceService()

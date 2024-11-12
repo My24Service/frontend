@@ -1,20 +1,14 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
-      <b-modal
-        id="invoice-definitive-modal"
-        ref="invoice-definitive-modal"
-        v-bind:title="$trans('Make definitive?')"
-        v-if="!isView"
-        @ok="doMakeDefinitive"
-      >
-        <p class="my-4">
-          {{ $trans("Are you sure you want to make this invoice definitive?") }}
-        </p>
-        <p>
-          <strong><i>{{ $trans("You won't be able to make changes after that") }}</i></strong>
-        </p>
-      </b-modal>
+
+      <InvoicePDFViewer
+        :invoice-in="invoice"
+        :is-view="false"
+        v-if="invoice"
+        ref="invoice-viewer"
+      />
+
       <header>
         <div class="page-title">
           <h3>
@@ -444,61 +438,11 @@
 
       </b-form>
 
-      <b-modal ref="invoice-viewer" size="xl" v-b-modal.modal-scrollable>
-        <div class="d-flex flex-row justify-content-center align-items-center iframe-loader"
-            v-if="iframeLoading">
-          <b-spinner medium></b-spinner>
-        </div>
-        <iframe
-          :src="this.invoiceURL"
-          style="min-height:720px; width: 100%; border: 0"
-          @load="iframeLoaded"
-          v-show="!iframeLoading">
-        </iframe>
-        <template #modal-footer="{ ok }">
-          <b-button
-            class="btn button btn-danger"
-            @click="showMakeDefinitiveModal"
-            v-if="invoice.preliminary"
-            variant="danger"
-          >
-            {{ $trans('Make definitive') }}
-          </b-button>
-          <b-button
-            v-if="!isCustomer && !isBranchEmployee"
-            id="recreateInvoicePdf"
-            @click="recreateInvoicePdf"
-            :disabled="isGeneratingPDF"
-            class="btn btn-secondary"
-            type="button"
-            variant="secondary"
-          >
-            <b-spinner small v-if="isGeneratingPDF"></b-spinner>
-            {{ $trans('re-generate PDF') }}
-          </b-button>
-          <b-button
-            v-if="!isCustomer && !isBranchEmployee && invoice.invoice_pdf_from_docx_filename"
-            @click="downloadPdf"
-            :disabled="loadingPdf"
-            type="button"
-            variant="primary"
-          >
-            <b-spinner small v-if="loadingPdf"></b-spinner>
-            <b-icon icon="file-earmark-pdf"></b-icon>
-            {{ $trans('Download PDF') }}
-          </b-button>
-          <!-- Emulate built in modal footer ok and cancel button actions -->
-          <b-button @click="ok()" variant="primary">
-            {{ $trans("close") }}
-          </b-button>
-        </template>
-      </b-modal>
     </div>
   </b-overlay>
 </template>
 
 <script>
-import my24 from '../../services/my24.js'
 import {toDinero} from "@/utils";
 import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
 import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
@@ -524,11 +468,13 @@ import {
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import {useVuelidate} from "@vuelidate/core";
 import TotalsInputs from "../../components/TotalsInputs";
+import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 
 export default {
   name: 'InvoiceForm',
   mixins: [invoiceMixin],
   components: {
+    InvoicePDFViewer,
     PriceInput,
     Collapse,
     HoursComponent,
@@ -670,77 +616,8 @@ export default {
     this.isLoading = false
   },
   methods: {
-    async doMakeDefinitive() {
-      this.isLoading = true
-
-      try {
-        await this.invoiceService.makeDefinitive(this.invoice.id)
-        this.errorToast(this.$trans('Success making invoice definitive'))
-        this.isLoading = false
-        await this.$router.push({ name: 'invoice-view', params: {uuid: this.invoice.uuid }})
-      } catch(error) {
-        this.errorToast(this.$trans('Error making invoice definitive'))
-        this.isLoading = false
-      }
-    },
-    showMakeDefinitiveModal() {
-      this.$refs['invoice-definitive-modal'].show()
-    },
-    async downloadPdf() {
-      const url =  `/api/invoice/invoice/${this.invoice.id}/download_pdf_from_template/`
-      this.loadingPdf = true;
-
-      my24.downloadItem(
-        url,
-        `invoice-${this.invoice.invoice_id}.pdf`,
-        function() {
-          this.loadingPdf = false;
-        }.bind(this),
-        'post'
-      )
-    },
-    iframeLoaded() {
-        this.iframeLoading = false;
-    },
-    async downloadPdfBlob() {
-      this.iframeLoading = true;
-
-      try {
-        const response = await this.invoiceService.downloadPdfBlob(this.invoice.id)
-        const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-        this.invoiceURL = URL.createObjectURL(pdfBlob);
-        this.iframeLoading = false
-      } catch(error) {
-        console.log(`error fetching invoice pdf, ${error}`)
-        this.errorToast(
-          this.$trans(
-            'Error fetching invoice pdf, Check if there is an active template or try to regenerate'
-          )
-        )
-        this.iframeLoading = false
-      }
-    },
     showInvoiceDialog() {
-      this.downloadPdfBlob()
       this.$refs['invoice-viewer'].show();
-    },
-    async recreateInvoicePdf() {
-        this.isLoading = true;
-        this.isGeneratingPDF = true;
-        try {
-            await this.invoiceService.recreateInvoicePdf(this.invoice.id);
-            this.infoToast(this.$trans('Success'), this.$trans('Invoice pdf recreated'));
-            await this.loadInvoice()
-            await this.downloadPdfBlob()
-            this.isLoading = false;
-            this.isGeneratingPDF = false;
-        }
-        catch (err) {
-            console.log('Error recreating invoice pdf', err);
-            this.errorToast(this.$trans('Error recreating invoice pdf'));
-            this.isLoading = false;
-            this.isGeneratingPDF = false;
-        }
     },
     // openInvoice() {
     //   const routeData = this.$router.resolve({

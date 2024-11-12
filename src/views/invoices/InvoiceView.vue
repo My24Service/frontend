@@ -1,38 +1,15 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
-      <b-modal ref="invoice-viewer" size="xl" v-b-modal.modal-scrollable>
-        <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
-          <b-spinner medium></b-spinner>
-        </div>
-        <iframe :src="invoiceURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
 
-        <template #modal-footer="{ ok }">
-          <b-button
-            class="btn button btn-danger"
-            @click="generatePdf"
-            :disabled="loadingPdf"
-          >
-            <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Regenerate pdf') }}
-          </b-button>
-          <b-button
-            class="btn button btn-danger"
-            @click="downloadPdf"
-            v-if="data.invoice_pdf_from_docx_filename"
-            :disabled="loadingPdf"
-          >
-            <b-spinner small v-if="loadingPdf"></b-spinner>
-            {{ $trans('Download pdf') }}
-          </b-button>
-          <!-- Emulate built in modal footer ok and cancel button actions -->
-          <b-button @click="ok()" variant="primary">
-            {{ $trans("close") }}
-          </b-button>
-        </template>
-      </b-modal>
+      <InvoicePDFViewer
+        :invoice-in="invoice"
+        :is-view="true"
+        v-if="invoice"
+        ref="invoice-viewer"
+      />
 
-      <header v-if="data">
+      <header v-if="invoice">
         <div class="page-title">
           <h3>
             <b-icon icon="file-earmark-check-fill"></b-icon>
@@ -40,7 +17,7 @@
               :to="{name: 'invoice-list' }"
             >{{ $trans('Invoices') }}</router-link>
             /
-            <strong>{{ data.invoice_id }}</strong>
+            <strong>{{ invoice.invoice_id }}</strong>
             <span>
               <b-link
                 class="btn btn-sm btn-primary"
@@ -54,7 +31,7 @@
             <span>
               <router-link
                 class="btn btn-sm btn-primary"
-                :to="{name:'order-view', params: {pk: data.order}}">
+                :to="{name:'order-view', params: {pk: invoice.order}}">
                 <b-icon-arrow-up-right-circle
                 ></b-icon-arrow-up-right-circle>
                 {{ $trans('Order') }}
@@ -83,52 +60,52 @@
         </div>
       </header>
 
-      <div class="page-detail" v-if="data">
+      <div class="page-detail" v-if="invoice">
         <div class="flex-columns">
           <div class="panel col-2-3">
             <div class="container pdf-container">
               <div class="row">
                 <div class="col-sm-2 logo">
-                    <img class="thumbnail" :src="companyLogo" style="border:0; max-height: 120px; max-width: 120px" :alt="data.member.name" />
+                    <img class="thumbnail" :src="companyLogo" style="border:0; max-height: 120px; max-width: 120px" :alt="invoice.member.name" />
                 </div>
                 <div class="col-sm-4 info">
-                    <b>{{ data.member.name }}</b><br/>
-                    {{ data.member.address }}<br/>
-                    {{ data.member.postal }} {{ data.member.city }}<br/>
-                    {{ data.member.tel }} - {{ data.member.email}}<br/>
-                  <b>{{ $trans('VAT number') }}</b> {{ data.member.vat_number }}<br/>
-                  <b>{{ $trans('Chamber of commerce') }}</b> {{ data.member.chamber_of_commerce }}<br/>
+                    <b>{{ invoice.member.name }}</b><br/>
+                    {{ invoice.member.address }}<br/>
+                    {{ invoice.member.postal }} {{ invoice.member.city }}<br/>
+                    {{ invoice.member.tel }} - {{ invoice.member.email}}<br/>
+                  <b>{{ $trans('VAT number') }}</b> {{ invoice.member.vat_number }}<br/>
+                  <b>{{ $trans('Chamber of commerce') }}</b> {{ invoice.member.chamber_of_commerce }}<br/>
                 </div>
                 <div class="col-sm-6 panel panel-default">
                   <div class="panel-body">
                     <div class="row">
                       <span class="pull-left col-sm-4"><b>{{ $trans('Invoice number') }}</b></span>
                       <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.invoice_id }}</span>
+                        <span class="pull-right">{{ invoice.invoice_id }}</span>
                       </span>
                     </div>
                     <div class="row">
                       <span class="pull-left col-sm-4"><b>{{ $trans('Reference') }}</b></span>
                       <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.reference }}&nbsp;</span>
+                        <span class="pull-right">{{ invoice.reference }}&nbsp;</span>
                       </span>
                     </div>
                     <div class="row">
                       <span class="pull-left col-sm-4"><b>{{ $trans('Description') }}</b></span>
                       <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.description }}&nbsp;</span>
+                        <span class="pull-right">{{ invoice.description }}&nbsp;</span>
                       </span>
                     </div>
                     <div class="row">
                       <span class="pull-left col-sm-4"><b>{{ $trans('Order ID') }}</b></span>
                       <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.order_id }}</span>
+                        <span class="pull-right">{{ invoice.order_id }}</span>
                       </span>
                     </div>
                     <div class="row">
                       <span class="pull-left col-sm-4"><b>{{ $trans('Order reference') }}</b></span>
                       <span class="col-sm-6 underline">
-                        <span class="pull-right">{{ data.order_reference }}</span>
+                        <span class="pull-right">{{ invoice.order_reference }}</span>
                       </span>
                     </div>
                   </div>
@@ -139,25 +116,25 @@
                     <div class="row">
                       <span class="pull-left col-sm-6"><b>{{ $trans('Customer') }}</b></span>
                       <span class="col-sm-6 underline">
-                          <span class="pull-right">{{ data.customer.name }}</span>
+                          <span class="pull-right">{{ invoice.customer.name }}</span>
                       </span>
                     </div>
                     <div class="row">
                       <span class="pull-left col-sm-6"><b>{{ $trans('Address') }}</b></span>
                       <span class="col-sm-6 underline">
-                          <span class="pull-right">{{ data.customer.address }}</span>
+                          <span class="pull-right">{{ invoice.customer.address }}</span>
                       </span>
                     </div>
                     <div class="row">
                       <span class="pull-left col-sm-6"><b>{{ $trans('Postal') }}/{{ $trans('city') }}</b></span>
                       <span class="col-sm-6 underline">
-                          <span class="pull-right">{{ data.customer.country_code }}-{{ data.customer.postal }} {{ data.customer.city }}</span>
+                          <span class="pull-right">{{ invoice.customer.country_code }}-{{ invoice.customer.postal }} {{ invoice.customer.city }}</span>
                       </span>
                     </div>
                     <div class="row">
                       <span class="pull-left col-sm-6"><b>{{ $trans('Term of payment') }}</b></span>
                       <span class="col-sm-6 underline">
-                          <span class="pull-right">{{ data.term_of_payment_days }} days</span>
+                          <span class="pull-right">{{ invoice.term_of_payment_days }} days</span>
                       </span>
                     </div>
                   </div>
@@ -165,7 +142,7 @@
                     <div class="row"></div>
                   </div>
               </div>
-              <div class="row" v-if="data.invoicelines.length">
+              <div class="row" v-if="invoice.invoicelines.length">
                   <p><b>{{ $trans('Invoice lines') }}</b></p>
                   <table class="table table-bordered">
                       <thead>
@@ -176,7 +153,7 @@
                           <th>{{ $trans('VAT') }}</th>
                       </thead>
                       <tbody>
-                          <tr v-for="invoiceline in data.invoicelines" :key="invoiceline.id">
+                          <tr v-for="invoiceline in invoice.invoicelines" :key="invoiceline.id">
                               <td>{{ invoiceline.description }}</td>
                               <td>{{ invoiceline.amount }}</td>
                               <td>{{ invoiceline.price_dinero.toFormat('$0.00') }}</td>
@@ -190,9 +167,9 @@
                 <span class="total-text">{{ $trans('Invoice total') }}</span>
 
                 <TotalsInputs
-                  :total="data.total_dinero"
+                  :total="invoice.total_dinero"
                   :is-final-total="true"
-                  :vat="data.vat_dinero"
+                  :vat="invoice.vat_dinero"
                 />
               </div>
               <br/>
@@ -205,7 +182,7 @@
               <div class="row">
                 <div class="col-6">
                   <StatusesComponent
-                    :statuses="data.statuses"
+                    :statuses="invoice.statuses"
                   />
                 </div>
               </div>
@@ -217,21 +194,22 @@
   </b-overlay>
 </template>
 <script>
-import my24 from '../../services/my24.js'
-import { InvoiceService, InvoiceModel } from '../../models/invoices/Invoice.js'
+import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
 import TotalsInputs from "../../components/TotalsInputs";
 import StatusesComponent from "@/components/StatusesComponent.vue";
+import InvoicePDFViewer from "@/views/invoices/InvoicePDFViewer.vue";
 
 export default {
   name: "InvoiceView",
   components: {
+    InvoicePDFViewer,
     TotalsInputs,
     StatusesComponent
   },
   data() {
     return {
       isLoading: false,
-      data: null,
+      invoice: null,
       companyLogo: null,
       invoiceService: new InvoiceService(),
       iframeLoading: false,
@@ -245,64 +223,11 @@ export default {
     }
   },
   async created() {
-    this.loadInvoice()
+    await this.loadInvoice()
   },
   methods: {
-    iframeLoaded() {
-      this.iframeLoading = false;
-      URL.revokeObjectURL(this.invoiceURL);
-    },
-    async downloadPdf() {
-      const url =  `/api/invoice/invoice/${this.data.id}/download_pdf_from_template/`
-      this.loadingPdf = true;
-
-      my24.downloadItem(
-        url,
-        `invoice-${this.data.invoice_id}.pdf`,
-        function() {
-          this.loadingPdf = false;
-        }.bind(this),
-        'post'
-      )
-    },
     showInvoiceDialog() {
-      this.downloadPdfBlob()
       this.$refs['invoice-viewer'].show();
-    },
-    async downloadPdfBlob() {
-      this.iframeLoading = true;
-
-      try {
-        const response = await this.invoiceService.downloadPdfBlob(this.data.id)
-        const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-        this.invoiceURL = URL.createObjectURL(pdfBlob);
-        this.iframeLoading = false
-      } catch(error) {
-        console.log(`error fetching invoice pdf, ${error}`)
-        this.errorToast(
-          this.$trans(
-            'Error fetching invoice pdf. Check if there is an active template or try to regenerate'
-          )
-        )
-        this.iframeLoading = false
-      }
-    },
-    async generatePdf() {
-      this.isLoading = true;
-      this.loadingPdf = true;
-      try {
-          await this.invoiceService.recreateInvoicePdf(this.data.id);
-          this.infoToast(this.$trans('Success'), this.$trans('Invoice pdf recreated'));
-          await this.downloadPdfBlob()
-          this.isLoading = false;
-          this.loadingPdf = false;
-      }
-      catch (err) {
-          console.log('Error recreating invoice pdf', err);
-          this.errorToast(this.$trans('Error recreating invoice pdf'));
-          this.isLoading = false;
-          this.loadingPdf = false;
-      }
     },
     async loadInvoice() {
       this.isLoading = true
@@ -310,7 +235,7 @@ export default {
         const createPDFHeader = this.$route.query.create_pdf
         const data = await this.invoiceService.getByUuid(this.uuid, createPDFHeader)
 
-        this.data = new InvoiceModel(data)
+        this.invoice = new InvoiceModel(data)
         this.companyLogo = this.data.member.companylogo_url
         this.isLoading = false
       }
