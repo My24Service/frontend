@@ -10,6 +10,9 @@
       <p class="my-4">
         {{ $trans("Are you sure you want to make this invoice definitive?") }}
       </p>
+      <p>
+        <strong><i>{{ $trans("You won't be able to make changes after that") }}</i></strong>
+      </p>
     </b-modal>
 
     <b-modal
