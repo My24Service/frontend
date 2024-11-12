@@ -16,6 +16,8 @@ class InvoiceModel {
   total
   total_currency
 
+  invoice_pdf_from_docx_filename
+
   priceFields = ['vat', 'total']
 
   constructor(invoiceData) {
@@ -94,7 +96,7 @@ class InvoiceService extends BaseModel {
   }
 
   downloadPdfBlob(id) {
-    const url = `/invoice/invoice/${id}/download_pdf_from_template/`
+    const url = `/invoice/invoice/${id}/download_pdf/`
     return new this.axios.post(url, {}, {
       responseType: 'arraybuffer'
     })

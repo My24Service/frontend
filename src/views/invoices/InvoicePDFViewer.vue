@@ -32,25 +32,31 @@
           {{ $trans('Make definitive') }}
         </b-button>
         <b-button
-          class="btn button btn-danger"
-          @click="generatePdf"
-          v-if="!invoice.preliminary"
+          v-if="!isCustomer && !isBranchEmployee"
+          id="recreateInvoicePdf"
+          @click="recreateInvoicePdf"
           :disabled="isLoading"
+          class="btn btn-secondary"
+          type="button"
+          variant="secondary"
         >
           <b-spinner small v-if="isLoading"></b-spinner>
           {{ $trans('Recreate PDF') }}
         </b-button>
         <b-button
-          class="btn button btn-danger"
+          v-if="!isCustomer && !isBranchEmployee && invoice.invoice_pdf_from_docx_filename"
           @click="downloadPdf"
-          v-if="invoice.definitive_pdf_filename"
           :disabled="isLoading"
+          type="button"
+          variant="primary"
         >
           <b-spinner small v-if="isLoading"></b-spinner>
+          <b-icon icon="file-earmark-pdf"></b-icon>
           {{ $trans('Download PDF') }}
         </b-button>
+        <!-- Emulate built in modal footer ok and cancel button actions -->
         <b-button @click="ok()" variant="primary">
-          {{ $trans("Close") }}
+          {{ $trans("close") }}
         </b-button>
       </template>
 
@@ -68,11 +74,14 @@
 
 <script>
 import my24 from "@/services/my24";
+import {componentMixin} from "@/utils";
 import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
+import invoiceMixin from "@/views/invoices/invoice_form/mixin";
 
 export default {
   name: "invoicePDFViewer",
+  mixins: [invoiceMixin, componentMixin],
   props: {
     invoiceIn: {
       type: InvoiceModel
@@ -101,6 +110,21 @@ export default {
     }
   },
   methods: {
+    async recreateInvoicePdf() {
+      this.isLoading = true;
+      try {
+        await this.invoiceService.recreateInvoicePdf(this.invoice.id);
+        this.infoToast(this.$trans('Success'), this.$trans('Invoice pdf recreated'));
+        await this.loadInvoice()
+        await this.downloadPdfBlob()
+        this.isLoading = false;
+      }
+      catch (err) {
+        console.log('Error recreating invoice pdf', err);
+        this.errorToast(this.$trans('Error recreating invoice pdf'));
+        this.isLoading = false;
+      }
+    },
     async doMakeDefinitive() {
       this.isLoading = true
 
@@ -117,25 +141,6 @@ export default {
           return
         }
         this.errorToast(this.$trans('Error generating pdf'))
-      }
-    },
-    async generatePdf() {
-      this.isLoading = true
-
-      try {
-        await this.invoiceService.generatePdf(this.invoice.id)
-        await this.loadInvoice()
-        await this.downloadPdfBlob()
-        this.isLoading = false
-        this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
-      } catch(error) {
-        console.log('error generating pdf', error)
-        this.isLoading = false
-        if (error.response?.data?.template_error) {
-          this.errorToast(error.response.data.template_error)
-        } else {
-          this.errorToast(this.$trans('Error creating PDF'))
-        }
       }
     },
     async downloadPdf() {
