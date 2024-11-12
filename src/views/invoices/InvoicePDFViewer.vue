@@ -114,14 +114,14 @@ export default {
       this.isLoading = true;
       try {
         await this.invoiceService.recreateInvoicePdf(this.invoice.id);
-        this.infoToast(this.$trans('Success'), this.$trans('Invoice pdf recreated'));
+        this.infoToast(this.$trans('Success'), this.$trans('Invoice PDF created'));
         await this.loadInvoice()
         await this.downloadPdfBlob()
         this.isLoading = false;
       }
       catch (err) {
         console.log('Error recreating invoice pdf', err);
-        this.errorToast(this.$trans('Error recreating invoice pdf'));
+        this.errorToast(this.$trans('Error recreating invoice PDF'));
         this.isLoading = false;
       }
     },
@@ -140,7 +140,7 @@ export default {
           this.errorToast(error.response.data.template_error)
           return
         }
-        this.errorToast(this.$trans('Error generating pdf'))
+        this.errorToast(this.$trans('Error generating PDF'))
       }
     },
     async downloadPdf() {

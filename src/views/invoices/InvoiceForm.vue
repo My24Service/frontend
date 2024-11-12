@@ -17,8 +17,8 @@
               :to="{name: 'invoice-list' }"
             >{{ $trans('Invoices') }}</router-link>
             /
-            <span v-if="!isEdit">{{ $trans('New invoice') }}</span>
-            <span v-if="isEdit">{{ $trans('Update invoice') }}</span>
+            <span v-if="!isEdit">{{ $trans('New invoice') }} / {{ $trans('order') }} {{ order_id }}</span>
+            <span v-if="isEdit">{{ $trans('Update invoice') }} / {{ $trans('order') }} {{ order_id }}</span>
             <span v-if="isEdit">
               <b-link
                 class="btn btn-sm btn-primary"
@@ -535,6 +535,7 @@ export default {
 
       invoice_id: null,
       order_pk: null,
+      order_id: null,
       order_reference: null,
 
       default_currency: this.$store.getters.getDefaultCurrency,
@@ -586,6 +587,7 @@ export default {
     // set data in component
     this.invoice_id = invoiceData.invoice_id
     this.order_pk = invoiceData.order_pk
+    this.order_id = invoiceData.order_id
     this.invoice.order = this.order_pk
     this.invoice.invoice_id = this.invoice_id
     this.invoice.reference = invoiceData.order_reference

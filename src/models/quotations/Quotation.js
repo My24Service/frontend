@@ -6,6 +6,7 @@ import { QuotationLineModel } from "./QuotationLine";
 class QuotationModel {
   id
   uuid
+  quotation_id
   name
   description
   customer_id

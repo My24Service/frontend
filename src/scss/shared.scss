@@ -454,15 +454,17 @@ dl {
     line-height: 1.9;
     font-weight: 500;
     opacity: .5;
-    display: flex;
+    //display: flex;
     align-items: center;
     justify-content: end;
+    grid-column-start: 1;
   }
   dd {
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.6;
+    grid-column-start: 2;
     > * {
       margin-bottom: 0;
     }
