@@ -20,9 +20,6 @@ import {AUTH_LEVELS} from "@/constants";
 import EquipmentView from "../views/equipment/EquipmentView";
 import LocationView from "../views/equipment/LocationView";
 
-import ImportForm from '../views/customer/ImportForm.vue'
-import ImportList from '../views/customer/ImportList.vue'
-
 export default [
 {
   path: '/customers',
@@ -145,44 +142,6 @@ export default [
       path: '/customers/calendar',
       components: {
         'app-content': Calendar,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-
-    // import
-    {
-      name: 'customer-import-list',
-      path: '/customers/import',
-      components: {
-        'app-content': ImportList,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'customer-import-add',
-      path: '/customers/import/form',
-      components: {
-        'app-content': ImportForm,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'customer-import-edit',
-      path: '/customers/import/form/:pk',
-      components: {
-        'app-content': ImportForm,
         'app-subnav': SubNavCustomers
       },
       props: {
