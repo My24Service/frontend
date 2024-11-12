@@ -92,7 +92,7 @@ class InvoiceService extends BaseModel {
   }
 
   recreateInvoicePdf(pk) {
-    return this.axios.post(`${this.url}${pk}/recreate_pdf/?gotenberg=1`)
+    return this.axios.post(`${this.url}${pk}/recreate_pdf/`)
   }
 
   downloadPdfBlob(id) {
@@ -110,7 +110,4 @@ class InvoiceService extends BaseModel {
   }
 }
 
-const invoiceService = new InvoiceService()
-
-export default invoiceService
 export { InvoiceModel, InvoiceService }
