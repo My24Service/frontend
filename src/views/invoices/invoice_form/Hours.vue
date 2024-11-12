@@ -29,7 +29,7 @@
 
       <b-container fluid v-if="!isLoading && !hasStoredData">
         <b-row>
-          <b-col cols="2">
+          <b-col cols="4">
             <HeaderCell
               :text='$trans("Engineer")'
             />
@@ -39,7 +39,7 @@
               :text='$trans("Hours")'
             />
           </b-col>
-          <b-col cols="4">
+          <b-col cols="3">
             <HeaderCell
               :text='$trans("Engineer rate")'
               />
@@ -49,19 +49,19 @@
               :text='$trans("VAT type")'
               />
           </b-col>
-          <b-col cols="3" />
+          <b-col cols="2" />
         </b-row>
         <b-row v-for="activity in costService.collection" :key="activity.user" class="material_row">
-          <b-col cols="2" v-if="!activity.is_partner">
+          <b-col cols="4" v-if="!activity.is_partner">
             {{ getFullname(activity.user) }}
           </b-col>
-          <b-col cols="2" v-if="activity.is_partner">
+          <b-col cols="4" v-else>
             {{ activity.full_name }} ({{ activity.partner_companycode }})
           </b-col>
           <b-col cols="1">
             {{ activity.amount_duration_read }}
           </b-col>
-          <b-col cols="4">
+          <b-col cols="3">
             <b-form-radio-group
               @change="updateTotals"
               v-model="activity.use_price"
@@ -96,7 +96,7 @@
           <b-col cols="2">
             <VAT @vatChanged="(val) => changeVatType(activity, val)" />
           </b-col>
-          <b-col cols="3">
+          <b-col cols="2">
             <TotalsInputs
               :total="activity.total_dinero"
               :vat="activity.vat_dinero"

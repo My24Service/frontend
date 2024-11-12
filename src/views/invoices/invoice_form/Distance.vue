@@ -28,19 +28,14 @@
 
       <b-container fluid v-if="!isLoading && !hasStoredData">
         <b-row>
-          <b-col cols="2">
+          <b-col cols="3">
             <HeaderCell
             :text='$trans("Engineer")'
             />
           </b-col>
           <b-col cols="1">
             <HeaderCell
-              :text='$trans("To")'
-            />
-          </b-col>
-          <b-col cols="1">
-            <HeaderCell
-              :text='$trans("Back")'
+              :text="$trans('To/Back')"
             />
           </b-col>
           <b-col cols="1">
@@ -48,35 +43,32 @@
               :text='$trans("Total")'
             />
           </b-col>
-          <b-col cols="4">
+          <b-col cols="3">
             <HeaderCell
               :text='$trans("Rate")'
             />
           </b-col>
-          <b-col cols="3">
+          <b-col cols="2">
             <HeaderCell
               :text='$trans("VAT type")'
             />
           </b-col>
-          <b-col cols="3" />
+          <b-col cols="2" />
         </b-row>
         <b-row v-for="distance in costService.collection" :key="distance.user_id" class="distance_row">
-          <b-col cols="2" v-if="!distance.is_partner">
+          <b-col cols="3" v-if="!distance.is_partner">
             {{ getFullname(distance.user) }}
           </b-col>
-          <b-col cols="2" v-if="distance.is_partner">
+          <b-col cols="3" v-else>
             {{ distance.full_name }} ({{ distance.partner_companycode }})
           </b-col>
           <b-col cols="1">
-            {{ distance.distance_to }}
-          </b-col>
-          <b-col cols="1">
-            {{ distance.distance_back }}
+            {{ distance.distance_to }}/{{ distance.distance_back }}
           </b-col>
           <b-col cols="1">
             {{ distance.distance_total }}
           </b-col>
-          <b-col cols="4">
+          <b-col cols="3">
             <b-form-radio-group
               @change="updateTotals"
               v-model="distance.use_price"
@@ -103,10 +95,10 @@
               </b-form-radio>
             </b-form-radio-group>
           </b-col>
-          <b-col cols="3">
+          <b-col cols="2">
             <VAT @vatChanged="(val) => changeVatType(distance, val)" />
           </b-col>
-          <b-col cols="3">
+          <b-col cols="2">
             <TotalsInputs
               :total="distance.total_dinero"
               :vat="distance.vat_dinero"

@@ -39,6 +39,10 @@ class CostModel {
 
   updateTotals(priceDecimal, currency) {
     // console.log({priceDecimal, currency})
+    if (!priceDecimal) {
+      priceDecimal = '0.00'
+    }
+
     this.setPriceField('price', toDinero(priceDecimal, currency))
     const total = this.getTotal()
     // console.log({total, vat_type: this.vat_type})
@@ -112,6 +116,8 @@ class CostService extends BaseModel {
   newModelFromMaterial(material, price, price_currency, defaultPropsView) {
     const user = material.is_partner ? null : material.user_id
     const user_full_name = material.is_partner ? material.full_name : null
+    material.material_id = material.id
+    delete material.id
     return new this.model({
       ...material,
       ...this.getDefaultCostProps(),

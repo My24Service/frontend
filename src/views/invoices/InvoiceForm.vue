@@ -37,6 +37,7 @@
             </span>
             <span>
               <router-link
+                v-if="order_pk"
                 class="btn btn-sm btn-primary"
                 :to="{name:'order-view', params: {pk: order_pk}}">
                 <b-icon-arrow-up-right-circle
@@ -450,8 +451,7 @@
         </div>
         <iframe
           :src="this.invoiceURL"
-          style="min-height:720px; width: 100%;"
-          frameborder="0"
+          style="min-height:720px; width: 100%; border: 0"
           @load="iframeLoaded"
           v-show="!iframeLoading">
         </iframe>
@@ -499,13 +499,13 @@
 
 <script>
 import my24 from '../../services/my24.js'
-import { InvoiceService, InvoiceModel } from '../../models/invoices/Invoice.js'
-import { InvoiceLineService } from '../../models/invoices/InvoiceLine.js'
-import {toDinero} from "../../utils";
+import {toDinero} from "@/utils";
+import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
+import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
+import {MaterialModel, MaterialService} from "@/models/inventory/Material";
+import {EngineerUserModel, EngineerService} from "@/models/company/UserEngineer";
+import {CustomerModel, CustomerPriceModel, CustomerService} from "@/models/customer/Customer";
 import PriceInput from "../../components/PriceInput";
-import materialService, {MaterialModel} from "../../models/inventory/Material";
-import engineerService, {RateEngineerUserModel} from "../../models/company/UserEngineer";
-import customerService, {CustomerModel, CustomerPriceModel} from "../../models/customer/Customer";
 import Collapse from "../../components/Collapse";
 import invoiceMixin from "./invoice_form/mixin";
 import HoursComponent from "./invoice_form/Hours";
@@ -520,7 +520,7 @@ import {
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_WORK_HOURS
-} from "../../models/orders/Cost";
+} from "@/models/orders/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import {useVuelidate} from "@vuelidate/core";
 import TotalsInputs from "../../components/TotalsInputs";
@@ -616,6 +616,9 @@ export default {
 
       invoiceService: new InvoiceService(),
       invoiceLineService: new InvoiceLineService(),
+      materialService: new MaterialService(),
+      engineerService: new EngineerService(),
+      customerService: new CustomerService(),
       deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
     }
@@ -659,7 +662,7 @@ export default {
     )
 
     // create engineer models
-    this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
+    this.engineer_models = invoiceData.engineer_models.map((m) => new EngineerUserModel({
       ...m,
       engineer: {...m.engineer, default_currency: this.default_currency}
     }))
@@ -739,12 +742,12 @@ export default {
             this.isGeneratingPDF = false;
         }
     },
-    openInvoice() {
-      const routeData = this.$router.resolve({
-        name: 'invoice-view', params: { uuid: this.invoice.uuid }
-      })
-      window.open(`${document.location.origin}/${routeData.href}`, '_blank')
-    },
+    // openInvoice() {
+    //   const routeData = this.$router.resolve({
+    //     name: 'invoice-view', params: { uuid: this.invoice.uuid }
+    //   })
+    //   window.open(`${document.location.origin}/${routeData.href}`, '_blank')
+    // },
     invoiceLineAdded() {
       this.invoiceLines = this.$refs['invoice-lines'].getInvoiceLines()
     },
@@ -772,7 +775,7 @@ export default {
     },
     // customer
     async getCustomer() {
-      const customerData = await customerService.detail(this.customerPk)
+      const customerData = await this.customerService.detail(this.customerPk)
       this.customer = new CustomerModel(
         {...customerData, default_currency: this.default_currency}
       )
@@ -781,18 +784,18 @@ export default {
       // use minimal model for patch
       const minimalModel = new CustomerPriceModel(this.customer)
 
-      const customerData = await customerService.update(this.customerPk, minimalModel)
+      const customerData = await this.customerService.update(this.customerPk, minimalModel)
       this.customer = new CustomerModel(customerData)
       this.infoToast(this.$trans('Updated'), this.$trans('Customer data has been updated'))
     },
     // activity
     async updateEngineer(user_id) {
       let engineer_user = this.engineer_models.find((m) => m.id === user_id)
-      const minimalModel = new RateEngineerUserModel(
+      const minimalModel = new EngineerUserModel(
         {...engineer_user, default_currency: this.default_currency}
       )
 
-      let updatedEngineerUserJson = await engineerService.update(user_id, minimalModel)
+      let updatedEngineerUserJson = await this.engineerService.update(user_id, minimalModel)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
 
       this.infoToast(this.$trans('Updated'), this.$trans('Hourly rate engineer has been updated'))
@@ -802,7 +805,7 @@ export default {
       this.materialUpdating = true
       let material = this.material_models.find((m) => m.id === material_id)
       delete material.image
-      const updatedMaterialJson = await materialService.update(material_id, material)
+      const updatedMaterialJson = await this.materialService.update(material_id, material)
       material.setPriceFields(updatedMaterialJson)
 
       this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
@@ -872,14 +875,6 @@ export default {
   display : flex;
   margin-top: auto;
 }
-.vat {
-  white-space: nowrap;
-}
-.value-container {
-  padding-top: 4px;
-  padding-right: 4px;
-  padding-left: 4px;
-}
 .update-button {
   margin-bottom: 8px;
 }
@@ -890,7 +885,6 @@ export default {
 .total-text {
   font-weight: bold;
 }
-.listing { display: table; }
 .listing li:not(.text-right) { display: table-row;}
 .listing li:not(.text-right) span  {  display: table-cell;}
 .iframe-loader {
