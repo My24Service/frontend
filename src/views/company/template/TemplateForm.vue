@@ -110,6 +110,17 @@
               >
               </b-form-checkbox>
             </b-form-group>
+            <div>
+              <h4>{{ $trans("Template fields documentation") }}</h4>
+              <ul>
+                <li><a href="https://my24service.github.io/docs/#invoice-template-fields" target="_blank">
+                  {{ $trans("Invoices") }}
+                </a></li>
+                <li><a href="https://my24service.github.io/docs/#quotation-template-fields" target="_blank">
+                  {{ $trans("Quotations") }}
+                </a></li>
+              </ul>
+            </div>
           </div>
           <div class="panel" v-if="!isCreate && !isEdit">
             <h6>{{ $trans("Template") }}</h6>

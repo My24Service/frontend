@@ -336,7 +336,7 @@
           </div>
 
           <div>
-            <a href="https://my24service.github.io/docs/#order-fields" target="_blank">
+            <a href="https://my24service.github.io/docs/#orders" target="_blank">
               {{ $trans("documentation") }}
             </a>
           </div>
