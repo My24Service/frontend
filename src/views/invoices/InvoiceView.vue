@@ -5,7 +5,7 @@
       <InvoicePDFViewer
         :invoice-in="invoice"
         :is-view="true"
-        v-if="invoice"
+        v-if="invoice.id"
         ref="invoice-viewer"
       />
 
@@ -25,7 +25,7 @@
                 target="_blank"
               >
                 <b-icon icon="file-earmark"></b-icon>
-                {{ $trans('View pdf') }}
+                {{ $trans('View PDF') }}
               </b-link>
             </span>
             <span>

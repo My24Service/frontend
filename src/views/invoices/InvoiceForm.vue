@@ -5,7 +5,7 @@
       <InvoicePDFViewer
         :invoice-in="invoice"
         :is-view="false"
-        v-if="invoice"
+        v-if="invoice.id"
         ref="invoice-viewer"
       />
 

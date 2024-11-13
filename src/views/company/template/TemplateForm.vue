@@ -89,6 +89,10 @@
                 :state="isSubmitClicked ? !v$.template.file.$error : null"
                 accept=".docx"
               ></b-form-file>
+              <p v-if="template.url">
+                {{ $trans("Download") }}:
+                <a :href="template.url" target="_blank">{{ getNameFromUrl(template.url) }}</a>
+              </p>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.template.file.$error : null">
                 {{ $trans("Please select a file") }}
               </b-form-invalid-feedback>
@@ -192,10 +196,10 @@ import { required } from "@vuelidate/validators";
 import {
   TemplateService,
   TemplateModel
-} from "../../../models/company/Template.js";
+} from "@/models/company/Template";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
-import { QuotationService } from "../../../models/quotations/Quotation.js";
-import { InvoiceService } from '../../../models/invoices/Invoice.js'
+import { QuotationService } from "@/models/quotations/Quotation";
+import { InvoiceService } from '@/models/invoices/Invoice'
 import Multiselect from "vue-multiselect";
 
 export default {
@@ -374,7 +378,11 @@ export default {
     },
     selectResult(result, index) {
       this.result = result;
-    }
+    },
+    getNameFromUrl(url) {
+      const parts = url.split('/')
+      return parts[parts.length-1]
+    },
   }
 };
 </script>

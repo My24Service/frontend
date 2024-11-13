@@ -32,7 +32,7 @@
           {{ $trans('Make definitive') }}
         </b-button>
         <b-button
-          v-if="!isCustomer && !isBranchEmployee"
+          v-if="!isCustomer && !isBranchEmployee && !invoice.preliminary"
           id="recreateInvoicePdf"
           @click="recreateInvoicePdf"
           :disabled="isLoading"
