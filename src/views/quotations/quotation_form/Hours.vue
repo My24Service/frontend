@@ -86,7 +86,7 @@
               </div>
             </b-col>
           </b-row>
-          <b-row v-if="!parentHasQuotationLines && !isView">
+          <b-row v-if="!parentHasQuotationLines && !isView && index > 0">
             <b-col cols="8"></b-col>
             <b-col cols="4">
               <b-button

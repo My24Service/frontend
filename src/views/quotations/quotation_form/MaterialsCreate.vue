@@ -132,7 +132,7 @@
               </div>
             </b-col>
           </b-row>
-          <b-row v-if="!parentHasQuotationLines">
+          <b-row v-if="!parentHasQuotationLines && index > 0">
             <b-col cols="8"></b-col>
             <b-col cols="4">
               <b-button
