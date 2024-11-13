@@ -76,7 +76,7 @@
             </div>
           </b-col>
         </b-row>
-        <b-row v-if="!parentHasQuotationLines && index > 0">
+        <b-row v-if="!parentHasQuotationLines">
           <b-col cols="8"></b-col>
           <b-col cols="4">
             <b-button
@@ -282,6 +282,9 @@ export default {
     },
     deleteCost(index) {
       this.costService.deleteCollectionItem(index)
+      if (this.costService.collection.length === 0) {
+        this.addCost()
+      }
       this.updateTotals()
     },
     async saveCosts() {
