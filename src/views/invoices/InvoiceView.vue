@@ -46,17 +46,6 @@
               {{ $trans('Send invoice') }}
             </b-button>
           </h3>
-          <div
-            class="flex-columns"
-          >
-            <b-button
-              @click="() => showDeleteModal(quotation.id)"
-              type="button"
-              variant="danger"
-            >
-              {{ $trans('Delete') }}
-            </b-button>
-          </div>
         </div>
       </header>
 
