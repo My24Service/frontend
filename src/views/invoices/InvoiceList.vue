@@ -78,7 +78,7 @@
         <template #cell(icons)="data">
           <div class="h2 invoice-icons">
             <router-link
-              class="px-1"
+              class="icon-link"
               v-if="!data.item.preliminary"
               :title="$trans('Send invoice')"
               :to="{name: 'invoice-send',
@@ -90,10 +90,12 @@
               ></b-icon-mailbox>
             </router-link>
             <IconLinkDelete
+              v-if="data.item.preliminary"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
             <router-link
+              class="icon-link"
               :title="$trans('Order')"
               :to="{name:'order-view', params: {pk: data.item.order}}">
               <b-icon-arrow-up-right-circle
@@ -259,5 +261,8 @@ export default {
 
 .invoice-icons span {
   margin-right: 10px;
+}
+.icon-link {
+  padding-right: 8px;
 }
 </style>

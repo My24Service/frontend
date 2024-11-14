@@ -28,7 +28,7 @@ import {
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_USED_MATERIALS,
   COST_TYPE_WORK_HOURS
-} from "../../../models/orders/Cost";
+} from "@/models/orders/Cost";
 
 export default {
   name: "CostsTable",
@@ -46,7 +46,6 @@ export default {
     return {
       tableFields: null,
       tableFieldsUsedMaterials: [
-        {key: 'user_full_name', label: this.$trans('User')},
         {key: 'material_name', label: this.$trans('Name')},
         {key: 'amount_decimal', label: this.$trans('Amount')},
         {key: 'price', label: this.$trans('Price')},

@@ -229,8 +229,8 @@ export default {
       this.emptyCollection()
       this.$emit('emptyCollectionClicked', this.invoiceLineType)
     },
-    getMaterialName(usedMaterial) {
-      const material = this.materialModels.find((m) => m.id === usedMaterial.id)
+    getMaterialName(material_id) {
+      const material = this.materialModels.find((m) => m.id === material_id)
       return material ? material.name : this.$trans("unknown")
     },
     async loadData() {
@@ -328,7 +328,7 @@ export default {
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
-      return `${this.$trans("material")}: ${cost.user_full_name}, ${this.getMaterialName(cost.material)}`
+      return `${this.$trans("material")}: ${this.getMaterialName(cost.material)}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
       return `${this.$trans("Used materials")}`

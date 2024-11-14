@@ -5,7 +5,7 @@
       <InvoicePDFViewer
         :invoice-in="invoice"
         :is-view="true"
-        v-if="invoice.id"
+        v-if="invoice && invoice.id"
         ref="invoice-viewer"
       />
 
@@ -225,10 +225,11 @@ export default {
         const data = await this.invoiceService.getByUuid(this.uuid, createPDFHeader)
 
         this.invoice = new InvoiceModel(data)
-        this.companyLogo = this.data.member.companylogo_url
+        this.companyLogo = this.$store.getters.getMemberLogo
         this.isLoading = false
       }
       catch(err) {
+        console.log('error loading invoice', err)
         this.errorToast(this.$trans('Error loading invoice'))
         this.isLoading = false
       }

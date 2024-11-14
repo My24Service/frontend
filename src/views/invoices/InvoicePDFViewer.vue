@@ -44,7 +44,7 @@
           {{ $trans('Recreate PDF') }}
         </b-button>
         <b-button
-          v-if="!isCustomer && !isBranchEmployee && invoice.invoice_pdf_from_docx_filename"
+          v-if="!isCustomer && !isBranchEmployee && !invoice.preliminary && invoice.invoice_pdf_from_docx_filename"
           @click="downloadPdf"
           :disabled="isLoading"
           type="button"
@@ -76,7 +76,6 @@
 import my24 from "@/services/my24";
 import {componentMixin} from "@/utils";
 import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
-import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import invoiceMixin from "@/views/invoices/invoice_form/mixin";
 
 export default {
@@ -103,7 +102,6 @@ export default {
   data() {
     return {
       invoiceService: new InvoiceService(),
-      customerService: new CustomerService(),
       isLoading: false,
       invoiceURL: null,
       invoice: null
@@ -130,9 +128,9 @@ export default {
 
       try {
         await this.invoiceService.makeDefinitive(this.invoice.id)
-        this.errorToast(this.$trans('Success making invoice definitive'))
+        this.infoToast(this.$trans('Success'), this.$trans('Invoice is now definitive'))
         this.isLoading = false
-        await this.$router.push({ name: 'invoice-view', params: {pk: this.invoice.id }})
+        await this.$router.push({ name: 'invoice-view', params: {uuid: this.invoice.uuid }})
       } catch(error) {
         this.errorToast(this.$trans('Error making invoice definitive'))
         this.isLoading = false
@@ -144,7 +142,7 @@ export default {
       }
     },
     async downloadPdf() {
-      const url = `/api/invoice/invoice/${this.invoice.id}/download_definitive_pdf/`
+      const url = `/api/invoice/invoice/${this.invoice.id}/download_pdf/`
       this.isLoading = true
 
       my24.downloadItem(
@@ -166,7 +164,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         this.isLoading = false
-        console.log(`error fetching invoice pdf, ${error}`)
+        console.log(`error fetching invoice pdf, blob, ${error}`)
         this.infoToast(
           this.$trans('No PDF'),
           this.$trans(
@@ -209,16 +207,11 @@ export default {
         await this.downloadPdfBlob()
       }
     },
-    async getCustomer(pk) {
-      const customerData = await this.customerService.detail(pk)
-      this.customer = new CustomerModel(customerData)
-    },
     async loadInvoice() {
       this.isLoading = true
 
       try {
         this.invoice = new InvoiceModel(await this.invoiceService.detail(this.invoice.id))
-        await this.getCustomer(this.invoice.customer_relation)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoice', error)
