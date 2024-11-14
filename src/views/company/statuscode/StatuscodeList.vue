@@ -158,16 +158,18 @@ import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
-import { PIXEL_URL } from "../../../constants";
+import { PIXEL_URL } from "@/constants";
 import PillsStatuscode from "./PillsStatuscode.vue";
-import { QuotationStatuscodeService } from "../../../models/quotations/QuotationStatuscode.js";
+import { QuotationStatuscodeService } from "@/models/quotations/QuotationStatuscode";
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION,
-  STATUSCODE_TYPE_SICK_LEAVE
-} from "../../../models/company/AbstractStatuscode";
-import {LeaveStatuscodeService} from "../../../models/company/LeaveStatuscode";
-import {SickLeaveStatuscodeService} from "../../../models/company/SickLeaveStatuscode";
+  STATUSCODE_TYPE_SICK_LEAVE,
+  STATUSCODE_TYPE_INVOICE
+} from "@/models/company/AbstractStatuscode";
+import {LeaveStatuscodeService} from "@/models/company/LeaveStatuscode";
+import {SickLeaveStatuscodeService} from "@/models/company/SickLeaveStatuscode";
+import { InvoiceStatuscodeService } from "@/models/invoices/InvoiceStatuscode";
 
 export default {
   props: {
@@ -232,6 +234,9 @@ export default {
         break;
       case STATUSCODE_TYPE_SICK_LEAVE:
         this.statuscodeService = new SickLeaveStatuscodeService();
+        break;
+      case STATUSCODE_TYPE_INVOICE:
+        this.statuscodeService = new InvoiceStatuscodeService();
         break;
       default:
         throw `unknown list_type: ${this.list_type}`;

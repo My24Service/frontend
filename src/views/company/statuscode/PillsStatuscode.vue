@@ -16,16 +16,22 @@
         :to="{ name: `company-statuscodes-${STATUSCODE_TYPE_QUOTATION}` }">
         {{ $trans('Quotation') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive(STATUSCODE_TYPE_INVOICE)"
+        :to="{ name: `company-statuscodes-${STATUSCODE_TYPE_INVOICE}` }">
+        {{ $trans('Invoice') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
 <script>
-import { componentMixin } from '../../../utils.js'
+import { componentMixin } from '@/utils'
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION,
-  STATUSCODE_TYPE_SICK_LEAVE
-} from "../../../models/company/AbstractStatuscode";
+  STATUSCODE_TYPE_SICK_LEAVE,
+  STATUSCODE_TYPE_INVOICE
+} from "@/models/company/AbstractStatuscode";
 
 export default {
   name: 'PillsStatuscode',
@@ -36,7 +42,8 @@ export default {
       hasApiUsers: false,
       STATUSCODE_TYPE_LEAVE_HOURS,
       STATUSCODE_TYPE_QUOTATION,
-      STATUSCODE_TYPE_SICK_LEAVE
+      STATUSCODE_TYPE_SICK_LEAVE,
+      STATUSCODE_TYPE_INVOICE
     }
   },
   async created() {

@@ -359,15 +359,17 @@
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 
-import { QuotationActionModel } from "../../../models/quotations/QuotationAction.js";
-import {ActionService} from "../../../models/company/AbstractAction";
+import { QuotationActionModel } from "@/models/quotations/QuotationAction";
+import {ActionService} from "@/models/company/AbstractAction";
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION,
-  STATUSCODE_TYPE_SICK_LEAVE
-} from "../../../models/company/AbstractStatuscode";
-import {LeaveActionModel} from "../../../models/company/LeaveAction";
-import {SickLeaveActionModel} from "../../../models/company/SickLeaveAction";
+  STATUSCODE_TYPE_SICK_LEAVE,
+  STATUSCODE_TYPE_INVOICE
+} from "@/models/company/AbstractStatuscode";
+import {LeaveActionModel} from "@/models/company/LeaveAction";
+import {SickLeaveActionModel} from "@/models/company/SickLeaveAction";
+import { InvoiceActionModel } from "@/models/invoices/InvoiceAction";
 
 export default {
   setup() {
@@ -445,6 +447,11 @@ export default {
         {value: 'send_sms', text: this.$trans('send sms')},
         {value: 'send_fcm', text: this.$trans('send FCM')},
       ],
+      actionTypesInvoice: [
+        {value: 'email', text: this.$trans('send email')},
+        {value: 'send_sms', text: this.$trans('send sms')},
+        {value: 'send_fcm', text: this.$trans('send FCM')},
+      ],
     };
   },
   computed: {
@@ -468,6 +475,10 @@ export default {
       case STATUSCODE_TYPE_SICK_LEAVE:
         this.actionTypes = this.actionTypesSickLeave;
         this.action = new SickLeaveActionModel({})
+        break;
+      case STATUSCODE_TYPE_INVOICE:
+        this.actionTypes = this.actionTypesInvoice;
+        this.action = new InvoiceActionModel({})
         break;
       default:
         throw `unknown list_type: ${this.list_type}`;

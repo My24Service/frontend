@@ -73,6 +73,7 @@ import SickLeaveList from "../views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
 
 import {
+  STATUSCODE_TYPE_INVOICE,
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
 } from "../models/company/AbstractStatuscode";
@@ -774,6 +775,7 @@ export default [
     ...createStatuscodeRoutes(STATUSCODE_TYPE_QUOTATION),
     ...createStatuscodeRoutes(STATUSCODE_TYPE_LEAVE_HOURS),
     ...createStatuscodeRoutes(STATUSCODE_TYPE_SICK_LEAVE),
+    ...createStatuscodeRoutes(STATUSCODE_TYPE_INVOICE),
     // templates
     {
       name: 'company-templates',
