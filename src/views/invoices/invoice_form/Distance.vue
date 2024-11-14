@@ -28,7 +28,7 @@
 
       <b-container fluid v-if="!isLoading && !hasStoredData">
         <b-row>
-          <b-col cols="3">
+          <b-col cols="2">
             <HeaderCell
             :text='$trans("Engineer")'
             />
@@ -43,7 +43,7 @@
               :text='$trans("Total")'
             />
           </b-col>
-          <b-col cols="3">
+          <b-col cols="4">
             <HeaderCell
               :text='$trans("Rate")'
             />
@@ -56,10 +56,10 @@
           <b-col cols="2" />
         </b-row>
         <b-row v-for="distance in costService.collection" :key="distance.user_id" class="distance_row">
-          <b-col cols="3" v-if="!distance.is_partner">
+          <b-col cols="2" v-if="!distance.is_partner">
             {{ getFullname(distance.user) }}
           </b-col>
-          <b-col cols="3" v-else>
+          <b-col cols="2" v-else>
             {{ distance.full_name }} ({{ distance.partner_companycode }})
           </b-col>
           <b-col cols="1">
@@ -68,7 +68,7 @@
           <b-col cols="1">
             {{ distance.distance_total }}
           </b-col>
-          <b-col cols="3">
+          <b-col cols="4">
             <b-form-radio-group
               @change="updateTotals"
               v-model="distance.use_price"
@@ -130,7 +130,7 @@ import {
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS
 } from "./constants";
-import {toDinero} from "../../../utils";
+import {toDinero} from "@/utils";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import PriceInput from "../../../components/PriceInput";
