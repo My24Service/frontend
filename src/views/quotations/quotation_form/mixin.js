@@ -13,11 +13,17 @@ let quotationMixin = {
     }
   },
   methods: {
-    sectionHeader() {
-      return `header-${this.quotationLineType}`
+    sectionHeader(type) {
+      return `header-${type}`
     },
-    scrollToHeader() {
-      document.getElementById(this.sectionHeader()).scrollIntoView();
+    scrollToHeader(type) {
+      const header = this.sectionHeader(type)
+      const el = document.getElementById(header)
+      if (el) {
+        el.scrollIntoView()
+      } else {
+        console.log(`scrollToHeader: header '${header} element not found`)
+      }
     },
     checkValue(val) {
       if (!val || val === '') {
@@ -56,7 +62,7 @@ let quotationMixin = {
     createQuotationLinesClicked(selected) {
       this.useOnQuotationSelected = selected
       this.createQuotationLines()
-      this.scrollToHeader()
+      this.scrollToHeader(this.quotationLineType)
     },
     createQuotationLines() {
       switch (this.useOnQuotationSelected) {

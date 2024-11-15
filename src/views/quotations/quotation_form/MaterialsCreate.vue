@@ -1,15 +1,11 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-
     <details :open="isView ? 'open' : ''">
-      <span :id="sectionHeader()" class="section-header"></span>
-      <summary class="flex-columns space-between">
-        <h6>
-          {{ $trans('Materials') }}
-          <b-icon-check-circle v-if="parentHasQuotationLines"></b-icon-check-circle>
-        </h6>
-        <b-icon-chevron-down></b-icon-chevron-down>
-      </summary>
+      <SectionHeader
+        :parent-has-quotation-lines="parentHasQuotationLines"
+        :section="quotationLineType"
+        :title="$trans('Materials')"
+      />
 
       <div v-if="parentHasQuotationLines && isLoaded">
         <CostsTable
@@ -55,20 +51,17 @@
               <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
             </multiselect>
           </b-form-group>
-          <p
+          <b-form-group
+            label-cols="3"
+            v-bind:label="$trans('Material')"
+            label-for="material-search"
             v-if="cost.material"
           >
-            <b-form-group
-              label-cols="3"
-              v-bind:label="$trans('Material')"
-              label-for="material-search"
-            >
-              <b-form-input
-                readonly
-                :value="cost.material_name"
-              ></b-form-input>
-            </b-form-group>
-          </p>
+            <b-form-input
+              readonly
+              :value="cost.material_name"
+            ></b-form-input>
+          </b-form-group>
 
           <b-form-group
             label-cols="3"
@@ -216,6 +209,7 @@ import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {ChapterModel} from "@/models/quotations/Chapter";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
+import SectionHeader from "./SectionHeader.vue";
 
 export default {
   name: "MaterialsCreateComponent",
@@ -231,7 +225,8 @@ export default {
     TotalsInputs,
     Multiselect,
     AmountDecimalInput,
-    AddToQuotationLines
+    AddToQuotationLines,
+    SectionHeader
   },
   props: {
     chapter: {
@@ -250,7 +245,7 @@ export default {
   watch: {
     quotationLinesParent(newVal) {
       this.checkParentHasQuotationLines(newVal)
-      this.scrollToHeader()
+      this.scrollToHeader(this.quotationLineType)
     }
   },
   computed: {
@@ -318,6 +313,7 @@ export default {
     otherPriceChanged(priceDinero, cost) {
       cost.setPriceField('price', priceDinero)
       this.updateTotals()
+      this.hasChanges = true
     },
     addCost() {
       this.costService.collection.push(new CostModel({material: null}))
@@ -331,7 +327,6 @@ export default {
         this.addCost()
       }
       this.updateTotals()
-      this.hasChanges = true
     },
     async saveCosts() {
       if (this.isCollectionEmpty && this.costService.deletedItems.length === 0) {
@@ -345,15 +340,15 @@ export default {
         )
         await this.costService.updateCollection()
         this.infoToast(this.$trans('Updated'), this.$trans('Materials costs have been updated'))
+        await this.loadData()
         this.isLoading = false
         this.hasChanges = false
-        await this.loadData()
       } catch(error) {
         console.log('Error updating material costs', error)
         this.errorToast(this.$trans('Error updating material costs'))
         this.isLoading = false
       }
-      this.scrollToHeader()
+      this.scrollToHeader(this.quotationLineType)
     },
     async selectMaterial(material, index) {
       try {
@@ -450,7 +445,7 @@ export default {
         this.isLoaded = true
       }
     },
-    async loadMaterials (materialIds) {
+    async loadMaterials(materialIds) {
       let data
 
       this.isLoading = true
@@ -518,6 +513,7 @@ export default {
       if (this.isCollectionEmpty) {
         return
       }
+
       // provide methods to get price and currency
       this.costService.updateTotals(
         this.getPrice,
@@ -551,9 +547,5 @@ export default {
 }
 .material_row {
   margin-bottom: 20px;
-}
-.section-header {
-  position: relative;
-  top: -80px;
 }
 </style>
