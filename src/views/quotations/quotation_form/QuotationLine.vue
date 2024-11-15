@@ -385,20 +385,6 @@ export default {
         }
       }
       this.updateChapterTotals()
-
-      // const deleteCosts = this.quotationLineService.collection.filter(
-      //   (cost) => cost.cost_type === type)
-      //
-      // for (const cost of deleteCosts) {
-      // }
-      //
-      // const newCollection = this.quotationLineService.collection.filter(
-      //   (cost) => cost.cost_type !== type
-      // )
-      //
-      // if (newCollection.length !== this.quotationLineService.collection.length) {
-      //   this.quotationLineService.collection = newCollection
-      // }
     },
     doEditCollectionItem() {
       this.quotationLineService.doEditCollectionItem()

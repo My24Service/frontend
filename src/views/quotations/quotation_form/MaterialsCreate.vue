@@ -116,6 +116,7 @@
                     v-model="cost.price"
                     :currency="cost.price_currency"
                     @priceChanged="(val) => otherPriceChanged(val, cost)"
+                    @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
                   />
                 </p>
               </b-form-radio>
@@ -149,6 +150,7 @@
         </div>
         <div class="text-center">
           <b-button
+            :disabled="collectionHasEmptyItem"
             @click="addCost"
             class="btn btn-primary"
             type="button"
@@ -157,7 +159,7 @@
           </b-button>
           <span style="width: 80px">&nbsp;</span>
           <b-button
-            :disabled="isCollectionEmpty"
+            :disabled="showSaveButton"
             @click="() => saveCosts()"
             type="button"
             variant="primary"
@@ -190,73 +192,6 @@
         />
         <hr/>
       </div>
-
-      <b-container v-if="false">
-        <b-row v-if="totalAmount">
-          <b-col cols="12">
-            <TotalRow
-              :items_total="totalAmount"
-              :total="total_dinero"
-              :total_vat="totalVAT_dinero"
-            />
-            <hr/>
-          </b-col>
-        </b-row>
-        <b-row v-if="parentHasQuotationLines">
-          <b-col cols="12" class="text-center">
-            <EmptyQuotationLinesContainer
-              class="text-center"
-              @buttonClicked="() => { emptyQuotationLines() }"
-            />
-          </b-col>
-        </b-row>
-        <b-row v-if="false && (costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
-          <b-col cols="4"></b-col>
-          <b-col cols="8">
-            <b-button
-              @click="addCost"
-              class="btn btn-primary"
-              type="button"
-            >
-              {{ $trans("Add material") }}
-            </b-button>
-            <span style="width: 80px">&nbsp;</span>
-            <b-button
-              @click="() => saveCosts()"
-              class="btn btn-danger"
-              type="button"
-              variant="danger"
-            >
-              {{ $trans("Save changes") }}
-            </b-button>
-          </b-col>
-        </b-row>
-        <b-row v-if="false && (!costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
-          <b-col cols="6"></b-col>
-          <b-col cols="6">
-            <b-button
-              :disabled="compLoading"
-              @click="addCost"
-              class="btn btn-primary float-right"
-              type="button"
-            >
-              {{ $trans("Add material") }}
-            </b-button>
-          </b-col>
-        </b-row>
-
-        <b-row v-if="showAddQuotationLinesBlock">
-          <b-col cols="12">
-            <hr/>
-            <AddToQuotationLines
-              :useOnQuotationOptions="useOnQuotationOptions"
-              @buttonClicked="createQuotationLinesClicked"
-            />
-            <hr/>
-          </b-col>
-        </b-row>
-
-      </b-container>
 
     </details>
   </b-overlay>
@@ -319,19 +254,24 @@ export default {
     }
   },
   computed: {
-    compLoading () {
-      return this.isLoading
-    },
     showAddQuotationLinesBlock() {
       return !this.isCollectionEmpty && !this.parentHasQuotationLines
     },
     isCollectionEmpty() {
       const nonEmptyItems = this.costService.collection.filter((c) => c.material !== null)
-      return nonEmptyItems.length === 0 && this.materials.length === 0
+      return nonEmptyItems.length === 0 && (this.materialChosen || !this.materialChosen)
+    },
+    showSaveButton() {
+      return !this.hasChanges
+    },
+    collectionHasEmptyItem() {
+      const emptyItem = this.costService.collection.find((c) => c.material === null)
+      return emptyItem && (this.materialChosen || !this.materialChosen)
     },
   },
   data() {
     return {
+      materialChosen: false,
       isLoading: false,
       materials: [],
       materialModels: [],
@@ -353,7 +293,8 @@ export default {
       quotationLineService: new QuotationLineService(),
       materialService: new MaterialService(),
       fetchingMaterials: false,
-      isLoaded: false
+      isLoaded: false,
+      hasChanges: false
     }
   },
   async created() {
@@ -381,6 +322,8 @@ export default {
     addCost() {
       this.costService.collection.push(new CostModel({material: null}))
       this.costService.collectionHasChanges = true
+      this.materialChosen = false
+      this.hasChanges = true
     },
     deleteCost(index) {
       this.costService.deleteCollectionItem(index)
@@ -388,9 +331,10 @@ export default {
         this.addCost()
       }
       this.updateTotals()
+      this.hasChanges = true
     },
     async saveCosts() {
-      if (this.isCollectionEmpty) {
+      if (this.isCollectionEmpty && this.costService.deletedItems.length === 0) {
         return
       }
       try {
@@ -402,6 +346,7 @@ export default {
         await this.costService.updateCollection()
         this.infoToast(this.$trans('Updated'), this.$trans('Materials costs have been updated'))
         this.isLoading = false
+        this.hasChanges = false
         await this.loadData()
       } catch(error) {
         console.log('Error updating material costs', error)
@@ -440,7 +385,8 @@ export default {
           cost_type: COST_TYPE_USED_MATERIALS,
           margin_perc: 0
         })
-        console.log('changed!')
+        this.materialChosen = true
+        this.hasChanges = true
         this.costService.collection = newCollection
         this.isLoading = false
       } catch(error) {
@@ -497,6 +443,7 @@ export default {
         }
         this.isLoading = false
         this.isLoaded = true
+        this.hasChanges = false
       } catch(error) {
         this.errorToast(this.$trans('Error fetching material cost'))
         this.isLoading = false
