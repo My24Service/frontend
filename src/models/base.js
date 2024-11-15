@@ -46,7 +46,10 @@ class BaseModel {
     this.emptyCollectionItem()
   }
   deleteCollectionItem(index) {
-    this.deletedItems.push(this.collection[index])
+    // only mark for deletion when there's an id
+    if (this.collection[index].id) {
+      this.deletedItems.push(this.collection[index])
+    }
     this.collection.splice(index, 1)
     this.collectionHasChanges = true
   }

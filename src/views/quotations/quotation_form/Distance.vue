@@ -1,7 +1,7 @@
 <template>
   <details :open="isView ? 'open' : ''">
     <summary class="flex-columns space-between">
-      <h6>
+      <h6 :id="sectionHeader()">
         {{ $trans('Distance') }}
         <b-icon-check-circle v-if="parentHasQuotationLines"></b-icon-check-circle>
       </h6>

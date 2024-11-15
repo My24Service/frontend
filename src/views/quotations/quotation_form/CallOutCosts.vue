@@ -1,7 +1,7 @@
 <template>
   <details :open="isView ? 'open' : ''">
     <summary class="flex-columns space-between">
-      <h6>
+      <h6 :id="sectionHeader()">
         {{ $trans('Call out costs') }}
         <b-icon-check-circle v-if="parentHasQuotationLines"></b-icon-check-circle>
       </h6>
@@ -108,7 +108,13 @@
       </b-row>
       <b-row v-if="parentHasQuotationLines">
         <b-col cols="12">
+
           <i><strong>{{ $trans("Delete existing call out cost quotation lines if you want to add or change items") }}</strong></i>
+
+          <CollectionEmptyContainer
+            @buttonClicked="() => { emptyQuotationLines() }"
+          />
+
         </b-col>
       </b-row>
       <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
@@ -177,16 +183,17 @@ import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
 import TotalsInputs from "../../../components/TotalsInputs";
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import {toDinero} from "@/utils";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import {ChapterModel} from "@/models/quotations/Chapter";
 import {CustomerModel} from "@/models/customer/Customer";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
+import CollectionEmptyContainer from "./EmptyQuotationLinesContainer.vue";
 
 export default {
   name: "CallOutCosts",
   mixins: [quotationMixin],
   components: {
+    CollectionEmptyContainer,
     PriceInput,
     IconLinkDelete,
     HeaderCell,
@@ -197,6 +204,9 @@ export default {
     DurationInput,
      AddToQuotationLines
   },
+  emits: [
+    'emptyQuotationLinesClicked'
+  ],
   props: {
     chapter: {
       type: ChapterModel,
@@ -260,6 +270,9 @@ export default {
     this.isLoading = false
   },
   methods: {
+    emptyQuotationLines() {
+      this.$emit('emptyQuotationLinesClicked', this.quotationLineType)
+    },
     otherPriceChanged(priceDinero, cost) {
       cost.setPriceField('price_other', priceDinero)
       this.updateTotals()

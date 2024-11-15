@@ -13,6 +13,12 @@ let quotationMixin = {
     }
   },
   methods: {
+    sectionHeader() {
+      return `header-${this.quotationLineType}`
+    },
+    scrollToHeader() {
+      document.getElementById(this.sectionHeader()).scrollIntoView();
+    },
     checkValue(val) {
       if (!val || val === '') {
         return '-'
@@ -50,6 +56,7 @@ let quotationMixin = {
     createQuotationLinesClicked(selected) {
       this.useOnQuotationSelected = selected
       this.createQuotationLines()
+      this.scrollToHeader()
     },
     createQuotationLines() {
       switch (this.useOnQuotationSelected) {

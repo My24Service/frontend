@@ -75,7 +75,7 @@
       <b-form v-show="!isLoading">
         <div class="page-detail">
 
-          <div class="flex-columns">
+          <div class="flex-columns panel-container">
 
             <div class="panel col-1-3" v-if="!loadChapterModel">
 
@@ -100,7 +100,8 @@
             </div>
 
             <div class="panel"
-                :class="{'col-1-3': !loadChapterModel, 'col-1-2 fixed-position': loadChapterModel}">
+                :class="{'col-1-3': !loadChapterModel, 'col-1-2 left': loadChapterModel}">
+
               <div v-if="loadChapterModel">
                 <QuotationLine
                   :quotation="quotation"
@@ -128,11 +129,10 @@
                 />
 
               </div>
-
             </div>
 
             <div class="panel"
-              :class="{'col-1-3': !loadChapterModel, 'col-1-2': loadChapterModel}">
+              :class="{'col-1-3': !loadChapterModel, 'col-1-2 right': loadChapterModel}">
               <div v-if="loadChapterModel">
                 <h3>{{ $trans("Chapter costs") }}</h3>
 
@@ -143,6 +143,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -186,6 +187,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -334,6 +336,10 @@ export default {
     quotationLineSubmitted() {
       this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
     },
+    emptyQuotationLinesClicked(type) {
+      this.$refs['quotation-lines'].emptyQuotationLinesForType(type)
+      this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
+    },
     backToChapters() {
       this.quotationLines = []
       this.loadChapterModel = null
@@ -463,9 +469,17 @@ export default {
 .component-margin {
   margin-bottom: 10px;
 }
-.fixed-position .position-relative {
-  position: fixed !important;
-  width: 40%;
-  overflow: hidden;
+.left {
+  flex-grow: 1;
+}
+.right {
+  flex-grow: 5;
+  overflow-y: auto;
+}
+.right div {
+  height: fit-content;
+}
+.panel-container {
+  height: 100vh;
 }
 </style>

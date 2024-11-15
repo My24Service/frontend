@@ -360,6 +360,9 @@ export default {
       this.$refs['delete-line-modal'].show()
     },
     async doDelete() {
+      this.quotationLineService.deleteCollectionItemByid(this.deletePk)
+    },
+    async doDeleteOld() {
       this.isLoading = true
 
       try {
@@ -374,6 +377,29 @@ export default {
       }
     },
     // edit
+    emptyQuotationLinesForType(type) {
+      while(this.quotationLineService.collection.find((cost) => cost.cost_type === type)) {
+        for(let i=0; i<this.quotationLineService.collection.length; i++) {
+          if (this.quotationLineService.collection[i].cost_type === type)
+            this.quotationLineService.deleteCollectionItem(i)
+        }
+      }
+      this.updateChapterTotals()
+
+      // const deleteCosts = this.quotationLineService.collection.filter(
+      //   (cost) => cost.cost_type === type)
+      //
+      // for (const cost of deleteCosts) {
+      // }
+      //
+      // const newCollection = this.quotationLineService.collection.filter(
+      //   (cost) => cost.cost_type !== type
+      // )
+      //
+      // if (newCollection.length !== this.quotationLineService.collection.length) {
+      //   this.quotationLineService.collection = newCollection
+      // }
+    },
     doEditCollectionItem() {
       this.quotationLineService.doEditCollectionItem()
     },
