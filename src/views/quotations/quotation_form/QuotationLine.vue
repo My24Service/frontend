@@ -15,17 +15,6 @@
         <b-icon-chevron-down></b-icon-chevron-down>
       </summary>
 
-      <b-modal
-        id="delete-line-modal"
-        ref="delete-line-modal"
-        v-bind:title="$trans('Delete?')"
-        @ok="doDelete"
-      >
-        <p class="my-4">
-          {{ $trans("Are you sure you want to delete this quotation line?") }}
-        </p>
-      </b-modal>
-
       <p v-if="!quotationLineService.collection.length && !showForm">
         <i>{{ $trans("No quotation lines") }}</i>
       </p>
@@ -57,7 +46,7 @@
             />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
+              v-bind:method="function() { deleteItem(data.item.id) }"
             />
           </div>
         </template>
@@ -235,12 +224,25 @@
             </b-button>
           </b-col>
         </b-row>
+        <b-row v-if="quotationLineService.deletedItems.length">
+          <b-col cols="12">
+            <hr/>
+            <p><strong>{{ $trans("To be deleted") }}</strong></p>
+            <b-table
+              small
+              :fields="fieldsView"
+              :items="quotationLineService.deletedItems"
+              responsive="md"
+              class="line-table"
+            ></b-table>
+          </b-col>
+        </b-row>
       </b-container>
     </details>
   </b-overlay>
 </template>
 <script>
-import{ QuotationLineService, QuotationLineModel } from '@/models/quotations/QuotationLine.js';
+import{ QuotationLineService } from '@/models/quotations/QuotationLine.js';
 import PriceInput from "@/components/PriceInput";
 import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
@@ -326,9 +328,6 @@ export default {
     showForm() {
       return !this.isView && (this.quotationLineService.isEdit || this.newItem)
     },
-    quotationLinesHaveTotals() {
-      return this.quotationLineService.collection.find((line) => line.price_text === '*')
-    },
     isQuotationLineValid() {
       return this.quotationLineService.editItem.description !== null
         && this.quotationLineService.editItem.description !== ""
@@ -355,26 +354,8 @@ export default {
   },
   methods: {
     // delete
-    showDeleteModal(id) {
-      this.deletePk = id
-      this.$refs['delete-line-modal'].show()
-    },
-    async doDelete() {
-      this.quotationLineService.deleteCollectionItemByid(this.deletePk)
-    },
-    async doDeleteOld() {
-      this.isLoading = true
-
-      try {
-        await this.quotationLineService.delete(this.deletePk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Quotation line has been deleted'))
-        await this.loadData()
-        this.isLoading = false
-      } catch(error) {
-        this.isLoading = false
-        console.log('Error deleting quotation line', error)
-        this.errorToast(this.$trans('Error deleting quotation line'))
-      }
+    deleteItem(id) {
+      this.quotationLineService.deleteCollectionItemByid(id)
     },
     // edit
     emptyQuotationLinesForType(type) {
