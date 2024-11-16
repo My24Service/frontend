@@ -275,16 +275,8 @@ export default {
     showAddQuotationLinesBlock() {
       return !this.isCollectionEmpty && !this.parentHasQuotationLines
     },
-    isCollectionEmpty() {
-      const nonEmptyItems = this.costService.collection.filter((c) => c.material !== null)
-      return nonEmptyItems.length === 0 && (this.materialChosen || !this.materialChosen)
-    },
     showSaveButton() {
       return !this.hasChanges
-    },
-    collectionHasEmptyItem() {
-      const emptyItem = this.costService.collection.find((c) => c.material === null)
-      return emptyItem && (this.materialChosen || !this.materialChosen)
     },
   },
   data() {
@@ -303,7 +295,7 @@ export default {
         USE_PRICE_OTHER,
       },
       default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      default_vat: this.$store.getters.getQuotationDefaultVat,
       hasStoredData: false,
       getMaterialsDebounced: '',
       parentHasQuotationLines: false,
@@ -318,7 +310,7 @@ export default {
   async created() {
     this.isLoading = true
     this.getMaterialsDebounced = AwesomeDebouncePromise(this.getMaterials, 500)
-    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_vat = this.default_vat
     this.costService.default_currency = this.default_currency
 
     if (this.chapter.id) {
@@ -463,6 +455,7 @@ export default {
         this.isLoaded = true
         this.hasChanges = false
       } catch(error) {
+        console.log('error fetching material cost', error)
         this.errorToast(this.$trans('Error fetching material cost'))
         this.isLoading = false
         this.isLoaded = true
@@ -490,20 +483,20 @@ export default {
         chapter: this.chapter.id
       }
     },
-    getPrice(material_cost) {
+    getPrice(cost) {
       let model
 
-      switch (material_cost.use_price) {
+      switch (cost.use_price) {
         case this.usePriceOptions.USE_PRICE_PURCHASE:
-          model = this.materialModels.find((m) => m.id === material_cost.material)
+          model = this.materialModels.find((m) => m.id === cost.material)
           return model.price_purchase_ex
         case this.usePriceOptions.USE_PRICE_SELLING:
-          model = this.materialModels.find((m) => m.id === material_cost.material)
+          model = this.materialModels.find((m) => m.id === cost.material)
           return model.price_selling_ex
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return material_cost.price
+          return cost.price
         default:
-          console.log(`getPrice - unknown use price: ${material_cost.use_price}`)
+          console.log(`getPrice - unknown use price: ${cost.use_price}`)
           return "0.00"
       }
     },
@@ -533,6 +526,9 @@ export default {
       }
     },
     updateTotals() {
+      // to make sure our computed gets triggered
+      this.isLoading = true
+      this.isLoading = false
       if (this.isCollectionEmpty) {
         return
       }
@@ -564,10 +560,6 @@ export default {
 </script>
 
 <style scoped>
-.flex {
-  display : flex;
-  margin-top: auto;
-}
 .material_row {
   margin-bottom: 20px;
 }

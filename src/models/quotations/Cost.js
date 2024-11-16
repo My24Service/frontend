@@ -8,7 +8,7 @@ class CostModel {
   cost_type
   user
   user_full_name
-  material
+  material = null
   amount_int = 0
   amount_decimal
   amount_duration = "00:00:00"
@@ -95,6 +95,24 @@ class CostModel {
         return this.amount_int
       case COST_TYPE_CALL_OUT_COSTS:
         return this.amount_int
+      default:
+        console.log(`getTotal - unknown cost type: ${this.cost_type}`)
+        return 0
+    }
+  }
+
+  isEmpty() {
+    switch (this.cost_type) {
+      case COST_TYPE_USED_MATERIALS:
+        return this.material === null
+      case COST_TYPE_WORK_HOURS:
+      case COST_TYPE_TRAVEL_HOURS:
+      case COST_TYPE_EXTRA_WORK:
+      case COST_TYPE_ACTUAL_WORK:
+        return this.amount_duration_secs === 0
+      case COST_TYPE_DISTANCE:
+      case COST_TYPE_CALL_OUT_COSTS:
+        return this.amount_int === 0
       default:
         console.log(`getTotal - unknown cost type: ${this.cost_type}`)
         return 0

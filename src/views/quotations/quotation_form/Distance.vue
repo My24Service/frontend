@@ -235,7 +235,10 @@ export default {
     },
     showAddQuotationLinesBlock() {
       return this.costService.collection.length && !this.parentHasQuotationLines
-    }
+    },
+    showSaveButton() {
+      return !this.hasChanges
+    },
   },
   watch: {
     quotationLinesParent(newVal) {
@@ -244,6 +247,7 @@ export default {
   },
   data() {
     return {
+      hasChanges: false,
       isLoading: false,
       total_dinero: null,
       totalVAT_dinero: null,
@@ -255,9 +259,8 @@ export default {
         USE_PRICE_OTHER,
       },
       default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
-      invoice_default_price_per_km: this.$store.getters.getInvoiceDefaultPricePerKm,
+      default_vat: this.$store.getters.getQuotationDefaultVat,
+      default_price_per_km: this.$store.getters.getQuotationDefaultPricePerKm,
       quotationLineType: COST_TYPE_DISTANCE,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),
@@ -266,11 +269,11 @@ export default {
   async created() {
     this.isLoading = true
     // set vars in service
-    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_vat = this.default_vat
     this.costService.default_currency = this.default_currency
 
-    this.invoice_default_price_per_km_dinero = toDinero(
-      this.invoice_default_price_per_km,
+    this.default_price_per_km_dinero = toDinero(
+      this.default_price_per_km,
       this.default_currency
     )
 
@@ -349,6 +352,7 @@ export default {
         }
         this.isLoading = false
       } catch(error) {
+        console.log('error fetching distance cost', error)
         this.errorToast(this.$trans('Error fetching distance costs'))
         this.isLoading = false
       }
@@ -363,29 +367,37 @@ export default {
     getPriceFor(type) {
       switch (type) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.invoice_default_price_per_km_dinero
+          return this.default_price_per_km_dinero
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km_dinero
         default:
           throw `getPrice: unknown use_price: ${type}`
       }
     },
-    getPrice(distance) {
-      switch (distance.use_price) {
+    getPrice(cost) {
+      switch (cost.use_price) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.invoice_default_price_per_km
+          return this.default_price_per_km
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return distance.price_other
+          return cost.price_other
         default:
-          throw `getPrice: unknown use_price: ${distance.use_price}`
+          throw `getPrice: unknown use_price: ${cost.use_price}`
       }
     },
     getCurrency(_activity) {
       return this.default_currency
     },
     updateTotals() {
+      // to make sure our computed gets triggered
+      this.isLoading = true
+      this.isLoading = false
+      if (this.isCollectionEmpty) {
+        return
+      }
+      console.log('collection not empty?')
+
       // provide methods to get price and currency
       this.costService.updateTotals(
         this.getPrice,

@@ -155,6 +155,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -166,6 +167,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -177,6 +179,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 

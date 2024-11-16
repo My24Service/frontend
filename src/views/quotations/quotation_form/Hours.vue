@@ -180,11 +180,8 @@ import Multiselect from 'vue-multiselect'
 import quotationMixin from "./mixin.js";
 import DurationInput from "../../../components/DurationInput.vue"
 import {
-  INVOICE_LINE_TYPE_HOURS_TYPE_TRAVEL,
-  INVOICE_LINE_TYPE_HOURS_TYPE_WORK,
+  USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
-  USE_PRICE_PURCHASE,
-  USE_PRICE_SELLING,
   USE_PRICE_SETTINGS
 } from "./constants";
 import {
@@ -255,23 +252,26 @@ export default {
     },
     showAddQuotationLinesBlock() {
       return this.costService.collection.length && !this.parentHasQuotationLines && !this.isView
-    }
+    },
+    showSaveButton() {
+      return !this.hasChanges
+    },
   },
   data() {
     return {
+      hasChanges: false,
       isLoading: false,
       total_dinero: null,
       totalVAT_dinero: null,
       totalAmount: null,
       usePriceOptions: {
-        USE_PRICE_PURCHASE,
         USE_PRICE_SETTINGS,
-        USE_PRICE_SELLING,
+        USE_PRICE_CUSTOMER,
         USE_PRICE_OTHER,
       },
       default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
+      default_vat: this.$store.getters.getQuotationDefaultVat,
+      default_hourly_rate: this.$store.getters.getQuotationDefaultHourlyRate,
       hasStoredData: false,
       costService: new CostService(),
       quotationLineService: new QuotationLineService(),
@@ -281,7 +281,7 @@ export default {
   async created() {
     this.isLoading = true
     // set vars in service
-    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_vat = this.default_vat
     this.costService.default_currency = this.default_currency
 
     if (this.chapter.id) {
@@ -372,7 +372,8 @@ export default {
         this.checkParentHasQuotationLines(this.quotationLinesParent)
         this.isLoading = false
       } catch(error) {
-        this.errorToast(this.$trans('Error fetching material cost'))
+        console.log('error fetching hours costs', error)
+        this.errorToast(this.$trans('Error fetching hours cost'))
         this.isLoading = false
       }
     },
@@ -380,7 +381,9 @@ export default {
       return {
         use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
         quotation: this.chapter.quotation,
-        chapter: this.chapter.id
+        chapter: this.chapter.id,
+        amount_duration_read: "0:00",
+        amount_duration_secs: 0
       }
     },
     getEngineerRateFor(obj, usePrice) {
@@ -393,22 +396,29 @@ export default {
           throw `getEngineerRateFor: unknown usePrice for work hours: ${usePrice}`
       }
     },
-    getPrice(activity) {
-      switch (activity.use_price) {
+    getPrice(cost) {
+      switch (cost.use_price) {
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.hourly_rate_engineer
         case this.usePriceOptions.USE_PRICE_SETTINGS:
           return this.default_hourly_rate
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return activity.price_other
+          return cost.price_other
         default:
-          throw `getPrice: unknown use_price for quotation: ${activity.use_price}`
+          throw `getPrice: unknown use_price for quotation: ${cost.use_price}`
       }
     },
     getCurrency(_activity) {
       return this.default_currency
     },
     updateTotals() {
+      // to make sure our computed gets triggered
+      this.isLoading = true
+      this.isLoading = false
+      if (this.isCollectionEmpty) {
+        return
+      }
+
       // provide methods to get price and currency
       this.costService.updateTotals(
         this.getPrice,

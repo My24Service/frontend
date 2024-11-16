@@ -151,7 +151,8 @@ import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
 import DurationInput from "../../../components/DurationInput.vue"
 import {
-  USE_PRICE_OTHER,
+  USE_PRICE_CUSTOMER,
+  USE_PRICE_OTHER, USE_PRICE_SETTINGS,
 } from "./constants";
 import {COST_TYPE_CALL_OUT_COSTS, CostService} from "@/models/quotations/Cost";
 import HeaderCell from "./Header";
@@ -218,16 +219,8 @@ export default {
     showAddQuotationLinesBlock() {
       return this.costService.collection.length && !this.parentHasQuotationLines
     },
-    isCollectionEmpty() {
-      const nonEmptyItems = this.costService.collection.filter((c) => c.amount_int !== null && c.amount_int > 0)
-      return nonEmptyItems.length === 0 && this.hasChanges
-    },
     showSaveButton() {
       return !this.hasChanges
-    },
-    collectionHasEmptyItem() {
-      const emptyItem = this.costService.collection.find((c) => c.amount_int === null && c.amount_int > 0)
-      return emptyItem && this.hasChanges
     },
   },
   data() {
@@ -238,11 +231,13 @@ export default {
       totalAmount: null,
       costService: new CostService(),
       usePriceOptions: {
+        USE_PRICE_SETTINGS,
+        USE_PRICE_CUSTOMER,
         USE_PRICE_OTHER,
       },
       default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
+      default_vat: this.$store.getters.getQuotationDefaultVat,
+      default_call_out_costs: this.$store.getters.getQuotationDefaultCallOutCosts,
       quotationLineType: COST_TYPE_CALL_OUT_COSTS,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),
@@ -253,7 +248,7 @@ export default {
   async created() {
     this.isLoading = true
     // set vars in service
-    this.costService.invoice_default_vat = this.invoice_default_vat
+    this.costService.default_vat = this.default_vat
     this.costService.default_currency = this.default_currency
 
     if (this.chapter.id) {
@@ -337,7 +332,8 @@ export default {
         this.isLoading = false
         this.isLoaded = true
       } catch(error) {
-        this.errorToast(this.$trans('Error fetching material cost'))
+        console.log('error fetching call out costs costs', error)
+        this.errorToast(this.$trans('Error fetching costs'))
         this.isLoading = false
         this.isLoaded = true
       }
@@ -349,16 +345,16 @@ export default {
         chapter: this.chapter.id
       }
     },
-    getPrice(activity) {
-      switch (activity.use_price) {
+    getPrice(cost) {
+      switch (cost.use_price) {
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
-          return this.customer.hourly_rate_engineer
+          return this.customer.call_out_costs
         case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.default_hourly_rate
+          return this.default_call_out_costs
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return activity.price_other
+          return cost.price_other
         default:
-          console.log(`getPrice - unknown use price: ${activity.use_price}`)
+          console.log(`getPrice - unknown use price: ${cost.use_price}`)
           return "0.00"
       }
     },
@@ -370,6 +366,9 @@ export default {
       this.updateTotals()
     },
     updateTotals() {
+      // to make sure our computed gets triggered
+      this.isLoading = true
+      this.isLoading = false
       if (this.isCollectionEmpty) {
         return
       }
@@ -400,8 +399,4 @@ export default {
 }
 </script>
 <style scoped>
-.flex {
-  display : flex;
-  margin-top: auto;
-}
 </style>

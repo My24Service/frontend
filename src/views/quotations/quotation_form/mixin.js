@@ -15,7 +15,15 @@ let quotationMixin = {
   computed: {
     sectionHeader() {
       return `header-${this.quotationLineType}`
-    }
+    },
+    isCollectionEmpty() {
+      const nonEmptyItems = this.costService.collection.filter((c) => !c.isEmpty())
+      return nonEmptyItems.length === 0 && !this.isLoading
+    },
+    collectionHasEmptyItem() {
+      const emptyItem = this.costService.collection.find((c) => c.isEmpty())
+      return emptyItem && !this.isLoading
+    },
   },
   methods: {
     // sectionHeader(type) {
