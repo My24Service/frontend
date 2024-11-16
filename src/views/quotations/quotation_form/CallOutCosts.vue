@@ -4,7 +4,7 @@
       <SectionHeader
         :parent-has-quotation-lines="parentHasQuotationLines"
         :section-header="sectionHeader"
-        :title="$trans('Call out costs')"
+        :title="$trans('Call-out costs')"
       />
 
       <div v-if="!parentHasQuotationLines && isLoaded">
@@ -25,30 +25,45 @@
                     v-model="cost.amount_int"
                     size="sm"
                     style="width: 100px !important; float:left !important;"
-                    :disabled="parentHasQuotationLines"
                   ></b-form-input>
                 </b-form-group>
               </b-col>
               <b-col cols="3">
                 <b-form-group
                   v-bind:label="$trans('Price')"
-                  v-if="cost.quotation && !cost.savedHours"
                 >
-                  <PriceInput
-                    v-model="cost.price_other"
-                    :currency="cost.price_other_currency"
-                    @priceChanged="(val) => otherPriceChanged(val, cost)"
-                    @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
-                  />
+                  <b-form-radio-group
+                    @change="updateTotals"
+                    v-model="cost.use_price"
+                    v-if="!isView"
+                  >
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                      {{ $trans('Settings') }}
+                      {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                    </b-form-radio>
+
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                      {{ $trans('Customer') }}
+                      {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                    </b-form-radio>
+
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                      {{ $trans("Other") }}
+                      <PriceInput
+                        v-model="cost.price_other"
+                        :currency="cost.price_other_currency"
+                        @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, cost)"
+                        @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
+                      />
+                    </b-form-radio>
+                  </b-form-radio-group>
                 </b-form-group>
               </b-col>
               <b-col cols="2">
                 <b-form-group
                   v-bind:label="$trans('VAT type')"
-                  v-if="cost.quotation && !cost.savedHours"
                 >
                   <VAT
-                    v-if="!parentHasQuotationLines"
                     @vatChanged="(val) => changeVatType(cost, val)"
                   />
                 </b-form-group>
@@ -57,7 +72,6 @@
               <b-col cols="2" class="text-right">
                 <b-form-group
                   v-bind:label="$trans('VAT')"
-                  v-if="cost.quotation && !cost.savedHours"
                 >
                   <b-form-input
                     readonly
@@ -70,7 +84,6 @@
               <b-col cols="2" class="text-right">
                 <b-form-group
                   v-bind:label="$trans('Total')"
-                  v-if="cost.quotation && !cost.savedHours"
                 >
                   <b-form-input
                     readonly
@@ -106,7 +119,7 @@
             class="btn btn-primary"
             type="button"
           >
-            {{ $trans("Add call out cost") }}
+            {{ $trans("Add call-out cost") }}
           </b-button>
           <span style="width: 80px">&nbsp;</span>
           <b-button
@@ -152,7 +165,8 @@ import Multiselect from 'vue-multiselect'
 import DurationInput from "../../../components/DurationInput.vue"
 import {
   USE_PRICE_CUSTOMER,
-  USE_PRICE_OTHER, USE_PRICE_SETTINGS,
+  USE_PRICE_OTHER,
+  USE_PRICE_SETTINGS,
 } from "./constants";
 import {COST_TYPE_CALL_OUT_COSTS, CostService} from "@/models/quotations/Cost";
 import HeaderCell from "./Header";
@@ -168,6 +182,7 @@ import {QuotationLineService} from "@/models/quotations/QuotationLine";
 import CollectionEmptyContainer from "./EmptyQuotationLinesContainer.vue";
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
+import {toDinero} from "@/utils";
 
 export default {
   name: "CallOutCosts",
@@ -294,13 +309,13 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        this.infoToast(this.$trans('Created'), this.$trans('Call out costs have been updated'))
+        this.infoToast(this.$trans('Created'), this.$trans('Call-out costs have been updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error creating call out costs', error)
-        this.errorToast(this.$trans('Error creating call out costs'))
+        this.errorToast(this.$trans('Error creating call-out costs'))
         this.isLoading = false
       }
     },
@@ -345,6 +360,17 @@ export default {
         chapter: this.chapter.id
       }
     },
+    getPriceFor(usePrice) {
+      switch (usePrice) {
+        case this.usePriceOptions.USE_PRICE_CUSTOMER:
+          return this.customer.call_out_costs_dinero
+        case this.usePriceOptions.USE_PRICE_SETTINGS:
+          return toDinero(this.default_call_out_costs, this.default_currency)
+        default:
+          console.log(`getPriceFor - unknown use price: ${usePrice}`)
+          return "0.00"
+      }
+    },
     getPrice(cost) {
       switch (cost.use_price) {
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
@@ -387,10 +413,10 @@ export default {
       )
     },
     getDescriptionUserTotalsQuotationLine(_cost) {
-      return `${this.$trans("Call out costs")}`
+      return `${this.$trans("Call-out costs")}`
     },
     getDescriptionOnlyTotalQuotationLine() {
-      return `${this.$trans("Call out costs")}`
+      return `${this.$trans("Call-out costs")}`
     },
     getTotalAmountQuotationLine() {
       return this.totalAmount

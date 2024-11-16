@@ -1,177 +1,161 @@
 <template>
-  <details :open="isView ? 'open' : ''">
-    <SectionHeader
-      :parent-has-quotation-lines="parentHasQuotationLines"
-      :section-header="sectionHeader"
-      :title="$trans('Distance')"
-    />
-    <b-overlay :show="compLoading" rounded="sm">
-      <div
-        v-for="(cost, index) in this.costService.collection"
-        :key="index"
-        style="padding-top: 8px;"
-      >
-        <b-form-group
-          label-cols="3"
-          v-bind:label="$trans('Amount')"
-          v-if="cost.quotation"
+  <b-overlay :show="compLoading" rounded="sm">
+    <details :open="isView ? 'open' : ''">
+      <SectionHeader
+        :parent-has-quotation-lines="parentHasQuotationLines"
+        :section-header="sectionHeader"
+        :title="$trans('Distance')"
+      />
+
+      <div v-if="!parentHasQuotationLines && isLoaded">
+        <div
+          v-for="(cost, index) in this.costService.collection"
+          :key="index"
         >
-          <b-form-input
-            type="number"
-            @blur="updateTotals"
-            v-model="cost.amount_int"
-            size="sm"
-            style="width: 100px !important; float:left !important;"
-            :disabled="parentHasQuotationLines"
-          ></b-form-input>
-          <div style="width: 100px !important; float:right !important;">
-            {{ $trans('VAT') }}
-            <VAT
-              v-if="!parentHasQuotationLines"
-              @vatChanged="(val) => changeVatType(cost, val)"
-              style="width: 60px"
-            />
-            <span v-else>{{ cost.vat_type }}%</span>
-          </div>
-        </b-form-group>
+          <b-container>
+            <b-row>
+              <b-col cols="2">
+                <b-form-group
+                  v-bind:label="$trans('Kilometers')"
+                >
+                  <b-form-input
+                    type="number"
+                    @blur="updateTotals"
+                    v-model="cost.amount_int"
+                    size="sm"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3">
+                <b-form-group
+                  v-bind:label="$trans('Price')"
+                  v-if="cost.quotation && !cost.savedHours"
+                >
+                  <b-form-radio-group
+                    @change="updateTotals"
+                    v-model="cost.use_price"
+                    v-if="!parentHasQuotationLines"
+                  >
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                      {{ $trans('Settings') }}
+                      {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
+                    </b-form-radio>
 
-        <b-form-group
-          label-cols="3"
-          v-bind:label="$trans('Price')"
-          v-if="cost.quotation && !cost.savedHours"
-        >
-          <b-form-radio-group
-            @change="updateTotals"
-            v-model="cost.use_price"
-            v-if="!parentHasQuotationLines"
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                      {{ $trans('Customer') }}
+                      {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
+                    </b-form-radio>
+
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                      {{ $trans("Other") }}
+                      <PriceInput
+                        v-model="cost.price_other"
+                        :currency="cost.price_other_currency"
+                        @priceChanged="(val) => otherPriceChanged(val, cost)"
+                      />
+                    </b-form-radio>
+                  </b-form-radio-group>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2">
+                <b-form-group
+                  v-bind:label="$trans('VAT type')"
+                >
+                  <VAT
+                    @vatChanged="(val) => changeVatType(cost, val)"
+                  />
+                </b-form-group>
+              </b-col>
+              <b-col cols="1"></b-col>
+              <b-col cols="2" class="text-right">
+                <b-form-group
+                  v-bind:label="$trans('VAT')"
+                >
+                  <b-form-input
+                    readonly
+                    disabled
+                    :value="cost.vat_dinero.toFormat('$0.00')"
+                    class="text-right pr-0"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" class="text-right">
+                <b-form-group
+                  v-bind:label="$trans('Total')"
+                >
+                  <b-form-input
+                    readonly
+                    disabled
+                    class="text-right pr-0"
+                    :value="cost.total_dinero.toFormat('$0.00')"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </b-container>
+
+          <b-container>
+            <b-row>
+              <b-col cols="12" class="text-center">
+                <b-button
+                  @click="() => deleteCost(index)"
+                  type="button"
+                  variant="danger"
+                  size="sm"
+                >
+                  {{ $trans("Delete cost") }}
+                </b-button>
+              </b-col>
+            </b-row>
+            <hr/>
+          </b-container>
+        </div>
+        <div class="text-center">
+          <b-button
+            :disabled="collectionHasEmptyItem"
+            @click="addCost"
+            class="btn btn-primary"
+            type="button"
           >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
-              {{ $trans('Settings') }}
-              {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-            </b-form-radio>
-
-            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
-              {{ $trans('Customer') }}
-              {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-            </b-form-radio>
-
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
-              <p class="flex">
-                {{ $trans("Other") }}:&nbsp;&nbsp;
-                <PriceInput
-                  v-model="cost.price_other"
-                  :currency="cost.price_other_currency"
-                  @priceChanged="(val) => otherPriceChanged(val, cost)"
-                />
-              </p>
-            </b-form-radio>
-          </b-form-radio-group>
-          <b-form-input
-            v-else
-            :value="cost.price_dinero.toFormat('$0.00')"
-            disabled="disabled"
+            {{ $trans("Add distance") }}
+          </b-button>
+          <span style="width: 80px">&nbsp;</span>
+          <b-button
+            :disabled="showSaveButton"
+            @click="() => saveCosts()"
+            type="button"
+            variant="primary"
           >
-          </b-form-input>
-        </b-form-group>
-
-        <b-container>
-          <b-row>
-            <b-col cols="12">
-              <div v-if="cost.total_dinero">
-                <TotalsInputs
-                  :total="cost.total_dinero"
-                  :vat="cost.vat_dinero"
-                />
-              </div>
-            </b-col>
-          </b-row>
-          <b-row v-if="!parentHasQuotationLines">
-            <b-col cols="8"></b-col>
-            <b-col cols="4">
-              <b-button
-                @click="() => deleteCost(index)"
-                class="btn btn-danger"
-                type="button"
-                variant="danger"
-              >
-                {{ $trans("Delete cost") }}
-              </b-button>
-            </b-col>
-          </b-row>
-          <hr/>
-        </b-container>
+            {{ $trans("Save changes") }}
+          </b-button>
+        </div>
+        <hr/>
       </div>
 
-      <b-container style="padding-top: 8px;">
-        <b-row v-if="totalAmount">
-          <b-col cols="12">
-            <TotalRow
-              class="total-row"
-              v-if="!compLoading"
-              :items_total="totalAmount"
-              :total="total_dinero"
-              :total_vat="totalVAT_dinero"
-            />
-            <hr/>
-          </b-col>
-        </b-row>
-        <b-row v-if="parentHasQuotationLines">
-          <b-col cols="12">
-            <i><strong>{{ $trans("Delete existing distance quotation lines if you want to add or change items") }}</strong></i>
-          </b-col>
-        </b-row>
-        <b-row v-if="(costService.collection.length || costService.deletedItems.length) && !parentHasQuotationLines">
-          <b-col cols="4"></b-col>
-          <b-col cols="8">
-            <b-button
-              :disabled="compLoading"
-              @click="addCost"
-              class="btn btn-primary"
-              type="button"
-            >
-              {{ $trans('Add distance') }}
-            </b-button>
-            <span style="width: 80px">&nbsp;</span>
-            <b-button
-              :disabled="compLoading"
-              @click="() => saveCosts()"
-              class="btn btn-danger"
-              type="button"
-              variant="danger"
-              v-if="costService.collection.length"
-            >
-              {{ $trans("Save distance costs") }}
-            </b-button>
-          </b-col>
-        </b-row>
-        <b-row v-if="!costService.collection.length && !parentHasQuotationLines">
-          <b-col cols="7"></b-col>
-          <b-col cols="5">
-            <b-button
-              :disabled="compLoading"
-              @click="addCost"
-              class="btn btn-primary"
-              type="button"
-            >
-              {{ $trans('Add distance') }}
-            </b-button>
-          </b-col>
-        </b-row>
+      <div v-if="!isCollectionEmpty">
+        <TotalRow
+          :items_total="totalAmount"
+          :total="total_dinero"
+          :total_vat="totalVAT_dinero"
+        />
+        <hr/>
+      </div>
 
-        <b-row v-if="showAddQuotationLinesBlock">
-          <b-col cols="12">
-            <hr />
-            <AddToQuotationLines
-              :useOnQuotationOptions="useOnQuotationOptions"
-              @buttonClicked="createQuotationLinesClicked"
-            />
-            <hr/>
-          </b-col>
-        </b-row>
+      <EmptyQuotationLinesContainer
+        v-if="parentHasQuotationLines"
+        class="text-center"
+        @buttonClicked="() => { emptyQuotationLines() }"
+      />
 
-      </b-container>
-    </b-overlay>
-  </details>
+      <div v-if="showAddQuotationLinesBlock">
+        <AddToQuotationLines
+          :useOnQuotationOptions="useOnQuotationOptions"
+          @buttonClicked="createQuotationLinesClicked"
+        />
+      </div>
+
+    </details>
+  </b-overlay>
 </template>
 <script>
 import quotationMixin from "./mixin.js";
@@ -195,11 +179,14 @@ import {USE_PRICE_CUSTOMER} from "@/views/quotations/quotation_form/constants";
 import {CustomerModel} from "@/models/customer/Customer";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 import SectionHeader from "@/views/quotations/quotation_form/SectionHeader.vue";
+import EmptyQuotationLinesContainer
+  from "@/views/quotations/quotation_form/EmptyQuotationLinesContainer.vue";
 
 export default {
   name: "DistanceComponent",
   mixins: [quotationMixin],
   components: {
+    EmptyQuotationLinesContainer,
     SectionHeader,
     PriceInput,
     IconLinkDelete,
@@ -211,6 +198,9 @@ export default {
     DurationInput,
     AddToQuotationLines
   },
+  emits: [
+    'emptyQuotationLinesClicked'
+  ],
   props: {
     chapter: {
       type: ChapterModel,
@@ -247,7 +237,6 @@ export default {
   },
   data() {
     return {
-      hasChanges: false,
       isLoading: false,
       total_dinero: null,
       totalVAT_dinero: null,
@@ -264,6 +253,8 @@ export default {
       quotationLineType: COST_TYPE_DISTANCE,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),
+      isLoaded: false,
+      hasChanges: false
     }
   },
   async created() {
@@ -285,9 +276,13 @@ export default {
     this.isLoading = false
   },
   methods: {
+    emptyQuotationLines() {
+      this.$emit('emptyQuotationLinesClicked', this.quotationLineType)
+    },
     otherPriceChanged(priceDinero, cost) {
       cost.setPriceField('price_other', priceDinero)
       this.updateTotals()
+      this.hasChanges = true
     },
     addCost() {
       this.costService.collection.push(
@@ -313,14 +308,16 @@ export default {
         this.addCost()
       }
       this.updateTotals()
+      this.hasChanges = true
     },
     async saveCosts() {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
         this.infoToast(this.$trans('Created'), this.$trans('Distance costs updated'))
-        this.isLoading = false
         await this.loadData()
+        this.isLoading = false
+        this.hasChanges = false
       } catch(error) {
         console.log('Error updating distance costs', error)
         this.errorToast(this.$trans('Error updating distance costs'))
@@ -330,10 +327,12 @@ export default {
     changeVatType(obj, vatType) {
       obj.vat_type = vatType
       this.updateTotals()
+      this.hasChanges = true
     },
     async loadData() {
       this.costService.collection = []
       this.isLoading = true
+      this.isLoaded = false
 
       try {
         const response = await this.costService.list()
@@ -351,10 +350,12 @@ export default {
           this.addCost()
         }
         this.isLoading = false
+        this.isLoaded = true
       } catch(error) {
         console.log('error fetching distance cost', error)
         this.errorToast(this.$trans('Error fetching distance costs'))
         this.isLoading = false
+        this.isLoaded = true
       }
     },
     getDefaultProps() {
@@ -364,14 +365,15 @@ export default {
         chapter: this.chapter.id
       }
     },
-    getPriceFor(type) {
-      switch (type) {
+    getPriceFor(usePrice) {
+      switch (usePrice) {
         case this.usePriceOptions.USE_PRICE_SETTINGS:
           return this.default_price_per_km_dinero
         case this.usePriceOptions.USE_PRICE_CUSTOMER:
           return this.customer.price_per_km_dinero
         default:
-          throw `getPrice: unknown use_price: ${type}`
+          console.log(`getPriceFor - unknown use price: ${usePrice}`)
+          return "0.00"
       }
     },
     getPrice(cost) {
@@ -383,7 +385,8 @@ export default {
         case this.usePriceOptions.USE_PRICE_OTHER:
           return cost.price_other
         default:
-          throw `getPrice: unknown use_price: ${cost.use_price}`
+          console.log(`getPrice - unknown use price: ${cost.use_price}`)
+          return "0.00"
       }
     },
     getCurrency(_activity) {
@@ -396,7 +399,6 @@ export default {
       if (this.isCollectionEmpty) {
         return
       }
-      console.log('collection not empty?')
 
       // provide methods to get price and currency
       this.costService.updateTotals(
@@ -424,8 +426,4 @@ export default {
 }
 </script>
 <style scoped>
-.flex {
-  display : flex;
-  margin-top: auto;
-}
 </style>

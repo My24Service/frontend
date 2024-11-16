@@ -116,7 +116,6 @@
                   v-if="cost.quotation && !cost.savedHours"
                 >
                   <VAT
-                    v-if="!parentHasQuotationLines"
                     @vatChanged="(val) => changeVatType(cost, val)"
                   />
                 </b-form-group>
