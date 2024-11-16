@@ -24,6 +24,9 @@ let quotationMixin = {
       const emptyItem = this.costService.collection.find((c) => c.isEmpty())
       return emptyItem && !this.isLoading
     },
+    showAddQuotationLinesBlock() {
+      return this.costService.collection.length && !this.parentHasQuotationLines && !this.isView
+    },
   },
   methods: {
     // sectionHeader(type) {

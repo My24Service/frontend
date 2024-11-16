@@ -201,12 +201,11 @@
         @buttonClicked="() => { emptyQuotationLines() }"
       />
 
-      <div v-if="showAddQuotationLinesBlock">
+      <div v-if="showAddQuotationLinesBlock" class="text-center">
         <AddToQuotationLines
           :useOnQuotationOptions="useOnQuotationOptions"
           @buttonClicked="createQuotationLinesClicked"
         />
-        <hr/>
       </div>
 
     </details>
@@ -271,9 +270,6 @@ export default {
     }
   },
   computed: {
-    showAddQuotationLinesBlock() {
-      return !this.isCollectionEmpty && !this.parentHasQuotationLines
-    },
     showSaveButton() {
       return !this.hasChanges
     },
