@@ -7,6 +7,14 @@
         :title="$trans('Call-out costs')"
       />
 
+      <div v-if="parentHasQuotationLines && isLoaded">
+        <CostsTable
+          :collection="costService.collection"
+          :type="quotationLineType"
+        />
+        <hr/>
+      </div>
+
       <div v-if="!parentHasQuotationLines && isLoaded">
         <div
           v-for="(cost, index) in this.costService.collection"
@@ -183,11 +191,13 @@ import CollectionEmptyContainer from "./EmptyQuotationLinesContainer.vue";
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import {toDinero} from "@/utils";
+import CostsTable from "./CostsTable.vue";
 
 export default {
   name: "CallOutCosts",
   mixins: [quotationMixin],
   components: {
+    CostsTable,
     EmptyQuotationLinesContainer,
     SectionHeader,
     CollectionEmptyContainer,
@@ -354,7 +364,8 @@ export default {
       return {
         use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
         quotation: this.chapter.quotation,
-        chapter: this.chapter.id
+        chapter: this.chapter.id,
+        vat_type: this.default_vat
       }
     },
     getPriceFor(usePrice) {

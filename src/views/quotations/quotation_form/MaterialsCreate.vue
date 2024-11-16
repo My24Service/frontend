@@ -475,7 +475,8 @@ export default {
       return {
         use_price: this.usePriceOptions.USE_PRICE_SELLING,
         quotation: this.chapter.quotation,
-        chapter: this.chapter.id
+        chapter: this.chapter.id,
+        vat_type: this.default_vat
       }
     },
     getPrice(cost) {

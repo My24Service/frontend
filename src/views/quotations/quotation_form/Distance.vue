@@ -7,6 +7,14 @@
         :title="$trans('Distance')"
       />
 
+      <div v-if="parentHasQuotationLines && isLoaded">
+        <CostsTable
+          :collection="costService.collection"
+          :type="quotationLineType"
+        />
+        <hr/>
+      </div>
+
       <div v-if="!parentHasQuotationLines && isLoaded">
         <div
           v-for="(cost, index) in this.costService.collection"
@@ -179,13 +187,14 @@ import {USE_PRICE_CUSTOMER} from "@/views/quotations/quotation_form/constants";
 import {CustomerModel} from "@/models/customer/Customer";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 import SectionHeader from "@/views/quotations/quotation_form/SectionHeader.vue";
-import EmptyQuotationLinesContainer
-  from "@/views/quotations/quotation_form/EmptyQuotationLinesContainer.vue";
+import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
+import CostsTable from "./CostsTable.vue";
 
 export default {
   name: "DistanceComponent",
   mixins: [quotationMixin],
   components: {
+    CostsTable,
     EmptyQuotationLinesContainer,
     SectionHeader,
     PriceInput,
@@ -359,7 +368,8 @@ export default {
       return {
         use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
         quotation: this.chapter.quotation,
-        chapter: this.chapter.id
+        chapter: this.chapter.id,
+        vat_type: this.default_vat
       }
     },
     getPriceFor(usePrice) {

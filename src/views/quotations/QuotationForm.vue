@@ -4,7 +4,7 @@
       <QuotationPDFViewer
         :quotation-in="quotation"
         :is-view="isView"
-        v-if="quotation"
+        v-if="quotation && quotation.id"
         ref="quotation-viewer"
       />
 

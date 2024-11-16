@@ -47,16 +47,8 @@ class CostModel {
     // console.log({priceDecimal, currency})
     this.setPriceField('price', toDinero(priceDecimal, currency))
     const total = this.getTotal()
-    // console.log({total, vat_type: this.vat_type})
-    let total_with_margin = total
-    let margin = toDinero("0.00", currency)
-    if (this.margin_perc > 0) {
-      margin = total.multiply(this.margin_perc/100)
-      total_with_margin = total.add(margin)
-    }
-    const vat = total_with_margin.multiply(parseInt(this.vat_type)/100)
+    const vat = total.multiply(parseInt(this.vat_type)/100)
     this.currency = currency
-    this.setPriceField('margin', margin)
     this.setPriceField('total', total)
     this.setPriceField('vat', vat)
   }

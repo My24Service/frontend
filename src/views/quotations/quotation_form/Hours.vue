@@ -7,6 +7,14 @@
         :title="getTitle()"
       />
 
+      <div v-if="parentHasQuotationLines && isLoaded">
+        <CostsTable
+          :collection="costService.collection"
+          :type="quotationLineType"
+        />
+        <hr/>
+      </div>
+
       <div v-if="!parentHasQuotationLines && isLoaded">
         <div
           v-for="(cost, index) in this.costService.collection"
@@ -184,8 +192,8 @@ import AddToQuotationLines from './AddToQuotationLines.vue'
 import {ChapterModel} from "@/models/quotations/Chapter";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 import SectionHeader from "@/views/quotations/quotation_form/SectionHeader.vue";
-import EmptyQuotationLinesContainer
-  from "@/views/quotations/quotation_form/EmptyQuotationLinesContainer.vue";
+import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
+import CostsTable from "./CostsTable.vue";
 
 export default {
   name: "HoursComponent",
@@ -194,6 +202,7 @@ export default {
     'emptyQuotationLinesClicked'
   ],
   components: {
+    CostsTable,
     EmptyQuotationLinesContainer,
     SectionHeader,
     PriceInput,
@@ -378,7 +387,8 @@ export default {
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         amount_duration_read: "0:00",
-        amount_duration_secs: 0
+        amount_duration_secs: 0,
+        vat_type: this.default_vat
       }
     },
     getPriceFor(usePrice) {
