@@ -59,121 +59,150 @@
       </ul>
       <hr>
       <div class="new-invoice-line" v-if="invoiceLineService.editItem">
-        <b-row>
-          <b-col cols="6" role="group">
-            <b-form-group
-              label-size="sm"
-              label-for="new-invoice-line-description"
-            >
-              <b-form-input
-                id="new-invoice-line-description"
-                size="sm"
-                v-model="invoiceLineService.editItem.description"
-                :placeholder="$trans('Item description')"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              label-for="new-invoice-line-amount"
-            >
-              <b-form-input
-                @input="invoiceLineAmountChanged"
-                id="new-invoice-line-amount"
-                size="sm"
-                type="number"
-                v-model="invoiceLineService.editItem.amount"
-                :placeholder="$trans('Amount')"
-
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              label-for="new-invoice-line-price"
-            >
-              <PriceInput
-                id="new-invoice-line-price"
-                v-model="invoiceLineService.editItem.price"
-                :currency="invoiceLineService.editItem.price_currency"
-                @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
-              />
-            </b-form-group>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="2" role="group">
-            <b-form-group
-              label-size="sm"
-              label-for="new-invoice-line-total"
-            >
-              <b-form-input
-                :placeholder="$trans('Total')"
-                id="new-invoice-line-total"
-                readonly
-                disabled
-                :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
-                size="sm"
-              ></b-form-input>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              class="flex-columns vat"
-              label-size="sm"
-              v-bind:label="$trans('VAT %')"
-              label-for="new-invoice-line-total"
-            >
-            <span class="flex-columns space-between align-items-center">
-              <VAT @vatChanged="changeVatTypeInvoiceLine" />
-
-              {{ invoiceLineService.editItem.vat_dinero.toFormat('$0.00') }}
-            </span>
-            </b-form-group>
-          </b-col>
-          <b-col cols="4" role="group">
-            <b-form-group
-              label-size="sm"
-              label-for="invoice-submit-button"
-            >
-              <b-button
-                v-if="invoiceLineService.isEdit"
-                @click="invoiceService.doEditCollectionItem"
-                class="btn "
-                size="sm"
-                type="submit"
-                :disabled="!isInvoiceLineValid"
-                id="invoice-submit-button"
+        <b-container>
+          <b-row>
+            <b-col cols="6" role="group">
+              <b-form-group
+                label-size="sm"
+                label-for="new-invoice-line-description"
               >
-                {{ $trans('Edit') }}
-              </b-button>
-              <b-button
-                v-else
-                @click="addInvoiceLine"
-                class="btn"
-                size="sm"
-                type="submit"
-
-                :disabled="!isInvoiceLineValid"
-                id="invoice-submit-button"
+                <b-form-input
+                  id="new-invoice-line-description"
+                  size="sm"
+                  v-model="invoiceLineService.editItem.description"
+                  :placeholder="$trans('Item description')"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                label-for="new-invoice-line-amount"
               >
-                {{ $trans('Add') }}
+                <b-form-input
+                  @input="invoiceLineAmountChanged"
+                  id="new-invoice-line-amount"
+                  size="sm"
+                  type="number"
+                  v-model="invoiceLineService.editItem.amount"
+                  :placeholder="$trans('Amount')"
+
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                label-for="new-invoice-line-price"
+              >
+                <PriceInput
+                  id="new-invoice-line-price"
+                  v-model="invoiceLineService.editItem.price"
+                  :currency="invoiceLineService.editItem.price_currency"
+                  @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
+                />
+              </b-form-group>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="2" role="group">
+              <b-form-group
+                label-size="sm"
+                label-for="new-invoice-line-total"
+              >
+                <b-form-input
+                  :placeholder="$trans('Total')"
+                  id="new-invoice-line-total"
+                  readonly
+                  disabled
+                  :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
+                  size="sm"
+                ></b-form-input>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                class="flex-columns vat"
+                label-size="sm"
+                v-bind:label="$trans('VAT %')"
+                label-for="new-invoice-line-total"
+              >
+              <span class="flex-columns space-between align-items-center">
+                <VAT @vatChanged="changeVatTypeInvoiceLine" />
+
+                {{ invoiceLineService.editItem.vat_dinero.toFormat('$0.00') }}
+              </span>
+              </b-form-group>
+            </b-col>
+            <b-col cols="4" role="group">
+              <b-form-group
+                label-size="sm"
+                label-for="invoice-submit-button"
+              >
+                <b-button
+                  v-if="invoiceLineService.isEdit"
+                  @click="invoiceService.doEditCollectionItem"
+                  class="btn "
+                  size="sm"
+                  type="submit"
+                  :disabled="!isInvoiceLineValid"
+                  id="invoice-submit-button"
+                >
+                  {{ $trans('Edit') }}
+                </b-button>
+                <b-button
+                  v-else
+                  @click="addInvoiceLine"
+                  class="btn"
+                  size="sm"
+                  type="submit"
+
+                  :disabled="!isInvoiceLineValid"
+                  id="invoice-submit-button"
+                >
+                  {{ $trans('Add') }}
+                </b-button>
+              </b-form-group>
+            </b-col>
+          </b-row>
+        </b-container>
+        <b-container v-if="invoiceLineService.deletedItems.length">
+          <b-row>
+            <b-col cols="12">
+              <hr/>
+              <p><strong>{{ $trans("To be deleted") }}</strong></p>
+              <b-table
+                small
+                :fields="fieldsView"
+                :items="invoiceLineService.deletedItems"
+                responsive="md"
+                class="line-table"
+              ></b-table>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="12" class="text-center">
+              <b-button
+                @click="loadData"
+                class="btn btn-secondary"
+                type="button"
+
+                :disabled="!invoiceLineService.collectionHasChanges"
+              >
+                {{ $trans('Discard changes') }}
               </b-button>
-            </b-form-group>
-          </b-col>
-        </b-row>
+            </b-col>
+          </b-row>
+        </b-container>
       </div>
     </details>
   </b-overlay>
 </template>
 <script>
-import { InvoiceLineService } from '../../../models/invoices/InvoiceLine.js'
+import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
 import PriceInput from "../../../components/PriceInput";
 import VAT from "./VAT";
 import invoiceMixin from "./mixin";
-
 
 export default {
   components: {
@@ -206,6 +235,10 @@ export default {
     return {
       isLoading: false,
       invoiceLineService: new InvoiceLineService(),
+      fieldsView: [
+        {key: 'description', label: this.$trans('Description'), thAttr: {width: '60%'}},
+        {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
+      ],
     }
   },
   async created() {
@@ -236,6 +269,7 @@ export default {
     addInvoiceLine() {
       this.invoiceLineService.editItem.id = this.getInvoiceLineId()
       this.invoiceLineService.editItem.new = true
+      this.invoiceLineService.editItem.invoice = this.invoice.id
       this.invoiceLineService.editItem.type = this.INVOICE_LINE_TYPE_MANUAL
       this.invoiceLineService.editItem.price_text = this.invoiceLineService.editItem.price_dinero.toFormat('$0.00')
       this.invoiceLineService.addCollectionItem()

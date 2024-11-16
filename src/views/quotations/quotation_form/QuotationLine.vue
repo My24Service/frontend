@@ -192,9 +192,7 @@
         </b-button>
       </footer>
 
-      <b-container
-        v-if="showChangesBlock"
-      >
+      <b-container>
         <b-row class="quotation-total">
           <b-col cols="7">
             <span class="total-text">{{ $trans('Chapter total') }}</span>
@@ -208,6 +206,11 @@
             />
           </b-col>
         </b-row>
+      </b-container>
+
+      <b-container
+        v-if="showChangesBlock"
+      >
         <b-row>
           <b-col cols="2"></b-col>
           <b-col cols="10">
