@@ -1,6 +1,6 @@
 <template>
   <div class="use-on-invoice-container">
-    <h4>{{ $trans("What to add as quotation lines")}}</h4>
+    <h5>{{ $trans("What to add as quotation lines")}}</h5>
     <b-form-group>
       <b-form-radio-group
         v-model="useOnQuotationSelected"
