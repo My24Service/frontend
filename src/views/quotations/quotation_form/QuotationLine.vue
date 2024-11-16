@@ -26,6 +26,7 @@
         responsive="md"
         class="line-table"
         v-if="!showForm && quotationLineService.collection.length"
+        :tbody-tr-class="rowClass"
       >
         <template #cell(info)="data">
           <b>{{ data.item.info }}</b><br/>
@@ -41,6 +42,7 @@
             v-if="data.item.id && !isView"
           >
             <IconLinkEdit
+              style="margin-right: 4px"
               :method="function() { editQuotationLine(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
             />
@@ -48,6 +50,12 @@
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { deleteItem(data.item.id) }"
             />
+          </div>
+          <div
+            class="float-right"
+            v-if="!data.item.id && !isView"
+          >
+            <i>{{ $trans("not saved") }}</i>
           </div>
         </template>
       </b-table>
@@ -353,6 +361,15 @@ export default {
     this.isLoading = false
   },
   methods: {
+    rowClass(item, type) {
+      if (item && type === 'row') {
+        if (item.hasChanges) {
+          return 'bg-warning'
+        }
+      } else {
+        return null
+      }
+    },
     // delete
     deleteItem(id) {
       this.quotationLineService.deleteCollectionItemByid(id)
@@ -473,9 +490,6 @@ export default {
 <style scoped>
 .update-button {
   margin-bottom: 8px;
-}
-.quotation-line-header {
-  margin-bottom: 20px;
 }
 .quotation-total {
   margin-bottom: 20px;

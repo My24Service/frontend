@@ -483,6 +483,6 @@ export default {
   height: fit-content;
 }
 .panel-container {
-  height: 100vh;
+  height: 140vh;
 }
 </style>
