@@ -42,7 +42,7 @@
             v-if="data.item.id && !isView"
           >
             <IconLinkEdit
-              style="margin-right: 4px"
+              class="pr-2"
               :method="function() { editQuotationLine(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
             />
@@ -364,7 +364,7 @@ export default {
     rowClass(item, type) {
       if (item && type === 'row') {
         if (item.hasChanges) {
-          return 'bg-warning'
+          return 'has-changes'
         }
       } else {
         return null
