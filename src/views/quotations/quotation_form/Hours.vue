@@ -1,12 +1,10 @@
 <template>
   <details :open="isView ? 'open' : ''">
-    <summary class="flex-columns space-between">
-      <h6 :id="sectionHeader()">
-        {{ getTitle() }}
-        <b-icon-check-circle v-if="parentHasQuotationLines"></b-icon-check-circle>
-      </h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
-    </summary>
+    <SectionHeader
+      :parent-has-quotation-lines="parentHasQuotationLines"
+      :section-header="sectionHeader"
+      :title="getTitle()"
+    />
     <b-overlay :show="compLoading" rounded="sm">
       <div
         v-for="(cost, index) in this.costService.collection"
@@ -204,11 +202,13 @@ import {toDinero} from "@/utils";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import {ChapterModel} from "@/models/quotations/Chapter";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
+import SectionHeader from "@/views/quotations/quotation_form/SectionHeader.vue";
 
 export default {
   name: "HoursComponent",
   mixins: [quotationMixin],
   components: {
+    SectionHeader,
     PriceInput,
     IconLinkDelete,
     HeaderCell,

@@ -155,5 +155,6 @@ export default {
 .flex {
   display : flex;
   margin-top: auto;
+  min-width: 240px;
 }
 </style>

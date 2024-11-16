@@ -1,12 +1,10 @@
 <template>
   <details :open="isView ? 'open' : ''">
-    <summary class="flex-columns space-between">
-      <h6 :id="sectionHeader()">
-        {{ $trans('Distance') }}
-        <b-icon-check-circle v-if="parentHasQuotationLines"></b-icon-check-circle>
-      </h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
-    </summary>
+    <SectionHeader
+      :parent-has-quotation-lines="parentHasQuotationLines"
+      :section-header="sectionHeader"
+      :title="$trans('Distance')"
+    />
     <b-overlay :show="compLoading" rounded="sm">
       <div
         v-for="(cost, index) in this.costService.collection"
@@ -196,11 +194,13 @@ import {ChapterModel} from "@/models/quotations/Chapter";
 import {USE_PRICE_CUSTOMER} from "@/views/quotations/quotation_form/constants";
 import {CustomerModel} from "@/models/customer/Customer";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
+import SectionHeader from "@/views/quotations/quotation_form/SectionHeader.vue";
 
 export default {
   name: "DistanceComponent",
   mixins: [quotationMixin],
   components: {
+    SectionHeader,
     PriceInput,
     IconLinkDelete,
     HeaderCell,

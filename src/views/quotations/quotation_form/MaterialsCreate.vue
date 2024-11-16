@@ -3,7 +3,7 @@
     <details :open="isView ? 'open' : ''">
       <SectionHeader
         :parent-has-quotation-lines="parentHasQuotationLines"
-        :section="quotationLineType"
+        :section-header="sectionHeader"
         :title="$trans('Materials')"
       />
 
@@ -21,111 +21,135 @@
           :key="index"
           class="material_row"
         >
-          <b-form-group
-            label-cols="3"
-            v-bind:label="$trans('Material')"
-            label-for="material-search"
-            v-if="!cost.material"
-          >
-            <multiselect
-              id="material-search"
-              track-by="id"
-              :placeholder="$trans('Type to search')"
-              open-direction="bottom"
-              :options="materials"
-              :loading="fetchingMaterials"
-              :multiple="false"
-              :internal-search="false"
-              :clear-on-select="false"
-              :close-on-select="true"
-              :options-limit="30"
-              :limit="10"
-              :max-height="600"
-              :show-no-results="false"
-              :hide-selected="true"
-              @search-change="getMaterialsDebounced"
-              @select="(material) => selectMaterial(material, index)"
-              :custom-label="materialLabel"
-              ref="searchMaterial"
-            >
-              <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-            </multiselect>
-          </b-form-group>
-          <b-form-group
-            label-cols="3"
-            v-bind:label="$trans('Material')"
-            label-for="material-search"
-            v-if="cost.material"
-          >
-            <b-form-input
-              readonly
-              :value="cost.material_name"
-            ></b-form-input>
-          </b-form-group>
-
-          <b-form-group
-            label-cols="3"
-            v-bind:label="`${$trans('Amount')}`"
-            label-for="material-amount"
-            v-if="cost.material"
-          >
-            <b-form-input
-              style="width: 100px !important; float:left !important;"
-              :value="Math.round(cost.amount_decimal)"
-              @change="(amount) => changeAmount(cost, amount)"
-            ></b-form-input>
-
-            <div style="width: 100px !important; float:right !important;">
-              {{ $trans('VAT') }}
-              <VAT
-                @vatChanged="(val) => changeVatType(cost, val)"
-                style="width: 60px"
-              />
-            </div>
-          </b-form-group>
-
-          <b-form-group
-            label-cols="3"
-            v-bind:label="$trans('Price')"
-            label-for="material-price"
-            v-if="cost.material"
-          >
-            <b-form-radio-group
-              @change="updateTotals"
-              v-model="cost.use_price"
-            >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
-                {{ $trans('Pur.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-              </b-form-radio>
-
-              <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
-                {{ $trans('Sel.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-              </b-form-radio>
-
-              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
-                <p class="flex">
-                  {{ $trans("Other") }}:&nbsp;&nbsp;
-                  <PriceInput
-                    v-model="cost.price"
-                    :currency="cost.price_currency"
-                    @priceChanged="(val) => otherPriceChanged(val, cost)"
-                    @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
-                  />
-                </p>
-              </b-form-radio>
-            </b-form-radio-group>
-          </b-form-group>
           <b-container>
             <b-row>
               <b-col cols="12">
-                <div v-if="cost.total_dinero">
-                  <TotalsInputs
-                    :total="cost.total_dinero"
-                    :vat="cost.vat_dinero"
-                  />
-                </div>
+                <b-form-group
+                  label-cols="3"
+                  v-bind:label="$trans('Material')"
+                  label-for="material-search"
+                  v-if="!cost.material"
+                >
+                  <multiselect
+                    id="material-search"
+                    track-by="id"
+                    :placeholder="$trans('Type to search')"
+                    open-direction="bottom"
+                    :options="materials"
+                    :loading="fetchingMaterials"
+                    :multiple="false"
+                    :internal-search="false"
+                    :clear-on-select="false"
+                    :close-on-select="true"
+                    :options-limit="30"
+                    :limit="10"
+                    :max-height="600"
+                    :show-no-results="false"
+                    :hide-selected="true"
+                    @search-change="getMaterialsDebounced"
+                    @select="(material) => selectMaterial(material, index)"
+                    :custom-label="materialLabel"
+                    ref="searchMaterial"
+                  >
+                    <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  </multiselect>
+                </b-form-group>
+                <b-form-group
+                  label-for="material-search"
+                  v-if="cost.material"
+                >
+                  <b-form-input
+                    readonly
+                    :value="cost.material_name"
+                  ></b-form-input>
+                </b-form-group>
               </b-col>
             </b-row>
+            <b-row>
+              <b-col cols="2">
+                <b-form-group
+                  v-bind:label="`${$trans('Amount')}`"
+                  label-for="material-amount"
+                  v-if="cost.material"
+                >
+                  <b-form-input
+                    style="width: 100px !important; float:left !important;"
+                    :value="Math.round(cost.amount_decimal)"
+                    @change="(amount) => changeAmount(cost, amount)"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="3">
+                <b-form-group
+                  v-bind:label="$trans('Price')"
+                  label-for="material-price"
+                  v-if="cost.material"
+                >
+                  <b-form-radio-group
+                    @change="updateTotals"
+                    v-model="cost.use_price"
+                  >
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+                      {{ $trans('Pur.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
+                    </b-form-radio>
+
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+                      {{ $trans('Sel.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
+                    </b-form-radio>
+
+                    <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                      {{ $trans("Other") }}
+                      <PriceInput
+                        style="margin-left: -24px; margin-top: 2px;"
+                        v-model="cost.price"
+                        :currency="cost.price_currency"
+                        @priceChanged="(val) => otherPriceChanged(val, cost)"
+                        @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
+                      />
+                    </b-form-radio>
+                  </b-form-radio-group>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2">
+                <b-form-group
+                  v-bind:label="$trans('VAT type')"
+                  v-if="cost.quotation && !cost.savedHours"
+                >
+                  <VAT
+                    v-if="!parentHasQuotationLines"
+                    @vatChanged="(val) => changeVatType(cost, val)"
+                  />
+                </b-form-group>
+              </b-col>
+              <b-col cols="1"></b-col>
+              <b-col cols="2" class="text-right">
+                <b-form-group
+                  v-bind:label="$trans('VAT')"
+                >
+                  <b-form-input
+                    readonly
+                    disabled
+                    :value="cost.vat_dinero.toFormat('$0.00')"
+                    class="text-right pr-0"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" class="text-right">
+                <b-form-group
+                  v-bind:label="$trans('Total')"
+                >
+                  <b-form-input
+                    readonly
+                    disabled
+                    :value="cost.total_dinero.toFormat('$0.00')"
+                    class="text-right pr-0"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+            </b-row>
+          </b-container>
+
+          <b-container>
             <b-row>
               <b-col cols="12" class="text-center">
                 <b-button
@@ -245,7 +269,6 @@ export default {
   watch: {
     quotationLinesParent(newVal) {
       this.checkParentHasQuotationLines(newVal)
-      this.scrollToHeader(this.quotationLineType)
     }
   },
   computed: {
@@ -348,7 +371,7 @@ export default {
         this.errorToast(this.$trans('Error updating material costs'))
         this.isLoading = false
       }
-      this.scrollToHeader(this.quotationLineType)
+      this.scrollToHeader()
     },
     async selectMaterial(material, index) {
       try {
@@ -462,7 +485,7 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.USE_PRICE_PURCHASE,
+        use_price: this.usePriceOptions.USE_PRICE_SELLING,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id
       }

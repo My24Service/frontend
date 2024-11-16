@@ -1,12 +1,13 @@
 <template>
   <b-row>
     <b-col cols="2">
-      <span class="total-text">{{ $trans('Total') }}</span>
+      <span class="total-text">{{ $trans('Total amount') }}</span>
     </b-col>
     <b-col cols="4">
       <span class="total-text items-total">{{ items_total }}</span>
     </b-col>
-    <b-col cols="6">
+    <b-col cols="3"></b-col>
+    <b-col cols="3">
       <TotalsInputs
         v-if="total"
         :total="total"

@@ -12,17 +12,22 @@ let quotationMixin = {
       useOnQuotationSelected: null,
     }
   },
+  computed: {
+    sectionHeader() {
+      return `header-${this.quotationLineType}`
+    }
+  },
   methods: {
-    sectionHeader(type) {
-      return `header-${type}`
-    },
-    scrollToHeader(type) {
-      const header = this.sectionHeader(type)
-      const el = document.getElementById(header)
+    // sectionHeader(type) {
+    //   return `header-${type}`
+    // },
+    scrollToHeader() {
+      const el = document.getElementById(this.sectionHeader)
       if (el) {
         el.scrollIntoView()
+        console.log(`scrolled to ${this.sectionHeader}`)
       } else {
-        console.log(`scrollToHeader: header '${header} element not found`)
+        console.log(`scrollToHeader: header '${this.sectionHeader} element not found`)
       }
     },
     checkValue(val) {
@@ -62,7 +67,7 @@ let quotationMixin = {
     createQuotationLinesClicked(selected) {
       this.useOnQuotationSelected = selected
       this.createQuotationLines()
-      this.scrollToHeader(this.quotationLineType)
+      this.scrollToHeader()
     },
     createQuotationLines() {
       switch (this.useOnQuotationSelected) {
@@ -81,6 +86,7 @@ let quotationMixin = {
             total_currency: this.total_dinero.getCurrency(),
           })
           this.$emit('quotationLinesCreated', [quotationLine])
+          this.scrollToHeader()
           break
         case OPTION_USER_TOTALS:
           const quotationLines = this.costService.collection.map((cost) =>
@@ -91,6 +97,7 @@ let quotationMixin = {
             )
           )
           this.$emit('quotationLinesCreated', quotationLines)
+          this.scrollToHeader()
           break
         case OPTION_NONE:
           console.debug("not adding any costs")

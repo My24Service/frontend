@@ -2,9 +2,8 @@
   <b-overlay :show="isLoading" rounded="sm">
     <details :open="isView ? 'open' : ''">
       <SectionHeader
-        v-if="quotationLineType"
         :parent-has-quotation-lines="parentHasQuotationLines"
-        :section="quotationLineType"
+        :section-header="sectionHeader"
         :title="$trans('Call out costs')"
       />
 
@@ -45,7 +44,7 @@
               </b-col>
               <b-col cols="2">
                 <b-form-group
-                  v-bind:label="$trans('VAT')"
+                  v-bind:label="$trans('VAT type')"
                   v-if="cost.quotation && !cost.savedHours"
                 >
                   <VAT
@@ -54,20 +53,37 @@
                   />
                 </b-form-group>
               </b-col>
+              <b-col cols="1"></b-col>
+              <b-col cols="2" class="text-right">
+                <b-form-group
+                  v-bind:label="$trans('VAT')"
+                  v-if="cost.quotation && !cost.savedHours"
+                >
+                  <b-form-input
+                    readonly
+                    disabled
+                    :value="cost.vat_dinero.toFormat('$0.00')"
+                    class="text-right pr-0"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
+              <b-col cols="2" class="text-right">
+                <b-form-group
+                  v-bind:label="$trans('Total')"
+                  v-if="cost.quotation && !cost.savedHours"
+                >
+                  <b-form-input
+                    readonly
+                    disabled
+                    class="text-right pr-0"
+                    :value="cost.total_dinero.toFormat('$0.00')"
+                  ></b-form-input>
+                </b-form-group>
+              </b-col>
             </b-row>
           </b-container>
 
           <b-container>
-            <b-row>
-              <b-col cols="12">
-                <div v-if="cost.total_dinero">
-                  <TotalsInputs
-                    :total="cost.total_dinero"
-                    :vat="cost.vat_dinero"
-                  />
-                </div>
-              </b-col>
-            </b-row>
             <b-row>
               <b-col cols="12" class="text-center">
                 <b-button
@@ -193,7 +209,6 @@ export default {
   watch: {
     quotationLinesParent(newVal) {
       this.checkParentHasQuotationLines(newVal)
-      this.scrollToHeader()
     }
   },
   computed: {
