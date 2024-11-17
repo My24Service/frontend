@@ -266,7 +266,7 @@ import IconLinkEdit from "@/components/IconLinkEdit.vue";
 
 import {QuotationModel} from '@/models/quotations/Quotation.js';
 import {ChapterModel} from '@/models/quotations/Chapter'
-import{ QuotationLineService } from '@/models/quotations/QuotationLine.js';
+import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js';
 
 import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
@@ -413,16 +413,23 @@ export default {
       return this.quotationLineService.collection
     },
     quotationLinesCreated(quotationLines) {
-      if (quotationLines.length > 0) {
-        this.quotationLineService.collection = [
-          ...this.quotationLineService.collection,
-          ...quotationLines
-        ]
-        this.updateChapterTotals()
-        const txt = quotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
-        this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
-        this.quotationLineService.collectionHasChanges = true
+      if (quotationLines.length === 0) {
+        return
       }
+
+      const newQuotationLines = quotationLines.map(
+        (line) => new QuotationLineModel({...line, hasChanges: true})
+      )
+
+      this.quotationLineService.collection = [
+        ...this.quotationLineService.collection,
+        ...newQuotationLines
+      ]
+      this.updateChapterTotals()
+      const addedTxt = this.$trans('Added')
+      const txt = newQuotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
+      this.infoToast(addedTxt, `${newQuotationLines.length} ${txt} ${addedTxt.toLowerCase()}`)
+      this.quotationLineService.collectionHasChanges = true
     },
     updateChapterTotals() {
       this.total = this.quotationLineService.getItemsTotal()
@@ -503,9 +510,5 @@ export default {
 }
 .total-text {
   font-weight: bold;
-}
-.overflow {
-  overflow: auto;
-  position: relative;
 }
 </style>

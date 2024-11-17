@@ -217,7 +217,11 @@ import TotalsInputs from "@/components/TotalsInputs";
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
-import {COST_TYPE_USED_MATERIALS, CostModel, CostService} from "@/models/quotations/Cost";
+import {
+  COST_TYPE_USED_MATERIALS,
+  CostModel,
+  CostService
+} from "@/models/quotations/Cost";
 import {MaterialModel, MaterialService} from "@/models/inventory/Material";
 import {ChapterModel} from "@/models/quotations/Chapter";
 
@@ -320,13 +324,21 @@ export default {
       this.updateTotals()
       this.hasChanges = true
     },
-    addCost() {
-      this.costService.collection.push(new CostModel({
+    getNewCostModel() {
+      return new CostModel({
         material: null,
-      }))
-      this.costService.collectionHasChanges = true
+        ...this.costService.getDefaultCostProps(),
+        ...this.getDefaultProps(),
+        price_currency: this.default_currency,
+        use_price: this.usePriceOptions.USE_PRICE_SELLING,
+        price_other_currency: this.default_currency,
+        cost_type: COST_TYPE_USED_MATERIALS,
+        margin_perc: 0
+      })
+    },
+    addCost() {
+      this.costService.collection.push(this.getNewCostModel())
       this.materialChosen = false
-      this.hasChanges = true
     },
     deleteCost(index) {
       this.costService.deleteCollectionItem(index)
@@ -439,7 +451,7 @@ export default {
             cost.price_other_currency = cost.price_currency
           }
           materialIds.push(cost.material)
-          return new this.costService.model(cost)
+          return new CostModel(cost)
         })
         await this.loadMaterials(materialIds)
         this.costService.collection = costs
