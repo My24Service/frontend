@@ -166,29 +166,32 @@
   </b-overlay>
 </template>
 <script>
-import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
-import DurationInput from "../../../components/DurationInput.vue"
+
+import {toDinero} from "@/utils";
+import DurationInput from "@/components/DurationInput.vue"
+import PriceInput from "@/components/PriceInput";
+import TotalsInputs from "@/components/TotalsInputs";
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+
+import {COST_TYPE_CALL_OUT_COSTS, CostService} from "@/models/quotations/Cost";
+import {ChapterModel} from "@/models/quotations/Chapter";
+import {CustomerModel} from "@/models/customer/Customer";
+import {QuotationLineService} from "@/models/quotations/QuotationLine";
+
+import quotationMixin from "./mixin.js";
 import {
   USE_PRICE_CUSTOMER,
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS,
 } from "./constants";
-import {COST_TYPE_CALL_OUT_COSTS, CostService} from "@/models/quotations/Cost";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
-import TotalsInputs from "../../../components/TotalsInputs";
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import AddToQuotationLines from './AddToQuotationLines.vue'
-import {ChapterModel} from "@/models/quotations/Chapter";
-import {CustomerModel} from "@/models/customer/Customer";
-import {QuotationLineService} from "@/models/quotations/QuotationLine";
 import CollectionEmptyContainer from "./EmptyQuotationLinesContainer.vue";
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
-import {toDinero} from "@/utils";
 import CostsTable from "./CostsTable.vue";
 
 export default {

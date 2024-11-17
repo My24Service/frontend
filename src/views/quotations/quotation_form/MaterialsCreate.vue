@@ -208,22 +208,25 @@
 </template>
 
 <script>
-import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
-import AmountDecimalInput from "../../../components/AmountDecimalInput.vue"
+import AwesomeDebouncePromise from "awesome-debounce-promise";
+
+import AmountDecimalInput from "@/components/AmountDecimalInput.vue"
+import PriceInput from "@/components/PriceInput";
+import TotalsInputs from "@/components/TotalsInputs";
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {COST_TYPE_USED_MATERIALS, CostModel, CostService} from "@/models/quotations/Cost";
+import {MaterialModel, MaterialService} from "@/models/inventory/Material";
+import {ChapterModel} from "@/models/quotations/Chapter";
+
+import quotationMixin from "./mixin.js";
 import {USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING} from "./constants";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import {MaterialModel, MaterialService} from "@/models/inventory/Material";
-import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
-import TotalsInputs from "../../../components/TotalsInputs";
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import AddToQuotationLines from './AddToQuotationLines.vue'
-import AwesomeDebouncePromise from "awesome-debounce-promise";
-import {ChapterModel} from "@/models/quotations/Chapter";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
 import SectionHeader from "./SectionHeader.vue";

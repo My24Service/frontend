@@ -219,6 +219,8 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
+import StatusesComponent from "@/components/StatusesComponent.vue";
+
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
@@ -236,14 +238,13 @@ import CostService, {
   COST_TYPE_WORK_HOURS,
 } from "@/models/orders/Cost";
 
-import QuotationData from "@/views/quotations/quotation_form/QuotationData.vue";
-import Chapter from "@/views/quotations/quotation_form/Chapter.vue";
-import QuotationLine from "@/views/quotations/quotation_form/QuotationLine.vue";
-import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsComponent.vue";
-import CustomerView from "@/views/quotations/CustomerView.vue";
-import StatusesComponent from "@/components/StatusesComponent.vue";
-import QuotationView from "@/views/quotations/QuotationView.vue";
-import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
+import QuotationData from "./quotation_form/QuotationData.vue";
+import Chapter from "./quotation_form/Chapter.vue";
+import QuotationLine from "./quotation_form/QuotationLine.vue";
+import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
+import CustomerView from "./CustomerView.vue";
+import QuotationView from "./QuotationView.vue";
+import QuotationPDFViewer from "./QuotationPDFViewer.vue";
 
 export default {
   name: 'QuotationForm',

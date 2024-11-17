@@ -173,15 +173,17 @@ import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
 
-import QuotationData from './QuotationData.vue'
-import OrderTypesSelect from '../../../components/OrderTypesSelect.vue'
-import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
-import Collapse from '../../../components/Collapse.vue'
 import {componentMixin} from "@/utils";
+import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
+import Collapse from '@/components/Collapse.vue'
 import CustomerDetail from "@/components/CustomerDetail";
-import Chapter from './Chapter.vue'
 import TotalsInputs from "@/components/TotalsInputs";
+
+import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerService} from "@/models/customer/Customer";
+
+import QuotationData from './QuotationData.vue'
+import Chapter from './Chapter.vue'
 
 export default {
   name: "CustomerForm",
@@ -327,8 +329,6 @@ export default {
           this.isLoading = false
           this.buttonDisabled = false
         }
-      } else {
-        this.submitQuotationLineform = true
       }
     },
     async getCustomers(query) {

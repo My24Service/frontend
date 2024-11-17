@@ -141,12 +141,14 @@
   </b-overlay>
 </template>
 <script>
-import {QuotationModel} from '@/models/quotations/Quotation.js'
-import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
+
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
+
+import {QuotationModel} from '@/models/quotations/Quotation.js'
+import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 
 export default {
   name: 'ChapterComponent',

@@ -117,9 +117,11 @@
 </template>
 <script>
 import {useVuelidate} from "@vuelidate/core";
-import {QuotationModel} from '@/models/quotations/Quotation.js';
-import quotationMixin from "@/views/quotations/quotation_form/mixin";
 import {required} from "@vuelidate/validators";
+
+import {QuotationModel} from '@/models/quotations/Quotation.js';
+
+import quotationMixin from "./mixin";
 
 export default {
   name: 'QuotationDataForm',

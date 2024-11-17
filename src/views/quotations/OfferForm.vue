@@ -103,12 +103,13 @@
   </div>
 </template>
 <script>
-import my24 from '../../services/my24.js'
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
+
+import my24 from '@/services/my24.js'
+
 import {OfferModel, OfferService} from "@/models/quotations/Offer.js";
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
-
 
 export default {
   setup() {

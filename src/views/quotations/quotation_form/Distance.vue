@@ -166,27 +166,30 @@
   </b-overlay>
 </template>
 <script>
-import quotationMixin from "./mixin.js";
 import Multiselect from 'vue-multiselect'
-import DurationInput from "../../../components/DurationInput.vue"
-import {
-  USE_PRICE_OTHER,
-  USE_PRICE_SETTINGS
-} from "./constants";
-import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
-import HeaderCell from "./Header";
-import VAT from "./VAT";
-import PriceInput from "../../../components/PriceInput";
-import TotalRow from "./TotalRow";
-import TotalsInputs from "../../../components/TotalsInputs";
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
+
 import {toDinero} from "@/utils";
-import AddToQuotationLines from './AddToQuotationLines.vue'
+import DurationInput from "@/components/DurationInput.vue"
+import PriceInput from "@/components/PriceInput";
+import TotalsInputs from "@/components/TotalsInputs";
+import IconLinkDelete from '@/components/IconLinkDelete.vue'
+
+import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
 import {ChapterModel} from "@/models/quotations/Chapter";
-import {USE_PRICE_CUSTOMER} from "@/views/quotations/quotation_form/constants";
 import {CustomerModel} from "@/models/customer/Customer";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
-import SectionHeader from "@/views/quotations/quotation_form/SectionHeader.vue";
+
+import {
+  USE_PRICE_OTHER,
+  USE_PRICE_SETTINGS,
+  USE_PRICE_CUSTOMER
+} from "./constants";
+import quotationMixin from "./mixin.js";
+import HeaderCell from "./Header";
+import VAT from "./VAT";
+import TotalRow from "./TotalRow";
+import AddToQuotationLines from './AddToQuotationLines.vue'
+import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
 

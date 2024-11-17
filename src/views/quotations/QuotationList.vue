@@ -126,8 +126,6 @@
 </template>
 
 <script>
-import {QuotationService} from '@/models/quotations/Quotation.js'
-import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
@@ -138,7 +136,10 @@ import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
-import TableStatusInfo from '../../components/TableStatusInfo.vue'
+import TableStatusInfo from '@/components/TableStatusInfo.vue'
+
+import {QuotationService} from '@/models/quotations/Quotation.js'
+import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import { StatusService } from '@/models/quotations/Status.js'
 
 export default {

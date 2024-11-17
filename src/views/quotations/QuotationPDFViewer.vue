@@ -64,9 +64,10 @@
 </template>
 
 <script>
-import my24 from "@/services/my24";
 import {QuotationModel, QuotationService} from "@/models/quotations/Quotation";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
+
+import my24 from "@/services/my24";
 
 export default {
   name: "QuotationPDFViewer",

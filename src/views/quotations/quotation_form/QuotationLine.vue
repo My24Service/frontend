@@ -254,19 +254,22 @@
   </b-overlay>
 </template>
 <script>
-import{ QuotationLineService } from '@/models/quotations/QuotationLine.js';
-import PriceInput from "@/components/PriceInput";
-import VAT from "../quotation_form/VAT";
-import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useVuelidate} from "@vuelidate/core";
+
+import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
-import {QuotationModel} from '@/models/quotations/Quotation.js';
-import {ChapterModel} from '@/models/quotations/Chapter'
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
 import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
 import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
+
+import {QuotationModel} from '@/models/quotations/Quotation.js';
+import {ChapterModel} from '@/models/quotations/Chapter'
+import{ QuotationLineService } from '@/models/quotations/QuotationLine.js';
+
+import VAT from "../quotation_form/VAT";
+import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 
 export default {
   name: 'QuotationLineForm',
