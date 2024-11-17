@@ -474,6 +474,7 @@ export default {
 }
 .left {
   flex-grow: 1;
+  height: 100%;
 }
 .right {
   flex-grow: 5;

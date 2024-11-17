@@ -27,7 +27,8 @@
                   v-bind:label="$trans('Kilometers')"
                 >
                   <b-form-input
-                    @blur="updateTotals"
+                    type="number"
+                    @blur="amountChanged"
                     v-model="cost.amount_int"
                     size="sm"
                   ></b-form-input>
@@ -395,6 +396,10 @@ export default {
     getCurrency(_activity) {
       return this.default_currency
     },
+    amountChanged() {
+      this.hasChanges = true
+      this.updateTotals()
+    },
     updateTotals() {
       // to make sure our computed gets triggered
       this.isLoading = true
@@ -412,7 +417,7 @@ export default {
       this.total_dinero = this.costService.getItemsTotal()
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
       this.totalAmount = this.costService.collection.reduce(
-        (total, m) => (total + parseInt(m.amount_int)),
+        (total, m) => (total + m.amount_int),
         0
       )
     },

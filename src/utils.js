@@ -230,7 +230,7 @@ function toDinero(priceDecimal, currency) {
     amount = parseInt(amount.toFixed(0))
     // console.log({ priceDecimal, amount, currency })
     if (isNaN(amount)) {
-      throw `invalid input: ${priceDecimal}`
+      throw `toDinero - invalid input for amount: ${priceDecimal}`
     }
     return Dinero({ amount, currency })
   } else {

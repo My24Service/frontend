@@ -178,20 +178,7 @@
         </footer>
       </div>
 
-      <footer
-        class="modal-footer"
-        v-if="!showForm && !isView && quotation.preliminary"
-      >
-        <b-button
-          @click="newQuotationLine"
-          class="btn btn-primary update-button"
-          type="button"
-          variant="primary"
-        >
-          {{ $trans('New quotation line') }}
-        </b-button>
-      </footer>
-
+      <hr/>
       <b-container>
         <b-row class="quotation-total">
           <b-col cols="7">
@@ -210,7 +197,21 @@
 
       <b-container
         v-if="showChangesBlock"
+        class="pb-3"
       >
+        <hr/>
+        <b-row v-if="quotationLineService.deletedItems.length">
+          <b-col cols="12">
+            <h4>{{ $trans("To be deleted") }}</h4>
+            <b-table
+              small
+              :fields="fieldsView"
+              :items="quotationLineService.deletedItems"
+              responsive="md"
+              class="line-table"
+            ></b-table>
+          </b-col>
+        </b-row>
         <b-row>
           <b-col cols="2"></b-col>
           <b-col cols="10">
@@ -235,20 +236,22 @@
             </b-button>
           </b-col>
         </b-row>
-        <b-row v-if="quotationLineService.deletedItems.length">
-          <b-col cols="12">
-            <hr/>
-            <p><strong>{{ $trans("To be deleted") }}</strong></p>
-            <b-table
-              small
-              :fields="fieldsView"
-              :items="quotationLineService.deletedItems"
-              responsive="md"
-              class="line-table"
-            ></b-table>
-          </b-col>
-        </b-row>
       </b-container>
+
+      <footer
+        class="modal-footer"
+        v-if="!showForm && !isView && quotation.preliminary"
+      >
+        <b-button
+          @click="newQuotationLine"
+          class="btn btn-primary update-button"
+          type="button"
+          variant="primary"
+        >
+          {{ $trans('New quotation line') }}
+        </b-button>
+      </footer>
+
     </details>
   </b-overlay>
 </template>
@@ -502,7 +505,6 @@ export default {
 }
 .overflow {
   overflow: auto;
-  max-height: 650px;
   position: relative;
 }
 </style>

@@ -65,12 +65,11 @@
                 </b-form-group>
               </b-col>
             </b-row>
-            <b-row>
+            <b-row v-if="cost.material">
               <b-col cols="2">
                 <b-form-group
                   v-bind:label="`${$trans('Amount')}`"
                   label-for="material-amount"
-                  v-if="cost.material"
                 >
                   <b-form-input
                     :value="Math.round(cost.amount_decimal)"
@@ -82,7 +81,6 @@
                 <b-form-group
                   v-bind:label="$trans('Price')"
                   label-for="material-price"
-                  v-if="cost.material"
                 >
                   <b-form-radio-group
                     @change="updateTotals"
@@ -100,8 +98,8 @@
                       {{ $trans("Other") }}
                       <PriceInput
                         style="margin-left: -24px; margin-top: 2px;"
-                        v-model="cost.price"
-                        :currency="cost.price_currency"
+                        v-model="cost.price_other"
+                        :currency="cost.price_other_currency"
                         @priceChanged="(val) => otherPriceChanged(val, cost)"
                         @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
                       />
@@ -112,7 +110,6 @@
               <b-col cols="2">
                 <b-form-group
                   v-bind:label="$trans('VAT type')"
-                  v-if="cost.quotation && !cost.savedHours"
                 >
                   <VAT
                     @vatChanged="(val) => changeVatType(cost, val)"
@@ -316,12 +313,14 @@ export default {
   },
   methods: {
     otherPriceChanged(priceDinero, cost) {
-      cost.setPriceField('price', priceDinero)
+      cost.setPriceField('price_other', priceDinero)
       this.updateTotals()
       this.hasChanges = true
     },
     addCost() {
-      this.costService.collection.push(new CostModel({material: null}))
+      this.costService.collection.push(new CostModel({
+        material: null,
+      }))
       this.costService.collectionHasChanges = true
       this.materialChosen = false
       this.hasChanges = true
@@ -417,6 +416,7 @@ export default {
     changeAmount(cost, amount) {
       cost.amount_decimal = amount
       this.updateTotals()
+      this.hasChanges = true
     },
     getMaterialName(material_id) {
       const material = this.materialModels.find((m) => m.id === material_id)
@@ -431,6 +431,10 @@ export default {
         let materialIds = []
         await this.costService.loadCollection()
         const costs = this.costService.collection.map((cost) => {
+          if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
+            cost.price_other = cost.price
+            cost.price_other_currency = cost.price_currency
+          }
           materialIds.push(cost.material)
           return new this.costService.model(cost)
         })
@@ -445,7 +449,7 @@ export default {
         this.isLoaded = true
         this.hasChanges = false
       } catch(error) {
-        console.log('error fetching material cost', error)
+        console.log('error fetching material cost:', error)
         this.errorToast(this.$trans('Error fetching material cost'))
         this.isLoading = false
         this.isLoaded = true
@@ -485,7 +489,7 @@ export default {
           model = this.materialModels.find((m) => m.id === cost.material)
           return model.price_selling_ex
         case this.usePriceOptions.USE_PRICE_OTHER:
-          return cost.price
+          return cost.price_other
         default:
           console.log(`getPrice - unknown use price: ${cost.use_price}`)
           return "0.00"

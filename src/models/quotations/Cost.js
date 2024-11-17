@@ -69,7 +69,7 @@ class CostModel {
       case COST_TYPE_CALL_OUT_COSTS:
         return this.price_dinero.multiply(this.amount_int)
       default:
-        console.log(`getTotal - unknown cost type: ${this.cost_type}`)
+        console.debug(`getTotal - unknown cost type: ${this.cost_type}`)
         return toDinero("0.00", "EUR")
     }
   }
@@ -88,7 +88,7 @@ class CostModel {
       case COST_TYPE_CALL_OUT_COSTS:
         return this.amount_int
       default:
-        console.log(`getTotal - unknown cost type: ${this.cost_type}`)
+        console.debug(`getTotal - unknown cost type: ${this.cost_type}`)
         return 0
     }
   }

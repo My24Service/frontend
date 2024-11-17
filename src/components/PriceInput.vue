@@ -24,6 +24,7 @@
         <b-form-input
           v-model="decimal"
           class="input-decimal"
+          type="number"
           size="sm"
           :state="v$.decimal.$error ? false : null"
           @input="update"

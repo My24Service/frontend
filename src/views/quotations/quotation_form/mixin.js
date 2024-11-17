@@ -36,9 +36,8 @@ let quotationMixin = {
       const el = document.getElementById(this.sectionHeader)
       if (el) {
         el.scrollIntoView()
-        console.log(`scrolled to ${this.sectionHeader}`)
       } else {
-        console.log(`scrollToHeader: header '${this.sectionHeader} element not found`)
+        console.debug(`scrollToHeader: header '${this.sectionHeader} element not found`)
       }
     },
     checkValue(val) {
