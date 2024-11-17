@@ -1,10 +1,9 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <details open>
-      <summary class="flex-columns space-between">
-        <h6>{{ $trans('Chapters') }}</h6>
-        <b-icon-chevron-down></b-icon-chevron-down>
-      </summary>
+
+    <h6>{{ $trans('Chapters') }}</h6>
+
+    <div>
       <b-modal
         id="delete-chapter-modal"
         ref="delete-chapter-modal"
@@ -47,6 +46,7 @@
             <IconLinkEdit
               :method="function() { editChapter(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
+              class="pr-2"
             />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
@@ -137,7 +137,7 @@
           {{ $trans('New chapter') }}
         </b-button>
       </footer>
-    </details>
+    </div>
   </b-overlay>
 </template>
 <script>

@@ -9,12 +9,10 @@
       <b-icon-arrow-left-circle-fill></b-icon-arrow-left-circle-fill>
       {{ $trans("Back to quotation and chapters") }}
     </b-button>
-    <details open class="overflow">
-      <summary class="flex-columns space-between">
-        <h6>{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h6>
-        <b-icon-chevron-down></b-icon-chevron-down>
-      </summary>
 
+    <h6>{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h6>
+
+    <div>
       <p v-if="!quotationLineService.collection.length && !showForm">
         <i>{{ $trans("No quotation lines") }}</i>
       </p>
@@ -197,7 +195,7 @@
 
       <b-container
         v-if="showChangesBlock"
-        class="pb-3"
+        class="pb-3 has-changes rounded"
       >
         <hr/>
         <b-row v-if="quotationLineService.deletedItems.length">
@@ -252,7 +250,7 @@
         </b-button>
       </footer>
 
-    </details>
+    </div>
   </b-overlay>
 </template>
 <script>

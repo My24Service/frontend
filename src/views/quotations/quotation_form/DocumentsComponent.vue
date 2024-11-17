@@ -1,9 +1,6 @@
 <template>
-  <details open>
-    <summary class="flex-columns space-between">
-      <h6>{{ $trans('Documents') }}</h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
-    </summary>
+  <div>
+    <h6>{{ $trans('Documents') }}</h6>
 
     <!-- list -->
     <div
@@ -164,7 +161,7 @@
         </b-col>
       </b-row>
     </b-container>
-  </details>
+  </div>
 </template>
 
 <script>

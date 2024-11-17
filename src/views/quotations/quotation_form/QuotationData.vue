@@ -1,9 +1,6 @@
 <template>
-  <details open>
-    <summary class="flex-columns space-between">
-      <h6>{{ $trans('Details') }}</h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
-    </summary>
+  <div>
+    <h6>{{ $trans('Details') }}</h6>
 
     <div v-if="!isView">
       <b-form-group
@@ -116,7 +113,7 @@
       </b-container>
     </div>
 
-  </details>
+  </div>
 </template>
 <script>
 import {useVuelidate} from "@vuelidate/core";

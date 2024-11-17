@@ -86,17 +86,18 @@ class BaseModel {
       ...this.editItem
     })
 
-    let hasChanges = false
-    if (!this.collectionHasChanges) {
-      const changes = Object.entries(newItem).find(
-        ([k, v]) => k.indexOf('dinero') === -1 && k !== 'id' && this.beforeEditModel[k] !== v
-      )
-      console.log({changes})
-      hasChanges = !!(changes && changes.length > 0)
-      this.collectionHasChanges = hasChanges
+    const itemChanges = Object.entries(newItem).find(
+      ([k, v]) => k.indexOf('dinero') === -1 && k !== 'id' && this.beforeEditModel[k] !== v
+    )
+    // console.log({itemChanges})
+    const itemHasChanges = !!(itemChanges && itemChanges.length > 0)
+    newItem.hasChanges = itemHasChanges
+
+    // update collection changes only when needed
+    if (!this.collectionHasChanges && itemHasChanges) {
+      this.collectionHasChanges = true
     }
 
-    newItem.hasChanges = hasChanges
     this.collection.splice(this.editIndex, 1, newItem)
     this.editIndex = null
     this.isEdit = false

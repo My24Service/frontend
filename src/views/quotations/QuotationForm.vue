@@ -120,12 +120,16 @@
                   :quotation="quotation"
                   :is-view="isView"
                   ref="quotationDataComponent"
+                  class="component-margin"
                 />
+
+                <hr/>
 
                 <DocumentsComponent
                   v-if="quotation && quotation.id"
                   :quotation="quotation"
                   :is-view="isView"
+                  class="component-margin"
                 />
 
               </div>
