@@ -29,9 +29,9 @@ let quotationMixin = {
     },
   },
   methods: {
-    // sectionHeader(type) {
-    //   return `header-${type}`
-    // },
+    emptyQuotationLines() {
+      this.$emit('emptyQuotationLinesClicked', this.quotationLineType)
+    },
     scrollToHeader() {
       const el = document.getElementById(this.sectionHeader)
       if (el) {

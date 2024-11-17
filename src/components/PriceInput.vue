@@ -13,7 +13,6 @@
       <b-form-input
         v-model="number"
         class="input-number"
-        type="number"
         :placeholder="$trans('Price')"
         size="sm"
         @input="update"
@@ -25,7 +24,6 @@
         <b-form-input
           v-model="decimal"
           class="input-decimal"
-          type="number"
           size="sm"
           :state="v$.decimal.$error ? false : null"
           @input="update"

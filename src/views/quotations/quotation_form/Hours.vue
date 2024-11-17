@@ -27,9 +27,9 @@
                   v-bind:label="$trans('Hours')"
                 >
                   <DurationInput
+                    style="width: 80px !important;"
                     v-model="cost.amount_duration"
                     @durationChanged="(duration) => changeDuration(cost, duration)"
-                    style="width: 100px !important; float:left !important;"
                     v-if="!isView"
                   />
                 </b-form-group>
@@ -74,8 +74,7 @@
                   />
                 </b-form-group>
               </b-col>
-              <b-col cols="1"></b-col>
-              <b-col cols="2" class="text-right">
+              <b-col cols="2" class="text-right p-0">
                 <b-form-group
                   v-bind:label="$trans('VAT')"
                 >
@@ -87,10 +86,9 @@
                   ></b-form-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="2" class="text-right">
+              <b-col cols="2" class="text-right p-0">
                 <b-form-group
                   v-bind:label="$trans('Total')"
-                  v-if="cost.quotation && !cost.savedHours"
                 >
                   <b-form-input
                     readonly

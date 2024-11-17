@@ -73,7 +73,6 @@
                   v-if="cost.material"
                 >
                   <b-form-input
-                    style="width: 100px !important; float:left !important;"
                     :value="Math.round(cost.amount_decimal)"
                     @change="(amount) => changeAmount(cost, amount)"
                   ></b-form-input>
@@ -120,8 +119,7 @@
                   />
                 </b-form-group>
               </b-col>
-              <b-col cols="1"></b-col>
-              <b-col cols="2" class="text-right">
+              <b-col cols="2" class="text-right p-0">
                 <b-form-group
                   v-bind:label="$trans('VAT')"
                 >
@@ -133,7 +131,7 @@
                   ></b-form-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="2" class="text-right">
+              <b-col cols="2" class="text-right p-0">
                 <b-form-group
                   v-bind:label="$trans('Total')"
                 >
@@ -317,9 +315,6 @@ export default {
     this.isLoading = false
   },
   methods: {
-    emptyQuotationLines() {
-      this.$emit('emptyQuotationLinesClicked', this.quotationLineType)
-    },
     otherPriceChanged(priceDinero, cost) {
       cost.setPriceField('price', priceDinero)
       this.updateTotals()

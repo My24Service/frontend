@@ -27,7 +27,6 @@
                   v-bind:label="$trans('Kilometers')"
                 >
                   <b-form-input
-                    type="number"
                     @blur="updateTotals"
                     v-model="cost.amount_int"
                     size="sm"
@@ -37,7 +36,7 @@
               <b-col cols="3">
                 <b-form-group
                   v-bind:label="$trans('Price')"
-                  v-if="cost.quotation && !cost.savedHours"
+                  v-if="cost.quotation"
                 >
                   <b-form-radio-group
                     @change="updateTotals"
@@ -60,6 +59,7 @@
                         v-model="cost.price_other"
                         :currency="cost.price_other_currency"
                         @priceChanged="(val) => otherPriceChanged(val, cost)"
+                        @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
                       />
                     </b-form-radio>
                   </b-form-radio-group>
@@ -74,8 +74,7 @@
                   />
                 </b-form-group>
               </b-col>
-              <b-col cols="1"></b-col>
-              <b-col cols="2" class="text-right">
+              <b-col cols="2" class="text-right p-0">
                 <b-form-group
                   v-bind:label="$trans('VAT')"
                 >
@@ -87,7 +86,7 @@
                   ></b-form-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="2" class="text-right">
+              <b-col cols="2" class="text-right p-0">
                 <b-form-group
                   v-bind:label="$trans('Total')"
                 >
@@ -282,9 +281,6 @@ export default {
     this.isLoading = false
   },
   methods: {
-    emptyQuotationLines() {
-      this.$emit('emptyQuotationLinesClicked', this.quotationLineType)
-    },
     otherPriceChanged(priceDinero, cost) {
       cost.setPriceField('price_other', priceDinero)
       this.updateTotals()
@@ -416,7 +412,7 @@ export default {
       this.total_dinero = this.costService.getItemsTotal()
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
       this.totalAmount = this.costService.collection.reduce(
-        (total, m) => (total + m.amount_int),
+        (total, m) => (total + parseInt(m.amount_int)),
         0
       )
     },

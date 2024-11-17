@@ -7,7 +7,7 @@
       <span class="total-text items-total">{{ items_total }}</span>
     </b-col>
     <b-col cols="3"></b-col>
-    <b-col cols="3">
+    <b-col cols="3" class="p-0">
       <TotalsInputs
         v-if="total"
         :total="total"

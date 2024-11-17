@@ -32,7 +32,6 @@
                     @blur="amountChanged"
                     v-model="cost.amount_int"
                     size="sm"
-                    style="width: 100px !important; float:left !important;"
                   ></b-form-input>
                 </b-form-group>
               </b-col>
@@ -76,8 +75,7 @@
                   />
                 </b-form-group>
               </b-col>
-              <b-col cols="1"></b-col>
-              <b-col cols="2" class="text-right">
+              <b-col cols="2" class="text-right p-0">
                 <b-form-group
                   v-bind:label="$trans('VAT')"
                 >
@@ -89,7 +87,7 @@
                   ></b-form-input>
                 </b-form-group>
               </b-col>
-              <b-col cols="2" class="text-right">
+              <b-col cols="2" class="text-right p-0">
                 <b-form-group
                   v-bind:label="$trans('Total')"
                 >
@@ -281,9 +279,6 @@ export default {
     this.isLoading = false
   },
   methods: {
-    emptyQuotationLines() {
-      this.$emit('emptyQuotationLinesClicked', this.quotationLineType)
-    },
     otherPriceChanged(priceDinero, cost) {
       cost.setPriceField('price_other', priceDinero)
       this.updateTotals()
