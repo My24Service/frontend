@@ -1,7 +1,7 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
 
-    <h6>{{ $trans('Chapters') }}</h6>
+    <h5>{{ $trans('Chapters') }}</h5>
 
     <div>
       <b-modal
@@ -31,11 +31,11 @@
         v-if="!showForm && chapterService.collection.length"
       >
         <template #cell(chapter)="data">
-          <h4>
+          <h6>
             <b-link @click="function() { loadChapter(data.item) }">
               {{ data.item.name }}
             </b-link>
-          </h4>
+          </h6>
           <p>{{ data.item.description }}</p>
         </template>
         <template #cell(icons)="data" v-if="quotation.preliminary">

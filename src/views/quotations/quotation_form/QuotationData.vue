@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h6>{{ $trans('Details') }}</h6>
+    <h5>{{ $trans('Details') }}</h5>
 
     <div v-if="!isView">
       <b-form-group

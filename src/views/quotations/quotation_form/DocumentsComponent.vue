@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h6>{{ $trans('Documents') }}</h6>
+    <h5>{{ $trans('Documents') }}</h5>
 
     <!-- list -->
     <div
@@ -40,7 +40,7 @@
     <!-- form -->
     <div v-if="showForm">
       <b-form v-if="!documentService.isEdit">
-        <h4>{{ $trans("Add document(s)") }}</h4>
+        <h6>{{ $trans("Add document(s)") }}</h6>
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Choose files')"

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>{{ $trans('Customer') }}</h3>
+    <h5>{{ $trans('Customer') }}</h5>
     <b-form>
       <b-form-group
         label-size="sm"

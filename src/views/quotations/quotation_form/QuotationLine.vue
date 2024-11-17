@@ -10,7 +10,7 @@
       {{ $trans("Back to quotation and chapters") }}
     </b-button>
 
-    <h6>{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h6>
+    <h5 class="pt-2">{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h5>
 
     <div>
       <p v-if="!quotationLineService.collection.length && !showForm">

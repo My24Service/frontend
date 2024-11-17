@@ -138,7 +138,7 @@
             <div class="panel"
               :class="{'col-1-3': !loadChapterModel, 'col-1-2 right': loadChapterModel}">
               <div v-if="loadChapterModel">
-                <h3>{{ $trans("Chapter costs") }}</h3>
+                <h5>{{ $trans("Chapter costs") }}</h5>
 
                 <MaterialsCreate
                   :customer="customer"
