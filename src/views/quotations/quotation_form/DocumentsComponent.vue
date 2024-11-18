@@ -1,9 +1,6 @@
 <template>
-  <details open>
-    <summary class="flex-columns space-between">
-      <h6>{{ $trans('Documents') }}</h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
-    </summary>
+  <div>
+    <h5>{{ $trans('Documents') }}</h5>
 
     <!-- list -->
     <div
@@ -43,7 +40,7 @@
     <!-- form -->
     <div v-if="showForm">
       <b-form v-if="!documentService.isEdit">
-        <h4>{{ $trans("Add document(s)") }}</h4>
+        <h6>{{ $trans("Add document(s)") }}</h6>
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Choose files')"
@@ -164,7 +161,7 @@
         </b-col>
       </b-row>
     </b-container>
-  </details>
+  </div>
 </template>
 
 <script>
@@ -174,6 +171,7 @@ import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
 import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
 import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
+
 import {DocumentModel, DocumentService} from "@/models/quotations/Document";
 import {QuotationModel} from "@/models/quotations/Quotation"
 

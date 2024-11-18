@@ -1,6 +1,6 @@
 import BaseModel from '../../models/base'
 import priceMixin from "../../mixins/price";
-import {toDinero} from "../../utils";
+import {toDinero} from "@/utils";
 
 class CostModel {
   default_currency

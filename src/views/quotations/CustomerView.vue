@@ -78,8 +78,9 @@
   </b-container>
 </template>
 <script>
-import quotationMixin from "@/views/quotations/quotation_form/mixin";
 import {QuotationModel} from "@/models/quotations/Quotation";
+
+import quotationMixin from "./quotation_form/mixin";
 
 export default {
   name: "CustomerView",

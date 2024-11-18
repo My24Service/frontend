@@ -7,7 +7,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
-          <span>{{ $trans("Invoices") }}</span>
+          <span>{{ pageTitle }}</span>
         </h3>
 
         <b-button-toolbar>
@@ -115,8 +115,6 @@
   </div>
 </template>
 <script>
-import {InvoiceService} from '@/models/invoices/Invoice.js'
-import {InvoiceStatuscodeService} from '@/models/invoices/InvoiceStatuscode.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
@@ -127,7 +125,10 @@ import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
-import TableStatusInfo from '../../components/TableStatusInfo.vue'
+import TableStatusInfo from '@/components/TableStatusInfo.vue'
+
+import {InvoiceService} from '@/models/invoices/Invoice.js'
+import {InvoiceStatuscodeService} from '@/models/invoices/InvoiceStatuscode.js'
 import { InvoiceStatusService } from '@/models/invoices/InvoiceStatus.js'
 
 export default {
@@ -166,15 +167,24 @@ export default {
       ]
     }
   },
+  computed: {
+    pageTitle() {
+      switch (this.$route.name) {
+        case 'invoices-sent':
+          return this.$trans("Sent invoices")
+        case 'preliminary-invoices':
+          return this.$trans("Preliminary invoices")
+        default:
+          return this.$trans("Definitive invoices")
+      }
+    },
+  },
   async created () {
     this.invoiceService.currentPage = this.$route.query.page || 1
     await this.loadData()
     await this.loadStatusCodes()
   },
   methods: {
-    invoiceEditRoute(invoice) {
-      return invoice.preliminary ? 'invoice-edit': 'invoice-view'
-    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
@@ -238,7 +248,7 @@ export default {
   },
   watch: {
     '$route.name': {
-      handler: function(search) {
+      handler: function(_search) {
         if (this.$route.name === 'preliminary-invoices') {
           this.invoiceService.queryMode = 'preliminary'
         } else if(this.$route.name === 'invoices-sent') {

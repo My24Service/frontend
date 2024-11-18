@@ -1,10 +1,9 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <details open>
-      <summary class="flex-columns space-between">
-        <h6>{{ $trans('Chapters') }}</h6>
-        <b-icon-chevron-down></b-icon-chevron-down>
-      </summary>
+
+    <h5>{{ $trans('Chapters') }}</h5>
+
+    <div>
       <b-modal
         id="delete-chapter-modal"
         ref="delete-chapter-modal"
@@ -32,11 +31,11 @@
         v-if="!showForm && chapterService.collection.length"
       >
         <template #cell(chapter)="data">
-          <h4>
+          <h6>
             <b-link @click="function() { loadChapter(data.item) }">
               {{ data.item.name }}
             </b-link>
-          </h4>
+          </h6>
           <p>{{ data.item.description }}</p>
         </template>
         <template #cell(icons)="data" v-if="quotation.preliminary">
@@ -47,6 +46,7 @@
             <IconLinkEdit
               :method="function() { editChapter(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
+              class="pr-2"
             />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
@@ -137,16 +137,18 @@
           {{ $trans('New chapter') }}
         </b-button>
       </footer>
-    </details>
+    </div>
   </b-overlay>
 </template>
 <script>
-import {QuotationModel} from '@/models/quotations/Quotation.js'
-import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
+
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
+
+import {QuotationModel} from '@/models/quotations/Quotation.js'
+import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 
 export default {
   name: 'ChapterComponent',

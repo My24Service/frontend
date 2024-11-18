@@ -100,4 +100,16 @@ export const getters = {
   getMemberUsesEquipment(state) {
     return state.memberInfo.settings.order_uses_equipment
   },
+  getQuotationDefaultCallOutCosts(state) {
+    return state.memberInfo.settings.quotation_default_call_out_costs
+  },
+  getQuotationDefaultVat(state) {
+    return state.memberInfo.settings.quotation_default_vat
+  },
+  getQuotationDefaultHourlyRate(state) {
+    return state.memberInfo.settings.quotation_default_hourly_rate
+  },
+  getQuotationDefaultPricePerKm(state) {
+    return state.memberInfo.settings.quotation_default_price_per_km
+  },
 }

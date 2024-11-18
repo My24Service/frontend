@@ -91,11 +91,11 @@ export default {
 
 <style scoped>
 .input-number {
-  width: 50px;
+  width: 40px !important;
   text-align: right;
 }
 .input-decimal {
-  width: 56px !important;
+  width: 36px !important;
   text-align: center;
 }
 .flex {

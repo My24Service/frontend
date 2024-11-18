@@ -4,7 +4,7 @@
       <QuotationPDFViewer
         :quotation-in="quotation"
         :is-view="isView"
-        v-if="quotation"
+        v-if="quotation && quotation.id"
         ref="quotation-viewer"
       />
 
@@ -75,7 +75,7 @@
       <b-form v-show="!isLoading">
         <div class="page-detail">
 
-          <div class="flex-columns">
+          <div class="flex-columns panel-container">
 
             <div class="panel col-1-3" v-if="!loadChapterModel">
 
@@ -100,7 +100,8 @@
             </div>
 
             <div class="panel"
-                :class="{'col-1-3': !loadChapterModel, 'col-1-2 fixed-position': loadChapterModel}">
+                :class="{'col-1-3': !loadChapterModel, 'col-1-2 left': loadChapterModel}">
+
               <div v-if="loadChapterModel">
                 <QuotationLine
                   :quotation="quotation"
@@ -119,22 +120,25 @@
                   :quotation="quotation"
                   :is-view="isView"
                   ref="quotationDataComponent"
+                  class="component-margin"
                 />
+
+                <hr/>
 
                 <DocumentsComponent
                   v-if="quotation && quotation.id"
                   :quotation="quotation"
                   :is-view="isView"
+                  class="component-margin"
                 />
 
               </div>
-
             </div>
 
             <div class="panel"
-              :class="{'col-1-3': !loadChapterModel, 'col-1-2': loadChapterModel}">
+              :class="{'col-1-3': !loadChapterModel, 'col-1-2 right': loadChapterModel}">
               <div v-if="loadChapterModel">
-                <h3>{{ $trans("Chapter costs") }}</h3>
+                <h5>{{ $trans("Chapter costs") }}</h5>
 
                 <MaterialsCreate
                   :customer="customer"
@@ -143,6 +147,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -154,6 +159,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -165,6 +171,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -176,6 +183,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -186,6 +194,7 @@
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
                   @quotationLineSubmitted="quotationLineSubmitted"
+                  @emptyQuotationLinesClicked="emptyQuotationLinesClicked"
                   class="component-margin"
                 />
 
@@ -210,6 +219,8 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
+import StatusesComponent from "@/components/StatusesComponent.vue";
+
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
@@ -227,14 +238,13 @@ import CostService, {
   COST_TYPE_WORK_HOURS,
 } from "@/models/orders/Cost";
 
-import QuotationData from "@/views/quotations/quotation_form/QuotationData.vue";
-import Chapter from "@/views/quotations/quotation_form/Chapter.vue";
-import QuotationLine from "@/views/quotations/quotation_form/QuotationLine.vue";
-import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsComponent.vue";
-import CustomerView from "@/views/quotations/CustomerView.vue";
-import StatusesComponent from "@/components/StatusesComponent.vue";
-import QuotationView from "@/views/quotations/QuotationView.vue";
-import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
+import QuotationData from "./quotation_form/QuotationData.vue";
+import Chapter from "./quotation_form/Chapter.vue";
+import QuotationLine from "./quotation_form/QuotationLine.vue";
+import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
+import CustomerView from "./CustomerView.vue";
+import QuotationView from "./QuotationView.vue";
+import QuotationPDFViewer from "./QuotationPDFViewer.vue";
 
 export default {
   name: 'QuotationForm',
@@ -332,6 +342,10 @@ export default {
       this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
     },
     quotationLineSubmitted() {
+      this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
+    },
+    emptyQuotationLinesClicked(type) {
+      this.$refs['quotation-lines'].emptyQuotationLinesForType(type)
       this.quotationLines = this.$refs['quotation-lines'].getQuotationLines()
     },
     backToChapters() {
@@ -463,9 +477,18 @@ export default {
 .component-margin {
   margin-bottom: 10px;
 }
-.fixed-position .position-relative {
-  position: fixed !important;
-  width: 40%;
-  overflow: hidden;
+.left {
+  flex-grow: 1;
+  height: 100%;
+}
+.right {
+  flex-grow: 5;
+  overflow-y: auto;
+}
+.right div {
+  height: fit-content;
+}
+.panel-container {
+  height: 140vh;
 }
 </style>

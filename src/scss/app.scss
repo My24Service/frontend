@@ -68,3 +68,18 @@ details {
 td .h2.float-right span a {
   margin-inline-start: 1ex;
 }
+
+.has-changes {
+  background: rgba(255, 193, 7, .3) !important;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type=number] {
+  -moz-appearance:textfield; /* Firefox */
+}

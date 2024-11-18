@@ -7,7 +7,7 @@
       <div class="page-title">
         <h3>
           <b-icon icon="file-earmark-text-fill"></b-icon>
-          <span>{{ $trans("Quotations") }}</span>
+          <span>{{ pageTitle }}</span>
         </h3>
 
         <b-button-toolbar>
@@ -17,7 +17,11 @@
               v-bind:title="$trans('Refresh')"
             />
           </b-button-group>
-          <router-link class="btn button" :to="{name:'quotation-add'}">
+          <router-link
+            class="btn button"
+            :to="{name:'quotation-add'}"
+            v-if="canAdd"
+          >
             <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add quotation') }}
           </router-link>
         </b-button-toolbar>
@@ -79,19 +83,20 @@
         <template #cell(icons)="data">
           <div class="h2 quotation-icons">
             <IconLinkEdit
-              v-if="!data.item.preliminary && !data.item.is_sent"
-              class="edit-icon"
+              v-if="data.item.preliminary && !data.item.is_sent"
+              class="mr-2"
               router_name="quotation-edit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
             <IconLinkDelete
-              v-if="!data.item.is_sent"
+              class="mr-2"
+              v-if="data.item.preliminary && !data.item.is_sent"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
             <b-link
-              class="px-1"
+              class="mr-2"
               v-if="!data.item.preliminary"
               :title="$trans('Create order')"
               @click="function() { createOrder(data.item.id) }"
@@ -102,7 +107,7 @@
               ></b-icon-arrow-up-right-circle>
             </b-link>
             <router-link
-              class="px-1"
+              class="mr-2"
               v-if="!data.item.preliminary"
               :title="$trans('Send quotation')"
               :to="{name: 'quotation-send',
@@ -126,8 +131,6 @@
 </template>
 
 <script>
-import {QuotationService} from '@/models/quotations/Quotation.js'
-import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
@@ -138,7 +141,10 @@ import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
-import TableStatusInfo from '../../components/TableStatusInfo.vue'
+import TableStatusInfo from '@/components/TableStatusInfo.vue'
+
+import {QuotationService} from '@/models/quotations/Quotation.js'
+import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import { StatusService } from '@/models/quotations/Status.js'
 
 export default {
@@ -175,6 +181,27 @@ export default {
         {key: 'status', label: this.$trans('Status')},
         {key: 'icons', label: ''},
       ]
+    }
+  },
+  computed: {
+    pageTitle() {
+      switch (this.$route.name) {
+        case 'quotations-sent':
+          return this.$trans("Sent quotations")
+        case 'preliminary-quotations':
+          return this.$trans("Preliminary quotations")
+        default:
+          return this.$trans("Definitive quotations")
+      }
+    },
+    canAdd() {
+      switch (this.$route.name) {
+        case 'quotations-sent':
+        case 'quotation-list':
+          return false
+        default:
+          return true
+      }
     }
   },
   created () {

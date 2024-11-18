@@ -1,9 +1,6 @@
 <template>
-  <details open>
-    <summary class="flex-columns space-between">
-      <h6>{{ $trans('Details') }}</h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
-    </summary>
+  <div>
+    <h5>{{ $trans('Details') }}</h5>
 
     <div v-if="!isView">
       <b-form-group
@@ -116,13 +113,15 @@
       </b-container>
     </div>
 
-  </details>
+  </div>
 </template>
 <script>
 import {useVuelidate} from "@vuelidate/core";
-import {QuotationModel} from '@/models/quotations/Quotation.js';
-import quotationMixin from "@/views/quotations/quotation_form/mixin";
 import {required} from "@vuelidate/validators";
+
+import {QuotationModel} from '@/models/quotations/Quotation.js';
+
+import quotationMixin from "./mixin";
 
 export default {
   name: 'QuotationDataForm',

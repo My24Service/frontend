@@ -14,9 +14,9 @@
             <b-icon icon="file-earmark-check-fill"></b-icon>
             <router-link
               :to="{name: 'quotations-sent' }"
-            >{{ $trans('Sent') }}</router-link>
+            >{{ $trans('Quotation') }}</router-link>
             /
-            <strong>{{ quotation.quotation_name }}</strong>
+            <strong>{{ quotation.quotation_id }} {{ quotation.quotation_name }}</strong>
             <span>
               <b-link
                 class="btn btn-sm btn-primary"
@@ -197,15 +197,17 @@
   </b-overlay>
 </template>
 <script>
+import TotalsInputs from "@/components/TotalsInputs.vue";
+import StatusesComponent from "@/components/StatusesComponent.vue";
+import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
+
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
 import {CostService} from "@/models/orders/Cost"
 import {MemberModel} from "@/models/member/Member"
-import TotalsInputs from "@/components/TotalsInputs.vue";
-import DocumentsComponent from "@/views/quotations/quotation_form/DocumentsComponent.vue";
-import StatusesComponent from "@/components/StatusesComponent.vue";
-import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
+
+import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 
 export default {
   name: "QuotationView",

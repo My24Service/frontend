@@ -46,7 +46,10 @@ class BaseModel {
     this.emptyCollectionItem()
   }
   deleteCollectionItem(index) {
-    this.deletedItems.push(this.collection[index])
+    // only mark for deletion when there's an id
+    if (this.collection[index].id) {
+      this.deletedItems.push(this.collection[index])
+    }
     this.collection.splice(index, 1)
     this.collectionHasChanges = true
   }
@@ -83,12 +86,16 @@ class BaseModel {
       ...this.editItem
     })
 
-    if (!this.collectionHasChanges) {
-      const changes = Object.entries(newItem).find(
-        ([k, v]) => k.indexOf('dinero') === -1 && k !== 'id' && this.beforeEditModel[k] !== v
-      )
-      console.log({changes})
-      this.collectionHasChanges = !!(changes && changes.length > 0)
+    const itemChanges = Object.entries(newItem).find(
+      ([k, v]) => k.indexOf('dinero') === -1 && k !== 'id' && this.beforeEditModel[k] !== v
+    )
+    // console.log({itemChanges})
+    const itemHasChanges = !!(itemChanges && itemChanges.length > 0)
+    newItem.hasChanges = itemHasChanges
+
+    // update collection changes only when needed
+    if (!this.collectionHasChanges && itemHasChanges) {
+      this.collectionHasChanges = true
     }
 
     this.collection.splice(this.editIndex, 1, newItem)

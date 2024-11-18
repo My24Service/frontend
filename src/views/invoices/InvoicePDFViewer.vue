@@ -75,8 +75,10 @@
 <script>
 import my24 from "@/services/my24";
 import {componentMixin} from "@/utils";
+
 import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
-import invoiceMixin from "@/views/invoices/invoice_form/mixin";
+
+import invoiceMixin from "./invoice_form/mixin";
 
 export default {
   name: "invoicePDFViewer",

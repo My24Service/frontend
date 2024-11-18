@@ -102,27 +102,29 @@
 </template>
 
 <script>
-import Collapse from "../../../components/Collapse";
-import invoiceMixin from "./mixin.js";
-import invoiceLineService from "../../../models/invoices/InvoiceLine";
-import CostService, {COST_TYPE_USED_MATERIALS} from "../../../models/orders/Cost";
+import {toDinero} from "@/utils";
+import Collapse from "@/components/Collapse";
+import PriceInput from "@/components/PriceInput";
+import TotalsInputs from "@/components/TotalsInputs";
+
+import {InvoiceLineService} from "@/models/invoices/InvoiceLine";
+import {CostService, COST_TYPE_USED_MATERIALS} from "@/models/orders/Cost";
+import {MaterialModel} from "@/models/inventory/Material";
+
 import {
   INVOICE_LINE_TYPE_USED_MATERIALS,
   USE_PRICE_OTHER,
   USE_PRICE_PURCHASE,
   USE_PRICE_SELLING
 } from "./constants";
+import invoiceMixin from "./mixin.js";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
-import {MaterialModel} from "@/models/inventory/Material";
-import PriceInput from "../../../components/PriceInput";
 import TotalRow from "./TotalRow";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
-import TotalsInputs from "../../../components/TotalsInputs";
-import {toDinero} from "@/utils";
 
 export default {
   name: "MaterialsComponent",
@@ -143,6 +145,7 @@ export default {
   watch: {
     material_models: {
       handler(_newValue) {
+        console.log(_newValue)
         this.loadData()
       },
       deep: true
@@ -185,6 +188,7 @@ export default {
       totalAmount: null,
 
       costService: new CostService(),
+      invoiceLineService: new InvoiceLineService(),
 
       usePriceOptions: {
         USE_PRICE_PURCHASE,
@@ -199,7 +203,6 @@ export default {
       costType: COST_TYPE_USED_MATERIALS,
       parentHasInvoiceLines: false,
       invoiceLineType: INVOICE_LINE_TYPE_USED_MATERIALS,
-      invoiceLineService
     }
   },
   async created() {
