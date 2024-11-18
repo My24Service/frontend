@@ -8,9 +8,8 @@
             {{ $trans("Send invoice") }}
           </router-link>
           /
-          <router-link :to="{name: 'invoice-view', params: {uuid: invoice.uuid}}">
-            <strong>{{ invoice.invoice_id }}</strong>
-          </router-link>
+          <strong>{{ invoice.invoice_id }}</strong>
+
           <span class="dimmed">
             <span v-if="isCreate && !email.id">{{ $trans("new") }}</span>
             <span v-if="!isCreate">{{ $trans("resend") }}</span>

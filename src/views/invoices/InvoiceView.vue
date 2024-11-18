@@ -239,7 +239,7 @@ export default {
     sendInvoice() {
       this.$router.push({name: 'invoice-send',
         query: {
-          invoiceId: this.data.id,
+          invoiceId: this.invoice.id,
         }}
       );
     },
