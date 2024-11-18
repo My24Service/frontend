@@ -210,9 +210,6 @@ export default {
     DurationInput,
     AddToQuotationLines
   },
-  emits: [
-    'emptyQuotationLinesClicked'
-  ],
   props: {
     chapter: {
       type: ChapterModel,

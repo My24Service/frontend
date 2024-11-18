@@ -104,7 +104,7 @@ export default {
 
       try {
         await this.quotationService.makeDefinitive(this.quotation.id)
-        this.errorToast(this.$trans('Success making quotation definitive'))
+        this.infoToast(this.$trans('Success'), this.$trans('Quotation is now definitive'))
         this.isLoading = false
         await this.$router.push({ name: 'quotation-view', params: {pk: this.quotation.id }})
       } catch(error) {

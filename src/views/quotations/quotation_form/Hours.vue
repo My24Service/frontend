@@ -175,6 +175,11 @@ import IconLinkDelete from '@/components/IconLinkDelete.vue'
 
 import {ChapterModel} from "@/models/quotations/Chapter";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
+import {
+  COST_TYPE_TRAVEL_HOURS,
+  COST_TYPE_WORK_HOURS,
+  CostService
+} from "@/models/quotations/Cost";
 
 import quotationMixin from "./mixin.js";
 import {
@@ -182,11 +187,6 @@ import {
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS
 } from "./constants";
-import {
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS,
-  CostService
-} from "@/models/quotations/Cost";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
@@ -198,9 +198,6 @@ import CostsTable from "./CostsTable.vue";
 export default {
   name: "HoursComponent",
   mixins: [quotationMixin],
-  emits: [
-    'emptyQuotationLinesClicked'
-  ],
   components: {
     CostsTable,
     EmptyQuotationLinesContainer,

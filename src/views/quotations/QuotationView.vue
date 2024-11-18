@@ -14,9 +14,9 @@
             <b-icon icon="file-earmark-check-fill"></b-icon>
             <router-link
               :to="{name: 'quotations-sent' }"
-            >{{ $trans('Sent') }}</router-link>
+            >{{ $trans('Quotation') }}</router-link>
             /
-            <strong>{{ quotation.quotation_name }}</strong>
+            <strong>{{ quotation.quotation_id }} {{ quotation.quotation_name }}</strong>
             <span>
               <b-link
                 class="btn btn-sm btn-primary"

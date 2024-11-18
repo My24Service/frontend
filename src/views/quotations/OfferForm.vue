@@ -8,9 +8,7 @@
             {{ $trans("Send quotation") }}
           </router-link>
           /
-          <router-link :to="{name: 'quotation-view', params: {pk: quotation.id}}">
-            <strong>{{ quotation.quotation_name }}</strong>
-          </router-link>
+          <strong>{{ quotation.quotation_id }} {{ quotation.quotation_name }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !offer.id">{{ $trans("new") }}</span>
             <span v-if="!isCreate">{{ $trans("resend") }}</span>
@@ -157,7 +155,7 @@ export default {
       this.isLoading = true;
 
       try {
-        this.offer = await this.offerService.getUnsentOffer(this.offer.quotation);
+        this.offer = await this.offerService.getUnsentOffer(this.$route.query.quotationId);
         this.offer.quotation = this.$route.query.quotationId
         this.recipients = this.offer.recipients.split(",")
         this.isLoading = false;
@@ -238,6 +236,9 @@ export default {
 
       this.offer.recipients = validatedEmails
       this.isLoading = true;
+      const sentTitle = this.$trans("Sent")
+      const sentBody = this.$trans("Quotation has been sent")
+      const errorBody = this.$trans("Error sending quotation")
 
       if (this.isCreate) {
         this.offer.quotation = this.$route.query.quotationId
@@ -246,16 +247,14 @@ export default {
           this.isLoading = false;
 
           if (!this.offer.is_sent) {
-            this.errorToast(this.$trans("Error sending quotation"));
+            this.errorToast(errorBody);
             return;
-          } else {
-            this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
           }
-          this.$router.go(-1);
+          this.infoToast(sentTitle, sentBody);
           await this.$router.push({name: 'quotations-sent'});
         } catch (error) {
           console.log("Error sending quotation", error);
-          this.errorToast(this.$trans("Error sending quotation"));
+          this.errorToast(errorBody);
           this.isLoading = false;
         }
         return
@@ -268,15 +267,14 @@ export default {
 
         this.isLoading = false
         if (!this.offer.is_sent) {
-          this.errorToast(this.$trans("Error sending quotation"));
+          this.errorToast(errorBody);
           return;
-        } else {
-          this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
         }
+        this.infoToast(sentTitle, sentBody);
         await this.$router.push({name: 'quotations-sent'});
       } catch(error) {
         console.log("Error sending quotation", error);
-        this.errorToast(this.$trans("Error sending quotation"));
+        this.errorToast(this.$trans(errorBody));
         this.isLoading = false;
       }
     },
@@ -284,12 +282,6 @@ export default {
 };
 </script>
 <style scoped>
-.pdf-priview {
-  margin-top: 20px;
-}
-.pdf-priview .panel {
-  max-width: 70%;
-}
 .quotation-pdf-button {
   margin-left: 20px;
 }
