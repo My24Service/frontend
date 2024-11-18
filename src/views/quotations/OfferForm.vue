@@ -91,7 +91,7 @@
                 :disabled="loadingPdf"
               >
                 <b-spinner small v-if="loadingPdf"></b-spinner>
-                {{ $trans('Preview quotation pdf') }}
+                {{ $trans('Preview quotation PDF') }}
               </b-button>
             </p>
           </div>
