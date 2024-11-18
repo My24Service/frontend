@@ -90,7 +90,7 @@
                 :disabled="loadingPdf"
               >
                 <b-spinner small v-if="loadingPdf"></b-spinner>
-                {{ $trans('Preview invoice pdf') }}
+                {{ $trans('Preview invoice PDF') }}
               </b-button>
             </p>
           </div>
@@ -100,12 +100,13 @@
   </div>
 </template>
 <script>
-import my24 from '../../services/my24.js'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
-import { EmailService, EmailModel } from "@/models/invoices/Email.js";
-import { InvoiceService, InvoiceModel } from '../../models/invoices/Invoice.js'
 
+import my24 from '@/services/my24.js'
+
+import { EmailService, EmailModel } from "@/models/invoices/Email.js";
+import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
 
 export default {
   setup() {
@@ -174,7 +175,7 @@ export default {
       return emails.join(",")
     },
     async downloadPdf() {
-      const url =  `/api/invoice/invoice/${this.email.invoice}/download_pdf_from_template/`
+      const url =  `/api/invoice/invoice/${this.email.invoice}/download_pdf/`
       this.loadingPdf = true;
 
       my24.downloadItem(
@@ -198,24 +199,23 @@ export default {
         }
         this.isLoading = false
       } catch(error) {
+        this.isLoading = false
         console.log('error fetching invoice', error)
         this.errorToast(this.$trans('Error fetching invoice'))
-        this.isLoading = false
       }
     },
     async loadDocuments() {
       this.isLoading = true;
 
       try {
-        const result = await this.emailService.getDocuments(
+        this.documents = await this.emailService.getDocuments(
           this.email.invoice
         );
-        this.documents = result
         this.isLoading = false;
       } catch (error) {
+        this.isLoading = false;
         console.log("Error fetching documents", error);
         this.errorToast(this.$trans("Error fetching documents"));
-        this.isLoading = false;
       }
     },
     async submitForm() {
@@ -236,6 +236,9 @@ export default {
 
       this.email.recipients = validatedEmails
       this.isLoading = true;
+      const sentTitle = this.$trans("Sent")
+      const sentBody = this.$trans("Invoice has been sent")
+      const sendError = this.$trans("Error sending invoice")
 
       if (this.isCreate) {
         this.email.invoice = this.$route.query.invoiceId
@@ -244,17 +247,15 @@ export default {
           this.isLoading = false;
 
           if (!this.email.is_sent) {
-            this.errorToast(this.$trans("Error sending invoice"));
+            this.errorToast(sendError);
             return;
-          } else {
-            this.infoToast(this.$trans("Sent"), this.$trans("Invoice has been sent"));
           }
-          this.$router.go(-1);
-          this.$router.push({name: 'invoices-sent'});
+          this.infoToast(sentTitle, sentBody);
+          await this.$router.push({name: 'invoices-sent'});
         } catch (error) {
           console.log("Error sending invoice", error);
-          this.errorToast(this.$trans("Error sending invoice"));
           this.isLoading = false;
+          this.errorToast(sendError);
         }
         return
       }
@@ -266,28 +267,21 @@ export default {
 
         this.isLoading = false
         if (!this.email.is_sent) {
-          this.errorToast(this.$trans("Error sending invoice"));
+          this.errorToast(sendError);
           return;
-        } else {
-          this.infoToast(this.$trans("Sent"), this.$trans("Invoice have been sent"));
         }
-        this.$router.push({name: 'invoices-sent'});
+        this.infoToast(sentTitle, sentBody);
+        await this.$router.push({name: 'invoices-sent'});
       } catch(error) {
         console.log("Error sending invoice", error);
-        this.errorToast(this.$trans("Error sending invoice"));
         this.isLoading = false;
+        this.errorToast(sendError);
       }
     },
   }
 };
 </script>
 <style scoped>
-.pdf-priview {
-  margin-top: 20px;
-}
-.pdf-priview .panel {
-  max-width: 70%;
-}
 .invoice-pdf-button {
   margin-left: 20px;
 }

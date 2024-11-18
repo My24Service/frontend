@@ -183,10 +183,12 @@
   </b-overlay>
 </template>
 <script>
-import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
-import TotalsInputs from "../../components/TotalsInputs";
+import TotalsInputs from "@/components/TotalsInputs";
 import StatusesComponent from "@/components/StatusesComponent.vue";
-import InvoicePDFViewer from "@/views/invoices/InvoicePDFViewer.vue";
+
+import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
+
+import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 
 export default {
   name: "InvoiceView",

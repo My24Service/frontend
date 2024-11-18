@@ -137,6 +137,7 @@
 
         <div class="panel col-2-3">
           <InvoiceLine
+            v-if="!isLoading"
             ref="invoice-lines"
             :invoice="invoice"
             :invoicePk="pk"
@@ -345,6 +346,7 @@
               <b-icon-chevron-down></b-icon-chevron-down>
             </summary>
             <MaterialsComponent
+              v-if="material_models"
               :order_pk="order_pk"
               :customer="customer"
               :material_models="material_models"
@@ -357,7 +359,8 @@
           </details>
 
           <div v-if="order_pk">
-            <HoursComponent v-if="activity_totals.work_total !== '00:00'"
+            <HoursComponent
+              v-if="activity_totals.work_total !== '00:00' && !isLoading"
               :order_pk="order_pk"
               :type="COST_TYPE_WORK_HOURS"
               :hours_total="activity_totals.work_total"
@@ -369,7 +372,8 @@
               :invoiceLinesParent="invoiceLines"
             />
 
-            <HoursComponent v-if="activity_totals.travel_total !== '00:00'"
+            <HoursComponent
+              v-if="activity_totals.travel_total !== '00:00' && !isLoading"
               :order_pk="order_pk"
               :type="COST_TYPE_TRAVEL_HOURS"
               :hours_total="activity_totals.travel_total"
@@ -381,7 +385,8 @@
               :invoiceLinesParent="invoiceLines"
             />
 
-            <DistanceComponent v-if="activity_totals.distance_total > 0"
+            <DistanceComponent
+              v-if="activity_totals.distance_total > 0 && !isLoading"
               :order_pk="order_pk"
               :customer="customer"
               :user_totals="activity_totals.user_totals"
@@ -393,7 +398,8 @@
               :invoiceLinesParent="invoiceLines"
             />
 
-            <HoursComponent v-if="activity_totals.extra_work_total !== '00:00'"
+            <HoursComponent
+              v-if="activity_totals.extra_work_total !== '00:00' && !isLoading"
               :order_pk="order_pk"
               :type="COST_TYPE_EXTRA_WORK"
               :hours_total="activity_totals.extra_work_total"
@@ -405,7 +411,8 @@
               :invoiceLinesParent="invoiceLines"
             />
 
-            <HoursComponent v-if="activity_totals.actual_work_total !== '00:00'"
+            <HoursComponent
+              v-if="activity_totals.actual_work_total !== '00:00' && !isLoading"
               :order_pk="order_pk"
               :type="COST_TYPE_ACTUAL_WORK"
               :hours_total="activity_totals.actual_work_total"
@@ -424,6 +431,7 @@
               <b-icon-chevron-down></b-icon-chevron-down>
             </summary>
             <CallOutCostsComponent
+              v-if="!isLoading"
               :order_pk="order_pk"
               :customer="customer"
               :invoice_default_call_out_costs="invoice_default_call_out_costs"
@@ -443,14 +451,20 @@
 </template>
 
 <script>
+import {useVuelidate} from "@vuelidate/core";
+
 import {toDinero} from "@/utils";
+import TotalsInputs from "@/components/TotalsInputs";
+import PriceInput from "@/components/PriceInput";
+import Collapse from "@/components/Collapse";
+import CustomerCard from "@/components/CustomerCard";
+
 import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
 import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
 import {MaterialModel, MaterialService} from "@/models/inventory/Material";
 import {EngineerUserModel, EngineerService} from "@/models/company/UserEngineer";
 import {CustomerModel, CustomerPriceModel, CustomerService} from "@/models/customer/Customer";
-import PriceInput from "../../components/PriceInput";
-import Collapse from "../../components/Collapse";
+
 import invoiceMixin from "./invoice_form/mixin";
 import HoursComponent from "./invoice_form/Hours";
 import DistanceComponent from "./invoice_form/Distance";
@@ -458,7 +472,6 @@ import MaterialsComponent from "./invoice_form/Materials";
 import CallOutCostsComponent from "./invoice_form/CallOutCosts";
 import InvoiceLine from "./invoice_form/InvoiceLine";
 import VAT from "./invoice_form/VAT";
-import CustomerCard from "../../components/CustomerCard";
 import {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
@@ -466,8 +479,6 @@ import {
   COST_TYPE_WORK_HOURS
 } from "@/models/orders/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
-import {useVuelidate} from "@vuelidate/core";
-import TotalsInputs from "../../components/TotalsInputs";
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 
 export default {
@@ -572,61 +583,13 @@ export default {
   },
   async created() {
     this.isLoading = true
-
-    if (this.isEdit) {
-      await this.loadInvoice()
-    }
-
-    // get invoice data
-    const invoiceData = await this.invoiceService.getData(this.uuid)
-
-    // get customer
-    this.customerPk = invoiceData.customer_pk
-    await this.getCustomer()
-
-    // set data in component
-    this.invoice_id = invoiceData.invoice_id
-    this.order_pk = invoiceData.order_pk
-    this.order_id = invoiceData.order_id
-    this.invoice.order = this.order_pk
-    this.invoice.invoice_id = this.invoice_id
-    this.invoice.reference = invoiceData.order_reference
-
-    this.activity_totals = invoiceData.activity_totals
-    this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
-      ...m,
-      default_currency: this.default_currency,
-    }))
-
-    this.used_materials = invoiceData.used_materials
-
-    this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
-    this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
-
-    this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
-    this.invoice_default_partner_hourly_rate_dinero = toDinero(
-      this.invoice_default_partner_hourly_rate,
-      this.default_currency
-    )
-
-    // create engineer models
-    this.engineer_models = invoiceData.engineer_models.map((m) => new EngineerUserModel({
-      ...m,
-      engineer: {...m.engineer, default_currency: this.default_currency}
-    }))
-
+    await this.loadData()
     this.isLoading = false
   },
   methods: {
     showInvoiceDialog() {
       this.$refs['invoice-viewer'].show();
     },
-    // openInvoice() {
-    //   const routeData = this.$router.resolve({
-    //     name: 'invoice-view', params: { uuid: this.invoice.uuid }
-    //   })
-    //   window.open(`${document.location.origin}/${routeData.href}`, '_blank')
-    // },
     invoiceLineAdded() {
       this.invoiceLines = this.$refs['invoice-lines'].getInvoiceLines()
     },
@@ -690,6 +653,50 @@ export default {
       this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
       this.materialUpdating = false
     },
+    async loadData() {
+      this.material_models = null
+      if (this.isEdit) {
+        await this.loadInvoice()
+      }
+
+      // get invoice data
+      const invoiceData = await this.invoiceService.getData(this.uuid)
+
+      // get customer
+      this.customerPk = invoiceData.customer_pk
+      await this.getCustomer()
+
+      // set data in component
+      this.invoice_id = invoiceData.invoice_id
+      this.order_pk = invoiceData.order_pk
+      this.order_id = invoiceData.order_id
+      this.invoice.order = this.order_pk
+      this.invoice.invoice_id = this.invoice_id
+      this.invoice.reference = invoiceData.order_reference
+
+      this.activity_totals = invoiceData.activity_totals
+      this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
+        ...m,
+        default_currency: this.default_currency,
+      }))
+
+      this.used_materials = invoiceData.used_materials
+
+      this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
+      this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
+
+      this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
+      this.invoice_default_partner_hourly_rate_dinero = toDinero(
+        this.invoice_default_partner_hourly_rate,
+        this.default_currency
+      )
+
+      // create engineer models
+      this.engineer_models = invoiceData.engineer_models.map((m) => new EngineerUserModel({
+        ...m,
+        engineer: {...m.engineer, default_currency: this.default_currency}
+      }))
+    },
     async submitForm() {
       this.isLoading = true
 
@@ -721,9 +728,9 @@ export default {
         let invoiceLineService = this.$refs['invoice-lines'].invoiceLineService
         await this.invoiceService.update(this.invoice.id, this.invoice)
         await invoiceLineService.updateCollection(this.invoice.id)
-
+        await this.loadData()
+        this.isLoading = false
         this.infoToast(this.$trans('Updated'), this.$trans('Invoice has been updated'))
-        window.location.reload()
       } catch(error) {
         console.log(error)
         this.errorToast(this.$trans('Error updated invoice'))
