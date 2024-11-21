@@ -1,6 +1,21 @@
 <template>
   <div>
     <b-modal
+      ref="pdf-error-modal"
+      :title="$trans('Error creating PDF')"
+      v-if="pdfBlobError"
+      ok-only
+    >
+      <div class="d-block text-center">
+        <h5 v-if="pdfBlobError.template_error">{{ pdfBlobError.template_error }}</h5>
+        <h5 v-if="pdfBlobError.error">{{ pdfBlobError.error }}</h5>
+        <p v-if="pdfBlobError.details">
+          {{ $trans("details") }}: <strong>{{ pdfBlobError.details }}</strong>
+        </p>
+      </div>
+    </b-modal>
+
+    <b-modal
       id="quotation-definitive-modal"
       ref="quotation-definitive-modal"
       v-bind:title="$trans('Make definitive?')"
@@ -69,6 +84,18 @@ import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 
 import my24 from "@/services/my24";
 
+class PdfBlobError {
+  template_error
+  error
+  details
+
+  constructor(message) {
+    this.template_error = message.template_error
+    this.error = message.error
+    this.details = message.details
+  }
+}
+
 export default {
   name: "QuotationPDFViewer",
   props: {
@@ -95,7 +122,8 @@ export default {
       customerService: new CustomerService(),
       isLoading: false,
       quotationURL: null,
-      quotation: null
+      quotation: null,
+      pdfBlobError: null,
     }
   },
   methods: {
@@ -123,17 +151,17 @@ export default {
       try {
         await this.quotationService.generatePdf(this.quotation.id)
         await this.loadQuotation()
-        await this.downloadPdfBlob()
+        const result_ok = await this.downloadPdfBlob()
         this.isLoading = false
-        this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
+        if (!result_ok) {
+          this.$refs['pdf-error-modal'].show()
+        } else {
+          this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
+        }
       } catch(error) {
         console.log('error generating pdf', error)
         this.isLoading = false
-        if (error.response?.data?.template_error) {
-          this.errorToast(error.response.data.template_error)
-        } else {
-          this.errorToast(this.$trans('Error creating PDF'))
-        }
+        this.errorToast(this.$trans('Error creating PDF'))
       }
     },
     async downloadPdf() {
@@ -157,15 +185,20 @@ export default {
         const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
         this.quotationURL = URL.createObjectURL(pdfBlob);
         this.isLoading = false
+        this.pdfBlobError = null
+        return true
       } catch(error) {
+        console.log(`error fetching quotation definitive PDF, ${error}`)
         this.isLoading = false
-        console.log(`error fetching quotation pdf, ${error}`)
-        this.infoToast(
-          this.$trans('No PDF'),
-          this.$trans(
-            'Error fetching definitive PDF. Check if there is an active template or try to recreate.'
-          )
-        )
+        if ("TextDecoder" in window) {
+          const enc = new TextDecoder("utf-8")
+          const result = JSON.parse(enc.decode(error.response.data))
+          this.pdfBlobError = new PdfBlobError(result)
+        } else {
+          this.pdfBlobError = new PdfBlobError({error: '', details: ''})
+        }
+
+        return false
       }
     },
     async downloadPreviewPdfBlob() {
@@ -175,16 +208,20 @@ export default {
         const response = await this.quotationService.downloadPreviewPdfBlob(this.quotation.id)
         const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
         this.quotationURL = URL.createObjectURL(pdfBlob);
+        this.pdfBlobError = null
         this.isLoading = false
+        return true
       } catch(error) {
         this.isLoading = false
-        console.log(`error fetching quotation pdf, ${error}`)
-        this.infoToast(
-          this.$trans('No PDF'),
-          this.$trans(
-            'Error fetching preview PDF. Check if there is an active template.'
-          )
-        )
+        console.log(`error fetching quotation preview PDF, ${error}`)
+        if ("TextDecoder" in window) {
+          const enc = new TextDecoder("utf-8")
+          const response = JSON.parse(enc.decode(error.response.data))
+          this.pdfBlobError = new PdfBlobError(response)
+        } else {
+          this.pdfBlobError = new PdfBlobError({error: '', details: ''})
+        }
+        return false
       }
     },
     showMakeDefinitiveModal() {
@@ -195,11 +232,11 @@ export default {
       URL.revokeObjectURL(this.quotationURL);
     },
     async show() {
-      this.$refs['quotation-viewer'].show()
-      if (this.quotation.preliminary) {
-        await this.downloadPreviewPdfBlob()
+      const result = this.quotation.preliminary ? await this.downloadPreviewPdfBlob() : await this.downloadPdfBlob()
+      if (result) {
+        this.$refs['quotation-viewer'].show()
       } else {
-        await this.downloadPdfBlob()
+        this.$refs['pdf-error-modal'].show()
       }
     },
     async getCustomer(pk) {

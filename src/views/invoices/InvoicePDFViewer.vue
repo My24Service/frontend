@@ -1,6 +1,20 @@
 <template>
   <div>
     <b-modal
+      ref="pdf-error-modal"
+      :title="$trans('Error creating PDF')"
+      v-if="pdfBlobError"
+      ok-only
+    >
+      <div class="d-block text-center">
+        <h5 v-if="pdfBlobError.template_error">{{ pdfBlobError.template_error }}</h5>
+        <h5 v-if="pdfBlobError.error">{{ pdfBlobError.error }}</h5>
+        <p v-if="pdfBlobError.details">
+          {{ $trans("details") }}: <strong>{{ pdfBlobError.details }}</strong>
+        </p>
+      </div>
+    </b-modal>
+    <b-modal
       id="invoice-definitive-modal"
       ref="invoice-definitive-modal"
       v-bind:title="$trans('Make definitive?')"
@@ -80,6 +94,18 @@ import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
 
 import invoiceMixin from "./invoice_form/mixin";
 
+class PdfBlobError {
+  template_error
+  error
+  details
+
+  constructor(message) {
+    this.template_error = message.template_error
+    this.error = message.error
+    this.details = message.details
+  }
+}
+
 export default {
   name: "invoicePDFViewer",
   mixins: [invoiceMixin, componentMixin],
@@ -106,7 +132,8 @@ export default {
       invoiceService: new InvoiceService(),
       isLoading: false,
       invoiceURL: null,
-      invoice: null
+      invoice: null,
+      pdfBlobError: null,
     }
   },
   methods: {
@@ -114,10 +141,15 @@ export default {
       this.isLoading = true;
       try {
         await this.invoiceService.recreateInvoicePdf(this.invoice.id);
-        this.infoToast(this.$trans('Success'), this.$trans('Invoice PDF created'));
         await this.loadInvoice()
         await this.downloadPdfBlob()
-        this.isLoading = false;
+        const result_ok = await this.downloadPdfBlob()
+        this.isLoading = false
+        if (!result_ok) {
+          this.$refs['pdf-error-modal'].show()
+        } else {
+          this.infoToast(this.$trans('Success'), this.$trans('Invoice PDF created'));
+        }
       }
       catch (err) {
         console.log('Error recreating invoice pdf', err);
@@ -164,15 +196,20 @@ export default {
         const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
         this.invoiceURL = URL.createObjectURL(pdfBlob);
         this.isLoading = false
+        this.pdfBlobError = null
+        return true
       } catch(error) {
         this.isLoading = false
         console.log(`error fetching invoice pdf, blob, ${error}`)
-        this.infoToast(
-          this.$trans('No PDF'),
-          this.$trans(
-            'Error fetching definitive PDF. Check if there is an active template or try to recreate.'
-          )
-        )
+        if ("TextDecoder" in window) {
+          const enc = new TextDecoder("utf-8")
+          const result = JSON.parse(enc.decode(error.response.data))
+          this.pdfBlobError = new PdfBlobError(result)
+        } else {
+          this.pdfBlobError = new PdfBlobError({error: '', details: ''})
+        }
+
+        return false
       }
     },
     async downloadPreviewPdfBlob() {
@@ -183,15 +220,18 @@ export default {
         const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
         this.invoiceURL = URL.createObjectURL(pdfBlob);
         this.isLoading = false
+        this.pdfBlobError = null
       } catch(error) {
         this.isLoading = false
         console.log(`error fetching invoice pdf, ${error}`)
-        this.infoToast(
-          this.$trans('No PDF'),
-          this.$trans(
-            'Error fetching preview PDF. Check if there is an active template.'
-          )
-        )
+        if ("TextDecoder" in window) {
+          const enc = new TextDecoder("utf-8")
+          const response = JSON.parse(enc.decode(error.response.data))
+          this.pdfBlobError = new PdfBlobError(response)
+        } else {
+          this.pdfBlobError = new PdfBlobError({error: '', details: ''})
+        }
+        return false
       }
     },
     showMakeDefinitiveModal() {
@@ -202,11 +242,11 @@ export default {
       URL.revokeObjectURL(this.invoiceURL);
     },
     async show() {
-      this.$refs['invoice-viewer'].show()
-      if (this.invoice.preliminary) {
-        await this.downloadPreviewPdfBlob()
+      const result = this.invoice.preliminary ? await this.downloadPreviewPdfBlob() : await this.downloadPdfBlob()
+      if (result) {
+        this.$refs['invoice-viewer'].show()
       } else {
-        await this.downloadPdfBlob()
+        this.$refs['pdf-error-modal'].show()
       }
     },
     async loadInvoice() {
