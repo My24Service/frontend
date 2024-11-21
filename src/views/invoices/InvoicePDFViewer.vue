@@ -223,6 +223,7 @@ export default {
         this.invoiceURL = URL.createObjectURL(pdfBlob);
         this.isLoading = false
         this.pdfBlobError = null
+        return true
       } catch(error) {
         this.isLoading = false
         console.log(`error fetching invoice pdf, ${error}`)
