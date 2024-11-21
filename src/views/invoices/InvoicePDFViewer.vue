@@ -3,7 +3,6 @@
     <b-modal
       ref="pdf-error-modal"
       :title="$trans('Error creating PDF')"
-      v-if="pdfBlobError"
       ok-only
     >
       <div class="d-block text-center">
