@@ -5,7 +5,10 @@
       :title="$trans('Error creating PDF')"
       ok-only
     >
-      <div class="d-block text-center">
+      <div
+        class="d-block text-center"
+        v-if="pdfBlobError"
+      >
         <h5 v-if="pdfBlobError.template_error">{{ pdfBlobError.template_error }}</h5>
         <h5 v-if="pdfBlobError.error">{{ pdfBlobError.error }}</h5>
         <p v-if="pdfBlobError.details">
