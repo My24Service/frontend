@@ -50,7 +50,7 @@
           </h3>
           <div
             class="flex-columns"
-            v-if="!isView"
+            v-if="!isView && quotation.preliminary"
           >
             <b-button @click="cancelForm" type="button" variant="secondary">
               {{ $trans('Cancel') }}</b-button>
@@ -59,7 +59,7 @@
               type="button"
               variant="primary"
             >
-              {{ $trans('Submit') }}
+              {{ $trans('Save') }}
             </b-button>
             <b-button
               @click="submitQuotationAndRecreate"
@@ -433,6 +433,7 @@ export default {
         await this.quotationService.update(this.quotation.id, quotation)
         this.infoToast(this.$trans('Updated'), this.$trans('Quotation has been updated'))
         this.isLoading = false
+        this.showQuotationDialog()
       } catch(error) {
         console.log('error updating quotation', error)
         this.errorToast(this.$trans('Error updating quotation'))

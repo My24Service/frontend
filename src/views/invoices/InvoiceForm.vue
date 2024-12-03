@@ -44,7 +44,7 @@
             <b-button @click="cancelForm" type="button" variant="outline">
               {{ $trans('Cancel') }}</b-button>
             <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
+              {{ $trans('Save') }}</b-button>
           </b-button-toolbar>
         </div>
       </header>
