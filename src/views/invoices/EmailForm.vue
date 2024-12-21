@@ -106,6 +106,8 @@ import my24 from '@/services/my24.js'
 
 import { EmailService, EmailModel } from "@/models/invoices/Email.js";
 import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
+import {OrderModel, OrderService} from "@/models/orders/Order";
+import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 
 export default {
   setup() {
@@ -139,6 +141,8 @@ export default {
       isSubmitClicked: false,
       invoiceService: new InvoiceService(),
       emailService: new EmailService(),
+      orderService: new OrderService(),
+      customerService: new CustomerService(),
       recipients: [],
       email: new EmailModel({}),
       documents: [],
@@ -196,6 +200,17 @@ export default {
         if (!this.recipients.includes(this.invoice.invoice_email)) {
           this.recipients.push(this.invoice.invoice_email)
         }
+
+        const order = await this.orderService.detail(this.invoice.order)
+        const customer = new CustomerModel(await this.customerService.detail(order.customer_relation))
+        if (customer.email) {
+          for (let address of customer.email.split(',')) {
+            if (this.tagValidator(address)) {
+              this.recipients.push(address)
+            }
+          }
+        }
+
         this.isLoading = false
       } catch(error) {
         this.isLoading = false
@@ -219,7 +234,7 @@ export default {
     },
     async submitForm() {
       this.isSubmitClicked = true;
-      this.recipientInvalid = true;
+      this.recipientInvalid = false;
       this.v$.$touch();
       if (this.v$.$invalid) {
         console.log("invalid?", this.v$.$invalid);
