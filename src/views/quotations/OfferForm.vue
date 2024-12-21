@@ -205,6 +205,10 @@ export default {
       }
     },
     async loadDocuments() {
+      if (!this.offer.quotation) {
+        return
+      }
+
       this.isLoading = true;
 
       try {
@@ -220,10 +224,10 @@ export default {
     },
     async submitForm() {
       this.isSubmitClicked = true;
-      this.recipientInvalid = true;
+      this.recipientInvalid = false;
       this.v$.$touch();
       if (this.v$.$invalid) {
-        console.log("invalid?", this.v$.$invalid);
+        console.log("invalid?", this.v$.$errors);
         return;
       }
 

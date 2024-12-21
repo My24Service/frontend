@@ -50,7 +50,7 @@
           </h3>
           <div
             class="flex-columns"
-            v-if="!isView && quotation.preliminary"
+            v-if="!isView && (quotation.preliminary || isNew)"
           >
             <b-button @click="cancelForm" type="button" variant="secondary">
               {{ $trans('Cancel') }}</b-button>
@@ -415,7 +415,7 @@ export default {
         return
       }
 
-      if (!this.quotation.id) {
+      if (this.isNew) {
         this.isLoading = true
         try {
           const newQuotation = await this.quotationService.insert(quotation)
@@ -426,6 +426,7 @@ export default {
           this.errorToast(this.$trans('Error creating quotation'))
           this.isLoading = false
         }
+        return
       }
 
       this.isLoading = true
