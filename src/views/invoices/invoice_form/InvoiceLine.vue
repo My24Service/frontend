@@ -33,7 +33,7 @@
             {{ invoiceLine.amount }}
           </span>
           <span style="text-align: right">
-            {{ invoiceLine.price_text }}
+            {{ invoiceLine.price_dinero.toFormat('$0.00') }}
           </span>
           <span style="text-align: right">
             {{ invoiceLine.total_dinero.toFormat('$0.00') }}
