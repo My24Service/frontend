@@ -13,10 +13,10 @@
       <b-form-input
         v-model="number"
         class="input-number"
-        type="number"
         :placeholder="$trans('Price')"
         size="sm"
         @input="update"
+        @focus="gotFocus"
         :state="v$.number.$error ? false : null"
       ></b-form-input>
 
@@ -28,6 +28,7 @@
           size="sm"
           :state="v$.decimal.$error ? false : null"
           @input="update"
+          @focus="gotFocus"
         ></b-form-input>
       </template>
     </b-input-group>
@@ -36,14 +37,14 @@
 
 <script>
 import Dinero from "dinero.js";
-import {toDinero} from "../utils";
+import {toDinero} from "@/utils";
 import { useVuelidate } from '@vuelidate/core'
 import { required, numeric } from '@vuelidate/validators'
 
 export default {
   name: "PriceInput",
   props: ['currency', 'value'],
-  emits: ['priceChanged'],
+  emits: ['priceChanged', 'receivedFocus'],
   setup() {
     return { v$: useVuelidate() }
   },
@@ -95,6 +96,9 @@ export default {
     }
   },
   methods: {
+    gotFocus() {
+      this.$emit('receivedFocus')
+    },
     setPrice(priceDecimal) {
       if (!this.currency) {
         return
@@ -150,5 +154,6 @@ export default {
 .flex {
   display : flex;
   margin-top: auto;
+  min-width: 240px;
 }
 </style>

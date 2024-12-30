@@ -2,6 +2,9 @@ import {OPTION_NONE, OPTION_ONLY_TOTAL, OPTION_USER_TOTALS} from "./constants";
 import {QuotationLineModel} from "@/models/quotations/QuotationLine";
 
 let quotationMixin = {
+  emits: [
+    'emptyQuotationLinesClicked'
+  ],
   data() {
     return {
       useOnQuotationOptions: [
@@ -12,7 +15,34 @@ let quotationMixin = {
       useOnQuotationSelected: null,
     }
   },
+  computed: {
+    sectionHeader() {
+      return `header-${this.quotationLineType}`
+    },
+    isCollectionEmpty() {
+      const nonEmptyItems = this.costService.collection.filter((c) => !c.isEmpty())
+      return nonEmptyItems.length === 0 && !this.isLoading
+    },
+    collectionHasEmptyItem() {
+      const emptyItem = this.costService.collection.find((c) => c.isEmpty())
+      return emptyItem && !this.isLoading
+    },
+    showAddQuotationLinesBlock() {
+      return this.costService.collection.length && !this.parentHasQuotationLines && !this.isView
+    },
+  },
   methods: {
+    emptyQuotationLines() {
+      this.$emit('emptyQuotationLinesClicked', this.quotationLineType)
+    },
+    scrollToHeader() {
+      const el = document.getElementById(this.sectionHeader)
+      if (el) {
+        el.scrollIntoView()
+      } else {
+        console.debug(`scrollToHeader: header '${this.sectionHeader} element not found`)
+      }
+    },
     checkValue(val) {
       if (!val || val === '') {
         return '-'
@@ -50,6 +80,7 @@ let quotationMixin = {
     createQuotationLinesClicked(selected) {
       this.useOnQuotationSelected = selected
       this.createQuotationLines()
+      this.scrollToHeader()
     },
     createQuotationLines() {
       switch (this.useOnQuotationSelected) {
@@ -68,6 +99,7 @@ let quotationMixin = {
             total_currency: this.total_dinero.getCurrency(),
           })
           this.$emit('quotationLinesCreated', [quotationLine])
+          this.scrollToHeader()
           break
         case OPTION_USER_TOTALS:
           const quotationLines = this.costService.collection.map((cost) =>
@@ -78,6 +110,7 @@ let quotationMixin = {
             )
           )
           this.$emit('quotationLinesCreated', quotationLines)
+          this.scrollToHeader()
           break
         case OPTION_NONE:
           console.debug("not adding any costs")

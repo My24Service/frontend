@@ -1,20 +1,14 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <div class="app-page">
-      <b-modal
-        id="invoice-definitive-modal"
-        ref="invoice-definitive-modal"
-        v-bind:title="$trans('Make definitive?')"
-        v-if="!isView"
-        @ok="doMakeDefinitive"
-      >
-        <p class="my-4">
-          {{ $trans("Are you sure you want to make this invoice definitive?") }}
-        </p>
-        <p>
-          <strong><i>{{ $trans("You won't be able to make changes after that") }}</i></strong>
-        </p>
-      </b-modal>
+
+      <InvoicePDFViewer
+        :invoice-in="invoice"
+        :is-view="false"
+        v-if="invoice.id"
+        ref="invoice-viewer"
+      />
+
       <header>
         <div class="page-title">
           <h3>
@@ -23,8 +17,8 @@
               :to="{name: 'invoice-list' }"
             >{{ $trans('Invoices') }}</router-link>
             /
-            <span v-if="!isEdit">{{ $trans('New invoice') }}</span>
-            <span v-if="isEdit">{{ $trans('Update invoice') }}</span>
+            <span v-if="!isEdit">{{ $trans('New invoice') }} / {{ $trans('order') }} {{ order_id }}</span>
+            <span v-if="isEdit">{{ $trans('Update invoice') }} / {{ $trans('order') }} {{ order_id }}</span>
             <span v-if="isEdit">
               <b-link
                 class="btn btn-sm btn-primary"
@@ -37,6 +31,7 @@
             </span>
             <span>
               <router-link
+                v-if="order_pk"
                 class="btn btn-sm btn-primary"
                 :to="{name:'order-view', params: {pk: order_pk}}">
                 <b-icon-arrow-up-right-circle
@@ -49,7 +44,7 @@
             <b-button @click="cancelForm" type="button" variant="outline">
               {{ $trans('Cancel') }}</b-button>
             <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
+              {{ $trans('Save') }}</b-button>
           </b-button-toolbar>
         </div>
       </header>
@@ -142,6 +137,7 @@
 
         <div class="panel col-2-3">
           <InvoiceLine
+            v-if="!isLoading"
             ref="invoice-lines"
             :invoice="invoice"
             :invoicePk="pk"
@@ -350,6 +346,7 @@
               <b-icon-chevron-down></b-icon-chevron-down>
             </summary>
             <MaterialsComponent
+              v-if="material_models"
               :order_pk="order_pk"
               :customer="customer"
               :material_models="material_models"
@@ -362,7 +359,8 @@
           </details>
 
           <div v-if="order_pk">
-            <HoursComponent v-if="activity_totals.work_total !== '00:00'"
+            <HoursComponent
+              v-if="activity_totals.work_total !== '00:00' && !isLoading"
               :order_pk="order_pk"
               :type="COST_TYPE_WORK_HOURS"
               :hours_total="activity_totals.work_total"
@@ -374,7 +372,8 @@
               :invoiceLinesParent="invoiceLines"
             />
 
-            <HoursComponent v-if="activity_totals.travel_total !== '00:00'"
+            <HoursComponent
+              v-if="activity_totals.travel_total !== '00:00' && !isLoading"
               :order_pk="order_pk"
               :type="COST_TYPE_TRAVEL_HOURS"
               :hours_total="activity_totals.travel_total"
@@ -386,7 +385,8 @@
               :invoiceLinesParent="invoiceLines"
             />
 
-            <DistanceComponent v-if="activity_totals.distance_total > 0"
+            <DistanceComponent
+              v-if="activity_totals.distance_total > 0 && !isLoading"
               :order_pk="order_pk"
               :customer="customer"
               :user_totals="activity_totals.user_totals"
@@ -398,7 +398,8 @@
               :invoiceLinesParent="invoiceLines"
             />
 
-            <HoursComponent v-if="activity_totals.extra_work_total !== '00:00'"
+            <HoursComponent
+              v-if="activity_totals.extra_work_total !== '00:00' && !isLoading"
               :order_pk="order_pk"
               :type="COST_TYPE_EXTRA_WORK"
               :hours_total="activity_totals.extra_work_total"
@@ -410,7 +411,8 @@
               :invoiceLinesParent="invoiceLines"
             />
 
-            <HoursComponent v-if="activity_totals.actual_work_total !== '00:00'"
+            <HoursComponent
+              v-if="activity_totals.actual_work_total !== '00:00' && !isLoading"
               :order_pk="order_pk"
               :type="COST_TYPE_ACTUAL_WORK"
               :hours_total="activity_totals.actual_work_total"
@@ -429,6 +431,7 @@
               <b-icon-chevron-down></b-icon-chevron-down>
             </summary>
             <CallOutCostsComponent
+              v-if="!isLoading"
               :order_pk="order_pk"
               :customer="customer"
               :invoice_default_call_out_costs="invoice_default_call_out_costs"
@@ -443,70 +446,25 @@
 
       </b-form>
 
-      <b-modal ref="invoice-viewer" size="xl" v-b-modal.modal-scrollable>
-        <div class="d-flex flex-row justify-content-center align-items-center iframe-loader"
-            v-if="iframeLoading">
-          <b-spinner medium></b-spinner>
-        </div>
-        <iframe
-          :src="this.invoiceURL"
-          style="min-height:720px; width: 100%;"
-          frameborder="0"
-          @load="iframeLoaded"
-          v-show="!iframeLoading">
-        </iframe>
-        <template #modal-footer="{ ok }">
-          <b-button
-            class="btn button btn-danger"
-            @click="showMakeDefinitiveModal"
-            v-if="invoice.preliminary"
-            variant="danger"
-          >
-            {{ $trans('Make definitive') }}
-          </b-button>
-          <b-button
-            v-if="!isCustomer && !isBranchEmployee"
-            id="recreateInvoicePdf"
-            @click="recreateInvoicePdf"
-            :disabled="isGeneratingPDF"
-            class="btn btn-secondary"
-            type="button"
-            variant="secondary"
-          >
-            <b-spinner small v-if="isGeneratingPDF"></b-spinner>
-            {{ $trans('re-generate PDF') }}
-          </b-button>
-          <b-button
-            v-if="!isCustomer && !isBranchEmployee && invoice.invoice_pdf_from_docx_filename"
-            @click="downloadPdf"
-            :disabled="loadingPdf"
-            type="button"
-            variant="primary"
-          >
-            <b-spinner small v-if="loadingPdf"></b-spinner>
-            <b-icon icon="file-earmark-pdf"></b-icon>
-            {{ $trans('Download PDF') }}
-          </b-button>
-          <!-- Emulate built in modal footer ok and cancel button actions -->
-          <b-button @click="ok()" variant="primary">
-            {{ $trans("close") }}
-          </b-button>
-        </template>
-      </b-modal>
     </div>
   </b-overlay>
 </template>
 
 <script>
-import my24 from '../../services/my24.js'
-import { InvoiceService, InvoiceModel } from '../../models/invoices/Invoice.js'
-import { InvoiceLineService } from '../../models/invoices/InvoiceLine.js'
-import {toDinero} from "../../utils";
-import PriceInput from "../../components/PriceInput";
-import materialService, {MaterialModel} from "../../models/inventory/Material";
-import engineerService, {RateEngineerUserModel} from "../../models/company/UserEngineer";
-import customerService, {CustomerModel, CustomerPriceModel} from "../../models/customer/Customer";
-import Collapse from "../../components/Collapse";
+import {useVuelidate} from "@vuelidate/core";
+
+import {toDinero} from "@/utils";
+import TotalsInputs from "@/components/TotalsInputs";
+import PriceInput from "@/components/PriceInput";
+import Collapse from "@/components/Collapse";
+import CustomerCard from "@/components/CustomerCard";
+
+import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
+import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
+import {MaterialModel, MaterialService} from "@/models/inventory/Material";
+import {EngineerUserModel, EngineerService} from "@/models/company/UserEngineer";
+import {CustomerModel, CustomerPriceModel, CustomerService} from "@/models/customer/Customer";
+
 import invoiceMixin from "./invoice_form/mixin";
 import HoursComponent from "./invoice_form/Hours";
 import DistanceComponent from "./invoice_form/Distance";
@@ -514,21 +472,20 @@ import MaterialsComponent from "./invoice_form/Materials";
 import CallOutCostsComponent from "./invoice_form/CallOutCosts";
 import InvoiceLine from "./invoice_form/InvoiceLine";
 import VAT from "./invoice_form/VAT";
-import CustomerCard from "../../components/CustomerCard";
 import {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_WORK_HOURS
-} from "../../models/orders/Cost";
+} from "@/models/orders/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
-import {useVuelidate} from "@vuelidate/core";
-import TotalsInputs from "../../components/TotalsInputs";
+import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 
 export default {
   name: 'InvoiceForm',
   mixins: [invoiceMixin],
   components: {
+    InvoicePDFViewer,
     PriceInput,
     Collapse,
     HoursComponent,
@@ -589,6 +546,7 @@ export default {
 
       invoice_id: null,
       order_pk: null,
+      order_id: null,
       order_reference: null,
 
       default_currency: this.$store.getters.getDefaultCurrency,
@@ -616,134 +574,21 @@ export default {
 
       invoiceService: new InvoiceService(),
       invoiceLineService: new InvoiceLineService(),
+      materialService: new MaterialService(),
+      engineerService: new EngineerService(),
+      customerService: new CustomerService(),
       deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
     }
   },
   async created() {
     this.isLoading = true
-
-    if (this.isEdit) {
-      await this.loadInvoice()
-    }
-
-    // get invoice data
-    const invoiceData = await this.invoiceService.getData(this.uuid)
-
-    // get customer
-    this.customerPk = invoiceData.customer_pk
-    await this.getCustomer()
-
-    // set data in component
-    this.invoice_id = invoiceData.invoice_id
-    this.order_pk = invoiceData.order_pk
-    this.invoice.order = this.order_pk
-    this.invoice.invoice_id = this.invoice_id
-    this.invoice.reference = invoiceData.order_reference
-
-    this.activity_totals = invoiceData.activity_totals
-    this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
-      ...m,
-      default_currency: this.default_currency,
-    }))
-
-    this.used_materials = invoiceData.used_materials
-
-    this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
-    this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
-
-    this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
-    this.invoice_default_partner_hourly_rate_dinero = toDinero(
-      this.invoice_default_partner_hourly_rate,
-      this.default_currency
-    )
-
-    // create engineer models
-    this.engineer_models = invoiceData.engineer_models.map((m) => new RateEngineerUserModel({
-      ...m,
-      engineer: {...m.engineer, default_currency: this.default_currency}
-    }))
-
+    await this.loadData()
     this.isLoading = false
   },
   methods: {
-    async doMakeDefinitive() {
-      this.isLoading = true
-
-      try {
-        await this.invoiceService.makeDefinitive(this.invoice.id)
-        this.errorToast(this.$trans('Success making invoice definitive'))
-        this.isLoading = false
-        await this.$router.push({ name: 'invoice-view', params: {uuid: this.invoice.uuid }})
-      } catch(error) {
-        this.errorToast(this.$trans('Error making invoice definitive'))
-        this.isLoading = false
-      }
-    },
-    showMakeDefinitiveModal() {
-      this.$refs['invoice-definitive-modal'].show()
-    },
-    async downloadPdf() {
-      const url =  `/api/invoice/invoice/${this.invoice.id}/download_pdf_from_template/`
-      this.loadingPdf = true;
-
-      my24.downloadItem(
-        url,
-        `invoice-${this.invoice.invoice_id}.pdf`,
-        function() {
-          this.loadingPdf = false;
-        }.bind(this),
-        'post'
-      )
-    },
-    iframeLoaded() {
-        this.iframeLoading = false;
-    },
-    async downloadPdfBlob() {
-      this.iframeLoading = true;
-
-      try {
-        const response = await this.invoiceService.downloadPdfBlob(this.invoice.id)
-        const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-        this.invoiceURL = URL.createObjectURL(pdfBlob);
-        this.iframeLoading = false
-      } catch(error) {
-        console.log(`error fetching invoice pdf, ${error}`)
-        this.errorToast(
-          this.$trans(
-            'Error fetching invoice pdf, Check if there is an active template or try to regenerate'
-          )
-        )
-        this.iframeLoading = false
-      }
-    },
     showInvoiceDialog() {
-      this.downloadPdfBlob()
       this.$refs['invoice-viewer'].show();
-    },
-    async recreateInvoicePdf() {
-        this.isLoading = true;
-        this.isGeneratingPDF = true;
-        try {
-            await this.invoiceService.recreateInvoicePdf(this.invoice.id);
-            this.infoToast(this.$trans('Success'), this.$trans('Invoice pdf recreated'));
-            await this.loadInvoice()
-            await this.downloadPdfBlob()
-            this.isLoading = false;
-            this.isGeneratingPDF = false;
-        }
-        catch (err) {
-            console.log('Error recreating invoice pdf', err);
-            this.errorToast(this.$trans('Error recreating invoice pdf'));
-            this.isLoading = false;
-            this.isGeneratingPDF = false;
-        }
-    },
-    openInvoice() {
-      const routeData = this.$router.resolve({
-        name: 'invoice-view', params: { uuid: this.invoice.uuid }
-      })
-      window.open(`${document.location.origin}/${routeData.href}`, '_blank')
     },
     invoiceLineAdded() {
       this.invoiceLines = this.$refs['invoice-lines'].getInvoiceLines()
@@ -772,7 +617,7 @@ export default {
     },
     // customer
     async getCustomer() {
-      const customerData = await customerService.detail(this.customerPk)
+      const customerData = await this.customerService.detail(this.customerPk)
       this.customer = new CustomerModel(
         {...customerData, default_currency: this.default_currency}
       )
@@ -781,18 +626,18 @@ export default {
       // use minimal model for patch
       const minimalModel = new CustomerPriceModel(this.customer)
 
-      const customerData = await customerService.update(this.customerPk, minimalModel)
+      const customerData = await this.customerService.update(this.customerPk, minimalModel)
       this.customer = new CustomerModel(customerData)
       this.infoToast(this.$trans('Updated'), this.$trans('Customer data has been updated'))
     },
     // activity
     async updateEngineer(user_id) {
       let engineer_user = this.engineer_models.find((m) => m.id === user_id)
-      const minimalModel = new RateEngineerUserModel(
+      const minimalModel = new EngineerUserModel(
         {...engineer_user, default_currency: this.default_currency}
       )
 
-      let updatedEngineerUserJson = await engineerService.update(user_id, minimalModel)
+      let updatedEngineerUserJson = await this.engineerService.update(user_id, minimalModel)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
 
       this.infoToast(this.$trans('Updated'), this.$trans('Hourly rate engineer has been updated'))
@@ -802,11 +647,55 @@ export default {
       this.materialUpdating = true
       let material = this.material_models.find((m) => m.id === material_id)
       delete material.image
-      const updatedMaterialJson = await materialService.update(material_id, material)
+      const updatedMaterialJson = await this.materialService.update(material_id, material)
       material.setPriceFields(updatedMaterialJson)
 
       this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
       this.materialUpdating = false
+    },
+    async loadData() {
+      this.material_models = null
+      if (this.isEdit) {
+        await this.loadInvoice()
+      }
+
+      // get invoice data
+      const invoiceData = await this.invoiceService.getData(this.uuid)
+
+      // get customer
+      this.customerPk = invoiceData.customer_pk
+      await this.getCustomer()
+
+      // set data in component
+      this.invoice_id = invoiceData.invoice_id
+      this.order_pk = invoiceData.order_pk
+      this.order_id = invoiceData.order_id
+      this.invoice.order = this.order_pk
+      this.invoice.invoice_id = this.invoice_id
+      this.invoice.reference = invoiceData.order_reference
+
+      this.activity_totals = invoiceData.activity_totals
+      this.material_models = invoiceData.material_models.map((m) => new MaterialModel({
+        ...m,
+        default_currency: this.default_currency,
+      }))
+
+      this.used_materials = invoiceData.used_materials
+
+      this.invoice_default_price_per_km = invoiceData.invoice_default_price_per_km
+      this.invoice_default_call_out_costs = invoiceData.invoice_default_call_out_costs
+
+      this.invoice_default_partner_hourly_rate = invoiceData.invoice_default_partner_hourly_rate
+      this.invoice_default_partner_hourly_rate_dinero = toDinero(
+        this.invoice_default_partner_hourly_rate,
+        this.default_currency
+      )
+
+      // create engineer models
+      this.engineer_models = invoiceData.engineer_models.map((m) => new EngineerUserModel({
+        ...m,
+        engineer: {...m.engineer, default_currency: this.default_currency}
+      }))
     },
     async submitForm() {
       this.isLoading = true
@@ -839,9 +728,9 @@ export default {
         let invoiceLineService = this.$refs['invoice-lines'].invoiceLineService
         await this.invoiceService.update(this.invoice.id, this.invoice)
         await invoiceLineService.updateCollection(this.invoice.id)
-
+        await this.loadData()
+        this.isLoading = false
         this.infoToast(this.$trans('Updated'), this.$trans('Invoice has been updated'))
-        window.location.reload()
       } catch(error) {
         console.log(error)
         this.errorToast(this.$trans('Error updated invoice'))
@@ -872,14 +761,6 @@ export default {
   display : flex;
   margin-top: auto;
 }
-.vat {
-  white-space: nowrap;
-}
-.value-container {
-  padding-top: 4px;
-  padding-right: 4px;
-  padding-left: 4px;
-}
 .update-button {
   margin-bottom: 8px;
 }
@@ -890,7 +771,6 @@ export default {
 .total-text {
   font-weight: bold;
 }
-.listing { display: table; }
 .listing li:not(.text-right) { display: table-row;}
 .listing li:not(.text-right) span  {  display: table-cell;}
 .iframe-loader {

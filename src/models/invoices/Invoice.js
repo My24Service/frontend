@@ -16,6 +16,8 @@ class InvoiceModel {
   total
   total_currency
 
+  invoice_pdf_from_docx_filename
+
   priceFields = ['vat', 'total']
 
   constructor(invoiceData) {
@@ -90,18 +92,22 @@ class InvoiceService extends BaseModel {
   }
 
   recreateInvoicePdf(pk) {
-    return this.axios.post(`${this.url}${pk}/recreate_pdf/?gotenberg=1`)
+    return this.axios.post(`${this.url}${pk}/recreate_pdf/`)
   }
 
   downloadPdfBlob(id) {
-    const url = `/invoice/invoice/${id}/download_pdf_from_template/`
+    const url = `/invoice/invoice/${id}/download_pdf/`
+    return new this.axios.post(url, {}, {
+      responseType: 'arraybuffer'
+    })
+  }
+
+  downloadPreviewPdfBlob(id) {
+    const url = `/invoice/invoice/${id}/generate_preview_pdf/`
     return new this.axios.post(url, {}, {
       responseType: 'arraybuffer'
     })
   }
 }
 
-const invoiceService = new InvoiceService()
-
-export default invoiceService
 export { InvoiceModel, InvoiceService }

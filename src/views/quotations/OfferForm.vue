@@ -8,9 +8,7 @@
             {{ $trans("Send quotation") }}
           </router-link>
           /
-          <router-link :to="{name: 'quotation-view', params: {pk: quotation.id}}">
-            <strong>{{ quotation.quotation_name }}</strong>
-          </router-link>
+          <strong>{{ quotation.quotation_id }} {{ quotation.quotation_name }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !offer.id">{{ $trans("new") }}</span>
             <span v-if="!isCreate">{{ $trans("resend") }}</span>
@@ -30,6 +28,9 @@
       <div class="page-detail">
         <div class="flex-columns">
           <div class="panel">
+            <p class="text-center">
+              <strong><i>{{ $trans("Quotations can't be changed after having been sent") }}</i></strong>
+            </p>
             <h6>{{ $trans("Email") }}</h6>
             <b-form-group
               :label="$trans('Email recipients')"
@@ -90,7 +91,7 @@
                 :disabled="loadingPdf"
               >
                 <b-spinner small v-if="loadingPdf"></b-spinner>
-                {{ $trans('Preview quotation pdf') }}
+                {{ $trans('Preview quotation PDF') }}
               </b-button>
             </p>
           </div>
@@ -100,12 +101,13 @@
   </div>
 </template>
 <script>
-import my24 from '../../services/my24.js'
-import { useVuelidate } from "@vuelidate/core";
-import { required } from "@vuelidate/validators";
-import { OfferService, OfferModel } from "@/models/quotations/Offer.js";
-import {QuotationService, QuotationModel} from '@/models/quotations/Quotation'
+import {useVuelidate} from "@vuelidate/core";
+import {required} from "@vuelidate/validators";
 
+import my24 from '@/services/my24.js'
+
+import {OfferModel, OfferService} from "@/models/quotations/Offer.js";
+import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 
 export default {
   setup() {
@@ -126,9 +128,8 @@ export default {
     };
   },
   async mounted() {
-    this.offer.quotation = this.$route.query.quotationId
-    await this.loadDocuments()
     await this.loadData()
+    await this.loadDocuments()
     await this.loadQuotation()
   },
   data() {
@@ -154,7 +155,7 @@ export default {
       this.isLoading = true;
 
       try {
-        this.offer = await this.offerService.getUnsentOffer(this.offer.quotation);
+        this.offer = await this.offerService.getUnsentOffer(this.$route.query.quotationId);
         this.offer.quotation = this.$route.query.quotationId
         this.recipients = this.offer.recipients.split(",")
         this.isLoading = false;
@@ -204,13 +205,16 @@ export default {
       }
     },
     async loadDocuments() {
+      if (!this.offer.quotation) {
+        return
+      }
+
       this.isLoading = true;
 
       try {
-        const result = await this.offerService.getDocuments(
+        this.documents = await this.offerService.getDocuments(
           this.offer.quotation
-        );
-        this.documents = result
+        )
         this.isLoading = false;
       } catch (error) {
         console.log("Error fetching documents", error);
@@ -220,10 +224,10 @@ export default {
     },
     async submitForm() {
       this.isSubmitClicked = true;
-      this.recipientInvalid = true;
+      this.recipientInvalid = false;
       this.v$.$touch();
       if (this.v$.$invalid) {
-        console.log("invalid?", this.v$.$invalid);
+        console.log("invalid?", this.v$.$errors);
         return;
       }
 
@@ -236,6 +240,9 @@ export default {
 
       this.offer.recipients = validatedEmails
       this.isLoading = true;
+      const sentTitle = this.$trans("Sent")
+      const sentBody = this.$trans("Quotation has been sent")
+      const errorBody = this.$trans("Error sending quotation")
 
       if (this.isCreate) {
         this.offer.quotation = this.$route.query.quotationId
@@ -244,16 +251,14 @@ export default {
           this.isLoading = false;
 
           if (!this.offer.is_sent) {
-            this.errorToast(this.$trans("Error sending quotation"));
+            this.errorToast(errorBody);
             return;
-          } else {
-            this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
           }
-          this.$router.go(-1);
-          this.$router.push({name: 'quotations-sent'});
+          this.infoToast(sentTitle, sentBody);
+          await this.$router.push({name: 'quotations-sent'});
         } catch (error) {
           console.log("Error sending quotation", error);
-          this.errorToast(this.$trans("Error sending quotation"));
+          this.errorToast(errorBody);
           this.isLoading = false;
         }
         return
@@ -266,15 +271,14 @@ export default {
 
         this.isLoading = false
         if (!this.offer.is_sent) {
-          this.errorToast(this.$trans("Error sending quotation"));
+          this.errorToast(errorBody);
           return;
-        } else {
-          this.infoToast(this.$trans("Sent"), this.$trans("Quotation have been sent"));
         }
-        this.$router.push({name: 'quotations-sent'});
+        this.infoToast(sentTitle, sentBody);
+        await this.$router.push({name: 'quotations-sent'});
       } catch(error) {
         console.log("Error sending quotation", error);
-        this.errorToast(this.$trans("Error sending quotation"));
+        this.errorToast(this.$trans(errorBody));
         this.isLoading = false;
       }
     },
@@ -282,12 +286,6 @@ export default {
 };
 </script>
 <style scoped>
-.pdf-priview {
-  margin-top: 20px;
-}
-.pdf-priview .panel {
-  max-width: 70%;
-}
 .quotation-pdf-button {
   margin-left: 20px;
 }

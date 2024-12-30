@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>{{ $trans('Customer') }}</h3>
+    <h5>{{ $trans('Customer') }}</h5>
     <b-form>
       <b-form-group
         label-size="sm"
@@ -57,12 +57,7 @@
         </b-form-invalid-feedback>
       </b-form-group>
 
-      <details v-if="quotation.customer_id" open>
-        <summary class="flex-columns space-between">
-          <h6>{{ $trans('Customer details') }}</h6>
-          <b-icon-chevron-down></b-icon-chevron-down>
-        </summary>
-
+      <div v-if="quotation.customer_id">
         <b-form-group
           v-bind:label="$trans('Address')"
           label-for="order_address"
@@ -166,7 +161,7 @@
             v-model="quotation.quotation_tel"
           ></b-form-input>
         </b-form-group>
-      </details>
+      </div>
     </b-form>
   </div>
 </template>
@@ -178,15 +173,17 @@ import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
 
-import QuotationData from './QuotationData.vue'
-import OrderTypesSelect from '../../../components/OrderTypesSelect.vue'
-import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
-import Collapse from '../../../components/Collapse.vue'
 import {componentMixin} from "@/utils";
+import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
+import Collapse from '@/components/Collapse.vue'
 import CustomerDetail from "@/components/CustomerDetail";
-import Chapter from './Chapter.vue'
 import TotalsInputs from "@/components/TotalsInputs";
+
+import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerService} from "@/models/customer/Customer";
+
+import QuotationData from './QuotationData.vue'
+import Chapter from './Chapter.vue'
 
 export default {
   name: "CustomerForm",
@@ -332,8 +329,6 @@ export default {
           this.isLoading = false
           this.buttonDisabled = false
         }
-      } else {
-        this.submitQuotationLineform = true
       }
     },
     async getCustomers(query) {

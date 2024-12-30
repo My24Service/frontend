@@ -89,6 +89,10 @@
                 :state="isSubmitClicked ? !v$.template.file.$error : null"
                 accept=".docx"
               ></b-form-file>
+              <p v-if="template.url">
+                {{ $trans("Download") }}:
+                <a :href="template.url" target="_blank">{{ getNameFromUrl(template.url) }}</a>
+              </p>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.template.file.$error : null">
                 {{ $trans("Please select a file") }}
               </b-form-invalid-feedback>
@@ -106,6 +110,17 @@
               >
               </b-form-checkbox>
             </b-form-group>
+            <div>
+              <h4>{{ $trans("Template fields documentation") }}</h4>
+              <ul>
+                <li><a href="https://my24service.github.io/docs/#invoice-template-fields" target="_blank">
+                  {{ $trans("Invoices") }}
+                </a></li>
+                <li><a href="https://my24service.github.io/docs/#quotation-template-fields" target="_blank">
+                  {{ $trans("Quotations") }}
+                </a></li>
+              </ul>
+            </div>
           </div>
           <div class="panel" v-if="!isCreate && !isEdit">
             <h6>{{ $trans("Template") }}</h6>
@@ -192,10 +207,10 @@ import { required } from "@vuelidate/validators";
 import {
   TemplateService,
   TemplateModel
-} from "../../../models/company/Template.js";
+} from "@/models/company/Template";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
-import { QuotationService } from "../../../models/quotations/Quotation.js";
-import { InvoiceService } from '../../../models/invoices/Invoice.js'
+import { QuotationService } from "@/models/quotations/Quotation";
+import { InvoiceService } from '@/models/invoices/Invoice'
 import Multiselect from "vue-multiselect";
 
 export default {
@@ -374,7 +389,11 @@ export default {
     },
     selectResult(result, index) {
       this.result = result;
-    }
+    },
+    getNameFromUrl(url) {
+      const parts = url.split('/')
+      return parts[parts.length-1]
+    },
   }
 };
 </script>

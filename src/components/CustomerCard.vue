@@ -11,15 +11,15 @@
       </dd>
       <dt>{{ $trans('Contact') }}</dt>
       <dd>
-        {{ customer.contact ?  customer.contact + ' &middot; ' : ''}} 
-        {{ customer.email || '(email unknown)' }} <br>
+        {{ customer.contact ?  customer.contact + ' &middot; ' : ''}}
+        {{ customer.email || `(${$trans('email unknown')})` }} <br>
         <span v-if="customer.tel">{{ customer.tel }} <br></span>
         <span v-if="customer.mobile">{{ customer.mobile }}</span>
       </dd>
 
       <dt>Customer ID</dt>
       <dd>{{ customer.customer_id }}</dd>
-      
+
       <dt v-if="customer.external_identifier">Ext. ID</dt>
       <dd v-if="customer.external_identifier">{{ customer.external_identifier }}</dd>
       <dt v-if="customer.remarks">{{ $trans('Remarks') }}</dt>
@@ -27,19 +27,21 @@
     </dl>
   </div>
 </template>
-  
+
 <script>
+import {CustomerModel} from "@/models/customer/Customer";
+
 export default {
   name: "CustomerCard",
   props: {
     customer: {
-      type: [Object],
+      type: [CustomerModel],
       default: null
     },
   }
 }
 </script>
-  
+
   <style scope>
 .remarks {
   white-space: pre;

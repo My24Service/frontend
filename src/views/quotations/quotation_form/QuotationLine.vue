@@ -9,23 +9,10 @@
       <b-icon-arrow-left-circle-fill></b-icon-arrow-left-circle-fill>
       {{ $trans("Back to quotation and chapters") }}
     </b-button>
-    <details open class="overflow">
-      <summary class="flex-columns space-between">
-        <h6>{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h6>
-        <b-icon-chevron-down></b-icon-chevron-down>
-      </summary>
 
-      <b-modal
-        id="delete-line-modal"
-        ref="delete-line-modal"
-        v-bind:title="$trans('Delete?')"
-        @ok="doDelete"
-      >
-        <p class="my-4">
-          {{ $trans("Are you sure you want to delete this quotation line?") }}
-        </p>
-      </b-modal>
+    <h5 class="pt-2">{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h5>
 
+    <div>
       <p v-if="!quotationLineService.collection.length && !showForm">
         <i>{{ $trans("No quotation lines") }}</i>
       </p>
@@ -37,6 +24,7 @@
         responsive="md"
         class="line-table"
         v-if="!showForm && quotationLineService.collection.length"
+        :tbody-tr-class="rowClass"
       >
         <template #cell(info)="data">
           <b>{{ data.item.info }}</b><br/>
@@ -52,13 +40,20 @@
             v-if="data.item.id && !isView"
           >
             <IconLinkEdit
+              class="pr-2"
               :method="function() { editQuotationLine(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
             />
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
+              v-bind:method="function() { deleteItem(data.item.id) }"
             />
+          </div>
+          <div
+            class="float-right"
+            v-if="!data.item.id && !isView"
+          >
+            <i>{{ $trans("not saved") }}</i>
           </div>
         </template>
       </b-table>
@@ -181,23 +176,8 @@
         </footer>
       </div>
 
-      <footer
-        class="modal-footer"
-        v-if="!showForm && !isView && quotation.preliminary"
-      >
-        <b-button
-          @click="newQuotationLine"
-          class="btn btn-primary update-button"
-          type="button"
-          variant="primary"
-        >
-          {{ $trans('New quotation line') }}
-        </b-button>
-      </footer>
-
-      <b-container
-        v-if="showChangesBlock"
-      >
+      <hr/>
+      <b-container>
         <b-row class="quotation-total">
           <b-col cols="7">
             <span class="total-text">{{ $trans('Chapter total') }}</span>
@@ -209,6 +189,25 @@
               :is-final-total="true"
               :vat="vat"
             />
+          </b-col>
+        </b-row>
+      </b-container>
+
+      <b-container
+        v-if="showChangesBlock"
+        class="pb-3 has-changes rounded"
+      >
+        <hr/>
+        <b-row v-if="quotationLineService.deletedItems.length">
+          <b-col cols="12">
+            <h4>{{ $trans("To be deleted") }}</h4>
+            <b-table
+              small
+              :fields="fieldsView"
+              :items="quotationLineService.deletedItems"
+              responsive="md"
+              class="line-table"
+            ></b-table>
           </b-col>
         </b-row>
         <b-row>
@@ -236,23 +235,41 @@
           </b-col>
         </b-row>
       </b-container>
-    </details>
+
+      <footer
+        class="modal-footer"
+        v-if="!showForm && !isView && quotation.preliminary"
+      >
+        <b-button
+          @click="newQuotationLine"
+          class="btn btn-primary update-button"
+          type="button"
+          variant="primary"
+        >
+          {{ $trans('New quotation line') }}
+        </b-button>
+      </footer>
+
+    </div>
   </b-overlay>
 </template>
 <script>
-import{ QuotationLineService, QuotationLineModel } from '@/models/quotations/QuotationLine.js';
-import PriceInput from "@/components/PriceInput";
-import VAT from "../quotation_form/VAT";
-import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useVuelidate} from "@vuelidate/core";
+
+import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
-import {QuotationModel} from '@/models/quotations/Quotation.js';
-import {ChapterModel} from '@/models/quotations/Chapter'
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
 import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
 import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
+
+import {QuotationModel} from '@/models/quotations/Quotation.js';
+import {ChapterModel} from '@/models/quotations/Chapter'
+import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js';
+
+import VAT from "../quotation_form/VAT";
+import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 
 export default {
   name: 'QuotationLineForm',
@@ -326,9 +343,6 @@ export default {
     showForm() {
       return !this.isView && (this.quotationLineService.isEdit || this.newItem)
     },
-    quotationLinesHaveTotals() {
-      return this.quotationLineService.collection.find((line) => line.price_text === '*')
-    },
     isQuotationLineValid() {
       return this.quotationLineService.editItem.description !== null
         && this.quotationLineService.editItem.description !== ""
@@ -354,26 +368,29 @@ export default {
     this.isLoading = false
   },
   methods: {
-    // delete
-    showDeleteModal(id) {
-      this.deletePk = id
-      this.$refs['delete-line-modal'].show()
-    },
-    async doDelete() {
-      this.isLoading = true
-
-      try {
-        await this.quotationLineService.delete(this.deletePk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Quotation line has been deleted'))
-        await this.loadData()
-        this.isLoading = false
-      } catch(error) {
-        this.isLoading = false
-        console.log('Error deleting quotation line', error)
-        this.errorToast(this.$trans('Error deleting quotation line'))
+    rowClass(item, type) {
+      if (item && type === 'row') {
+        if (item.hasChanges) {
+          return 'has-changes'
+        }
+      } else {
+        return null
       }
     },
+    // delete
+    deleteItem(id) {
+      this.quotationLineService.deleteCollectionItemByid(id)
+    },
     // edit
+    emptyQuotationLinesForType(type) {
+      while(this.quotationLineService.collection.find((cost) => cost.cost_type === type)) {
+        for(let i=0; i<this.quotationLineService.collection.length; i++) {
+          if (this.quotationLineService.collection[i].cost_type === type)
+            this.quotationLineService.deleteCollectionItem(i)
+        }
+      }
+      this.updateChapterTotals()
+    },
     doEditCollectionItem() {
       this.quotationLineService.doEditCollectionItem()
     },
@@ -396,16 +413,23 @@ export default {
       return this.quotationLineService.collection
     },
     quotationLinesCreated(quotationLines) {
-      if (quotationLines.length > 0) {
-        this.quotationLineService.collection = [
-          ...this.quotationLineService.collection,
-          ...quotationLines
-        ]
-        this.updateChapterTotals()
-        const txt = quotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
-        this.infoToast(this.$trans('Added'), this.$trans(`${quotationLines.length} ${txt} added`))
-        this.quotationLineService.collectionHasChanges = true
+      if (quotationLines.length === 0) {
+        return
       }
+
+      const newQuotationLines = quotationLines.map(
+        (line) => new QuotationLineModel({...line, hasChanges: true})
+      )
+
+      this.quotationLineService.collection = [
+        ...this.quotationLineService.collection,
+        ...newQuotationLines
+      ]
+      this.updateChapterTotals()
+      const addedTxt = this.$trans('Added')
+      const txt = newQuotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
+      this.infoToast(addedTxt, `${newQuotationLines.length} ${txt} ${addedTxt.toLowerCase()}`)
+      this.quotationLineService.collectionHasChanges = true
     },
     updateChapterTotals() {
       this.total = this.quotationLineService.getItemsTotal()
@@ -481,18 +505,10 @@ export default {
 .update-button {
   margin-bottom: 8px;
 }
-.quotation-line-header {
-  margin-bottom: 20px;
-}
 .quotation-total {
   margin-bottom: 20px;
 }
 .total-text {
   font-weight: bold;
-}
-.overflow {
-  overflow: auto;
-  max-height: 650px;
-  position: relative;
 }
 </style>

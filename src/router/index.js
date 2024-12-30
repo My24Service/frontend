@@ -58,7 +58,7 @@ router.beforeEach(async (to, from, next) => {
   const userAuthLevel = getUserAuthLevel(store);
 
   if (!needsAuth) {
-    console.info('route allowed, no auth needed', {path})
+    console.debug('route allowed, no auth needed', {path})
     next()
     return
   }
@@ -77,7 +77,7 @@ router.beforeEach(async (to, from, next) => {
 
   // check user type if needed
   if (hasAccessRouteAuthLevel(authLevelNeeded, store)) {
-    console.info('route allowed', {path, pathAuthLevel, userAuthLevel})
+    console.debug('route allowed', {path, pathAuthLevel, userAuthLevel})
     next()
     return
   }

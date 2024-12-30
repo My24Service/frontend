@@ -8,7 +8,7 @@ class CostModel {
   cost_type
   user
   user_full_name
-  material
+  material = null
   amount_int = 0
   amount_decimal
   amount_duration = "00:00:00"
@@ -47,16 +47,8 @@ class CostModel {
     // console.log({priceDecimal, currency})
     this.setPriceField('price', toDinero(priceDecimal, currency))
     const total = this.getTotal()
-    // console.log({total, vat_type: this.vat_type})
-    let total_with_margin = total
-    let margin = toDinero("0.00", currency)
-    if (this.margin_perc > 0) {
-      margin = total.multiply(this.margin_perc/100)
-      total_with_margin = total.add(margin)
-    }
-    const vat = total_with_margin.multiply(parseInt(this.vat_type)/100)
+    const vat = total.multiply(parseInt(this.vat_type)/100)
     this.currency = currency
-    this.setPriceField('margin', margin)
     this.setPriceField('total', total)
     this.setPriceField('vat', vat)
   }
@@ -77,7 +69,8 @@ class CostModel {
       case COST_TYPE_CALL_OUT_COSTS:
         return this.price_dinero.multiply(this.amount_int)
       default:
-        throw `unknown cost type: ${this.cost_type}`
+        console.debug(`getTotal - unknown cost type: ${this.cost_type}`)
+        return toDinero("0.00", "EUR")
     }
   }
 
@@ -95,7 +88,26 @@ class CostModel {
       case COST_TYPE_CALL_OUT_COSTS:
         return this.amount_int
       default:
-        throw `unknown cost type: ${this.cost_type}`
+        console.debug(`getTotal - unknown cost type: ${this.cost_type}`)
+        return 0
+    }
+  }
+
+  isEmpty() {
+    switch (this.cost_type) {
+      case COST_TYPE_USED_MATERIALS:
+        return this.material === null
+      case COST_TYPE_WORK_HOURS:
+      case COST_TYPE_TRAVEL_HOURS:
+      case COST_TYPE_EXTRA_WORK:
+      case COST_TYPE_ACTUAL_WORK:
+        return this.amount_duration_secs === 0
+      case COST_TYPE_DISTANCE:
+      case COST_TYPE_CALL_OUT_COSTS:
+        return this.amount_int === 0
+      default:
+        console.log(`getTotal - unknown cost type: ${this.cost_type}`)
+        return 0
     }
   }
 }

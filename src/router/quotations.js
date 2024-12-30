@@ -55,6 +55,19 @@ export default [
     },
     {
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+      name: 'quotations-sent-view',
+      path: '/quotations/sent/view/:pk',
+      components: {
+        'app-content': QuotationView,
+        'app-subnav': SubNavQuotations
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
       name: 'quotations-sent',
       path: '/quotations/sent',
       components: {

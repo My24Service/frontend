@@ -34,12 +34,12 @@
               :text='$trans("Engineer")'
             />
           </b-col>
-          <b-col cols="1">
+          <b-col cols="2">
             <HeaderCell
               :text='$trans("Hours")'
             />
           </b-col>
-          <b-col cols="4">
+          <b-col cols="3">
             <HeaderCell
               :text='$trans("Engineer rate")'
               />
@@ -55,13 +55,13 @@
           <b-col cols="2" v-if="!activity.is_partner">
             {{ getFullname(activity.user) }}
           </b-col>
-          <b-col cols="2" v-if="activity.is_partner">
+          <b-col cols="2" v-else>
             {{ activity.full_name }} ({{ activity.partner_companycode }})
           </b-col>
-          <b-col cols="1">
+          <b-col cols="2">
             {{ activity.amount_duration_read }}
           </b-col>
-          <b-col cols="4">
+          <b-col cols="3">
             <b-form-radio-group
               @change="updateTotals"
               v-model="activity.use_price"
@@ -303,7 +303,7 @@ export default {
         switch (this.type) {
           case COST_TYPE_WORK_HOURS:
             // filter out empty values
-            user_totals = this.user_totals.filter((m) => m.work_secs !== null)
+            user_totals = this.user_totals.filter((m) => m.work_total_secs !== null)
             this.costService.collection = user_totals.map((activity) => (
               this.costService.newModelFromWorkHours(
                 activity,

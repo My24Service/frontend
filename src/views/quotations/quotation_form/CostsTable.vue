@@ -7,6 +7,9 @@
     responsive="md"
     class="data-table"
   >
+    <template #cell(amount_decimal)="data">
+      {{ getAmountDisplayValue(data.item.amount_decimal) }}
+    </template>
     <template #cell(price)="data">
       {{ data.item.price_dinero.toFormat('$0.00') }} ({{ data.item.use_price }})
     </template>
@@ -28,7 +31,7 @@ import {
   COST_TYPE_TRAVEL_HOURS,
   COST_TYPE_USED_MATERIALS,
   COST_TYPE_WORK_HOURS
-} from "@/models/orders/Cost";
+} from "@/models/invoices/Cost";
 
 export default {
   name: "CostsTable",
@@ -53,7 +56,6 @@ export default {
         {key: 'total', label: this.$trans('Total')},
       ],
       tableFieldsHours: [
-        {key: 'user_full_name', label: this.$trans('User')},
         {key: 'amount_duration_read', label: this.$trans('Amount')},
         {key: 'price', label: this.$trans('Price')},
         {key: 'vat', label: this.$trans('VAT')},
@@ -65,14 +67,28 @@ export default {
         {key: 'vat', label: this.$trans('VAT')},
         {key: 'total', label: this.$trans('Total')},
       ],
-
       tableFieldsCallOutCosts: [
         {key: 'amount_int', label: this.$trans('Amount')},
         {key: 'price', label: this.$trans('Price')},
         {key: 'vat', label: this.$trans('VAT')},
         {key: 'total', label: this.$trans('Total')},
       ],
+      COST_TYPE_ACTUAL_WORK,
+      COST_TYPE_CALL_OUT_COSTS,
+      COST_TYPE_DISTANCE,
+      COST_TYPE_EXTRA_WORK,
+      COST_TYPE_TRAVEL_HOURS,
+      COST_TYPE_USED_MATERIALS,
+      COST_TYPE_WORK_HOURS
+    }
+  },
+  methods: {
+    getAmountDisplayValue(amount) {
+      if (this.type === this.COST_TYPE_USED_MATERIALS) {
+        return Math.round(amount)
+      }
 
+      return amount
     }
   },
   created() {
