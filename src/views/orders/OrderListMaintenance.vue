@@ -47,6 +47,9 @@
                     <b-form-radio v-model="sortMode" value="default">{{ $trans('Start date (default)') }}</b-form-radio>
                     <b-form-radio v-model="sortMode" value="last_update">{{ $trans('Last update') }}</b-form-radio>
                   </b-form-group>
+                  <b-form-group :label="$trans('Display only orders since')">
+                    <b-form-datepicker v-model="sinceDate" id="sort-filter-since" value="" locale="nl" :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }" />
+                  </b-form-group>
                 </div>
               </b-col>
             </b-row>
@@ -266,6 +269,7 @@ export default {
     return {
       memberNewDataSocket: new MemberNewDataSocket(),
       sortMode: 'default',
+      sinceDate: null,
       searchQuery: null,
       statusService: new StatusService(),
       model: new OrderService(),
@@ -312,6 +316,7 @@ export default {
     },
     doSort() {
       this.model.setSort(this.sortMode)
+      this.model.setSinceDate(this.sinceDate);
       this.loadData()
     },
     handleSearchOk(val) {
