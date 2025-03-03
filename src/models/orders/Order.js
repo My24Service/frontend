@@ -373,6 +373,10 @@ class OrderService extends BaseModel {
       listArgs.push(`order_by=${this.sort}`)
     }
 
+    if (this.since) {
+      listArgs.push(`since=${this.since}`)
+    }
+
     if (this.listArgs.length) {
       for (const arg of this.listArgs) {
         listArgs.push(arg)

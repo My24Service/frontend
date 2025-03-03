@@ -14,7 +14,7 @@ class BaseModel {
   searchQuery = null
   userFilter = null
   sort = null
-
+  since = null
   currentPage = 1
   count = 0
   numPages = 0
@@ -246,31 +246,38 @@ class BaseModel {
     this.sort = sort
   }
 
+  setSinceDate(since) {
+    this.since = since
+  }
+
   getListUrl() {
     return this.url
   }
 
   async list() {
-    let listArgs = []
 
-    listArgs.push(`page=${this.currentPage}`)
+    this.queryArgs = {};
+    this.queryArgs['page'] = this.currentPage;
 
     if (this.searchQuery) {
-      listArgs.push(`q=${this.searchQuery}`)
+      this.queryArgs['q']= this.searchQuery;
     }
 
     if (this.userFilter) {
-      listArgs.push(`user_filter=${this.userFilter}`)
+      this.queryArgs['user_filter'] = this.userFilter;
     }
 
     if (this.sort) {
-      listArgs.push(`order_by=${this.sort}`)
+      this.queryArgs['order_by'] = this.sort;
     }
 
-    if (this.listArgs.length) {
-      for (const arg of this.listArgs) {
-        listArgs.push(arg)
-      }
+    if (this.since) {
+      this.queryArgs['since'] = this.since;
+    }
+
+    let listArgs = []
+    for (const arg in this.queryArgs) {
+      listArgs.push( `${arg}=${this.queryArgs[arg]}` );
     }
 
     if (this.sortField !== null) {
@@ -279,7 +286,6 @@ class BaseModel {
     }
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
-
     const response = await this.axios.get(url)
 
     if ('count' in response.data) {

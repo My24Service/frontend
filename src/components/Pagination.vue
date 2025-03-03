@@ -43,8 +43,10 @@ export default {
     currentPage: function(val) {
       const query = {
         ...this.$route.query,
+        ...this.model.queryArgs,
         page: val,
       }
+
       this.$router.push({ query }).catch(e => {})
     }
   },

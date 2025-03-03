@@ -308,6 +308,12 @@ export default {
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
     this.model.currentPage = this.$route.query.page || 1
+
+    this.sinceDate = this.$route.query.since || null
+    this.model.since = this.sinceDate
+    this.sortMode = this.$route.query.order_by || 'default'
+    this.model.sort = this.sortMode
+
     await this.loadData()
   },
   methods: {
