@@ -144,6 +144,7 @@ const themes = {
   'rivieramaison': 'theme-shltr',
   'poelgeest': 'theme-shltr',
   'graafbakeries': 'theme-shltr',
+  'dpworld': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 
