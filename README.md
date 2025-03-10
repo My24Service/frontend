@@ -84,4 +84,4 @@ Online development environments are available at *.{user}.my24service-dev.com
 
 To deploy local changes, run:
 
-`./deploy_dev.sh {user}`
+`./deploy_dev_developer.sh {user}`
