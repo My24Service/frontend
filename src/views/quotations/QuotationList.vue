@@ -171,7 +171,6 @@ export default {
       quotationService: new QuotationService(),
       quotationStatuscodeService: new QuotationStatuscodeService(),
       statusService: new StatusService(),
-      quotationType: null,
       searchQuery: null,
       quotationPk: null,
       isLoading: false,
@@ -202,12 +201,20 @@ export default {
     },
   },
   created () {
-    this.quotationService.currentPage = this.$route.query.page || 1
-    this.quotationType = this.$route.query.quotation_filter || null
-    this.loadData()
-    this.loadStatusCodes()
+    this.initialLoadData();
   },
   methods: {
+    async initialLoadData() {
+      // The loadData and loadStatusCode are now done async, so
+      // the isLoading is stable after completing. This prevented
+      // the Pagination to update properly (it rendered 0 / 0 results
+      // instead of the actual model counts).
+      this.quotationService.currentPage = this.$route.query.page || 1
+
+      await this.loadData();
+      await this.loadStatusCodes()
+    },
+
     getRowDataRoute(quotation) {
       if (!quotation.preliminary) {
         if (quotation.is_sent) {
