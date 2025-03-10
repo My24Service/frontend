@@ -20,7 +20,6 @@
           <router-link
             class="btn button"
             :to="{name:'quotation-add'}"
-            v-if="canAdd"
           >
             <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add quotation') }}
           </router-link>
@@ -46,6 +45,10 @@
     </b-modal>
 
     <div class="panel overflow-auto">
+      <div class="subnav-pills">
+        <PillsQuotationTypes />
+      </div>
+      <br>
       <b-table
         small
         id="document-table"
@@ -146,10 +149,12 @@ import TableStatusInfo from '@/components/TableStatusInfo.vue'
 import {QuotationService} from '@/models/quotations/Quotation.js'
 import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import { StatusService } from '@/models/quotations/Status.js'
+import PillsQuotationTypes from "@/components/PillsQuotationTypes.vue";
 
 export default {
   name: 'QuotationList',
   components: {
+    PillsQuotationTypes,
     SearchForm, ButtonLinkSort,
     IconLinkEdit,
     IconLinkDelete,
@@ -166,6 +171,7 @@ export default {
       quotationService: new QuotationService(),
       quotationStatuscodeService: new QuotationStatuscodeService(),
       statusService: new StatusService(),
+      quotationType: null,
       searchQuery: null,
       quotationPk: null,
       isLoading: false,
@@ -194,18 +200,10 @@ export default {
           return this.$trans("Definitive quotations")
       }
     },
-    canAdd() {
-      switch (this.$route.name) {
-        case 'quotations-sent':
-        case 'quotation-list':
-          return false
-        default:
-          return true
-      }
-    }
   },
   created () {
     this.quotationService.currentPage = this.$route.query.page || 1
+    this.quotationType = this.$route.query.quotation_filter || null
     this.loadData()
     this.loadStatusCodes()
   },
