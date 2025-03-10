@@ -275,7 +275,7 @@ class BaseModel {
       this.queryArgs['since'] = this.since;
     }
 
-    let listArgs = []
+    let listArgs = this.listArgs
     for (const arg in this.queryArgs) {
       listArgs.push( `${arg}=${this.queryArgs[arg]}` );
     }
