@@ -48,6 +48,7 @@ class EquipmentService extends BaseModel {
     'standard_hours': null,
     'created': null,
     'modified': null,
+    'documents': []
   }
 
   url = '/equipment/equipment/'
