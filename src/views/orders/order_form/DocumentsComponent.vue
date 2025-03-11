@@ -272,6 +272,12 @@ export default {
       }
     },
     async loadData() {
+
+      if (this.order.documents) {
+        this.documentService.collection = this.order.documents;
+        return;
+      }
+
       if (!this.order.id) {
         return
       }
