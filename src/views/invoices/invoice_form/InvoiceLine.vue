@@ -317,6 +317,7 @@ export default {
         for (let invoiceLine of invoiceLines) {
           invoiceLine.id = this.getInvoiceLineId()
           invoiceLine.new = true
+          invoiceLine.invoice = this.invoice.id
           // console.log(`id: ${id}`)
           this.invoiceLineService.collection.push(invoiceLine)
         }
