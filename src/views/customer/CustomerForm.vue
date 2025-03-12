@@ -140,6 +140,12 @@
               v-model="customer.country_code"
               :options="countries"
               size="sm"></b-form-select>
+
+            <b-form-invalid-feedback
+              :state="isSubmitClicked ? !v$.customer.country_code.$error : null">
+              {{ $trans('Please select a country') }}
+            </b-form-invalid-feedback>
+
           </b-form-group>
 
           <b-form-group
@@ -268,6 +274,7 @@
             <PriceInput
               v-model="customer.hourly_rate_engineer"
               :currency="customer.hourly_rate_engineer_currency"
+              :allow-empty="isCreate"
               @priceChanged="(val) => customer.setHourlyRateEngineer(val)"
             />
           </b-form-group>
@@ -281,6 +288,7 @@
             <PriceInput
               v-model="customer.call_out_costs"
               :currency="customer.call_out_costs_currency"
+              :allow-empty="isCreate"
               @priceChanged="(val) => customer.setCallOutCosts(val)"
             />
           </b-form-group>
@@ -414,6 +422,9 @@ export default {
         city: {
           required,
         },
+        country_code: {
+          required,
+        }
       }
     }
   },
