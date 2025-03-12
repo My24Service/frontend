@@ -138,6 +138,25 @@
           </div>
         </div>
 
+        <div class="order-filter-links" v-if="isMobileOrders()">
+          <div class="filter-container">
+            <div class="filters-part">
+              <b-nav pills>
+                <b-nav-item
+                  :active="isActive('orders')"
+                  :to="{name:'mobile-orders'}"
+                >
+                  {{ $trans('All') }}
+                </b-nav-item>
+              </b-nav>
+            </div>
+            <UserFilters
+              route_name="mobile-orders"
+              :filters="userFilters"
+            />
+          </div>
+        </div>
+
         <div v-if="!isCustomer && !isBranchEmployee && dispatch && selectedOrders.length > 0">
           <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
 
@@ -417,6 +436,11 @@ export default {
         data.data_type === NEW_DATA_EVENTS_TYPES.NEW_DATA_ORDER_REJECTED)) {
         this.loadData()
       }
+    },
+    isMobileOrders() {
+      const parts = this.$route.path.split('/')
+      parts.shift()
+      return (parts[0] === 'mobile' && parts[1] === 'orders');
     },
     isMobile() {
       const parts = this.$route.path.split('/')
