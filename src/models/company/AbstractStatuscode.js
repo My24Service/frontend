@@ -22,7 +22,7 @@ class BaseStatuscodeService extends BaseModel {
   url = '/statuscode/statuscode/'
 
   async list() {
-    this.setListArgs([`code_type=${this.code_type}`])
+    this.setListArgs(`code_type=${this.code_type}`)
     return await super.list()
   }
 }
