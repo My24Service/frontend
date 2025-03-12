@@ -26,22 +26,22 @@
             <span></span>
         </li>
         <li v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id" class="listing-item">
-          <span>
+          <span style="vertical-align:middle">
             {{ invoiceLine.description }}
           </span>
-          <span style="text-align: right">
-            {{ invoiceLine.amount }}
+          <span style="width:120px">
+            <input type="number" class="form-control form-control-sm" v-model.number="invoiceLine.amount" v-on:change="invoiceLineAmountEdited(invoiceLine.id,$event)" style="text-align:right;font-size:1em;margin-top:3px;max-width:120px" />
           </span>
-          <span style="text-align: right">
+          <span style="text-align: right;vertical-align:middle">
             {{ invoiceLine.price_dinero.toFormat('$0.00') }}
           </span>
-          <span style="text-align: right">
+          <span style="text-align: right;vertical-align:middle">
             {{ invoiceLine.total_dinero.toFormat('$0.00') }}
           </span>
-          <span style="text-align: right">
+          <span style="text-align: right;vertical-align:middle">
             {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
           </span>
-          <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;">
+          <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;vertical-align:middle">
             <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
               <b-icon-trash></b-icon-trash>
             </b-link>
@@ -203,6 +203,7 @@ import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
 import PriceInput from "../../../components/PriceInput";
 import VAT from "./VAT";
 import invoiceMixin from "./mixin";
+import {toDinero} from "@/utils";
 
 export default {
   components: {
@@ -263,6 +264,42 @@ export default {
     this.isLoading = false
   },
   methods: {
+    invoiceLineAmountEdited(invoiceItemId, event) {
+      const new_amount = event.target.value;
+      for (const line of this.invoiceLineService.collection) {
+        if (line.id === invoiceItemId) {
+
+          // The `vat_type` might be '0.00' but that does not mean that no VAT has been
+          // applied -- the `vat_total` might be non-zero. If so, is it safe to assume
+          // that the 'standard' VAT has been applied, and we need to apply that here
+          // as well?
+          let vat_percentage = parseFloat(line.vat_type)
+          if (vat_percentage === 0.0 && line.vat > 0.0) {
+            vat_percentage = parseFloat(this.$store.getters.getInvoiceDefaultVat)
+          }
+
+          // Normalize to 1.0:
+          if (vat_percentage > 0.0) {
+            vat_percentage /= 100.0;
+          }
+
+          let new_total = new_amount * line.price;
+          let new_vat = new_total * vat_percentage;
+
+          // console.log( 'new total:'+new_total+', vat='+new_vat );
+
+          line.amount = new_amount
+          line.vat = new_vat;
+          line.vat_dinero = toDinero(line.vat, line.vat_currency)
+
+          line.total = new_total;
+          line.total_dinero = toDinero( line.total, line.total_currency)
+
+          this.updateInvoiceTotals()
+          return;
+        }
+      }
+    },
     getInvoiceLines() {
       return this.invoiceLineService.collection
     },
@@ -280,6 +317,7 @@ export default {
         for (let invoiceLine of invoiceLines) {
           invoiceLine.id = this.getInvoiceLineId()
           invoiceLine.new = true
+          invoiceLine.invoice = this.invoice.id
           // console.log(`id: ${id}`)
           this.invoiceLineService.collection.push(invoiceLine)
         }

@@ -275,9 +275,29 @@ class BaseModel {
       this.queryArgs['since'] = this.since;
     }
 
-    let listArgs = []
+    // HVG20250312
+    // After searching, or changing orders the `page=xxx` values starts accumulating to something
+    // like `page=1&page=1&page=1`, which is not desired. So an extra pass is done here to ensure
+    // that each key is only added once to the listArgs.
+    const sanitizedArgs = {};
+
+    for (const assignment in this.listArgs) {
+      const keyValue = this.listArgs[assignment].split( '=', 2 )
+      if (keyValue.length === 1) {
+        sanitizedArgs[keyValue[0]] = '';
+      } else if (keyValue.length === 2) {
+        sanitizedArgs[keyValue[0]] = keyValue[1];
+      }
+    }
+
     for (const arg in this.queryArgs) {
-      listArgs.push( `${arg}=${this.queryArgs[arg]}` );
+      sanitizedArgs[ arg ] = this.queryArgs[ arg ];
+    }
+
+    // Start building up the listArgs from the sanitized list of arguments.
+    const listArgs = []
+    for (const arg in sanitizedArgs) {
+      listArgs.push( `${arg}=${sanitizedArgs[arg]}` );
     }
 
     if (this.sortField !== null) {

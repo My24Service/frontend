@@ -569,10 +569,10 @@
             v-bind:label="$trans('Assignee(s)')"
             label-for="order-assigned-to"
             label-cols="3">
-            <div v-if="order.assigned_user_info.length===0">
+            <div v-if="!order.assigned_user_info || order.assigned_user_info.length===0">
               <label  class="col-form-label order-assignee dimmed">{{ $trans('Nobody assigned') }}</label>
             </div>
-            <div v-if="order.assigned_user_info.length>0">
+            <div v-if="order.assigned_user_info && order.assigned_user_info.length>0">
               <div class="col-form-label order-assignee" v-for="(engineer, index) in order.assigned_user_info" :key="index">
                 <span>{{ engineer.full_name }}</span>
                 <b-link v-if="engineer.booked===0" @click="unassignEngineer(engineer, $event)" class="float-right h5 mx-2"><b-icon-trash-fill></b-icon-trash-fill></b-link>

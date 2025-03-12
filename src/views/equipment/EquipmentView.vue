@@ -110,6 +110,12 @@
               ref="order-stats"
             />
           </b-tab>
+          <b-tab key="docs" :title="$trans('Documents')">
+            <DocumentsComponent
+              :equipment="equipment"
+              :is-view="true"
+            />
+          </b-tab>
         </b-tabs>
       </div>
     </div>
@@ -131,10 +137,12 @@ import { OrderService } from '@/models/orders/Order'
 import { EquipmentService } from "@/models/equipment/equipment";
 
 import moment from 'moment/min/moment-with-locales'
+import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    DocumentsComponent,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     OrderTableInfo,

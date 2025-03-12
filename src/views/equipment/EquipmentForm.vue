@@ -478,6 +478,14 @@
               ></b-form-select>
             </b-form-group>
         </div>
+        <div class="panel col-1-3">
+          <div class="documents section">
+            <DocumentsComponent
+              :equipment="equipment"
+              :is-view="false"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </b-overlay>
@@ -504,6 +512,7 @@ import { BranchService } from "../../models/company/Branch";
 import {componentMixin} from "../../utils";
 import { LocationService } from "../../models/equipment/location";
 import PriceInput from "../../components/PriceInput";
+import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 
 export default {
   mixins: [componentMixin],
@@ -513,6 +522,7 @@ export default {
   components: {
     Multiselect,
     PriceInput,
+    DocumentsComponent
   },
   props: {
     pk: {
@@ -574,6 +584,7 @@ export default {
       branch: null,
 
       locations: [],
+
       customerService: new CustomerService(),
       branchService: new BranchService(),
       locationService: new LocationService(),
@@ -702,6 +713,7 @@ export default {
       try {
         const equipmentData = await this.equipmentService.detail(this.pk)
         this.equipment = new EquipmentModel(equipmentData)
+
         if (this.hasBranches && !this.isEmployee) {
           if (this.equipment.branch) {
             this.branch = await this.branchService.detail(this.equipment.branch)

@@ -1,13 +1,10 @@
 <template>
-  <details open>
-    <summary class="flex-columns space-between">
-      <h6>{{ $trans('Documents') }}</h6>
-      <b-icon-paperclip></b-icon-paperclip>
-    </summary>
+  <div>
+   <h6>{{ $trans('Documents') }}</h6>
 
     <!-- list -->
     <div
-      v-if="!showForm"
+      v-if="true"
     >
       <p v-if="!documentService.collection.length">
         <i>{{ $trans("No documents") }}</i>
@@ -52,7 +49,7 @@
     <!-- form -->
     <div v-if="showForm">
       <b-form v-if="!documentService.isEdit">
-        <h4>{{ $trans("Add document(s)") }}</h4>
+        <p>{{ $trans("Add document(s)") }}</p>
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Choose files')"
@@ -67,7 +64,7 @@
       </b-form>
 
       <b-form v-if="documentService.isEdit">
-        <h4>{{ $trans("Edit document") }}</h4>
+        <p>{{ $trans("Edit document") }}</p>
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Choose files')"
@@ -82,10 +79,10 @@
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Name')"
-          label-for="order-document-name"
+          label-for="equipment-document-name"
         >
           <b-form-input
-            id="order-document-name"
+            id="equipment-document-name"
             size="sm"
             v-model="documentService.editItem.name"
           ></b-form-input>
@@ -94,10 +91,10 @@
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Description')"
-          label-for="order-document-description"
+          label-for="equipment-document-description"
         >
           <b-form-textarea
-            id="order-document-description"
+            id="equipment-document-description"
             v-model="documentService.editItem.description"
             rows="1"
           ></b-form-textarea>
@@ -169,7 +166,7 @@
         </b-col>
       </b-row>
     </b-container>
-  </details>
+  </div>
 </template>
 
 <script>
@@ -179,8 +176,8 @@ import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
 import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
 import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
-import {DocumentModel, DocumentService} from "@/models/orders/Document";
-import {OrderModel} from "@/models/orders/Order"
+import {DocumentModel, DocumentService} from "@/models/equipment/Document";
+import {EquipmentModel} from "@/models/equipment/equipment"
 import {componentMixin} from "@/utils";
 import ApiResult from "@/components/ApiResult.vue";
 
@@ -196,8 +193,8 @@ export default {
     IconLinkDelete
   },
   props: {
-    order: {
-      type: OrderModel,
+    equipment: {
+      type: EquipmentModel,
       default: null
     },
     isView: {
@@ -205,15 +202,10 @@ export default {
       default: false
     }
   },
-  // watch: {
-  //   order: async function(newVal) {
-  //     await this.loadData()
-  //   }
-  // },
   data() {
     return {
       isLoading: false,
-      isNewOrder: true,
+      isNewEquipment: true,
       fields: [
         {key: 'name', label: this.$trans('Name')},
         {key: 'icons', label: ""},
@@ -228,7 +220,7 @@ export default {
   },
   computed: {
     showChangesBlock() {
-      return this.order.id && !this.showForm && (this.documentService.collection.length || this.documentService.deletedItems.length) && this.documentService.collectionHasChanges
+      return this.equipment.id && !this.showForm && (this.documentService.collection.length || this.documentService.deletedItems.length) && this.documentService.collectionHasChanges
     },
     showForm() {
       return !this.isView && (this.documentService.isEdit || this.newItem)
@@ -238,19 +230,16 @@ export default {
     }
   },
   async created () {
-    if (!this.order.id) {
-      this.newDocument()
-    }
-
     await this.loadData()
   },
+  watch: {
+    equipment: {
+      handler() {
+        this.loadData()
+      },
+    }
+  },
   methods: {
-    async orderCreated(orderPk) {
-      for (const document of this.documentService.collection) {
-        document.order = orderPk
-      }
-      return await this.submitDocuments()
-    },
     doEditCollectionItem() {
       this.documentService.doEditCollectionItem()
     },
@@ -267,23 +256,23 @@ export default {
     },
     deleteDocument(index) {
       this.documentService.deleteCollectionItem(index)
-      if (this.order.id) {
+      if (this.equipment.id) {
         this.infoToast(this.$trans('Marked for delete'), this.$trans("Document marked for delete"))
       }
     },
     async loadData() {
 
-      if (this.order.documents) {
-        this.documentService.collection = this.order.documents;
+      if (this.equipment.documents) {
+        this.documentService.collection = this.equipment.documents;
         return;
       }
 
-      if (!this.order.id) {
+      if (!this.equipment.id) {
         return
       }
 
       this.isLoading = true
-      this.documentService.setListArgs(`order=${this.order.id}`)
+      this.documentService.setListArgs(`equipment=${this.equipment.id}`)
 
       try {
         await this.documentService.loadCollection()
@@ -305,7 +294,7 @@ export default {
           reader.onload = (f) => {
             const b64 = f.target.result
             this.documentService.collection.push(new DocumentModel({
-              order: this.order.id,
+              equipment: this.equipment.id,
               file: b64,
               name: files[i].name,
               description: ''
@@ -325,25 +314,25 @@ export default {
       }
 
       this.isLoading = true
-      let orderErrors = []
+      let equipmentErrors = []
       for (const document of this.documentService.collection) {
         if (document.file && document.file.indexOf('http') !== -1) {
           delete document.file
         }
 
-        if (!document.order) {
-          if (!this.order.id) {
-            orderErrors.push(`no order to update document: ${document.name}`)
+        if (!document.equipment) {
+          if (!this.equipment.id) {
+            equipmentErrors.push(`no equipment to update document: ${document.name}`)
           } else {
-            document.order = this.order.id
+            document.equipment = this.equipment.id
           }
         }
       }
 
-      if (orderErrors.length > 0) {
-        console.log('no order to update documents', orderErrors)
-        this.errorToast(this.$trans('Error updating documents (no order)'))
-        return orderErrors
+      if (equipmentErrors.length > 0) {
+        console.log('no equipment to update documents', equipmentErrors)
+        this.errorToast(this.$trans('Error updating documents (no equipment)'))
+        return equipmentErrors
       }
 
       let errors = []

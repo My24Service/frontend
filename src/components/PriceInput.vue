@@ -43,12 +43,23 @@ import { required, numeric } from '@vuelidate/validators'
 
 export default {
   name: "PriceInput",
-  props: ['currency', 'value'],
+  props: ['currency', 'value', 'allow-empty' ],
   emits: ['priceChanged', 'receivedFocus'],
   setup() {
     return { v$: useVuelidate() }
   },
   validations() {
+    if (this.allowEmpty) {
+      return {
+        number: {
+          numeric
+        },
+        decimal: {
+          numeric
+        }
+      }
+    }
+
     return {
       number: {
         required,
