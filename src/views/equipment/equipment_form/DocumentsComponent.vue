@@ -251,7 +251,6 @@ export default {
       this.newItem = false
     },
     newDocument() {
-      debugger
       this.documentService.newEditItem()
       this.newItem = true
     },
@@ -310,8 +309,6 @@ export default {
       }
     },
     async submitDocuments() {
-      debugger
-
       if (this.documentService.collection.length === 0) {
         return []
       }
