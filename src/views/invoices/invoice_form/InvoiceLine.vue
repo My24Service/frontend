@@ -26,22 +26,22 @@
             <span></span>
         </li>
         <li v-for="invoiceLine in invoiceLineService.collection" :key="invoiceLine.id" class="listing-item">
-          <span>
+          <span style="vertical-align:middle">
             {{ invoiceLine.description }}
           </span>
-          <span>
-            <input type="number" class="form-control form-control-sm" v-model.number="invoiceLine.amount" v-on:change="invoiceLineAmountEdited(invoiceLine.id,$event)" style="text-align:right" />
+          <span style="width:120px">
+            <input type="number" class="form-control form-control-sm" v-model.number="invoiceLine.amount" v-on:change="invoiceLineAmountEdited(invoiceLine.id,$event)" style="text-align:right;font-size:1em;margin-top:3px;max-width:120px" />
           </span>
-          <span style="text-align: right">
+          <span style="text-align: right;vertical-align:middle">
             {{ invoiceLine.price_dinero.toFormat('$0.00') }}
           </span>
-          <span style="text-align: right">
+          <span style="text-align: right;vertical-align:middle">
             {{ invoiceLine.total_dinero.toFormat('$0.00') }}
           </span>
-          <span style="text-align: right">
+          <span style="text-align: right;vertical-align:middle">
             {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
           </span>
-          <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;">
+          <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;vertical-align:middle">
             <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
               <b-icon-trash></b-icon-trash>
             </b-link>
