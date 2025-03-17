@@ -138,6 +138,7 @@ import { EquipmentService } from "@/models/equipment/equipment";
 
 import moment from 'moment/min/moment-with-locales'
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
+import {DocumentService} from "@/models/equipment/Document";
 
 export default {
   mixins: [componentMixin],
@@ -178,6 +179,9 @@ export default {
     }
   },
   computed: {
+    DocumentService() {
+      return DocumentService
+    },
     hasQr() {
       const qrType = this.$store.getters.getEquipmentQrType;
       return qrType !== 'none'

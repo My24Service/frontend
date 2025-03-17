@@ -176,10 +176,11 @@ import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
 import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
 import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
-import {DocumentModel, DocumentService} from "@/models/equipment/Document";
+import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
 import {EquipmentModel} from "@/models/equipment/equipment"
 import {componentMixin} from "@/utils";
 import ApiResult from "@/components/ApiResult.vue";
+import {LocationModel} from "@/models/equipment/location";
 
 export default {
   mixins: [componentMixin],
@@ -193,6 +194,10 @@ export default {
     IconLinkDelete
   },
   props: {
+    location: {
+      type: LocationModel,
+      default: null
+    },
     equipment: {
       type: EquipmentModel,
       default: null
@@ -213,14 +218,17 @@ export default {
       fieldsView: [
         {key: 'name', label: this.$trans('Name')},
       ],
-      documentService: new DocumentService(),
+      // documentService: new DocumentService(),
+      documentService: this.location != null ? new LocationDocumentService() : new DocumentService(),
+      isLocation: this.location != null,
+      isEquipment: this.equipment != null,
       newItem: false,
       files: [],
     }
   },
   computed: {
     showChangesBlock() {
-      return this.equipment.id && !this.showForm && (this.documentService.collection.length || this.documentService.deletedItems.length) && this.documentService.collectionHasChanges
+      return this.getParentId() && !this.showForm && (this.documentService.collection.length || this.documentService.deletedItems.length) && this.documentService.collectionHasChanges
     },
     showForm() {
       return !this.isView && (this.documentService.isEdit || this.newItem)
@@ -233,6 +241,11 @@ export default {
     await this.loadData()
   },
   watch: {
+    location: {
+      handler() {
+        this.loadData();
+      }
+    },
     equipment: {
       handler() {
         this.loadData()
@@ -240,6 +253,11 @@ export default {
     }
   },
   methods: {
+    getParentId() {
+      if (this.isEquipment) return this.equipment.id
+      else if (this.isLocation) return this.location.id
+      return null
+    },
     doEditCollectionItem() {
       this.documentService.doEditCollectionItem()
     },
@@ -256,23 +274,32 @@ export default {
     },
     deleteDocument(index) {
       this.documentService.deleteCollectionItem(index)
-      if (this.equipment.id) {
+      if (this.getParentId()) {
         this.infoToast(this.$trans('Marked for delete'), this.$trans("Document marked for delete"))
       }
     },
     async loadData() {
 
-      if (this.equipment.documents) {
-        this.documentService.collection = this.equipment.documents;
+      if (this.equipment != null) {
+        if (this.equipment.documents) {
+          this.documentService.collection = this.equipment.documents;
+          return;
+        }
+      }
+      else if (this.location != null) {
+        if (this.location.documents) {
+          this.documentService.collection = this.location.documents;
+          return;
+        }
+      }
+
+      if (!this.getParentId()) {
         return;
       }
 
-      if (!this.equipment.id) {
-        return
-      }
-
       this.isLoading = true
-      this.documentService.setListArgs(`equipment=${this.equipment.id}`)
+      this.documentService.setParentId( this.getParentId() );
+      //this.documentService.setListArgs(`equipment=${this.equipment.id}`)
 
       try {
         await this.documentService.loadCollection()
@@ -293,12 +320,23 @@ export default {
           const reader = new FileReader()
           reader.onload = (f) => {
             const b64 = f.target.result
-            this.documentService.collection.push(new DocumentModel({
-              equipment: this.equipment.id,
+
+            const newDocumentAttr = {
               file: b64,
               name: files[i].name,
               description: ''
-            }))
+            };
+
+            if (this.isLocation) {
+              newDocumentAttr.location = this.getParentId()
+            } else if (this.isEquipment){
+              newDocumentAttr.equipment = this.getParentId()
+            } else {
+              console.error( 'Bad state, expected location or equipment not set')
+              return;
+            }
+
+            this.documentService.collection.push(new DocumentModel(newDocumentAttr))
           }
 
           reader.readAsDataURL(files[i])
@@ -314,25 +352,34 @@ export default {
       }
 
       this.isLoading = true
-      let equipmentErrors = []
+      let documentErrors = []
       for (const document of this.documentService.collection) {
         if (document.file && document.file.indexOf('http') !== -1) {
           delete document.file
         }
 
-        if (!document.equipment) {
+        if (this.isLocation) {
+          if (!this.location.id) {
+            documentErrors.push(`no location to update document: ${document.name}`)
+          } else {
+            document.location = this.location.id
+          }
+        } else if (this.isEquipment) {
           if (!this.equipment.id) {
-            equipmentErrors.push(`no equipment to update document: ${document.name}`)
+            documentErrors.push(`no equipment to update document: ${document.name}`)
           } else {
             document.equipment = this.equipment.id
           }
         }
+        else {
+          documentErrors.push( 'documents could not be updated')
+        }
       }
 
-      if (equipmentErrors.length > 0) {
-        console.log('no equipment to update documents', equipmentErrors)
-        this.errorToast(this.$trans('Error updating documents (no equipment)'))
-        return equipmentErrors
+      if (documentErrors.length > 0) {
+        console.log('no equipment/locations to update documents', documentErrors)
+        this.errorToast(this.$trans('Error updating documents (no equipment or location)'))
+        return documentErrors
       }
 
       let errors = []
@@ -354,7 +401,6 @@ export default {
       }
 
       this.isLoading = false
-
       return errors
     },
 
