@@ -264,7 +264,16 @@
                 </b-form-group>
               </b-col>
             </b-row>
+
+            <div class="documents section" style="margin-top:2em">
+              <DocumentsComponent
+                :location="location"
+                :is-view="false"
+              />
+            </div>
           </div>
+
+
         </b-form>
       </b-overlay>
     </div>
@@ -282,10 +291,12 @@ import {componentMixin} from "../../utils";
 import { CustomerService } from "../../models/customer/Customer";
 import { BranchService } from "../../models/company/Branch";
 import { BuildingService } from "../../models/equipment/building";
+import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
+    DocumentsComponent,
     Multiselect,
   },
   setup() {

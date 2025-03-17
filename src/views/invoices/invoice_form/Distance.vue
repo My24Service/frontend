@@ -63,7 +63,8 @@
             {{ distance.full_name }} ({{ distance.partner_companycode }})
           </b-col>
           <b-col cols="1">
-            {{ distance.distance_to_total }}/{{ distance.distance_back_total }}
+            <input type="number" class="form-control form-control-sm" v-model.number="distance.distance_to_total" style="display:inline-block;width:3.5em;text-align:right" v-on:change="distanceChange(distance,$event)" />
+            <input type="number" class="form-control form-control-sm" v-model.number="distance.distance_back_total" style="display:inline-block;width:3.5em;text-align:right" v-on:change="distanceChange(distance,$event)" />
           </b-col>
           <b-col cols="1">
             {{ distance.distance_total }}
@@ -194,6 +195,7 @@ export default {
     return {
       isLoading: false,
       costService: new CostService(),
+      distanceTotal: null,
 
       total_dinero: null,
       totalVAT_dinero: null,
@@ -237,6 +239,29 @@ export default {
     this.isLoading = false
   },
   methods: {
+
+    distanceChange( distance, event ) {
+      // Recalculate the values to when adding invoice lines, the correct total distance is shown.
+      distance.distance_total = distance.distance_to_total + distance.distance_back_total
+      distance.amount_int = distance.distance_total
+
+      distance.total = distance.distance_total * distance.price
+      distance.total_dinero = toDinero( distance.total, distance.total_currency )
+
+      distance.vat = distance.vat_type > 0 ? (distance.total * (distance.vat_type / 100)).toFixed(2 ) : 0
+      distance.vat_dinero = toDinero( distance.vat, distance.vat_currency )
+
+      let distanceTotal = 0
+      for (const c of this.costService.collection) {
+        if (c.cost_type === 'distance')
+          distanceTotal += c.amount_int
+      }
+
+      // This only gets assigned if the user overrides the distance (we
+      // cannot modify `this.distance_total` because that's a no mutating prop):
+      this.distanceTotal = distanceTotal
+      // this.distance_total = distanceTotal
+    },
     emptyCollectionClicked() {
       this.emptyCollection()
       this.$emit('emptyCollectionClicked', this.invoiceLineType)
@@ -324,7 +349,9 @@ export default {
       return `${this.$trans("Distance")}`
     },
     getTotalAmountInvoiceLine() {
-      return this.distance_total
+      // If there is a user override for distance, the non-mutable distance_total contains
+      // the invalid, previous, value.
+      return (this.distanceTotal !== null) ? this.distanceTotal : this.distance_total
     },
     // createInvoiceLines in mixin
   },

@@ -85,6 +85,8 @@ let invoiceMixin = {
           this.$emit('invoiceLinesCreated', [invoiceLine])
           break
         case OPTION_USER_TOTALS:
+          // If the 'amount' has changed in the UI, this still hangs on to the
+          // previous 'amount', totalling to '8' where it should be '10'.
           const invoiceLines = this.costService.collection.map((cost) =>
             this.invoiceLineService.newModelFromCost(
               cost,

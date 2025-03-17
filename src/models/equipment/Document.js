@@ -23,11 +23,31 @@ class DocumentService extends BaseModel {
     file: ''
   }
 
-  url = '/equipment/document/'
+  url = '/equipment/equipment-document/'
   model = DocumentModel
+
+  setParentId( id ) {
+    this.setListArgs( `equipment=${id}` )
+  }
+}
+
+class LocationDocumentService extends DocumentService {
+  fields = {
+    order: null,
+    name: '',
+    description: '',
+    file: ''
+  }
+
+  url = '/equipment/location-document/'
+  model = DocumentModel
+
+  setParentId( id ) {
+    this.setListArgs( `location=${id}` )
+  }
 }
 
 const documentModel = new DocumentService()
 
 export default documentModel
-export { DocumentService, DocumentModel }
+export { DocumentService, LocationDocumentService, DocumentModel }
