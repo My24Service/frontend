@@ -30,7 +30,8 @@
             {{ invoiceLine.description }}
           </span>
           <span style="width:120px">
-            <input type="number" class="form-control form-control-sm" v-model.number="invoiceLine.amount" v-on:change="invoiceLineAmountEdited(invoiceLine.id,$event)" style="text-align:right;font-size:1em;margin-top:3px;max-width:120px" />
+            <!-- <input type="number" class="form-control form-control-sm" v-model.number="invoiceLine.amount" v-on:change="invoiceLineAmountEdited(invoiceLine.id,$event)" style="text-align:right;font-size:1em;margin-top:3px;max-width:120px" />-->
+            {{ invoiceLine.amount }}
           </span>
           <span style="text-align: right;vertical-align:middle">
             {{ invoiceLine.price_dinero.toFormat('$0.00') }}
@@ -264,6 +265,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    /*
     invoiceLineAmountEdited(invoiceItemId, event) {
       const new_amount = event.target.value;
       for (const line of this.invoiceLineService.collection) {
@@ -299,7 +301,7 @@ export default {
           return;
         }
       }
-    },
+    }, */
     getInvoiceLines() {
       return this.invoiceLineService.collection
     },

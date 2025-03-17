@@ -59,7 +59,8 @@
             {{ activity.full_name }} ({{ activity.partner_companycode }})
           </b-col>
           <b-col cols="2">
-            {{ activity.amount_duration_read }}
+            <input type="text" class="form-control form-control-sm" v-model.lazy="activity.amount_duration_read" style="display:inline-block;width:4.5em;text-align:right" v-on:change="activityDurationChange(activity,$event)"/>
+            <!-- {{ activity.amount_duration_read }}-->
           </b-col>
           <b-col cols="3">
             <b-form-radio-group
@@ -227,6 +228,7 @@ export default {
       COST_TYPE_ACTUAL_WORK,
 
       costService: new CostService(),
+      totalHours: null,
 
       default_currency: this.$store.getters.getDefaultCurrency,
       invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
@@ -279,6 +281,48 @@ export default {
     this.isLoading = false
   },
   methods: {
+    activityDurationChange(activity, event) {
+//       console.log( activity );
+      const durationParts = activity.amount_duration_read.split( ':', 2 );
+      let h = 0, m = 0;
+
+      if (durationParts.length === 1) {
+        // it only has an hours part
+        h = parseInt(durationParts[0])
+      } else if (durationParts.length === 2) {
+        h = parseInt(durationParts[0])
+        m = parseInt(durationParts[1])
+      }
+
+      let newDuration = h + ':';
+      if (m < 10) newDuration += '0';
+      newDuration += m;
+
+      activity.amount_duration_read = newDuration;
+      activity.amount_duration = newDuration + ':00'; // always 0 seconds
+      activity.amount_duration_secs = (h * 3600) + (m * 60);
+
+      // Update user_totals so adding invoice-line uses correct total hours.
+      let totalSeconds = 0;
+      for(const ut of this.user_totals) {
+        if (ut.user_id === activity.user) {
+          ut.work_total = activity.amount_duration;
+          ut.work_total_secs = activity.amount_duration_secs;
+        }
+
+        totalSeconds += ut.work_total_secs;
+      }
+
+      const newHours = (totalSeconds / 3600).toFixed(0);
+      const newMinutes = (totalSeconds - (newHours * 3600)) % 60;
+
+      let newTotalHours = newHours + ':';
+      if (newMinutes < 10) newTotalHours += '0';
+      newTotalHours += newMinutes;
+
+      this.totalHours = newTotalHours
+      this.updateTotals()
+    },
     emptyCollectionClicked() {
       this.emptyCollection()
       this.$emit('emptyCollectionClicked', this.invoiceLineType)
@@ -460,7 +504,8 @@ export default {
       return this.getTitle()
     },
     getTotalAmountInvoiceLine() {
-      return this.hours_total
+      // if user override is present then totalHours will have the value to return
+      return (this.totalHours !== null) ? this.totalHours : this.hours_total
     },
   }
 }

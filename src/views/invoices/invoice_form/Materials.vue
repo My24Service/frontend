@@ -50,7 +50,7 @@
           {{ material.name }}
         </b-col>
         <b-col cols="1">
-          {{ material.amount }}
+          <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material,$event)" />
         </b-col>
         <b-col cols="4">
           <b-form-radio-group
@@ -228,6 +228,30 @@ export default {
     this.isLoading = false
   },
   methods: {
+    // Triggered when the 'amount' field changes value.
+    materialAmountChange(material, event) {
+      // console.log( material )
+
+      // Update all the values.
+      material.amount_decimal = material.amount
+      material.total = material.amount * material.price;
+      material.vat = material.vat_type > 0 ? (material.total * (material.vat_type / 100)) : 0;
+      material.total_dinero = toDinero( material.total, material.total_currency )
+      material.vat_dinero = toDinero( material.vat, material.vat_currency )
+
+      // Recalculate the total amount, for if the total is added as a single invoice-line,
+      // the 'previous' totalAmount would be applied.
+      for(const m of this.used_materials) {
+        if (m.identifier === material.identifier) {
+          m.amount = material.amount
+        }
+      }
+
+      this.totalAmount = this.used_materials.reduce(
+        (total, m) => (total + parseInt(m.amount)),
+        0
+      )
+    },
     emptyCollectionClicked() {
       this.emptyCollection()
       this.$emit('emptyCollectionClicked', this.invoiceLineType)
