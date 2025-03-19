@@ -65,6 +65,12 @@
               ref="order-stats"
             />
           </b-tab>
+          <b-tab key="docs" :title="$trans('Documents')">
+            <DocumentsComponent
+              :location="location"
+              :is-view="true"
+            />
+          </b-tab>
         </b-tabs>
       </div>
     </div>
@@ -81,10 +87,13 @@ import {componentMixin} from "../../utils";
 
 import { OrderService } from '../../models/orders/Order.js'
 import { LocationService } from "../../models/equipment/location";
+import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
+import {LocationDocumentService} from "@/models/equipment/Document";
 
 export default {
   mixins: [componentMixin],
   components: {
+    DocumentsComponent,
     ButtonLinkRefresh,
     ButtonLinkSearch,
     OrderTableInfo,
@@ -131,6 +140,9 @@ export default {
     }
   },
   computed: {
+    LocationDocumentService() {
+      return LocationDocumentService
+    },
     editLink() {
       if (this.hasBranches) {
         return 'equipment-location-edit'

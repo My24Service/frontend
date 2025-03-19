@@ -47,6 +47,9 @@
                     <b-form-radio v-model="sortMode" value="default">{{ $trans('Start date (default)') }}</b-form-radio>
                     <b-form-radio v-model="sortMode" value="last_update">{{ $trans('Last update') }}</b-form-radio>
                   </b-form-group>
+                  <b-form-group :label="$trans('Display only orders since')">
+                    <b-form-datepicker v-model="sinceDate" id="sort-filter-since" value="" locale="nl" :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }" />
+                  </b-form-group>
                 </div>
               </b-col>
             </b-row>
@@ -132,6 +135,25 @@
               :filters="userFilters"
             />
 
+          </div>
+        </div>
+
+        <div class="order-filter-links" v-if="isMobileOrders()">
+          <div class="filter-container">
+            <div class="filters-part">
+              <b-nav pills>
+                <b-nav-item
+                  :active="isActive('orders')"
+                  :to="{name:'mobile-orders'}"
+                >
+                  {{ $trans('All') }}
+                </b-nav-item>
+              </b-nav>
+            </div>
+            <UserFilters
+              route_name="mobile-orders"
+              :filters="userFilters"
+            />
           </div>
         </div>
 
@@ -266,6 +288,7 @@ export default {
     return {
       memberNewDataSocket: new MemberNewDataSocket(),
       sortMode: 'default',
+      sinceDate: null,
       searchQuery: null,
       statusService: new StatusService(),
       model: new OrderService(),
@@ -304,6 +327,12 @@ export default {
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
     this.model.currentPage = this.$route.query.page || 1
+
+    this.sinceDate = this.$route.query.since || null
+    this.model.since = this.sinceDate
+    this.sortMode = this.$route.query.order_by || 'default'
+    this.model.sort = this.sortMode
+
     await this.loadData()
   },
   methods: {
@@ -312,6 +341,7 @@ export default {
     },
     doSort() {
       this.model.setSort(this.sortMode)
+      this.model.setSinceDate(this.sinceDate);
       this.loadData()
     },
     handleSearchOk(val) {
@@ -406,6 +436,11 @@ export default {
         data.data_type === NEW_DATA_EVENTS_TYPES.NEW_DATA_ORDER_REJECTED)) {
         this.loadData()
       }
+    },
+    isMobileOrders() {
+      const parts = this.$route.path.split('/')
+      parts.shift()
+      return (parts[0] === 'mobile' && parts[1] === 'orders');
     },
     isMobile() {
       const parts = this.$route.path.split('/')

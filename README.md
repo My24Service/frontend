@@ -76,3 +76,12 @@ Add `/etc/hosts` entry:
 ```
 
 When running `npm run dev` you should now be able to connect to `http://demo.my24service-dev.com:3000` which should use the development API at `demo.api.my24service-dev.com`.
+
+## Development environment
+Online development environments are available at *.{user}.my24service-dev.com
+
+### Deploy changes
+
+To deploy local changes, run:
+
+`./deploy_dev_developer.sh {user}`

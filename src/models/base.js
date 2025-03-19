@@ -14,7 +14,7 @@ class BaseModel {
   searchQuery = null
   userFilter = null
   sort = null
-
+  since = null
   currentPage = 1
   count = 0
   numPages = 0
@@ -246,31 +246,58 @@ class BaseModel {
     this.sort = sort
   }
 
+  setSinceDate(since) {
+    this.since = since
+  }
+
   getListUrl() {
     return this.url
   }
 
   async list() {
-    let listArgs = []
 
-    listArgs.push(`page=${this.currentPage}`)
+    this.queryArgs = {};
+    this.queryArgs['page'] = this.currentPage;
 
     if (this.searchQuery) {
-      listArgs.push(`q=${this.searchQuery}`)
+      this.queryArgs['q']= this.searchQuery;
     }
 
     if (this.userFilter) {
-      listArgs.push(`user_filter=${this.userFilter}`)
+      this.queryArgs['user_filter'] = this.userFilter;
     }
 
     if (this.sort) {
-      listArgs.push(`order_by=${this.sort}`)
+      this.queryArgs['order_by'] = this.sort;
     }
 
-    if (this.listArgs.length) {
-      for (const arg of this.listArgs) {
-        listArgs.push(arg)
+    if (this.since) {
+      this.queryArgs['since'] = this.since;
+    }
+
+    // HVG20250312
+    // After searching, or changing orders the `page=xxx` values starts accumulating to something
+    // like `page=1&page=1&page=1`, which is not desired. So an extra pass is done here to ensure
+    // that each key is only added once to the listArgs.
+    const sanitizedArgs = {};
+
+    for (const assignment in this.listArgs) {
+      const keyValue = this.listArgs[assignment].split( '=', 2 )
+      if (keyValue.length === 1) {
+        sanitizedArgs[keyValue[0]] = '';
+      } else if (keyValue.length === 2) {
+        sanitizedArgs[keyValue[0]] = keyValue[1];
       }
+    }
+
+    for (const arg in this.queryArgs) {
+      sanitizedArgs[ arg ] = this.queryArgs[ arg ];
+    }
+
+    // Start building up the listArgs from the sanitized list of arguments.
+    const listArgs = []
+    for (const arg in sanitizedArgs) {
+      listArgs.push( `${arg}=${sanitizedArgs[arg]}` );
     }
 
     if (this.sortField !== null) {
@@ -279,7 +306,6 @@ class BaseModel {
     }
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
-
     const response = await this.axios.get(url)
 
     if ('count' in response.data) {

@@ -568,6 +568,20 @@
           <b-form-group
             v-bind:label="$trans('Assignee(s)')"
             label-for="order-assigned-to"
+            label-cols="3">
+            <div v-if="!order.assigned_user_info || order.assigned_user_info.length===0">
+              <label  class="col-form-label order-assignee dimmed">{{ $trans('Nobody assigned') }}</label>
+            </div>
+            <div v-if="order.assigned_user_info && order.assigned_user_info.length>0">
+              <div class="col-form-label order-assignee" v-for="(engineer, index) in order.assigned_user_info" :key="index">
+                <span>{{ engineer.full_name }}</span>
+                <b-link v-if="engineer.booked===0" @click="unassignEngineer(engineer, $event)" class="float-right h5 mx-2"><b-icon-trash-fill></b-icon-trash-fill></b-link>
+              </div>
+            </div>
+          </b-form-group>
+          <!-- <b-form-group
+            v-bind:label="$trans('Assignee(s)')"
+            label-for="order-assigned-to"
             label-cols="3"
             label-class="dimmed"
           >
@@ -575,7 +589,7 @@
               <span v-if="index > 0"> - </span>
               {{ person.full_name }}
             </label>
-          </b-form-group>
+          </b-form-group> -->
           <b-form-group
             label-for="order-orderline-remarks"
             v-bind:label="$trans('Planning remarks')"
@@ -1052,6 +1066,7 @@ export default {
       getBranchesDebounced: null,
       engineers: [],
       selectedEngineers: [],
+      removedEngineers: [],
       asssignResult: [],
       files: [],
       orderPk: null,
@@ -1264,6 +1279,13 @@ export default {
     }
   },
   methods: {
+    // remove engineers
+    unassignEngineer( engineer, event ) {
+      // console.log( 'unassignEngineer('+engineer.user_id+')' )
+      this.removedEngineers.push( engineer )
+      event.target.closest('.order-assignee').style.textDecoration = 'line-through';
+      event.target.style.display = 'none';
+    },
     // equipment
     showAddEquipmentModal() {
       this.$refs.multiselect_equipment.deactivate()
@@ -1628,7 +1650,8 @@ export default {
       // TODO why is this if here? shouldn't be needed
       // if (this.order.id) {
       const assignErrors = await this.assignEngineers(this.order.order_id)
-      errors = [...errors, ...assignErrors]
+      const removeErrors = await this.unassignEngineers(this.order.id)
+      errors = [...errors, ...assignErrors, ...removeErrors]
       // }
 
       if (!this.isCreate && this.acceptOrder) {
@@ -1769,6 +1792,44 @@ export default {
       }
 
       return [processedInfolines, errors]
+    },
+    async unassignEngineers(order_pk) {
+      if (this.removedEngineers.length === 0) {
+        return []
+      }
+
+      let errors = []
+      let unassigned_total = 0
+
+      for (const engineer of this.removedEngineers) {
+        try {
+          let result = await this.assignService.unAssign(engineer.user_id, order_pk)
+          // If `result.result == 0`, the removal was not allowed; which, at this
+          // time, only happens when there are booked hours or materials. In the
+          // future, perhaps a 'reason' for failure could be included, but for
+          // now, a zero value indicates failure.
+          if (!result.result) {
+            errors.push( `${engineer.full_name} ${this.$trans('has booked hours or materials')}` )
+          } else {
+            unassigned_total++
+          }
+        } catch (error) {
+          errors.push(error)
+          console.log('error un-assigning engineers', error)
+        }
+      }
+
+      if (errors.length === 0) {
+        this.infoToast(this.$trans('Engineers unassigned'), `${unassigned_total} ${this.$trans('engineer(s) have been unassigned')}`)
+      } else {
+        console.log('errors un-assigning engineers', errors)
+        this.errorToast(errors.join(', '), this.$trans('There were errors unassigning engineers'))
+      }
+
+      // unsure what assignResult does elsewhere?
+      // this.assignResult = newSelectedEngineers
+      this.removedEngineers = []
+      return errors
     },
     async assignEngineers(order_id) {
       if (this.selectedEngineers.length === 0) {

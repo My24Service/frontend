@@ -1,13 +1,10 @@
 <template>
-  <details open>
-    <summary class="flex-columns space-between">
-      <h6>{{ $trans('Documents') }}</h6>
-      <b-icon-paperclip></b-icon-paperclip>
-    </summary>
+  <div>
+   <h6>{{ $trans('Documents') }}</h6>
 
     <!-- list -->
     <div
-      v-if="!showForm"
+      v-if="true"
     >
       <p v-if="!documentService.collection.length">
         <i>{{ $trans("No documents") }}</i>
@@ -52,7 +49,7 @@
     <!-- form -->
     <div v-if="showForm">
       <b-form v-if="!documentService.isEdit">
-        <h4>{{ $trans("Add document(s)") }}</h4>
+        <p>{{ $trans("Add document(s)") }}</p>
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Choose files')"
@@ -67,7 +64,7 @@
       </b-form>
 
       <b-form v-if="documentService.isEdit">
-        <h4>{{ $trans("Edit document") }}</h4>
+        <p>{{ $trans("Edit document") }}</p>
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Choose files')"
@@ -82,10 +79,10 @@
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Name')"
-          label-for="order-document-name"
+          label-for="equipment-document-name"
         >
           <b-form-input
-            id="order-document-name"
+            id="equipment-document-name"
             size="sm"
             v-model="documentService.editItem.name"
           ></b-form-input>
@@ -94,10 +91,10 @@
         <b-form-group
           label-cols="3"
           v-bind:label="$trans('Description')"
-          label-for="order-document-description"
+          label-for="equipment-document-description"
         >
           <b-form-textarea
-            id="order-document-description"
+            id="equipment-document-description"
             v-model="documentService.editItem.description"
             rows="1"
           ></b-form-textarea>
@@ -169,7 +166,7 @@
         </b-col>
       </b-row>
     </b-container>
-  </details>
+  </div>
 </template>
 
 <script>
@@ -179,10 +176,11 @@ import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
 import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
 import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
-import {DocumentModel, DocumentService} from "@/models/orders/Document";
-import {OrderModel} from "@/models/orders/Order"
+import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
+import {EquipmentModel} from "@/models/equipment/equipment"
 import {componentMixin} from "@/utils";
 import ApiResult from "@/components/ApiResult.vue";
+import {LocationModel} from "@/models/equipment/location";
 
 export default {
   mixins: [componentMixin],
@@ -196,8 +194,12 @@ export default {
     IconLinkDelete
   },
   props: {
-    order: {
-      type: OrderModel,
+    location: {
+      type: LocationModel,
+      default: null
+    },
+    equipment: {
+      type: EquipmentModel,
       default: null
     },
     isView: {
@@ -205,15 +207,10 @@ export default {
       default: false
     }
   },
-  // watch: {
-  //   order: async function(newVal) {
-  //     await this.loadData()
-  //   }
-  // },
   data() {
     return {
       isLoading: false,
-      isNewOrder: true,
+      isNewEquipment: true,
       fields: [
         {key: 'name', label: this.$trans('Name')},
         {key: 'icons', label: ""},
@@ -221,14 +218,17 @@ export default {
       fieldsView: [
         {key: 'name', label: this.$trans('Name')},
       ],
-      documentService: new DocumentService(),
+      // documentService: new DocumentService(),
+      documentService: this.location != null ? new LocationDocumentService() : new DocumentService(),
+      isLocation: this.location != null,
+      isEquipment: this.equipment != null,
       newItem: false,
       files: [],
     }
   },
   computed: {
     showChangesBlock() {
-      return this.order.id && !this.showForm && (this.documentService.collection.length || this.documentService.deletedItems.length) && this.documentService.collectionHasChanges
+      return this.getParentId() && !this.showForm && (this.documentService.collection.length || this.documentService.deletedItems.length) && this.documentService.collectionHasChanges
     },
     showForm() {
       return !this.isView && (this.documentService.isEdit || this.newItem)
@@ -238,18 +238,25 @@ export default {
     }
   },
   async created () {
-    if (!this.order.id) {
-      this.newDocument()
-    }
-
     await this.loadData()
   },
-  methods: {
-    async orderCreated(orderPk) {
-      for (const document of this.documentService.collection) {
-        document.order = orderPk
+  watch: {
+    location: {
+      handler() {
+        this.loadData();
       }
-      return await this.submitDocuments()
+    },
+    equipment: {
+      handler() {
+        this.loadData()
+      },
+    }
+  },
+  methods: {
+    getParentId() {
+      if (this.isEquipment) return this.equipment.id
+      else if (this.isLocation) return this.location.id
+      return null
     },
     doEditCollectionItem() {
       this.documentService.doEditCollectionItem()
@@ -267,23 +274,32 @@ export default {
     },
     deleteDocument(index) {
       this.documentService.deleteCollectionItem(index)
-      if (this.order.id) {
+      if (this.getParentId()) {
         this.infoToast(this.$trans('Marked for delete'), this.$trans("Document marked for delete"))
       }
     },
     async loadData() {
 
-      if (this.order.documents) {
-        this.documentService.collection = this.order.documents;
+      if (this.equipment != null) {
+        if (this.equipment.documents) {
+          this.documentService.collection = this.equipment.documents;
+          return;
+        }
+      }
+      else if (this.location != null) {
+        if (this.location.documents) {
+          this.documentService.collection = this.location.documents;
+          return;
+        }
+      }
+
+      if (!this.getParentId()) {
         return;
       }
 
-      if (!this.order.id) {
-        return
-      }
-
       this.isLoading = true
-      this.documentService.setListArgs(`order=${this.order.id}`)
+      this.documentService.setParentId( this.getParentId() );
+      //this.documentService.setListArgs(`equipment=${this.equipment.id}`)
 
       try {
         await this.documentService.loadCollection()
@@ -304,12 +320,23 @@ export default {
           const reader = new FileReader()
           reader.onload = (f) => {
             const b64 = f.target.result
-            this.documentService.collection.push(new DocumentModel({
-              order: this.order.id,
+
+            const newDocumentAttr = {
               file: b64,
               name: files[i].name,
               description: ''
-            }))
+            };
+
+            if (this.isLocation) {
+              newDocumentAttr.location = this.getParentId()
+            } else if (this.isEquipment){
+              newDocumentAttr.equipment = this.getParentId()
+            } else {
+              console.error( 'Bad state, expected location or equipment not set')
+              return;
+            }
+
+            this.documentService.collection.push(new DocumentModel(newDocumentAttr))
           }
 
           reader.readAsDataURL(files[i])
@@ -325,25 +352,34 @@ export default {
       }
 
       this.isLoading = true
-      let orderErrors = []
+      let documentErrors = []
       for (const document of this.documentService.collection) {
         if (document.file && document.file.indexOf('http') !== -1) {
           delete document.file
         }
 
-        if (!document.order) {
-          if (!this.order.id) {
-            orderErrors.push(`no order to update document: ${document.name}`)
+        if (this.isLocation) {
+          if (!this.location.id) {
+            documentErrors.push(`no location to update document: ${document.name}`)
           } else {
-            document.order = this.order.id
+            document.location = this.location.id
           }
+        } else if (this.isEquipment) {
+          if (!this.equipment.id) {
+            documentErrors.push(`no equipment to update document: ${document.name}`)
+          } else {
+            document.equipment = this.equipment.id
+          }
+        }
+        else {
+          documentErrors.push( 'documents could not be updated')
         }
       }
 
-      if (orderErrors.length > 0) {
-        console.log('no order to update documents', orderErrors)
-        this.errorToast(this.$trans('Error updating documents (no order)'))
-        return orderErrors
+      if (documentErrors.length > 0) {
+        console.log('no equipment/locations to update documents', documentErrors)
+        this.errorToast(this.$trans('Error updating documents (no equipment or location)'))
+        return documentErrors
       }
 
       let errors = []
@@ -365,7 +401,6 @@ export default {
       }
 
       this.isLoading = false
-
       return errors
     },
 

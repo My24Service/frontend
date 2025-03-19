@@ -226,6 +226,7 @@ export default {
   data() {
     return {
       sortMode: 'default',
+      sinceDate: null,
       searchQuery: null,
       model: new OrderService(),
       selectedOrders: [],
@@ -253,6 +254,12 @@ export default {
     // get statuscodes and load orders
     this.statuscodes = await this.$store.dispatch('getStatuscodes')
     this.model.currentPage = this.$route.query.page || 1
+
+    this.sinceDate = this.$route.query.since || null
+    this.model.since = this.sinceDate
+    this.sortMode = this.$route.query.order_by || 'default'
+    this.model.sort = this.sortMode
+
     await this.loadData()
   },
   methods: {
@@ -262,6 +269,7 @@ export default {
     },
     doSort() {
       this.model.setSort(this.sortMode)
+      this.model.setSinceDate(this.sinceDate)
       this.loadData()
     },
     // search

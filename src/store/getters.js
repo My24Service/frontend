@@ -112,4 +112,7 @@ export const getters = {
   getQuotationDefaultPricePerKm(state) {
     return state.memberInfo.settings.quotation_default_price_per_km
   },
+  getOrderListMustIncludeReference(state) {
+    return state.memberInfo.settings.order_list_include_reference
+  },
 }
