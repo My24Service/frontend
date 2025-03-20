@@ -539,10 +539,12 @@
                 :placeholder="$trans('Type to search engineer(s)')"
                 open-direction="bottom"
                 :options="engineers"
+                :loading="isLookupLoading.engineers"
                 :multiple="true"
-                :taggable="true"
                 :custom-label="engineerLabel"
+                @search-change="getEngineersDebounced"
                 >
+                <span slot="noResult">{{ $trans('Nothing found.') }}</span>
               </multiselect>
             </b-form-group>
             <div v-if="assignResult.length > 0">
@@ -1012,6 +1014,11 @@ export default {
   data() {
     return {
       isLoading: false,
+
+      // FIXME HVG20250320 The state for all the search tables (branches, customers) should ideally be kept separate from `isLoading` to avoid unnecessary flickering of irrelevant UI elements.
+      isLookupLoading: {
+        engineers: false,
+      },
       buttonDisabled: false,
       editIndex: null,
       acceptOrder: false,
@@ -1057,6 +1064,7 @@ export default {
       engineers: [],
       selectedEngineers: [],
       removedEngineers: [],
+      getEngineersDebounced: null,
       assignResult: [],
       files: [],
       orderPk: null,
@@ -1215,10 +1223,9 @@ export default {
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
-    this.countries = await this.$store.dispatch('getCountries')
+    this.getEngineersDebounced = AwesomeDebouncePromise(this.getEngineers, 500)
 
-    const { results } = await this.engineerService.list()
-    this.engineers = results
+    this.countries = await this.$store.dispatch('getCountries')
 
     if (this.isCreate) {
       this.order = new OrderModel()
@@ -1270,6 +1277,18 @@ export default {
     }
   },
   methods: {
+    // Search engineers
+    async getEngineers(query) {
+      this.isLookupLoading.engineers = true
+      try {
+        this.engineers = await this.userListService.search(query, 'engineer' )
+        // this.engineers = await this.engineerService.search(query)
+      } catch(error) {
+        console.log('Error searching engineers', error)
+        this.errorToast(this.$trans('Error searching engineers'))
+      }
+      this.isLookupLoading.engineers = false
+    },
     // remove engineers
     unassignEngineer( engineer, event ) {
       // console.log( 'unassignEngineer('+engineer.user_id+')' )
@@ -1400,7 +1419,6 @@ export default {
       this.equipment_location = option.id
       this.location = option.name
     },
-
     // order lines
     deleteOrderLine(index) {
       this.deletedOrderlines.push(this.order.orderlines[index])
@@ -1489,8 +1507,8 @@ export default {
       this.emptyInfoLine()
     },
 
-    engineerLabel({ full_name }) {
-      return full_name
+    engineerLabel({ name }) {
+      return name
     },
 
     salesLabel({ email }) {
