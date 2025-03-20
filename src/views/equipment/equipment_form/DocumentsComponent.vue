@@ -273,6 +273,8 @@ export default {
       this.newItem = true
     },
     deleteDocument(index) {
+      debugger
+
       this.documentService.deleteCollectionItem(index)
       if (this.getParentId()) {
         this.infoToast(this.$trans('Marked for delete'), this.$trans("Document marked for delete"))
@@ -347,7 +349,8 @@ export default {
       }
     },
     async submitDocuments() {
-      if (this.documentService.collection.length === 0) {
+      if (this.documentService.collection.length === 0
+          && this.documentService.deletedItems.length === 0) {
         return []
       }
 
