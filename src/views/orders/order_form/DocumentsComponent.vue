@@ -320,7 +320,8 @@ export default {
       }
     },
     async submitDocuments() {
-      if (this.documentService.collection.length === 0) {
+      if (this.documentService.collection.length === 0
+        && this.documentService.deletedItems.length === 0) {
         return []
       }
 
