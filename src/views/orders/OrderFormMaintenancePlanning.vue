@@ -529,7 +529,7 @@
               v-bind:label="$trans('Assign to')"
               label-for="order-assign"
               label-cols="3"
-              v-if="asssignResult.length === 0"
+              v-if="assignResult.length === 0"
             >
               <multiselect
                 v-model="selectedEngineers"
@@ -545,12 +545,12 @@
                 >
               </multiselect>
             </b-form-group>
-            <div v-if="asssignResult.length > 0">
+            <div v-if="assignResult.length > 0">
               <h4>{{ $trans("Assign result") }}</h4>
               <ul>
 
                 <li
-                  v-for="(engineer, index) of asssignResult"
+                  v-for="(engineer, index) of assignResult"
                   :key="index"
                   :class="engineer.hasOwnProperty('apiOk') && engineer.apiOk ? 'text-success' : 'text-danger'"
                 >
@@ -1067,7 +1067,7 @@ export default {
       engineers: [],
       selectedEngineers: [],
       removedEngineers: [],
-      asssignResult: [],
+      assignResult: [],
       files: [],
       orderPk: null,
       nextField: 'orders',
@@ -1864,7 +1864,7 @@ export default {
         this.errorToast(this.$trans('There were errors assigning to users'))
       }
 
-      this.asssignResult = newSelectedEngineers
+      this.assignResult = newSelectedEngineers
       this.selectedEngineers = []
 
       return errors
