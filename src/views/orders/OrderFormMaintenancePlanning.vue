@@ -529,7 +529,7 @@
               v-bind:label="$trans('Assign to')"
               label-for="order-assign"
               label-cols="3"
-              v-if="asssignResult.length === 0"
+              v-if="assignResult.length === 0"
             >
               <multiselect
                 v-model="selectedEngineers"
@@ -539,18 +539,20 @@
                 :placeholder="$trans('Type to search engineer(s)')"
                 open-direction="bottom"
                 :options="engineers"
+                :loading="isLookupLoading.engineers"
                 :multiple="true"
-                :taggable="true"
                 :custom-label="engineerLabel"
+                @search-change="getEngineersDebounced"
                 >
+                <span slot="noResult">{{ $trans('Nothing found.') }}</span>
               </multiselect>
             </b-form-group>
-            <div v-if="asssignResult.length > 0">
+            <div v-if="assignResult.length > 0">
               <h4>{{ $trans("Assign result") }}</h4>
               <ul>
 
                 <li
-                  v-for="(engineer, index) of asssignResult"
+                  v-for="(engineer, index) of assignResult"
                   :key="index"
                   :class="engineer.hasOwnProperty('apiOk') && engineer.apiOk ? 'text-success' : 'text-danger'"
                 >
@@ -579,17 +581,7 @@
               </div>
             </div>
           </b-form-group>
-          <!-- <b-form-group
-            v-bind:label="$trans('Assignee(s)')"
-            label-for="order-assigned-to"
-            label-cols="3"
-            label-class="dimmed"
-          >
-            <label class="col-form-label order-assignee" v-for="(person, index) in order.assigned_user_info" :key="index">
-              <span v-if="index > 0"> - </span>
-              {{ person.full_name }}
-            </label>
-          </b-form-group> -->
+
           <b-form-group
             label-for="order-orderline-remarks"
             v-bind:label="$trans('Planning remarks')"
@@ -1022,6 +1014,11 @@ export default {
   data() {
     return {
       isLoading: false,
+
+      // FIXME HVG20250320 The state for all the search tables (branches, customers) should ideally be kept separate from `isLoading` to avoid unnecessary flickering of irrelevant UI elements.
+      isLookupLoading: {
+        engineers: false,
+      },
       buttonDisabled: false,
       editIndex: null,
       acceptOrder: false,
@@ -1067,7 +1064,8 @@ export default {
       engineers: [],
       selectedEngineers: [],
       removedEngineers: [],
-      asssignResult: [],
+      getEngineersDebounced: null,
+      assignResult: [],
       files: [],
       orderPk: null,
       nextField: 'orders',
@@ -1225,9 +1223,9 @@ export default {
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
+    this.getEngineersDebounced = AwesomeDebouncePromise(this.getEngineers, 500)
+
     this.countries = await this.$store.dispatch('getCountries')
-    const { results } = await this.engineerService.list()
-    this.engineers = results
 
     if (this.isCreate) {
       this.order = new OrderModel()
@@ -1279,6 +1277,18 @@ export default {
     }
   },
   methods: {
+    // Search engineers
+    async getEngineers(query) {
+      this.isLookupLoading.engineers = true
+      try {
+        this.engineers = await this.userListService.search(query, 'engineer' )
+        // this.engineers = await this.engineerService.search(query)
+      } catch(error) {
+        console.log('Error searching engineers', error)
+        this.errorToast(this.$trans('Error searching engineers'))
+      }
+      this.isLookupLoading.engineers = false
+    },
     // remove engineers
     unassignEngineer( engineer, event ) {
       // console.log( 'unassignEngineer('+engineer.user_id+')' )
@@ -1409,7 +1419,6 @@ export default {
       this.equipment_location = option.id
       this.location = option.name
     },
-
     // order lines
     deleteOrderLine(index) {
       this.deletedOrderlines.push(this.order.orderlines[index])
@@ -1498,8 +1507,8 @@ export default {
       this.emptyInfoLine()
     },
 
-    engineerLabel({ full_name }) {
-      return full_name
+    engineerLabel({ name }) {
+      return name
     },
 
     salesLabel({ email }) {
@@ -1864,7 +1873,7 @@ export default {
         this.errorToast(this.$trans('There were errors assigning to users'))
       }
 
-      this.asssignResult = newSelectedEngineers
+      this.assignResult = newSelectedEngineers
       this.selectedEngineers = []
 
       return errors
