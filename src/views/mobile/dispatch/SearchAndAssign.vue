@@ -7,6 +7,19 @@
       :cancel-disabled="true"
       @ok="searchAndAssignDone"
     >
+      <b-row v-if="selectedOrders.length > 0">
+        <b-col cols="12">
+          <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
+          <span v-for="(order, index) in selectedOrders" :key="order.id">
+          {{ order.order_id }}
+          <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
+        </span>
+          <b-link class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
+            <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
+          </b-link>
+        </b-col>
+      </b-row>
+
       <form ref="search-form" @submit.stop.prevent="searchAndAssignDone">
         <b-container fluid>
           <b-row role="group">
@@ -109,14 +122,26 @@ export default {
       isLoading: false,
       orderStatusColorCode: '#666',
       orders: [],
-      assigned: []
+      selectedOrders: []
     }
   },
   methods: {
-    selectOrder(item) {
-      debugger;
-      console.log( 'Select order to list.')
-      this.assigned.push( item );
+    selectOrder(order) {
+      for( let i=0; i<this.selectedOrders.length; i++) {
+        if (this.selectedOrders[i].id === order.id) {
+          return
+        }
+      }
+
+      this.selectedOrders.push(order)
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+    },
+    removeSelectedOrder(index) {
+      this.selectedOrders.splice(index, 1)
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+    },
+    doAssign() {
+      this.searchAndAssignDone();
     },
     search() {
       // at least 2 characters...
@@ -130,7 +155,9 @@ export default {
       }
     },
     searchAndAssignDone() {
-      this.$emit('search-and-assign-done', this.assigned)
+      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.$emit('search-and-assign-done', this.selectedOrders.length>0 )
+      // this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
     },
     async loadData() {
       this.isLoading = true
@@ -138,7 +165,6 @@ export default {
       try {
         const data = await this.model.list()
         this.orders = data.results
-        // this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
@@ -165,6 +191,13 @@ export default {
 #search-modal-wide input.form-control.form-control-sm {
   max-width: 200px;
   margin: 0 auto 2em auto;
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 3rem;
+  border-color: transparent;
+  box-shadow: 0 0.25ex 0.5ex rgba(0, 0, 0, 0.25);
+  min-height: 2.6rem;
+  padding: 2ex;
+  font-size: 0.85rem;
 }
 
 /* this is a bit of a cheat but hey ho */

@@ -130,7 +130,7 @@
       <SearchAndAssign
         id="search-modal-wide"
         ref="search-modal-wide"
-        @do-search="handleSearchOk"/>
+        @search-and-assign-done="searchAndAssignDone"/>
 
       <!--
       <SearchModal
@@ -634,6 +634,28 @@ export default {
         this.errorToast(this.$trans('Error splitting order'))
         this.showOverlay = false
       }
+    },
+    async searchAndAssignDone(newAssignMode) {
+      debugger
+      this.loadDone = false
+      this.assignMode = newAssignMode
+
+      if (this.assignMode) {
+        this.alreadyAssignedUsers = []
+        this.selectedOrders = await this.$store.dispatch('getAssignOrders')
+        for (const order of this.selectedOrders) {
+          this.alreadyAssignedUsers.push(...order.assigned_user_info.map((userInfo) => {
+            return {
+              user_id: userInfo.user_id,
+              full_name: userInfo.full_name
+            }
+          }))
+        }
+      } else {
+        this.alreadyAssignedUsers = []
+      }
+
+      this.loadDone = true
     },
     // search
     handleSearchOk(val) {
