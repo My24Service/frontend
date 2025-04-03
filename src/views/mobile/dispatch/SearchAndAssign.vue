@@ -70,43 +70,6 @@
           </li>
         </ul>
       </div>
-  <!--
-
-      <b-table
-        id="order-table"
-        small
-        :busy='isLoading'
-        :fields="fields"
-        :items="orders"
-        responsive="md"
-        class="data-table"
-        tbody-tr-class="order-row"
-      >
-        <template #table-busy>
-          <div class="text-center text-danger my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-
-        <template #cell(order_id)="data">
-          {{ data.value }}
-        </template>
-
-        <template #cell(order_name)="data">
-          <span class="order-company-name">{{ data.value }}</span>
-        </template>
-
-        <template #cell(icons)="data">
-          <div class="h2 float-right">
-            <IconLinkAssign
-              v-bind:title="$trans('Assign')"
-              v-bind:method="function() { selectOrder(data.item) }"
-            />
-          </div>
-        </template>
-      </b-table> -->
-
     </b-modal>
   </div>
 </template>
@@ -145,88 +108,7 @@ export default {
       lastQuery: false,
       isLoading: false,
       orderStatusColorCode: '#666',
-      orders: [
-        {
-            "id": 699,
-            "uuid": "93d292f4-ac7e-4201-8959-a89aff03d2e5",
-            "customer_id": "2164",
-            "order_id": "10798",
-            "customer_reference": null,
-            "order_reference": "AAABBBCCC",
-            "order_type": "Onderhoud",
-            "customer_remarks": "",
-            "description": null,
-            "start_date": "19/09/2025",
-            "start_time": null,
-            "end_date": "19/09/2025",
-            "end_time": null,
-            "order_date": "19/09/2025",
-            "remarks": null,
-            "order_name": "Test B.V.",
-            "order_address": "testbvstraat 130",
-            "order_postal": "3562LM",
-            "order_city": "Utrecht",
-            "order_country_code": "NL",
-            "order_tel": "",
-            "order_mobile": "0650384058",
-            "order_email": "my24service.jordey@gmail.com",
-            "order_contact": "Test 1",
-            "workorder_pdf_url": "",
-            "documents": [],
-            "user_order_is_available": true,
-            "created": "16/09/2024 15:14",
-            "statuses": [
-            ],
-            "orderlines": [
-              {
-                "id": 1348,
-                "product": "S12EW airconditioner met wifi",
-                "location": "Kantoor 1",
-                "remarks": "1x per jaar in maart",
-                "price_purchase": "0.00",
-                "price_selling": "0.00",
-                "amount": 1,
-                "material_relation": null,
-                "location_relation_inventory": null,
-                "purchase_order_material": null,
-                "equipment": 20,
-                "equipment_location": 14,
-                "maintenance_contract": 13
-              }
-            ],
-            "required_assigned": "3/1 (300.00%)",
-            "required_users": 1,
-            "user_order_available_set_count": 0,
-            "assigned_count": 3,
-            "customer_relation": 1169,
-            "customer_rate_avg": null,
-            "workorder_url": "http://demo.my24service.com:3000/#/orders/orders/workorder/93d292f4-ac7e-4201-8959-a89aff03d2e5",
-            "infolines": [],
-            "workorder_documents": [],
-            "branch": null,
-            "assigned_user_info": [
-              {
-                "user_id": 44,
-                "full_name": "Melissa Vedder",
-                "license_plate": ""
-              },
-              {
-                "user_id": 57,
-                "full_name": "kees kees",
-                "license_plate": ""
-              },
-              {
-                "user_id": 65,
-                "full_name": "Hugo van Galen M",
-                "license_plate": ""
-              }
-            ],
-            "last_update": "2025-03-20T12:53:28.346404",
-            "last_status": "Opdracht toegewezen aan mv",
-            "last_status_full": "20/03/2025 12:53 Opdracht toegewezen aan mv",
-            "last_status_date": "2025-03-20T12:53:28.346404"
-        }
-      ],
+      orders: [],
       assigned: []
     }
   },
