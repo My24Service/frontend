@@ -44,14 +44,14 @@
           </li>
           <li v-if="!isLoading" v-for="order in orders" :key="order.id" style="">
             <div class="listing-item" style="">
-              <span class="order-id">#{{ order.order_id }}<span v-if="$store.getters.getOrderListMustIncludeReference"> / {{ order.order_reference }}</span></span>
+              <span class="order-id">#{{ order.order_id }}<span v-if="$store.getters.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span></span>
               <span class="order-type">{{ order.order_type }}</span>
               <span class="order-company-name">{{ order.order_name }}</span>
               <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
                 {{ order.start_date }}<b v-if="order.start_time !== null" :title="order.start_time"><b-icon icon="clock"></b-icon></b>
               </span>
-              <span class="order-status">
-                <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`" :title="order.last_status_full"></b-icon>
+              <span class="order-status" :title="order.last_status_full">
+                <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`"></b-icon>
                 {{ order.last_status_full }}
               </span>
 
@@ -276,7 +276,8 @@ export default {
 
 <style>
 #search-modal-wide .modal-dialog.modal-md {
-  max-width: 80vw;
+  width: 75vw;
+  max-width: 855px;
 }
 
 #search-modal-wide input.form-control.form-control-sm {
@@ -289,19 +290,50 @@ export default {
   display: none;
 }
 
+#search-modal-wide .headings span {
+  width: 10rem;
+}
+
+#search-modal-wide .order-actions {
+  width: 30px;
+  max-width: 30px;
+  min-width: 30px;
+}
 #search-modal-wide .order-status {
-  min-width: 20rem;
+  min-width: 10rem;
+  width: 10rem;
 }
 
 #search-modal-wide .listing-item .order-type {
   font-weight: bold;
+  min-width: 6rem;
+  width: 6rem;
+}
+
+#search-modal-wide .headings span.order-type {
+  min-width: 6rem;
+  width: 6rem;
+}
+
+#search-modal-wide .listing-item .order-start-date {
+  max-width: 9rem;
+  min-width: 9rem;
+  width: 9rem;
+}
+
+#search-modal-wide .headings .order-company-name,
+#search-modal-wide .listing-item .order-company-name {
+  min-width: 7rem;
+  max-width: 7rem;
+  width: 7rem;
 }
 
 #search-modal-wide .listing-item .order-actions {
-  position: absolute;
-  right: 40px;
+  /* position: absolute;
+  right: 40px; */
   text-align:right;
 }
+
 
 #search-modal-wide .list-empty,
 #search-modal-wide .headings span {
@@ -325,5 +357,9 @@ export default {
 
 #search-modal-wide .list-loading div {
   margin: auto;
+}
+
+#search-modal-wide .overflow-auto {
+  max-height: calc(75vh - 200px);
 }
 </style>
