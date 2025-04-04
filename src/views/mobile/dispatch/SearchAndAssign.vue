@@ -6,19 +6,9 @@
       v-bind:title="$trans('Search')"
       :cancel-disabled="true"
       @ok="searchAndAssignDone"
+      :ok-title="$trans('Close')"
     >
-      <b-row v-if="selectedOrders.length > 0">
-        <b-col cols="12">
-          <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
-          <span v-for="(order, index) in selectedOrders" :key="order.id">
-          {{ order.order_id }}
-          <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
-        </span>
-          <b-link class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
-            <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
-          </b-link>
-        </b-col>
-      </b-row>
+
 
       <form ref="search-form" @submit.stop.prevent="searchAndAssignDone">
         <b-container fluid>
@@ -29,7 +19,6 @@
           </b-row>
         </b-container>
       </form>
-
 
       <div class="overflow-auto">
         <ul class="listing order-list full-size">
@@ -83,6 +72,23 @@
           </li>
         </ul>
       </div>
+      <div slot="modal-footer" class="w-100">
+        <b-row v-if="selectedOrders.length > 0" class="selected-orders float-left">
+          <span class="dimmed">{{ $trans('Selected') }} ({{ selectedOrders.length }}):</span>
+          <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
+              {{ order.order_id }}
+              <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+              <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+        </span>
+          <!--
+          <b-button variant="primary" v-if="selectedOrders.length > 0" @click.prevent="searchAndAssignDone()">
+            <b-icon-person-lines-fill></b-icon-person-lines-fill>
+            {{ $trans('Assign these orders') }}
+          </b-button>
+          -->
+        </b-row>
+        <b-btn class="float-right" variant="primary" @click="searchAndAssignDone()" :data-non-zero="hasSelectedOrders()?'1':'0'"><b-icon-person-lines-fill class="assign-icon"></b-icon-person-lines-fill>&nbsp;<span>{{ buttonLabel }}</span></b-btn>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -122,10 +128,22 @@ export default {
       isLoading: false,
       orderStatusColorCode: '#666',
       orders: [],
-      selectedOrders: []
+      selectedOrders: [],
+      buttonLabel: this.$trans('Close')
     }
   },
   methods: {
+    hasSelectedOrders() {
+      return this.selectedOrders.length > 0;
+    },
+    updateButtonLabel() {
+      if (this.hasSelectedOrders()) {
+        this.buttonLabel = this.$trans('Assign these orders')
+      } else {
+        this.buttonLabel = this.$trans('Close')
+      }
+    },
+
     selectOrder(order) {
       for( let i=0; i<this.selectedOrders.length; i++) {
         if (this.selectedOrders[i].id === order.id) {
@@ -134,19 +152,19 @@ export default {
       }
 
       this.selectedOrders.push(order)
+      this.updateButtonLabel();
+
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
+      this.updateButtonLabel();
+
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
-    doAssign() {
-      this.searchAndAssignDone();
-    },
     search() {
-      // at least 2 characters...
+      // at least 2 characters and prevent searching the same thing over and over...
       if (this.query.trim().length > 2) {
-        // prevent searching the same thing over and over...
         if (this.lastQuery === false || this.lastQuery !== this.query) {
           this.lastQuery = this.query;
           this.model.setSearchQuery(this.query);
@@ -157,14 +175,18 @@ export default {
     searchAndAssignDone() {
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
       this.$emit('search-and-assign-done', this.selectedOrders.length>0 )
-      // this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
+      this.hide();
     },
     async loadData() {
       this.isLoading = true
 
       try {
+        this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
+
         const data = await this.model.list()
         this.orders = data.results
+
+        this.updateButtonLabel();
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
@@ -243,38 +265,32 @@ export default {
   width: 7rem;
 }
 
-#search-modal-wide .listing-item .order-actions {
-  /* position: absolute;
-  right: 40px; */
-  text-align:right;
-}
+#search-modal-wide .listing-item .order-actions { text-align:right }
 
 
 #search-modal-wide .list-empty,
-#search-modal-wide .headings span {
-  color: #a9adae;
-}
+#search-modal-wide .headings span { color: #a9adae }
 
 #search-modal-wide .order-status,
-#search-modal-wide .order-id {
-  color: #a9adae;
-}
+#search-modal-wide .order-id { color: #a9adae }
 
-#search-modal-wide .order-id {
-  text-align: end;
-  width: 10rem;
-}
+#search-modal-wide .order-id { text-align: end; width: 10rem; }
 
-#search-modal-wide .list-empty div {
-  margin: auto;
-  padding: 5px 10px;
-}
+#search-modal-wide .list-empty div { margin: auto; padding: 5px 10px; }
 
-#search-modal-wide .list-loading div {
-  margin: auto;
-}
+#search-modal-wide .list-loading div { margin: auto }
+#search-modal-wide .overflow-auto { max-height: calc(75vh - 200px) }
 
-#search-modal-wide .overflow-auto {
-  max-height: calc(75vh - 200px);
-}
+#search-modal-wide .btn.btn-primary { color: #fff !important }
+#search-modal-wide .btn.btn-primary .assign-icon { display: none }
+#search-modal-wide .btn.btn-primary[data-non-zero="1"] .assign-icon { display: inline-block }
+
+.selected-orders { padding: 0.4rem 1rem 0.4rem 1rem }
+
+.selected-order { margin-left: 5px }
+.selected-order .icon {cursor: pointer}
+
+.selected-order:not(:hover) .icon:last-of-type,
+.selected-order:hover .icon:first-of-type { display: none }
+
 </style>

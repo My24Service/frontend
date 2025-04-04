@@ -636,7 +636,6 @@ export default {
       }
     },
     async searchAndAssignDone(newAssignMode) {
-      debugger
       this.loadDone = false
       this.assignMode = newAssignMode
 
