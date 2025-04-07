@@ -11,7 +11,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
     </b-modal>
     <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-id">
-        #{{ order.order_id }}<span v-if="this.$store.getters.getOrderListMustIncludeReference"> / {{ order.order_reference }}</span>
+        #{{ order.order_id }}<span v-if="this.$store.getters.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span>
     </router-link>
     <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-type">
       <strong>{{ order.order_type }}</strong>

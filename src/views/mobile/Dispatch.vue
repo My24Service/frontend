@@ -127,11 +127,17 @@
 
       </div>
 
+      <SearchAndAssign
+        id="search-modal-wide"
+        ref="search-modal-wide"
+        @search-and-assign-done="searchAndAssignDone"/>
+
+      <!--
       <SearchModal
         id="search-modal"
         ref="search-modal"
         @do-search="handleSearchOk"
-      />
+      /> -->
 
       <b-modal
         ref="dispatch-change-date-modal"
@@ -426,7 +432,8 @@ import {
   AssignedOrderService
 } from '@/models/mobile/AssignedOrder'
 import { AssignService } from '@/models/mobile/Assign'
-import SearchModal from '../../components/SearchModal.vue'
+// import SearchModal from '../../components/SearchModal.vue'
+import SearchAndAssign from "@/views/mobile/dispatch/SearchAndAssign.vue";
 import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from '@/constants';
 import Multiselect from "vue-multiselect";
@@ -445,7 +452,8 @@ export default {
   name: 'DispatchNew',
   components: {
     Multiselect,
-    SearchModal,
+    // SearchModal,
+    SearchAndAssign,
     DispatchWeek,
     TimeInput
   },
@@ -627,9 +635,30 @@ export default {
         this.showOverlay = false
       }
     },
+    async searchAndAssignDone(newAssignMode) {
+      this.loadDone = false
+      this.assignMode = newAssignMode
+
+      if (this.assignMode) {
+        this.alreadyAssignedUsers = []
+        this.selectedOrders = await this.$store.dispatch('getAssignOrders')
+        for (const order of this.selectedOrders) {
+          this.alreadyAssignedUsers.push(...order.assigned_user_info.map((userInfo) => {
+            return {
+              user_id: userInfo.user_id,
+              full_name: userInfo.full_name
+            }
+          }))
+        }
+      } else {
+        this.alreadyAssignedUsers = []
+      }
+
+      this.loadDone = true
+    },
     // search
     handleSearchOk(val) {
-      this.$refs['search-modal'].hide()
+      this.$refs['search-modal-wide'].hide()
       setTimeout(() => {
         // this.dispatch.setSearchQuery(val)
         // this.dispatch.search()
@@ -637,7 +666,7 @@ export default {
       this.loadData()
     },
     showSearchModal() {
-      this.$refs['search-modal'].show()
+      this.$refs['search-modal-wide'].show()
     },
     // rest
     loadToday() {
