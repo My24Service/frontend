@@ -223,6 +223,29 @@ export default {
     },
   },
   data() {
+    let workHourDataFields = [
+      {label: this.$trans('Date'), key: 'date', thClass: 'col-tight'},
+      {label: this.$trans('Source'), key: 'source', thClass: 'col-tight'},
+      {label: this.$trans('Work start'), key: 'work_start', thClass: 'col-wide'},
+      {label: this.$trans('Work end'), key: 'work_end', thClass: 'col-wide'},
+      {label: this.$trans('Travel to'), key: 'travel_to', thClass: 'col-wide'},
+      {label: this.$trans('Travel back'), key: 'travel_back', thClass: 'col-wide'},
+      {label: this.$trans('Distance to'), key: 'distance_to', thClass: 'col-wide'},
+      {label: this.$trans('Distance back'), key: 'distance_back', thClass: 'col-wide'},
+      {label: this.$trans('Description'), key: 'description'},
+    ];
+
+    const break_calculation_settings = this.$store.getters.getAutomaticBreakCalculationSettings;
+    if (break_calculation_settings
+      && break_calculation_settings.after > 0
+      && break_calculation_settings.duration > 0) {
+      workHourDataFields.splice( 4, 0, {
+        label: this.$trans('Break'),
+        key: 'break_duration',
+        thClass: 'col-tight'
+      } );
+    }
+
     return {
       today: null,
       data: [],
@@ -237,17 +260,7 @@ export default {
       // excludeDays: ['Su', 'Sa'],
       excludeDays: [],
       workhourData: [],
-      workhourDataFields: [
-        {label: this.$trans('Date'), key: 'date'},
-        {label: this.$trans('Source'), key: 'source'},
-        {label: this.$trans('Work start'), key: 'work_start'},
-        {label: this.$trans('Work end'), key: 'work_end'},
-        {label: this.$trans('Travel to'), key: 'travel_to'},
-        {label: this.$trans('Travel back'), key: 'travel_back'},
-        {label: this.$trans('Distance to'), key: 'distance_to'},
-        {label: this.$trans('Distance back'), key: 'distance_back'},
-        {label: this.$trans('Description'), key: 'description'},
-      ],
+      workhourDataFields: workHourDataFields,
       leaveData: [],
       leaveDataFields: [
         {label: this.$trans('Date'), key: 'date'},
@@ -557,6 +570,10 @@ export default {
     _processDataDetail(data) {
       this.fullName = data.full_name
       this.workhourData = data.workhour_data
+      // for(const data of this.workhourData) {
+      //   data['distance_to_and_back'] = data['distance_to'] + ' / ' + data['distance_back'];
+      //   data['travel_to_and_back'] = data['travel_to'] + ' / ' + data['travel_back'];
+      // }
       this.leaveData = data.leave_data
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
@@ -625,6 +642,14 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+table#workhours-table thead tr th.col-tight {
+  max-width: 5.5rem;
+  width: 5rem;
+}
 
+table#workhours-table thead tr th.col-wide {
+  max-width: 9.5rem;
+  width: 9rem;
+}
 </style>

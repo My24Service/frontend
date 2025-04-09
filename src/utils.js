@@ -191,6 +191,7 @@ let componentMixin = {
         'distance_total': this.$trans('Distance total'),
         'extra_work': this.$trans('Total extra work'),
         'actual_work': this.$trans('Total actual work'),
+        'breaks_total': this.$trans('Total breaks'),
         'distance_fixed_rate_amount': this.$trans('Total trips')
       }
 
