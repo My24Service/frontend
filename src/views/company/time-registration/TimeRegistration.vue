@@ -10,6 +10,7 @@
       <TimeRegistrationData
         ref="user-time-registration"
         :user_id="user_id"
+        @reloadData="loadData()"
       />
     </div>
   </div>

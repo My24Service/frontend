@@ -187,11 +187,11 @@ let componentMixin = {
     translateHoursField(field) {
       const allFields = {
         'work_total': this.$trans("Work total"),
+        'break_total': this.$trans('Breaks total'),
         'travel_total': this.$trans('Travel total'),
         'distance_total': this.$trans('Distance total'),
         'extra_work': this.$trans('Total extra work'),
         'actual_work': this.$trans('Total actual work'),
-        'breaks_total': this.$trans('Total breaks'),
         'distance_fixed_rate_amount': this.$trans('Total trips')
       }
 

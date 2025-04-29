@@ -135,7 +135,8 @@ import {
 import ExpiryConditionForm from "./ExpiryConditionForm";
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
-  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE
+  STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE,
+  STATUSCODE_TYPE_WORK_HOURS
 } from "../../../models/company/AbstractStatuscode";
 import {
   LeaveStatuscodeModel,
@@ -145,6 +146,10 @@ import {
   SickLeaveStatuscodeModel,
   SickLeaveStatuscodeService
 } from "../../../models/company/SickLeaveStatuscode";
+import {
+  WorkHoursStatuscodeModel,
+  WorkHoursStatuscodeService
+} from "@/models/company/WorkHoursStatuscode";
 
 export default {
   setup() {
@@ -213,6 +218,10 @@ export default {
       case STATUSCODE_TYPE_SICK_LEAVE:
         this.statuscodeService = new SickLeaveStatuscodeService();
         this.statuscode = new SickLeaveStatuscodeModel({});
+        break;
+      case STATUSCODE_TYPE_WORK_HOURS:
+        this.statuscodeService = new WorkHoursStatuscodeService();
+        this.statuscode = new WorkHoursStatuscodeModel({});
         break;
       default:
         throw `unknown list_type: ${this.list_type}`;

@@ -365,11 +365,14 @@ import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION,
   STATUSCODE_TYPE_SICK_LEAVE,
-  STATUSCODE_TYPE_INVOICE
+  STATUSCODE_TYPE_INVOICE,
+  STATUSCODE_TYPE_WORK_HOURS
 } from "@/models/company/AbstractStatuscode";
 import {LeaveActionModel} from "@/models/company/LeaveAction";
 import {SickLeaveActionModel} from "@/models/company/SickLeaveAction";
-import { InvoiceActionModel } from "@/models/invoices/InvoiceAction";
+import {InvoiceActionModel} from "@/models/invoices/InvoiceAction";
+import {WorkHoursActionModel} from "@/models/company/WorkHoursAction";
+
 
 export default {
   setup() {
@@ -452,6 +455,11 @@ export default {
         {value: 'send_sms', text: this.$trans('send sms')},
         {value: 'send_fcm', text: this.$trans('send FCM')},
       ],
+      actionTypesWorkHours: [
+        {value: 'email', text: this.$trans('send email')},
+        {value: 'send_sms', text: this.$trans('send sms')},
+        {value: 'send_fcm', text: this.$trans('send FCM')},
+      ],
     };
   },
   computed: {
@@ -479,6 +487,10 @@ export default {
       case STATUSCODE_TYPE_INVOICE:
         this.actionTypes = this.actionTypesInvoice;
         this.action = new InvoiceActionModel({})
+        break;
+      case STATUSCODE_TYPE_WORK_HOURS:
+        this.actionTypes = this.actionTypesWorkHours;
+        this.action = new WorkHoursActionModel({})
         break;
       default:
         throw `unknown list_type: ${this.list_type}`;
