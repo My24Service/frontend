@@ -190,6 +190,19 @@
         responsive="md"
         class="data-table"
       >
+          <template v-slot:cell(work_times)="{ item }">
+            {{ item.work_start }} - {{ item.work_end }}
+            <!--<span v-if="item.unforeseen_start">{{ item.unforeseen_start }} - {{ item.unforeseen_end }}</span>
+            <span v-else>{{ item.work_start }} - {{ item.work_end }}</span>-->
+          </template>
+          <template v-slot:cell(work_travel)="{ item }">
+            <span v-if="item.travel_to === '00:00:00' && item.travel_back === '00:00:00'" class="dimmed">&ndash;</span>
+            <span v-else>{{ item.travel_to }} / {{ item.travel_back }}</span>
+          </template>
+          <template v-slot:cell(work_distance)="{ item }">
+            <span v-if="item.distance_to === 0 && item.distance_back === 0" class="dimmed">&ndash;</span>
+            <span v-else>{{ item.distance_to }} / {{ item.distance_back }}</span>
+          </template>
           <template v-slot:cell(work_correct)="{ item }">
             <b-btn v-if="isPlanning" variant="outline" class="highlight-on-hover-row" size="sm" @click="editCorrection(item)">+ / -</b-btn>
           </template>
@@ -251,15 +264,20 @@ export default {
     },
   },
   data() {
+    debugger
     let workHourDataFields = [
       {label: this.$trans('Date'), key: 'date', thClass: 'col-tight'},
       {label: this.$trans('Source'), key: 'source', thClass: 'col-tight'},
-      {label: this.$trans('Work start'), key: 'work_start', thClass: 'col-wide'},
-      {label: this.$trans('Work end'), key: 'work_end', thClass: 'col-wide'},
-      {label: this.$trans('Travel to'), key: 'travel_to', thClass: 'col-wide'},
-      {label: this.$trans('Travel back'), key: 'travel_back', thClass: 'col-wide'},
-      {label: this.$trans('Distance to'), key: 'distance_to', thClass: 'col-wide'},
-      {label: this.$trans('Distance back'), key: 'distance_back', thClass: 'col-wide'},
+      {key: 'work_times', label: this.$trans('Work start') + ' - ' + this.$trans('Work end'), thClass: 'col-wide'},
+      // {label: this.$trans('Work start'), key: 'work_start', thClass: 'col-wide'},
+      // {label: this.$trans('Work end'), key: 'work_end', thClass: 'col-wide'},
+      {key: 'work_travel', label: this.$trans('Travel to') + ' / ' + this.$trans('Travel back'), thClass: 'col-wide'},
+      // {label: this.$trans('Travel to'), key: 'travel_to', thClass: 'col-wide'},
+      // {label: this.$trans('Travel back'), key: 'travel_back', thClass: 'col-wide'},
+      {key: 'work_distance', label: this.$trans('Distance to / back'), thClass: 'col-wide'},
+      // {label: this.$trans('Distance to'), key: 'distance_to', thClass: 'col-wide'},
+      // {label: this.$trans('Distance back'), key: 'distance_back', thClass: 'col-wide'},
+      {label: this.$trans('Project'), key: 'project'},
       {label: this.$trans('Description'), key: 'description'},
       {key: 'work_correct', label:'', thClass:'col-tight'},
     ];
