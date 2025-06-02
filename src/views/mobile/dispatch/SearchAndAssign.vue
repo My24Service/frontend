@@ -54,7 +54,8 @@
               <span class="order-type">{{ order.order_type }}</span>
               <span class="order-company-name">{{ order.order_name }}</span>
               <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
-                {{ order.start_date }}<b v-if="order.start_time !== null" :title="order.start_time"><b-icon icon="clock"></b-icon></b>
+                {{ order.start_date }}
+                <b @click="editStartDate(order)" v-if="order.start_time !== null" :title="order.start_time"><b-icon icon="clock"></b-icon></b>
               </span>
               <span class="order-status" :title="order.last_status_full">
                 <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`"></b-icon>
@@ -93,6 +94,7 @@
         </b-row>
         <b-btn class="float-right" variant="primary" @click="searchAndAssignDone()" :data-non-zero="hasSelectedOrders()?'1':'0'"><b-icon-person-lines-fill class="assign-icon"></b-icon-person-lines-fill>&nbsp;<span>{{ buttonLabel }}</span></b-btn>
       </div>
+      <EditStartDate id="edit-start-date" ref="edit-start-date" @edit-start-date-done="editStartDateDone"></EditStartDate>
     </b-modal>
   </div>
 </template>
@@ -107,9 +109,11 @@ import IconLinkAssign from "@/components/IconLinkAssign.vue";
 import my24 from "@/services/my24";
 import {OrderService} from "@/models/orders/Order";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
+import EditStartDate from "@/views/mobile/dispatch/EditStartDate.vue";
 
 export default {
   components: {
+    EditStartDate,
     IconLinkAssign,
     ButtonLinkSearch,
     IconLinkEdit,
@@ -149,6 +153,31 @@ export default {
     },
     handleOk(bvModalEvent) {
       bvModalEvent.preventDefault()
+    },
+    editStartDateDone(order_id, start_date, end_date) {
+      debugger;
+
+      // If we received new data, then we should probably make the call
+      // to update the actual dates for this order on the backend.
+      this.model.update(order_id, { "start_date": start_date, "end_date": end_date } );
+
+      // Additionally, we need to find this order in the list, so that
+      // we can update the start-date with the updated value.
+      for (const order of this.orders) {
+        if (order.id === order_id) {
+          order.start_date = start_date;
+          break;
+        }
+      }
+
+      console.log("editStartDateDone "+order_id+", from "+start_date+" to "+end_date);
+    },
+    editStartDate(order) {
+      console.log(order);
+      // debugger;
+
+      this.$refs['edit-start-date'].setFromOrder(order);
+      this.$refs['edit-start-date'].show();
     },
     selectOrder(order) {
       for( let i=0; i<this.selectedOrders.length; i++) {
