@@ -190,8 +190,45 @@
         responsive="md"
         class="data-table"
       >
+          <template v-slot:cell(work_times)="{ item }">
+            {{ item.work_start }} - {{ item.work_end }}
+            <!--<span v-if="item.unforeseen_start">{{ item.unforeseen_start }} - {{ item.unforeseen_end }}</span>
+            <span v-else>{{ item.work_start }} - {{ item.work_end }}</span>-->
+          </template>
+          <template v-slot:cell(work_travel)="{ item }">
+            <span v-if="item.travel_to === '00:00:00' && item.travel_back === '00:00:00'" class="dimmed">&ndash;</span>
+            <span v-else>{{ item.travel_to }} / {{ item.travel_back }}</span>
+          </template>
+          <template v-slot:cell(work_distance)="{ item }">
+            <span v-if="item.distance_to === 0 && item.distance_back === 0" class="dimmed">&ndash;</span>
+            <span v-else>{{ item.distance_to }} / {{ item.distance_back }}</span>
+          </template>
+          <template v-slot:cell(work_correct)="{ item }">
+            <b-btn v-if="isPlanning" variant="outline" class="highlight-on-hover-row" size="sm" @click="editCorrection(item)">+ / -</b-btn>
+          </template>
       </b-table>
     </div>
+
+    <b-modal ref="time-correction-modal" id="time-correction-modal" v-bind:title="$trans('Work hours correction')" @ok="commitTimeCorrection()">
+      <form ref="edit-correction-form">
+        <b-container fluid>
+          <b-row role="group">
+            <b-col size="12">
+              <p>{{ this.$trans('Enter a correction value in minutes or in the form hh:mm.')}}</p>
+              <b-form-input size="sm" autofocus v-model="timeEntryCorrection" v-bind:placeholder="$trans('Enter time value')" @xxchange="onChangeTimeCorrection()" @update="onChangeTimeCorrection()" style="margin-top:1rem;margin-bottom:1rem;width:10rem;"/>
+              <div class="dimmed"><span v-html="timeEntryCorrectionAsText"></span></div>
+              <!--
+              <b-form-checkbox
+                id="notify-user"
+                name="notify-user"
+                v-model="timeEntryCorrectionNotify"
+                value="notify"
+                unchecked-value="no">{{ this.$trans('Notify user') }}</b-form-checkbox> -->
+            </b-col>
+          </b-row>
+        </b-container>
+      </form>
+    </b-modal>
 
   </div>
 </template>
@@ -200,6 +237,7 @@
 import moment from 'moment/min/moment-with-locales'
 import {componentMixin} from "../utils";
 import {use} from "chai";
+import timeRegistrationModel, {TimeRegistrationService} from "@/models/company/TimeRegistration";
 
 export default {
   mixins: [componentMixin],
@@ -210,6 +248,9 @@ export default {
       default: null
     },
   },
+  emits: [
+    'reloadData'
+  ],
   watch: {
     activeDateQueryMode: {
       handler() {
@@ -223,6 +264,42 @@ export default {
     },
   },
   data() {
+    debugger
+    let workHourDataFields = [
+      {label: this.$trans('Date'), key: 'date', thClass: 'col-tight'},
+      {label: this.$trans('Source'), key: 'source', thClass: 'col-tight'},
+      {key: 'work_times', label: this.$trans('Work start') + ' - ' + this.$trans('Work end'), thClass: 'col-wide'},
+      // {label: this.$trans('Work start'), key: 'work_start', thClass: 'col-wide'},
+      // {label: this.$trans('Work end'), key: 'work_end', thClass: 'col-wide'},
+      {key: 'work_travel', label: this.$trans('Travel to') + ' / ' + this.$trans('Travel back'), thClass: 'col-wide'},
+      // {label: this.$trans('Travel to'), key: 'travel_to', thClass: 'col-wide'},
+      // {label: this.$trans('Travel back'), key: 'travel_back', thClass: 'col-wide'},
+      {key: 'work_distance', label: this.$trans('Distance to / back'), thClass: 'col-wide'},
+      // {label: this.$trans('Distance to'), key: 'distance_to', thClass: 'col-wide'},
+      // {label: this.$trans('Distance back'), key: 'distance_back', thClass: 'col-wide'},
+      {label: this.$trans('Project'), key: 'project'},
+      {label: this.$trans('Description'), key: 'description'},
+      {key: 'work_correct', label:'', thClass:'col-tight'},
+    ];
+
+    /*
+    // The breaks are calculated over an entire day, so showing these /per entry/ makes no
+    // sense, as this would be invalid if multiple entries happen on a single days. If the
+    // breaks are calculated on a /per registration/ basis, then this would make sense to
+    // include. It's now intentionally disabled and left as a comment in case this should
+    // be enabled in the future.
+    const break_calculation_settings = this.$store.getters.getAutomaticBreakCalculationSettings;
+    if (break_calculation_settings
+      && break_calculation_settings.after > 0
+      && break_calculation_settings.duration > 0) {
+      workHourDataFields.splice( 4, 0, {
+        label: this.$trans('Break'),
+        key: 'break_duration',
+        thClass: 'col-tight'
+      } );
+    }
+    */
+
     return {
       today: null,
       data: [],
@@ -237,17 +314,7 @@ export default {
       // excludeDays: ['Su', 'Sa'],
       excludeDays: [],
       workhourData: [],
-      workhourDataFields: [
-        {label: this.$trans('Date'), key: 'date'},
-        {label: this.$trans('Source'), key: 'source'},
-        {label: this.$trans('Work start'), key: 'work_start'},
-        {label: this.$trans('Work end'), key: 'work_end'},
-        {label: this.$trans('Travel to'), key: 'travel_to'},
-        {label: this.$trans('Travel back'), key: 'travel_back'},
-        {label: this.$trans('Distance to'), key: 'distance_to'},
-        {label: this.$trans('Distance back'), key: 'distance_back'},
-        {label: this.$trans('Description'), key: 'description'},
-      ],
+      workhourDataFields: workHourDataFields,
       leaveData: [],
       leaveDataFields: [
         {label: this.$trans('Date'), key: 'date'},
@@ -268,7 +335,12 @@ export default {
           value: 'year'
         },
       ],
-      listTitle: null
+      listTitle: null,
+      timeEntry: null,
+      timeEntryCorrection: '00:00', // value entered
+      timeEntryParsed: '', // (+/-)10:00 value
+      timeEntryCorrectionAsText: '', // message below input
+      timeEntryCorrectionNotify: false,
     }
   },
   computed: {
@@ -300,6 +372,70 @@ export default {
     this.activeDateQueryMode = this.$route.query.mode ? this.$route.query.mode : 'week'
   },
   methods: {
+    async commitTimeCorrection() {
+      // console.log( 'Apply correction of '+this.timeEntryParsed+ ' to id#' + this.timeEntry.id )
+      if (this.timeEntryParsed === this.timeEntry.work_correction) {
+        // console.log( 'work correction value has not changed');
+        return;
+      }
+      // After posting this, we need to update the whole UI.
+      const result = await timeRegistrationModel.editCorrection(this.timeEntry.source_id, {
+        'work_correction': this.timeEntryParsed,
+        'work_correction_by_user': this.user_id,
+        'notify_engineer': this.timeEntryCorrectionNotify
+      } );
+      if (result && result.result) {
+        this.$emit('reloadData')
+      }
+    },
+    onChangeTimeCorrection() {
+      // Attempts to parse this as a valid hh:mm value, otherwise assume minutes. This
+      // will update the text in the modal dialog as well to show how it will be interpreted.
+      this.timeEntryCorrection = this.timeEntryCorrection.trim();
+      const parsed = (this.timeEntryCorrection === '' || this.timeEntryCorrection === '-')
+        ? null
+        : this.timeEntryCorrection.split(':');
+
+      if (parsed == null || parsed.length === 0 || parsed.length > 2) {
+        this.timeEntryCorrectionAsText = this.$trans('Invalid time');
+        return;
+      }
+
+      let hh = 0, mm = 0;
+      let is_negative = 0;
+      if (parsed.length === 1) {
+        mm = parseInt( parsed[0] );
+        is_negative = mm < 0;
+        if (is_negative) mm = 0 - mm;
+        hh = Math.floor(mm / 60)
+        mm -= (hh * 60)
+      } else { // if (parsed.length === 2) {
+        hh = parseInt( parsed[0] );
+        is_negative = hh < 0;
+
+        if (is_negative) hh = 0 - hh;
+        mm = parseInt( parsed[1] );
+      }
+
+      const display_time = ''+hh+':'+(mm < 10 ? '0': '')+mm
+      this.timeEntryParsed = (is_negative ? '-' : '')+display_time;
+      this.timeEntryCorrectionAsText = this.$trans( is_negative ? 'Subtract' : 'Add ') + ' ' + display_time;
+    },
+    editCorrection(timeEntry) {
+      this.timeEntry = timeEntry;
+      this.timeEntryCorrectionNotify = false;
+      if (timeEntry) {
+        this.timeEntryCorrectionAsText = ''
+
+        this.timeEntryCorrection = timeEntry.work_correction;
+        if (this.timeEntryCorrection.trim().length === 0) {
+          this.timeEntryCorrection = '0';
+        }
+        this.onChangeTimeCorrection()
+
+        this.$refs['time-correction-modal'].show();
+      }
+    },
     getListTitle(totalsFields) {
       let result = []
       for (const key of totalsFields) {
@@ -557,6 +693,10 @@ export default {
     _processDataDetail(data) {
       this.fullName = data.full_name
       this.workhourData = data.workhour_data
+      // for(const data of this.workhourData) {
+      //   data['distance_to_and_back'] = data['distance_to'] + ' / ' + data['distance_back'];
+      //   data['travel_to_and_back'] = data['travel_to'] + ' / ' + data['travel_back'];
+      // }
       this.leaveData = data.leave_data
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
@@ -625,6 +765,19 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+table#workhours-table thead tr th.col-tight {
+  max-width: 5.5rem;
+  width: 5rem;
+}
+
+table#workhours-table thead tr th.col-wide {
+  max-width: 9.5rem;
+  width: 9rem;
+}
+
+tr:hover button.highlight-on-hover-row {
+  background-color: #ff9933;
+}
 
 </style>

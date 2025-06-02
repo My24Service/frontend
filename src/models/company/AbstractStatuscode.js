@@ -7,6 +7,7 @@ export const STATUSCODE_TYPE_TRIP = 'trip'
 export const STATUSCODE_TYPE_LEAVE_HOURS = 'leave_hours'
 export const STATUSCODE_TYPE_SICK_LEAVE = 'sick_leave'
 export const STATUSCODE_TYPE_PURCHASE_ORDER = 'purchase_order'
+export const STATUSCODE_TYPE_WORK_HOURS = 'work_hours'
 
 class AbstractStatuscodeModel {
   statuscode

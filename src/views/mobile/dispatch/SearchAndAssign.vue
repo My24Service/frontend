@@ -10,11 +10,15 @@
     >
 
 
-      <form ref="search-form" @submit.stop.prevent="searchAndAssignDone">
+      <form ref="search-form">
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-                <b-form-input size="sm" autofocus v-model="query" v-bind:placeholder="$trans('Type to search orders')" @change="searchDebounced" @update="searchDebounced"></b-form-input>
+                <b-form-input size="sm" autofocus v-model="query"
+                              v-bind:placeholder="$trans('Type to search orders')"
+                              @keydown.enter.native="search"
+                              @change="searchDebounced"
+                              @update="searchDebounced"></b-form-input>
             </b-col>
           </b-row>
         </b-container>
@@ -143,7 +147,9 @@ export default {
         this.buttonLabel = this.$trans('Close')
       }
     },
-
+    handleOk(bvModalEvent) {
+      bvModalEvent.preventDefault()
+    },
     selectOrder(order) {
       for( let i=0; i<this.selectedOrders.length; i++) {
         if (this.selectedOrders[i].id === order.id) {
@@ -163,13 +169,21 @@ export default {
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
     search() {
-      // at least 2 characters and prevent searching the same thing over and over...
-      if (this.query.trim().length > 2) {
+      // At least 2 characters and prevent searching the same thing over and over,
+      // and if its empty, we reset the list of results. If data is currently
+      // being fetched, we ignore the search completely to prevent weird race-conditions.
+      if (this.isLoading) return;
+
+      const query_length = this.query.trim().length;
+      if (query_length > 2) {
         if (this.lastQuery === false || this.lastQuery !== this.query) {
           this.lastQuery = this.query;
           this.model.setSearchQuery(this.query);
           this.loadData();
         }
+      } else if (query_length === 0) {
+        this.lastQuery = false;
+        this.orders = [];
       }
     },
     searchAndAssignDone() {
