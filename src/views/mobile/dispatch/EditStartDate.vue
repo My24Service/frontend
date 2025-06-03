@@ -6,7 +6,7 @@
       v-bind:title="$trans('Edit Order Dates')"
       @ok="editStartDateDone"
       @cancel="editStartDateCancel"
-      :ok-title="$trans('Close')">
+      :ok-title="$trans('Save')">
       <p>{{ this.$trans('Edit the dates for this order.')}}</p>
       <!-- <p>Order #<span>{{ order_id }}</span></p> -->
       <form ref="start-date-form">
@@ -19,8 +19,10 @@
               id="start_date"
               v-model="start_date"
               :placeholder="$trans('Select date')"
-              locale="nl"
+              v-bind:locale="lang"
+              value-as-date=true
               :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+              @input="check_date_start()"
             ></b-form-datepicker>
           </b-form-group>
 
@@ -34,8 +36,11 @@
                 v-model="end_date"
                 class="mb-2"
                 :placeholder="$trans('Select date')"
-                locale="nl"
+                v-bind:locale="lang"
+                value-as-date=true
+                :state="this.error == null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                @input="check_date_end()"
               ></b-form-datepicker>
             </b-form-group>
         </b-container>
@@ -49,38 +54,48 @@ import moment from "moment/moment";
 
 export default {
   async created () {
-    const lang = this.$store.getters.getCurrentLanguage
+    // this.lang = this.$store.getters.getCurrentLanguage
     this.$moment = moment
-    this.$moment.locale(lang)
+    this.$moment.locale(this.lang)
   },
   data() {
-    console.log('EditStartDate data');
     return {
+      lang: 'nl',
       start_date: null,
       end_date: null,
-      order_id: null
+      order_id: null,
+      error: null,
     }
   },
   methods: {
     setFromOrder(order) {
-      console.log('EditStartDate setFromOrder');
       this.order_id = order.id;
-
-      this.start_date = this.$moment(order.start_date, 'DD/MM/YYYY').toDate()
-      this.end_date = this.$moment(order.end_date, 'DD/MM/YYYY').toDate()
-
-      debugger
-      console.log("order_id="+this.order_id+", start="+this.start_date+", end="+this.end_date);
+      this.start_date = this.$moment(order.start_date, 'DD/MM/YYYY').toDate();
+      this.end_date = this.$moment(order.end_date, 'DD/MM/YYYY').toDate();
+    },
+    check_date_start() {
+      this.error = null;
+      if (this.end_date < this.start_date) {
+        this.end_date = this.start_date;
+      }
+    },
+    check_date_end() {
+      if (this.end_date < this.start_date) {
+        this.error = this.$trans('The end date cannot lie before start date')
+      } else {
+        this.error = null;
+      }
     },
     editStartDateCancel() {
-      debugger
       this.hide();
     },
-    editStartDateDone() {
-      ///this.$store.dispatch('setAssignOrders', this.selectedOrders)
-      ///
-      this.$emit('edit-start-date-done', this.order_id, this.start_date, this.end_date )
-      this.hide();
+    editStartDateDone(e) {
+      if (this.error == null) {
+        this.$emit('edit-start-date-done', this.order_id, this.start_date, this.end_date)
+        this.hide();
+      } else {
+        e.preventDefault();
+      }
     },
     show() {
       console.log('EditStartDate SHOW');

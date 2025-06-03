@@ -55,7 +55,9 @@
               <span class="order-company-name">{{ order.order_name }}</span>
               <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
                 {{ order.start_date }}
-                <b @click="editStartDate(order)" v-if="order.start_time !== null" :title="order.start_time"><b-icon icon="clock"></b-icon></b>
+                <b-link v-bind:title="$trans('Edit start and end dates')" v-on:click.native="editStartDate(order)">
+                  <b-icon-pencil class="edit-icon"></b-icon-pencil>
+                </b-link>
               </span>
               <span class="order-status" :title="order.last_status_full">
                 <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`"></b-icon>
@@ -125,11 +127,13 @@ export default {
     this.searchDebounced = AwesomeDebouncePromise(this.search, 500)
   },
   async created() {
+    this.lang = this.$store.getters.getCurrentLanguage;
     this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
   },
   data() {
     return {
       model: new OrderService(),
+      lang: null,
       searchDebounced: null,
       query: '',
       lastQuery: false,
@@ -154,23 +158,41 @@ export default {
     handleOk(bvModalEvent) {
       bvModalEvent.preventDefault()
     },
-    editStartDateDone(order_id, start_date, end_date) {
-      debugger;
+    async editStartDateDone(order_id, start_date, end_date) {
+      console.log("editStartDateDone "+order_id+", from "+start_date+" to "+end_date);
+      debugger
 
-      // If we received new data, then we should probably make the call
-      // to update the actual dates for this order on the backend.
-      this.model.update(order_id, { "start_date": start_date, "end_date": end_date } );
+      const formatHelper = function(date) {
+        const m = date.getMonth() + 1; // 0 based
+        const y = date.getFullYear();
+        const d = date.getDate();
+        let formatted = '';
+        if (d < 10) formatted += '0';
+        formatted += d + '/';
+        if (m < 10) formatted += '0';
+        formatted += m + '/' + y;
+        return formatted;
+      };
+
+      const formatted_start = formatHelper(start_date);
+      const formatted_end = formatHelper(end_date);
+
+      // If we received new data, then we should  update the actual dates for this order on the backend.
+      await this.model.update( order_id, { "start_date": formatted_start, "end_date": formatted_end} );
 
       // Additionally, we need to find this order in the list, so that
       // we can update the start-date with the updated value.
+      // The dates are always dd/mm/yyyy (Dutch locale)
       for (const order of this.orders) {
         if (order.id === order_id) {
-          order.start_date = start_date;
+          order.start_date = formatted_start;
           break;
         }
       }
 
-      console.log("editStartDateDone "+order_id+", from "+start_date+" to "+end_date);
+      debugger
+      console.log('done')
+
     },
     editStartDate(order) {
       console.log(order);
