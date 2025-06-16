@@ -194,6 +194,7 @@
             {{ item.work_start }} - {{ item.work_end }}
             <!--<span v-if="item.unforeseen_start">{{ item.unforeseen_start }} - {{ item.unforeseen_end }}</span>
             <span v-else>{{ item.work_start }} - {{ item.work_end }}</span>-->
+            <span v-if="item.work_correction !== '00:00'" style="color:red">{{ item.work_correction }}</span>
           </template>
           <template v-slot:cell(work_travel)="{ item }">
             <span v-if="item.travel_to === '00:00:00' && item.travel_back === '00:00:00'" class="dimmed">&ndash;</span>
@@ -268,7 +269,7 @@ export default {
     let workHourDataFields = [
       {label: this.$trans('Date'), key: 'date', thClass: 'col-tight'},
       {label: this.$trans('Source'), key: 'source', thClass: 'col-tight'},
-      {key: 'work_times', label: this.$trans('Work start') + ' - ' + this.$trans('Work end'), thClass: 'col-wide'},
+      {key: 'work_times', label: this.$trans('Work start') + ' - ' + this.$trans('Work end') + ' ±', thClass: 'col-wider'},
       // {label: this.$trans('Work start'), key: 'work_start', thClass: 'col-wide'},
       // {label: this.$trans('Work end'), key: 'work_end', thClass: 'col-wide'},
       {key: 'work_travel', label: this.$trans('Travel to') + ' / ' + this.$trans('Travel back'), thClass: 'col-wide'},
@@ -691,12 +692,19 @@ export default {
       this.data = results
     },
     _processDataDetail(data) {
-      this.fullName = data.full_name
-      this.workhourData = data.workhour_data
-      // for(const data of this.workhourData) {
-      //   data['distance_to_and_back'] = data['distance_to'] + ' / ' + data['distance_back'];
-      //   data['travel_to_and_back'] = data['travel_to'] + ' / ' + data['travel_back'];
-      // }
+      this.fullName = data.full_name;
+      this.workhourData = data.workhour_data;
+      for(const data of this.workhourData) {
+        if (data['work_correction'] !== '00:00') {
+          // remove initial zero for times like '02:00'
+          if (data['work_correction'][0] === '0') {
+            data['work_correction'] = data['work_correction'].substring(1);
+          }
+          if (data['work_correction'][0] !== '-') {
+            data['work_correction'] = '+' + data['work_correction'];
+          }
+        }
+      }
       this.leaveData = data.leave_data
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
@@ -774,6 +782,11 @@ table#workhours-table thead tr th.col-tight {
 table#workhours-table thead tr th.col-wide {
   max-width: 9.5rem;
   width: 9rem;
+}
+
+table#workhours-table thead tr th.col-wider {
+  max-width: 12.5rem;
+  width: 12rem;
 }
 
 tr:hover button.highlight-on-hover-row {
