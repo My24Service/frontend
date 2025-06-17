@@ -145,6 +145,8 @@ const themes = {
   'poelgeest': 'theme-shltr',
   'graafbakeries': 'theme-shltr',
   'dpwn': 'theme-shltr',
+  'dpworld': 'theme-shltr',
+  'trioworld': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 
