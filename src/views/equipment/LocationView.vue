@@ -21,8 +21,30 @@
       <div class='panel col-1-3 sidebar'>
         <h6>{{ $trans('Location details') }}</h6>
         <dl>
-            <dt>{{ $trans('Name') }}</dt>
-            <dd v-if="location">{{ location.name }}</dd>
+          <dt>{{ $trans('Name') }}</dt>
+          <dd v-if="location">{{ location.name }}</dd>
+          <dt v-if="hasQr" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
+          <dd v-if="hasQr">
+            <div v-if="location.qr_path" class="qr-container">
+              <b-link
+                class="btn btn-sm btn-outline" :href="location.qr_path"
+                target="_blank"
+                :title="$trans('Open QR in new tab')">
+                <img alt="QR code" class="qr-code-image" :src="location.qr_path" />
+              </b-link>
+              <p>
+                <a href="javascript:" @click="download(location)">
+                  {{ $trans("Download") }}
+                </a>
+              </p>
+            </div>
+            <img v-if="!location.qr_path" :alt="$trans('No QR yet')" class="qr-code-image" :src="NO_IMAGE_URL" />
+            <p>
+              <b-button @click="recreate_qr">
+                {{ $trans("Recreate")}}
+              </b-button>
+            </p>
+          </dd>
         </dl>
       </div>
 
@@ -83,12 +105,13 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "../../utils";
+import {componentMixin} from "@/utils";
+import {NO_IMAGE_URL} from '@/constants'
 
-import { OrderService } from '../../models/orders/Order.js'
-import { LocationService } from "../../models/equipment/location";
+import { OrderService } from '@/models/orders/Order'
+import { LocationService } from "@/models/equipment/location";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
-import {LocationDocumentService} from "@/models/equipment/Document";
+import my24 from "@/services/my24";
 
 export default {
   mixins: [componentMixin],
@@ -102,6 +125,7 @@ export default {
   },
   data() {
     return {
+      NO_IMAGE_URL,
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
@@ -140,8 +164,9 @@ export default {
     }
   },
   computed: {
-    LocationDocumentService() {
-      return LocationDocumentService
+    hasQr() {
+      const qrType = this.$store.getters.getEquipmentQrType;
+      return qrType !== 'none'
     },
     editLink() {
       if (this.hasBranches) {
@@ -171,6 +196,16 @@ export default {
         console.log('error fetching location stats', error)
         this.errorToast(`${this.$trans('Error fetching location insights:')} ${error}`)
         // this.isLoading = false
+      }
+    },
+    download(equipment) {
+      my24.downloadItem(equipment.qr_path, `${equipment.name} ${equipment.uuid}.png`)
+    },
+    async recreate_qr() {
+      const result = await this.locationService.recreateQr(this.pk)
+      this.location = {
+        ...this.location,
+        qr_path: result.qr_path
       }
     },
     listLink() {
@@ -227,8 +262,11 @@ export default {
 </script>
 
 <style scoped>
-  .wide {
-    min-width: 66%;
-    max-width: unset;
-  }
+.qr-code-image {
+  width: 250px;
+  height: 250px;
+}
+.qr-container {
+  text-align: center;
+}
 </style>
