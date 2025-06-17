@@ -21,6 +21,11 @@ class LocationService extends BaseModel {
 
   url = '/equipment/location/'
 
+  recreateQr(pk) {
+    return this.axios.post(`${this.url}${pk}/create_qr/`)
+      .then((response) => response.data)
+  }
+
   searchCustomer(query, customerPk) {
     return this.axios.get(`${this.url}autocomplete/?q=${query}&customer=${customerPk}`)
       .then((response) => response.data)
