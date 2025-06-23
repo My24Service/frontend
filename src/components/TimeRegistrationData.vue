@@ -380,7 +380,8 @@ export default {
         return;
       }
       // After posting this, we need to update the whole UI.
-      const result = await timeRegistrationModel.editCorrection(this.timeEntry.source_id, {
+      const result = await timeRegistrationModel.editCorrection(this.timeEntry.id, {
+        'source': this.timeEntry.source,
         'work_correction': this.timeEntryParsed,
         'work_correction_by_user': this.user_id,
         'notify_engineer': this.timeEntryCorrectionNotify
