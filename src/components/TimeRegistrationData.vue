@@ -265,7 +265,6 @@ export default {
     },
   },
   data() {
-    debugger
     let workHourDataFields = [
       {label: this.$trans('Date'), key: 'date', thClass: 'col-tight'},
       {label: this.$trans('Source'), key: 'source', thClass: 'col-tight'},
