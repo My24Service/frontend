@@ -159,9 +159,7 @@ export default {
       bvModalEvent.preventDefault()
     },
     async editStartDateDone(order_id, start_date, end_date) {
-      console.log("editStartDateDone "+order_id+", from "+start_date+" to "+end_date);
-      debugger
-
+      // console.log("editStartDateDone "+order_id+", from "+start_date+" to "+end_date);
       const formatHelper = function(date) {
         const m = date.getMonth() + 1; // 0 based
         const y = date.getFullYear();
@@ -190,12 +188,12 @@ export default {
         }
       }
 
-      debugger
-      console.log('done')
+      // debugger
+      // console.log('done')
 
     },
     editStartDate(order) {
-      console.log(order);
+      // console.log(order);
       // debugger;
 
       this.$refs['edit-start-date'].setFromOrder(order);
