@@ -397,30 +397,27 @@ export default {
         ? null
         : this.timeEntryCorrection.split(':');
 
-      if (parsed == null || parsed.length === 0 || parsed.length > 2) {
+      if (parsed != null && parsed.length > 0 && parsed.length < 3) {
+        let hh = 0, mm = 0;
+        const is_negative = parsed[0][0] === '-';
+        if (parsed.length === 1) {
+          mm = parseInt( parsed[0] );
+          if (isNaN( mm )) mm = 0;
+          if (is_negative) mm = 0 - mm;
+          hh = Math.floor(mm / 60)
+          mm -= (hh * 60)
+        } else { // if (parsed.length === 2) {
+          hh = parseInt( parsed[0] );
+          if (isNaN( hh )) hh = 0;
+          if (is_negative) hh = 0 - hh;
+          mm = parseInt( parsed[1] );
+        }
+        const display_time = ''+hh+':'+(mm < 10 ? '0': '')+mm
+        this.timeEntryParsed = (is_negative ? '-' : '')+display_time;
+        this.timeEntryCorrectionAsText = this.$trans( is_negative ? 'Subtract' : 'Add ') + ' ' + display_time;
+      } else {
         this.timeEntryCorrectionAsText = this.$trans('Invalid time');
-        return;
       }
-
-      let hh = 0, mm = 0;
-      let is_negative = 0;
-      if (parsed.length === 1) {
-        mm = parseInt( parsed[0] );
-        is_negative = mm < 0;
-        if (is_negative) mm = 0 - mm;
-        hh = Math.floor(mm / 60)
-        mm -= (hh * 60)
-      } else { // if (parsed.length === 2) {
-        hh = parseInt( parsed[0] );
-        is_negative = hh < 0;
-
-        if (is_negative) hh = 0 - hh;
-        mm = parseInt( parsed[1] );
-      }
-
-      const display_time = ''+hh+':'+(mm < 10 ? '0': '')+mm
-      this.timeEntryParsed = (is_negative ? '-' : '')+display_time;
-      this.timeEntryCorrectionAsText = this.$trans( is_negative ? 'Subtract' : 'Add ') + ' ' + display_time;
     },
     editCorrection(timeEntry) {
       this.timeEntry = timeEntry;
