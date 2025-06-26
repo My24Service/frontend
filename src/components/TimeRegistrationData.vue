@@ -192,8 +192,6 @@
       >
           <template v-slot:cell(work_times)="{ item }">
             {{ item.work_start }} - {{ item.work_end }}
-            <!--<span v-if="item.unforeseen_start">{{ item.unforeseen_start }} - {{ item.unforeseen_end }}</span>
-            <span v-else>{{ item.work_start }} - {{ item.work_end }}</span>-->
             <span v-if="item.work_correction !== '00:00'" style="color:red">{{ item.work_correction }}</span>
           </template>
           <template v-slot:cell(work_travel)="{ item }">
@@ -692,17 +690,6 @@ export default {
     _processDataDetail(data) {
       this.fullName = data.full_name;
       this.workhourData = data.workhour_data;
-      for(const data of this.workhourData) {
-        if (data['work_correction'] !== '00:00') {
-          // remove initial zero for times like '02:00'
-          if (data['work_correction'][0] === '0') {
-            data['work_correction'] = data['work_correction'].substring(1);
-          }
-          if (data['work_correction'][0] !== '-') {
-            data['work_correction'] = '+' + data['work_correction'];
-          }
-        }
-      }
       this.leaveData = data.leave_data
       this.date_list = data.date_list.map((dateIn) => {
         return this.$moment(dateIn).format('YYYY-MM-DD')
