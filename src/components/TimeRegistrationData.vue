@@ -411,6 +411,7 @@ export default {
           if (isNaN( hh )) hh = 0;
           if (is_negative) hh = 0 - hh;
           mm = parseInt( parsed[1] );
+          if (isNaN(mm)) mm = 0;
         }
         const display_time = ''+hh+':'+(mm < 10 ? '0': '')+mm
         this.timeEntryParsed = (is_negative ? '-' : '')+display_time;
