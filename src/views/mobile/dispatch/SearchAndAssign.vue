@@ -10,11 +10,15 @@
     >
 
 
-      <form ref="search-form" @submit.stop.prevent="searchAndAssignDone">
+      <form ref="search-form">
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-                <b-form-input size="sm" autofocus v-model="query" v-bind:placeholder="$trans('Type to search orders')" @change="searchDebounced" @update="searchDebounced"></b-form-input>
+                <b-form-input size="sm" autofocus v-model="query"
+                              v-bind:placeholder="$trans('Type to search orders')"
+                              @keydown.enter.native="search"
+                              @change="searchDebounced"
+                              @update="searchDebounced"></b-form-input>
             </b-col>
           </b-row>
         </b-container>
@@ -50,7 +54,10 @@
               <span class="order-type">{{ order.order_type }}</span>
               <span class="order-company-name">{{ order.order_name }}</span>
               <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
-                {{ order.start_date }}<b v-if="order.start_time !== null" :title="order.start_time"><b-icon icon="clock"></b-icon></b>
+                {{ order.start_date }}
+                <b-link v-bind:title="$trans('Edit start and end dates')" v-on:click.native="editStartDate(order)">
+                  <b-icon-pencil class="edit-icon"></b-icon-pencil>
+                </b-link>
               </span>
               <span class="order-status" :title="order.last_status_full">
                 <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`"></b-icon>
@@ -89,6 +96,7 @@
         </b-row>
         <b-btn class="float-right" variant="primary" @click="searchAndAssignDone()" :data-non-zero="hasSelectedOrders()?'1':'0'"><b-icon-person-lines-fill class="assign-icon"></b-icon-person-lines-fill>&nbsp;<span>{{ buttonLabel }}</span></b-btn>
       </div>
+      <EditStartDate id="edit-start-date" ref="edit-start-date" @edit-start-date-done="editStartDateDone"></EditStartDate>
     </b-modal>
   </div>
 </template>
@@ -103,9 +111,11 @@ import IconLinkAssign from "@/components/IconLinkAssign.vue";
 import my24 from "@/services/my24";
 import {OrderService} from "@/models/orders/Order";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
+import EditStartDate from "@/views/mobile/dispatch/EditStartDate.vue";
 
 export default {
   components: {
+    EditStartDate,
     IconLinkAssign,
     ButtonLinkSearch,
     IconLinkEdit,
@@ -117,11 +127,13 @@ export default {
     this.searchDebounced = AwesomeDebouncePromise(this.search, 500)
   },
   async created() {
+    this.lang = this.$store.getters.getCurrentLanguage;
     this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
   },
   data() {
     return {
       model: new OrderService(),
+      lang: null,
       searchDebounced: null,
       query: '',
       lastQuery: false,
@@ -143,7 +155,50 @@ export default {
         this.buttonLabel = this.$trans('Close')
       }
     },
+    handleOk(bvModalEvent) {
+      bvModalEvent.preventDefault()
+    },
+    async editStartDateDone(order_id, start_date, end_date) {
+      // console.log("editStartDateDone "+order_id+", from "+start_date+" to "+end_date);
+      const formatHelper = function(date) {
+        const m = date.getMonth() + 1; // 0 based
+        const y = date.getFullYear();
+        const d = date.getDate();
+        let formatted = '';
+        if (d < 10) formatted += '0';
+        formatted += d + '/';
+        if (m < 10) formatted += '0';
+        formatted += m + '/' + y;
+        return formatted;
+      };
 
+      const formatted_start = formatHelper(start_date);
+      const formatted_end = formatHelper(end_date);
+
+      // If we received new data, then we should  update the actual dates for this order on the backend.
+      await this.model.update( order_id, { "start_date": formatted_start, "end_date": formatted_end} );
+
+      // Additionally, we need to find this order in the list, so that
+      // we can update the start-date with the updated value.
+      // The dates are always dd/mm/yyyy (Dutch locale)
+      for (const order of this.orders) {
+        if (order.id === order_id) {
+          order.start_date = formatted_start;
+          break;
+        }
+      }
+
+      // debugger
+      // console.log('done')
+
+    },
+    editStartDate(order) {
+      // console.log(order);
+      // debugger;
+
+      this.$refs['edit-start-date'].setFromOrder(order);
+      this.$refs['edit-start-date'].show();
+    },
     selectOrder(order) {
       for( let i=0; i<this.selectedOrders.length; i++) {
         if (this.selectedOrders[i].id === order.id) {
@@ -163,13 +218,21 @@ export default {
       this.$store.dispatch('setAssignOrders', this.selectedOrders)
     },
     search() {
-      // at least 2 characters and prevent searching the same thing over and over...
-      if (this.query.trim().length > 2) {
+      // At least 2 characters and prevent searching the same thing over and over,
+      // and if its empty, we reset the list of results. If data is currently
+      // being fetched, we ignore the search completely to prevent weird race-conditions.
+      if (this.isLoading) return;
+
+      const query_length = this.query.trim().length;
+      if (query_length > 2) {
         if (this.lastQuery === false || this.lastQuery !== this.query) {
           this.lastQuery = this.query;
           this.model.setSearchQuery(this.query);
           this.loadData();
         }
+      } else if (query_length === 0) {
+        this.lastQuery = false;
+        this.orders = [];
       }
     },
     searchAndAssignDone() {

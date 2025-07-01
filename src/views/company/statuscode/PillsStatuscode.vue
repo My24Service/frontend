@@ -21,6 +21,11 @@
         :to="{ name: `company-statuscodes-${STATUSCODE_TYPE_INVOICE}` }">
         {{ $trans('Invoice') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive(STATUSCODE_TYPE_WORK_HOURS)"
+        :to="{ name: `company-statuscodes-${STATUSCODE_TYPE_WORK_HOURS}` }">
+        {{ $trans('Work hours') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
@@ -30,7 +35,7 @@ import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION,
   STATUSCODE_TYPE_SICK_LEAVE,
-  STATUSCODE_TYPE_INVOICE
+  STATUSCODE_TYPE_INVOICE, STATUSCODE_TYPE_WORK_HOURS
 } from "@/models/company/AbstractStatuscode";
 
 export default {
@@ -43,7 +48,8 @@ export default {
       STATUSCODE_TYPE_LEAVE_HOURS,
       STATUSCODE_TYPE_QUOTATION,
       STATUSCODE_TYPE_SICK_LEAVE,
-      STATUSCODE_TYPE_INVOICE
+      STATUSCODE_TYPE_INVOICE,
+      STATUSCODE_TYPE_WORK_HOURS,
     }
   },
   async created() {

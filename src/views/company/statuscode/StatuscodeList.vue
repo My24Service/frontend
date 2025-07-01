@@ -165,11 +165,12 @@ import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION,
   STATUSCODE_TYPE_SICK_LEAVE,
-  STATUSCODE_TYPE_INVOICE
+  STATUSCODE_TYPE_INVOICE, STATUSCODE_TYPE_WORK_HOURS
 } from "@/models/company/AbstractStatuscode";
 import {LeaveStatuscodeService} from "@/models/company/LeaveStatuscode";
 import {SickLeaveStatuscodeService} from "@/models/company/SickLeaveStatuscode";
 import { InvoiceStatuscodeService } from "@/models/invoices/InvoiceStatuscode";
+import {WorkHoursStatuscodeService} from "@/models/company/WorkHoursStatuscode";
 
 export default {
   props: {
@@ -237,6 +238,9 @@ export default {
         break;
       case STATUSCODE_TYPE_INVOICE:
         this.statuscodeService = new InvoiceStatuscodeService();
+        break;
+      case STATUSCODE_TYPE_WORK_HOURS:
+        this.statuscodeService = new WorkHoursStatuscodeService();
         break;
       default:
         throw `unknown list_type: ${this.list_type}`;

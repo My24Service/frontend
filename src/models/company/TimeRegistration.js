@@ -9,6 +9,10 @@ class TimeRegistrationService extends BaseModel {
     return this.axios.get(url).then((response) => response.data)
   }
 
+  editCorrection(pk, data) {
+    const url = `${this.url}time-correction/${pk}/`;
+    return this.axios.patch(url, data).then((response) => response.data)
+  }
 }
 
 let timeRegistrationModel = new TimeRegistrationService();

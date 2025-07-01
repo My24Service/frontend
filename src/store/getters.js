@@ -115,4 +115,16 @@ export const getters = {
   getOrderListMustIncludeReference(state) {
     return state.memberInfo.settings.order_list_include_reference
   },
+  getAutomaticBreakCalculationEnabled(state) {
+    return state.memberInfo.settings.break_calculation
+  },
+  getAutomaticBreakCalculationSettings(state) {
+    if (state.memberInfo.settings.break_calculation)
+      return {
+        after: parseInt(state.memberInfo.settings.break_calculation_after_minutes),
+        duration: parseInt(state.memberInfo.settings.break_calculation_duration_minutes),
+      };
+
+    return { after: 0, duration: 0};
+  }
 }
