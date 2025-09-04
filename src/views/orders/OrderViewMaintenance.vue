@@ -61,11 +61,14 @@
             <dt v-if="!isCustomer">{{ $trans("Customer remarks") }}</dt>
             <dd v-if="!isCustomer">{{ order.customer_remarks }}</dd>
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
-            <dd v-if="!hasBranches" class="flex-columns">
+            <dd class="flex-columns">
               <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank">
                 <b-icon icon="file-earmark"></b-icon>
                 {{ $trans('View workorder') }}
               </b-link>
+
+            </dd>
+            <dd v-if="!hasBranches" class="flex-columns">
 
               <b-link class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
                 <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}

@@ -23,6 +23,7 @@ class Account extends BaseModel {
     const postData = {
       username: username,
       password: password,
+      app: 'web'
     }
 
     return this.axios.post(url, postData, headers).then((response) => response.data)
