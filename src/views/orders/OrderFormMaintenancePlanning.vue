@@ -1432,7 +1432,6 @@ export default {
       this.product = item.product
       this.location = item.location
       this.remarks = item.remarks
-      console.log(this.orderline_pk)
 
       if (item.equipment && item.equipment_location) {
         this.equipment_location = item.equipment_location
