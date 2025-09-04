@@ -260,7 +260,6 @@ export default {
     showMembers() {
       return this.hasMembers;
     },
-
     hasOrders() {
       return this.hasAccessToModule('orders')
     },

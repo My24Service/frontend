@@ -75,6 +75,11 @@
         :to="{ name: 'company-activity' }">
         {{ $trans('Activity') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('connector-gripp')"
+        :to="{ name: 'company-connector-gripp' }">
+        {{ $trans('Gripp') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
@@ -107,6 +112,9 @@ export default {
     hasStatuscodes() {
       const has = ['demo', 'viavandalen']
       return has.indexOf(this.$store.getters.getMemberCompanycode) !== -1;
+    },
+    hasAccessToConnectorGripp() {
+      return this.hasAccessToModule('connector-gripp')
     },
     getToRouteMaintenanceUsers() {
       if (this.hasAccessToModule('company', 'engineer-users') && !this.hasBranches) {
