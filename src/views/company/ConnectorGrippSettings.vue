@@ -212,7 +212,17 @@ export default {
       this.isLoading = true
 
       try {
-        await memberModel.updateSettings(this.settings)
+        // If we don't send all the settings, all the other settings
+        // will be reset to defaults, so we /must/ include everything.
+        const allSettings = await memberModel.getSettings()
+        const localKeys = Object.keys(this.settings);
+        for (const key in allSettings) {
+          if (localKeys.indexOf(key) > -1) {
+            allSettings[ key ] = this.settings[ key ];
+          }
+        }
+        
+        await memberModel.updateSettings(allSettings);
         this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -242,15 +252,13 @@ export default {
           'gripp_tasktype_travel': ''
         };
 
-        const defaultKeys = Object.keys(this.settings);
+        const localKeys = Object.keys(this.settings);
 
-        // This fetches *all* the settings, we are only interested in a subset to show
-        // on this page.
+        // This fetches *all* the settings, we are only interested in a
+        // subset to show on this page.
         const data = await memberModel.getSettings()
-
-
         for (const key in data) {
-          if (defaultKeys.indexOf(key) > -1) {
+          if (localKeys.indexOf(key) > -1) {
             this.settings[ key ] = data[ key ];
           }
         }
