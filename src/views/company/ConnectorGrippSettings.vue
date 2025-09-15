@@ -172,6 +172,7 @@
         <tr><td>Wanneer: </td><td><strong>Opdracht</strong> wordt <strong>gewijzigd</strong></td></tr>
         <tr><td>Actie: </td><td><strong>Web verzoek</strong></td></tr>
         <tr><td>Verzoek methode:</td><td><strong>POST</strong></td></tr>
+        <tr><td>Headers:</td><td><strong>User-Agent: My24Service/Gripp<br/>Content-Type: application/json</strong></td></tr>
         <tr><td>Web adres:</td><td><code>https://{{member["companycode"]}}.my24service.com/api/connector/gripp/{{settings["gripp_webhook_password"]}}/automation-updated-order</code></td></tr>
         <tr><td>Body:</td><td><code>{ "number": {nummer} }</code></td></tr>
       </table>
@@ -221,7 +222,7 @@ export default {
             allSettings[ key ] = this.settings[ key ];
           }
         }
-        
+
         await memberModel.updateSettings(allSettings);
         this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
         this.buttonDisabled = false
