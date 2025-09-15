@@ -173,7 +173,7 @@
         <tr><td>Actie: </td><td><strong>Web verzoek</strong></td></tr>
         <tr><td>Verzoek methode:</td><td><strong>POST</strong></td></tr>
         <tr><td>Web adres:</td><td><code>https://{{member["companycode"]}}.my24service.com/api/connector/gripp/{{settings["gripp_webhook_password"]}}/automation-updated-order</code></td></tr>
-        <tr><td>Body:</td><td><code>{ "number": {number} }</code></td></tr>
+        <tr><td>Body:</td><td><code>{ "number": {nummer} }</code></td></tr>
       </table>
     </div>
   </div>
