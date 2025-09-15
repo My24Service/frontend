@@ -433,7 +433,8 @@ export default {
         { value: "status", text: this.$trans("status change original order") },
         { value: "email_workorders", text: this.$trans("email workorders") },
         { value: "send_sms", text: this.$trans("send sms") },
-        { value: "send_fcm", text: this.$trans("send FCM") }
+        { value: "send_fcm", text: this.$trans("send FCM") },
+        { value: "send_to_gripp", text: this.$trans("send to Gripp") },
       ],
       actionTypesQuotation: [
         {value: 'email', text: this.$trans('send email')},

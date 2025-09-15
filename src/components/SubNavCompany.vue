@@ -113,9 +113,6 @@ export default {
       const has = ['demo', 'viavandalen']
       return has.indexOf(this.$store.getters.getMemberCompanycode) !== -1;
     },
-    hasAccessToConnectorGripp() {
-      return this.hasAccessToModule('connector-gripp')
-    },
     getToRouteMaintenanceUsers() {
       if (this.hasAccessToModule('company', 'engineer-users') && !this.hasBranches) {
         return { name: 'users-engineers' }
