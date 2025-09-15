@@ -239,7 +239,7 @@ export default {
           'gripp_project_phase_match': '0',
           'gripp_project_phase_workorder_signed': '',
           'gripp_tasktype_hours': '',
-          'gripp_tasktype_minutes': ''
+          'gripp_tasktype_travel': ''
         };
 
         const defaultKeys = Object.keys(this.settings);
