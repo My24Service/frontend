@@ -115,6 +115,9 @@ export const getters = {
   getOrderListMustIncludeReference(state) {
     return state.memberInfo.settings.order_list_include_reference
   },
+  getGrippAvailable(state) {
+    return state.memberInfo.settings.gripp_api_available;
+  },
   getAutomaticBreakCalculationEnabled(state) {
     return state.memberInfo.settings.break_calculation
   },

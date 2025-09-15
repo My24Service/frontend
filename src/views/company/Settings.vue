@@ -83,6 +83,7 @@ export default {
   		let newValues = {}
 
 	    for (let [key, value] of Object.entries(values)) {
+        if (key.startsWith('gripp_')) continue;
         if (key === 'countries' || key === 'order_types') {
           newValues[key] = value.join(',')
         } else {

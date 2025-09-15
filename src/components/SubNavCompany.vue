@@ -75,6 +75,12 @@
         :to="{ name: 'company-activity' }">
         {{ $trans('Activity') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('connector-gripp')"
+        v-if="hasGripp"
+        :to="{ name: 'company-connector-gripp' }">
+        {{ $trans('Gripp') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
@@ -136,6 +142,9 @@ export default {
     hasPartners() {
       return this.hasAccessToModule('company', 'partners')
     },
+    hasGripp() {
+      return this.hasAccessToModule('company','connector-gripp');
+    }
   },
 }
 </script>

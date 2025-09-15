@@ -71,6 +71,7 @@ import LeaveTypes from "../views/company/time-registration/LeaveTypes";
 import UnconfirmedSickLeaveList from "../views/company/time-registration/UnconfirmedSickLeaveList";
 import SickLeaveList from "../views/company/time-registration/SickLeaveList";
 import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
+import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
 
 import {
   STATUSCODE_TYPE_INVOICE,
@@ -146,6 +147,18 @@ function createStatuscodeRoutes(type) {
         'app-subnav': SubNavCompany
       },
     },
+    {
+      name: 'company-connector-gripp',
+      path: '/company/connector-gripp',
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': GrippSettings,
+        'app-subnav': SubNavCompany
+      },
+    }
   ]
 }
 
