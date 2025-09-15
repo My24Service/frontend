@@ -346,6 +346,7 @@ import { required } from '@vuelidate/validators'
 import actionOrderModel from '@/models/orders/Action.js'
 import actionTripModel from '@/models/mobile/TripStatuscodeAction.js'
 import partnerModel from '@/models/company/Partner.js'
+import my24 from "@/services/my24";
 
 export default {
   setup() {
@@ -426,7 +427,19 @@ export default {
   async created() {
     switch(this.list_type) {
       case 'order':
-        this.actionTypes = this.actionTypesOrder
+        this.actionTypes = this.actionTypesOrder.slice()
+
+        const hasAccessToGripp = my24.hasAccessToModule({
+          isStaff: this.isStaff,
+          isSuperuser: this.isSuperuser,
+          contract: this.$store.state.memberContract,
+          module: 'company',
+          part: 'connector-gripp'});
+
+        if (hasAccessToGripp) {
+          this.actionTypes.push( {value: 'send_to_gripp', text: this.$trans('send to Gripp')} );
+        }
+
         this.actionModel = actionOrderModel
 
         const partners = await partnerModel.list()
