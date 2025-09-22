@@ -50,9 +50,7 @@
     </div>
   </div>
 </template>
-
 <script>
-
 import memberModel from '@/models/member/Member.js'
 
 export default {
