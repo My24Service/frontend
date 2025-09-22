@@ -22,7 +22,7 @@
           </b-thead>
           <tbody>
             <template v-for = "(value, key, index) in settings">
-              <b-tr :key="key">
+              <b-tr :key="key" v-if="!key.startsWith('gripp_')">
                 <b-td>
                   {{ index+1 }}: {{ key.split('_').join(' ') }}
                 </b-td>
@@ -83,7 +83,6 @@ export default {
   		let newValues = {}
 
 	    for (let [key, value] of Object.entries(values)) {
-        if (key.startsWith('gripp_')) continue;
         if (key === 'countries' || key === 'order_types') {
           newValues[key] = value.join(',')
         } else {
