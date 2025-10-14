@@ -47,9 +47,10 @@
           </router-link>
         </template>
         <template #cell(customer)="data">
-          <!-- <router-link :to="{name: 'customer-view', params: {pk: data.item.customer}}"> -->
+          <span v-if="data.item.customer_branch_view">
             {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>
-          <!-- </router-link> -->
+          </span>
+          <span v-else>-</span>
         </template>
         <template #cell(created)="data">
           <small>{{ data.item.created }}</small>
@@ -58,9 +59,12 @@
           <small>{{ data.item.modified }}</small>
         </template>
         <template #cell(branch)="data">
-          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
-            {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>
-          </router-link>
+          <span v-if="data.item.customer_branch_view">
+            <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
+              {{ data.item.customer_branch_view.name }} <span class="dimmed">&middot; {{ data.item.customer_branch_view.city }}</span>
+            </router-link>
+          </span>
+          <span v-else>-</span>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
