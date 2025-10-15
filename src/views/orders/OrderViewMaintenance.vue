@@ -66,10 +66,8 @@
                 <b-icon icon="file-earmark"></b-icon>
                 {{ $trans('View workorder') }}
               </b-link>
-
             </dd>
             <dd v-if="!hasBranches" class="flex-columns">
-
               <b-link class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
                 <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
               </b-link>
@@ -78,6 +76,19 @@
             <dd class="flex-columns">
               <div v-if="order.parent_order_data && order.parent_order_data.companycode">
                 {{ order.parent_order_data.companycode }} - {{ order.parent_order_data.order_id}}
+              </div>
+            </dd>
+            <dt v-if="hasBranches">{{ $trans("Workorder original order ") }}</dt>
+            <dd v-if="hasBranches" class="flex-columns">
+              <div v-if="order.workorder_url_org_order">
+                <b-link
+                  class="btn btn-sm btn-outline"
+                  v-if="order.workorder_url_org_order.url"
+                  :href="order.workorder_url_org_order.url"
+                  target="_blank"
+                  :title="`${$trans('Download PDF')}(${order.workorder_url_org_order.url}`">
+                  <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+                </b-link>
               </div>
             </dd>
             <dt>{{ $trans("Partner order ID(s)") }}</dt>
@@ -236,6 +247,21 @@
             </b-table>
           </div>
           <h6 v-else class="dimmed">{{ $trans('Workorder documents partner') }}</h6>
+
+          <div v-if="order.workorder_documents_org_order && order.workorder_documents_org_order.length > 0 && hasBranches">
+            <h6>{{ $trans('Workorder documents original order') }}</h6>
+            <b-table
+              borderless small
+              :fields="workorderDocumentFields"
+              :items="order.workorder_documents_org_order" responsive="sm">
+              <template #cell(url)="data">
+                <b-link :href="data.item.url" target="_blank"  class="flex-columns">
+                  {{ $trans('Order') }} {{ order.order_id }}
+                  <small class="dimmed">{{ data.item.name }}</small>
+                </b-link>
+              </template>
+            </b-table>
+          </div>
 
           <div v-if="order.reported_codes_extra_data.length">
             <h6>{{ $trans('Reported extra text') }}</h6>
