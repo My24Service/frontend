@@ -426,18 +426,18 @@
 <script>
 import { OrderService } from '../../models/orders/Order.js'
 import { componentMixin } from '../../utils'
-import { PurchaseInvoiceService } from "../../models/orders/PurchaseInvoice";
+import { PurchaseInvoiceService } from "@/models/invoices/PurchaseInvoice";
 import IconLinkPlus from "@/components/IconLinkPlus.vue";
 import PriceInput from "@/components/PriceInput.vue";
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import StatusesComponent from "@/components/StatusesComponent.vue";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
-import ApiResult from "@/components/ApiResult.vue";
+// import ApiResult from "@/components/ApiResult.vue";
 
 export default {
   mixins: [componentMixin],
   components: {
-    ApiResult,
+    // ApiResult,
     DocumentsComponent,
     StatusesComponent,
     IconLinkPlus,
@@ -575,6 +575,16 @@ export default {
 
       try {
         this.order = this.pk !== null ? await this.orderService.detail(this.pk) : await this.orderService.detailUuid(this.uuid)
+
+        // set location based on setting
+        if (this.$store.getters.getMemberUsesEquipment) {
+          for (let i=0; i<this.order.orderlines.length; i++) {
+            console.debug(`overriding orderline location from '${this.order.orderlines[i].location} to ${this.order.orderlines[i].equipment_location_view.name}`)
+            this.order.orderlines[i].location = this.order.orderlines[i].equipment_location_view.name
+            console.debug(`overriding orderline product from '${this.order.orderlines[i].product} to ${this.order.orderlines[i].equipment_view.name}`)
+            this.order.orderlines[i].product = this.order.orderlines[i].equipment_view.name
+          }
+        }
 
         if (this.hasBranches) {
           this.purchaseInvoiceService.setListArgs(`order=${this.order.id}`)
