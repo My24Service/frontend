@@ -86,6 +86,16 @@ class LocationService extends BaseModel {
     return this.axios.get(`${this.url}list_for_select/?customer=${customer}`)
       .then((response) => response.data)
   }
+
+  getExportUrl() {
+    let listArgs = []
+
+    if (this.searchQuery) {
+      listArgs.push(`q=${this.searchQuery}`)
+    }
+
+    return `/api/equipment/location-export-qr/?${listArgs.join('&')}`
+  }
 }
 
 const locationService = new LocationService()

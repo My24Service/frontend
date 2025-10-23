@@ -108,6 +108,16 @@ class EquipmentService extends BaseModel {
 
     return this.axios.post(`${this.url}create_quick/`, data).then(response => response.data)
   }
+
+  getExportUrl() {
+    let listArgs = []
+
+    if (this.searchQuery) {
+      listArgs.push(`q=${this.searchQuery}`)
+    }
+
+    return `/api/equipment/equipment-export-qr/?${listArgs.join('&')}`
+  }
 }
 
 const equipmentService = new EquipmentService()

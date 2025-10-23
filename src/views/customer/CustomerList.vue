@@ -21,25 +21,24 @@
           <b-icon icon="building"></b-icon> {{ $trans("Customers") }}
         </h3>
         <b-button-toolbar>
-              <b-button-group class="mr-1">
+          <b-button-group class="mr-1">
 
-                <ButtonLinkRefresh
-                  v-bind:method="function() { loadData() }"
-                  v-bind:title="$trans('Refresh')"
-                />
-                <ButtonLinkSearch
-                  v-bind:method="function() { showSearchModal() }"
-                />
-                <ButtonLinkDownload
-                  v-bind:method="function() { downloadList() }"
-                  v-bind:title="$trans('Download')"
-                />
-              </b-button-group>
-              <router-link :to="{name: 'customer-add'}" class="btn"><b-icon icon="building"></b-icon>{{$trans('Add customer')}}</router-link>
-            </b-button-toolbar>
+            <ButtonLinkRefresh
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
+            />
+            <ButtonLinkSearch
+              v-bind:method="function() { showSearchModal() }"
+            />
+            <ButtonLinkDownload
+              v-bind:method="function() { downloadList() }"
+              v-bind:title="$trans('Download')"
+            />
+          </b-button-group>
+          <router-link :to="{name: 'customer-add'}" class="btn"><b-icon icon="building"></b-icon>{{$trans('Add customer')}}</router-link>
+        </b-button-toolbar>
       </div>
     </header>
-
 
     <div class="app-detail panel overflow-auto">
 
@@ -174,7 +173,7 @@ export default {
     downloadList() {
       if (confirm(this.$trans('Are you sure you want to export all customers?'))) {
         const url = this.model.getExportUrl()
-        my24.downloadItem(url, 'customers.xlsx')
+        my24.downloadItemAuth(url, 'customers.xlsx')
       }
     },
     // search

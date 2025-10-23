@@ -13,6 +13,10 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
+            <ButtonLinkDownload
+              v-bind:method="function() { downloadList() }"
+              v-bind:title="$trans('Download QR-codes')"
+            />
           </b-button-group>
           <router-link :to="{name: newLink}" class="btn btn-primary">{{ $trans('Add location') }}</router-link>
         </b-button-toolbar>
@@ -114,10 +118,13 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {componentMixin} from "../../utils";
+import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
+import my24 from "@/services/my24";
 
 export default {
   mixins: [componentMixin],
   components: {
+    ButtonLinkDownload,
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
@@ -204,6 +211,11 @@ export default {
     this.loadData()
   },
   methods: {
+    // download
+    downloadList() {
+      const url = this.locationService.getExportUrl()
+      my24.downloadItemAuth(url, 'locations.xlsx', () => {})
+    },
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

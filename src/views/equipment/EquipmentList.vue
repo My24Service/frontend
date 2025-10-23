@@ -63,11 +63,15 @@
         <b-button-toolbar>
           <b-button-group class="mr-1">
             <ButtonLinkRefresh
-            v-bind:method="function() { loadData() }"
-            v-bind:title="$trans('Refresh')"
+              v-bind:method="function() { loadData() }"
+              v-bind:title="$trans('Refresh')"
             />
             <ButtonLinkSearch
-            v-bind:method="function() { showSearchModal() }"
+              v-bind:method="function() { showSearchModal() }"
+            />
+            <ButtonLinkDownload
+              v-bind:method="function() { downloadList() }"
+              v-bind:title="$trans('Download QR-codes')"
             />
           </b-button-group>
           <router-link :to="{name: newLink}" class="btn">{{ $trans("Add Equipment") }}</router-link>
@@ -171,11 +175,14 @@ import {componentMixin} from "@/utils";
 import { EquipmentStateModel, EquipmentStateService } from "@/models/equipment/EquipmentState";
 import { EquipmentService } from '@/models/equipment/equipment'
 import IconLinkPlus from "../../components/IconLinkPlus";
+import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
+import my24 from "@/services/my24";
 
 export default {
   mixins: [componentMixin],
   name: 'EquipmentList',
   components: {
+    ButtonLinkDownload,
     IconLinkDelete,
     IconLinkEdit,
     ButtonLinkRefresh,
@@ -287,6 +294,11 @@ export default {
     this.isLoading = false
   },
   methods: {
+    // download
+    downloadList() {
+      const url = this.equipmentService.getExportUrl()
+      my24.downloadItemAuth(url, 'equipment.xlsx', () => {})
+    },
     // sorting
     async sortingChanged(ctx) {
       this.equipmentService.setSorting(ctx.sortBy, ctx.sortDesc)
