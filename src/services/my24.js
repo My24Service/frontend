@@ -50,6 +50,30 @@ class My24 extends BaseModel {
       });
   }
 
+  downloadItemAuth(url, name, callback) {
+    let headers = { responseType: 'blob' }
+
+    auth.setInterceptors(normalClient)
+    const client = normalClient.get(url, headers)
+
+    client
+      .then((response) => {
+        const blob = new Blob([response.data], { type: response.data.type });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = name;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        link.remove()
+      })
+      .catch(console.error)
+      .finally(function () {
+        if (callback) {
+          callback()
+        }
+      });
+  }
+
   status2color(statuscodes, status, text_color=false) {
     const defaultColor = '#ccc'
     const defaultTextColor = '#000'

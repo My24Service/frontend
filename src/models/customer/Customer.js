@@ -166,7 +166,7 @@ class CustomerService extends BaseModel {
       listArgs.push(`q=${this.searchQuery}`)
     }
 
-    return `/customer/export/?${listArgs.join('&')}`
+    return `/api/customer/export/?${listArgs.join('&')}`
   }
 
 }
