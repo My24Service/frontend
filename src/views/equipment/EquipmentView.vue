@@ -261,7 +261,7 @@ export default {
         await this.loadHistory()
 
         const equipmentData = await this.equipmentService.detail(this.pk)
-        this.equipment = new this.equipmentService.model(equipmentData)
+        this.equipment = new this.equipmentService.customerService(equipmentData)
 
       } catch(error) {
         console.log('error fetching equipment detail data', error)
