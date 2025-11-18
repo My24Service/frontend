@@ -368,7 +368,8 @@ tr:focus-within .edit-icon {
   }
   button.primary,
   .btn-primary {
-    color: $normal-link!important;
+    color: $my24 ;
+    //color: $normal-link!important;
   }
   h6 {
     text-transform: uppercase;
@@ -750,7 +751,7 @@ html {
       &.btn-secondary {
         background-color: #0009;
         border-color:  transparent;
-        color: white;
+        color: $secondary;
         &:hover {
           /* background-color: $secondary; */
         }
@@ -770,6 +771,8 @@ html {
 
     .btn-group .btn-secondary {
       margin-inline: 0;
+      background: white;
+      color: $primary;
     }
     .backlink {
       cursor: pointer;
