@@ -207,7 +207,10 @@ class BaseModel {
     this.listArgs = []
   }
 
-  setSorting(field, sortDesc) {
+  setSorting(field, sortDesc, reset=true) {
+    if (reset) {
+      this.currentPage = 1
+    }
     this.sortField = field
     this.sortDesc = sortDesc
   }
@@ -233,8 +236,10 @@ class BaseModel {
     }
   }
 
-  setSearchQuery(query) {
-    this.currentPage = 1
+  setSearchQuery(query, reset=true) {
+    if (reset) {
+      this.currentPage = 1
+    }
     this.searchQuery = query
   }
 
@@ -254,8 +259,7 @@ class BaseModel {
     return this.url
   }
 
-  async list() {
-
+  getQueryArgs() {
     this.queryArgs = {};
     this.queryArgs['page'] = this.currentPage;
 
@@ -273,6 +277,11 @@ class BaseModel {
 
     if (this.since) {
       this.queryArgs['since'] = this.since;
+    }
+
+    if (this.sortField !== null) {
+      this.queryArgs['sort_field'] = this.sortField
+      this.queryArgs['sort_dir'] = this.sortDesc ? 'desc' : 'asc'
     }
 
     // HVG20250312:
@@ -305,15 +314,16 @@ class BaseModel {
       sanitizedArgs[ arg ] = this.queryArgs[ arg ];
     }
 
+    return sanitizedArgs
+  }
+
+  async list() {
+    const sanitizedArgs = this.getQueryArgs()
+
     // Start building up the listArgs from the sanitized list of arguments.
     const listArgs = []
     for (const arg in sanitizedArgs) {
       listArgs.push( `${arg}=${sanitizedArgs[arg]}` );
-    }
-
-    if (this.sortField !== null) {
-      listArgs.push(`sort_field=${this.sortField}`)
-      listArgs.push(`sort_dir=${this.sortDesc ? 'desc' : 'asc'}`)
     }
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
