@@ -160,9 +160,8 @@
           &nbsp;
           <b-button
             @click="submitDocuments"
-            class="btn btn-danger"
+            class="btn btn-primary"
             type="button"
-            variant="danger"
           >
             {{ $trans('Save changes') }}
           </b-button>
