@@ -188,7 +188,7 @@ export default {
       if (this.$route.query.sort_dir) {
         this.sortDesc = this.$route.query.sort_dir === 'desc'
       }
-      this.buildingService.setSorting(this.sortBy, this.sortDesc)
+      this.buildingService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
     }
 
     if (this.hasBranches) {

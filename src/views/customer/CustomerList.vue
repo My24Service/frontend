@@ -186,7 +186,7 @@ export default {
       if (this.$route.query.sort_dir) {
         this.sortDesc = this.$route.query.sort_dir === 'desc'
       }
-      this.customerService.setSorting(this.sortBy, this.sortDesc, false)
+      this.customerService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
     }
 
     this.loadData()
