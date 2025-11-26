@@ -215,7 +215,12 @@ export default {
     async handleSearchOk(val) {
       this.$refs['search-modal'].hide()
       this.customerService.setSearchQuery(val)
-      await this.loadData()
+      const query = {
+        ...this.$route.query,
+        ...this.customerService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
