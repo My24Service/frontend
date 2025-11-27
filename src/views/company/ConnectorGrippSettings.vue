@@ -180,7 +180,7 @@
   </div>
 </template>
 <script>
-import memberModel from '@/models/member/Member.js'
+import memberModel, {MemberService} from '@/models/member/Member.js'
 
 export default {
   data() {
@@ -191,6 +191,7 @@ export default {
       settings: {}, // the ones from server
       currentSettings: {}, // the ones in the page
       member: memberModel.getFields(),
+      service: new MemberService()
     }
   },
   computed: {
@@ -215,7 +216,7 @@ export default {
       try {
         // If we don't send all the settings, all the other settings
         // will be reset to defaults, so we /must/ include everything.
-        const allSettings = await memberModel.getSettings()
+        const allSettings = await this.service.getSettings()
         const localKeys = Object.keys(this.settings);
         for (const key in allSettings) {
           if (localKeys.indexOf(key) > -1) {
@@ -223,7 +224,7 @@ export default {
           }
         }
 
-        await memberModel.updateSettings(allSettings);
+        await this.service.updateSettings(allSettings);
         this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
@@ -236,7 +237,7 @@ export default {
     },
     async loadData() {
       this.isLoading = true
-      this.member = await memberModel.getMe()
+      this.member = await this.service.getMe()
       try {
 
         this.currentSettings = {};
@@ -257,7 +258,7 @@ export default {
 
         // This fetches *all* the settings, we are only interested in a
         // subset to show on this page.
-        const data = await memberModel.getSettings()
+        const data = await this.service.getSettings()
         for (const key in data) {
           if (localKeys.indexOf(key) > -1) {
             this.settings[ key ] = data[ key ];

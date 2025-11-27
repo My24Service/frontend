@@ -82,6 +82,7 @@ import ImportList from "../views/company/ImportList";
 
 import ImportForm from "../views/company/ImportForm";
 import ImportPreview from "../views/company/ImportPreview";
+import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
 
 const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
 
@@ -156,6 +157,18 @@ function createStatuscodeRoutes(type) {
       },
       components: {
         'app-content': GrippSettings,
+        'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'company-teamleader',
+      path: '/company/teamleader',
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': TeamleaderSettings,
         'app-subnav': SubNavCompany
       },
     }

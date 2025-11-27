@@ -81,6 +81,12 @@
         :to="{ name: 'company-connector-gripp' }">
         {{ $trans('Gripp') }}
       </b-nav-item>
+      <b-nav-item
+        :active="isActive('teamleader')"
+        v-if="hasTeamleader || true"
+        :to="{ name: 'company-teamleader' }">
+        {{ $trans('Teamleader') }}
+      </b-nav-item>
     </b-nav>
   </div>
 </template>
@@ -144,7 +150,10 @@ export default {
     },
     hasGripp() {
       return this.hasAccessToModule('company','connector-gripp');
-    }
+    },
+    hasTeamleader() {
+      return this.hasAccessToModule('company','teamleader');
+    },
   },
 }
 </script>
