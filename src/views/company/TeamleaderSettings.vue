@@ -9,24 +9,7 @@
       </div>
     </header>
     <div class="app-detail panel overflow-auto">
-      <!--
-      <h4>Teamleader API instellingen</h4>
-
-      <ul>
-        <li>company: <strong>read</strong></li>
-        <li>contact: <strong>read</strong></li>
-        <li>file: <strong>create read update</strong></li>
-        <li>hour: <strong>create read update</strong></li>
-        <li>offer: <strong>read update</strong></li>
-        <li>offerprojectline: <strong>read update</strong></li>
-        <li>project: <strong>read update</strong></li>
-        <li>product: <strong>read</strong></li>
-        <li>task: <strong>create read update</strong></li>
-        <li>timelineentry: <strong>create read</strong></li>
-      </ul>
-      -->
-
-      <b-form id="gripp_settings_form" class="page-detail flex-columns">
+      <b-form class="page-detail flex-columns">
         <div class="panel col-1-1">
           <div class="section rounded-sm">
             <h5>API Actief</h5>
@@ -54,26 +37,23 @@
           <div class="section rounded-sm">
             <h5>Tokens</h5>
 
-            <div class="bg-success" v-if="settings.token">
+            <div class="bg-success p-2 rounded-sm text-white" v-if="settings.token">
               {{ $trans('Tokens aanwezig')}}
             </div>
-            <div v-else class="bg-warning p-2">
+            <div v-else class="bg-warning p-2 rounded-sm">
               {{ $trans('Geen tokens aanwezig')}}
             </div>
 
             <div class="btn-group">
-              <button class="btn btn-secondary m-1">
-                {{ $trans('Legen') }}
-              </button>
-              <button class="btn btn-secondary m-1">
-                {{ $trans('Reset') }}
+              <button class="btn btn-danger m-1">
+                {{ $trans('Verwijder tokens') }}
               </button>
               <button
                 class="btn btn-primary m-1"
                 v-if="!settings.token"
                 @click="checkTokens()"
               >
-                {{ $trans('Check tokens') }}
+                {{ $trans('Geef toegang') }}
               </button>
             </div>
 
@@ -84,15 +64,15 @@
             <b-form-group
               label-size="sm"
               label-cols="4"
-              :label="$trans('Document template ID')"
-              label-for="template_uuid"
+              :label="$trans('Invoice template ID')"
+              label-for="invoice_template_uuid"
             >
               <div class="d-flex">
                 <b-form-input
-                  id="template_uuid"
+                  id="invoice_template_uuid"
                   size="sm"
                   type="text"
-                  v-model="settings.template_uuid"
+                  v-model="settings.invoice_template_uuid"
                 ></b-form-input>
                 <button class="btn-sm btn-secondary">Kies</button>
               </div>
@@ -129,6 +109,7 @@ export default {
       submitClicked: false,
       settings: {},
       service: new TeamleaderService(),
+      authorizationUrl: null,
     }
   },
   computed: {
@@ -143,8 +124,7 @@ export default {
     async checkTokens() {
       const result = await this.service.checkTokens()
       if (result.status === 'auth') {
-        const authorization_url = result.authorization_url
-        // TODO load in iframe
+        window.open(result.authorization_url, '_blank');
       }
       if (result.status === 'ok') {
         this.infoToast('Status', 'Tokens aanwezig')
@@ -154,8 +134,8 @@ export default {
       await this.service.emptyTokens()
       await this.loadData()
     },
-    async updateDocumentTemplateSetting() {
-      await this.service.updateDocumentTemplateSetting(this.settings.template_uuid)
+    async updateInvoiceDocumentTemplateSetting() {
+      await this.service.updateInvoiceDocumentTemplateSetting(this.settings.invoice_template_uuid)
       await this.loadData()
     },
     async updateDepartmentSetting() {

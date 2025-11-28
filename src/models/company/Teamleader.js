@@ -33,14 +33,14 @@ class TeamleaderService extends BaseModel{
     return this.axios.post(url, data, headers).then(response => response.data)
   }
 
-  async updateDocumentTemplateSetting(templateUuid) {
+  async updateInvoiceDocumentTemplateSetting(templateUuid) {
     const data = {
-      template_uuid: templateUuid
+      invoice_template_uuid: templateUuid
     }
 
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
-    const url = `${this.base_url}/update-document-template/`
+    const url = `${this.base_url}/update-invoice-document-template/`
 
     return this.axios.patch(url, data, headers).then(response => response.data)
   }
