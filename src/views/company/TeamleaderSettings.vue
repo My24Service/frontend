@@ -1,5 +1,14 @@
 <template>
   <div class="app-page">
+    <b-modal
+      id="delete-tokens"
+      ref="delete-tokens"
+      :title="$trans('Tokens verwijderen?')"
+      @ok="doEmptyTokens"
+    >
+      <p class="my-4">{{ $trans('Weet u zeker dat u de tokens wilt verwijderen?') }}</p>
+    </b-modal>
+
     <header>
       <div class="page-title">
         <h3>
@@ -38,22 +47,26 @@
             <h5>Tokens</h5>
 
             <div class="bg-success p-2 rounded-sm text-white" v-if="settings.token">
-              {{ $trans('Tokens aanwezig')}}
+              {{ $trans('Aanwezig')}}
             </div>
             <div v-else class="bg-warning p-2 rounded-sm">
-              {{ $trans('Geen tokens aanwezig')}}
+              {{ $trans('Niet aanwezig')}}
             </div>
 
             <div class="btn-group">
-              <button class="btn btn-danger m-1">
-                {{ $trans('Verwijder tokens') }}
+              <button
+                class="btn btn-danger m-1"
+                v-if="settings.token"
+                @click="emptyTokens()"
+              >
+                {{ $trans('Verwijder') }}
               </button>
               <button
                 class="btn btn-primary m-1"
                 v-if="!settings.token"
                 @click="checkTokens()"
               >
-                {{ $trans('Geef toegang') }}
+                {{ $trans('Verleen toegang') }}
               </button>
             </div>
 
@@ -131,6 +144,9 @@ export default {
       }
     },
     async emptyTokens() {
+      this.$refs['delete-tokens'].show()
+    },
+    async doEmptyTokens() {
       await this.service.emptyTokens()
       await this.loadData()
     },
