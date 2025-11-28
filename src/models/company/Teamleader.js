@@ -5,10 +5,35 @@ class TeamleaderService extends BaseModel{
   axios = client
   base_url = 'teamleader'
 
+  async oauthPost(code, state) {
+    const data = { code, state }
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.base_url}/oauth/`
+
+    return this.axios.post(url, data, headers).then(response => response.data)
+  }
+
   async configDetail() {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
     const url = `${this.base_url}/config/`
+
+    return this.axios.get(url, headers).then(response => response.data)
+  }
+
+  async departmentList() {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.base_url}/department/`
+
+    return this.axios.get(url, headers).then(response => response.data)
+  }
+
+  async invoiceDocumentTemplateList() {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.base_url}/invoice-document-template/`
 
     return this.axios.get(url, headers).then(response => response.data)
   }

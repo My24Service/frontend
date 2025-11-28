@@ -1,5 +1,10 @@
 <template>
   <div class="app-page">
+    <DepartmentChooser
+      id="department-chooser-modal"
+      ref="department-chooser-modal"
+      @department-chosen="departmentChosen"
+    />
     <b-modal
       id="delete-tokens"
       ref="delete-tokens"
@@ -46,7 +51,7 @@
           <div class="section rounded-sm">
             <h5>Tokens</h5>
 
-            <div class="bg-success p-2 rounded-sm text-white" v-if="settings.token">
+            <div class="bg-success p-2 rounded-sm text-white" v-if="settings.has_tokens">
               {{ $trans('Aanwezig')}}
             </div>
             <div v-else class="bg-warning p-2 rounded-sm">
@@ -113,8 +118,12 @@
 </template>
 <script>
 import {TeamleaderService} from '@/models/company/Teamleader'
+import DepartmentChooser from "@/views/company/teamleader/DepartmentsChooser.vue";
 
 export default {
+  components: {
+    DepartmentChooser,
+  },
   data() {
     return {
       isLoading: false,
@@ -134,6 +143,12 @@ export default {
     this.loadData()
   },
   methods: {
+    departmentChosen(id) {
+      console.log(`in settings, departmentChosen=${id}`)
+    },
+    chooseDepartment() {
+      this.$refs['department-chooser-modal'].show()
+    },
     async checkTokens() {
       const result = await this.service.checkTokens()
       if (result.status === 'auth') {

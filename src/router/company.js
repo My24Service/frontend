@@ -83,6 +83,7 @@ import ImportList from "../views/company/ImportList";
 import ImportForm from "../views/company/ImportForm";
 import ImportPreview from "../views/company/ImportPreview";
 import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
+import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
 
 const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
 
@@ -161,14 +162,26 @@ function createStatuscodeRoutes(type) {
       },
     },
     {
-      name: 'company-teamleader',
-      path: '/company/teamleader',
+      name: 'company-teamleader-settings',
+      path: '/company/teamleader-settings',
       props: {
         'app-content': route => ({...route.params, list_type: type}),
         'app-subnav': true
       },
       components: {
         'app-content': TeamleaderSettings,
+        'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'company-teamleader-callback',
+      path: '/company/teamleader-callback',
+      props: {
+        'app-content': route => ({...route.params, list_type: type}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': TeamleaderCallback,
         'app-subnav': SubNavCompany
       },
     }

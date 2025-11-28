@@ -84,7 +84,7 @@
       <b-nav-item
         :active="isActive('teamleader')"
         v-if="hasTeamleader || true"
-        :to="{ name: 'company-teamleader' }">
+        :to="{ name: 'company-teamleader-settings' }">
         {{ $trans('Teamleader') }}
       </b-nav-item>
     </b-nav>
