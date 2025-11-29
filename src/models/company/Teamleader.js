@@ -38,12 +38,12 @@ class TeamleaderService extends BaseModel{
     return this.axios.get(url, headers).then(response => response.data)
   }
 
-  async checkTokens() {
+  async authorize() {
     const data = {}
 
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
-    const url = `${this.base_url}/check-tokens/`
+    const url = `${this.base_url}/authorize/`
 
     return this.axios.post(url, data, headers).then(response => response.data)
   }
@@ -58,9 +58,10 @@ class TeamleaderService extends BaseModel{
     return this.axios.post(url, data, headers).then(response => response.data)
   }
 
-  async updateInvoiceDocumentTemplateSetting(templateUuid) {
+  async updateInvoiceDocumentTemplateSetting(templateUuid, name) {
     const data = {
-      invoice_template_uuid: templateUuid
+      invoice_template_uuid: templateUuid,
+      invoice_template_name: name
     }
 
     const token = await this.getCsrfToken()
@@ -70,9 +71,10 @@ class TeamleaderService extends BaseModel{
     return this.axios.patch(url, data, headers).then(response => response.data)
   }
 
-  async updateDepartmentSetting(departmentUuid) {
+  async updateDepartmentSetting(departmentUuid, name) {
     const data = {
-      department_uuid: departmentUuid
+      department_uuid: departmentUuid,
+      department_name: name,
     }
 
     const token = await this.getCsrfToken()

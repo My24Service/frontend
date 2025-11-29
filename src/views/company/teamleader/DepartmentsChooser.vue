@@ -5,17 +5,20 @@
     :title="$trans('Choose department')"
     ok-only
   >
-    <b-table
-      id="documents-table"
-      small
-      :busy='isLoading'
-      :fields="fields"
-      :items="departments"
-      responsive="md"
-      class="data-table"
-      @row-clicked="onRowClicked"
-    >
-    </b-table>
+    <b-overlay :show="isLoading" rounded="sm">
+      <b-table
+        id="documents-table"
+        small
+        :busy="isLoading"
+        :fields="fields"
+        :items="departments"
+        :hover="true"
+        responsive="md"
+        tbody-tr-class="table-row"
+        @row-clicked="onRowClicked"
+      >
+      </b-table>
+    </b-overlay>
   </b-modal>
 </template>
 <script>
@@ -28,7 +31,7 @@ export default {
   props: {
   },
   emits: [
-    'departmentChosen'
+    'department-chosen'
   ],
   data() {
     return {
@@ -43,15 +46,14 @@ export default {
   created() {
   },
   methods: {
-    onRowClicked(item, index, event) {
-      console.log({item})
-      this.$emit('departmentChosen', item.id)
+    onRowClicked(item, _index, _event) {
+      this.$emit('department-chosen', item)
     },
     async loadData() {
       this.isLoading = true
       try {
-        this.departments = await this.service.departmentList()
-        console.log(this.departments)
+        const response = await this.service.departmentList()
+        this.departments = response.data
         this.isLoading = false
 
       } catch(error) {
@@ -71,5 +73,7 @@ export default {
 }
 </script>
 <style scoped>
-
+.table-row {
+  cursor: pointer;
+}
 </style>

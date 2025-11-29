@@ -69,7 +69,7 @@
               <button
                 class="btn btn-primary m-1"
                 v-if="!settings.token"
-                @click="checkTokens()"
+                @click="authorize()"
               >
                 {{ $trans('Verleen toegang') }}
               </button>
@@ -87,10 +87,11 @@
             >
               <div class="d-flex">
                 <b-form-input
-                  id="invoice_template_uuid"
+                  id="invoice_template_name"
                   size="sm"
                   type="text"
-                  v-model="settings.invoice_template_uuid"
+                  :state="isInvoiceTemplateOk"
+                  v-model="settings.invoice_template_name"
                 ></b-form-input>
                 <button class="btn-sm btn-secondary">Kies</button>
               </div>
@@ -102,12 +103,16 @@
               label-for="department_uuid">
               <div class="d-flex">
                 <b-form-input
-                  id="department_uuid"
+                  id="department_name"
                   size="sm"
                   type="text"
-                  v-model="settings.department_uuid"
+                  :state="isDepartmentOk"
+                  v-model="settings.department_name"
                 ></b-form-input>
-                <button class="btn-sm btn-secondary">Kies</button>
+                <button
+                  class="btn-sm btn-secondary"
+                  @click="chooseDepartment()"
+                >Kies</button>
               </div>
             </b-form-group>
           </div>
@@ -132,27 +137,41 @@ export default {
       settings: {},
       service: new TeamleaderService(),
       authorizationUrl: null,
+      authorizeClicked: false
     }
   },
   computed: {
-    isSubmitClicked() {
-      return this.submitClicked
+    isDepartmentOk() {
+      return !this.isEmpty(this.settings.department_uuid)
+    },
+    isInvoiceTemplateOk() {
+      return !this.isEmpty(this.settings.invoice_template_uuid)
     },
   },
   created() {
     this.loadData()
   },
   methods: {
-    departmentChosen(id) {
-      console.log(`in settings, departmentChosen=${id}`)
+    isEmpty(val) {
+      return val === null || val === ""
+    },
+    async departmentChosen(item) {
+      this.$refs['department-chooser-modal'].hide()
+      await this.updateDepartmentSetting(item)
     },
     chooseDepartment() {
       this.$refs['department-chooser-modal'].show()
     },
-    async checkTokens() {
-      const result = await this.service.checkTokens()
+    async authorize() {
+      const result = await this.service.authorize()
       if (result.status === 'auth') {
-        window.open(result.authorization_url, '_blank');
+        window.open(result.authorization_url, '_blank')
+        const id = setInterval(async () => {
+          this.settings = await this.service.configDetail()
+          if (this.settings.has_tokens) {
+            clearInterval(id)
+          }
+        }, 1000)
       }
       if (result.status === 'ok') {
         this.infoToast('Status', 'Tokens aanwezig')
@@ -165,12 +184,12 @@ export default {
       await this.service.emptyTokens()
       await this.loadData()
     },
-    async updateInvoiceDocumentTemplateSetting() {
-      await this.service.updateInvoiceDocumentTemplateSetting(this.settings.invoice_template_uuid)
+    async updateInvoiceDocumentTemplateSetting(item) {
+      await this.service.updateInvoiceDocumentTemplateSetting(item.id, item.name)
       await this.loadData()
     },
-    async updateDepartmentSetting() {
-      await this.service.updateDepartmentSetting(this.settings.department_uuid)
+    async updateDepartmentSetting(item) {
+      await this.service.updateDepartmentSetting(item.id, item.name)
       await this.loadData()
     },
     async updateEnabled() {
