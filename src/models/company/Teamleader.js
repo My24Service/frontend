@@ -30,10 +30,10 @@ class TeamleaderService extends BaseModel{
     return this.axios.get(url, headers).then(response => response.data)
   }
 
-  async invoiceDocumentTemplateList() {
+  async invoiceDocumentTemplateList(id) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
-    const url = `${this.base_url}/invoice-document-template/`
+    const url = `${this.base_url}/invoice-document-template/?department_id=${id}`
 
     return this.axios.get(url, headers).then(response => response.data)
   }

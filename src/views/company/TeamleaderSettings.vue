@@ -5,6 +5,14 @@
       ref="department-chooser-modal"
       @department-chosen="departmentChosen"
     />
+
+    <DocumentTemplateChooser
+      id="template-chooser-modal"
+      ref="template-chooser-modal"
+      :department-id="settings.department_uuid"
+      @template-chosen="invoiceTemplateChosen"
+    />
+
     <b-modal
       id="delete-tokens"
       ref="delete-tokens"
@@ -82,23 +90,6 @@
             <b-form-group
               label-size="sm"
               label-cols="4"
-              :label="$trans('Invoice template ID')"
-              label-for="invoice_template_uuid"
-            >
-              <div class="d-flex">
-                <b-form-input
-                  id="invoice_template_name"
-                  size="sm"
-                  type="text"
-                  :state="isInvoiceTemplateOk"
-                  v-model="settings.invoice_template_name"
-                ></b-form-input>
-                <button class="btn-sm btn-secondary">Kies</button>
-              </div>
-            </b-form-group>
-            <b-form-group
-              label-size="sm"
-              label-cols="4"
               v-bind:label="$trans('Department ID')"
               label-for="department_uuid">
               <div class="d-flex">
@@ -115,6 +106,26 @@
                 >Kies</button>
               </div>
             </b-form-group>
+            <b-form-group
+              label-size="sm"
+              label-cols="4"
+              :label="$trans('Invoice template ID')"
+              label-for="invoice_template_uuid"
+            >
+              <div class="d-flex">
+                <b-form-input
+                  id="invoice_template_name"
+                  size="sm"
+                  type="text"
+                  :state="isInvoiceTemplateOk"
+                  v-model="settings.invoice_template_name"
+                ></b-form-input>
+                <button
+                  class="btn-sm btn-secondary"
+                  @click="chooseInvoiceTemplate()"
+                >Kies</button>
+              </div>
+            </b-form-group>
           </div>
         </div>
       </b-form>
@@ -124,9 +135,11 @@
 <script>
 import {TeamleaderService} from '@/models/company/Teamleader'
 import DepartmentChooser from "@/views/company/teamleader/DepartmentsChooser.vue";
+import DocumentTemplateChooser from "@/views/company/teamleader/DocumentTemplateChooser.vue";
 
 export default {
   components: {
+    DocumentTemplateChooser,
     DepartmentChooser,
   },
   data() {
@@ -161,6 +174,13 @@ export default {
     },
     chooseDepartment() {
       this.$refs['department-chooser-modal'].show()
+    },
+    async invoiceTemplateChosen(item) {
+      this.$refs['template-chooser-modal'].hide()
+      await this.updateInvoiceDocumentTemplateSetting(item)
+    },
+    chooseInvoiceTemplate() {
+      this.$refs['template-chooser-modal'].show()
     },
     async authorize() {
       const result = await this.service.authorize()

@@ -4,10 +4,11 @@
     ref="modal"
     :title="$trans('Choose department')"
     ok-only
+    @ok="hide"
   >
     <b-overlay :show="isLoading" rounded="sm">
       <b-table
-        id="documents-table"
+        id="departments-table"
         small
         :busy="isLoading"
         :fields="fields"
@@ -28,8 +29,7 @@ export default {
   name: "DepartmentChooser",
   mixins: [],
   components: {},
-  props: {
-  },
+  props: {},
   emits: [
     'department-chosen'
   ],
