@@ -33,100 +33,145 @@
     <div class="app-detail panel overflow-auto">
       <b-form class="page-detail flex-columns">
         <div class="panel col-1-1">
-          <div class="section rounded-sm">
-            <h5>API Actief</h5>
-            <b-form-group
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Gripp API koppeling')"
-              label-for="api_enabled">
-              <b-form-checkbox
-                id="api_enabled"
-                size="sm"
-                v-model="settings.api_enabled">
-                Actief
-              </b-form-checkbox>
-            </b-form-group>
-
-            <button
-              class="btn btn-primary"
-              @click="updateEnabled()"
-            >
-              {{ $trans('Submit') }}
-            </button>
-          </div>
-
-          <div class="section rounded-sm">
-            <h5>Tokens</h5>
-
-            <div class="bg-success p-2 rounded-sm text-white" v-if="settings.has_tokens">
-              {{ $trans('Aanwezig')}}
-            </div>
-            <div v-else class="bg-warning p-2 rounded-sm">
-              {{ $trans('Niet aanwezig')}}
-            </div>
-
-            <div class="btn-group">
-              <button
-                class="btn btn-danger m-1"
-                v-if="settings.token"
-                @click="emptyTokens()"
-              >
-                {{ $trans('Verwijder') }}
-              </button>
-              <button
-                class="btn btn-primary m-1"
-                v-if="!settings.token"
-                @click="authorize()"
-              >
-                {{ $trans('Verleen toegang') }}
-              </button>
-            </div>
-
-          </div>
-
-          <div class="section rounded-sm">
-            <h5>Instellingen</h5>
-            <b-form-group
-              label-size="sm"
-              label-cols="4"
-              v-bind:label="$trans('Department ID')"
-              label-for="department_uuid">
-              <div class="d-flex">
-                <b-form-input
-                  id="department_name"
-                  size="sm"
-                  type="text"
-                  :state="isDepartmentOk"
-                  v-model="settings.department_name"
-                ></b-form-input>
-                <button
-                  class="btn-sm btn-secondary"
-                  @click="chooseDepartment()"
-                >Kies</button>
+          <ol>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>API Actief</h5>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="4"
+                  :label="$trans('Gripp API koppeling')"
+                  label-for="api_enabled">
+                  <b-form-checkbox
+                    id="api_enabled"
+                    size="sm"
+                    v-model="settings.api_enabled">
+                    Actief
+                  </b-form-checkbox>
+                </b-form-group>
+                <div class="btn-group d-flex justify-content-end">
+                  <div class="p-2">
+                    <button
+                      class="btn btn-primary m-1"
+                      @click="updateEnabled()"
+                    >
+                      {{ $trans('Submit') }}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </b-form-group>
-            <b-form-group
-              label-size="sm"
-              label-cols="4"
-              :label="$trans('Invoice template ID')"
-              label-for="invoice_template_uuid"
-            >
-              <div class="d-flex">
-                <b-form-input
-                  id="invoice_template_name"
-                  size="sm"
-                  type="text"
-                  :state="isInvoiceTemplateOk"
-                  v-model="settings.invoice_template_name"
-                ></b-form-input>
-                <button
-                  class="btn-sm btn-secondary"
-                  @click="chooseInvoiceTemplate()"
-                >Kies</button>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Verbinding</h5>
+                <div class="bg-success p-2 rounded-sm text-white" v-if="settings.has_tokens">
+                  {{ $trans('Actief')}}
+                </div>
+                <div v-else class="bg-warning p-2 rounded-sm">
+                  {{ $trans('Niet actief')}}
+                </div>
+
+                <div class="btn-group d-flex justify-content-end">
+                  <div
+                    class="p-2"
+                    v-if="settings.has_tokens && false"
+                  >
+                    <button
+                      class="btn btn-danger m-1"
+                      @click="emptyTokens()"
+                    >
+                      {{ $trans('Verwijder') }}
+                    </button>
+                  </div>
+                  <div
+                    class="p-2"
+                    v-if="!settings.has_tokens"
+                  >
+                    <button
+                      class="btn btn-primary m-1"
+                      @click="authorize()"
+                    >
+                      {{ $trans('Verleen toegang') }}
+                    </button>
+                  </div>
+
+                </div>
               </div>
-            </b-form-group>
-          </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Department</h5>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="4"
+                  v-bind:label="$trans('Department ID')"
+                  label-for="department_uuid">
+                  <div class="d-flex">
+                    <b-form-input
+                      id="department_name"
+                      size="sm"
+                      type="text"
+                      :state="isDepartmentOk"
+                      v-model="settings.department_name"
+                    ></b-form-input>
+                    <button
+                      class="btn-sm btn-secondary"
+                      @click="chooseDepartment()"
+                    >Kies</button>
+                  </div>
+                </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Factuur template</h5>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="4"
+                  :label="$trans('Invoice template ID')"
+                  label-for="invoice_template_uuid"
+                >
+                  <div class="d-flex">
+                    <b-form-input
+                      id="invoice_template_name"
+                      size="sm"
+                      type="text"
+                      :state="isInvoiceTemplateOk"
+                      v-model="settings.invoice_template_name"
+                    ></b-form-input>
+                    <button
+                      class="btn-sm btn-secondary"
+                      @click="chooseInvoiceTemplate()"
+                    >Kies</button>
+                  </div>
+                </b-form-group>
+                <h5>BTW-tarieven</h5>
+                <b-table
+                  id="tax-rates-table"
+                  small
+                  :busy="isLoading"
+                  :fields="fields"
+                  :items="taxRates"
+                  responsive="md"
+                  v-if="taxRates.length"
+                >
+                </b-table>
+                <p v-if="!taxRates.length">
+                  Nog geen BTW-tarieven aanwezig
+                </p>
+                <div class="btn-group d-flex justify-content-end">
+                  <div
+                    class="p-2"
+                  >
+                    <button
+                      class="btn btn-primary"
+                      @click="resetTaxRates()"
+                    >Ververs</button>
+                  </div>
+                </div>
+              </div>
+            </li>
+          </ol>
         </div>
       </b-form>
     </div>
@@ -150,7 +195,12 @@ export default {
       settings: {},
       service: new TeamleaderService(),
       authorizationUrl: null,
-      authorizeClicked: false
+      authorizeClicked: false,
+      taxRates: [],
+      fields: [
+        {key: 'description', label: this.$trans('Description')},
+        {key: 'rate', label: this.$trans('Rate')},
+      ]
     }
   },
   computed: {
@@ -198,9 +248,11 @@ export default {
       }
     },
     async emptyTokens() {
+      // button/modal not used at the moment
       this.$refs['delete-tokens'].show()
     },
     async doEmptyTokens() {
+      // not used at the moment
       await this.service.emptyTokens()
       await this.loadData()
     },
@@ -216,15 +268,26 @@ export default {
       await this.service.updateEnabled(this.settings.api_enabled)
       await this.loadData()
     },
+    async resetTaxRates() {
+      const response = await this.service.resetTaxRates(this.settings.department_uuid)
+      this.infoToast("BTW-tarieven",
+        `${response.delete_result[0]} verwijderd, ${response.created} aangemaakt`)
+      await this.fetchTaxRates()
+    },
+    async fetchTaxRates() {
+      this.taxRates = []
+      const response = await this.service.fetchTaxRates()
+      this.taxRates = response.results
+    },
     async loadData() {
       this.isLoading = true
       try {
         this.settings = await this.service.configDetail()
+        await this.fetchTaxRates()
         this.isLoading = false
-
       } catch(error) {
-        console.log('error fetching config', error)
-        this.errorToast(this.$trans('Error fetching config'))
+        console.log('error fetching data', error)
+        this.errorToast(this.$trans('Error fetching data'))
         this.isLoading = false
       }
     },
@@ -240,5 +303,12 @@ export default {
 input[type="number"] {
   max-width: 5em;
   text-align: right;
+}
+ol {
+  font-size: 2.6em;
+  list-style-type: upper-roman;
+}
+.revert {
+  font-size: 0.9rem;
 }
 </style>

@@ -96,6 +96,21 @@ class TeamleaderService extends BaseModel{
     return this.axios.patch(url, data, headers).then(response => response.data)
   }
 
+  async fetchTaxRates() {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.base_url}/tax-rate/`
+
+    return this.axios.get(url, headers).then(response => response.data)
+  }
+
+  async resetTaxRates(department_id) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.base_url}/tax-rate-reset/?department_id=${department_id}`
+
+    return this.axios.post(url, {}, headers).then(response => response.data)
+  }
 }
 
 export {TeamleaderService}
