@@ -96,7 +96,6 @@ import BarChart from "../../components/BarChart.vue"
 import PieChart from "../../components/PieChart.vue"
 import OrderStatusColorSpan from '../../components/OrderStatusColorSpan.vue'
 import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
-import { readonly } from '@vue/composition-api'
 
 
 let d = new Date();

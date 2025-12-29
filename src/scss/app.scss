@@ -8,8 +8,7 @@ $normal-link: #fff;
 $font-size-base: 0.9rem;
 
 // Then import Bootstrap an BootstrapVue SCSS files (order is important)
-@import 'node_modules/bootstrap/scss/bootstrap.scss';
-@import 'node_modules/bootstrap-vue/src/index.scss';
+@import 'bootstrap/scss/bootstrap.scss';
 
 html, body {
   height: 100%;
@@ -83,3 +82,5 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance:textfield; /* Firefox */
 }
+
+@import "shared";

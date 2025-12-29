@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite'
 import visualizer from 'rollup-plugin-visualizer'
 import themePreprocessorPlugin from "@zougt/vite-plugin-theme-preprocessor"
-import vue from '@vitejs/plugin-vue2'
+import vue from '@vitejs/plugin-vue'
+import Components from 'unplugin-vue-components/vite'
+import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
 
 const path = require("path");
 export default defineConfig({
@@ -10,15 +12,30 @@ export default defineConfig({
   //   sourcemap: true
   // },
   server: {
-    host: 'demo.my24service.com',
+    host: '0.0.0.0',
     port: 3000,
-    hmr: {
-      host: "localhost",
-      port: 3000
-    }
+    allowedHosts: [
+      'stormy.my24service-dev.com',
+      '*.my24service.com',
+    ]
+    // hmr: {
+    //   host: "localhost",
+    //   port: 3000
+    // }
   },
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          compatConfig: {
+            MODE: 2
+          }
+        }
+      }
+    }),
+    Components({
+      resolvers: [BootstrapVueNextResolver()],
+    }),
     visualizer(),
     themePreprocessorPlugin({
       scss: {
@@ -59,7 +76,20 @@ export default defineConfig({
     extensions: ['.js', '.json', '.vue'],
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      vue: '@vue/compat'
     },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: [
+          'mixed-decls',
+          'color-functions',
+          'global-builtin',
+          'import'
+        ]
+      },
+    }
   },
   test: {
     environment: 'happy-dom',

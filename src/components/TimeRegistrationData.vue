@@ -235,8 +235,7 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 import {componentMixin} from "../utils";
-import {use} from "chai";
-import timeRegistrationModel, {TimeRegistrationService} from "@/models/company/TimeRegistration";
+import {TimeRegistrationService} from "@/models/company/TimeRegistration";
 
 export default {
   mixins: [componentMixin],
@@ -339,6 +338,7 @@ export default {
       timeEntryParsed: '', // (+/-)10:00 value
       timeEntryCorrectionAsText: '', // message below input
       timeEntryCorrectionNotify: false,
+      timeRegistrationService: new TimeRegistrationService()
     }
   },
   computed: {
@@ -377,7 +377,7 @@ export default {
         return;
       }
       // After posting this, we need to update the whole UI.
-      const result = await timeRegistrationModel.editCorrection(this.timeEntry.id, {
+      const result = await this.timeRegistrationService.editCorrection(this.timeEntry.id, {
         'source': this.timeEntry.source,
         'work_correction': this.timeEntryParsed,
         'work_correction_by_user': this.user_id,
