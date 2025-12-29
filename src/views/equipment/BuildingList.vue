@@ -119,6 +119,9 @@ export default {
     Pagination,
   },
   computed: {
+    service() {
+      return this.buildingService
+    },
     editLink() {
       if (this.hasBranches) {
         return 'equipment-building-edit'
@@ -143,7 +146,6 @@ export default {
   },
   data() {
     return {
-      searchQuery: null,
       buildingService: new BuildingService(),
       buildingPk: null,
       isLoading: false,
@@ -179,6 +181,16 @@ export default {
   },
   created() {
     this.buildingService.resetListArgs()
+    this.buildingService.currentPage = this.$route.query.page || 1
+    this.buildingService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
+    if (this.$route.query.sort_field) {
+      this.sortBy = this.$route.query.sort_field
+      if (this.$route.query.sort_dir) {
+        this.sortDesc = this.$route.query.sort_dir === 'desc'
+      }
+      this.buildingService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+    }
+
     if (this.hasBranches) {
       if (this.isEmployee) {
         this.fields = this.fieldsBranchNonPlanning
@@ -192,15 +204,19 @@ export default {
         this.fields = this.fieldsCustomerPlanning
       }
     }
-    this.buildingService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
-    handleSearchOk(val) {
+    async handleSearchOk(val) {
       this.$refs['search-modal'].hide()
       this.buildingService.setSearchQuery(val)
-      this.loadData()
+      const query = {
+        ...this.$route.query,
+        ...this.buildingService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
     },
     showSearchModal() {
       this.$refs['search-modal'].show()

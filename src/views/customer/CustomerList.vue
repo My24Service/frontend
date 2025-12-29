@@ -50,6 +50,10 @@
         :items="customers"
         responsive="md"
         class="data-table"
+        :no-local-sorting="true"
+        @sort-changed="sortingChanged"
+        :sort-by.sync="sortBy"
+        :sort-desc.sync="sortDesc"
         sort-icon-left
         :tbody-tr-class="rowClass"
       >
@@ -119,15 +123,15 @@
       </b-table>
     </div>
     <Pagination
-      v-if="!isLoading"
-      :model="model"
+      v-if="!isLoading && service"
+      :model="service"
       :model_name="$trans('Customer')"
     />
   </div>
 </template>
 
 <script>
-import customerModel from '../../models/customer/Customer.js'
+import {CustomerService} from '../../models/customer/Customer.js'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -146,11 +150,16 @@ export default {
     SearchModal,
     Pagination,
   },
+  computed: {
+    service() {
+      return this.customerService
+    },
+  },
   data() {
     return {
       pk: null,
       searchQuery: null,
-      model: customerModel,
+      customerService: new CustomerService(),
       isLoading: false,
       customers: [],
       customerFields: [
@@ -162,25 +171,56 @@ export default {
         {key: 'contact', label: this.$trans('Contact')},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
+      sortBy: 'name',
+      sortDesc: false,
     }
   },
   created() {
-    this.model.currentPage = this.$route.query.page || 1
+    // this.model.currentPage = this.$route.query.page || 1
+    // this.model.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
+    this.customerService.resetListArgs()
+    this.customerService.currentPage = this.$route.query.page || 1
+    this.customerService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
+    if (this.$route.query.sort_field) {
+      this.sortBy = this.$route.query.sort_field
+      if (this.$route.query.sort_dir) {
+        this.sortDesc = this.$route.query.sort_dir === 'desc'
+      }
+      this.customerService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+    }
+
     this.loadData()
   },
   methods: {
     // download
     downloadList() {
       if (confirm(this.$trans('Are you sure you want to export all customers?'))) {
-        const url = this.model.getExportUrl()
+        const url = this.customerService.getExportUrl()
         my24.downloadItemAuth(url, 'customers.xlsx')
       }
     },
+    // sorting
+    async sortingChanged(ctx) {
+      // set sorting and reset current page
+      this.customerService.setSorting(ctx.sortBy, ctx.sortDesc, true)
+      const query = {
+        ...this.$route.query,
+        ...this.customerService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
+      // await this.loadData()
+    },
     // search
-    handleSearchOk(val) {
+    async handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
-      this.loadData()
+      this.customerService.setSearchQuery(val)
+      const query = {
+        ...this.$route.query,
+        ...this.customerService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
@@ -192,7 +232,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.pk)
+        await this.customerService.delete(this.pk)
         this.infoToast(this.$trans('Deleted'), this.$trans('Customer has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -210,7 +250,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.model.list()
+        const data = await this.customerService.list()
         this.customers = data.results
         this.isLoading = false
       } catch(error) {

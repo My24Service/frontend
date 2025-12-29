@@ -43,7 +43,7 @@ export default {
     currentPage: function(val) {
       const query = {
         ...this.$route.query,
-        ...this.model.queryArgs,
+        ...this.model.getQueryArgs(),
         page: val,
       }
 

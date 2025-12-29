@@ -108,7 +108,7 @@
         <b-button
           :disabled="isLoading"
           @click="cancelEditDocument"
-          class="btn btn-secondary update-button"
+          class="btn btn-primary"
           type="button"
           size="sm"
           variant="secondary"
@@ -136,7 +136,7 @@
     >
       <b-button
         @click="newDocument"
-        class="btn btn-primary update-button"
+        class="btn btn-primary"
         type="button"
         variant="primary"
       >
@@ -160,9 +160,8 @@
           &nbsp;
           <b-button
             @click="submitDocuments"
-            class="btn btn-danger"
+            class="btn btn-primary"
             type="button"
-            variant="danger"
           >
             {{ $trans('Save changes') }}
           </b-button>

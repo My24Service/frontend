@@ -86,8 +86,8 @@
       </b-table>
     </div>
     <Pagination
-      v-if="!isLoading"
-      :model="locationService"
+      v-if="!isLoading && service"
+      :model="service"
       :model_name="$trans('Location')"
     />
 
@@ -134,6 +134,9 @@ export default {
     Pagination,
   },
   computed: {
+    service() {
+      return this.locationService
+    },
     editLink() {
       if (this.hasBranches) {
         return 'equipment-location-edit'
@@ -194,6 +197,16 @@ export default {
   },
   created() {
     this.locationService.resetListArgs()
+    this.locationService.currentPage = this.$route.query.page || 1
+    this.locationService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
+    if (this.$route.query.sort_field) {
+      this.sortBy = this.$route.query.sort_field
+      if (this.$route.query.sort_dir) {
+        this.sortDesc = this.$route.query.sort_dir === 'desc'
+      }
+      this.locationService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+    }
+
     if (this.hasBranches) {
       if (this.isEmployee) {
         this.fields = this.fieldsBranchNonPlanning
@@ -207,7 +220,6 @@ export default {
         this.fields = this.fieldsCustomerPlanning
       }
     }
-    this.locationService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
@@ -217,10 +229,15 @@ export default {
       my24.downloadItemAuth(url, 'locations.xlsx', () => {})
     },
     // search
-    handleSearchOk(val) {
+    async handleSearchOk(val) {
       this.$refs['search-modal'].hide()
       this.locationService.setSearchQuery(val)
-      this.loadData()
+      const query = {
+        ...this.$route.query,
+        ...this.locationService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
     },
     showSearchModal() {
       this.$refs['search-modal'].show()

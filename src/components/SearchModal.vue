@@ -35,6 +35,9 @@ export default {
       query: null
     }
   },
+  created() {
+    this.query = this.$route.query.q || ""
+  },
   methods: {
     doSearch() {
       this.$emit('do-search', this.query)

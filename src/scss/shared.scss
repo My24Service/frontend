@@ -368,7 +368,9 @@ tr:focus-within .edit-icon {
   }
   button.primary,
   .btn-primary {
-    color: $normal-link!important;
+    //color: $my24;
+
+    //color: $normal-link!important;
   }
   h6 {
     text-transform: uppercase;
@@ -733,9 +735,9 @@ html {
     
     .btn,
     .btn-primary {
-      background-color: white ;
+      background-color: white;
       border-color: #fff6;
-      color: $my24 ;
+      color: $my24;
       &:not(:disabled):active {
         border-color: white !important;
       }
@@ -748,8 +750,9 @@ html {
         color: white !important;
       }
       &.btn-secondary {
-        background-color: #0009;
-        border-color:  transparent;
+        //background-color: #0009;
+        background-color: $secondary;
+        //border-color:  transparent;
         color: white;
         &:hover {
           /* background-color: $secondary; */
@@ -770,6 +773,8 @@ html {
 
     .btn-group .btn-secondary {
       margin-inline: 0;
+      background: white !important;
+      color: $primary;
     }
     .backlink {
       cursor: pointer;

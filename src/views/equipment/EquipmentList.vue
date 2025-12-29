@@ -154,11 +154,10 @@
       </b-table>
     </div>
     <Pagination
-        v-if="!isLoading"
-        :model="equipmentService"
+        v-if="!isLoading && service"
+        :model="service"
         :model_name="$trans('Equipment')"
       />
-
   </div>
 </template>
 
@@ -172,11 +171,13 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {componentMixin} from "@/utils";
-import { EquipmentStateModel, EquipmentStateService } from "@/models/equipment/EquipmentState";
-import { EquipmentService } from '@/models/equipment/equipment'
+import {EquipmentStateModel, EquipmentStateService} from "@/models/equipment/EquipmentState";
+import {EquipmentService} from '@/models/equipment/equipment'
 import IconLinkPlus from "../../components/IconLinkPlus";
 import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
+import unconfirmedSickLeaveList
+  from "@/views/company/time-registration/UnconfirmedSickLeaveList.vue";
 
 export default {
   mixins: [componentMixin],
@@ -193,6 +194,9 @@ export default {
     IconLinkPlus,
   },
   computed: {
+    service() {
+      return this.equipmentService
+    },
     editLink() {
       if (this.hasBranches) {
         return 'equipment-equipment-edit'
@@ -217,7 +221,6 @@ export default {
   },
   data() {
     return {
-      searchQuery: null,
       equipmentStateService: new EquipmentStateService(),
       equipmentService: new EquipmentService(),
       isLoading: false,
@@ -273,8 +276,15 @@ export default {
   },
   async created() {
     this.equipmentService.resetListArgs()
-    this.isLoading = true
     this.equipmentService.currentPage = this.$route.query.page || 1
+    this.equipmentService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
+    if (this.$route.query.sort_field) {
+      this.sortBy = this.$route.query.sort_field
+      if (this.$route.query.sort_dir) {
+        this.sortDesc = this.$route.query.sort_dir === 'desc'
+      }
+      this.equipmentService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+    }
 
     if (this.hasBranches) {
       if (this.isEmployee) {
@@ -291,7 +301,6 @@ export default {
     }
 
     await this.loadData()
-    this.isLoading = false
   },
   methods: {
     // download
@@ -301,8 +310,15 @@ export default {
     },
     // sorting
     async sortingChanged(ctx) {
-      this.equipmentService.setSorting(ctx.sortBy, ctx.sortDesc)
-      await this.loadData()
+      // set sorting and reset current page
+      this.equipmentService.setSorting(ctx.sortBy, ctx.sortDesc, true)
+      const query = {
+        ...this.$route.query,
+        ...this.equipmentService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
+      // await this.loadData()
     },
     // add state
     showAddStateModal(id) {
@@ -321,10 +337,15 @@ export default {
       }
     },
     // search
-    handleSearchOk(val) {
+    async handleSearchOk(val) {
       this.$refs['search-modal'].hide()
       this.equipmentService.setSearchQuery(val)
-      this.loadData()
+      const query = {
+        ...this.$route.query,
+        ...this.equipmentService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
     },
     showSearchModal() {
       this.$refs['search-modal'].show()
@@ -346,12 +367,16 @@ export default {
     },
     // rest
     async loadData() {
+      this.isLoading = true
+
       try {
         const data = await this.equipmentService.list()
         this.equipmentObjects = data.results;
+        this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)
         this.errorToast(this.$trans('Error loading equipment'))
+        this.isLoading = false
       }
     }
   }
