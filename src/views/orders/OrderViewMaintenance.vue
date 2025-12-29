@@ -605,10 +605,15 @@ export default {
         // set location based on setting
         if (this.$store.getters.getMemberUsesEquipment) {
           for (let i=0; i<this.order.orderlines.length; i++) {
-            console.debug(`overriding orderline location from '${this.order.orderlines[i].location} to ${this.order.orderlines[i].equipment_location_view.name}`)
-            this.order.orderlines[i].location = this.order.orderlines[i].equipment_location_view.name
-            console.debug(`overriding orderline product from '${this.order.orderlines[i].product} to ${this.order.orderlines[i].equipment_view.name}`)
-            this.order.orderlines[i].product = this.order.orderlines[i].equipment_view.name
+            if (this.order.orderlines[i].equipment_location_view.name !== "" && this.order.orderlines[i].equipment_location_view.name !== null) {
+              console.debug(`overriding orderline location from '${this.order.orderlines[i].location} to ${this.order.orderlines[i].equipment_location_view.name}`)
+              this.order.orderlines[i].location = this.order.orderlines[i].equipment_location_view.name
+            }
+
+            if (this.order.orderlines[i].equipment_view.name !== "" && this.order.orderlines[i].equipment_view.name !== null) {
+              console.debug(`overriding orderline product from '${this.order.orderlines[i].product} to ${this.order.orderlines[i].equipment_view.name}`)
+              this.order.orderlines[i].product = this.order.orderlines[i].equipment_view.name
+            }
           }
         }
 
