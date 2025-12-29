@@ -111,6 +111,15 @@ class TeamleaderService extends BaseModel{
 
     return this.axios.post(url, {}, headers).then(response => response.data)
   }
+
+  async fetchBusinessTypes() {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    const url = `${this.base_url}/business-type-list/`
+
+    return this.axios.get(url, headers).then(response => response.data)
+  }
+
 }
 
 export {TeamleaderService}

@@ -283,6 +283,8 @@ export default {
       this.isLoading = true
       try {
         this.settings = await this.service.configDetail()
+        const businessTypes = await this.service.fetchBusinessTypes()
+        console.log(businessTypes)
         await this.fetchTaxRates()
         this.isLoading = false
       } catch(error) {
