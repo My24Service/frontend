@@ -1,13 +1,10 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { createStore } from 'vuex'
 
 import { actions } from './actions';
 import { getters } from './getters';
 import { mutations } from './mutations';
 
-Vue.use(Vuex);
-
-let store = new Vuex.Store({
+let store = new createStore({
   state: {
     data: [],
     next: null,

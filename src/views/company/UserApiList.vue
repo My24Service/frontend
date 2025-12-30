@@ -87,7 +87,7 @@
               size="60"
               :value="data.item.api_user.token"
             />
-            <b-link v-on:click.native="copyToken(data.item.token)">
+            <b-link v-on:click="copyToken(data.item.token)">
               <b-icon-back class="icon-th"></b-icon-back>
             </b-link>
           </p>
@@ -101,7 +101,7 @@
             </span>
             <span v-else>
               {{ $trans('Active') }}&nbsp;-
-              <b-link v-on:click.native="function(){ showRevokeModal(data.item.id) }">{{ $trans('Revoke') }}</b-link>
+              <b-link v-on:click="function(){ showRevokeModal(data.item.id) }">{{ $trans('Revoke') }}</b-link>
               <p>
                 {{ $trans("Valid until") }}: {{ getValidUntil(data.item.api_user) }}
               </p>

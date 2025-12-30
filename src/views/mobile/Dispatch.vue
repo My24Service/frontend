@@ -115,7 +115,7 @@
 
         <DispatchWeek
           v-if="loadDone"
-          :startDate.sync="startDate"
+          :startDate="startDate"
           :orderClickHandler="openActionsModal"
           :mode="mode"
           :is-assign-mode="assignMode"
@@ -217,7 +217,7 @@
             <b-row>
               <b-col size="6"></b-col>
               <b-col size="6" class="text-right">
-                <b-link class="px-1" title="clear" v-on:click.native="clearAssignedorderDates()">
+                <b-link class="px-1" title="clear" v-on:click="clearAssignedorderDates()">
                   {{ $trans('clear') }}
                 </b-link>
               </b-col>
@@ -338,7 +338,7 @@
             <b-row>
               <b-col size="6"></b-col>
               <b-col size="6" class="text-right">
-                <b-link class="px-1" title="clear" v-on:click.native="clearAssignedorderSplit()">
+                <b-link class="px-1" title="clear" v-on:click="clearAssignedorderSplit()">
                   {{ $trans('clear') }}
                 </b-link>
               </b-col>

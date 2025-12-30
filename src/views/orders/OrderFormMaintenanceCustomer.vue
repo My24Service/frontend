@@ -195,7 +195,7 @@
               <OrderTypesSelect
                 v-if="(!isCreate && !isLoading) || isCreate"
                 :orderTypeIn="order.order_type"
-                :order-type.sync="order.order_type"
+                :order-type="order.order_type"
                 :include-all="false"
               />
             </b-form-group>

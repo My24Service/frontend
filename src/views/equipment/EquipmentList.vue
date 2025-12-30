@@ -92,8 +92,8 @@
         sort-icon-left
         :no-local-sorting="true"
         @sort-changed="sortingChanged"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
+        :sort-by="sortBy"
+        :sort-desc="sortDesc"
       >
         <template #head(icons)="">
           <div class="float-right">

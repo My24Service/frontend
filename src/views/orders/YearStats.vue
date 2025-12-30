@@ -28,7 +28,7 @@
             </b-col>
             <b-col cols="4">
               <OrderTypesSelect
-                :order-type.sync="orderType"
+                :order-type="orderType"
                 :include-all="true"
               />
             </b-col>

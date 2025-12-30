@@ -1,18 +1,15 @@
 <template>
   <div>
     <WorkorderMaintenance v-if="memberType === 'maintenance'" :uuid="uuid" />
-    <WorkorderTemps v-if="memberType === 'temps'" :uuid="uuid" />
   </div>
 </template>
 <script>
 import WorkorderMaintenance from "./WorkorderMaintenance.vue"
-import WorkorderTemps from "./WorkorderTemps.vue"
 
 export default {
   name: "Workorder",
   components: {
   	WorkorderMaintenance,
-  	WorkorderTemps
   },
 	props: {
 		uuid: {

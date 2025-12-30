@@ -1,6 +1,6 @@
 <template>
   <span>
-    <b-link v-bind:title="title" v-on:click.native="method()">
+    <b-link v-bind:title="title" v-on:click="method()">
       <b-icon-person-check-fill class="edit-icon"></b-icon-person-check-fill>
     </b-link>
   </span>

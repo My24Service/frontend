@@ -8,7 +8,7 @@
       @cancel="cancelCreateEquipment"
     >
       <form ref="maintenance_equipment_new_equipment-form" @submit.stop.prevent="submitCreateEquipment">
-        <b-container fluid>
+        <b-container fluid="md">
           <b-row role="group">
             <b-col size="12">
               <b-form-group
@@ -278,7 +278,6 @@
             >
               <b-form-input
                 id="order_city"
-
                 v-model="order.order_city"
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null"
               ></b-form-input>
@@ -358,7 +357,7 @@
             <OrderTypesSelect
               v-if="(!isCreate && !isLoading) || isCreate"
               :orderTypeIn="order.order_type"
-              :order-type.sync="order.order_type"
+              :order-type="order.order_type"
               :include-all="false"
             />
           </b-form-group>

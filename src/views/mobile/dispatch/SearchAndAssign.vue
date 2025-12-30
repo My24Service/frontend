@@ -16,7 +16,7 @@
             <b-col size="12">
                 <b-form-input size="sm" autofocus v-model="query"
                               v-bind:placeholder="$trans('Type to search orders')"
-                              @keydown.enter.native="search"
+                              @keydown.enter="search"
                               @change="searchDebounced"
                               @update="searchDebounced"></b-form-input>
             </b-col>
@@ -55,7 +55,7 @@
               <span class="order-company-name">{{ order.order_name }}</span>
               <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
                 {{ order.start_date }}
-                <b-link v-bind:title="$trans('Edit start and end dates')" v-on:click.native="editStartDate(order)">
+                <b-link v-bind:title="$trans('Edit start and end dates')" v-on:click="editStartDate(order)">
                   <b-icon-pencil class="edit-icon"></b-icon-pencil>
                 </b-link>
               </span>

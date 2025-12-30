@@ -36,6 +36,7 @@ export const actions = {
       try {
         const languageVars = await my24.getLanguageVars()
         const initialData = await my24.getInitialData()
+        console.log({initialData})
 
         const memberContract = !isEmpty(initialData.memberInfo) && initialData.memberInfo.contract ? my24.getModelsFromString(initialData.memberInfo.contract.member_contract) : {}
 

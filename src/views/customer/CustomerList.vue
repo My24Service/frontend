@@ -52,8 +52,8 @@
         class="data-table"
         :no-local-sorting="true"
         @sort-changed="sortingChanged"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
+        :sort-by="sortBy"
+        :sort-desc="sortDesc"
         sort-icon-left
         :tbody-tr-class="rowClass"
       >

@@ -1,4 +1,4 @@
-import VueRouter from 'vue-router'
+import {createRouter, createWebHashHistory} from 'vue-router'
 
 import TheIndexLayout from '../components/TheIndexLayout.vue'
 
@@ -18,8 +18,8 @@ import catchall from './catchall'
 import webshop from './webshop'
 import bim from './bim'
 import docks from './docks'
-import {AUTH_LEVELS} from "../constants";
-import {getIsLoggedIn, getUserAuthLevel, hasAccessRouteAuthLevel} from "../utils";
+import {AUTH_LEVELS} from "@/constants";
+import {getIsLoggedIn, getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
 
 const routes = [
   {
@@ -44,8 +44,9 @@ const routes = [
   ...docks,
 ]
 
-const router = new VueRouter({
-  routes
+export const router = createRouter({
+  history: createWebHashHistory(),
+  routes,
 })
 
 router.beforeEach(async (to, from, next) => {
@@ -85,5 +86,3 @@ router.beforeEach(async (to, from, next) => {
   console.warn('route not allowed because of user auth level', {path, pathAuthLevel, userAuthLevel})
   next(`/no-access?next=${to.path}`)
 });
-
-export default router

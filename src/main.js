@@ -9,23 +9,52 @@ script.src = `${BASE_URL}/api/jsi18n/`
 script.async = false
 document.head.appendChild(script)
 
-import Vue from 'vue'
-import Vuex from 'vuex'
-import VueRouter from 'vue-router'
-import Loading from 'vue-loading-overlay'
-import { ColorPicker, ColorPanel } from "one-colorpicker"
+import { createApp } from 'vue'
+// import Loading from 'vue-loading-overlay'
+// import { ColorPicker, ColorPanel } from "one-colorpicker"
 
-import 'vue-spinners/dist/vue-spinners.css'
-import VueSpinners from 'vue-spinners/dist/vue-spinners.common'
-
-Vue.use(VueSpinners)
+// import 'vue-spinners/dist/vue-spinners.css'
+// import VueSpinners from 'vue-spinners/dist/vue-spinners.common'
 
 // import VCalendar from 'v-calendar'
 // Vue.use(VCalendar)
 
 import App from './App.vue'
 import store from './store'
-import router from './router'
+import {router} from './router'
+
+// global mixins
+import toastMix from '@/mixins/toast'
+
+
+function createOurApp() {
+  const app = createApp(App)
+  app.use(router)
+  app.use(store)
+  app.mixin(toastMix)
+  // app.use(VueSpinners)
+  // app.use(Loading)
+  // app.use(ColorPanel)
+  // app.use(ColorPicker)
+
+  app.config.productionTip = false
+
+  // tired of those "v$ already defined" warnings -_-
+  app.config.silent = true
+
+  app.prototype.$trans = (text) => {
+    if (text in window.member_type_text) {
+      return gettext(window.member_type_text[text])
+    }
+
+    return gettext(text)
+  }
+
+  return app
+}
+
+// const app = createOurApp();
+// app.mount('#app')
 
 import './scss/app.scss'
 // import 'vue-loading-overlay/dist/vue-loading.css'
@@ -54,42 +83,16 @@ toggleTheme({
   scopeName: theme,
 });
 
-// global mixins
-import toastMix from '@/mixins/toast'
-Vue.mixin(toastMix)
-
 // auth
 import auth from '@/services/auth'
 import client from '@/services/api'
 import accountModel from "./models/account/Account";
 auth.setInterceptors(client)
 
-Vue.config.productionTip = false
-
-// tired of those "v$ already defined" warnings -_-
-Vue.config.silent = true
-
-Vue.prototype.$trans = (text) => {
-  if (text in window.member_type_text) {
-    return gettext(window.member_type_text[text])
-  }
-
-  return gettext(text)
-}
-
-Vue.use(Vuex)
-Vue.use(VueRouter)
-Vue.use(Loading)
-Vue.use(ColorPanel)
-Vue.use(ColorPicker)
-
 store.dispatch('getInitialData')
   .then(() => {
-    new Vue({
-      store,
-      router,
-      render: (h) => h(App),
-    }).$mount('#app')
+    const app = createOurApp();
+    app.mount('#app')
   })
   .catch((error) => {
     if (error.response) {

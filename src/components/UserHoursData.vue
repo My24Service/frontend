@@ -25,8 +25,8 @@
       :items="data"
       responsive="md"
       class="data-table"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
+      :sort-by="sortBy"
+      :sort-desc="sortDesc"
     >
       <template #table-busy>
         <div class="text-center text-danger my-2">
