@@ -86,7 +86,8 @@ export default {
 
       try {
         const loginResult = await accountModel.login(this.username, this.password)
-        this.$auth.authenticate({ accessToken: loginResult.token })
+        await this.$store.dispatch('auth/authenticate', { accessToken: loginResult.token });
+
 
         await this.$store.dispatch('getInitialData')
         const userDetails = await accountModel.getUserDetails()
@@ -106,6 +107,7 @@ export default {
 
       } catch (error) {
         console.log(error)
+        await this.$store.dispatch('auth/loginFailure');
         loader.hide()
 
         this.errorToast(this.$trans('Error logging you in'))

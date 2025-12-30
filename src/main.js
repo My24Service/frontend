@@ -26,12 +26,11 @@ import {router} from './router'
 // global mixins
 import toastMix from '@/mixins/toast'
 
-
 function createOurApp() {
-  const app = createApp(App)
-  app.use(router)
-  app.use(store)
-  app.mixin(toastMix)
+  const app = createApp(App).use(store);
+    app.use(router)
+    app.mixin(toastMix)
+
   // app.use(VueSpinners)
   // app.use(Loading)
   // app.use(ColorPanel)
@@ -84,10 +83,7 @@ toggleTheme({
 });
 
 // auth
-import auth from '@/services/auth'
-import client from '@/services/api'
 import accountModel from "./models/account/Account";
-auth.setInterceptors(client)
 
 store.dispatch('getInitialData')
   .then(() => {

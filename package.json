@@ -48,7 +48,7 @@
     "@babel/eslint-parser": "^7.22.9",
     "@babel/preset-env": "^7.16.11",
     "@vitejs/plugin-vue": "^6.0.3",
-    "@vue/compiler-sfc": "^3.1.0",
+    "@vue/compiler-sfc": "^3.5.26",
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "@zougt/vite-plugin-theme-preprocessor": "^1.4.8",
@@ -62,6 +62,7 @@
     "less": "^4.1.2",
     "rollup-plugin-visualizer": "^5.5.4",
     "sass": "^1.49.8",
+    "unplugin-icons": "^22.5.0",
     "unplugin-vue-components": "^30.0.0",
     "vite": "^7.2.7"
   }

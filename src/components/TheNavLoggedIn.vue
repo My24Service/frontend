@@ -218,7 +218,7 @@ export default {
       let loader = this.$loading.show()
 
       try {
-        this.$auth.logout(false)
+        await this.$store.dispatch('auth/logout');
         await this.$store.dispatch('getInitialData')
 
         loader.hide()

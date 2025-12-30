@@ -3,6 +3,7 @@ import { createStore } from 'vuex'
 import { actions } from './actions';
 import { getters } from './getters';
 import { mutations } from './mutations';
+import { auth } from "@/services/auth2/module";
 
 let store = new createStore({
   state: {
@@ -26,6 +27,9 @@ let store = new createStore({
   actions,
   getters,
   mutations,
+  modules: {
+    auth,
+  },
 });
 
 export default store;

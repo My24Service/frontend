@@ -7,6 +7,7 @@ import {
   AUTH_LEVELS
 } from "./constants";
 import Dinero from "dinero.js";
+import {useStore} from "vuex";
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
@@ -95,8 +96,9 @@ function getUserAuthLevel(store) {
   }
 }
 
-function hasAccessRouteAuthLevel(authLevelNeeded, store) {
-  const authLevelUser = getUserAuthLevel(store)
+function hasAccessRouteAuthLevel(authLevelNeeded) {
+  console.log('HAI in hasAccessRouteAuthLevel')
+  const authLevelUser = getUserAuthLevel()
 
   // TODO in the future use ONLY arrays?
   // let needed = typeof authLevelNeeded === 'string' ? [ authLevelNeeded ] : authLevelNeeded
@@ -208,17 +210,19 @@ let componentMixin = {
       return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
     },
     async doFetchUnacceptedCountAndUpdateStore() {
+      const store = useStore()
       const service = new OrderService()
       const countResult = await service.getUnacceptedCount()
       if (countResult && 'count' in countResult) {
-        await this.$store.dispatch('setUnacceptedCount', countResult.count)
+        await store.dispatch('setUnacceptedCount', countResult.count)
       }
     },
     hasAccessToModule(module, part) {
+      const store = useStore()
       return my24.hasAccessToModule({
         isStaff: this.isStaff,
         isSuperuser: this.isSuperuser,
-        contract: this.$store.state.memberContract,
+        contract: store.state.memberContract,
         module,
         part,
       })

@@ -27,7 +27,7 @@ export default {
       return JSON.parse(jsonPayload);
     },
     async checkToken() {
-      const token = this.$auth.getAccessToken()
+      const token = localStorage.getItem('accessToken')
       const tokenVars = this.parseJwt(token)
       const expireInSeconds = tokenVars.exp - Math.round(Date.now()/1000)
       const expireInHours = Math.round(expireInSeconds/(60*60))
@@ -39,7 +39,7 @@ export default {
         try {
           const result = await accountModel.refreshToken(token)
           console.debug('token refresh result', result)
-          this.$auth.authenticate({ accessToken: result.token })
+          await this.$store.dispatch('auth/authenticate', { accessToken: result.token });
           console.debug('token refreshed')
         } catch (e) {
           console.error('error refreshing token', e)

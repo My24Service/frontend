@@ -4,6 +4,8 @@ import themePreprocessorPlugin from "@zougt/vite-plugin-theme-preprocessor"
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
 import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
+import IconsResolve from 'unplugin-icons/resolver'
+import Icons from 'unplugin-icons/vite'
 
 const path = require("path");
 export default defineConfig({
@@ -34,7 +36,15 @@ export default defineConfig({
       }
     }),
     Components({
-      resolvers: [BootstrapVueNextResolver()],
+      resolvers: [
+        BootstrapVueNextResolver(),
+        IconsResolve()
+      ],
+      dts: true,
+    }),
+    Icons({
+      compiler: 'vue3',
+      autoInstall: true,
     }),
     visualizer(),
     themePreprocessorPlugin({

@@ -1,21 +1,16 @@
 import axios from 'axios'
 import BASE_URL from './base-url'
-import auth from '@/services/auth'
+import setInterceptors from '@/services/auth2/clientDriver'
 
-let client, normalClient
+const client = axios.create({
+  baseURL: `${BASE_URL}/api`,
+  withCredentials: false
+})
+const normalClient = axios.create({
+  withCredentials: false
+})
 
-if (process.env.NODE_ENV !== 'test') {
-  client = axios.create({
-    baseURL: `${BASE_URL}/api`,
-    withCredentials: false
-  })
-  normalClient = axios.create({
-    withCredentials: false
-  })
-  auth.setInterceptors(client)
-} else {
-  client = axios
-}
+setInterceptors(client)
 
 export default client
 export {normalClient}

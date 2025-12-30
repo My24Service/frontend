@@ -2,7 +2,7 @@ import {createRouter, createWebHashHistory} from 'vue-router'
 
 import TheIndexLayout from '../components/TheIndexLayout.vue'
 
-import store from '../store'
+// import store from '../store'
 import orders from './orders'
 import quotations from './quotations'
 import invoices from './invoices'
@@ -20,6 +20,7 @@ import bim from './bim'
 import docks from './docks'
 import {AUTH_LEVELS} from "@/constants";
 import {getIsLoggedIn, getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
+import {useStore} from "vuex";
 
 const routes = [
   {
@@ -50,6 +51,7 @@ export const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  const store = useStore()
   const isAllowedMemberPath = await store.dispatch('hasAccessToRoute', to.path)
   const path = to.path;
   const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
@@ -77,7 +79,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // check user type if needed
-  if (hasAccessRouteAuthLevel(authLevelNeeded, store)) {
+  if (hasAccessRouteAuthLevel(authLevelNeeded)) {
     console.debug('route allowed', {path, pathAuthLevel, userAuthLevel})
     next()
     return
