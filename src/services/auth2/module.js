@@ -1,4 +1,5 @@
 import AuthService from '@/services/auth2/service';
+import accountModel from "@/models/account/Account";
 
 const storageUser = localStorage.getItem('user')
 const user = storageUser ? JSON.parse(storageUser) : null;
@@ -20,6 +21,20 @@ export const auth = {
     },
     loginFailure({commit}) {
       commit('loginFailure');
+    },
+    refreshToken({commit}) {
+      const token = localStorage.getItem('accessToken')
+      if (token) {
+        accountModel.refreshToken(token).then((result) => {
+          console.debug('token refresh result', result)
+          AuthService.authenticate({ accessToken: result.token })
+          console.debug('token refreshed, reload window')
+          window.location.reload()
+        })
+      } else {
+        console.log('no token, logout and reload')
+        AuthService.logout()
+      }
     }
   },
   mutations: {

@@ -71,41 +71,15 @@ toggleTheme({
   scopeName: theme,
 });
 
-// auth
-import accountModel from "./models/account/Account";
-
 store.dispatch('getInitialData')
   .then(() => {
     const app = createOurApp();
     app.mount('#app')
   })
-  .catch((error) => {
-    console.log("HELP ERROR", error)
-    if (error.response) {
-      if (error.response.status === 401) {
-        console.log('401 in main')
-        // try to refresh token
-        try {
-          const token = auth.getAccessToken()
-          if (token) {
-            accountModel.refreshToken(token).then((result) => {
-              console.debug('token refresh result', result)
-              auth.authenticate({ accessToken: result.token })
-              console.debug('token refreshed, reload window')
-              window.location.reload()
-            })
-          } else {
-            console.log('no token, logout and reload')
-            auth.logout(true)
-          }
-        } catch (e) {
-          console.error('error refreshing token', e)
-          console.log('logout and reload')
-          auth.logout(true)
-        }
-
-        // console.log('401 in main, logout and reload')
-        // auth.logout(true)
-      }
+  .catch(async (error) => {
+    if (error.response && error.response.status === 401) {
+      console.log('401 in main')
+      // try to refresh token
+      await store.dispatch('refreshToken')
     }
   })

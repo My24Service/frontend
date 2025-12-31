@@ -6,7 +6,7 @@ export const getters = {
     return state.streamInfo
   },
   isLoggedIn: state => {
-    return !isEmpty(state.userInfo)
+    return !!isEmpty(state.userInfo)
   },
   getUserPk: state => {
     return state.userInfo.user.pk

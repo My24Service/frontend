@@ -44,7 +44,7 @@ async function checkVersion() {
   //   this.newVersion = data.version
   //   this.message = `A new version is available`
   // } else {
-    this.newVersionAvailable = false
+    newVersionAvailable.value = false
   // }
 }
 
@@ -53,13 +53,13 @@ function versionToInt(version) {
 }
 
 function openReloadModal() {
-  if(this.newVersionAvailable) {
+  if(newVersionAvailable.value) {
     this.$refs['reload-modal'].show()
   }
 }
 
 function doReload() {
-  if(!this.newVersionAvailable) {
+  if(!newVersionAvailable.value) {
     this.$refs['reload-modal'].hide()
   } else {
     window.location.reload(false)

@@ -1,6 +1,6 @@
 <template>
   <div ref="index" v-if="!store.state.auth.loggedIn">
-    <b-container class="d-flex justify-center flex-column">
+    <b-container class="d-flex justify-center flex-column" v-if="memberInfo">
       <NavBrand />
       <h4>{{  memberInfo.name }}</h4>
     </b-container>
@@ -31,11 +31,11 @@
 import NavBrand from '@/components/NavBrand.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import Version from "./Version.vue"
-import {onMounted} from "vue";
+import {computed, onMounted} from "vue";
 import {useStore} from "vuex";
 
 const store = useStore()
-const memberInfo =store.state.memberInfo
+const memberInfo = computed(() => store.state.memberInfo)
 
 onMounted(() => {
   setTimeout(() => {

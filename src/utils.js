@@ -164,7 +164,11 @@ function uuidv4() {
 }
 
 function $trans(text) {
-  if (text in window.member_type_text) {
+  if (!window.django) {
+    return text
+  }
+
+  if (window.member_type_text && text in window.member_type_text) {
     return django.gettext(window.member_type_text[text])
   }
 

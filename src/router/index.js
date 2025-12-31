@@ -58,7 +58,7 @@ router.beforeEach(async (to, from, next) => {
   const authLevelNeeded = to.meta.hasOwnProperty('authLevelNeeded') ? to.meta.authLevelNeeded : AUTH_LEVELS.PLANNING
   const pathAuthLevel = authLevelNeeded;
   const userIsLoggedIn = getIsLoggedIn(store);
-  const userAuthLevel = getUserAuthLevel(store);
+  const userAuthLevel = userIsLoggedIn ? getUserAuthLevel(store) : null;
 
   if (!needsAuth) {
     console.debug('route allowed, no auth needed', {path})
