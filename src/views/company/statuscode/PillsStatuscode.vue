@@ -30,7 +30,7 @@
   </div>
 </template>
 <script>
-import { componentMixin } from '@/utils'
+
 import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION,
@@ -40,7 +40,7 @@ import {
 
 export default {
   name: 'PillsStatuscode',
-  mixins: [componentMixin],
+
   data() {
     return {
       memberType: null,

@@ -90,7 +90,7 @@
 
 <script>
 import my24 from "@/services/my24";
-import {componentMixin} from "@/utils";
+
 
 import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
 
@@ -110,7 +110,7 @@ class PdfBlobError {
 
 export default {
   name: "invoicePDFViewer",
-  mixins: [invoiceMixin, componentMixin],
+  mixins: [invoiceMixin],
   props: {
     invoiceIn: {
       type: InvoiceModel

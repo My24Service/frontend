@@ -94,10 +94,10 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '../../utils.js'
+
 
 export default {
-  mixins: [componentMixin],
+
   name: 'UserSalesList',
   components: {
     PillsCompanyUsers,

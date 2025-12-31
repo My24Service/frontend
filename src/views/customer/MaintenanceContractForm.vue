@@ -343,15 +343,14 @@ import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import { CustomerService } from '../../models/customer/Customer.js'
 import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
 import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
-import { EquipmentService } from "../../models/equipment/equipment";
-import {componentMixin} from "../../utils";
+import { EquipmentService } from "../../models/equipment/equipment"
 import PriceInput from "../../components/PriceInput";
 import CustomerCard from '../../components/CustomerCard.vue'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
-  mixins: [componentMixin],
+
   setup() {
     return { v$: useVuelidate() }
   },

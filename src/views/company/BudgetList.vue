@@ -133,11 +133,11 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {componentMixin} from "../../utils";
+
 import PriceInput from "../../components/PriceInput";
 
 export default {
-  mixins: [componentMixin],
+
   name: 'BudgetList',
   components: {
     IconLinkDelete,

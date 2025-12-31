@@ -48,10 +48,10 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
-import {componentMixin} from "../utils";
+
 
 export default {
-  mixins: [componentMixin],
+
   name: "UserHoursData",
   props: {
     detail_route_name: {

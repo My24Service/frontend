@@ -119,7 +119,7 @@ import { required, sameAs } from '@vuelidate/validators'
 import Password from 'vue-password-strength-meter'
 
 import accountModel from '../models/account/Account.js'
-import { componentMixin } from '../utils.js'
+
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
@@ -136,7 +136,7 @@ export default {
   setup() {
     return { v$: useVuelidate() }
   },
-  mixins: [componentMixin],
+
   components: {
     TheLanguageChooser,
     NavItems,

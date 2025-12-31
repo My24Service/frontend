@@ -1,5 +1,5 @@
 <template>
-  <div ref="index" v-if="!isLoggedIn">
+  <div ref="index" v-if="!store.state.auth.loggedIn">
     <b-container class="d-flex justify-center flex-column">
       <NavBrand />
       <h4>{{  memberInfo.name }}</h4>
@@ -18,7 +18,7 @@
       <header>
         <div class='page-title'>
           <h3>
-            <b-icon icon="hourglass-split"></b-icon>
+            <IBiHourglassSplit></IBiHourglassSplit>
           </h3>
         </div>
       </header>
@@ -27,36 +27,24 @@
   </div>
 </template>
 
-<script>
-import { componentMixin } from '@/utils.js'
+<script setup>
 import NavBrand from '@/components/NavBrand.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import Version from "./Version.vue"
+import {onMounted} from "vue";
+import {useStore} from "vuex";
 
-export default {
-  name: 'TheIndex',
-  mixins: [componentMixin],
-  components: {
-    NavBrand,
-    LoginForm,
-    Version
-  },
-  data() {
-    return {
-      slide: 0,
-      memberInfo: this.$store.state.memberInfo,
+const store = useStore()
+const memberInfo =store.state.memberInfo
+
+onMounted(() => {
+  setTimeout(() => {
+    if (store.getters.getIsPlanning) {
+      console.info(`planning, redirecting to 'order-list'`)
+      this.$router.push({ name: 'material-list' });
     }
-  },
-
-  created() {
-    setTimeout(() => {
-      if (this.isPlanning) {
-        console.info(`planning, redirecting to 'order-list'`)
-        this.$router.push({ name: 'material-list' });
-      }
-    }, 100);
-  }
-}
+  }, 100);
+})
 </script>
 
 <style scoped>

@@ -83,13 +83,13 @@
 
 <script>
 import my24 from '../services/my24.js'
-import { componentMixin } from '@/utils'
+
 import {StatusService} from '@/models/orders/Status.js'
 import IconLinkDelete from './IconLinkDelete.vue'
 import {OrderService} from "@/models/orders/Order";
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     IconLinkDelete
   },

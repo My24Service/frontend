@@ -1,4 +1,4 @@
-@use "app" as config;
+@use "theme" as config;
 
 button > * {
   /* only allow the button element itself to be clicked,          */
@@ -276,7 +276,7 @@ tr:focus-within .edit-icon {
   --text-color: #757a7c;
   color: var(--text-color);
 
-  table { 
+  table {
     thead th {
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -304,7 +304,7 @@ tr:focus-within .edit-icon {
         width: 100%;
         color: var(--text-color);
         font-weight: 500;
-        
+
         &:hover {
           color: #212529;
         }
@@ -328,7 +328,7 @@ tr:focus-within .edit-icon {
 /* app ui components / blocks */
 
 .panel {
-  
+
   .tabs {
     &:first-child {
       margin: -1rem -1rem 0;
@@ -379,7 +379,7 @@ tr:focus-within .edit-icon {
     color: #232c2f;
     margin-bottom: 1ex;
     user-select: none;
-    
+
     &:not(:first-child) {
       margin-top: 2rem;
     }
@@ -400,14 +400,14 @@ tr:focus-within .edit-icon {
     &.panel {
       max-width: 50%; // FIXME
       margin-top: 0;
-      
+
       h3 {
         margin: 2rem;
         text-align: center;
         letter-spacing: -1px;
       }
     }
-    
+
     &.sidebar {
       min-width: 50ch !important;
       max-width: 60ch !important;
@@ -438,7 +438,7 @@ tr:focus-within .edit-icon {
   &.space-between {
     justify-content: space-between;
   }
-  
+
 }
 
 .flex-stack > .panel + .panel {
@@ -454,7 +454,7 @@ dl {
     font-size: smaller;
     margin: 0;
     text-align: end;
-    
+
     line-height: 1.9;
     font-weight: 500;
     opacity: .5;
@@ -497,7 +497,7 @@ dl {
 
     &:hover {
       background: #f6f9fc;
-      
+
       a.px-1 {
         opacity: 1;
         pointer-events: all;
@@ -560,7 +560,7 @@ dl {
       }
 
       .order-status > span {
-        
+
         text-align: center;
         min-width: 2rem;
       }
@@ -579,7 +579,7 @@ dl {
     }
 
     > .listing-item:hover {
-      
+
       > * {
         color: #323435;
       }
@@ -665,7 +665,7 @@ dl {
   border: 8px solid white;
   box-shadow: 0 0.5ex 3ex -2ex;
   height: auto;
-  
+
   &.profile-picture {
     aspect-ratio: 1;
     width: 256px;
@@ -696,18 +696,18 @@ dl {
 
   &.isEditing {
     background-color: #f6f9fc;
-    
+
     img[src=""] {
       background-color: #ddd;
       background-image:
-      linear-gradient(45deg, #ccc 25%, transparent 25%), 
+      linear-gradient(45deg, #ccc 25%, transparent 25%),
       linear-gradient(135deg, #ccc 25%, transparent 25%),
       linear-gradient(45deg, transparent 75%, #ccc 75%),
       linear-gradient(135deg, transparent 75%, #ccc 75%);
       background-size:25px 25px; /* Must be a square */
       background-position:0 0, 12.5px 0, 12.5px -12.5px, 0px 12.5px; /* Must be half of one side of the square */
     }
-    
+
   }
   .form-group {
     position: absolute;
@@ -734,7 +734,7 @@ html {
       gap: 1ex;
       align-items: center;
     }
-    
+
     .btn,
     .btn-primary {
       background-color: white;
@@ -767,7 +767,7 @@ html {
     }
     .btn-toolbar {
       gap: 1ex;
-      
+
       button {
         font-size: 0.9rem;
       }
@@ -814,7 +814,7 @@ html {
 }
 
 .progress {
-  
+
   & .progress-bar {
     opacity: .5;
     max-width: 0;
@@ -822,7 +822,7 @@ html {
     animation: progressbar 1.5s 0s cubic-bezier(0.65, 0.05, 0.36, 1) forwards 1;
   }
 
-  
+
   .progress-bar {
     animation-delay: calc(var(--delay, .25s) * .05s);
   }
@@ -830,7 +830,7 @@ html {
 }
 
 :hover > .progress {
-  
+
   & .progress-bar {
     transition-duration: .4s;
     opacity: 1;

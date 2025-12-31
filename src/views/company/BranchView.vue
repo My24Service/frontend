@@ -188,7 +188,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "@/utils";
+
 import BranchCard from '../../components/BranchCard.vue'
 
 import {BranchService, BranchModel} from '@/models/company/Branch'
@@ -197,7 +197,7 @@ import {LocationService} from "@/models/equipment/location";
 import {EquipmentService} from "@/models/equipment/equipment";
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,

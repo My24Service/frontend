@@ -453,13 +453,13 @@ import customerModel from '@/models/customer/Customer.js'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import orderlineModel from "../../models/orders/Orderline";
-import {componentMixin} from "@/utils";
+
 
 export default {
   setup() {
     return { v$: useVuelidate() }
   },
-  mixins: [componentMixin],
+
   components: {
     Multiselect,
     OrderTypesSelect

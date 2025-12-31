@@ -179,7 +179,7 @@
 <script>
 import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
 import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
-import {componentMixin} from "../../utils";
+
 import CustomerDetail from "../../components/CustomerDetail";
 import CustomerCard from "../../components/CustomerCard";
 import {OrdersMaintenanceService} from '../../models/orders/OrdersMaintenance'
@@ -189,7 +189,7 @@ import OrderTableInfo from "../../components/OrderTableInfo";
 import SearchModal from "../../components/SearchModal";
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     CustomerDetail,
     CustomerCard,

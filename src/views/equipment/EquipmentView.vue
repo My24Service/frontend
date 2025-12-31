@@ -129,7 +129,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "@/utils";
+
 import {NO_IMAGE_URL} from '@/constants'
 import my24 from "@/services/my24";
 
@@ -140,7 +140,7 @@ import moment from 'moment/min/moment-with-locales'
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     DocumentsComponent,
     ButtonLinkRefresh,

@@ -509,13 +509,13 @@ import {
   EquipmentModel
 } from '../../models/equipment/equipment.js'
 import { BranchService } from "../../models/company/Branch";
-import {componentMixin} from "../../utils";
+
 import { LocationService } from "../../models/equipment/location";
 import PriceInput from "../../components/PriceInput";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 
 export default {
-  mixins: [componentMixin],
+
   setup() {
     return { v$: useVuelidate() }
   },

@@ -173,7 +173,7 @@ import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
 
-import {componentMixin} from "@/utils";
+
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import Collapse from '@/components/Collapse.vue'
 import CustomerDetail from "@/components/CustomerDetail";
@@ -187,7 +187,7 @@ import Chapter from './Chapter.vue'
 
 export default {
   name: "CustomerForm",
-  mixins: [componentMixin],
+
   setup() {
     return { v$: useVuelidate() }
   },

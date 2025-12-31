@@ -170,7 +170,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {componentMixin} from "@/utils";
+
 import {EquipmentStateModel, EquipmentStateService} from "@/models/equipment/EquipmentState";
 import {EquipmentService} from '@/models/equipment/equipment'
 import IconLinkPlus from "../../components/IconLinkPlus";
@@ -180,7 +180,7 @@ import unconfirmedSickLeaveList
   from "@/views/company/time-registration/UnconfirmedSickLeaveList.vue";
 
 export default {
-  mixins: [componentMixin],
+
   name: 'EquipmentList',
   components: {
     ButtonLinkDownload,

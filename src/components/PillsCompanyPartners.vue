@@ -20,10 +20,10 @@
   </div>
 </template>
 <script>
-import { componentMixin } from '@/utils.js'
+
 
 export default {
-  mixins: [componentMixin],
+
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')

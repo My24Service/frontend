@@ -35,11 +35,11 @@
   </div>
 </template>
 <script>
-import { componentMixin } from '@/utils.js'
+
 
 export default {
   name: 'SubNav',
-  mixins: [componentMixin],
+
   data() {
     return {
       memberType: null,

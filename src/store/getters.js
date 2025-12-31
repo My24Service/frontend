@@ -1,4 +1,5 @@
 import { isEmpty } from '@/utils'
+import {AUTH_LEVELS} from "@/constants";
 
 export const getters = {
   getStreamInfo: state => {
@@ -129,5 +130,43 @@ export const getters = {
       };
 
     return { after: 0, duration: 0};
-  }
+  },
+
+  // migrated from utils
+  getIsStaff(state) {
+    return state.userInfo.submodel === 'staff' && state.userInfo.user.is_staff
+    // return state.userInfo.hasOwnProperty('is_staff') && state.userInfo.is_staff
+  },
+  getIsSuperuser(state) {
+    return state.userInfo.submodel === 'superuser' && state.userInfo.user.is_superuser
+    // return state.userInfo.hasOwnProperty('is_superuser') && state.userInfo.is_superuser
+  },
+  getIsPlanning(state) {
+    return state.userInfo.submodel === 'planning_user' && state.userInfo.user.planning_user
+    // return state.userInfo.hasOwnProperty('planning_user') && state.userInfo.planning_user
+  },
+  getIsCustomer(state) {
+    return state.userInfo.submodel === 'customer_user' && state.userInfo.user.customer_user
+    // return state.userInfo.hasOwnProperty('customer_user') && state.userInfo.customer_user
+  },
+  getIsEngineer(state) {
+    return state.userInfo.submodel === 'engineer' && state.userInfo.user.engineer
+    // return state.userInfo.hasOwnProperty('engineer') && state.userInfo.engineer
+  },
+  getIsSales(state) {
+    return state.userInfo.submodel === 'sales_user' && state.userInfo.user.sales_user
+    // return state.userInfo.hasOwnProperty('sales_user') && state.userInfo.sales_user
+  },
+  getIsStudent(state) {
+    return state.userInfo.submodel === 'student_user' && state.userInfo.user.student_user
+    // return state.userInfo.hasOwnProperty('student_user') && state.userInfo.student_user
+  },
+  getIsEmployee(state) {
+    return state.userInfo.submodel === 'employee_user' && state.userInfo.user.employee_user
+    // return state.userInfo.hasOwnProperty() && state.userInfo.employee_user
+  },
+  getIsBranchEmployee(state) {
+    return state.userInfo.submodel === 'employee_user' && state.userInfo.user.employee_user && state.userInfo.user.employee_user.branch
+    // return state.userInfo.user.hasOwnProperty('employee_user') && state.userInfo.employee_user && state.userInfo.employee_user.branch
+  },
 }

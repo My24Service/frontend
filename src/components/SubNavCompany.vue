@@ -86,10 +86,10 @@
 </template>
 
 <script>
-import { componentMixin } from '../utils.js'
+
 
 export default {
-  mixins: [componentMixin],
+
   data() {
     return {
       isLoaded: false,

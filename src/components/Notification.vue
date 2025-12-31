@@ -2,14 +2,14 @@
   <div/>
 </template>
 <script>
-import { componentMixin } from '../utils.js'
+
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
 import { NEW_DATA_EVENTS } from '../constants'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
 
 export default {
-  mixins: [componentMixin],
+
   data() {
     return {
       memberNewDataSocket: new MemberNewDataSocket(),

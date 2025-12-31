@@ -234,11 +234,11 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
-import {componentMixin} from "../utils";
+
 import {TimeRegistrationService} from "@/models/company/TimeRegistration";
 
 export default {
-  mixins: [componentMixin],
+
   name: "TimeRegistrationData",
   props: {
     user_id: {

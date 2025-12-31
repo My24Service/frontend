@@ -180,11 +180,11 @@ import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {DocumentModel, DocumentService} from "@/models/orders/Document";
 import {OrderModel} from "@/models/orders/Order"
-import {componentMixin} from "@/utils";
+
 import ApiResult from "@/components/ApiResult.vue";
 
 export default {
-  mixins: [componentMixin],
+
   name: "DocumentsComponent",
   components: {
     ApiResult,

@@ -942,7 +942,7 @@ import {CustomerService} from '@/models/customer/Customer'
 import {AssignService} from '@/models/mobile/Assign'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
 import Collapse from '@/components/Collapse'
-import {componentMixin} from "@/utils";
+
 import {BranchService} from "@/models/company/Branch";
 import {EquipmentService} from "@/models/equipment/equipment";
 import {QuotationService} from '@/models/quotations/Quotation'
@@ -964,7 +964,7 @@ const isCorrectTime = (value) => {
 }
 
 export default {
-  mixins: [componentMixin],
+
   setup() {
     return { v$: useVuelidate() }
   },

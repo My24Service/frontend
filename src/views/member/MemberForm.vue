@@ -477,12 +477,12 @@ import {
 } from '@/models/member/Member'
 import { ContractService } from '@/models/member/Contract'
 import {NO_IMAGE_URL} from "@/constants";
-import {componentMixin} from "@/utils";
+
 import ApiResult from "@/components/ApiResult.vue";
 
 export default {
   components: {ApiResult},
-  mixins: [componentMixin],
+
   setup() {
     return { v$: useVuelidate() }
   },

@@ -451,7 +451,7 @@
 
 <script>
 import { OrderService } from '../../models/orders/Order.js'
-import { componentMixin } from '../../utils'
+
 import { PurchaseInvoiceService } from "@/models/invoices/PurchaseInvoice";
 import IconLinkPlus from "@/components/IconLinkPlus.vue";
 import PriceInput from "@/components/PriceInput.vue";
@@ -461,7 +461,7 @@ import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue
 // import ApiResult from "@/components/ApiResult.vue";
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     // ApiResult,
     DocumentsComponent,

@@ -96,7 +96,7 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import Pagination from "../../components/Pagination.vue"
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import PillsEngineer from "./PillsEngineer";
-import {componentMixin} from "../../utils";
+
 import EngineerEventOrderForm from "./EngineerEventOrderForm";
 import {NEW_DATA_EVENTS} from "../../constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
@@ -106,7 +106,7 @@ import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     IconLinkDelete,
     ButtonLinkRefresh,

@@ -287,14 +287,14 @@ import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
 import { LocationService, LocationModel } from '../../models/equipment/location.js'
-import {componentMixin} from "../../utils";
+
 import { CustomerService } from "../../models/customer/Customer";
 import { BranchService } from "../../models/company/Branch";
 import { BuildingService } from "../../models/equipment/building";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     DocumentsComponent,
     Multiselect,

@@ -42,11 +42,11 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils'
+
 import {MemberService} from "@/models/member/Member";
 
 export default {
-  mixins: [componentMixin],
+
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')

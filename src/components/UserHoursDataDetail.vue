@@ -36,11 +36,11 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import {componentMixin} from "../utils";
+
 
 export default {
   name: "UserHoursDataDetail",
-  mixins: [componentMixin],
+
   data() {
     return {
       today: moment(),

@@ -67,10 +67,10 @@
 
 <script>
 import {ImportService} from "../../models/company/Import";
-import {componentMixin} from "../../utils";
+
 
 export default {
-  mixins: [componentMixin],
+
   props: {
     pk: {
       type: [String, Number],

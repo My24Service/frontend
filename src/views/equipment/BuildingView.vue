@@ -97,13 +97,13 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "@/utils";
+
 
 import { OrderService } from '@/models/orders/Order'
 import { BuildingService } from "@/models/equipment/building";
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,

@@ -18,6 +18,7 @@ export default defineConfig({
     port: 3000,
     allowedHosts: [
       'stormy.my24service-dev.com',
+      'riedel.my24service-dev.com',
       '*.my24service.com',
     ]
     // hmr: {
@@ -26,15 +27,7 @@ export default defineConfig({
     // }
   },
   plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          compatConfig: {
-            MODE: 2
-          }
-        }
-      }
-    }),
+    vue(),
     Components({
       resolvers: [
         BootstrapVueNextResolver(),
@@ -56,7 +49,7 @@ export default defineConfig({
           {
             scopeName: "theme-default",
             // path or varscontent must be selected
-            path: path.resolve("./src/scss/app.scss"),
+            path: path.resolve("./src/scss/default.scss"),
             // varsContent same as content in path
             // varsContent:`@primary-color:${defaultPrimaryColor};`
           },
@@ -85,8 +78,7 @@ export default defineConfig({
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-      vue: '@vue/compat'
+      "@": path.resolve(__dirname, "./src")
     },
   },
   css: {

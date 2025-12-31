@@ -20,6 +20,18 @@ $normal-link: $secondary;
 $font-size-base: 0.9rem;
 
 // Then import Bootstrap an BootstrapVue SCSS files (order is important)
-@import 'bootstrap/scss/bootstrap.scss';
+//@import 'bootstrap/scss/bootstrap.scss';
 
-@import "shared";
+// override theme
+@use "theme" with (
+  $color-accent: #30BFBF,
+  $my24: #30BFBF,
+  $primary: #000,
+  $secondary: $my24,
+  $navbar-light-color: $secondary,
+  $active-link: $secondary,
+  $normal-link: $secondary,
+  $font-size-base: 0.9rem,
+);
+
+@use "shared";

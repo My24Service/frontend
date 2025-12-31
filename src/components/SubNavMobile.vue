@@ -90,11 +90,11 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
+
 
 export default {
   name: "OrdersSubNav",
-  mixins: [componentMixin],
+
   data() {
     return {
       isLoaded: false,

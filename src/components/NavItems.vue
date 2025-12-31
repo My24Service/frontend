@@ -205,14 +205,14 @@
 </template>
 
 <script>
-import { componentMixin } from '../utils.js'
+
 import SubNav from '@/components/SubNav';
 import SubNavCustomers from '@/components/SubNavCustomers';
 import SubNavInventory from '@/components/SubNavInventory';
 import {MemberService} from "@/models/member/Member";
 
 export default {
-  mixins: [componentMixin],
+
   data() {
     return {
       memberService: new MemberService(),

@@ -178,12 +178,12 @@ import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
 import {EquipmentModel} from "@/models/equipment/equipment"
-import {componentMixin} from "@/utils";
+
 import ApiResult from "@/components/ApiResult.vue";
 import {LocationModel} from "@/models/equipment/location";
 
 export default {
-  mixins: [componentMixin],
+
   name: "DocumentsComponent",
   components: {
     ApiResult,

@@ -11,7 +11,7 @@
       ref="reload-modal"
       v-bind:title="$trans('Reload page?')"
       @ok="doReload"
-      ok-only
+      ok-only="true"
     >
       <p class="my-4">
         {{ $trans(message) }}: {{ newVersion }}
@@ -23,59 +23,57 @@
   </span>
 </template>
 
-<script>
+<script setup>
 import { VERSION } from '@/version.js'
-import axios from '@/services/api.js'
+import {onMounted, onUnmounted, ref} from "vue";
+import {$trans} from "@/utils";
 
-export default {
-  name: "appVersion",
-  data() {
-    return {
-      version: VERSION,
-      newVersionAvailable: false,
-      newVersion: null,
-      intervalId: null,
-      message: `Using the latest version (${VERSION})`
-    }
-  },
-  methods: {
-    async checkVersion() {
-      // TODO implement this
-      // https://api.github.com/My24Service/frontend/releases
-      // const data = await axios.get('https://api.github.com/repos/OWNER/REPO/tags').then((response) => response.data)
+const version = VERSION
+const newVersionAvailable = ref(false)
+const newVersion = ref(null)
+const intervalId = ref(null)
+const message = `Using the latest version (${VERSION})`
 
-      // if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
-      //   this.newVersionAvailable = true
-      //   this.newVersion = data.version
-      //   this.message = `A new version is available`
-      // } else {
-        this.newVersionAvailable = false
-      // }
-    },
-    versionToInt(version) {
-      return parseInt(version.slice(1).replaceAll('.', ''))
-    },
-    openReloadModal() {
-      if(this.newVersionAvailable) {
-        this.$refs['reload-modal'].show()
-      }
-    },
-    doReload() {
-      if(!this.newVersionAvailable) {
-        this.$refs['reload-modal'].hide()
-      } else {
-        window.location.reload(false)
-      }
-    }
-  },
-  mounted() {
-    this.intervalId = setInterval(this.checkVersion, 1000*60*15)
-    this.checkVersion()
-  },
-  beforeDestroy() {
-    clearInterval(this.intervalId)
+async function checkVersion() {
+  // TODO implement this
+  // https://api.github.com/My24Service/frontend/releases
+  // const data = await axios.get('https://api.github.com/repos/OWNER/REPO/tags').then((response) => response.data)
+
+  // if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
+  //   this.newVersionAvailable = true
+  //   this.newVersion = data.version
+  //   this.message = `A new version is available`
+  // } else {
+    this.newVersionAvailable = false
+  // }
+}
+
+function versionToInt(version) {
+  return parseInt(version.slice(1).replaceAll('.', ''))
+}
+
+function openReloadModal() {
+  if(this.newVersionAvailable) {
+    this.$refs['reload-modal'].show()
   }
 }
+
+function doReload() {
+  if(!this.newVersionAvailable) {
+    this.$refs['reload-modal'].hide()
+  } else {
+    window.location.reload(false)
+  }
+}
+
+onMounted(() => {
+  intervalId.value = setInterval(checkVersion, 1000*60*15)
+  checkVersion()
+})
+
+onUnmounted(() => {
+  clearInterval(intervalId)
+})
 </script>
 
 <style scoped>

@@ -41,10 +41,8 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils'
 
 export default {
-  mixins: [componentMixin],
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')

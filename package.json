@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@ivanv/vue-collapse-transition": "^1.0.2",
-    "@vue/compat": "^3.1.0",
     "async": "^3.2.1",
     "awesome-debounce-promise": "^2.1.0",
     "axios": "^0.27.2",
@@ -25,7 +24,7 @@
     "is-ci": "^3.0.1",
     "mutationobserver-shim": "^0.3.7",
     "one-colorpicker": "^1.0.12",
-    "popper.js": "^1.16.1",
+    "popper.js": "^2.0.0-next.4",
     "portal-vue": "^3.0.0",
     "realpath-native": "^3.0.0",
     "regenerator-runtime": "^0.13.9",

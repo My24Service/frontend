@@ -1,8 +1,11 @@
 import BaseModel from '@/models/base';
 import {normalClient} from "@/services/api";
-import auth from '@/services/auth'
+import {useStore} from "vuex";
+import setInterceptors from '@/services/auth2/clientDriver'
 
 class My24 extends BaseModel {
+  store = useStore()
+
   getInitialData() {
     return this.axios.get('/get-initial-data/').then((response) => response.data)
   }
@@ -26,7 +29,7 @@ class My24 extends BaseModel {
     let client;
 
     if (requestMethod === 'post') {
-      auth.setInterceptors(normalClient)
+      setInterceptors(normalClient)
       client = normalClient.post(url, {}, headers)
     } else {
       client = normalClient.get(url, headers)
@@ -53,7 +56,7 @@ class My24 extends BaseModel {
   downloadItemAuth(url, name, callback) {
     let headers = { responseType: 'blob' }
 
-    auth.setInterceptors(normalClient)
+    setInterceptors(normalClient)
     const client = normalClient.get(url, headers)
 
     client

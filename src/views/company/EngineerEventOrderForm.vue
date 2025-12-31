@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import {componentMixin} from "../../utils";
+
 import Multiselect from "vue-multiselect";
 import moment from "moment";
 import orderModel from "../../models/orders/Order";
@@ -79,7 +79,7 @@ import engineerEventModel from "../../models/company/EngineerEvent";
 
 export default {
   name: "EngineerEventOrderForm",
-  mixins: [componentMixin],
+
   components: {
     Multiselect,
   },

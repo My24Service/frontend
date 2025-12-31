@@ -22,11 +22,11 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils'
+import {$trans} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
   methods: {
+    $trans,
     isActive(item) {
       const parts = this.$route.path.split('/')
       return parts[2] === item

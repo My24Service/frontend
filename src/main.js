@@ -41,18 +41,10 @@ function createOurApp() {
   // tired of those "v$ already defined" warnings -_-
   app.config.silent = true
 
-  app.prototype.$trans = (text) => {
-    if (text in window.member_type_text) {
-      return gettext(window.member_type_text[text])
-    }
-
-    return gettext(text)
-  }
-
   return app
 }
 
-import './scss/app.scss'
+import './scss/default.scss'
 // import 'vue-loading-overlay/dist/vue-loading.css'
 import "./scss/shared.scss";
 
@@ -88,7 +80,7 @@ store.dispatch('getInitialData')
     app.mount('#app')
   })
   .catch((error) => {
-    console.log("HELP ERROR")
+    console.log("HELP ERROR", error)
     if (error.response) {
       if (error.response.status === 401) {
         console.log('401 in main')

@@ -248,12 +248,12 @@ import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
 import { BuildingService, BuildingModel } from '../../models/equipment/building.js'
-import {componentMixin} from "../../utils";
+
 import { CustomerService } from "../../models/customer/Customer";
 import { BranchService } from "../../models/company/Branch";
 
 export default {
-  mixins: [componentMixin],
+
   components: {
     Multiselect,
   },
