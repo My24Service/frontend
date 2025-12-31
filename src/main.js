@@ -52,12 +52,9 @@ function createOurApp() {
   return app
 }
 
-// const app = createOurApp();
-// app.mount('#app')
-
 import './scss/app.scss'
 // import 'vue-loading-overlay/dist/vue-loading.css'
-// import './scss/shared.scss'
+import "./scss/shared.scss";
 
 // themes
 const defaultTheme = 'theme-default'
@@ -91,6 +88,7 @@ store.dispatch('getInitialData')
     app.mount('#app')
   })
   .catch((error) => {
+    console.log("HELP ERROR")
     if (error.response) {
       if (error.response.status === 401) {
         console.log('401 in main')

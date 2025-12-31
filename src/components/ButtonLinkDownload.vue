@@ -1,6 +1,6 @@
 <template>
   <b-button size="sm" :title="title" @click="method()">
-    <b-icon-cloud-download aria-hidden="true"></b-icon-cloud-download>
+    <IBiCloudDownload aria-hidden="true"></IBiCloudDownload>
   </b-button>
 </template>
 

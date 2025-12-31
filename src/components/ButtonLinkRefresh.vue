@@ -1,6 +1,6 @@
 <template>
   <b-button size="sm" v-bind:title="title" @click="method()">
-    <b-icon-arrow-repeat aria-hidden="true"></b-icon-arrow-repeat>
+    <IBiArrowRepeat aria-hidden="true"></IBiArrowRepeat>
   </b-button>
 </template>
 

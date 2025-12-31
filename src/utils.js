@@ -96,9 +96,9 @@ function getUserAuthLevel(store) {
   }
 }
 
-function hasAccessRouteAuthLevel(authLevelNeeded) {
+function hasAccessRouteAuthLevel(authLevelNeeded, store) {
   console.log('HAI in hasAccessRouteAuthLevel')
-  const authLevelUser = getUserAuthLevel()
+  const authLevelUser = getUserAuthLevel(store)
 
   // TODO in the future use ONLY arrays?
   // let needed = typeof authLevelNeeded === 'string' ? [ authLevelNeeded ] : authLevelNeeded
@@ -210,11 +210,10 @@ let componentMixin = {
       return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
     },
     async doFetchUnacceptedCountAndUpdateStore() {
-      const store = useStore()
       const service = new OrderService()
       const countResult = await service.getUnacceptedCount()
       if (countResult && 'count' in countResult) {
-        await store.dispatch('setUnacceptedCount', countResult.count)
+        await this.$store.dispatch('setUnacceptedCount', countResult.count)
       }
     },
     hasAccessToModule(module, part) {
@@ -222,7 +221,7 @@ let componentMixin = {
       return my24.hasAccessToModule({
         isStaff: this.isStaff,
         isSuperuser: this.isSuperuser,
-        contract: store.state.memberContract,
+        contract: this.$store.state.memberContract,
         module,
         part,
       })

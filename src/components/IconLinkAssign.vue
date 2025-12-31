@@ -1,7 +1,7 @@
 <template>
   <span>
     <b-link v-bind:title="title" v-on:click="method()">
-      <b-icon-person-check-fill class="edit-icon"></b-icon-person-check-fill>
+      <IBiPersonCheckFill class="edit-icon"></IBiPersonCheckFill>
     </b-link>
   </span>
 </template>

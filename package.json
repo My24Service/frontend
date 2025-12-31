@@ -47,6 +47,7 @@
     "@babel/core": "^7.17.5",
     "@babel/eslint-parser": "^7.22.9",
     "@babel/preset-env": "^7.16.11",
+    "@iconify-json/bi": "^1.2.7",
     "@vitejs/plugin-vue": "^6.0.3",
     "@vue/compiler-sfc": "^3.5.26",
     "@vuelidate/core": "^2.0.3",

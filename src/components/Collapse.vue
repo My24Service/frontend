@@ -4,8 +4,8 @@
       <div class="section-header bg-primary">
         <h4>{{ title }}</h4>
         <div class="section-header-icon float-right h4 mb-2">
-          <b-icon-arrow-up-short v-if="isOpen"></b-icon-arrow-up-short>
-          <b-icon-arrow-down-short v-if="!isOpen"></b-icon-arrow-down-short>
+          <IBiArrowUpShort v-if="isOpen"></IBiArrowUpShort>
+          <IBiArrowDownShort v-if="!isOpen"></IBiArrowDownShort>
         </div>
       </div>
     </b-link>

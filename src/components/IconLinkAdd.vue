@@ -1,10 +1,10 @@
 <template>
   <span>
     <b-link v-if="method" class="icon-th" v-bind:title="title" v-on:click="method()">
-      <b-icon-plus variant="info"></b-icon-plus>
+      <IBiPlus variant="info"></IBiPlus>
     </b-link>
     <router-link v-if="router_name" class="icon-th" v-bind:title="title" :to="{name: router_name, params: router_params}">
-      <b-icon-plus variant="info"></b-icon-plus>
+      <IBiPlus variant="info"></IBiPlus>
     </router-link>
   </span>
 </template>

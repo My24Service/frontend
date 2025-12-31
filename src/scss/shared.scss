@@ -1,3 +1,5 @@
+@use "app" as config;
+
 button > * {
   /* only allow the button element itself to be clicked,          */
   /* ignore child elements (which are usually icons / text spans) */
@@ -25,7 +27,7 @@ input::placeholder {
 }
 
 .multiselect__select {
-  padding: 0px 8px;
+  padding: 0 8px;
   &:before {
     top: 60%!important;
   }
@@ -76,12 +78,12 @@ tr:focus-within .edit-icon {
 }
 
 .navbar-light .navbar-nav .nav-link {
-  color: $normal-link !important
+  color: config.$normal-link !important
 }
 
 .navbar-light .navbar-nav .nav-link.active,
 .navbar-light .navbar-nav {
-  color: $active-link !important
+  color: config.$active-link !important
 }
 
 #app-layout {
@@ -196,7 +198,7 @@ tr:focus-within .edit-icon {
   padding: 0;
   height: 100vh;
   overflow-y: scroll;
-  background-image: linear-gradient(to bottom, var(--primary) 11rem, transparent 11rem);
+  background-image: linear-gradient(to bottom, config.$primary 11rem, transparent 11rem);
   > header {
     margin: 0 0rem 0;
     padding: 1rem 2rem;
@@ -347,7 +349,7 @@ tr:focus-within .edit-icon {
           letter-spacing: .25px;
           line-height: 3.2rem;
           padding: 0;
-          color: $secondary;
+          color: config.$secondary;
 
           &:hover,
           &:focus {
@@ -355,8 +357,8 @@ tr:focus-within .edit-icon {
           }
 
           &.active {
-            box-shadow: inset 0px -4px $primary;
-            color: $primary;
+            box-shadow: inset 0px -4px config.$primary;
+            color: config.$primary;
             font-weight: 500;
           }
         }
@@ -550,7 +552,7 @@ dl {
         max-width: 9rem;
       }
       .order-documents {
-        flex-grow: grow;
+        //flex-grow: grow;
       }
       .order-status {
         min-width: 10rem;
@@ -737,7 +739,7 @@ html {
     .btn-primary {
       background-color: white;
       border-color: #fff6;
-      color: $my24;
+      color: config.$my24;
       &:not(:disabled):active {
         border-color: white !important;
       }
@@ -751,7 +753,7 @@ html {
       }
       &.btn-secondary {
         //background-color: #0009;
-        background-color: $secondary;
+        background-color: config.$secondary;
         //border-color:  transparent;
         color: white;
         &:hover {
@@ -774,7 +776,7 @@ html {
     .btn-group .btn-secondary {
       margin-inline: 0;
       background: white !important;
-      color: $primary;
+      color: config.$primary;
     }
     .backlink {
       cursor: pointer;
@@ -842,7 +844,7 @@ html {
 }
 
 .badge.badge-light {
-  color: $primary;
+  color: config.$primary;
 }
 
 .active .badge.badge-light {
@@ -921,10 +923,10 @@ html {
         text-align: center;
         border-radius: 50%;
         &.today {
-          background-color: $primary;
+          background-color: config.$primary;
           color: white;
           + small {
-            color: $primary;
+            color: config.$primary;
           }
         }
       }

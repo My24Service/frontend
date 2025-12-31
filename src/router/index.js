@@ -1,4 +1,4 @@
-import {createRouter, createWebHashHistory} from 'vue-router'
+import {createRouter, createWebHashHistory, createWebHistory} from 'vue-router'
 
 import TheIndexLayout from '../components/TheIndexLayout.vue'
 
@@ -46,7 +46,7 @@ const routes = [
 ]
 
 export const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
 })
 
@@ -79,7 +79,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // check user type if needed
-  if (hasAccessRouteAuthLevel(authLevelNeeded)) {
+  if (hasAccessRouteAuthLevel(authLevelNeeded, store)) {
     console.debug('route allowed', {path, pathAuthLevel, userAuthLevel})
     next()
     return

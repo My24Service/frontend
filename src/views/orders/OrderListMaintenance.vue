@@ -7,7 +7,6 @@
       </div>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
           <span>{{ $trans("Orders") }}</span>
         </h3>
 
@@ -22,7 +21,7 @@
             />
           </b-button-group>
           <router-link class="btn button" :to="{name:'order-add'}">
-            <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add order') }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add order') }}
           </router-link>
         </b-button-toolbar>
       </div>

@@ -2,11 +2,11 @@
   <span>
     <b-button v-if="method" :title="title" size="sm">
       <b-link v-on:click="method()">
-        <b-icon-plus aria-hidden="true"></b-icon-plus>
+        <IBiPlus aria-hidden="true"></IBiPlus>
       </b-link>
     </b-button>
     <b-button v-if="router_name" size="sm" v-bind:title="title" :to="{name: router_name, params: router_params}">
-      <b-icon-plus aria-hidden="true"></b-icon-plus>
+      <IBiPlus aria-hidden="true"></IBiPlus>
     </b-button>
   </span>
 </template>
