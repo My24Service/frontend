@@ -4,13 +4,13 @@
       <div class='page-title'>
         <h3>
           <b-icon icon="bookshelf"></b-icon>
-          <span class="backlink" @click="goBack">{{ $trans('Stock Locations') }}</span> / 
+          <span class="backlink" @click="goBack">{{ $trans('Stock Locations') }}</span> /
           {{ stockLocation.name }} <small class="dimmed">({{ stockLocation.identifier }})</small>
         </h3>
         <router-link :to="{name: 'stock-location-edit', params: {pk: this.pk}}" class="btn">{{ `${$trans('Edit')} ${$trans('stock location')}` }}</router-link>
       </div>
     </header>
-    
+
       <div class="page-detail">
         <!--
         <div class="col-1-3">
@@ -49,7 +49,7 @@
           </b-row>
         </div>
       </div>
-    
+
   </div>
 </template>
 
@@ -88,7 +88,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching stock location/inventory', error)
-        this.errorToast(this.$trans('Error fetching stock location/inventory'))
+        errorToast(create, this.$trans('Error fetching stock location/inventory'))
         this.isLoading = false
       }
     }

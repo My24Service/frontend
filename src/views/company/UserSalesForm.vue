@@ -192,6 +192,9 @@ import { helpers } from '@vuelidate/validators'
 
 import { usernameExists } from '@/models/helpers.js'
 import salesUserModel from '@/models/company/UserSales.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -314,12 +317,12 @@ export default {
         this.salesuser.password = this.salesuser.password1
         try {
           await salesUserModel.insert(this.salesuser)
-          this.infoToast(this.$trans('Created'), this.$trans('sales user has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('sales user has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating sales user', error)
-          this.errorToast(this.$trans('Error creating sales user'))
+          errorToast(create, this.$trans('Error creating sales user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -338,12 +341,12 @@ export default {
         }
 
         await salesUserModel.update(this.pk, this.salesuser)
-        this.infoToast(this.$trans('Updated'), this.$trans('sales user has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('sales user has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating sales user', error)
-        this.errorToast(this.$trans('Error updating sales user'))
+        errorToast(create, this.$trans('Error updating sales user'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -357,7 +360,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching salesuser', error)
-        this.errorToast(this.$trans('Error loading sales user'))
+        errorToast(create, this.$trans('Error loading sales user'))
         this.isLoading = false
       }
     },

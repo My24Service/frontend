@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3><b-icon icon="person-square"></b-icon>{{ $trans('Partners') }}</h3>
-        
+
       </div>
     </header>
 
@@ -42,7 +42,7 @@
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                 </multiselect>
               </b-form-group>
-            
+
               <b-form-group
                 v-if="this.member_info"
                 label-size="sm"
@@ -83,6 +83,9 @@ import Multiselect from 'vue-multiselect'
 
 import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent.js'
 import memberModel from '@/models/member/Member.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -125,7 +128,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching members', error)
-        this.errorToast(this.$trans('Error fetching members'))
+        errorToast(create, this.$trans('Error fetching members'))
         this.isLoading = false
       }
     },
@@ -152,12 +155,12 @@ export default {
         delete this.partnerRequest.status
 
         await partnerRequestsSentModel.insert(this.partnerRequest)
-        this.infoToast(this.$trans('Created'), this.$trans('Partner request has been sent'))
+        infoToast(create, this.$trans('Created'), this.$trans('Partner request has been sent'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error sending partner request', error)
-        this.errorToast(this.$trans('Error sending partner request'))
+        errorToast(create, this.$trans('Error sending partner request'))
         this.isLoading = false
       }
     },

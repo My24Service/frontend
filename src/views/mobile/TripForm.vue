@@ -631,13 +631,13 @@ export default {
       if (this.isCreate) {
         try {
           const trip = await tripModel.insert(this.trip)
-          this.infoToast(this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
+          infoToast(create, this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
           this.isLoading = false
           this.buttonDisabled = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating trip', error)
-          this.errorToast(this.$trans('Error creating trip'))
+          errorToast(create, this.$trans('Error creating trip'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -647,13 +647,13 @@ export default {
 
       try {
         await tripModel.update(this.pk, this.trip)
-        this.infoToast(this.$trans('Trip updated'), this.$trans('Trip has been updated'))
+        infoToast(create, this.$trans('Trip updated'), this.$trans('Trip has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating trip', error)
-        this.errorToast(this.$trans('Error updating trip'))
+        errorToast(create, this.$trans('Error updating trip'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -667,7 +667,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        errorToast(create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -691,7 +691,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        this.errorToast(this.$trans('Error fetching trip'))
+        errorToast(create, this.$trans('Error fetching trip'))
         this.isLoading = false
       }
     },

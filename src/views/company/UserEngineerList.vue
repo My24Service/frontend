@@ -92,13 +92,14 @@ import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import engineerModel from '../../models/company/UserEngineer.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import PillsEngineer from "./PillsEngineer";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'UserEngineerList',
@@ -106,10 +107,8 @@ export default {
     PillsCompanyUsers,
     IconLinkEdit,
     IconLinkDelete,
-    ButtonLinkAdd,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkDownload,
     SearchModal,
     Pagination,
     PillsEngineer,
@@ -166,10 +165,10 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Removed engineer'), `${this.$trans('Engineer has been removed')}`)
+        infoToast(create, this.$trans('Removed engineer'), `${this.$trans('Engineer has been removed')}`)
         await this.loadData()
       } catch(error) {
-        this.errorToast(`${this.$trans('Error deleting engineer:')} ${error}`);
+        errorToast(create, `${this.$trans('Error deleting engineer:')} ${error}`);
       }
     },
     // rest
@@ -185,7 +184,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineers', error)
-        this.errorToast(this.$trans('Error loading engineers'))
+        errorToast(create, this.$trans('Error loading engineers'))
         this.isLoading = false
       }
     }

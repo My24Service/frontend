@@ -180,11 +180,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.memberPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Member has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Member has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting member', error)
-        this.errorToast(this.$trans('Error deleting member'))
+        errorToast(create, this.$trans('Error deleting member'))
       }
     },
     // search
@@ -217,7 +217,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching members', error)
-        this.errorToast(this.$trans('Error loading members'))
+        errorToast(create, this.$trans('Error loading members'))
         this.isLoading = false
       }
     }

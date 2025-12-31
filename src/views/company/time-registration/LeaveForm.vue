@@ -332,7 +332,7 @@ export default {
         this.compLoading = false
       } catch(error) {
         console.log('Error fetching users', error)
-        this.errorToast(this.$trans('Error fetching users'))
+        errorToast(create, this.$trans('Error fetching users'))
         this.compLoading = false
       }
     },
@@ -361,12 +361,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.leaveHoursService.insert(this.leave);
-          this.infoToast(this.$trans("Created"), this.$trans("Leave has been created"));
+          infoToast(create, this.$trans("Created"), this.$trans("Leave has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating leave", error);
-          this.errorToast(this.$trans("Error creating leave"));
+          errorToast(create, this.$trans("Error creating leave"));
           this.isLoading = false;
         }
 
@@ -375,12 +375,12 @@ export default {
 
       try {
         await this.leaveHoursService.update(this.pk, this.leave);
-        this.infoToast(this.$trans("Updated"), this.$trans("Leave has been updated"));
+        infoToast(create, this.$trans("Updated"), this.$trans("Leave has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("Error updating leave", error);
-        this.errorToast(this.$trans("Error updating leave"));
+        errorToast(create, this.$trans("Error updating leave"));
         this.isLoading = false;
       }
     },
@@ -398,7 +398,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave", error);
-        this.errorToast(this.$trans("Error loading leave"));
+        errorToast(create, this.$trans("Error loading leave"));
         this.isLoading = false;
       }
     },
@@ -411,7 +411,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave types", error);
-        this.errorToast(this.$trans("Error loading leave types"));
+        errorToast(create, this.$trans("Error loading leave types"));
         this.isLoading = false;
       }
     },

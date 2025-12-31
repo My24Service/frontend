@@ -317,13 +317,13 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        this.infoToast(this.$trans('Created'), this.$trans('Distance costs updated'))
+        infoToast(create, this.$trans('Created'), this.$trans('Distance costs updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error updating distance costs', error)
-        this.errorToast(this.$trans('Error updating distance costs'))
+        errorToast(create, this.$trans('Error updating distance costs'))
         this.isLoading = false
       }
     },
@@ -356,7 +356,7 @@ export default {
         this.isLoaded = true
       } catch(error) {
         console.log('error fetching distance cost', error)
-        this.errorToast(this.$trans('Error fetching distance costs'))
+        errorToast(create, this.$trans('Error fetching distance costs'))
         this.isLoading = false
         this.isLoaded = true
       }

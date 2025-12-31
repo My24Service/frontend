@@ -115,7 +115,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching mutations', error)
-        this.errorToast(this.$trans('Error loading mutations'))
+        errorToast(create, this.$trans('Error loading mutations'))
         this.isLoading = false
       }
     }

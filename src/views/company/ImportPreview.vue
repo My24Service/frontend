@@ -66,8 +66,10 @@
 </template>
 
 <script>
-import {ImportService} from "../../models/company/Import";
-
+import {ImportService} from "@/models/company/Import";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
@@ -180,11 +182,11 @@ export default {
       if (confirm(this.$trans("Import these records?"))) {
         try {
           await this.service.doImport(this.pk)
-          this.infoToast(this.$trans('Imported'), this.$trans('Data has been imported'))
+          infoToast(create, this.$trans('Imported'), this.$trans('Data has been imported'))
           await this.$router.push({name: 'company-import-list'})
         } catch (error) {
           console.log('Error importing data', error)
-          this.errorToast(this.$trans('Error importing data'))
+          errorToast(create, this.$trans('Error importing data'))
         }
       }
     },

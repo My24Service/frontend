@@ -131,11 +131,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.supplierPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Supplier has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Supplier has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting supplier', error)
-        this.errorToast(this.$trans('Error deleting supplier'))
+        errorToast(create, this.$trans('Error deleting supplier'))
       }
     },
     // rest
@@ -148,7 +148,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching suppliers', error)
-        this.errorToast(this.$trans('Error loading suppliers'))
+        errorToast(create, this.$trans('Error loading suppliers'))
         this.isLoading = false
       }
     }

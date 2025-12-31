@@ -324,10 +324,13 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '../../models/helpers.js'
+import { usernameExists } from '@/models/helpers'
 import engineerModel, {EngineerUserModel} from '../../models/company/UserEngineer.js'
 import stockLocationModel from '../../models/inventory/StockLocation.js'
 import PriceInput from "../../components/PriceInput";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -458,7 +461,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching locations', error)
-        this.errorToast(this.$trans('Error fetching locations'))
+        errorToast(create, this.$trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -474,7 +477,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error creating new location', error)
-        this.errorToast(this.$trans('Error creating new location'))
+        errorToast(create, this.$trans('Error creating new location'))
         this.isLoading = false
       }
     },
@@ -515,12 +518,12 @@ export default {
         this.engineer.password = this.engineer.password1
         try {
           await engineerModel.insert(this.engineer)
-          this.infoToast(`${this.$trans('Created')} ${this.engineer.username}`, `${this.$trans('Engineer has been added')}: ${this.engineer.first_name} ${this.engineer.last_name}`)
+          infoToast(create, `${this.$trans('Created')} ${this.engineer.username}`, `${this.$trans('Engineer has been added')}: ${this.engineer.first_name} ${this.engineer.last_name}`)
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating engineer', error)
-          this.errorToast(`${this.$trans('Error creating engineer')} ${error}`);
+          errorToast(create, `${this.$trans('Error creating engineer')} ${error}`);
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -538,12 +541,12 @@ export default {
         }
 
         await engineerModel.update(this.pk, this.engineer)
-        this.infoToast(`${this.$trans('Updated')} ${this.engineer.username}`, `${this.engineer.first_name} ${this.engineer.last_name}'s ${this.$trans('details updated')}`)
+        infoToast(create, `${this.$trans('Updated')} ${this.engineer.username}`, `${this.engineer.first_name} ${this.engineer.last_name}'s ${this.$trans('details updated')}`)
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating engineer', error)
-        this.errorToast(`${this.$trans('Error updating engineer details: ')} ${error}`)
+        errorToast(create, `${this.$trans('Error updating engineer details: ')} ${error}`)
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -558,7 +561,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineer', error)
-        this.errorToast(this.$trans('Error loading engineer'))
+        errorToast(create, this.$trans('Error loading engineer'))
         this.isLoading = false
       }
     },

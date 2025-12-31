@@ -740,16 +740,16 @@ export default {
           await this.memberService.insert(this.member)
           this.member.apiOk = true
           if (this.isRequest) {
-            this.infoToast(this.$trans('Requested'), this.$trans('Request has been created'))
+            infoToast(create, this.$trans('Requested'), this.$trans('Request has been created'))
           } else {
-            this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
+            infoToast(create, this.$trans('Created'), this.$trans('Member has been created'))
           }
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating member', error)
-          this.errorToast(this.$trans('Error creating member'))
+          errorToast(create, this.$trans('Error creating member'))
           this.member.apiOk = false
           this.member.error = error
           this.buttonDisabled = false
@@ -768,13 +768,13 @@ export default {
 
         await this.memberService.update(this.pk, this.member)
         this.member.apiOk = true
-        this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Member has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating member', error)
-        this.errorToast(this.$trans('Error updating member'))
+        errorToast(create, this.$trans('Error updating member'))
         this.member.apiOk = false
         this.member.error = error
         this.isLoading = false
@@ -792,7 +792,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching member', error)
-        this.errorToast(this.$trans('Error fetching member'))
+        errorToast(create, this.$trans('Error fetching member'))
         this.isLoading = false
       }
     },

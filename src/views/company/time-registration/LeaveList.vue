@@ -155,11 +155,11 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveHoursService.delete(this.leavePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Leave has been deleted"));
+        infoToast(create, this.$trans("Deleted"), this.$trans("Leave has been deleted"));
         this.loadData();
       } catch (error) {
         console.log("error deleting leave", error);
-        this.errorToast(this.$trans("Error deleting leave"));
+        errorToast(create, this.$trans("Error deleting leave"));
         this.isLoading = false;
       }
     },
@@ -173,7 +173,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave requests", error);
-        this.errorToast(this.$trans("Error loading leave requests"));
+        errorToast(create, this.$trans("Error loading leave requests"));
         this.isLoading = false;
       }
     }

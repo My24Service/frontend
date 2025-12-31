@@ -128,14 +128,14 @@ export default {
       if(this.assignMode) {
         try {
           await tripAvailabilityModel.assign(this.selectedUser.id, this.tripAvailability.trip.id)
-          this.infoToast(this.$trans('Assigned'), this.$trans('Trip assigned'))
+          infoToast(create, this.$trans('Assigned'), this.$trans('Trip assigned'))
           this.loadTripAvailability()
           this.cancel()
           this.buttonDisabled = false
           this.isLoading = false
         } catch(error) {
           console.log('error assigning trip', error)
-          this.errorToast(this.$trans('Error assigning trip'))
+          errorToast(create, this.$trans('Error assigning trip'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -145,14 +145,14 @@ export default {
 
       try {
         await tripAvailabilityModel.unAssign(this.selectedUser.id, this.tripAvailability.trip.id)
-        this.infoToast(this.$trans('Unassigned'), this.$trans('Student unassigned'))
+        infoToast(create, this.$trans('Unassigned'), this.$trans('Student unassigned'))
         this.loadTripAvailability()
         this.cancel()
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('error unassigning trip', error)
-        this.errorToast(this.$trans('Error unassigning trip'))
+        errorToast(create, this.$trans('Error unassigning trip'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -173,7 +173,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching tripAvailability', error)
-        this.errorToast(this.$trans('Error fetching trip availability'))
+        errorToast(create, this.$trans('Error fetching trip availability'))
         this.isLoading = false
       }
     }

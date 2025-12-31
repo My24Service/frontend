@@ -5,8 +5,11 @@
 
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
-import { NEW_DATA_EVENTS } from '../constants'
+import { NEW_DATA_EVENTS } from '@/constants'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
@@ -19,16 +22,16 @@ export default {
   methods:{
     handleMessageUser(data) {
       if (data.level === 'error') {
-        this.errorToast(data.message, this.$trans('User message'))
+        errorToast(create, data.message, this.$trans('User message'))
       } else {
-        this.infoToast(this.$trans('User message'), data.message)
+        infoToast(create, this.$trans('User message'), data.message)
       }
     },
     handleMessageMember(data) {
       if (data.level === 'error') {
-        this.errorToast(data.message, this.$trans('Company message'))
+        errorToast(create, data.message, this.$trans('Company message'))
       } else {
-        this.infoToast(this.$trans('Company message'), data.message)
+        infoToast(create, this.$trans('Company message'), data.message)
       }
     },
     async setupPolling() {

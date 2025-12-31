@@ -32,7 +32,7 @@
             v-bind:method="function() { showSearchModal() }"
             />
           </b-button-group>
-          <router-link 
+          <router-link
             :to="{name: 'company-branch-add'}"
             class="btn"
             >{{ $trans('New branch') }}</router-link>
@@ -54,7 +54,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -81,7 +81,7 @@
             </span>
           </span>
         </template>
-        
+
         <template #cell(tel)="data">
           {{  data.item.tel }}
           <span v-if="data.item.mobile && data.item.mobile.trim() !== ''">
@@ -118,9 +118,11 @@ import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'BranchList',
@@ -129,7 +131,6 @@ export default {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -173,11 +174,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Branch has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Branch has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting branch', error)
-        this.errorToast(this.$trans('Error deleting branch'))
+        errorToast(create, this.$trans('Error deleting branch'))
       }
     },
     // rest
@@ -190,7 +191,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching branches', error)
-        this.errorToast(this.$trans('Error loading branches'))
+        errorToast(create, this.$trans('Error loading branches'))
         this.isLoading = false
       }
     }

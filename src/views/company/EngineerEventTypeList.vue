@@ -87,6 +87,9 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import PillsEngineer from "./PillsEngineer";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   components: {
@@ -140,11 +143,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.engineerEventTypeModelPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Event type has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Event type has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting event type', error)
-        this.errorToast(this.$trans('Error deleting event type'))
+        errorToast(create, this.$trans('Error deleting event type'))
       }
     },
     // rest
@@ -160,7 +163,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching event types', error)
-        this.errorToast(this.$trans('Error loading event types'))
+        errorToast(create, this.$trans('Error loading event types'))
         this.isLoading = false
       }
     }

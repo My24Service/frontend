@@ -671,7 +671,7 @@ export default {
             console.log('Error creating infolines', error)
           }
 
-          this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
@@ -682,7 +682,7 @@ export default {
           }
         } catch(error) {
           console.log('Error creating order', error)
-          this.errorToast(this.$trans('Error creating order'))
+          errorToast(create, this.$trans('Error creating order'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -701,10 +701,10 @@ export default {
           orderline.order = this.pk
           if (orderline.id) {
             await orderlineModel.update(orderline.id, orderline)
-            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+            // infoToast(create, this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
           } else {
             await orderlineModel.insert(orderline)
-            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+            // infoToast(create, this.$trans('Orderline created'), this.$trans('Orderline has been created'))
           }
         }
 
@@ -712,17 +712,17 @@ export default {
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
             await orderlineModel.delete(orderline.id)
-            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+            // infoToast(create, this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
           }
         }
 
-        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating order', error)
-        this.errorToast(this.$trans('Error updating order'))
+        errorToast(create, this.$trans('Error updating order'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -731,10 +731,10 @@ export default {
         try {
           await this.orderService.setAccepted(this.pk)
 
-          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
+          infoToast(create, this.$trans('Accepted'), this.$trans('Order has been accepted'))
         } catch(error) {
           console.log('Error accepting order', error)
-          this.errorToast(this.$trans('Error accepting order'))
+          errorToast(create, this.$trans('Error accepting order'))
         }
       }
 
@@ -747,7 +747,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(create, this.$trans('Error fetching customers'))
         this.isLoading = false
       }
     },
@@ -761,7 +761,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        this.errorToast(this.$trans('Error fetching order'))
+        errorToast(create, this.$trans('Error fetching order'))
         this.isLoading = false
       }
     },

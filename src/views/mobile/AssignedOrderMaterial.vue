@@ -319,11 +319,11 @@ export default {
     async doDelete() {
       try {
         await assignedOrderMaterialModel.delete(this.assignedOrderMaterialPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Material has been deleted'))
         this.geAassignedOrderMaterials()
       } catch(error) {
         console.log('Error deleting material', error)
-        this.errorToast(this.$trans('Error deleting material'))
+        errorToast(create, this.$trans('Error deleting material'))
       }
     },
     selectAssignedOrder(option) {
@@ -341,7 +341,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching assigned orders', error)
-        this.errorToast(this.$trans('Error fetching assigned orders'))
+        errorToast(create, this.$trans('Error fetching assigned orders'))
         this.isLoading = false
       }
     },
@@ -353,7 +353,7 @@ export default {
         this.materials = await inventoryModel.getMaterialsForLocation(this.selectedLocationPk, query)
       } catch(error) {
         console.log('Error fetching materials', error)
-        this.errorToast(this.$trans('Error fetching materials'))
+        errorToast(create, this.$trans('Error fetching materials'))
       }
     },
     selectMaterial(option) {
@@ -372,7 +372,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching locations', error)
-        this.errorToast(this.$trans('Error fetching locations'))
+        errorToast(create, this.$trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -394,7 +394,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching assigned order materials', error)
-        this.errorToast(this.$trans('Error fetching assigned order materials'))
+        errorToast(create, this.$trans('Error fetching assigned order materials'))
         this.isLoading = false
       }
     },
@@ -416,7 +416,7 @@ export default {
         this.editMode = true
       } catch(error) {
         console.log('error fetching material', error)
-        this.errorToast(this.$trans('Error fetching material'))
+        errorToast(create, this.$trans('Error fetching material'))
         this.isLoading = false
       }
     },
@@ -450,7 +450,7 @@ export default {
       if (this.editMode) {
         try {
           await assignedOrderMaterialModel.update(this.assignedOrderMaterialPk, this.assignedOrderMaterial)
-          this.errorToast(this.$trans('Material has been updated'))
+          errorToast(create, this.$trans('Material has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.v$.$reset()
@@ -458,7 +458,7 @@ export default {
           this.resetForm()
         } catch(error) {
           console.log('Error updating material', error)
-          this.errorToast(this.$trans('Error updating material'))
+          errorToast(create, this.$trans('Error updating material'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -468,7 +468,7 @@ export default {
 
       try {
         await assignedOrderMaterialModel.insert(this.assignedOrderMaterial)
-        this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
+        infoToast(create, this.$trans('Created'), this.$trans('Material has been created'))
         this.buttonDisabled = false
         this.isLoading = false
         this.v$.$reset()
@@ -477,7 +477,7 @@ export default {
         this.resetForm()
       } catch(error) {
         console.log('Error creating material', error)
-        this.errorToast(this.$trans('Error creating material'))
+        errorToast(create, this.$trans('Error creating material'))
         this.buttonDisabled = false
         this.isLoading = false
       }

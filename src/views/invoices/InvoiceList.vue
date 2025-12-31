@@ -204,13 +204,13 @@ export default {
 
       try {
         await this.invoiceService.delete(this.invoicePk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Invoice has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Invoice has been deleted'))
         this.isLoading = false
         await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting invoice', error)
-        this.errorToast(this.$trans('Error deleting invoice'))
+        errorToast(create, this.$trans('Error deleting invoice'))
       }
     },
     async loadStatusCodes () {
@@ -227,7 +227,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscodes", error);
-        this.errorToast(this.$trans("Error loading statuscodes"));
+        errorToast(create, this.$trans("Error loading statuscodes"));
         this.isLoading = false;
       }
     },
@@ -241,7 +241,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoices', error)
-        this.errorToast(this.$trans('Error loading invoices'))
+        errorToast(create, this.$trans('Error loading invoices'))
         this.isLoading = false
       }
     }

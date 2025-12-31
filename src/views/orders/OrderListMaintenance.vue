@@ -373,11 +373,11 @@ export default {
 
       try {
         await this.statusService.insert(status)
-        this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
+        infoToast(create, this.$trans('Created'), this.$trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        this.errorToast(this.$trans('Error creating status'))
+        errorToast(create, this.$trans('Error creating status'))
       }
     },
     rowStyle(item, type) {
@@ -401,11 +401,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.orderPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
-        this.errorToast(this.$trans('Error deleting order'))
+        errorToast(create, this.$trans('Error deleting order'))
       }
     },
     async loadData() {
@@ -425,7 +425,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
-        this.errorToast(this.$trans('Error loading orders'))
+        errorToast(create, this.$trans('Error loading orders'))
         this.isLoading = false
       }
     },

@@ -385,7 +385,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        this.errorToast(this.$trans('Error fetching quotation'))
+        errorToast(create, this.$trans('Error fetching quotation'))
         this.isLoading = false
       }
     },
@@ -401,11 +401,11 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.updateAndRecreate(this.quotation.id, quotation)
-        this.infoToast(this.$trans('Updated and recreated'), this.$trans('Quotation has been updated and the PDF recreated'))
+        infoToast(create, this.$trans('Updated and recreated'), this.$trans('Quotation has been updated and the PDF recreated'))
         this.isLoading = false
       } catch(error) {
         console.log('error updating quotation', error)
-        this.errorToast(this.$trans('Error updating quotation'))
+        errorToast(create, this.$trans('Error updating quotation'))
         this.isLoading = false
       }
     },
@@ -423,7 +423,7 @@ export default {
           this.isLoading = false
         } catch(error) {
           console.log('error creating quotation', error)
-          this.errorToast(this.$trans('Error creating quotation'))
+          errorToast(create, this.$trans('Error creating quotation'))
           this.isLoading = false
         }
         return
@@ -432,12 +432,12 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.update(this.quotation.id, quotation)
-        this.infoToast(this.$trans('Updated'), this.$trans('Quotation has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Quotation has been updated'))
         this.isLoading = false
         this.showQuotationDialog()
       } catch(error) {
         console.log('error updating quotation', error)
-        this.errorToast(this.$trans('Error updating quotation'))
+        errorToast(create, this.$trans('Error updating quotation'))
         this.isLoading = false
       }
     },

@@ -161,7 +161,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching unsent offer", error);
-        this.errorToast(this.$trans("Error fetching unsent offer"));
+        errorToast(create, this.$trans("Error fetching unsent offer"));
         this.isLoading = false;
       }
     },
@@ -200,7 +200,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        this.errorToast(this.$trans('Error fetching quotation'))
+        errorToast(create, this.$trans('Error fetching quotation'))
         this.isLoading = false
       }
     },
@@ -218,7 +218,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("Error fetching documents", error);
-        this.errorToast(this.$trans("Error fetching documents"));
+        errorToast(create, this.$trans("Error fetching documents"));
         this.isLoading = false;
       }
     },
@@ -251,14 +251,14 @@ export default {
           this.isLoading = false;
 
           if (!this.offer.is_sent) {
-            this.errorToast(errorBody);
+            errorToast(create, errorBody);
             return;
           }
-          this.infoToast(sentTitle, sentBody);
+          infoToast(create, sentTitle, sentBody);
           await this.$router.push({name: 'quotations-sent'});
         } catch (error) {
           console.log("Error sending quotation", error);
-          this.errorToast(errorBody);
+          errorToast(create, errorBody);
           this.isLoading = false;
         }
         return
@@ -271,14 +271,14 @@ export default {
 
         this.isLoading = false
         if (!this.offer.is_sent) {
-          this.errorToast(errorBody);
+          errorToast(create, errorBody);
           return;
         }
-        this.infoToast(sentTitle, sentBody);
+        infoToast(create, sentTitle, sentBody);
         await this.$router.push({name: 'quotations-sent'});
       } catch(error) {
         console.log("Error sending quotation", error);
-        this.errorToast(this.$trans(errorBody));
+        errorToast(create, this.$trans(errorBody));
         this.isLoading = false;
       }
     },

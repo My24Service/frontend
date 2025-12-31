@@ -328,13 +328,13 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        this.infoToast(this.$trans('Created'), this.$trans('Hours costs have been updated'))
+        infoToast(create, this.$trans('Created'), this.$trans('Hours costs have been updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error creating hours costs', error)
-        this.errorToast(this.$trans('Error creating hours costs'))
+        errorToast(create, this.$trans('Error creating hours costs'))
         this.isLoading = false
       }
     },
@@ -373,7 +373,7 @@ export default {
         this.isLoaded = true
       } catch(error) {
         console.log('error fetching hours costs', error)
-        this.errorToast(this.$trans('Error fetching hours cost'))
+        errorToast(create, this.$trans('Error fetching hours cost'))
         this.isLoading = false
         this.isLoaded = true
       }

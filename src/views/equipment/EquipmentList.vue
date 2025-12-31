@@ -329,11 +329,11 @@ export default {
       try {
         await this.equipmentStateService.insert(this.state)
         this.state = new EquipmentStateModel({})
-        this.infoToast(this.$trans('Created'), this.$trans('State added'))
+        infoToast(create, this.$trans('Created'), this.$trans('State added'))
         await this.loadData()
       } catch(error) {
         console.log('Error adding state', error)
-        this.errorToast(this.$trans('Error adding state'))
+        errorToast(create, this.$trans('Error adding state'))
       }
     },
     // search
@@ -358,11 +358,11 @@ export default {
     async doDelete() {
       try {
         await this.equipmentService.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Equipment has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Equipment has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting equipment', error)
-        this.errorToast(this.$trans('Error deleting equipment'))
+        errorToast(create, this.$trans('Error deleting equipment'))
       }
     },
     // rest
@@ -375,7 +375,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)
-        this.errorToast(this.$trans('Error loading equipment'))
+        errorToast(create, this.$trans('Error loading equipment'))
         this.isLoading = false
       }
     }

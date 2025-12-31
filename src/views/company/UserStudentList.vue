@@ -113,6 +113,9 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'UserstudentuserList',
@@ -173,7 +176,7 @@ export default {
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user active', error)
-        this.errorToast(this.$trans('Error setting student user active'))
+        errorToast(create, this.$trans('Error setting student user active'))
       }
     },
     async setInActive(pk, email) {
@@ -182,7 +185,7 @@ export default {
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user inactive', error)
-        this.errorToast(this.$trans('Error setting student user inactive'))
+        errorToast(create, this.$trans('Error setting student user inactive'))
       }
     },
     // delete
@@ -193,11 +196,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting studentuser', error)
-        this.errorToast(this.$trans('Error deleting studentuser'))
+        errorToast(create, this.$trans('Error deleting studentuser'))
       }
     },
     // rest
@@ -210,7 +213,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentusers', error)
-        this.errorToast(this.$trans('Error loading student users'))
+        errorToast(create, this.$trans('Error loading student users'))
         this.isLoading = false
       }
     }

@@ -26,7 +26,7 @@
     />
 
     <div class="panel overflow-auto">
-      
+
       <b-table
         id="activity-table"
         small
@@ -37,7 +37,7 @@
         class="data-table"
         sort-icon-left
       >
-        
+
         <template #table-busy>
           <div class="text-center my-2">
             <br>
@@ -112,7 +112,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching activity', error);
-        this.errorToast(this.$trans('Error loading activity'))
+        errorToast(create, this.$trans('Error loading activity'))
 
         this.isLoading = false
       }

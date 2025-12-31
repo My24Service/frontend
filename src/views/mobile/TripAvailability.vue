@@ -91,7 +91,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching trips', error);
-        this.errorToast(this.$trans('Error loading trips'))
+        errorToast(create, this.$trans('Error loading trips'))
         this.isLoading = false
       }
     }

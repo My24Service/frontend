@@ -138,11 +138,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.modulePartPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Module part has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Module part has been deleted'))
         this.loadData()
       } catch(error) {
         console.log('Error deleting module part', error)
-        this.errorToast(this.$trans('Error deleting module part'))
+        errorToast(create, this.$trans('Error deleting module part'))
       }
     },
     // rest
@@ -155,7 +155,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching module parts', error)
-        this.errorToast(this.$trans('Error loading module parts'))
+        errorToast(create, this.$trans('Error loading module parts'))
         this.isLoading = false
       }
     }

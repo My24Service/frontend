@@ -35,9 +35,9 @@
     </b-modal>
 
     <div class="panel overflow-auto">
-      
+
       <PillsCompanyPartners />
-      <br />      
+      <br />
       <b-table
         id="partner-table"
         small
@@ -50,7 +50,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -90,6 +90,9 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'PartnerList',
@@ -141,11 +144,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('partner has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('partner has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting partner', error)
-        this.errorToast(this.$trans('Error deleting partner'))
+        errorToast(create, this.$trans('Error deleting partner'))
       }
     },
     // rest
@@ -158,7 +161,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching partners', error);
-        this.errorToast(this.$trans('Error loading partners'))
+        errorToast(create, this.$trans('Error loading partners'))
         this.isLoading = false
       }
     }

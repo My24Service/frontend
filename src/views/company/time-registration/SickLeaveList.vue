@@ -149,12 +149,12 @@ export default {
        this.isLoading = true;
       try {
         await this.sickLeavesService.delete(this.leavePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Sick leave has been deleted"));
+        infoToast(create, this.$trans("Deleted"), this.$trans("Sick leave has been deleted"));
         this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error deleting sick leave", error);
-        this.errorToast(this.$trans("Error deleting sick leave"));
+        errorToast(create, this.$trans("Error deleting sick leave"));
       }
     },
     async loadData() {
@@ -166,7 +166,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching sick leave request", error);
-        this.errorToast(this.$trans("Error loading sick leave request"));
+        errorToast(create, this.$trans("Error loading sick leave request"));
         this.isLoading = false;
       }
     }

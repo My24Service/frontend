@@ -111,13 +111,13 @@ export default {
         this.isLoading = true
         try {
           await moduleModel.insert(this.module)
-          this.infoToast(this.$trans('Created'), this.$trans('Module has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Module has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating module', error)
-          this.errorToast(this.$trans('Error creating module'))
+          errorToast(create, this.$trans('Error creating module'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -129,13 +129,13 @@ export default {
         this.isLoading = true
 
         await moduleModel.update(this.pk, this.module)
-        this.infoToast(this.$trans('Updated'), this.$trans('Module has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Module has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating module', error)
-        this.errorToast(this.$trans('Error updating module'))
+        errorToast(create, this.$trans('Error updating module'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -147,7 +147,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching module', error)
-        this.errorToast(this.$trans('Error fetching module'))
+        errorToast(create, this.$trans('Error fetching module'))
         this.isLoading = false
       }
     },

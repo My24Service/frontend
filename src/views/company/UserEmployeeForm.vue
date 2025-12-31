@@ -192,9 +192,12 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '../../models/helpers.js'
+import { usernameExists } from '@/models/helpers'
 import employeeModel from '../../models/company/UserEmployee.js'
 import branchModel from '../../models/company/Branch.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -340,12 +343,12 @@ export default {
         this.employee.password = this.employee.password1
         try {
           await employeeModel.insert(this.employee)
-          this.infoToast(this.$trans('Created'), this.$trans('employee has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('employee has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating employee', error)
-          this.errorToast(this.$trans('Error creating employee'))
+          errorToast(create, this.$trans('Error creating employee'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -364,12 +367,12 @@ export default {
         }
 
         await employeeModel.update(this.pk, this.employee)
-        this.infoToast(this.$trans('Updated'), this.$trans('employee has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('employee has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating employee', error)
-        this.errorToast(this.$trans('Error updating employee'))
+        errorToast(create, this.$trans('Error updating employee'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -383,7 +386,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching employee', error)
-        this.errorToast(this.$trans('Error loading employee'))
+        errorToast(create, this.$trans('Error loading employee'))
         this.isLoading = false
       }
     },

@@ -34,16 +34,19 @@
       <div class='flex-columns align-items-center justify-content-center'>
         <b-button type="submit">log in</b-button>
         <b-link @click="function() { forgotPassword() }">{{ $trans('Forgot password?') }}</b-link>
+        <BButton @click="create({title: 'Hello', body: 'World'})">Show</BButton>
       </div>
     </form>
 </template>
 
 <script setup>
 import accountModel from "../models/account/Account"
-import {reactive} from "vue";
+import {reactive, useTemplateRef} from "vue";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
-import {$trans} from "@/utils";
+import {$trans, errorToast, infoToast, isEmpty} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
+const {create} = useToast()
 
 const store = useStore()
 const router = useRouter()
@@ -60,38 +63,31 @@ function forgotPassword() {
 }
 
 function checkFormValidity() {
-  const valid = this.$refs['login-form'].checkValidity();
-  this.usernameState = valid;
-  this.passwordState = valid;
+  const valid = !isEmpty(form.password.value) && !isEmpty(form.username.valueOf())
+  form.usernameState = valid;
+  form.passwordState = valid;
   return valid;
 }
 
 async function doLogin(e) {
   e.preventDefault();
 
-  // do login
-  if (!this.checkFormValidity()) {
+  if (!checkFormValidity()) {
     return;
   }
 
-  this.$nextTick(() => {
-    this.$bvModal.hide('login-modal')
-  })
-
-  const loader = this.$loading.show()
+  // const loader = this.$loading.show()
 
   try {
-    const loginResult = await accountModel.login(this.username, this.password)
+    const loginResult = await accountModel.login(form.username, form.password)
     await store.dispatch('auth/authenticate', { accessToken: loginResult.token });
-
-
     await store.dispatch('getInitialData')
     const userDetails = await accountModel.getUserDetails()
     await store.dispatch('setStreamInfo', userDetails.stream)
 
-    loader.hide()
+    // loader.hide()
 
-    this.infoToast(this.$trans('Logged in'), this.$trans('You are now logged in'))
+    infoToast(create, $trans('Logged in'), $trans('You are now logged in'))
 
     if (document.location.hash.indexOf('?') !== -1) {
       const nextPart = document.location.hash.split('?')[1]
@@ -104,9 +100,9 @@ async function doLogin(e) {
   } catch (error) {
     console.log(error)
     await store.dispatch('auth/loginFailure');
-    loader.hide()
+    // loader.hide()
 
-    this.errorToast(this.$trans('Error logging you in'))
+    errorToast(create, $trans('Error logging you in'))
   }
 }
 </script>

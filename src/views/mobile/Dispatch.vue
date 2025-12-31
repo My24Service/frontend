@@ -533,7 +533,7 @@ export default {
         this.searchingEngineers = false
       } catch(error) {
         console.log('Error fetching engineers', error)
-        this.errorToast(this.$trans('Error fetching engineers'))
+        errorToast(create, this.$trans('Error fetching engineers'))
         this.searchingEngineers = false
       }
     },
@@ -580,7 +580,7 @@ export default {
 
       } catch(error) {
         console.log('error updating assignedOrder dates', error)
-        this.errorToast(this.$trans('Error updating dates'))
+        errorToast(create, this.$trans('Error updating dates'))
         this.showOverlay = false
       }
     },
@@ -626,12 +626,12 @@ export default {
           await this.assignedOrderService.insert(obj)
         }
         this.$refs['dispatch-split-order-modal'].hide();
-        this.infoToast(this.$trans('Success'), this.$trans('Order split'))
+        infoToast(create, this.$trans('Success'), this.$trans('Order split'))
         this.refreshData()
         this.showOverlay = false
       } catch(error) {
         console.log('error creating assignedOrder', error)
-        this.errorToast(this.$trans('Error splitting order'))
+        errorToast(create, this.$trans('Error splitting order'))
         this.showOverlay = false
       }
     },
@@ -697,12 +697,12 @@ export default {
         this.$refs['dispatch-order-actions-modal'].show();
       } catch (error) {
         console.log('error fetching order', error)
-        this.errorToast(this.$trans('Error fetching order'))
+        errorToast(create, this.$trans('Error fetching order'))
       }
     },
     addSelectedUser(user) {
       if (this.userAlreadyAssigned(user.user_id)) {
-        this.infoToast(this.$trans('Already assigned'), this.$trans('Order(s) already assigned'))
+        infoToast(create, this.$trans('Already assigned'), this.$trans('Order(s) already assigned'))
         return
       }
       if (!this.userAlreadySelected(user.user_id)) {
@@ -729,13 +729,13 @@ export default {
           await this.assignService.assignToUser(user_id, this.selectedOrderIds, true)
         }
 
-        this.infoToast(this.$trans('Success'), this.$trans('Order(s) assigned'))
+        infoToast(create, this.$trans('Success'), this.$trans('Order(s) assigned'))
         this.cancelAssign()
         this.refreshData()
         this.buttonDisabled = false
         this.showOverlay = false
       } catch (e) {
-        this.errorToast(this.$trans('Error assigning order(s)'))
+        errorToast(create, this.$trans('Error assigning order(s)'))
         this.showOverlay = false
         this.buttonDisabled = false
       }
@@ -747,12 +747,12 @@ export default {
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
           await this.assignService.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
-          this.infoToast(this.$trans('Success'), this.$trans('Order removed from planning'))
+          infoToast(create, this.$trans('Success'), this.$trans('Order removed from planning'))
           this.refreshData()
           this.showOverlay = false
         } catch (error) {
           console.log('error un-assigning', error)
-          this.errorToast(this.$trans('Error un-assigning order'))
+          errorToast(create, this.$trans('Error un-assigning order'))
           this.showOverlay = false
         }
       })

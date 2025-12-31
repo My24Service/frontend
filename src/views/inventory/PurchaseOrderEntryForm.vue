@@ -4,7 +4,7 @@
       <div class='page-title'>
         <h3>
           <b-icon icon="receipt"></b-icon>
-          <span @click="cancelForm" class="backlink">{{ $trans('Entries') }}</span> / 
+          <span @click="cancelForm" class="backlink">{{ $trans('Entries') }}</span> /
           <span v-if="isCreate">{{ $trans('New entry') }}</span>
           <span v-if="!isCreate">{{ $trans('Edit entry') }}</span>
         </h3>
@@ -22,7 +22,7 @@
       <b-overlay :show="isLoading" rounded="sm">
         <div class="container app-form">
           <b-form>
-            
+
             <b-row>
               <b-col cols="12" role="group">
                 <b-form-group
@@ -327,7 +327,7 @@
 
             <div class="mx-auto">
               <footer class="modal-footer">
-                
+
               </footer>
             </div>
           </b-form>
@@ -474,7 +474,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching purchase order products', error)
-        this.errorToast(this.$trans('Error fetching purchase order products'))
+        errorToast(create, this.$trans('Error fetching purchase order products'))
         this.isLoading = false
       }
     },
@@ -539,7 +539,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching purchase orders', error)
-        this.errorToast(this.$trans('Error fetching purchase orders'))
+        errorToast(create, this.$trans('Error fetching purchase orders'))
         this.isLoading = false
       }
     },
@@ -568,14 +568,14 @@ export default {
         try {
           for (const entry of this.purchaseorderEntries) {
             await purchaseorderEntryModel.insert(entry)
-            this.infoToast(this.$trans('Created'), this.$trans('Entry has been created'))
+            infoToast(create, this.$trans('Created'), this.$trans('Entry has been created'))
           }
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating entry', error)
-          this.errorToast(this.$trans('Error creating entry'))
+          errorToast(create, this.$trans('Error creating entry'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -598,13 +598,13 @@ export default {
 
       try {
         await purchaseorderEntryModel.update(this.pk, this.purchaseorderEntry)
-        this.infoToast(this.$trans('Updated'), this.$trans('Entry has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Entry has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating entry', error)
-        this.errorToast(this.$trans('Error updating entry'))
+        errorToast(create, this.$trans('Error updating entry'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -622,7 +622,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching entry', error)
-        this.errorToast(this.$trans('Error fetching entry'))
+        errorToast(create, this.$trans('Error fetching entry'))
         this.isLoading = false
       }
     },

@@ -141,7 +141,10 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {ApiUserService} from '../../models/company/UserApi.js'
+import {ApiUserService} from '@/models/company/UserApi'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'UserApiList',
@@ -193,11 +196,11 @@ export default {
     async doDelete() {
       try {
         await this.apiUserService.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('API user has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('API user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting API user', error)
-        this.errorToast(this.$trans('Error deleting API user'))
+        errorToast(create, this.$trans('Error deleting API user'))
       }
     },
     // rest
@@ -208,11 +211,11 @@ export default {
     async doRevoke() {
       try {
         await this.apiUserService.revoke(this.revokeId)
-        this.infoToast(this.$trans('Revoked'), this.$trans('API key has been revoked'))
+        infoToast(create, this.$trans('Revoked'), this.$trans('API key has been revoked'))
         await this.loadData()
       } catch(error) {
         console.log('Error revoking API key', error)
-        this.errorToast(this.$trans('Error revoking API key'))
+        errorToast(create, this.$trans('Error revoking API key'))
       }
     },
     getValidUntil(api_user) {
@@ -222,7 +225,7 @@ export default {
       this.$refs.clone.focus();
       document.execCommand('copy');
       // navigator.clipboard.writeText(token)
-      this.infoToast(this.$trans('Copy'), this.$trans('Token copied to clipboard'))
+      infoToast(create, this.$trans('Copy'), this.$trans('Token copied to clipboard'))
     },
     async loadData() {
       this.isLoading = true;
@@ -233,7 +236,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching api users', error)
-        this.errorToast(this.$trans('Error loading API keys'))
+        errorToast(create, this.$trans('Error loading API keys'))
         this.isLoading = false
       }
     }

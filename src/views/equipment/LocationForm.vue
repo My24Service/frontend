@@ -390,7 +390,7 @@ export default {
         this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(create, this.$trans('Error fetching customers'))
       }
     },
     customerLabel({ name, city}) {
@@ -408,7 +408,7 @@ export default {
         this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
-        this.errorToast(this.$trans('Error fetching branches'))
+        errorToast(create, this.$trans('Error fetching branches'))
       }
     },
     branchLabel({ name, city}) {
@@ -441,7 +441,7 @@ export default {
       if (this.isCreate) {
         try {
           await this.locationService.insert(this.location)
-          this.infoToast(this.$trans('Created'), this.$trans('Location has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Location has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
@@ -457,7 +457,7 @@ export default {
           }
         } catch(error) {
           console.log('Error creating location', error)
-          this.errorToast(this.$trans('Error creating location'))
+          errorToast(create, this.$trans('Error creating location'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -467,13 +467,13 @@ export default {
 
       try {
         await this.locationService.update(this.pk, this.location)
-        this.infoToast(this.$trans('Updated'), this.$trans('Location has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Location has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating location', error)
-        this.errorToast(this.$trans('Error updating location'))
+        errorToast(create, this.$trans('Error updating location'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -494,7 +494,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching location', error)
-        this.errorToast(this.$trans('Error fetching location'))
+        errorToast(create, this.$trans('Error fetching location'))
         this.isLoading = false
       }
     },

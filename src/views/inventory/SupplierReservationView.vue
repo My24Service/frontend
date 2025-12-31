@@ -123,7 +123,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching reservation', error)
-        this.errorToast(this.$trans('Error fetching reservation'))
+        errorToast(create, this.$trans('Error fetching reservation'))
         this.isLoading = false
       }
     }

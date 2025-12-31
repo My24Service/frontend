@@ -102,6 +102,9 @@ import {NEW_DATA_EVENTS} from "../../constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import my24 from "../../services/my24";
 import ButtonLinkDownload from "../../components/ButtonLinkDownload";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
@@ -155,7 +158,7 @@ export default {
       this.$refs['attach-order-modal'].show(event_id, engineer_user_id)
     },
     assignedOk() {
-      this.infoToast(this.$trans('Assigned'), this.$trans('Order created and assigned'))
+      infoToast(create, this.$trans('Assigned'), this.$trans('Order created and assigned'))
     },
 
     // delete
@@ -166,11 +169,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.engineerEventModelPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Event has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Event has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting event', error)
-        this.errorToast(this.$trans('Error deleting event'))
+        errorToast(create, this.$trans('Error deleting event'))
       }
     },
     // rest
@@ -186,7 +189,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching events', error)
-        this.errorToast(this.$trans('Error loading events'))
+        errorToast(create, this.$trans('Error loading events'))
         this.isLoading = false
       }
     },

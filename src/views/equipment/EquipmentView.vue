@@ -220,7 +220,7 @@ export default {
         // this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment stats data', error)
-        this.errorToast(`${this.$trans('Error fetching equipment stats:')} ${error}`)
+        errorToast(create, `${this.$trans('Error fetching equipment stats:')} ${error}`)
         // this.isLoading = false
       }
     },
@@ -265,7 +265,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching equipment detail data', error)
-        this.errorToast(`${this.$trans('Error fetching equipment detail:')} ${error}`)
+        errorToast(create, `${this.$trans('Error fetching equipment detail:')} ${error}`)
         this.isLoading = false
       }
     },
@@ -277,7 +277,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        errorToast(create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     }

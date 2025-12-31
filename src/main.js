@@ -23,13 +23,9 @@ import App from './App.vue'
 import store from './store'
 import {router} from './router'
 
-// global mixins
-import toastMix from '@/mixins/toast'
-
 function createOurApp() {
   const app = createApp(App).use(store);
     app.use(router)
-    app.mixin(toastMix)
 
   // app.use(VueSpinners)
   // app.use(Loading)

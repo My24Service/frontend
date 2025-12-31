@@ -25,7 +25,7 @@
           </div>
         </b-col>
       </b-row>
-      
+
       <b-table
         id="assigned-finished-table"
         small
@@ -188,7 +188,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching assigned orders', error)
-        this.errorToast(this.$trans('Error loading orders'))
+        errorToast(create, this.$trans('Error loading orders'))
         this.isLoading = false
       }
     }

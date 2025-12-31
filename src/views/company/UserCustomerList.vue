@@ -91,7 +91,9 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
@@ -145,11 +147,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Customer user has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Customer user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting customer user', error)
-        this.errorToast(this.$trans('Error deleting customer user'))
+        errorToast(create, this.$trans('Error deleting customer user'))
       }
     },
     // rest
@@ -162,7 +164,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customerusers', error)
-        this.errorToast(this.$trans('Error loading customer users'))
+        errorToast(create, this.$trans('Error loading customer users'))
         this.isLoading = false
       }
     }

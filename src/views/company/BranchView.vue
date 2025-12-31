@@ -330,7 +330,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching branch detail data', error)
-        this.errorToast(this.$trans('Error fetching branch detail'))
+        errorToast(create, this.$trans('Error fetching branch detail'))
         this.isLoading = false
       }
     },
@@ -343,7 +343,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        errorToast(create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     }

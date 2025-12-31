@@ -213,11 +213,11 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveTypeService.delete(this.leaveTypePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Leave type has been deleted"));
+        infoToast(create, this.$trans("Deleted"), this.$trans("Leave type has been deleted"));
         this.loadData();
       } catch (error) {
         console.log("error deleting leave type", error);
-        this.errorToast(this.$trans("Error deleting leave type"));
+        errorToast(create, this.$trans("Error deleting leave type"));
         this.isLoading = false;
       }
     },
@@ -231,7 +231,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave types", error);
-        this.errorToast(this.$trans("Error loading leave types"));
+        errorToast(create, this.$trans("Error loading leave types"));
         this.isLoading = false;
       }
     },
@@ -248,7 +248,7 @@ export default {
       if (!this.leaveTypePk) {
         try {
           await this.leaveTypeService.insert(this.leaveTypeForm);
-          this.infoToast(this.$trans("Created"), this.$trans("Leave type has been created"));
+          infoToast(create, this.$trans("Created"), this.$trans("Leave type has been created"));
           this.isLoadingForm = false;
           this.$nextTick(() => {
             this.$bvModal.hide("add-edit-leave-type-modal");
@@ -256,7 +256,7 @@ export default {
           });
         } catch (error) {
           console.log("Error creating leave types", error);
-          this.errorToast(this.$trans("Error creating leave types"));
+          errorToast(create, this.$trans("Error creating leave types"));
           this.isLoadingForm = false;
         }
 
@@ -265,7 +265,7 @@ export default {
 
       try {
         await this.leaveTypeService.update(this.leaveTypePk, this.leaveTypeForm);
-        this.infoToast(this.$trans("Updated"), this.$trans("Leave type has been updated"));
+        infoToast(create, this.$trans("Updated"), this.$trans("Leave type has been updated"));
         this.isLoadingForm = false;
         this.$nextTick(() => {
           this.$bvModal.hide("add-edit-leave-type-modal");
@@ -273,7 +273,7 @@ export default {
         });
       } catch (error) {
         console.log("Error updating leave type", error);
-        this.errorToast(this.$trans("Error updating leave type"));
+        errorToast(create, this.$trans("Error updating leave type"));
         this.isLoadingForm = false;
       }
       this.resetLeaveTypeForm();

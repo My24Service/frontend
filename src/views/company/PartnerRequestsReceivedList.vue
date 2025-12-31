@@ -66,7 +66,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #cell(icons)="data">
@@ -122,6 +122,9 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'PartnerRequestsReceivedList',
@@ -173,11 +176,11 @@ export default {
     async acceptRequest() {
       try {
         await this.model.accept(this.pk)
-        this.infoToast(this.$trans('Accepted'), this.$trans('Partner request has been accepted'))
+        infoToast(create, this.$trans('Accepted'), this.$trans('Partner request has been accepted'))
         await this.loadData()
       } catch(error) {
         console.log('Error accepting partner request', error)
-        this.errorToast(this.$trans('Error accepting partner request'))
+        errorToast(create, this.$trans('Error accepting partner request'))
       }
     },
     showRejectRequestModal(id) {
@@ -187,11 +190,11 @@ export default {
     async rejectRequest() {
       try {
         await this.model.reject(this.pk)
-        this.infoToast(this.$trans('Rejected'), this.$trans('Partner request has been rejected'))
+        infoToast(create, this.$trans('Rejected'), this.$trans('Partner request has been rejected'))
         await this.loadData()
       } catch(error) {
         console.log('Error rejecting partner request', error)
-        this.errorToast(this.$trans('Error rejecting partner request'))
+        errorToast(create, this.$trans('Error rejecting partner request'))
       }
     },
     // delete
@@ -202,11 +205,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting partner request', error)
-        this.errorToast(this.$trans('Error deleting partner request'))
+        errorToast(create, this.$trans('Error deleting partner request'))
       }
     },
     // rest
@@ -219,7 +222,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching partnerRequestsReceived', error);
-        this.errorToast(this.$trans('Error loading partner requests sent'))
+        errorToast(create, this.$trans('Error loading partner requests sent'))
         this.isLoading = false
       }
     }

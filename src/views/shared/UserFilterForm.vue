@@ -538,12 +538,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.service.insert(this.filter)
-          this.infoToast(this.$trans('Created'), this.$trans('Filter has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Filter has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating filter', error)
-          this.errorToast(this.$trans('Error creating filter'))
+          errorToast(create, this.$trans('Error creating filter'))
           this.isLoading = false
         }
 
@@ -552,12 +552,12 @@ export default {
 
       try {
         await this.service.update(this.pk, this.filter)
-        this.infoToast(this.$trans('Updated'), this.$trans('Filter has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Filter has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating filter', error)
-        this.errorToast(this.$trans('Error updating filter'))
+        errorToast(create, this.$trans('Error updating filter'))
         this.isLoading = false
       }
     },
@@ -574,7 +574,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching filter', error)
-        this.errorToast(this.$trans('Error loading filter'))
+        errorToast(create, this.$trans('Error loading filter'))
         this.isLoading = false
       }
     },

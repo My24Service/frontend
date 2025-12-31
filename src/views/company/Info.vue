@@ -323,7 +323,10 @@ import { useVuelidate } from '@vuelidate/core'
 import {email, required, url} from '@vuelidate/validators'
 
 import memberModel from '../../models/member/Member.js'
-import {NO_IMAGE_URL} from "../../constants"
+import {NO_IMAGE_URL} from "@/constants"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -440,13 +443,13 @@ export default {
         }
 
         await memberModel.updateMe(this.member)
-        this.infoToast(this.$trans('Updated'), this.$trans('Info updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Info updated'))
 
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('error updating member/me', error)
-        this.errorToast(this.$trans('Error updating info'))
+        errorToast(create, this.$trans('Error updating info'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -466,7 +469,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching member/me', error)
-        this.errorToast(this.$trans('Error fetching member info'))
+        errorToast(create, this.$trans('Error fetching member info'))
         this.isLoading = false
       }
     },

@@ -34,7 +34,7 @@
                 v-model="supplier.identifier"
               ></b-form-input>
             </b-form-group>
-        
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -51,7 +51,7 @@
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
             </b-form-group>
-        
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -68,7 +68,7 @@
                 {{ $trans('Please enter an address') }}
               </b-form-invalid-feedback>
             </b-form-group>
-        
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -85,7 +85,7 @@
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
             </b-form-group>
-        
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -126,7 +126,7 @@
                 v-model="supplier.email"
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -138,7 +138,7 @@
                 v-model="supplier.tel"
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -150,7 +150,7 @@
                 v-model="supplier.mobile"
               ></b-form-input>
             </b-form-group>
-          
+
             <b-form-group
               label-size="sm"
               label-cols="3"
@@ -255,13 +255,13 @@ export default {
       if (this.isCreate) {
         try {
           await supplierModel.insert(this.supplier)
-          this.infoToast(this.$trans('Created'), this.$trans('Supplier has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Supplier has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating supplier', error)
-          this.errorToast(this.$trans('Error creating supplier'))
+          errorToast(create, this.$trans('Error creating supplier'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -271,13 +271,13 @@ export default {
 
       try {
         await supplierModel.update(this.pk, this.supplier)
-        this.infoToast(this.$trans('Updated'), this.$trans('Supplier has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Supplier has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating supplier', error)
-        this.errorToast(this.$trans('Error updating supplier'))
+        errorToast(create, this.$trans('Error updating supplier'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -290,7 +290,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching supplier', error)
-        this.errorToast(this.$trans('Error fetching supplier'))
+        errorToast(create, this.$trans('Error fetching supplier'))
         this.isLoading = false
       }
     },

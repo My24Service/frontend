@@ -538,9 +538,11 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '../../models/helpers.js'
+import { usernameExists } from '@/models/helpers'
 import studentUserModel from '../../models/company/UserStudent.js'
-
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -717,11 +719,11 @@ export default {
           this.studentuser.username = this.studentuser.email
 
           await studentUserModel.register(this.studentuser)
-          this.infoToast(this.$trans('Registered'), this.$trans('Registration success'))
+          infoToast(create, this.$trans('Registered'), this.$trans('Registration success'))
           this.registrationSuccess = true
         } catch(error) {
           console.log('Error creating studentuser', error)
-          this.errorToast(this.$trans('Error registering'))
+          errorToast(create, this.$trans('Error registering'))
           this.buttonDisabled = false
         }
 
@@ -749,12 +751,12 @@ export default {
         this.studentuser.password = this.studentuser.password1
         try {
           await studentUserModel.insert(this.studentuser)
-          this.infoToast(this.$trans('Created'), this.$trans('studentuser has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('studentuser has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating studentuser', error)
-          this.errorToast(this.$trans('Error creating studentuser'))
+          errorToast(create, this.$trans('Error creating studentuser'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -775,12 +777,12 @@ export default {
         }
 
         await studentUserModel.update(this.pk, this.studentuser)
-        this.infoToast(this.$trans('Updated'), this.$trans('studentuser has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('studentuser has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating studentuser', error)
-        this.errorToast(this.$trans('Error updating studentuser'))
+        errorToast(create, this.$trans('Error updating studentuser'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -794,7 +796,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentuser', error)
-        this.errorToast(this.$trans('Error loading studentuser'))
+        errorToast(create, this.$trans('Error loading studentuser'))
         this.isLoading = false
       }
     },

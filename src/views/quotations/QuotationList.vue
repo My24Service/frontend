@@ -247,13 +247,13 @@ export default {
 
       try {
         await this.quotationService.delete(this.quotationPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Quotation has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Quotation has been deleted'))
         this.isLoading = false
         await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting quotation', error)
-        this.errorToast(this.$trans('Error deleting quotation'))
+        errorToast(create, this.$trans('Error deleting quotation'))
       }
     },
     // rest
@@ -266,7 +266,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotations', error)
-        this.errorToast(this.$trans('Error loading quotations'))
+        errorToast(create, this.$trans('Error loading quotations'))
         this.isLoading = false
       }
     },
@@ -284,7 +284,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscodes", error);
-        this.errorToast(this.$trans("Error loading statuscodes"));
+        errorToast(create, this.$trans("Error loading statuscodes"));
         this.isLoading = false;
       }
     }

@@ -540,7 +540,7 @@ export default {
         this.isGeneratingPDF = true;
         try {
             await this.orderService.recreateWorkorderPdfGotenberg(this.pk);
-            this.infoToast(this.$trans('Success'), this.$trans('Workorder recreated'));
+            infoToast(create, this.$trans('Success'), this.$trans('Workorder recreated'));
             await this.loadOrder();
             this.isLoading = false;
             this.buttonDisabled = false;
@@ -548,7 +548,7 @@ export default {
         }
         catch (err) {
             console.log('Error recreating workorder', err);
-            this.errorToast(this.$trans('Error recreating workorder'));
+            errorToast(create, this.$trans('Error recreating workorder'));
             this.buttonDisabled = false;
             this.isLoading = false;
             this.isGeneratingPDF = false;
@@ -630,7 +630,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        this.errorToast(this.$trans('Error fetching order'))
+        errorToast(create, this.$trans('Error fetching order'))
         this.isLoading = false
       }
     }

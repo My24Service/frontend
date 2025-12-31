@@ -73,6 +73,10 @@ import { required } from '@vuelidate/validators'
 
 import materialEventTypeModel from '../../models/company/EngineerEventType.js'
 
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
+
 export default {
   setup() {
     return { v$: useVuelidate() }
@@ -135,13 +139,13 @@ export default {
       if (this.isCreate) {
         try {
           await materialEventTypeModel.insert(this.materialEventType)
-          this.infoToast(this.$trans('Created'), this.$trans('Event type has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Event type has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating event type', error)
-          this.errorToast(this.$trans('Error creating event type'))
+          errorToast(create, this.$trans('Error creating event type'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -151,13 +155,13 @@ export default {
 
       try {
         await materialEventTypeModel.update(this.pk, this.materialEventType)
-        this.infoToast(this.$trans('Updated'), this.$trans('Event type has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Event type has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating event type', error)
-        this.errorToast(this.$trans('Error updating event type'))
+        errorToast(create, this.$trans('Error updating event type'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -170,7 +174,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching event type', error)
-        this.errorToast(this.$trans('Error fetching event type'))
+        errorToast(create, this.$trans('Error fetching event type'))
         this.isLoading = false
       }
     },

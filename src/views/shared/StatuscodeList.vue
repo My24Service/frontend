@@ -244,11 +244,11 @@ export default {
     async doDelete() {
       try {
         await this.statuscodeModel.delete(this.statuscodePk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Statuscode has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Statuscode has been deleted'))
         this.loadData()
       } catch(error) {
         console.log('error deleting statuscodes', error)
-        this.errorToast(this.$trans('Error deleting statuscode'))
+        errorToast(create, this.$trans('Error deleting statuscode'))
       }
     },
     // rest
@@ -261,7 +261,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching statuscodes', error)
-        this.errorToast(this.$trans('Error loading statuscodes'))
+        errorToast(create, this.$trans('Error loading statuscodes'))
         this.isLoading = false
       }
     }

@@ -3,8 +3,8 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-medical"></b-icon> 
-          <span class="backlink" @click="goBack">{{ $trans('Purchase orders') }}</span> / 
+          <b-icon icon="file-earmark-medical"></b-icon>
+          <span class="backlink" @click="goBack">{{ $trans('Purchase orders') }}</span> /
           {{ purchaseOrder.purchase_order_id }} <span class="dimmed">{{ purchaseOrder.order_name }}</span>
         </h3>
         <div class="flex-columns">
@@ -21,35 +21,35 @@
       <div class="panel">
         <h3><strong>{{ purchaseOrder.purchase_order_id }}</strong> <br/><small>{{ purchaseOrder.order_name }}</small>
         </h3>
-        
+
           <dl>
             <dt>{{ $trans('Expected entry date') }}</dt>
             <dd>{{ purchaseOrder.expected_entry_date }}</dd>
 
             <dt>{{ $trans('Supplier') }}</dt>
             <dd>{{ purchaseOrder.order_name }}</dd>
-          
+
             <dt>{{ $trans('Address') }}</dt>
             <dd>{{ purchaseOrder.order_address }}</dd>
-          
+
             <dt>{{ $trans('Country/Postal/city') }}</dt>
             <dd>
               {{ purchaseOrder.order_country_code }}-
               {{ purchaseOrder.order_postal }} {{ purchaseOrder.order_city }}
             </dd>
-          
+
             <dt>{{ $trans('Contact') }}</dt>
             <dd>{{ purchaseOrder.order_contact }}</dd>
-          
+
             <dt>{{ $trans('Tel') }}</dt>
             <dd>{{ purchaseOrder.order_tel }}</dd>
           </dl>
-      
-        
+
+
           <dl>
             <dt>{{ $trans('Mobile') }}</dt>
             <dd>{{ purchaseOrder.order_mobile }}</dd>
-          
+
             <dt>{{ $trans('Email') }}</dt>
             <dd>
               <b-link class="px-1" v-bind:href="`mailto:${purchaseOrder.order_email}`">
@@ -63,10 +63,10 @@
             <dt>{{ $trans('Supplier remarks') }}</dt>
             <dd>{{ purchaseOrder.supplier_remarks}}</dd>
           </dl>
-        
+
 
         <h6>{{$trans('History')}}</h6>
-          
+
           <ul class="listing">
             <li v-for="status in purchaseOrder.statuses" :key="status.id">
               <div class="listing-item">
@@ -74,8 +74,8 @@
               </div>
             </li>
           </ul>
-          
-        
+
+
       </div>
 
       <div class="panel col-2-3">
@@ -161,7 +161,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching purchase order', error)
-        this.errorToast(this.$trans('Error fetching purchase order'))
+        errorToast(create, this.$trans('Error fetching purchase order'))
         this.isLoading = false
       }
     }

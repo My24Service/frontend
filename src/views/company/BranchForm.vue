@@ -166,8 +166,10 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-
 import branchModel from '../../models/company/Branch.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -237,12 +239,12 @@ export default {
       if (this.isCreate) {
         try {
           await branchModel.insert(this.branch)
-          this.infoToast(this.$trans('Created'), this.$trans('Branch has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Branch has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating branch', error)
-          this.errorToast(this.$trans('Error creating branch'))
+          errorToast(create, this.$trans('Error creating branch'))
           this.isLoading = false
         }
 
@@ -251,12 +253,12 @@ export default {
 
       try {
         await branchModel.update(this.pk, this.branch)
-        this.infoToast(this.$trans('Updated'), this.$trans('Branch has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Branch has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating branch', error)
-        this.errorToast(this.$trans('Error updating branch'))
+        errorToast(create, this.$trans('Error updating branch'))
         this.isLoading = false
       }
     },
@@ -268,7 +270,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching branch', error)
-        this.errorToast(this.$trans('Error loading branch'))
+        errorToast(create, this.$trans('Error loading branch'))
         this.isLoading = false
       }
     },

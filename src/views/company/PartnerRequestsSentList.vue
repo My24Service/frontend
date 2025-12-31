@@ -14,7 +14,7 @@
             />
           </b-button-group>
           <router-link :to="{name: 'partner-request-add'}" class="btn">{{$trans('New partner request')}}</router-link>
-          
+
         </b-button-toolbar>
       </div>
     </header>
@@ -36,7 +36,7 @@
 
     <div class="page-detail panel">
       <PillsCompanyPartners />
-      
+
 
       <b-table
         id="partnerRequestsSent-table"
@@ -50,7 +50,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #cell(icons)="data">
@@ -83,9 +83,11 @@ import PillsCompanyPartners from '@/components/PillsCompanyPartners.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'PartnerRequestsSentList',
@@ -94,7 +96,6 @@ export default {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -138,11 +139,11 @@ export default {
     async doDelete() {
       try {
         this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting partner request', error)
-        this.errorToast(this.$trans('Error deleting partner request'))
+        errorToast(create, this.$trans('Error deleting partner request'))
       }
     },
     // rest
@@ -155,7 +156,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching partnerRequestsSent', error)
-        this.errorToast(this.$trans('Error loading partner requests sent'))
+        errorToast(create, this.$trans('Error loading partner requests sent'))
         this.isLoading = false
       }
     }

@@ -64,6 +64,9 @@ import { required, sameAs } from '@vuelidate/validators'
 import Password from 'vue-password-strength-meter'
 
 import accountModel from '../models/account/Account.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -114,13 +117,13 @@ export default {
       this.isLoading = true
       try {
         const result = await accountModel.resetPassword(this.password1)
-        this.infoToast(this.$trans('Password reset'), this.$trans('Reset password successful'))
+        infoToast(create, this.$trans('Password reset'), this.$trans('Reset password successful'))
 
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.push({path: '/'})
       } catch(error) {
-        this.errorToast(this.$trans('Something went wrong, please try again'))
+        errorToast(create, this.$trans('Something went wrong, please try again'))
 
         this.buttonDisabled = false
         this.isLoading = false

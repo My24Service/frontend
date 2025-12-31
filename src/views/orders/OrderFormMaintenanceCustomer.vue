@@ -617,13 +617,13 @@ export default {
           // add documents
           this.$refs['documents-component'].orderCreated(newOrder)
 
-          this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating order', error)
-          this.errorToast(this.$trans('Error creating order'))
+          errorToast(create, this.$trans('Error creating order'))
           this.isLoading = false
           this.buttonDisabled = false
           return
@@ -642,27 +642,27 @@ export default {
           orderline.order = this.pk
           if (orderline.id) {
             await this.orderlineService.update(orderline.id, orderline)
-            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+            // infoToast(create, this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
           } else {
             await this.orderlineService.insert(orderline)
-            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+            // infoToast(create, this.$trans('Orderline created'), this.$trans('Orderline has been created'))
           }
         }
 
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
             await this.orderlineService.delete(orderline.id)
-            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+            // infoToast(create, this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
           }
         }
 
-        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating order', error)
-        this.errorToast(this.$trans('Error updating order'))
+        errorToast(create, this.$trans('Error updating order'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -713,7 +713,7 @@ export default {
       this.isLoading = false
     } catch (error) {
       console.log('error loading order', error)
-      this.errorToast(this.$trans('Error fetching order data'))
+      errorToast(create, this.$trans('Error fetching order data'))
       this.isLoading = false
     }
   },

@@ -46,7 +46,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -141,11 +141,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.entryPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Entry has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Entry has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting entry', error)
-        this.errorToast(this.$trans('Error deleting entry'))
+        errorToast(create, this.$trans('Error deleting entry'))
       }
     },
     // rest
@@ -158,7 +158,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching entries', error)
-        this.errorToast(this.$trans('Error loading entries'))
+        errorToast(create, this.$trans('Error loading entries'))
         this.isLoading = false
       }
     }

@@ -202,13 +202,13 @@ export default {
         this.isLoading = true
         try {
           await contractModel.insert(this.contract)
-          this.infoToast(this.$trans('Created'), this.$trans('contract has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('contract has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating contract', error)
-          this.errorToast(this.$trans('Error creating contract'))
+          errorToast(create, this.$trans('Error creating contract'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -220,13 +220,13 @@ export default {
         this.isLoading = true
 
         await contractModel.update(this.pk, this.contract)
-        this.infoToast(this.$trans('Updated'), this.$trans('contract has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('contract has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating contract', error)
-        this.errorToast(this.$trans('Error updating contract'))
+        errorToast(create, this.$trans('Error updating contract'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -237,7 +237,7 @@ export default {
         this.fillSelected(this.contract.module_paths_pks)
       } catch(error) {
         console.log('error fetching contract', error)
-        this.errorToast(this.$trans('Error fetching contract'))
+        errorToast(create, this.$trans('Error fetching contract'))
       }
     },
     getPathsFromModel() {

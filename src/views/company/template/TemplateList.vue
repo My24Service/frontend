@@ -153,11 +153,11 @@ export default {
     async doDelete() {
       try {
         await this.templateService.delete(this.templatePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Template has been deleted"));
+        infoToast(create, this.$trans("Deleted"), this.$trans("Template has been deleted"));
         await this.loadData();
       } catch (error) {
         console.log("error deleting templates", error);
-        this.errorToast(this.$trans("Error deleting template"));
+        errorToast(create, this.$trans("Error deleting template"));
       }
     },
     // rest
@@ -170,7 +170,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching templates", error);
-        this.errorToast(this.$trans("Error loading templates"));
+        errorToast(create, this.$trans("Error loading templates"));
         this.isLoading = false;
       }
     },
@@ -183,7 +183,7 @@ export default {
         await this.loadData()
       } catch (error) {
         console.log("error setting template as active", error);
-        this.errorToast(this.$trans("Error setting template as active"));
+        errorToast(create, this.$trans("Error setting template as active"));
         this.isLoading = false;
       }
     }

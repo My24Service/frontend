@@ -88,7 +88,9 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
@@ -140,11 +142,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Employee has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Employee has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting employee', error)
-        this.errorToast(this.$trans('Error deleting employee'))
+        errorToast(create, this.$trans('Error deleting employee'))
       }
     },
     // rest
@@ -157,7 +159,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching employees', error)
-        this.errorToast(this.$trans('Error loading employees'))
+        errorToast(create, this.$trans('Error loading employees'))
         this.isLoading = false
       }
     }

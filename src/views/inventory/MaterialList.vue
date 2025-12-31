@@ -139,11 +139,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.materialPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Material has been deleted'))
         this.loadData()
       } catch(error) {
         console.log('error deleting material', error)
-        this.errorToast(this.$trans('Error deleting material'))
+        errorToast(create, this.$trans('Error deleting material'))
       }
     },
     // rest
@@ -156,7 +156,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching materials', error)
-        this.errorToast(this.$trans('Error loading materials'))
+        errorToast(create, this.$trans('Error loading materials'))
         this.isLoading = false
       }
     }

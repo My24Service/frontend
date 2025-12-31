@@ -150,12 +150,12 @@ export default {
         if (!result_ok) {
           this.$refs['pdf-error-modal'].show()
         } else {
-          this.infoToast(this.$trans('Success'), this.$trans('Invoice PDF created'));
+          infoToast(create, this.$trans('Success'), this.$trans('Invoice PDF created'));
         }
       }
       catch (err) {
         console.log('Error recreating invoice pdf', err);
-        this.errorToast(this.$trans('Error recreating invoice PDF'));
+        errorToast(create, this.$trans('Error recreating invoice PDF'));
         this.isLoading = false;
       }
     },
@@ -164,17 +164,17 @@ export default {
 
       try {
         await this.invoiceService.makeDefinitive(this.invoice.id)
-        this.infoToast(this.$trans('Success'), this.$trans('Invoice is now definitive'))
+        infoToast(create, this.$trans('Success'), this.$trans('Invoice is now definitive'))
         this.isLoading = false
         await this.$router.push({ name: 'invoice-view', params: {uuid: this.invoice.uuid }})
       } catch(error) {
-        this.errorToast(this.$trans('Error making invoice definitive'))
+        errorToast(create, this.$trans('Error making invoice definitive'))
         this.isLoading = false
         if (error.response?.data?.template_error) {
-          this.errorToast(error.response.data.template_error)
+          errorToast(create, error.response.data.template_error)
           return
         }
-        this.errorToast(this.$trans('Error generating PDF'))
+        errorToast(create, this.$trans('Error generating PDF'))
       }
     },
     async downloadPdf() {
@@ -260,7 +260,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoice', error)
-        this.errorToast(this.$trans('Error fetching invoice'))
+        errorToast(create, this.$trans('Error fetching invoice'))
         this.isLoading = false
       }
     },

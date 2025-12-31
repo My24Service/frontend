@@ -146,13 +146,13 @@ export default {
         this.isLoading = true
         try {
           await modulePartModel.insert(this.modulePart)
-          this.infoToast(this.$trans('Created'), this.$trans('Module part has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Module part has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating module part', error)
-          this.errorToast(this.$trans('Error creating module part'))
+          errorToast(create, this.$trans('Error creating module part'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -164,13 +164,13 @@ export default {
         this.isLoading = true
 
         await modulePartModel.update(this.pk, this.modulePart)
-        this.infoToast(this.$trans('Updated'), this.$trans('Module part has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Module part has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating module part', error)
-        this.errorToast(this.$trans('Error updating module part'))
+        errorToast(create, this.$trans('Error updating module part'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -181,7 +181,7 @@ export default {
         this.modulePart = await modulePartModel.detail(this.pk)
         this.isLoading = false
       } catch {
-        this.errorToast(this.$trans('Error fetching module part'))
+        errorToast(create, this.$trans('Error fetching module part'))
         this.isLoading = false
       }
     },

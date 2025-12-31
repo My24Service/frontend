@@ -8,6 +8,7 @@ import {
 } from "./constants";
 import Dinero from "dinero.js";
 import {useStore} from "vuex";
+import {useToast} from "bootstrap-vue-next";
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
@@ -175,6 +176,14 @@ function $trans(text) {
   return django.gettext(text)
 }
 
+function infoToast(create, title, body) {
+  create({title, body, variant: 'success'})
+}
+
+function errorToast(create, body, title=$trans('Error')) {
+  create({title, body, variant: 'danger'})
+}
+
 export {
   isEmpty,
   translateHoursField,
@@ -187,5 +196,7 @@ export {
   getUserAuthLevel,
   toDinero,
   uuidv4,
-  $trans
+  $trans,
+  infoToast,
+  errorToast
 }

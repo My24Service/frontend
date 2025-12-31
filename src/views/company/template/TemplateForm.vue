@@ -294,7 +294,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching template", error);
-        this.errorToast(this.$trans("Error loading template"));
+        errorToast(create, this.$trans("Error loading template"));
         this.isLoading = false;
       }
     },
@@ -322,7 +322,7 @@ export default {
         this.fetchingResults = false;
       } catch (error) {
         console.log("Error fetching results", error);
-        this.errorToast(this.$trans("Error fetching results"));
+        errorToast(create, this.$trans("Error fetching results"));
         this.fetchingResults = false;
       }
     },
@@ -338,12 +338,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.templateService.insert(this.template);
-          this.infoToast(this.$trans("Created"), this.$trans("Template has been created"));
+          infoToast(create, this.$trans("Created"), this.$trans("Template has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating template", error);
-          this.errorToast(this.$trans("Error creating template"));
+          errorToast(create, this.$trans("Error creating template"));
           this.isLoading = false;
         }
       }
@@ -356,14 +356,14 @@ export default {
 
         try {
           await this.templateService.update(this.pk, this.template);
-          this.infoToast(this.$trans("Created"), this.$trans("Template has been updated"));
+          infoToast(create, this.$trans("Created"), this.$trans("Template has been updated"));
           this.isLoading = false;
           this.isEdit = false
           this.template = {}
           await this.loadData()
         } catch (error) {
           console.log("Error creating template", error);
-          this.errorToast(this.$trans("Error creating template"));
+          errorToast(create, this.$trans("Error creating template"));
           this.isLoading = false;
         }
       }
@@ -383,7 +383,7 @@ export default {
         window.open(_url, "_blank");
       } catch (error) {
         console.log("Error downloading template", error);
-        this.errorToast(this.$trans("Error downloading template"));
+        errorToast(create, this.$trans("Error downloading template"));
         this.loadingPdf = false;
       }
     },

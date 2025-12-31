@@ -553,7 +553,7 @@ export default {
 
       await this.getSuppliers('')
     } catch {
-      this.errorToast(this.$trans('Error fetching countries'))
+      errorToast(create, this.$trans('Error fetching countries'))
       this.buttonDisabled = false
     }
   },
@@ -616,7 +616,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching materials', error)
-        this.errorToast(this.$trans('Error fetching products'))
+        errorToast(create, this.$trans('Error fetching products'))
         this.isLoading = false
       }
     },
@@ -629,7 +629,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching suppliers', error)
-        this.errorToast(this.$trans('Error fetching suppliers'))
+        errorToast(create, this.$trans('Error fetching suppliers'))
         this.isLoading = false
       }
     },
@@ -661,7 +661,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error searching reservations', error)
-        this.errorToast(this.$trans('Error searching reservations'))
+        errorToast(create, this.$trans('Error searching reservations'))
         this.isLoading = false
       }
     },
@@ -706,14 +706,14 @@ export default {
             await purchaseOrderMaterialModel.insert(material)
           }
 
-          this.infoToast(this.$trans('Created'), this.$trans('Purchase order has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('Purchase order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating purchase order', error)
-          this.errorToast(this.$trans('Error creating purchase order'))
+          errorToast(create, this.$trans('Error creating purchase order'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -723,23 +723,23 @@ export default {
 
       try {
         await purchaseOrderModel.update(this.pk, this.purchaseOrder)
-        this.infoToast(this.$trans('Updated'), this.$trans('Purchase order has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('Purchase order has been updated'))
 
         for (let material of this.purchaseOrder.materials) {
           material.purchase_order = this.pk
           if (material.id) {
             await purchaseOrderMaterialModel.update(material.id, material)
-            this.infoToast(this.$trans('Product updated'), this.$trans('Purchase order product has been updated'))
+            infoToast(create, this.$trans('Product updated'), this.$trans('Purchase order product has been updated'))
           } else {
             await purchaseOrderMaterialModel.insert(material)
-            this.infoToast(this.$trans('Product created'), this.$trans('Purchase order product has been created'))
+            infoToast(create, this.$trans('Product created'), this.$trans('Purchase order product has been created'))
           }
         }
 
         for (const material of this.deletedMaterials) {
           if (material.id) {
             await purchaseOrderMaterialModel.delete(material.id)
-            this.infoToast(this.$trans('Product removed'), this.$trans('Purchase order product has been removed'))
+            infoToast(create, this.$trans('Product removed'), this.$trans('Purchase order product has been removed'))
           }
         }
 
@@ -748,7 +748,7 @@ export default {
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating purchase order', error)
-        this.errorToast(this.$trans('Error updating purchase order'))
+        errorToast(create, this.$trans('Error updating purchase order'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -766,7 +766,7 @@ export default {
         await this.getMaterials('')
       } catch(error) {
         console.log('error fetching purchase order', error)
-        this.errorToast(this.$trans('Error fetching purchase order'))
+        errorToast(create, this.$trans('Error fetching purchase order'))
         this.isLoading = false
       }
     },

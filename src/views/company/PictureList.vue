@@ -6,7 +6,7 @@
         <h3>
           <b-icon icon="images"></b-icon> {{ $trans('Pictures') }}
         </h3>
-        
+
         <b-button-toolbar>
           <b-button-group class="mr-1">
             <ButtonLinkRefresh
@@ -21,7 +21,7 @@
             <b-icon icon="image"></b-icon>
             {{ $trans('Add picture') }}</router-link>
         </b-button-toolbar>
-        
+
       </div>
     </header>
 
@@ -52,7 +52,7 @@
         class="data-table"
         sort-icon-left
       >
-        
+
         <template #table-busy>
           <div class="text-center text-danger my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
@@ -96,10 +96,12 @@ import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
-import {NO_IMAGE_URL} from "../../constants"
+import {NO_IMAGE_URL} from "@/constants"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   components: {
@@ -107,7 +109,6 @@ export default {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -149,11 +150,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.picturePk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Picture has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Picture has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting picture', error)
-        this.errorToast(this.$trans('Error deleting picture'))
+        errorToast(create, this.$trans('Error deleting picture'))
       }
     },
     // rest
@@ -166,7 +167,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching pictures', error)
-        this.errorToast(this.$trans('Error loading pictures'))
+        errorToast(create, this.$trans('Error loading pictures'))
         this.isLoading = false
       }
     }

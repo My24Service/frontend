@@ -200,6 +200,9 @@ import { helpers } from '@vuelidate/validators'
 
 import { usernameExists } from '@/models/helpers.js'
 import planningUserModel from '@/models/company/UserPlanning.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {
@@ -325,11 +328,11 @@ export default {
         this.planninguser.password = this.planninguser.password1
         try {
           await planningUserModel.insert(this.planninguser)
-          this.infoToast(this.$trans('Created'), this.$trans('planning user has been created'))
+          infoToast(create, this.$trans('Created'), this.$trans('planning user has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
-          this.errorToast(this.$trans('Error creating planning user'))
+          errorToast(create, this.$trans('Error creating planning user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -348,11 +351,11 @@ export default {
 
       try {
         await planningUserModel.update(this.pk, this.planninguser)
-        this.infoToast(this.$trans('Updated'), this.$trans('planning user has been updated'))
+        infoToast(create, this.$trans('Updated'), this.$trans('planning user has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
-        this.errorToast(this.$trans('Error updating planning user'))
+        errorToast(create, this.$trans('Error updating planning user'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -366,7 +369,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching planninguser', error)
-        this.errorToast(this.$trans('Error loading planning user'))
+        errorToast(create, this.$trans('Error loading planning user'))
         this.isLoading = false
       }
     },

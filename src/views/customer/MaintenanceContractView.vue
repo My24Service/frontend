@@ -316,7 +316,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error.response)
-        this.errorToast(`${this.$trans('Error loading maintenance contract')}: ${error.response.status} ${error.response.statusText}`)
+        errorToast(create, `${this.$trans('Error loading maintenance contract')}: ${error.response.status} ${error.response.statusText}`)
         this.isLoading = false
       }
     },

@@ -162,12 +162,12 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveHoursService.acceptLeave(this.leavePk);
-        this.infoToast(this.$trans("Accepted"), this.$trans("Leave as been accepted"));
+        infoToast(create, this.$trans("Accepted"), this.$trans("Leave as been accepted"));
         this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error accepting leave", error);
-        this.errorToast(this.$trans("Error accepting leave"));
+        errorToast(create, this.$trans("Error accepting leave"));
       }
     },
     showRejectModal(id) {
@@ -178,12 +178,12 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveHoursService.doReject(this.leavePk);
-        this.infoToast(this.$trans("Rejected"), this.$trans("Leave as been rejected"));
+        infoToast(create, this.$trans("Rejected"), this.$trans("Leave as been rejected"));
         this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error rejecting leave", error);
-        this.errorToast(this.$trans("Error rejecting leave"));
+        errorToast(create, this.$trans("Error rejecting leave"));
       }
     },
     // rest
@@ -196,7 +196,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave requests", error);
-        this.errorToast(this.$trans("Error loading leave requests"));
+        errorToast(create, this.$trans("Error loading leave requests"));
         this.isLoading = false;
       }
     }

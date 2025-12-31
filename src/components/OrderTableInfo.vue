@@ -87,6 +87,9 @@ import my24 from '../services/my24.js'
 import {StatusService} from '@/models/orders/Status.js'
 import IconLinkDelete from './IconLinkDelete.vue'
 import {OrderService} from "@/models/orders/Order";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
@@ -173,11 +176,11 @@ export default {
     async doDelete() {
       try {
         await this.orderService.delete(this.order.id)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Order has been deleted'))
         this.$emit('reload-data')
       } catch(error) {
         console.log('Error deleting order', error)
-        this.errorToast(this.$trans('Error deleting order'))
+        errorToast(create, this.$trans('Error deleting order'))
       }
     },
     handleStatusChange(id, value) {
@@ -194,7 +197,7 @@ export default {
         await this.statusService.insert(status)
       } catch(error) {
         console.log('Error creating status', error)
-        this.errorToast(this.$trans('Error creating status'))
+        errorToast(create, this.$trans('Error creating status'))
       }
     }
   }

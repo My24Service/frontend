@@ -124,17 +124,19 @@
 </template>
 
 <script>
-import { BudgetService } from '../../models/company/Budget.js'
+import { BudgetService } from '@/models/company/Budget'
 
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-
 import PriceInput from "../../components/PriceInput";
+
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
@@ -144,7 +146,6 @@ export default {
     IconLinkEdit,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     PriceInput,
@@ -193,15 +194,15 @@ export default {
       try {
         if (this.isEdit) {
           await this.service.update(this.budget.id, this.budget)
-          this.infoToast(this.$trans('Updated'), this.$trans('Budget modified'))
+          infoToast(create, this.$trans('Updated'), this.$trans('Budget modified'))
         } else {
           await this.service.insert(this.budget)
-          this.infoToast(this.$trans('Created'), this.$trans('Budget added'))
+          infoToast(create, this.$trans('Created'), this.$trans('Budget added'))
         }
         await this.loadData()
       } catch(error) {
         console.log('Error handling budget', error)
-        this.errorToast(this.$trans('Error handling budget'))
+        errorToast(create, this.$trans('Error handling budget'))
       }
     },
     // search
@@ -221,11 +222,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Budget has been deleted'))
+        infoToast(create, this.$trans('Deleted'), this.$trans('Budget has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting budget', error)
-        this.errorToast(this.$trans('Error deleting budget'))
+        errorToast(create, this.$trans('Error deleting budget'))
       }
     },
     // rest
@@ -235,7 +236,7 @@ export default {
         this.budgets = data.results.map((m) => new this.service.model(m))
       } catch(error) {
         console.log('error fetching budgets', error)
-        this.errorToast(this.$trans('Error loading budgets'))
+        errorToast(create, this.$trans('Error loading budgets'))
       }
     }
   }
