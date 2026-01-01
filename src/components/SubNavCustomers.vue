@@ -69,7 +69,7 @@ export default {
       return !this.hasBranches && this.isCustomer
     },
     hasUpload() {
-      return this.isStaff || this.isSuperuser
+      return this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser
     }
   },
 }

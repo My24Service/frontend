@@ -107,7 +107,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentuser', error)
-        errorToast(create, this.$trans('Error loading studentuser'))
+        errorToast(create, $trans('Error loading studentuser'))
         this.isLoading = false
       }
     },

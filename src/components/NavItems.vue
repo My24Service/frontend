@@ -244,18 +244,18 @@ export default {
     },
     showCustomers() {
       return !this.hasBranches && (
-        (this.hasCustomers && this.isPlanning) ||
-        this.hasOrders && (this.isPlanning || this.isStaff || this.isSuperuser)
+        (this.hasCustomers && this.$store.getters.getIsPlanning) ||
+        this.hasOrders && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser)
       );
     },
     showEquipment() {
       return this.hasBranches;
     },
     showInventory() {
-      return this.hasInventory && (this.isPlanning || this.isStaff || this.isSuperuser);
+      return this.hasInventory && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser);
     },
     showMobile() {
-      return this.hasMobile && (this.isPlanning || this.isStaff || this.isSuperuser)
+      return this.hasMobile && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser)
     },
     showCompany() {
       return !this.isCustomer && !this.isEmployee;
@@ -285,7 +285,7 @@ export default {
       return this.hasAccessToModule('company')
     },
     hasMembers() {
-      return this.isStaff || this.isSuperuser
+      return this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser
     },
     unacceptedCount() {
       return this.$store.state.unacceptedCount
@@ -294,10 +294,10 @@ export default {
       return this.$store.getters.getMemberHasBranches
     },
     hasBim() {
-      return this.hasAccessToModule('3d') && (this.isPlanning || this.isStaff || this.isSuperuser)
+      return this.hasAccessToModule('3d') && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser)
     },
     hasWebshop() {
-      return this.hasAccessToModule('webshop') && (this.isPlanning || this.isStaff || this.isSuperuser)
+      return this.hasAccessToModule('webshop') && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser)
     }
   },
   watch: {

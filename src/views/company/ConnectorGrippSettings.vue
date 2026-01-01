@@ -182,7 +182,7 @@
 <script>
 import memberModel from '@/models/member/Member.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -227,12 +227,12 @@ export default {
         }
 
         await memberModel.updateSettings(allSettings);
-        infoToast(create, this.$trans('Updated'), this.$trans('Settings updated'))
+        infoToast(create, $trans('Updated'), $trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('Error updating settings', error)
-        errorToast(create, this.$trans('Error updating settings'))
+        errorToast(create, $trans('Error updating settings'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -275,7 +275,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching settings', error)
-        errorToast(create, this.$trans('Error fetching settings'))
+        errorToast(create, $trans('Error fetching settings'))
         this.isLoading = false
       }
     },

@@ -439,7 +439,7 @@ import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {UserListService} from "@/models/company/UserList";
 import TimeInput from "@/components/TimeInput.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 const memberNewDataSocket = new MemberNewDataSocket()
@@ -469,12 +469,12 @@ export default {
       mode: null,
       showUsersMode: null,
       modeOptions: [
-        { item: 'compact', name: this.$trans('Compact') },
-        { item: 'wide', name: this.$trans('Wide') },
+        { item: 'compact', name: $trans('Compact') },
+        { item: 'wide', name: $trans('Wide') },
       ],
       showUsersOptions: [
-        { item: 'all', name: this.$trans('All') },
-        { item: 'active', name: this.$trans('Active') },
+        { item: 'all', name: $trans('All') },
+        { item: 'active', name: $trans('Active') },
       ],
       scrollTopButton: null,
       searchQuery: null,
@@ -534,7 +534,7 @@ export default {
         this.searchingEngineers = false
       } catch(error) {
         console.log('Error fetching engineers', error)
-        errorToast(create, this.$trans('Error fetching engineers'))
+        errorToast(create, $trans('Error fetching engineers'))
         this.searchingEngineers = false
       }
     },
@@ -581,7 +581,7 @@ export default {
 
       } catch(error) {
         console.log('error updating assignedOrder dates', error)
-        errorToast(create, this.$trans('Error updating dates'))
+        errorToast(create, $trans('Error updating dates'))
         this.showOverlay = false
       }
     },
@@ -627,12 +627,12 @@ export default {
           await this.assignedOrderService.insert(obj)
         }
         this.$refs['dispatch-split-order-modal'].hide();
-        infoToast(create, this.$trans('Success'), this.$trans('Order split'))
+        infoToast(create, $trans('Success'), $trans('Order split'))
         this.refreshData()
         this.showOverlay = false
       } catch(error) {
         console.log('error creating assignedOrder', error)
-        errorToast(create, this.$trans('Error splitting order'))
+        errorToast(create, $trans('Error splitting order'))
         this.showOverlay = false
       }
     },
@@ -698,12 +698,12 @@ export default {
         this.$refs['dispatch-order-actions-modal'].show();
       } catch (error) {
         console.log('error fetching order', error)
-        errorToast(create, this.$trans('Error fetching order'))
+        errorToast(create, $trans('Error fetching order'))
       }
     },
     addSelectedUser(user) {
       if (this.userAlreadyAssigned(user.user_id)) {
-        infoToast(create, this.$trans('Already assigned'), this.$trans('Order(s) already assigned'))
+        infoToast(create, $trans('Already assigned'), $trans('Order(s) already assigned'))
         return
       }
       if (!this.userAlreadySelected(user.user_id)) {
@@ -730,13 +730,13 @@ export default {
           await this.assignService.assignToUser(user_id, this.selectedOrderIds, true)
         }
 
-        infoToast(create, this.$trans('Success'), this.$trans('Order(s) assigned'))
+        infoToast(create, $trans('Success'), $trans('Order(s) assigned'))
         this.cancelAssign()
         this.refreshData()
         this.buttonDisabled = false
         this.showOverlay = false
       } catch (e) {
-        errorToast(create, this.$trans('Error assigning order(s)'))
+        errorToast(create, $trans('Error assigning order(s)'))
         this.showOverlay = false
         this.buttonDisabled = false
       }
@@ -748,12 +748,12 @@ export default {
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
           await this.assignService.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
-          infoToast(create, this.$trans('Success'), this.$trans('Order removed from planning'))
+          infoToast(create, $trans('Success'), $trans('Order removed from planning'))
           this.refreshData()
           this.showOverlay = false
         } catch (error) {
           console.log('error un-assigning', error)
-          errorToast(create, this.$trans('Error un-assigning order'))
+          errorToast(create, $trans('Error un-assigning order'))
           this.showOverlay = false
         }
       })

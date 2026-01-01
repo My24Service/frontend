@@ -83,10 +83,10 @@ export default {
       isLoading: false,
       mutations: [],
       fields: [
-        {key: 'material_name', label: this.$trans('Material'), sortable: true},
-        {key: 'summary', label: this.$trans('Mutation'), sortable: true},
-        {key: 'amount', label: this.$trans('Amount'), sortable: true},
-        {key: 'modified', label: this.$trans('Date'), sortable: true},
+        {key: 'material_name', label: $trans('Material'), sortable: true},
+        {key: 'summary', label: $trans('Mutation'), sortable: true},
+        {key: 'amount', label: $trans('Amount'), sortable: true},
+        {key: 'modified', label: $trans('Date'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -115,7 +115,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching mutations', error)
-        errorToast(create, this.$trans('Error loading mutations'))
+        errorToast(create, $trans('Error loading mutations'))
         this.isLoading = false
       }
     }

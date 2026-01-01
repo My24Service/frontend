@@ -273,7 +273,7 @@ import materialService from '../../models/inventory/Material.js'
 import supplierModel from '../../models/inventory/Supplier.js'
 import {NO_IMAGE_URL} from "@/constants"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -366,13 +366,13 @@ export default {
       if (this.isCreate) {
         try {
           await materialService.insert(this.material)
-          infoToast(create, this.$trans('Created'), this.$trans('Material has been created'))
+          infoToast(create, $trans('Created'), $trans('Material has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating material', error)
-          errorToast(create, this.$trans('Error creating material'))
+          errorToast(create, $trans('Error creating material'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -386,13 +386,13 @@ export default {
         }
 
         await materialService.update(this.pk, this.material)
-        infoToast(create, this.$trans('Updated'), this.$trans('Material has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Material has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating material', error)
-        errorToast(create, this.$trans('Error updating material'))
+        errorToast(create, $trans('Error updating material'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -404,7 +404,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching suppliers', error)
-        errorToast(create, this.$trans('Error fetching suppliers'))
+        errorToast(create, $trans('Error fetching suppliers'))
         this.isLoading = false
       }
     },
@@ -417,7 +417,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching material', error)
-        errorToast(create, this.$trans('Error fetching material'))
+        errorToast(create, $trans('Error fetching material'))
         this.isLoading = false
       }
     },

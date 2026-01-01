@@ -298,7 +298,7 @@ import {
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
 import Multiselect from "vue-multiselect";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -337,8 +337,8 @@ export default {
       filter: null,
       examples: [],
       queryModes: [
-        {value: QUERY_MODE_AND, text: this.$trans('and')},
-        {value: QUERY_MODE_OR, text: this.$trans('or')},
+        {value: QUERY_MODE_AND, text: $trans('and')},
+        {value: QUERY_MODE_OR, text: $trans('or')},
       ],
       allFields: [],
       statusFields: [],
@@ -512,7 +512,7 @@ export default {
       }
     },
     removeCondition(index) {
-      if (confirm(this.$trans("Remove this condition?"))) {
+      if (confirm($trans("Remove this condition?"))) {
         this.filter.json_conditions.splice(index, 1)
       }
     },
@@ -541,12 +541,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.service.insert(this.filter)
-          infoToast(create, this.$trans('Created'), this.$trans('Filter has been created'))
+          infoToast(create, $trans('Created'), $trans('Filter has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating filter', error)
-          errorToast(create, this.$trans('Error creating filter'))
+          errorToast(create, $trans('Error creating filter'))
           this.isLoading = false
         }
 
@@ -555,12 +555,12 @@ export default {
 
       try {
         await this.service.update(this.pk, this.filter)
-        infoToast(create, this.$trans('Updated'), this.$trans('Filter has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Filter has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating filter', error)
-        errorToast(create, this.$trans('Error updating filter'))
+        errorToast(create, $trans('Error updating filter'))
         this.isLoading = false
       }
     },
@@ -577,7 +577,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching filter', error)
-        errorToast(create, this.$trans('Error loading filter'))
+        errorToast(create, $trans('Error loading filter'))
         this.isLoading = false
       }
     },

@@ -303,39 +303,39 @@ export default {
       customer: new CustomerModel({}),
       orders: [],
       orderFields: [
-        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
       maintenanceContracts: [],
       maintenanceContractFields: [
-        {key: 'contract', label: this.$trans('Contract')},
+        {key: 'contract', label: $trans('Contract')},
       ],
       locations: [],
       locationFieldsCustomer: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'name', label: $trans('Name')},
+        {key: 'created', label: $trans('Created')},
+        {key: 'modified', label: $trans('Modified')},
         {key: 'icons', label: ""}
       ],
       locationFieldsBranch: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'name', label: $trans('Name')},
+        {key: 'created', label: $trans('Created')},
+        {key: 'modified', label: $trans('Modified')},
         {key: 'icons', label: ""}
       ],
       locationFields: [],
 
       equipment: [],
       equipmentFieldsCustomer: [
-        {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
-        {key: 'created', label: this.$trans('Created')},
+        {key: 'name', label: $trans('Equipment')},
+        {key: 'brand', label: $trans('Brand')},
+        {key: 'created', label: $trans('Created')},
         {key: 'icons', label: ""}
       ],
       equipmentFieldsBranch: [
-        {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
-        {key: 'created', label: this.$trans('Created')},
+        {key: 'name', label: $trans('Equipment')},
+        {key: 'brand', label: $trans('Brand')},
+        {key: 'created', label: $trans('Created')},
         {key: 'icons', label: ""}
       ],
       equipmentFields: [],
@@ -429,7 +429,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching orders or customer detail', error)
-        errorToast(create, this.$trans('Error fetching orders'))
+        errorToast(create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -441,7 +441,7 @@ export default {
         this.maintenanceContracts = data.results
       } catch(error) {
         console.log('error fetching maintenance contracts', error)
-        errorToast(create, this.$trans('Error fetching maintenance contracts'))
+        errorToast(create, $trans('Error fetching maintenance contracts'))
         this.isLoading = false
       }
     },
@@ -453,7 +453,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer orders', error)
-        errorToast(create, this.$trans('Error fetching customer orders'))
+        errorToast(create, $trans('Error fetching customer orders'))
         this.isLoading = false
       }
     }

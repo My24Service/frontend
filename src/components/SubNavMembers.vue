@@ -65,22 +65,22 @@ export default {
   },
   computed: {
     hasMembers() {
-      return this.isSuperuser || this.isStaff
+      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
     },
     hasDeletedMembers() {
-      return this.isSuperuser || this.isStaff
+      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
     },
     hasRequestedMembers() {
-      return this.isSuperuser || this.isStaff
+      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
     },
     hasContracts() {
-      return this.isSuperuser || this.isStaff
+      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
     },
     hasModules() {
-      return this.isSuperuser
+      return this.$store.getters.getIsSuperuser
     },
     hasModuleParts() {
-      return this.isSuperuser
+      return this.$store.getters.getIsSuperuser
     },
   },
 }

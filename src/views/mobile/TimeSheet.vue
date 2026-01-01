@@ -42,9 +42,9 @@ export default {
       isLoading: true,
       materials: [],
       materialFields: [
-        {label: this.$trans('Material'), key: 'material_name', sortable: true},
-        {label: this.$trans('Identifier'), key: 'material_identifier', sortable: true},
-        {label: this.$trans('Amount'), key: 'amount', sortable: true},
+        {label: $trans('Material'), key: 'material_name', sortable: true},
+        {label: $trans('Identifier'), key: 'material_identifier', sortable: true},
+        {label: $trans('Amount'), key: 'amount', sortable: true},
       ],
     }
   },
@@ -77,7 +77,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching assigned orders', error)
-        errorToast(create, this.$trans('Error loading orders'))
+        errorToast(create, $trans('Error loading orders'))
         this.isLoading = false
       }
     }

@@ -390,7 +390,7 @@ import partnerModel from '../../models/company/Partner.js'
 import PriceInput from "../../components/PriceInput";
 import DocumentsComponent from "@/views/customer/DocumentComponent.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -514,15 +514,15 @@ export default {
       try {
         const syncResult = await partnerModel.copy_customer_orders(this.pk, this.customer.branch_partner)
         await this.getBranchesForPartner()
-        infoToast(create, this.$trans('Synced'), this.$trans('Orders synced'))
+        infoToast(create, $trans('Synced'), $trans('Orders synced'))
       } catch (error) {
         console.log('Error syncing orders', error)
-        errorToast(create, this.$trans('Error syncing orders'))
+        errorToast(create, $trans('Error syncing orders'))
       }
       this.syncingOrders = false
     },
     async createBranchFromCustomer() {
-      if (confirm(this.$trans("Create branch from customer?"))) {
+      if (confirm($trans("Create branch from customer?"))) {
         const result = await partnerModel.createBranchFromCustomer(this.pk, this.customer.branch_partner)
         this.customer.branch_id = result.branch.id
         await this.getBranchesForPartner()
@@ -559,12 +559,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.customerService.insert(this.customer)
-          infoToast(create, this.$trans('Created'), this.$trans('Customer has been created'))
+          infoToast(create, $trans('Created'), $trans('Customer has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating customer', error)
-          errorToast(create, this.$trans('Error creating customer'))
+          errorToast(create, $trans('Error creating customer'))
           this.isLoading = false
         }
 
@@ -576,12 +576,12 @@ export default {
           this.customer.branch_id = null
         }
         await this.customerService.update(this.pk, this.customer)
-        infoToast(create, this.$trans('Updated'), this.$trans('Customer has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Customer has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating customer', error)
-        errorToast(create, this.$trans('Error updating customer'))
+        errorToast(create, $trans('Error updating customer'))
         this.isLoading = false
       }
     },
@@ -595,7 +595,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer', error)
-        errorToast(create, this.$trans('Error loading customer'))
+        errorToast(create, $trans('Error loading customer'))
         this.isLoading = false
       }
     },

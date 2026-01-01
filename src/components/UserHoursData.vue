@@ -131,7 +131,7 @@ export default {
 
       header_columns.push({
         key: 'full_name',
-        label: this.$trans('User'),
+        label: $trans('User'),
         sortable: true
       })
 
@@ -146,7 +146,7 @@ export default {
 
       header_columns.push({
         key: 'total',
-        label: this.$trans('Total'),
+        label: $trans('Total'),
         sortable: true
       })
 

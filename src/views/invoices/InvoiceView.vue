@@ -232,7 +232,7 @@ export default {
       }
       catch(err) {
         console.log('error loading invoice', err)
-        errorToast(create, this.$trans('Error loading invoice'))
+        errorToast(create, $trans('Error loading invoice'))
         this.isLoading = false
       }
     },

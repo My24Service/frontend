@@ -458,7 +458,7 @@ import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import StatusesComponent from "@/components/StatusesComponent.vue";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 
@@ -481,25 +481,25 @@ export default {
       workorderURL: '',
       iframeLoading: true,
       orderLineFields: [
-        {key: 'product', label: this.$trans('Product'), thAttr: {width: '30%'}},
-        {key: 'location', label: this.$trans('Location'), thAttr: {width: '30%'}},
-        {key: 'remarks', label: this.$trans('Remarks'), thAttr: {width: '40%'}}
+        {key: 'product', label: $trans('Product'), thAttr: {width: '30%'}},
+        {key: 'location', label: $trans('Location'), thAttr: {width: '30%'}},
+        {key: 'remarks', label: $trans('Remarks'), thAttr: {width: '40%'}}
       ],
       infoLineFields: [
-        {key: 'info', label: this.$trans('Infolines')}
+        {key: 'info', label: $trans('Infolines')}
       ],
       workorderDocumentFields: [
-        {key: 'url', label: this.$trans('URL'),  thStyle: {display: 'none'}},
+        {key: 'url', label: $trans('URL'),  thStyle: {display: 'none'}},
       ],
       extraDataFields: [
-        {key: 'statuscode', label: this.$trans('Status')},
-        {key: 'extra_data', label: this.$trans('Text')},
+        {key: 'statuscode', label: $trans('Status')},
+        {key: 'extra_data', label: $trans('Text')},
       ],
       purchaseInvoiceFields: [
-        {key: 'reference', label: this.$trans('Reference')},
-        {key: 'description', label: this.$trans('Description')},
-        {key: 'vat', label: this.$trans('VAT')},
-        {key: 'total', label: this.$trans('Total')},
+        {key: 'reference', label: $trans('Reference')},
+        {key: 'description', label: $trans('Description')},
+        {key: 'vat', label: $trans('VAT')},
+        {key: 'total', label: $trans('Total')},
         {key: 'icons'},
       ],
       purchaseInvoice: null,
@@ -542,7 +542,7 @@ export default {
         this.isGeneratingPDF = true;
         try {
             await this.orderService.recreateWorkorderPdfGotenberg(this.pk);
-            infoToast(create, this.$trans('Success'), this.$trans('Workorder recreated'));
+            infoToast(create, $trans('Success'), $trans('Workorder recreated'));
             await this.loadOrder();
             this.isLoading = false;
             this.buttonDisabled = false;
@@ -550,7 +550,7 @@ export default {
         }
         catch (err) {
             console.log('Error recreating workorder', err);
-            errorToast(create, this.$trans('Error recreating workorder'));
+            errorToast(create, $trans('Error recreating workorder'));
             this.buttonDisabled = false;
             this.isLoading = false;
             this.isGeneratingPDF = false;
@@ -632,7 +632,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        errorToast(create, this.$trans('Error fetching order'))
+        errorToast(create, $trans('Error fetching order'))
         this.isLoading = false
       }
     }

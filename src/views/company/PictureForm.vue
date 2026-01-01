@@ -75,7 +75,7 @@ import { required } from '@vuelidate/validators'
 import pictureModel from '../../models/company/Picture.js'
 import {NO_IMAGE_URL} from "@/constants"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -148,13 +148,13 @@ export default {
       if (this.isCreate) {
         try {
           await pictureModel.insert(this.picture)
-          infoToast(create, this.$trans('Created'), this.$trans('Picture has been created'))
+          infoToast(create, $trans('Created'), $trans('Picture has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating picture', error)
-          errorToast(create, this.$trans('Error creating picture'))
+          errorToast(create, $trans('Error creating picture'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -168,13 +168,13 @@ export default {
 
       try {
         await pictureModel.update(this.pk, this.picture)
-        infoToast(create, this.$trans('Updated'), this.$trans('Picture has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Picture has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating picture', error)
-        errorToast(create, this.$trans('Error updating picture'))
+        errorToast(create, $trans('Error updating picture'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -188,7 +188,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching picture', error)
-        errorToast(create, this.$trans('Error fetching picture'))
+        errorToast(create, $trans('Error fetching picture'))
         this.isLoading = false
       }
     },

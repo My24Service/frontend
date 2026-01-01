@@ -103,7 +103,7 @@ import SubNav from "./SubNav.vue";
 import { UserLeaveHoursService, UserLeaveHoursModel } from "@/models/company/UserLeaveHours.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -124,10 +124,10 @@ export default {
       isLoading: false,
       leaves: [],
       fields: [
-        { key: "full_name", label: this.$trans("User"), thAttr: { width: "15%" } },
-        { key: "date", label: this.$trans("Date/hours") },
-        { key: "leave_type_name", label: this.$trans("Leave type") },
-        { key: "last_status_full", label: this.$trans("Status") },
+        { key: "full_name", label: $trans("User"), thAttr: { width: "15%" } },
+        { key: "date", label: $trans("Date/hours") },
+        { key: "leave_type_name", label: $trans("Leave type") },
+        { key: "last_status_full", label: $trans("Status") },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -154,11 +154,11 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveHoursService.delete(this.leavePk);
-        infoToast(create, this.$trans("Deleted"), this.$trans("Leave has been deleted"));
+        infoToast(create, $trans("Deleted"), $trans("Leave has been deleted"));
         this.loadData();
       } catch (error) {
         console.log("error deleting leave", error);
-        errorToast(create, this.$trans("Error deleting leave"));
+        errorToast(create, $trans("Error deleting leave"));
         this.isLoading = false;
       }
     },
@@ -172,7 +172,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave requests", error);
-        errorToast(create, this.$trans("Error loading leave requests"));
+        errorToast(create, $trans("Error loading leave requests"));
         this.isLoading = false;
       }
     }

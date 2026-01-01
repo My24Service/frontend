@@ -218,7 +218,7 @@ import inventoryModel from '@/models/inventory/Inventory.js'
 import materialService from '@/models/inventory/Material.js'
 import stockLocationModel from '@/models/inventory/StockLocation.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 const greaterThanZero = (value) => parseInt(value) > 0
@@ -295,11 +295,11 @@ export default {
       } catch(error) {
         console.log('Error fetching materials', error)
         this.isLoading = false
-        errorToast(create, this.$trans('Error fetching materials'))
+        errorToast(create, $trans('Error fetching materials'))
       }
     },
     materialLabel(material) {
-      const text = this.$trans('in stock')
+      const text = $trans('in stock')
       return `${material.material_name}, ${text}: ${material.total_amount}`
     },
     fromLocationLabel(location) {
@@ -319,7 +319,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching locations', error)
-        errorToast(create, this.$trans('Error fetching locations'))
+        errorToast(create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -336,7 +336,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching locations', error)
-        errorToast(create, this.$trans('Error fetching locations'))
+        errorToast(create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -361,7 +361,7 @@ export default {
           this.selectedFromLocationPk,
           this.selectedToLocationPk,
           this.amount)
-        infoToast(create, this.$trans('Moved'), this.$trans('Material moved'))
+        infoToast(create, $trans('Moved'), $trans('Material moved'))
         this.buttonDisabled = true
         this.isLoading = false
 
@@ -379,7 +379,7 @@ export default {
         }
       } catch(error) {
         console.log('error moving', error)
-        errorToast(create, this.$trans('Error moving material'))
+        errorToast(create, $trans('Error moving material'))
         this.buttonDisabled = false
         this.isLoading = false
       }

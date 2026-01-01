@@ -349,7 +349,7 @@ import purchaseOrderModel from '../../models/inventory/PurchaseOrder.js'
 import stockLocationModel from '../../models/inventory/StockLocation.js'
 import materialModel from '../../models/inventory/Material.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 const greaterThanZero = (value) => parseInt(value) > 0
@@ -384,12 +384,12 @@ export default {
       selectedPurchaseOrder: {},
 
       entriesFields: [
-        { key: 'purchase_order_material_view.name', label: this.$trans('Name') },
-        { key: 'purchase_order_material_view.unit', label: this.$trans('Unit') },
-        { key: 'ordered_amount', label: this.$trans('Ordered amount') },
-        { key: 'amount', label: this.$trans('Entry amount') },
-        { key: 'entry_date', label: this.$trans('Date') },
-        { key: 'stock_location_name', label: this.$trans('Location') },
+        { key: 'purchase_order_material_view.name', label: $trans('Name') },
+        { key: 'purchase_order_material_view.unit', label: $trans('Unit') },
+        { key: 'ordered_amount', label: $trans('Ordered amount') },
+        { key: 'amount', label: $trans('Entry amount') },
+        { key: 'entry_date', label: $trans('Date') },
+        { key: 'stock_location_name', label: $trans('Location') },
         { key: 'icons', label: '' }
       ],
       editIndex: null,
@@ -477,7 +477,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching purchase order products', error)
-        errorToast(create, this.$trans('Error fetching purchase order products'))
+        errorToast(create, $trans('Error fetching purchase order products'))
         this.isLoading = false
       }
     },
@@ -542,7 +542,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching purchase orders', error)
-        errorToast(create, this.$trans('Error fetching purchase orders'))
+        errorToast(create, $trans('Error fetching purchase orders'))
         this.isLoading = false
       }
     },
@@ -571,14 +571,14 @@ export default {
         try {
           for (const entry of this.purchaseorderEntries) {
             await purchaseorderEntryModel.insert(entry)
-            infoToast(create, this.$trans('Created'), this.$trans('Entry has been created'))
+            infoToast(create, $trans('Created'), $trans('Entry has been created'))
           }
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating entry', error)
-          errorToast(create, this.$trans('Error creating entry'))
+          errorToast(create, $trans('Error creating entry'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -601,13 +601,13 @@ export default {
 
       try {
         await purchaseorderEntryModel.update(this.pk, this.purchaseorderEntry)
-        infoToast(create, this.$trans('Updated'), this.$trans('Entry has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Entry has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating entry', error)
-        errorToast(create, this.$trans('Error updating entry'))
+        errorToast(create, $trans('Error updating entry'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -625,7 +625,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching entry', error)
-        errorToast(create, this.$trans('Error fetching entry'))
+        errorToast(create, $trans('Error fetching entry'))
         this.isLoading = false
       }
     },

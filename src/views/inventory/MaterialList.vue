@@ -88,7 +88,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -107,13 +107,13 @@ export default {
       isLoading: false,
       materials: [],
       fields: [
-        {key: 'show_name', label: this.$trans('Name'), sortable: true, thAttr: {width: '25%'}},
-        {key: 'identifier', label: this.$trans('Identifier'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'location', label: this.$trans('Location'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'price_purchase', label: this.$trans('Purchase price'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'price_selling', label: this.$trans('Selling price'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'supplier_name', label: this.$trans('Supplier'), sortable: true, thAttr: {width: '15%'}},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'show_name', label: $trans('Name'), sortable: true, thAttr: {width: '25%'}},
+        {key: 'identifier', label: $trans('Identifier'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'location', label: $trans('Location'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'price_purchase', label: $trans('Purchase price'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'price_selling', label: $trans('Selling price'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'supplier_name', label: $trans('Supplier'), sortable: true, thAttr: {width: '15%'}},
+        {key: 'modified', label: $trans('Modified'), sortable: true, thAttr: {width: '10%'}},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
     }
@@ -140,11 +140,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.materialPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Material has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Material has been deleted'))
         this.loadData()
       } catch(error) {
         console.log('error deleting material', error)
-        errorToast(create, this.$trans('Error deleting material'))
+        errorToast(create, $trans('Error deleting material'))
       }
     },
     // rest
@@ -157,7 +157,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching materials', error)
-        errorToast(create, this.$trans('Error loading materials'))
+        errorToast(create, $trans('Error loading materials'))
         this.isLoading = false
       }
     }

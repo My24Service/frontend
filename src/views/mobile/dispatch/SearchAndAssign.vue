@@ -141,7 +141,7 @@ export default {
       orderStatusColorCode: '#666',
       orders: [],
       selectedOrders: [],
-      buttonLabel: this.$trans('Close')
+      buttonLabel: $trans('Close')
     }
   },
   methods: {
@@ -150,9 +150,9 @@ export default {
     },
     updateButtonLabel() {
       if (this.hasSelectedOrders()) {
-        this.buttonLabel = this.$trans('Assign these orders')
+        this.buttonLabel = $trans('Assign these orders')
       } else {
-        this.buttonLabel = this.$trans('Close')
+        this.buttonLabel = $trans('Close')
       }
     },
     handleOk(bvModalEvent) {
@@ -253,7 +253,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
-        errorToast(create, this.$trans('Error loading orders'))
+        errorToast(create, $trans('Error loading orders'))
         this.isLoading = false
       }
     },

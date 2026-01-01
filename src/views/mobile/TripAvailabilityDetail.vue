@@ -86,7 +86,7 @@
 <script>
 import tripAvailabilityModel from '@/models/mobile/TripAvailability.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -100,9 +100,9 @@ export default {
       unAssignMode: false,
       tripAvailability: {trip: {}},
       fields: [
-        { key: 'full_name', label: this.$trans('Name') },
-        { key: 'address', label: this.$trans('Address') },
-        { key: 'rating_avg', label: this.$trans('Rating') },
+        { key: 'full_name', label: $trans('Name') },
+        { key: 'address', label: $trans('Address') },
+        { key: 'rating_avg', label: $trans('Rating') },
         { key: 'icons', label: ''}
       ],
     }
@@ -131,14 +131,14 @@ export default {
       if(this.assignMode) {
         try {
           await tripAvailabilityModel.assign(this.selectedUser.id, this.tripAvailability.trip.id)
-          infoToast(create, this.$trans('Assigned'), this.$trans('Trip assigned'))
+          infoToast(create, $trans('Assigned'), $trans('Trip assigned'))
           this.loadTripAvailability()
           this.cancel()
           this.buttonDisabled = false
           this.isLoading = false
         } catch(error) {
           console.log('error assigning trip', error)
-          errorToast(create, this.$trans('Error assigning trip'))
+          errorToast(create, $trans('Error assigning trip'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -148,14 +148,14 @@ export default {
 
       try {
         await tripAvailabilityModel.unAssign(this.selectedUser.id, this.tripAvailability.trip.id)
-        infoToast(create, this.$trans('Unassigned'), this.$trans('Student unassigned'))
+        infoToast(create, $trans('Unassigned'), $trans('Student unassigned'))
         this.loadTripAvailability()
         this.cancel()
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('error unassigning trip', error)
-        errorToast(create, this.$trans('Error unassigning trip'))
+        errorToast(create, $trans('Error unassigning trip'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -176,7 +176,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching tripAvailability', error)
-        errorToast(create, this.$trans('Error fetching trip availability'))
+        errorToast(create, $trans('Error fetching trip availability'))
         this.isLoading = false
       }
     }

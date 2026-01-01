@@ -74,7 +74,7 @@ import { required } from '@vuelidate/validators'
 
 import stockLocationModel from '@/models/inventory/StockLocation.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -140,13 +140,13 @@ export default {
       if (this.isCreate) {
         try {
           await stockLocationModel.insert(this.stockLocation)
-          infoToast(create, this.$trans('Created'), this.$trans('Stock location has been created'))
+          infoToast(create, $trans('Created'), $trans('Stock location has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating stock location', error)
-          errorToast(create, this.$trans('Error creating stock location'))
+          errorToast(create, $trans('Error creating stock location'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -156,13 +156,13 @@ export default {
 
       try {
         await stockLocationModel.update(this.pk, this.stockLocation)
-        infoToast(create, this.$trans('Updated'), this.$trans('Stock location has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Stock location has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating stock location', error)
-        errorToast(create, this.$trans('Error updating stock location'))
+        errorToast(create, $trans('Error updating stock location'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -175,7 +175,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching stock location', error)
-        errorToast(create, this.$trans('Error fetching stock location'))
+        errorToast(create, $trans('Error fetching stock location'))
         this.isLoading = false
       }
     },

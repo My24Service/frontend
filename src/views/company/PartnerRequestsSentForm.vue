@@ -84,7 +84,7 @@ import Multiselect from 'vue-multiselect'
 import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent.js'
 import memberModel from '@/models/member/Member.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -128,7 +128,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching members', error)
-        errorToast(create, this.$trans('Error fetching members'))
+        errorToast(create, $trans('Error fetching members'))
         this.isLoading = false
       }
     },
@@ -155,12 +155,12 @@ export default {
         delete this.partnerRequest.status
 
         await partnerRequestsSentModel.insert(this.partnerRequest)
-        infoToast(create, this.$trans('Created'), this.$trans('Partner request has been sent'))
+        infoToast(create, $trans('Created'), $trans('Partner request has been sent'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error sending partner request', error)
-        errorToast(create, this.$trans('Error sending partner request'))
+        errorToast(create, $trans('Error sending partner request'))
         this.isLoading = false
       }
     },

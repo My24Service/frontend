@@ -226,7 +226,7 @@ import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {ChapterService} from "@/models/quotations/Chapter";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import CustomerForm from './quotation_form/CustomerForm.vue'
@@ -386,7 +386,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        errorToast(create, this.$trans('Error fetching quotation'))
+        errorToast(create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     },
@@ -402,11 +402,11 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.updateAndRecreate(this.quotation.id, quotation)
-        infoToast(create, this.$trans('Updated and recreated'), this.$trans('Quotation has been updated and the PDF recreated'))
+        infoToast(create, $trans('Updated and recreated'), $trans('Quotation has been updated and the PDF recreated'))
         this.isLoading = false
       } catch(error) {
         console.log('error updating quotation', error)
-        errorToast(create, this.$trans('Error updating quotation'))
+        errorToast(create, $trans('Error updating quotation'))
         this.isLoading = false
       }
     },
@@ -424,7 +424,7 @@ export default {
           this.isLoading = false
         } catch(error) {
           console.log('error creating quotation', error)
-          errorToast(create, this.$trans('Error creating quotation'))
+          errorToast(create, $trans('Error creating quotation'))
           this.isLoading = false
         }
         return
@@ -433,12 +433,12 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.update(this.quotation.id, quotation)
-        infoToast(create, this.$trans('Updated'), this.$trans('Quotation has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Quotation has been updated'))
         this.isLoading = false
         this.showQuotationDialog()
       } catch(error) {
         console.log('error updating quotation', error)
-        errorToast(create, this.$trans('Error updating quotation'))
+        errorToast(create, $trans('Error updating quotation'))
         this.isLoading = false
       }
     },

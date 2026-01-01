@@ -85,7 +85,7 @@ import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -107,11 +107,11 @@ export default {
       trips: [],
       tripPk: null,
       fields: [
-        {key: 'trip_date', label: this.$trans('Date'), sortable: true},
-        {key: 'last_status', label: this.$trans('Status'), sortable: true},
-        {key: 'description', label: this.$trans('Description'), sortable: true},
-        {key: 'required_users', label: this.$trans('Required users'), sortable: true},
-        {key: 'num_orders', label: this.$trans('# orders'), sortable: true},
+        {key: 'trip_date', label: $trans('Date'), sortable: true},
+        {key: 'last_status', label: $trans('Status'), sortable: true},
+        {key: 'description', label: $trans('Description'), sortable: true},
+        {key: 'required_users', label: $trans('Required users'), sortable: true},
+        {key: 'num_orders', label: $trans('# orders'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -138,11 +138,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.tripPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Trip has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Trip has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting trip', error)
-        errorToast(create, this.$trans('Error deleting trip'))
+        errorToast(create, $trans('Error deleting trip'))
       }
     },
     // rest
@@ -155,7 +155,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching trips', error)
-        errorToast(create, this.$trans('Error loading trips'))
+        errorToast(create, $trans('Error loading trips'))
         this.isLoading = false
       }
     }

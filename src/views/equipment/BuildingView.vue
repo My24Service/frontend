@@ -122,16 +122,16 @@ export default {
       building: null,
       orders: [],
       orderFields: [
-        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
       breadcrumb: [
         {
-          text: this.$trans('Buildings'),
+          text: $trans('Buildings'),
           to: {name: this.listLink()}
         },
         {
-          text: this.$trans('Detail'),
+          text: $trans('Detail'),
           active: true
         },
       ],
@@ -193,7 +193,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching building detail data', error)
-        errorToast(create, this.$trans('Error fetching building detail'))
+        errorToast(create, $trans('Error fetching building detail'))
         this.isLoading = false
       }
     },
@@ -206,7 +206,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        errorToast(create, this.$trans('Error fetching orders'))
+        errorToast(create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     }

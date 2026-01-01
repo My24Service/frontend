@@ -513,7 +513,7 @@ import { LocationService } from "@/models/equipment/location";
 import PriceInput from "../../components/PriceInput";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -626,7 +626,7 @@ export default {
         this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
-        errorToast(create, this.$trans('Error fetching customers'))
+        errorToast(create, $trans('Error fetching customers'))
       }
     },
     customerLabel({ name, city}) {
@@ -644,7 +644,7 @@ export default {
         this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
-        errorToast(create, this.$trans('Error fetching branches'))
+        errorToast(create, $trans('Error fetching branches'))
       }
     },
     branchLabel({ name, city}) {
@@ -676,7 +676,7 @@ export default {
       if (this.isCreate) {
         try {
           await this.equipmentService.insert(this.equipment)
-          infoToast(create, this.$trans('Created'), this.$trans('Equipment has been created'))
+          infoToast(create, $trans('Created'), $trans('Equipment has been created'))
           this.isLoading = false
 
           if (isBulk) {
@@ -691,7 +691,7 @@ export default {
           }
         } catch(error) {
           console.log('Error creating equipment', error)
-          errorToast(create, this.$trans('Error creating equipment'))
+          errorToast(create, $trans('Error creating equipment'))
           this.isLoading = false
         }
 
@@ -700,12 +700,12 @@ export default {
 
       try {
         await this.equipmentService.update(this.pk, this.equipment)
-        infoToast(create, this.$trans('Updated'), this.$trans('Equipment has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Equipment has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating equipment', error)
-        errorToast(create, this.$trans('Error updating equipment'))
+        errorToast(create, $trans('Error updating equipment'))
         this.isLoading = false
       }
     },
@@ -732,7 +732,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)
-        errorToast(create, this.$trans('Error loading equipment'))
+        errorToast(create, $trans('Error loading equipment'))
         this.isLoading = false
       }
     },

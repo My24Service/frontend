@@ -139,32 +139,32 @@ export default {
       members: [],
       fields: [
         {key: 'member_logo', label: '', thAttr: {width: '20%'}},
-        {key: 'member_info', label: this.$trans('Member'), thAttr: {width: '20%'}},
-        {key: 'contract_text', label: this.$trans('Contract'), thAttr: {width: '30%'}},
-        {key: 'member_type', label: this.$trans('Type'), thAttr: {width: '10%'}},
-        {key: 'created', label: this.$trans('Created'), thAttr: {width: '10%'}},
+        {key: 'member_info', label: $trans('Member'), thAttr: {width: '20%'}},
+        {key: 'contract_text', label: $trans('Contract'), thAttr: {width: '30%'}},
+        {key: 'member_type', label: $trans('Type'), thAttr: {width: '10%'}},
+        {key: 'created', label: $trans('Created'), thAttr: {width: '10%'}},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
     }
   },
   computed: {
     showDelete() {
-      if ((this.isStaff || this.isSuperuser) && this.requested) {
+      if ((this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser) && this.requested) {
         return true
       }
 
-      return !!(this.isSuperuser && !this.requested && !this.deleted);
+      return !!(this.$store.getters.getIsSuperuser && !this.requested && !this.deleted);
     },
     modelName() {
       if (this.requested) {
-        return this.$trans('Requested member')
+        return $trans('Requested member')
       }
 
       if (this.deleted) {
-        return this.$trans('Deleted member')
+        return $trans('Deleted member')
       }
 
-      return this.$trans('Member')
+      return $trans('Member')
     }
   },
   created() {
@@ -180,11 +180,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.memberPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Member has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Member has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting member', error)
-        errorToast(create, this.$trans('Error deleting member'))
+        errorToast(create, $trans('Error deleting member'))
       }
     },
     // search
@@ -208,7 +208,7 @@ export default {
           this.service.setListArgs('is_requested=True')
         }
 
-        if (this.isSuperuser && !this.requested && !this.deleted) {
+        if (this.$store.getters.getIsSuperuser && !this.requested && !this.deleted) {
           this.service.setListArgs('is_requested=False&is_deleted=False')
         }
 
@@ -217,7 +217,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching members', error)
-        errorToast(create, this.$trans('Error loading members'))
+        errorToast(create, $trans('Error loading members'))
         this.isLoading = false
       }
     }

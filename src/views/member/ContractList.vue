@@ -103,10 +103,10 @@ export default {
       isLoading: false,
       contracts: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), thAttr: {width: '20%'}, sortable: true},
-        {key: 'modules_text', label: this.$trans('Modules'), thAttr: {width: '50%'}, sortable: true},
-        {key: 'created', label: this.$trans('Created'), thAttr: {width: '10%'}, sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), thAttr: {width: '10%'}, sortable: true},
+        {key: 'name', label: $trans('Name'), thAttr: {width: '20%'}, sortable: true},
+        {key: 'modules_text', label: $trans('Modules'), thAttr: {width: '50%'}, sortable: true},
+        {key: 'created', label: $trans('Created'), thAttr: {width: '10%'}, sortable: true},
+        {key: 'modified', label: $trans('Modified'), thAttr: {width: '10%'}, sortable: true},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
     }
@@ -133,11 +133,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.contractPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Contract has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Contract has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting contract', error)
-        errorToast(create, this.$trans('Error deleting contract'))
+        errorToast(create, $trans('Error deleting contract'))
       }
     },
     // rest
@@ -150,7 +150,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching contracts', error)
-        errorToast(create, this.$trans('Error loading contracts'))
+        errorToast(create, $trans('Error loading contracts'))
         this.isLoading = false
       }
     }

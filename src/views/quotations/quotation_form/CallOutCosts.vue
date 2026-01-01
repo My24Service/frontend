@@ -169,7 +169,7 @@
 import {toDinero} from "@/utils";
 import PriceInput from "@/components/PriceInput";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import {COST_TYPE_CALL_OUT_COSTS, CostService} from "@/models/quotations/Cost";
@@ -301,13 +301,13 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        infoToast(create, this.$trans('Created'), this.$trans('Call-out costs have been updated'))
+        infoToast(create, $trans('Created'), $trans('Call-out costs have been updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error creating call out costs', error)
-        errorToast(create, this.$trans('Error creating call-out costs'))
+        errorToast(create, $trans('Error creating call-out costs'))
         this.isLoading = false
       }
     },
@@ -340,7 +340,7 @@ export default {
         this.isLoaded = true
       } catch(error) {
         console.log('error fetching call out costs costs', error)
-        errorToast(create, this.$trans('Error fetching costs'))
+        errorToast(create, $trans('Error fetching costs'))
         this.isLoading = false
         this.isLoaded = true
       }
@@ -406,10 +406,10 @@ export default {
       )
     },
     getDescriptionUserTotalsQuotationLine(_cost) {
-      return `${this.$trans("Call-out costs")}`
+      return `${$trans("Call-out costs")}`
     },
     getDescriptionOnlyTotalQuotationLine() {
-      return `${this.$trans("Call-out costs")}`
+      return `${$trans("Call-out costs")}`
     },
     getTotalAmountQuotationLine() {
       return this.totalAmount

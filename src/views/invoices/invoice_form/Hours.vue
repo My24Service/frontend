@@ -403,13 +403,13 @@ export default {
     getTitle() {
       switch (this.type) {
         case COST_TYPE_WORK_HOURS:
-          return this.$trans("Work hours")
+          return $trans("Work hours")
         case COST_TYPE_TRAVEL_HOURS:
-          return this.$trans("Travel hours")
+          return $trans("Travel hours")
         case COST_TYPE_EXTRA_WORK:
-          return this.$trans("Extra work")
+          return $trans("Extra work")
         case COST_TYPE_ACTUAL_WORK:
-          return this.$trans("Actual work")
+          return $trans("Actual work")
         default:
           throw `getTitle(), unknown type ${this.type}`
       }

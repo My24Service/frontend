@@ -258,7 +258,7 @@ export default {
     },
     getMaterialName(material_id) {
       const material = this.materialModels.find((m) => m.id === material_id)
-      return material ? material.name : this.$trans("unknown")
+      return material ? material.name : $trans("unknown")
     },
     async loadData() {
       // create material models
@@ -355,10 +355,10 @@ export default {
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
-      return `${this.$trans("material")}: ${this.getMaterialName(cost.material)}`
+      return `${$trans("material")}: ${this.getMaterialName(cost.material)}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Used materials")}`
+      return `${$trans("Used materials")}`
     },
     getTotalAmountInvoiceLine() {
       return this.totalAmount

@@ -268,7 +268,7 @@ import {QuotationLineModel, QuotationLineService} from '@/models/quotations/Quot
 import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -323,13 +323,13 @@ export default {
       isLoading: false,
       newItem: false,
       fields: [
-        {key: 'info', label: this.$trans('Info'), thAttr: {width: '40%'}},
-        {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
+        {key: 'info', label: $trans('Info'), thAttr: {width: '40%'}},
+        {key: 'total', label: $trans('Total'), thAttr: {width: '40%'}},
         {key: 'icons', label: '', thAttr: {width: '20%'}},
       ],
       fieldsView: [
-        {key: 'info', label: this.$trans('Info'), thAttr: {width: '60%'}},
-        {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
+        {key: 'info', label: $trans('Info'), thAttr: {width: '60%'}},
+        {key: 'total', label: $trans('Total'), thAttr: {width: '40%'}},
       ],
     }
   },
@@ -423,8 +423,8 @@ export default {
         ...newQuotationLines
       ]
       this.updateChapterTotals()
-      const addedTxt = this.$trans('Added')
-      const txt = newQuotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
+      const addedTxt = $trans('Added')
+      const txt = newQuotationLines.length === 1 ? $trans('invoice line') : $trans('invoice lines')
       infoToast(create, addedTxt, `${newQuotationLines.length} ${txt} ${addedTxt.toLowerCase()}`)
       this.quotationLineService.collectionHasChanges = true
     },
@@ -464,13 +464,13 @@ export default {
             quotationLine.chapter = this.chapter.id
           }
           await this.quotationLineService.updateCollection()
-          infoToast(create, this.$trans('Updated'), this.$trans('chapter has been updated'))
+          infoToast(create, $trans('Updated'), $trans('chapter has been updated'))
           this.isLoading = false
           this.quotationLineService.collection = []
           await this.loadData()
           this.$emit('quotationLineSubmitted')
         } catch(error) {
-          errorToast(create, this.$trans('Error updating chapter'))
+          errorToast(create, $trans('Error updating chapter'))
           this.isLoading = false
       }
     },
@@ -489,7 +489,7 @@ export default {
           this.$emit('quotationLinesLoaded', this.quotationLineService.collection)
         } catch(error) {
           console.log('error fetching quotation lines', error)
-          errorToast(create, this.$trans('Error loading quotation lines'))
+          errorToast(create, $trans('Error loading quotation lines'))
           this.isLoading = false
         }
         this.quotationLineService.listArgs = []

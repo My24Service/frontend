@@ -196,7 +196,7 @@ import { usernameExists } from '@/models/helpers'
 import employeeModel from '../../models/company/UserEmployee.js'
 import branchModel from '../../models/company/Branch.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -343,12 +343,12 @@ export default {
         this.employee.password = this.employee.password1
         try {
           await employeeModel.insert(this.employee)
-          infoToast(create, this.$trans('Created'), this.$trans('employee has been created'))
+          infoToast(create, $trans('Created'), $trans('employee has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating employee', error)
-          errorToast(create, this.$trans('Error creating employee'))
+          errorToast(create, $trans('Error creating employee'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -367,12 +367,12 @@ export default {
         }
 
         await employeeModel.update(this.pk, this.employee)
-        infoToast(create, this.$trans('Updated'), this.$trans('employee has been updated'))
+        infoToast(create, $trans('Updated'), $trans('employee has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating employee', error)
-        errorToast(create, this.$trans('Error updating employee'))
+        errorToast(create, $trans('Error updating employee'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -386,7 +386,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching employee', error)
-        errorToast(create, this.$trans('Error loading employee'))
+        errorToast(create, $trans('Error loading employee'))
         this.isLoading = false
       }
     },

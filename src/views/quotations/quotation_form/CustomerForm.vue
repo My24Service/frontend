@@ -173,7 +173,7 @@ import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
@@ -307,13 +307,13 @@ export default {
         try {
           const quotation = await this.quotationService.insert(this.quotation)
 
-          infoToast(create, this.$trans('Created'), this.$trans('Quotation has been created'))
+          infoToast(create, $trans('Created'), $trans('Quotation has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           await this.$router.push({ name: 'quotation-edit-preliminary', params: { pk: quotation.id, is_new: true } })
         } catch(error) {
           console.log('Error creating quotation', error)
-          errorToast(create, this.$trans('Error creating quotation'))
+          errorToast(create, $trans('Error creating quotation'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -328,7 +328,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching customers', error)
-        errorToast(create, this.$trans('Error fetching customers'))
+        errorToast(create, $trans('Error fetching customers'))
         this.isLoading = false
       }
     },

@@ -93,7 +93,7 @@ import my24 from "@/services/my24";
 import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
 import invoiceMixin from "./invoice_form/mixin";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 class PdfBlobError {
@@ -123,7 +123,7 @@ export default {
   computed: {
     viewerTitle() {
       if (this.invoice) {
-        return this.invoice.preliminary ? this.$trans("PDF preview") : this.$trans("Definitive PDF")
+        return this.invoice.preliminary ? $trans("PDF preview") : $trans("Definitive PDF")
       } else {
         return ''
       }
@@ -150,12 +150,12 @@ export default {
         if (!result_ok) {
           this.$refs['pdf-error-modal'].show()
         } else {
-          infoToast(create, this.$trans('Success'), this.$trans('Invoice PDF created'));
+          infoToast(create, $trans('Success'), $trans('Invoice PDF created'));
         }
       }
       catch (err) {
         console.log('Error recreating invoice pdf', err);
-        errorToast(create, this.$trans('Error recreating invoice PDF'));
+        errorToast(create, $trans('Error recreating invoice PDF'));
         this.isLoading = false;
       }
     },
@@ -164,17 +164,17 @@ export default {
 
       try {
         await this.invoiceService.makeDefinitive(this.invoice.id)
-        infoToast(create, this.$trans('Success'), this.$trans('Invoice is now definitive'))
+        infoToast(create, $trans('Success'), $trans('Invoice is now definitive'))
         this.isLoading = false
         await this.$router.push({ name: 'invoice-view', params: {uuid: this.invoice.uuid }})
       } catch(error) {
-        errorToast(create, this.$trans('Error making invoice definitive'))
+        errorToast(create, $trans('Error making invoice definitive'))
         this.isLoading = false
         if (error.response?.data?.template_error) {
           errorToast(create, error.response.data.template_error)
           return
         }
-        errorToast(create, this.$trans('Error generating PDF'))
+        errorToast(create, $trans('Error generating PDF'))
       }
     },
     async downloadPdf() {
@@ -260,7 +260,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoice', error)
-        errorToast(create, this.$trans('Error fetching invoice'))
+        errorToast(create, $trans('Error fetching invoice'))
         this.isLoading = false
       }
     },

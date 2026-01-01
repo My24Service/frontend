@@ -150,7 +150,7 @@ import {
   WorkHoursStatuscodeService
 } from "@/models/company/WorkHoursStatuscode";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -255,12 +255,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.statuscodeService.insert(this.statuscode);
-          infoToast(create, this.$trans("Created"), this.$trans("Statuscode has been created"));
+          infoToast(create, $trans("Created"), $trans("Statuscode has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating statuscode", error);
-          errorToast(create, this.$trans("Error creating statuscode"));
+          errorToast(create, $trans("Error creating statuscode"));
           this.isLoading = false;
         }
 
@@ -269,12 +269,12 @@ export default {
 
       try {
         await this.statuscodeService.update(this.pk, this.statuscode);
-        infoToast(create, this.$trans("Updated"), this.$trans("Statuscode has been updated"));
+        infoToast(create, $trans("Updated"), $trans("Statuscode has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("Error updating statuscode", error);
-        errorToast(create, this.$trans("Error updating statuscode"));
+        errorToast(create, $trans("Error updating statuscode"));
         this.isLoading = false;
       }
     },
@@ -286,7 +286,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscode", error);
-        errorToast(create, this.$trans("Error loading statuscode"));
+        errorToast(create, $trans("Error loading statuscode"));
         this.isLoading = false;
       }
     },

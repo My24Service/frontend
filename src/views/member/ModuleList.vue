@@ -104,9 +104,9 @@ export default {
       isLoading: false,
       modules: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), thAttr: {width: '70%'}, sortable: true},
-        {key: 'created', label: this.$trans('Created'), thAttr: {width: '10%'}, sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), thAttr: {width: '10%'}, sortable: true},
+        {key: 'name', label: $trans('Name'), thAttr: {width: '70%'}, sortable: true},
+        {key: 'created', label: $trans('Created'), thAttr: {width: '10%'}, sortable: true},
+        {key: 'modified', label: $trans('Modified'), thAttr: {width: '10%'}, sortable: true},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
     }
@@ -133,11 +133,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.modulePk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Module has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Module has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting module', error)
-        errorToast(create, this.$trans('Error deleting module'))
+        errorToast(create, $trans('Error deleting module'))
       }
     },
     // rest
@@ -150,7 +150,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching modules', error)
-        errorToast(create, this.$trans('Error loading modules'))
+        errorToast(create, $trans('Error loading modules'))
         this.isLoading = false
       }
     }

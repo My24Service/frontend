@@ -99,7 +99,7 @@ import { SickLeavesService } from "@/models/company/SickLeave.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -120,11 +120,11 @@ export default {
       isLoading: false,
       leaves: [],
       fields: [
-        { key: "user_full_name", label: this.$trans("User"), thAttr: { width: "15%" } },
-        { key: "date", label: this.$trans("Date") },
-        { key: "created_by_fullname", label: this.$trans("Created by") },
-        { key: "created", label: this.$trans("Created") },
-        { key: "last_status_full", label: this.$trans("Status") },
+        { key: "user_full_name", label: $trans("User"), thAttr: { width: "15%" } },
+        { key: "date", label: $trans("Date") },
+        { key: "created_by_fullname", label: $trans("Created by") },
+        { key: "created", label: $trans("Created") },
+        { key: "last_status_full", label: $trans("Status") },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -150,12 +150,12 @@ export default {
        this.isLoading = true;
       try {
         await this.sickLeavesService.delete(this.leavePk);
-        infoToast(create, this.$trans("Deleted"), this.$trans("Sick leave has been deleted"));
+        infoToast(create, $trans("Deleted"), $trans("Sick leave has been deleted"));
         this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error deleting sick leave", error);
-        errorToast(create, this.$trans("Error deleting sick leave"));
+        errorToast(create, $trans("Error deleting sick leave"));
       }
     },
     async loadData() {
@@ -167,7 +167,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching sick leave request", error);
-        errorToast(create, this.$trans("Error loading sick leave request"));
+        errorToast(create, $trans("Error loading sick leave request"));
         this.isLoading = false;
       }
     }

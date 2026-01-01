@@ -169,7 +169,7 @@
 import {toDinero} from "@/utils";
 import PriceInput from "@/components/PriceInput";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
@@ -309,13 +309,13 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        infoToast(create, this.$trans('Created'), this.$trans('Distance costs updated'))
+        infoToast(create, $trans('Created'), $trans('Distance costs updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error updating distance costs', error)
-        errorToast(create, this.$trans('Error updating distance costs'))
+        errorToast(create, $trans('Error updating distance costs'))
         this.isLoading = false
       }
     },
@@ -348,7 +348,7 @@ export default {
         this.isLoaded = true
       } catch(error) {
         console.log('error fetching distance cost', error)
-        errorToast(create, this.$trans('Error fetching distance costs'))
+        errorToast(create, $trans('Error fetching distance costs'))
         this.isLoading = false
         this.isLoaded = true
       }
@@ -414,10 +414,10 @@ export default {
       )
     },
     getDescriptionUserTotalsQuotationLine(_cost) {
-      return `${this.$trans("distance")}`
+      return `${$trans("distance")}`
     },
     getDescriptionOnlyTotalQuotationLine() {
-      return `${this.$trans("Distance")}`
+      return `${$trans("Distance")}`
     },
     getTotalAmountQuotationLine() {
       return this.totalAmount

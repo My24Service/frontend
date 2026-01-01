@@ -102,7 +102,7 @@ import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import { TemplateService } from "@/models/company/Template";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -124,12 +124,12 @@ export default {
       isLoading: false,
       templates: [],
       fields: [
-        { key: "name", label: this.$trans("Name"), thAttr: { width: "15%" } },
-        { key: "template_type", label: this.$trans("Type") },
-        { key: "description", label: this.$trans("Description") },
-        { key: "is_active", label: this.$trans("Is active") },
-        { key: "created", label: this.$trans("Created") },
-        { key: "modified", label: this.$trans("Modified") },
+        { key: "name", label: $trans("Name"), thAttr: { width: "15%" } },
+        { key: "template_type", label: $trans("Type") },
+        { key: "description", label: $trans("Description") },
+        { key: "is_active", label: $trans("Is active") },
+        { key: "created", label: $trans("Created") },
+        { key: "modified", label: $trans("Modified") },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -156,11 +156,11 @@ export default {
     async doDelete() {
       try {
         await this.templateService.delete(this.templatePk);
-        infoToast(create, this.$trans("Deleted"), this.$trans("Template has been deleted"));
+        infoToast(create, $trans("Deleted"), $trans("Template has been deleted"));
         await this.loadData();
       } catch (error) {
         console.log("error deleting templates", error);
-        errorToast(create, this.$trans("Error deleting template"));
+        errorToast(create, $trans("Error deleting template"));
       }
     },
     // rest
@@ -173,7 +173,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching templates", error);
-        errorToast(create, this.$trans("Error loading templates"));
+        errorToast(create, $trans("Error loading templates"));
         this.isLoading = false;
       }
     },
@@ -186,7 +186,7 @@ export default {
         await this.loadData()
       } catch (error) {
         console.log("error setting template as active", error);
-        errorToast(create, this.$trans("Error setting template as active"));
+        errorToast(create, $trans("Error setting template as active"));
         this.isLoading = false;
       }
     }

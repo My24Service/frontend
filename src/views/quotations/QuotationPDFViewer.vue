@@ -84,7 +84,7 @@
 import {QuotationModel, QuotationService} from "@/models/quotations/Quotation";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import my24 from "@/services/my24";
@@ -115,7 +115,7 @@ export default {
   computed: {
     viewerTitle() {
       if (this.quotation) {
-        return this.quotation.preliminary ? this.$trans("PDF preview") : this.$trans("Definitive PDF")
+        return this.quotation.preliminary ? $trans("PDF preview") : $trans("Definitive PDF")
       } else {
         return ''
       }
@@ -137,17 +137,17 @@ export default {
 
       try {
         await this.quotationService.makeDefinitive(this.quotation.id)
-        infoToast(create, this.$trans('Success'), this.$trans('Quotation is now definitive'))
+        infoToast(create, $trans('Success'), $trans('Quotation is now definitive'))
         this.isLoading = false
         await this.$router.push({ name: 'quotation-view', params: {pk: this.quotation.id }})
       } catch(error) {
-        errorToast(create, this.$trans('Error making quotation definitive'))
+        errorToast(create, $trans('Error making quotation definitive'))
         this.isLoading = false
         if (error.response?.data?.template_error) {
           errorToast(create, error.response.data.template_error)
           return
         }
-        errorToast(create, this.$trans('Error generating pdf'))
+        errorToast(create, $trans('Error generating pdf'))
       }
     },
     async generatePdf() {
@@ -161,12 +161,12 @@ export default {
         if (!result_ok) {
           this.$refs['pdf-error-modal'].show()
         } else {
-          infoToast(create, this.$trans('Success'), this.$trans('PDF created'))
+          infoToast(create, $trans('Success'), $trans('PDF created'))
         }
       } catch(error) {
         console.log('error generating pdf', error)
         this.isLoading = false
-        errorToast(create, this.$trans('Error creating PDF'))
+        errorToast(create, $trans('Error creating PDF'))
       }
     },
     async downloadPdf() {
@@ -257,7 +257,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        errorToast(create, this.$trans('Error fetching quotation'))
+        errorToast(create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     },

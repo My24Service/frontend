@@ -121,7 +121,7 @@ export default {
       this.day_field_types = data.day_field_types
       this.fullName = data.full_name
 
-      let header_columns = [{label: this.$trans('Field'), key: 'field'}]
+      let header_columns = [{label: $trans('Field'), key: 'field'}]
 
       // add days
       for(let i=0; i<data.date_list.length; i++) {
@@ -134,7 +134,7 @@ export default {
 
       header_columns.push({
         key: 'total',
-        label: this.$trans('Total'),
+        label: $trans('Total'),
         sortable: true
       })
 

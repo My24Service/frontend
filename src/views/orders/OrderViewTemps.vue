@@ -142,9 +142,9 @@ export default {
       isLoading: true,
       order: orderModel.getFields(),
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') }
+        { key: 'product', label: $trans('Product') },
+        { key: 'location', label: $trans('Location') },
+        { key: 'remarks', label: $trans('Remarks') }
       ],
     }
   },
@@ -167,7 +167,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        errorToast(create, this.$trans('Error fetching order'))
+        errorToast(create, $trans('Error fetching order'))
         this.isLoading = false
       }
     }

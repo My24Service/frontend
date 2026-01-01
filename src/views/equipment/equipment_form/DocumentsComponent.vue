@@ -179,7 +179,7 @@ import {EquipmentModel} from "@/models/equipment/equipment"
 import ApiResult from "@/components/ApiResult.vue";
 import {LocationModel} from "@/models/equipment/location";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -209,11 +209,11 @@ export default {
       isLoading: false,
       isNewEquipment: true,
       fields: [
-        {key: 'name', label: this.$trans('Name')},
+        {key: 'name', label: $trans('Name')},
         {key: 'icons', label: ""},
       ],
       fieldsView: [
-        {key: 'name', label: this.$trans('Name')},
+        {key: 'name', label: $trans('Name')},
       ],
       // documentService: new DocumentService(),
       documentService: this.location != null ? new LocationDocumentService() : new DocumentService(),
@@ -272,7 +272,7 @@ export default {
     deleteDocument(index) {
       this.documentService.deleteCollectionItem(index)
       if (this.getParentId()) {
-        infoToast(create, this.$trans('Marked for delete'), this.$trans("Document marked for delete"))
+        infoToast(create, $trans('Marked for delete'), $trans("Document marked for delete"))
       }
     },
     async loadData() {
@@ -306,7 +306,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching documents', error)
-        errorToast(create, this.$trans('Error loading documents'))
+        errorToast(create, $trans('Error loading documents'))
         this.isLoading = false
       }
     },
@@ -376,7 +376,7 @@ export default {
 
       if (documentErrors.length > 0) {
         console.log('no equipment/locations to update documents', documentErrors)
-        errorToast(create, this.$trans('Error updating documents (no equipment or location)'))
+        errorToast(create, $trans('Error updating documents (no equipment or location)'))
         return documentErrors
       }
 
@@ -386,16 +386,16 @@ export default {
         errors = this.documentService.collection.filter((d) => d.error)
 
         if (errors.length > 0) {
-          errorToast(create, this.$trans('Error updating documents'))
+          errorToast(create, $trans('Error updating documents'))
         } else {
-          infoToast(create, this.$trans('Updated'), this.$trans('Documents have been updated'))
+          infoToast(create, $trans('Updated'), $trans('Documents have been updated'))
           this.documentService.collectionHasChanges = false
         }
         // await this.loadData()
       } catch (e) {
         errors.push(e)
         console.log('error updating documents', e)
-        errorToast(create, this.$trans('Error updating documents'))
+        errorToast(create, $trans('Error updating documents'))
       }
 
       this.isLoading = false

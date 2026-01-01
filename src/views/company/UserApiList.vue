@@ -143,7 +143,7 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {ApiUserService} from '@/models/company/UserApi'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -167,9 +167,9 @@ export default {
       isLoading: false,
       apiusers: [],
       apiuserFields: [
-        {key: 'username', label: this.$trans('Username')},
-        {key: 'api_user.name', label: this.$trans('Name')},
-        {key: 'token', label: this.$trans('Token')},
+        {key: 'username', label: $trans('Username')},
+        {key: 'api_user.name', label: $trans('Name')},
+        {key: 'token', label: $trans('Token')},
         {key: 'icons'}
       ],
     }
@@ -196,11 +196,11 @@ export default {
     async doDelete() {
       try {
         await this.apiUserService.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('API user has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('API user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting API user', error)
-        errorToast(create, this.$trans('Error deleting API user'))
+        errorToast(create, $trans('Error deleting API user'))
       }
     },
     // rest
@@ -211,11 +211,11 @@ export default {
     async doRevoke() {
       try {
         await this.apiUserService.revoke(this.revokeId)
-        infoToast(create, this.$trans('Revoked'), this.$trans('API key has been revoked'))
+        infoToast(create, $trans('Revoked'), $trans('API key has been revoked'))
         await this.loadData()
       } catch(error) {
         console.log('Error revoking API key', error)
-        errorToast(create, this.$trans('Error revoking API key'))
+        errorToast(create, $trans('Error revoking API key'))
       }
     },
     getValidUntil(api_user) {
@@ -225,7 +225,7 @@ export default {
       this.$refs.clone.focus();
       document.execCommand('copy');
       // navigator.clipboard.writeText(token)
-      infoToast(create, this.$trans('Copy'), this.$trans('Token copied to clipboard'))
+      infoToast(create, $trans('Copy'), $trans('Token copied to clipboard'))
     },
     async loadData() {
       this.isLoading = true;
@@ -236,7 +236,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching api users', error)
-        errorToast(create, this.$trans('Error loading API keys'))
+        errorToast(create, $trans('Error loading API keys'))
         this.isLoading = false
       }
     }

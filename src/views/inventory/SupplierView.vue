@@ -81,9 +81,9 @@ export default {
       supplier: supplierModel.getFields(),
       materials: [],
       materialFields: [
-        { key: 'name', label: this.$trans('Name') },
-        { key: 'unit', label: this.$trans('Unit') },
-        { key: 'modified', label: this.$trans('Modified') }
+        { key: 'name', label: $trans('Name') },
+        { key: 'unit', label: $trans('Unit') },
+        { key: 'modified', label: $trans('Modified') }
       ],
     }
   },
@@ -106,7 +106,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching supplier/materials', error)
-        errorToast(create, this.$trans('Error fetching supplier/materials'))
+        errorToast(create, $trans('Error fetching supplier/materials'))
         this.isLoading = false
       }
     }

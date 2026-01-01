@@ -91,7 +91,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -112,12 +112,12 @@ export default {
       isLoading: false,
       partners: [],
       partnerFields: [
-        {key: 'partner_view.name', label: this.$trans('Name'), sortable: true},
-        {key: 'partner_view.companycode', label: this.$trans('Company code'), sortable: true},
-        {key: 'partner_view.city', label: this.$trans('City'), sortable: true},
-        {key: 'partner_view.email', label: this.$trans('Email'), sortable: true},
-        {key: 'has_branches', label: this.$trans('Branches?'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'partner_view.name', label: $trans('Name'), sortable: true},
+        {key: 'partner_view.companycode', label: $trans('Company code'), sortable: true},
+        {key: 'partner_view.city', label: $trans('City'), sortable: true},
+        {key: 'partner_view.email', label: $trans('Email'), sortable: true},
+        {key: 'has_branches', label: $trans('Branches?'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -144,11 +144,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('partner has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('partner has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting partner', error)
-        errorToast(create, this.$trans('Error deleting partner'))
+        errorToast(create, $trans('Error deleting partner'))
       }
     },
     // rest
@@ -161,7 +161,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching partners', error);
-        errorToast(create, this.$trans('Error loading partners'))
+        errorToast(create, $trans('Error loading partners'))
         this.isLoading = false
       }
     }

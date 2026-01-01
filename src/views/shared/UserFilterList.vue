@@ -91,7 +91,7 @@ import ButtonLinkSearch from "../../components/ButtonLinkSearch";
 import SearchModal from "../../components/SearchModal";
 import Pagination from "../../components/Pagination";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -120,8 +120,8 @@ export default {
       model: null,
       filters: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), thAttr: {width: '20%'}},
-        {key: 'conditions', label: this.$trans('Conditions'), thAttr: {width: '65%'}},
+        {key: 'name', label: $trans('Name'), thAttr: {width: '20%'}},
+        {key: 'conditions', label: $trans('Conditions'), thAttr: {width: '65%'}},
         {key: 'icons', label: '', thAttr: {width: '15%'}},
       ]
     }
@@ -152,11 +152,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Filter has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Filter has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting filter', error)
-        errorToast(create, this.$trans('Error deleting filter'))
+        errorToast(create, $trans('Error deleting filter'))
       }
     },
     async loadData() {
@@ -168,7 +168,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching filters', error)
-        errorToast(create, this.$trans('Error loading filters'))
+        errorToast(create, $trans('Error loading filters'))
         this.isLoading = false
       }
     }

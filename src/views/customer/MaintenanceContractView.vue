@@ -217,22 +217,22 @@ export default {
       isCreate: false,
 
       equipmentFields: [
-        { key: 'equipment_name', label: this.$trans('Name') },
-        { key: 'times_per_year', label: this.$trans('Frequency') },
-        { key: 'tariff', label: this.$trans('Tariff'), thAttr: {style: 'text-align: right;'}},
-        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'equipment_name', label: $trans('Name') },
+        { key: 'times_per_year', label: $trans('Frequency') },
+        { key: 'tariff', label: $trans('Tariff'), thAttr: {style: 'text-align: right;'}},
+        { key: 'remarks', label: $trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       equipmentFieldsCreate: [
-        { key: 'id', label: this.$trans('id'), thAttr: {width: '5%'} },
-        { key: 'name', label: this.$trans('Name'), },
-        { key: 'frequency', label: this.$trans('Frequency'), thAttr: {width: '50%'} },
-        { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '15%'} },
+        { key: 'id', label: $trans('id'), thAttr: {width: '5%'} },
+        { key: 'name', label: $trans('Name'), },
+        { key: 'frequency', label: $trans('Frequency'), thAttr: {width: '50%'} },
+        { key: 'amount', label: $trans('Amount'), thAttr: {width: '15%'} },
       ],
       orderLinesData: [],
       selectedData: [],
       maintenanceOrdersFields: [
-        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', label: ''},
       ],
       maintenanceOrders: []
@@ -316,7 +316,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error.response)
-        errorToast(create, `${this.$trans('Error loading maintenance contract')}: ${error.response.status} ${error.response.statusText}`)
+        errorToast(create, `${$trans('Error loading maintenance contract')}: ${error.response.status} ${error.response.statusText}`)
         this.isLoading = false
       }
     },

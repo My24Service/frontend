@@ -100,14 +100,14 @@ function hasAccessRouteAuthLevel(authLevelNeeded, store) {
 
 function translateHoursField(field) {
   const allFields = {
-    'work_total': this.$trans("Work total"),
-    'break_total': this.$trans('Breaks total'),
-    'travel_total': this.$trans('Travel total'),
-    'distance_total': this.$trans('Distance total'),
-    'extra_work': this.$trans('Total extra work'),
-    'actual_work': this.$trans('Total actual work'),
-    'unforeseen_work': this.$trans('Total unforeseen work'),
-    'distance_fixed_rate_amount': this.$trans('Total trips')
+    'work_total': $trans("Work total"),
+    'break_total': $trans('Breaks total'),
+    'travel_total': $trans('Travel total'),
+    'distance_total': $trans('Distance total'),
+    'extra_work': $trans('Total extra work'),
+    'actual_work': $trans('Total actual work'),
+    'unforeseen_work': $trans('Total unforeseen work'),
+    'distance_fixed_rate_amount': $trans('Total trips')
   }
 
   return allFields[field]

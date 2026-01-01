@@ -18,7 +18,7 @@
             <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
           </b-link>
         </b-col>
-        
+
         <b-col cols="1">
           <div class="float-right">
             <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
@@ -102,15 +102,15 @@ export default {
       inventoryHeaders: null,
       isLoading: false,
       tableFields: [
-        {thAttr: {width: '20%'}, key: 'supplier.name', label: this.$trans('Supplier'), sortable: true},
-        {thAttr: {width: '20%'}, key: 'name', label: this.$trans('Product'), sortable: true},
-        // {thAttr: {width: '10%'}, key: 'num_entries', label: this.$trans('Total purchase'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'num_sales', label: this.$trans('Total sales'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'turnover', label: this.$trans('Turnover'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'profit', label: this.$trans('Profit'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'margin_product', label: this.$trans('Margin product'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'current_stock', label: this.$trans('Stock'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'sum_inventory', label: this.$trans('Locations'), sortable: false},
+        {thAttr: {width: '20%'}, key: 'supplier.name', label: $trans('Supplier'), sortable: true},
+        {thAttr: {width: '20%'}, key: 'name', label: $trans('Product'), sortable: true},
+        // {thAttr: {width: '10%'}, key: 'num_entries', label: $trans('Total purchase'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'num_sales', label: $trans('Total sales'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'turnover', label: $trans('Turnover'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'profit', label: $trans('Profit'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'margin_product', label: $trans('Margin product'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'current_stock', label: $trans('Stock'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'sum_inventory', label: $trans('Locations'), sortable: false},
         {key: 'icons'},
       ],
       tableData: [],

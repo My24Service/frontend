@@ -426,7 +426,7 @@ import Collapse from '@/components/Collapse.vue'
 import {OrderlineService} from "@/models/orders/Orderline";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -471,9 +471,9 @@ export default {
       infoline_pk: null,
       info: '',
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'product', label: $trans('Product') },
+        { key: 'location', label: $trans('Location') },
+        { key: 'remarks', label: $trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       submitClicked: false,
@@ -620,13 +620,13 @@ export default {
           // add documents
           this.$refs['documents-component'].orderCreated(newOrder)
 
-          infoToast(create, this.$trans('Created'), this.$trans('Order has been created'))
+          infoToast(create, $trans('Created'), $trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating order', error)
-          errorToast(create, this.$trans('Error creating order'))
+          errorToast(create, $trans('Error creating order'))
           this.isLoading = false
           this.buttonDisabled = false
           return
@@ -645,27 +645,27 @@ export default {
           orderline.order = this.pk
           if (orderline.id) {
             await this.orderlineService.update(orderline.id, orderline)
-            // infoToast(create, this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+            // infoToast(create, $trans('Orderline updated'), $trans('Orderline has been updated'))
           } else {
             await this.orderlineService.insert(orderline)
-            // infoToast(create, this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+            // infoToast(create, $trans('Orderline created'), $trans('Orderline has been created'))
           }
         }
 
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
             await this.orderlineService.delete(orderline.id)
-            // infoToast(create, this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+            // infoToast(create, $trans('Orderline removed'), $trans('Orderline has been removed'))
           }
         }
 
-        infoToast(create, this.$trans('Updated'), this.$trans('Order has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating order', error)
-        errorToast(create, this.$trans('Error updating order'))
+        errorToast(create, $trans('Error updating order'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -716,7 +716,7 @@ export default {
       this.isLoading = false
     } catch (error) {
       console.log('error loading order', error)
-      errorToast(create, this.$trans('Error fetching order data'))
+      errorToast(create, $trans('Error fetching order data'))
       this.isLoading = false
     }
   },

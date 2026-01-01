@@ -125,7 +125,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -145,15 +145,15 @@ export default {
       isLoading: false,
       reservations: [],
       fields: [
-        {key: 'id', label: this.$trans('Reservation'), sortable: true},
-        {key: 'materials', label: this.$trans('Materials')},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'id', label: $trans('Reservation'), sortable: true},
+        {key: 'materials', label: $trans('Materials')},
+        {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'icons', label: ''},
       ],
       material_fields: [
-        {key: 'material_view.name', label: this.$trans('Product')},
-        {key: 'remarks', label: this.$trans('Remarks')},
-        {key: 'amount', label: this.$trans('Amount')},
+        {key: 'material_view.name', label: $trans('Product')},
+        {key: 'remarks', label: $trans('Remarks')},
+        {key: 'amount', label: $trans('Amount')},
       ],
     }
   },
@@ -179,11 +179,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.supplierReservationPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Entry Reservation been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Entry Reservation been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting reservation', error)
-        errorToast(create, this.$trans('Error deleting reservation'))
+        errorToast(create, $trans('Error deleting reservation'))
       }
     },
     // rest
@@ -196,7 +196,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching reservations', error)
-        errorToast(create, this.$trans('Error loading reservations'))
+        errorToast(create, $trans('Error loading reservations'))
         this.isLoading = false
       }
     }

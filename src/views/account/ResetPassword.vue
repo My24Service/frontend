@@ -42,7 +42,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import accountModel from '@/models/account/Account.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -86,13 +86,13 @@ export default {
       this.isLoading = true
       try {
         const result = await accountModel.sendResetPasswordLink(this.email)
-        infoToast(create, this.$trans('Reset link sent'), this.$trans('Password reset link has been sent'))
+        infoToast(create, $trans('Reset link sent'), $trans('Password reset link has been sent'))
 
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
-        errorToast(create, this.$trans('Something went wrong, please try again'))
+        errorToast(create, $trans('Something went wrong, please try again'))
 
         this.buttonDisabled = false
         this.isLoading = false

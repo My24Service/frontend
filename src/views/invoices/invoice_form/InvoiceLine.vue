@@ -205,7 +205,7 @@ import PriceInput from "../../../components/PriceInput";
 import VAT from "./VAT";
 import invoiceMixin from "./mixin";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 
@@ -241,8 +241,8 @@ export default {
       isLoading: false,
       invoiceLineService: new InvoiceLineService(),
       fieldsView: [
-        {key: 'description', label: this.$trans('Description'), thAttr: {width: '60%'}},
-        {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
+        {key: 'description', label: $trans('Description'), thAttr: {width: '60%'}},
+        {key: 'total', label: $trans('Total'), thAttr: {width: '40%'}},
       ],
     }
   },
@@ -327,8 +327,8 @@ export default {
           this.invoiceLineService.collection.push(invoiceLine)
         }
         this.updateInvoiceTotals()
-        const txt = invoiceLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
-        infoToast(create, this.$trans('Added'), this.$trans(`${invoiceLines.length} ${txt} added`))
+        const txt = invoiceLines.length === 1 ? $trans('invoice line') : $trans('invoice lines')
+        infoToast(create, $trans('Added'), $trans(`${invoiceLines.length} ${txt} added`))
       }
     },
     updateInvoiceTotals() {
@@ -351,7 +351,7 @@ export default {
     emptyCollectionClicked(type) {
       this.invoiceLineService.collection = this.invoiceLineService.collection.filter((m) => m.type !== type)
       this.updateInvoiceTotals()
-      infoToast(create, this.$trans('Removed'), this.$trans(`invoice lines removed`))
+      infoToast(create, $trans('Removed'), $trans(`invoice lines removed`))
     },
     getInvoiceLineId() {
       if (this.invoiceLineService.collection.length === 0) {
@@ -379,7 +379,7 @@ export default {
           this.updateInvoiceTotals()
         } catch(error) {
           console.log('error fetching invoice lines', error)
-          errorToast(create, this.$trans('Error loading invoice lines'))
+          errorToast(create, $trans('Error loading invoice lines'))
           this.isLoading = false
         }
         this.invoiceLineService.listArgs = []

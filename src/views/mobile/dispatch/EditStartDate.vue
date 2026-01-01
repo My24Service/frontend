@@ -7,7 +7,7 @@
       @ok="editStartDateDone"
       @cancel="editStartDateCancel"
       :ok-title="$trans('Save')">
-      <p>{{ this.$trans('Edit the dates for this order.')}}</p>
+      <p>{{ $trans('Edit the dates for this order.')}}</p>
       <!-- <p>Order #<span>{{ order_id }}</span></p> -->
       <form ref="start-date-form">
         <b-container>
@@ -81,7 +81,7 @@ export default {
     },
     check_date_end() {
       if (this.end_date < this.start_date) {
-        this.error = this.$trans('The end date cannot lie before start date')
+        this.error = $trans('The end date cannot lie before start date')
       } else {
         this.error = null;
       }

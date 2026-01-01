@@ -132,14 +132,14 @@ export default {
       buttonDisabled: false,
       purchaseOrder: purchaseOrderModel.getFields(),
       materialFields: [
-        { key: 'material_view.name', label: this.$trans('Name') },
-        { key: 'amount', label: this.$trans('Amount') },
-        { key: 'remarks', label: this.$trans('Remarks') }
+        { key: 'material_view.name', label: $trans('Name') },
+        { key: 'amount', label: $trans('Amount') },
+        { key: 'remarks', label: $trans('Remarks') }
       ],
       entryFields: [
-        { key: 'material_name', label: this.$trans('Product') },
-        { key: 'amount', label: this.$trans('Amount') },
-        { key: 'entry_date', label: this.$trans('Date') },
+        { key: 'material_name', label: $trans('Product') },
+        { key: 'amount', label: $trans('Amount') },
+        { key: 'entry_date', label: $trans('Date') },
       ]
     }
   },
@@ -161,7 +161,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching purchase order', error)
-        errorToast(create, this.$trans('Error fetching purchase order'))
+        errorToast(create, $trans('Error fetching purchase order'))
         this.isLoading = false
       }
     }

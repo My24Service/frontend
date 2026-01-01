@@ -203,11 +203,11 @@ export default {
 
       try {
         await accountModel.changePassword(this.old_password, this.new_password1)
-        infoToast(create, this.$trans('Password changed'), this.$trans('Your password is changed'))
+        infoToast(create, $trans('Password changed'), $trans('Your password is changed'))
         this.$refs['password-change-modal'].hide()
       } catch(error) {
         console.log(error)
-        errorToast(create, this.$trans('Error changing your password'))
+        errorToast(create, $trans('Error changing your password'))
       }
     },
     logout() {
@@ -245,7 +245,7 @@ export default {
       } catch (error) {
         console.log(error)
         loader.hide()
-        errorToast(create, this.$trans('Error logging you out'))
+        errorToast(create, $trans('Error logging you out'))
       }
     },
     onContractChange(data) {

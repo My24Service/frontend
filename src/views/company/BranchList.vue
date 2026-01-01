@@ -121,7 +121,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -142,12 +142,12 @@ export default {
       isLoading: false,
       branches: [],
       branchFields: [
-        {key: 'id', label: this.$trans('Branch'), sortable: true, },
-        {key: 'contact', label: this.$trans('Contact'), sortable: true, },
-        {key: 'tel', label: this.$trans('Phone'), sortable: true, },
-        {key: 'address', label: this.$trans('Address'), sortable: true, },
-        {key: 'country_code', label: this.$trans('Postal'), sortable: true, },
-        {key: 'city', label: this.$trans('City'), sortable: true, },
+        {key: 'id', label: $trans('Branch'), sortable: true, },
+        {key: 'contact', label: $trans('Contact'), sortable: true, },
+        {key: 'tel', label: $trans('Phone'), sortable: true, },
+        {key: 'address', label: $trans('Address'), sortable: true, },
+        {key: 'country_code', label: $trans('Postal'), sortable: true, },
+        {key: 'city', label: $trans('City'), sortable: true, },
         {key: 'icons', }
       ],
     }
@@ -174,11 +174,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Branch has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Branch has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting branch', error)
-        errorToast(create, this.$trans('Error deleting branch'))
+        errorToast(create, $trans('Error deleting branch'))
       }
     },
     // rest
@@ -191,7 +191,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching branches', error)
-        errorToast(create, this.$trans('Error loading branches'))
+        errorToast(create, $trans('Error loading branches'))
         this.isLoading = false
       }
     }

@@ -82,8 +82,8 @@ export default {
       isLoading: false,
       activity: [],
       activityFields: [
-        {key: 'text', label: this.$trans('Activity'), sortable: true},
-        {key: 'created', label: this.$trans('Date'), sortable: true},
+        {key: 'text', label: $trans('Activity'), sortable: true},
+        {key: 'created', label: $trans('Date'), sortable: true},
         {key: 'icons', label: ''},
       ],
     }
@@ -112,7 +112,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching activity', error);
-        errorToast(create, this.$trans('Error loading activity'))
+        errorToast(create, $trans('Error loading activity'))
 
         this.isLoading = false
       }

@@ -88,7 +88,7 @@ import Pagination from "../../components/Pagination.vue"
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import PillsEngineer from "./PillsEngineer";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -112,11 +112,11 @@ export default {
       isLoading: false,
       eventTypes: [],
       fields: [
-        {key: 'event_type', label: this.$trans('Event type'), sortable: true},
-        {key: 'measure_last_event_type', label: this.$trans('Measure last event type'), sortable: true},
-        {key: 'statuscode_view.statuscode', label: this.$trans('Status'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'event_type', label: $trans('Event type'), sortable: true},
+        {key: 'measure_last_event_type', label: $trans('Measure last event type'), sortable: true},
+        {key: 'statuscode_view.statuscode', label: $trans('Status'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -143,11 +143,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.engineerEventTypeModelPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Event type has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Event type has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting event type', error)
-        errorToast(create, this.$trans('Error deleting event type'))
+        errorToast(create, $trans('Error deleting event type'))
       }
     },
     // rest
@@ -163,7 +163,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching event types', error)
-        errorToast(create, this.$trans('Error loading event types'))
+        errorToast(create, $trans('Error loading event types'))
         this.isLoading = false
       }
     }

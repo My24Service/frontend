@@ -164,7 +164,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -186,12 +186,12 @@ export default {
       purchaseOrders: [],
       fields: [
         'index',
-        {key: 'purchase_order_id', label: this.$trans('Order'), sortable: true },
-        {key: 'supplier_reservation', label: this.$trans('Reservation')},
-        {key: 'last_status', label: this.$trans('Status')},
-        {key: 'expected_entry_date', label: this.$trans('Expected entry date'), sortable: true,thAttr: {width: '15%'}},
-        {key: 'created', label: this.$trans('Created'), sortable: true,thAttr: {width: '15%'}},
-        {key: 'totals', label: this.$trans('# entries / # products'),thAttr: {width: '15%'}},
+        {key: 'purchase_order_id', label: $trans('Order'), sortable: true },
+        {key: 'supplier_reservation', label: $trans('Reservation')},
+        {key: 'last_status', label: $trans('Status')},
+        {key: 'expected_entry_date', label: $trans('Expected entry date'), sortable: true,thAttr: {width: '15%'}},
+        {key: 'created', label: $trans('Created'), sortable: true,thAttr: {width: '15%'}},
+        {key: 'totals', label: $trans('# entries / # products'),thAttr: {width: '15%'}},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
       status: {
@@ -223,11 +223,11 @@ export default {
 
       try {
         await this.model.insert(status)
-        infoToast(create, this.$trans('Created'), this.$trans('Status has been created'))
+        infoToast(create, $trans('Created'), $trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(create, this.$trans('Error creating status'))
+        errorToast(create, $trans('Error creating status'))
       }
     },
     showChangeStatusModal(id) {
@@ -242,11 +242,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.purchaseOrderPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Purchase order has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Purchase order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting purchase order', error)
-        errorToast(create, this.$trans('Error deleting purchase order'))
+        errorToast(create, $trans('Error deleting purchase order'))
       }
     },
     // rest
@@ -259,7 +259,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching purchase orders', error)
-        errorToast(create, this.$trans('Error loading purchase orders'))
+        errorToast(create, $trans('Error loading purchase orders'))
         this.isLoading = false
       }
     }

@@ -942,7 +942,7 @@ import {CustomerService} from '@/models/customer/Customer'
 import {AssignService} from '@/models/mobile/Assign'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import {BranchService} from "@/models/company/Branch";
@@ -1038,15 +1038,15 @@ export default {
       isEditInfoLine: false,
 
       orderLineFields: [
-        { key: 'info', label: this.$trans('Orderline') },
+        { key: 'info', label: $trans('Orderline') },
       ],
       infoLineFields: [
-        { key: 'info', label: this.$trans('Info') },
+        { key: 'info', label: $trans('Info') },
         { key: 'icons', label: '' }
       ],
       recommendedUsers: [],
       recommendedUsersFields: [
-        { key: 'full_name', label: this.$trans('Name') },
+        { key: 'full_name', label: $trans('Name') },
       ],
       submitClicked: false,
       countries: [],
@@ -1069,8 +1069,8 @@ export default {
       orderPk: null,
       nextField: 'orders',
       nextFieldOptions: [
-        { item: 'orders', name: this.$trans('Orders') },
-        { item: 'dispatch', name: this.$trans('Dispatch') },
+        { item: 'orders', name: $trans('Orders') },
+        { item: 'dispatch', name: $trans('Dispatch') },
       ],
 
       getEquipmentDebounced: null,
@@ -1284,7 +1284,7 @@ export default {
         // this.engineers = await this.engineerService.search(query)
       } catch(error) {
         console.log('Error searching engineers', error)
-        errorToast(create, this.$trans('Error searching engineers'))
+        errorToast(create, $trans('Error searching engineers'))
       }
       this.isLookupLoading.engineers = false
     },
@@ -1309,7 +1309,7 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
             await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
             await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
@@ -1323,7 +1323,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding equipment', error)
-        errorToast(create, this.$trans('Error adding equipment'))
+        errorToast(create, $trans('Error adding equipment'))
       }
     },
     async getEquipment(query) {
@@ -1336,7 +1336,7 @@ export default {
 
       } catch(error) {
         console.log('Error searching equipment', error)
-        errorToast(create, this.$trans('Error searching equipment'))
+        errorToast(create, $trans('Error searching equipment'))
       }
     },
     equipmentLabel({ name }) {
@@ -1368,7 +1368,7 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
             await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
             await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
 
@@ -1382,7 +1382,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding location', error)
-        errorToast(create, this.$trans('Error adding location'))
+        errorToast(create, $trans('Error adding location'))
       }
     },
     async getSalesUsers(query) {
@@ -1395,7 +1395,7 @@ export default {
         this.searchingSalesUsers = false
       } catch(error) {
         console.log('Error fetching sales users', error)
-        errorToast(create, this.$trans('Error fetching sales users'))
+        errorToast(create, $trans('Error fetching sales users'))
         this.searchingSalesUsers = false
       }
     },
@@ -1408,7 +1408,7 @@ export default {
         }
       } catch(error) {
         console.log('Error searching location', error)
-        errorToast(create, this.$trans('Error searching location'))
+        errorToast(create, $trans('Error searching location'))
       }
     },
     locationLabel({ name }) {
@@ -1630,7 +1630,7 @@ export default {
           this.buttonDisabled = false
           this.isLoading = false
           console.log('Error creating order', error)
-          // errorToast(create, this.$trans('Error creating order'))
+          // errorToast(create, $trans('Error creating order'))
           return
         }
       } else {
@@ -1664,17 +1664,17 @@ export default {
       if (!this.isCreate && this.acceptOrder) {
         try {
           await this.orderService.setAccepted(this.pk)
-          infoToast(create, this.$trans('Accepted'), this.$trans('Order has been accepted'))
+          infoToast(create, $trans('Accepted'), $trans('Order has been accepted'))
         } catch(error) {
           errors.push(error)
           console.log('Error accepting order', error)
-          errorToast(create, this.$trans('Error accepting order'))
+          errorToast(create, $trans('Error accepting order'))
         }
       }
 
       if (errors.length > 0) {
         // TODO do we want this message? the errors in the form are obvious
-        errorToast(create, this.$trans('There were errors'))
+        errorToast(create, $trans('There were errors'))
         console.log('There were errors', errors)
         this.buttonDisabled = false
         this.isLoading = false
@@ -1682,9 +1682,9 @@ export default {
       }
 
       if (this.isCreate) {
-        infoToast(create, this.$trans('Created'), this.$trans('Order has been created'))
+        infoToast(create, $trans('Created'), $trans('Order has been created'))
       } else {
-        infoToast(create, this.$trans('Updated'), this.$trans('Order has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Order has been updated'))
       }
 
       if (this.nextField === 'dispatch') {
@@ -1816,7 +1816,7 @@ export default {
           // future, perhaps a 'reason' for failure could be included, but for
           // now, a zero value indicates failure.
           if (!result.result) {
-            errors.push( `${engineer.full_name} ${this.$trans('has booked hours or materials')}` )
+            errors.push( `${engineer.full_name} ${$trans('has booked hours or materials')}` )
           } else {
             unassigned_total++
           }
@@ -1827,10 +1827,10 @@ export default {
       }
 
       if (errors.length === 0) {
-        infoToast(create, this.$trans('Engineers unassigned'), `${unassigned_total} ${this.$trans('engineer(s) have been unassigned')}`)
+        infoToast(create, $trans('Engineers unassigned'), `${unassigned_total} ${$trans('engineer(s) have been unassigned')}`)
       } else {
         console.log('errors un-assigning engineers', errors)
-        errorToast(create, errors.join(', '), this.$trans('There were errors unassigning engineers'))
+        errorToast(create, errors.join(', '), $trans('There were errors unassigning engineers'))
       }
 
       // unsure what assignResult does elsewhere?
@@ -1865,10 +1865,10 @@ export default {
       }
 
       if (errors.length === 0) {
-        infoToast(create, this.$trans('Assigned'), this.$trans('Order assigned'))
+        infoToast(create, $trans('Assigned'), $trans('Order assigned'))
       } else {
         console.log('errors assigning to users', errors)
-        errorToast(create, this.$trans('There were errors assigning to users'))
+        errorToast(create, $trans('There were errors assigning to users'))
       }
 
       this.assignResult = newSelectedEngineers
@@ -1885,7 +1885,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.warn('Error fetching customers', error)
-        errorToast(create, this.$trans('Error fetching customers'))
+        errorToast(create, $trans('Error fetching customers'))
         this.isLoading = false
       }
     },
@@ -1898,7 +1898,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching branches', error)
-        errorToast(create, this.$trans('Error fetching branches'))
+        errorToast(create, $trans('Error fetching branches'))
         this.isLoading = false
       }
     },
@@ -1920,7 +1920,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.warn('error fetching order', error)
-        errorToast(create, this.$trans('Error fetching order'))
+        errorToast(create, $trans('Error fetching order'))
         this.isLoading = false
       }
     },

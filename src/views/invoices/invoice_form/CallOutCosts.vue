@@ -299,10 +299,10 @@ export default {
       )
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
-      return `${this.$trans("Call out costs")}`
+      return `${$trans("Call out costs")}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Call out costs")}`
+      return `${$trans("Call out costs")}`
     },
     getTotalAmountInvoiceLine() {
       return this.totalAmount

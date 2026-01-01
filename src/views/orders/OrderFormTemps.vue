@@ -454,7 +454,7 @@ import customerModel from '@/models/customer/Customer.js'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import orderlineModel from "../../models/orders/Orderline";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 
@@ -499,9 +499,9 @@ export default {
       location: '',
       remarks: '',
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'product', label: $trans('Product') },
+        { key: 'location', label: $trans('Location') },
+        { key: 'remarks', label: $trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       submitClicked: false,
@@ -674,18 +674,18 @@ export default {
             console.log('Error creating infolines', error)
           }
 
-          infoToast(create, this.$trans('Created'), this.$trans('Order has been created'))
+          infoToast(create, $trans('Created'), $trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
-          if (confirm((this.$trans('Do you want to add documents to this order?')))) {
+          if (confirm(($trans('Do you want to add documents to this order?')))) {
             await this.$router.push({name: 'order-document-add', params: {orderPk: order.id}})
           } else {
             this.$router.go(-1)
           }
         } catch(error) {
           console.log('Error creating order', error)
-          errorToast(create, this.$trans('Error creating order'))
+          errorToast(create, $trans('Error creating order'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -704,10 +704,10 @@ export default {
           orderline.order = this.pk
           if (orderline.id) {
             await orderlineModel.update(orderline.id, orderline)
-            // infoToast(create, this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+            // infoToast(create, $trans('Orderline updated'), $trans('Orderline has been updated'))
           } else {
             await orderlineModel.insert(orderline)
-            // infoToast(create, this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+            // infoToast(create, $trans('Orderline created'), $trans('Orderline has been created'))
           }
         }
 
@@ -715,17 +715,17 @@ export default {
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
             await orderlineModel.delete(orderline.id)
-            // infoToast(create, this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+            // infoToast(create, $trans('Orderline removed'), $trans('Orderline has been removed'))
           }
         }
 
-        infoToast(create, this.$trans('Updated'), this.$trans('Order has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating order', error)
-        errorToast(create, this.$trans('Error updating order'))
+        errorToast(create, $trans('Error updating order'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -734,10 +734,10 @@ export default {
         try {
           await this.orderService.setAccepted(this.pk)
 
-          infoToast(create, this.$trans('Accepted'), this.$trans('Order has been accepted'))
+          infoToast(create, $trans('Accepted'), $trans('Order has been accepted'))
         } catch(error) {
           console.log('Error accepting order', error)
-          errorToast(create, this.$trans('Error accepting order'))
+          errorToast(create, $trans('Error accepting order'))
         }
       }
 
@@ -750,7 +750,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching customers', error)
-        errorToast(create, this.$trans('Error fetching customers'))
+        errorToast(create, $trans('Error fetching customers'))
         this.isLoading = false
       }
     },
@@ -764,7 +764,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        errorToast(create, this.$trans('Error fetching order'))
+        errorToast(create, $trans('Error fetching order'))
         this.isLoading = false
       }
     },

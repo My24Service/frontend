@@ -89,7 +89,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -108,12 +108,12 @@ export default {
       isLoading: false,
       entries: [],
       fields: [
-        {key: 'order_id', label: this.$trans('Order ID'), sortable: true},
-        {key: 'supplier', label: this.$trans('Supplier'), sortable: true},
-        {key: 'material_name', label: this.$trans('Product'), sortable: true},
-        {key: 'amount', label: this.$trans('Amount')},
-        {key: 'entry_date', label: this.$trans('Entry date')},
-        {key: 'stock_location_name', label: this.$trans('Moved to location')},
+        {key: 'order_id', label: $trans('Order ID'), sortable: true},
+        {key: 'supplier', label: $trans('Supplier'), sortable: true},
+        {key: 'material_name', label: $trans('Product'), sortable: true},
+        {key: 'amount', label: $trans('Amount')},
+        {key: 'entry_date', label: $trans('Entry date')},
+        {key: 'stock_location_name', label: $trans('Moved to location')},
         {key: 'icons'}
       ],
     }
@@ -140,11 +140,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.entryPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Entry has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Entry has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting entry', error)
-        errorToast(create, this.$trans('Error deleting entry'))
+        errorToast(create, $trans('Error deleting entry'))
       }
     },
     // rest
@@ -157,7 +157,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching entries', error)
-        errorToast(create, this.$trans('Error loading entries'))
+        errorToast(create, $trans('Error loading entries'))
         this.isLoading = false
       }
     }

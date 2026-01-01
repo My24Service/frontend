@@ -198,7 +198,7 @@ import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import Pagination from "../../components/Pagination.vue"
 import SearchModal from '../../components/SearchModal.vue'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -242,7 +242,7 @@ export default {
       isLoading: false,
       orders: [],
       fields: [
-        {thAttr: {width: '80%'}, key: 'id', label: this.$trans('Order')},
+        {thAttr: {width: '80%'}, key: 'id', label: $trans('Order')},
         {thAttr: {width: '20%'}, key: 'icons'}
       ],
     }
@@ -311,11 +311,11 @@ export default {
 
       try {
         await statusModel.insert(status)
-        infoToast(create, this.$trans('Created'), this.$trans('Status has been created'))
+        infoToast(create, $trans('Created'), $trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(create, this.$trans('Error creating status'))
+        errorToast(create, $trans('Error creating status'))
       }
     },
     rowStyle(item, type) {
@@ -339,11 +339,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.orderPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
-        errorToast(create, this.$trans('Error deleting order'))
+        errorToast(create, $trans('Error deleting order'))
       }
     },
     async loadData() {
@@ -356,7 +356,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
-        errorToast(create, this.$trans('Error loading orders'))
+        errorToast(create, $trans('Error loading orders'))
         this.isLoading = false
       }
     }

@@ -117,7 +117,7 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -143,11 +143,11 @@ export default {
       isLoading: true,
       maintenanceContracts: [],
       maintenanceContractFields: [
-        {key: 'name', label: this.$trans('Contract name'), sortable: true},
-        {key: 'customer_view_name', label: this.$trans('Customer'), sortable: true},
-        {key: 'sum_tariffs', label: this.$trans('Contract value'), sortable: true},
-        {key: 'remarks', label: this.$trans('Remarks'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'name', label: $trans('Contract name'), sortable: true},
+        {key: 'customer_view_name', label: $trans('Customer'), sortable: true},
+        {key: 'sum_tariffs', label: $trans('Contract value'), sortable: true},
+        {key: 'remarks', label: $trans('Remarks'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'icons'}
       ],
       maintenanceContractService: new MaintenanceContractService(),
@@ -175,11 +175,11 @@ export default {
     async doDelete() {
       try {
         await this.maintenanceContractService.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Maintenance contract has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting maintenance contract', error)
-        errorToast(create, this.$trans('Error deleting maintenance contract'))
+        errorToast(create, $trans('Error deleting maintenance contract'))
       }
     },
     // rest
@@ -195,7 +195,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)
-        errorToast(create, this.$trans('Error loading maintenance contracts'))
+        errorToast(create, $trans('Error loading maintenance contracts'))
         this.isLoading = false
       }
     }

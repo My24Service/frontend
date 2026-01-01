@@ -224,7 +224,7 @@ export default {
         // fill bar graph data and set labels/fields
         let monthDataBar = [], monthDataPie = [], labels = [], colors = []
         for (const week of weeks) {
-          const weekText =  `${this.$trans("week")} ${week}`
+          const weekText =  `${$trans("week")} ${week}`
           labels.push(weekText)
           colors.push(this.getRandomColor(weekText))
           if (week in monthData.items) {

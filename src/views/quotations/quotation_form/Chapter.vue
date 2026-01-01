@@ -150,7 +150,7 @@ import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {QuotationModel} from '@/models/quotations/Quotation.js'
 import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -188,7 +188,7 @@ export default {
       newItem: false,
       isLoading: false,
       fields: [
-        {key: 'chapter', label: this.$trans('Chapter'), thAttr: {width: '80%'}},
+        {key: 'chapter', label: $trans('Chapter'), thAttr: {width: '80%'}},
         {key: 'icons', label: '', thAttr: {width: '20%'}},
       ],
       hasChanges: false,
@@ -222,13 +222,13 @@ export default {
 
       try {
         await this.chapterService.delete(this.deletePk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Chapter has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Chapter has been deleted'))
         await this.loadData()
         this.isLoading = false
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting chapter', error)
-        errorToast(create, this.$trans('Error deleting chapter'))
+        errorToast(create, $trans('Error deleting chapter'))
       }
     },
     async doEditChapter() {

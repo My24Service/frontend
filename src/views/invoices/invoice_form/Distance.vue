@@ -343,10 +343,10 @@ export default {
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
-      return `${this.$trans("distance")}: ${cost.user_full_name}`
+      return `${$trans("distance")}: ${cost.user_full_name}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Distance")}`
+      return `${$trans("Distance")}`
     },
     getTotalAmountInvoiceLine() {
       // If there is a user override for distance, the non-mutable distance_total contains

@@ -102,7 +102,7 @@ import { UserListService } from "@/models/company/UserList.js";
 import { SickLeavesService } from "@/models/company/SickLeave.js";
 import Multiselect from 'vue-multiselect'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -182,12 +182,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.sickLeavesService.insert(this.leave);
-          infoToast(create, this.$trans("Created"), this.$trans("Leave has been created"));
+          infoToast(create, $trans("Created"), $trans("Leave has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating leave", error);
-          errorToast(create, this.$trans("Error creating leave"));
+          errorToast(create, $trans("Error creating leave"));
           this.isLoading = false;
         }
 
@@ -196,12 +196,12 @@ export default {
 
       try {
         await this.sickLeavesService.update(this.pk, this.leave);
-        infoToast(create, this.$trans("Updated"), this.$trans("Leave has been updated"));
+        infoToast(create, $trans("Updated"), $trans("Leave has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("Error updating leave", error);
-        errorToast(create, this.$trans("Error updating leave"));
+        errorToast(create, $trans("Error updating leave"));
         this.isLoading = false;
       }
     },
@@ -221,7 +221,7 @@ export default {
         this.compLoading = false
       } catch(error) {
         console.log('Error fetching users', error)
-        errorToast(create, this.$trans('Error fetching users'))
+        errorToast(create, $trans('Error fetching users'))
         this.compLoading = false
       }
     },
@@ -237,7 +237,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching sick leave", error);
-        errorToast(create, this.$trans("Error loading sick leave"));
+        errorToast(create, $trans("Error loading sick leave"));
         this.isLoading = false;
       }
     },

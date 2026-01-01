@@ -88,7 +88,7 @@ import {StatusService} from '@/models/orders/Status.js'
 import IconLinkDelete from './IconLinkDelete.vue'
 import {OrderService} from "@/models/orders/Order";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -132,12 +132,12 @@ export default {
       orderStatusColorCode: '#666',
       statuscodes: [],
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product'), thAttr: {width: '25%'} },
-        { key: 'location', label: this.$trans('Location'), thAttr: {width: '25%'} },
-        { key: 'remarks', label: this.$trans('Remarks'), thAttr: {width: '50%'} }
+        { key: 'product', label: $trans('Product'), thAttr: {width: '25%'} },
+        { key: 'location', label: $trans('Location'), thAttr: {width: '25%'} },
+        { key: 'remarks', label: $trans('Remarks'), thAttr: {width: '50%'} }
       ],
       infoLineFields: [
-        { key: 'info', label: this.$trans('Infolines') }
+        { key: 'info', label: $trans('Infolines') }
       ],
       assignedUsers: []
     }
@@ -176,11 +176,11 @@ export default {
     async doDelete() {
       try {
         await this.orderService.delete(this.order.id)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Order has been deleted'))
         this.$emit('reload-data')
       } catch(error) {
         console.log('Error deleting order', error)
-        errorToast(create, this.$trans('Error deleting order'))
+        errorToast(create, $trans('Error deleting order'))
       }
     },
     handleStatusChange(id, value) {
@@ -197,7 +197,7 @@ export default {
         await this.statusService.insert(status)
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(create, this.$trans('Error creating status'))
+        errorToast(create, $trans('Error creating status'))
       }
     }
   }

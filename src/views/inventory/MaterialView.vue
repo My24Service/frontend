@@ -80,8 +80,8 @@ export default {
       material: materialService.getFields(),
       inventory: [],
       inventoryFields: [
-        { key: 'location_name', label: this.$trans('Location') },
-        { key: 'total_amount', label: this.$trans('Total amount') },
+        { key: 'location_name', label: $trans('Location') },
+        { key: 'total_amount', label: $trans('Total amount') },
       ],
       NO_IMAGE_URL
     }
@@ -105,7 +105,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching inventory', error)
-        errorToast(create, this.$trans('Error fetching inventory'))
+        errorToast(create, $trans('Error fetching inventory'))
         this.isLoading = false
       }
     }

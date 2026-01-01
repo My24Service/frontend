@@ -13,7 +13,7 @@
           </b-link>
         </b-col>
         <b-col cols="10" class="text-center">
-        
+
           <b-row>
             <b-col cols="6">
               <b-form-group
@@ -78,11 +78,11 @@
           </div>
         </template>
         <template #cell(sum_amount)="data">
-          {{ data.item.sum_amount }} 
+          {{ data.item.sum_amount }}
           <span>({{ data.item.amount_perc }}%)</span>
         </template>
         <template #cell(sum_price_selling)="data">
-          &euro; {{ data.item.sum_price_selling.toFixed(2) }} 
+          &euro; {{ data.item.sum_price_selling.toFixed(2) }}
           <span>({{ data.item.amount_selling_perc }}%)</span>
         </template>
         <template #cell(sum_price_purchase)="data">
@@ -119,23 +119,23 @@ export default {
       modes: [
         {
           'value': MODES.TS,
-          'text': this.$trans('Total material sales')
+          'text': $trans('Total material sales')
         },
         {
           'value': MODES.TSPS,
-          'text': this.$trans('Total sales per supplier')
+          'text': $trans('Total sales per supplier')
         },
         {
           'value': MODES.TSPC,
-          'text': this.$trans('Total material sales per customer')
+          'text': $trans('Total material sales per customer')
         },
         {
           'value': MODES.TSPMC,
-          'text': this.$trans('Total sales per material per customer')
+          'text': $trans('Total sales per material per customer')
         },
         {
           'value': MODES.TSPMS,
-          'text': this.$trans('Total sales per material per supplier')
+          'text': $trans('Total sales per material per supplier')
         }
       ],
       currentMode: MODES.TS,
@@ -146,46 +146,46 @@ export default {
       isBarChart: false,
       graphField: 'sum_amount',
       graphFieldOptions: [
-        { item: 'sum_amount', name: this.$trans('Amount') },
-        { item: 'sum_price_selling', name: this.$trans('Selling price') },
-        { item: 'profit', name: this.$trans('Profit') },
+        { item: 'sum_amount', name: $trans('Amount') },
+        { item: 'sum_price_selling', name: $trans('Selling price') },
+        { item: 'profit', name: $trans('Profit') },
       ],
       TD_fields: [
-        {key: 'material_name', label: this.$trans('Material'), sortable: true},
-        {key: 'sum_amount', label: this.$trans('Total amount'), sortable: true},
-        {key: 'sum_price_selling', label: this.$trans('Total selling'), sortable: true},
-        {key: 'sum_price_purchase', label: this.$trans('Total purchase'), sortable: true},
-        {key: 'profit', label: this.$trans('Profit'), sortable: true},
+        {key: 'material_name', label: $trans('Material'), sortable: true},
+        {key: 'sum_amount', label: $trans('Total amount'), sortable: true},
+        {key: 'sum_price_selling', label: $trans('Total selling'), sortable: true},
+        {key: 'sum_price_purchase', label: $trans('Total purchase'), sortable: true},
+        {key: 'profit', label: $trans('Profit'), sortable: true},
       ],
       TSPS_fields: [
-        {key: 'supplier_name', label: this.$trans('Supplier'), sortable: true},
-        {key: 'sum_amount', label: this.$trans('Total amount'), sortable: true},
-        {key: 'sum_price_selling', label: this.$trans('Total selling'), sortable: true},
-        {key: 'sum_price_purchase', label: this.$trans('Total purchase'), sortable: true},
-        {key: 'profit', label: this.$trans('Profit'), sortable: true},
+        {key: 'supplier_name', label: $trans('Supplier'), sortable: true},
+        {key: 'sum_amount', label: $trans('Total amount'), sortable: true},
+        {key: 'sum_price_selling', label: $trans('Total selling'), sortable: true},
+        {key: 'sum_price_purchase', label: $trans('Total purchase'), sortable: true},
+        {key: 'profit', label: $trans('Profit'), sortable: true},
       ],
       TSPC_fields: [
-        {key: 'customer_name', label: this.$trans('Supplier'), sortable: true},
-        {key: 'sum_amount', label: this.$trans('Total amount'), sortable: true},
-        {key: 'sum_price_selling', label: this.$trans('Total selling'), sortable: true},
-        {key: 'sum_price_purchase', label: this.$trans('Total purchase'), sortable: true},
-        {key: 'profit', label: this.$trans('Profit'), sortable: true},
+        {key: 'customer_name', label: $trans('Supplier'), sortable: true},
+        {key: 'sum_amount', label: $trans('Total amount'), sortable: true},
+        {key: 'sum_price_selling', label: $trans('Total selling'), sortable: true},
+        {key: 'sum_price_purchase', label: $trans('Total purchase'), sortable: true},
+        {key: 'profit', label: $trans('Profit'), sortable: true},
       ],
       TSPMS_fields: [
-        {key: 'supplier_name', label: this.$trans('Supplier'), sortable: true},
-        {key: 'material_name', label: this.$trans('Material'), sortable: true},
-        {key: 'sum_amount', label: this.$trans('Total amount'), sortable: true},
-        {key: 'sum_price_selling', label: this.$trans('Total selling'), sortable: true},
-        {key: 'sum_price_purchase', label: this.$trans('Total purchase'), sortable: true},
-        {key: 'profit', label: this.$trans('Profit'), sortable: true},
+        {key: 'supplier_name', label: $trans('Supplier'), sortable: true},
+        {key: 'material_name', label: $trans('Material'), sortable: true},
+        {key: 'sum_amount', label: $trans('Total amount'), sortable: true},
+        {key: 'sum_price_selling', label: $trans('Total selling'), sortable: true},
+        {key: 'sum_price_purchase', label: $trans('Total purchase'), sortable: true},
+        {key: 'profit', label: $trans('Profit'), sortable: true},
       ],
       TSPMC_fields: [
-        {key: 'customer_name', label: this.$trans('Customer'), sortable: true},
-        {key: 'material_name', label: this.$trans('Material'), sortable: true},
-        {key: 'sum_amount', label: this.$trans('Total amount'), sortable: true},
-        {key: 'sum_price_selling', label: this.$trans('Total selling'), sortable: true},
-        {key: 'sum_price_purchase', label: this.$trans('Total purchase'), sortable: true},
-        {key: 'profit', label: this.$trans('Profit'), sortable: true},
+        {key: 'customer_name', label: $trans('Customer'), sortable: true},
+        {key: 'material_name', label: $trans('Material'), sortable: true},
+        {key: 'sum_amount', label: $trans('Total amount'), sortable: true},
+        {key: 'sum_price_selling', label: $trans('Total selling'), sortable: true},
+        {key: 'sum_price_purchase', label: $trans('Total purchase'), sortable: true},
+        {key: 'profit', label: $trans('Profit'), sortable: true},
       ],
       options: {
         responsive: true,

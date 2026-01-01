@@ -230,7 +230,7 @@ import { usernameExists } from '@/models/helpers'
 import customerUserModel from '../../models/company/UserCustomer.js'
 import customerModel from '../../models/customer/Customer.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -349,7 +349,7 @@ export default {
         this.customers = response
         this.isLoading = false
       }).catch(() => {
-        errorToast(create, this.$trans('Error fetching customers'))
+        errorToast(create, $trans('Error fetching customers'))
         this.isLoading = false
       })
     },
@@ -385,11 +385,11 @@ export default {
 
         try {
           await customerUserModel.insert(this.customeruser)
-          infoToast(create, this.$trans('Created'), this.$trans('Customer user has been created'))
+          infoToast(create, $trans('Created'), $trans('Customer user has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
-          errorToast(create, this.$trans('Error creating customer user'))
+          errorToast(create, $trans('Error creating customer user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -408,11 +408,11 @@ export default {
         }
 
         await customerUserModel.update(this.pk, this.customeruser)
-        infoToast(create, this.$trans('Updated'), this.$trans('Customer user has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Customer user has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
-        errorToast(create, this.$trans('Error updating customer user'))
+        errorToast(create, $trans('Error updating customer user'))
         this.isLoading = false
       }
     },
@@ -428,7 +428,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customeruser', error)
-        errorToast(create, this.$trans('Error loading customer user'))
+        errorToast(create, $trans('Error loading customer user'))
         this.isLoading = false
       }
     },

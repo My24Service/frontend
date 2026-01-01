@@ -126,7 +126,7 @@ import {InvoiceService} from '@/models/invoices/Invoice.js'
 import {InvoiceStatuscodeService} from '@/models/invoices/InvoiceStatuscode.js'
 import { InvoiceStatusService } from '@/models/invoices/InvoiceStatus.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -151,12 +151,12 @@ export default {
       order: null,
       statuscodes: [],
       fields: [
-        {key: 'invoice_id', label: this.$trans('ID')},
-        {key: 'created_by_fullname', label: this.$trans('Created by')},
-        {key: 'term_of_payment_days', label: this.$trans('Term of payment')},
-        {key: 'total', label: this.$trans('Total')},
-        {key: 'vat', label: this.$trans('Vat')},
-        {key: 'status', label: this.$trans('Status')},
+        {key: 'invoice_id', label: $trans('ID')},
+        {key: 'created_by_fullname', label: $trans('Created by')},
+        {key: 'term_of_payment_days', label: $trans('Term of payment')},
+        {key: 'total', label: $trans('Total')},
+        {key: 'vat', label: $trans('Vat')},
+        {key: 'status', label: $trans('Status')},
         {key: 'icons', label: ''},
       ]
     }
@@ -165,11 +165,11 @@ export default {
     pageTitle() {
       switch (this.$route.name) {
         case 'invoices-sent':
-          return this.$trans("Sent invoices")
+          return $trans("Sent invoices")
         case 'preliminary-invoices':
-          return this.$trans("Preliminary invoices")
+          return $trans("Preliminary invoices")
         default:
-          return this.$trans("Definitive invoices")
+          return $trans("Definitive invoices")
       }
     },
   },
@@ -198,13 +198,13 @@ export default {
 
       try {
         await this.invoiceService.delete(this.invoicePk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Invoice has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Invoice has been deleted'))
         this.isLoading = false
         await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting invoice', error)
-        errorToast(create, this.$trans('Error deleting invoice'))
+        errorToast(create, $trans('Error deleting invoice'))
       }
     },
     async loadStatusCodes () {
@@ -221,7 +221,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscodes", error);
-        errorToast(create, this.$trans("Error loading statuscodes"));
+        errorToast(create, $trans("Error loading statuscodes"));
         this.isLoading = false;
       }
     },
@@ -235,7 +235,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoices', error)
-        errorToast(create, this.$trans('Error loading invoices'))
+        errorToast(create, $trans('Error loading invoices'))
         this.isLoading = false
       }
     }

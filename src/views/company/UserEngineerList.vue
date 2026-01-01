@@ -98,7 +98,7 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import PillsEngineer from "./PillsEngineer";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -122,12 +122,12 @@ export default {
       isLoading: false,
       engineers: [],
       engineerFields: [
-        {key: 'full_name', label: this.$trans('Name'), sortable: true},
-        {key: 'username', label: this.$trans('Username'), sortable: true},
-        {key: 'engineer.mobile', label: this.$trans('Mobile'), sortable: true},
-        {key: 'email', label: this.$trans('Email'), sortable: true},
-        {key: 'last_login', label: this.$trans('Last login'), sortable: true},
-        {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
+        {key: 'full_name', label: $trans('Name'), sortable: true},
+        {key: 'username', label: $trans('Username'), sortable: true},
+        {key: 'engineer.mobile', label: $trans('Mobile'), sortable: true},
+        {key: 'email', label: $trans('Email'), sortable: true},
+        {key: 'last_login', label: $trans('Last login'), sortable: true},
+        {key: 'date_joined', label: $trans('Date joined'), sortable: true},
         {key: 'icons', label: ''}
       ]
     }
@@ -144,7 +144,7 @@ export default {
   methods: {
     // download
     downloadList() {
-      if (confirm(this.$trans('Are you sure you want to export all engineers?'))) {
+      if (confirm($trans('Are you sure you want to export all engineers?'))) {
         my24.downloadItem('/company/engineer-export-xls/', 'engineers.xlsx')
       }
     },
@@ -165,10 +165,10 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, this.$trans('Removed engineer'), `${this.$trans('Engineer has been removed')}`)
+        infoToast(create, $trans('Removed engineer'), `${$trans('Engineer has been removed')}`)
         await this.loadData()
       } catch(error) {
-        errorToast(create, `${this.$trans('Error deleting engineer:')} ${error}`);
+        errorToast(create, `${$trans('Error deleting engineer:')} ${error}`);
       }
     },
     // rest
@@ -184,7 +184,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineers', error)
-        errorToast(create, this.$trans('Error loading engineers'))
+        errorToast(create, $trans('Error loading engineers'))
         this.isLoading = false
       }
     }

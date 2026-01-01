@@ -114,7 +114,7 @@ import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -138,13 +138,13 @@ export default {
       isLoading: false,
       studentusers: [],
       studentuserFields: [
-        {key: 'full_name', label: this.$trans('Name'), sortable: true},
-        {key: 'username', label: this.$trans('Username'), sortable: true},
-        {key: 'student_user.mobile', label: this.$trans('Mobile'), sortable: true},
-        {key: 'email', label: this.$trans('Email'), sortable: true},
-        {key: 'last_login', label: this.$trans('Last login'), sortable: true},
-        {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
-        {key: 'active', label: this.$trans('Active?')},
+        {key: 'full_name', label: $trans('Name'), sortable: true},
+        {key: 'username', label: $trans('Username'), sortable: true},
+        {key: 'student_user.mobile', label: $trans('Mobile'), sortable: true},
+        {key: 'email', label: $trans('Email'), sortable: true},
+        {key: 'last_login', label: $trans('Last login'), sortable: true},
+        {key: 'date_joined', label: $trans('Date joined'), sortable: true},
+        {key: 'active', label: $trans('Active?')},
         {key: 'icons'}
       ],
     }
@@ -156,7 +156,7 @@ export default {
   methods: {
     // download
     downloadList() {
-      if (confirm(this.$trans('Are you sure you want to export all students?'))) {
+      if (confirm($trans('Are you sure you want to export all students?'))) {
         my24.downloadItem('/company/student-export-xls/', 'students.xlsx')
       }
     },
@@ -176,7 +176,7 @@ export default {
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user active', error)
-        errorToast(create, this.$trans('Error setting student user active'))
+        errorToast(create, $trans('Error setting student user active'))
       }
     },
     async setInActive(pk, email) {
@@ -185,7 +185,7 @@ export default {
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user inactive', error)
-        errorToast(create, this.$trans('Error setting student user inactive'))
+        errorToast(create, $trans('Error setting student user inactive'))
       }
     },
     // delete
@@ -196,11 +196,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('studentuser has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting studentuser', error)
-        errorToast(create, this.$trans('Error deleting studentuser'))
+        errorToast(create, $trans('Error deleting studentuser'))
       }
     },
     // rest
@@ -213,7 +213,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentusers', error)
-        errorToast(create, this.$trans('Error loading student users'))
+        errorToast(create, $trans('Error loading student users'))
         this.isLoading = false
       }
     }

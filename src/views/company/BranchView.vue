@@ -219,33 +219,33 @@ export default {
       branch: null,
       orders: [],
       orderPastFields: [
-        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
       breadcrumb: [
         {
-          text: this.$trans('Branches'),
+          text: $trans('Branches'),
           to: {name: 'company-branches'}
         },
         {
-          text: this.$trans('Detail'),
+          text: $trans('Detail'),
           active: true
         },
       ],
 
       locations: [],
       locationFields: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'name', label: $trans('Name')},
+        {key: 'created', label: $trans('Created')},
+        {key: 'modified', label: $trans('Modified')},
         {key: 'icons', label: ""}
       ],
 
       equipment: [],
       equipmentFields: [
-        {key: 'name', label: this.$trans('Equipment')},
-        {key: 'brand', label: this.$trans('Brand')},
-        {key: 'created', label: this.$trans('Created')},
+        {key: 'name', label: $trans('Equipment')},
+        {key: 'brand', label: $trans('Brand')},
+        {key: 'created', label: $trans('Created')},
         {key: 'icons', label: ""}
       ],
       statsData: null
@@ -330,7 +330,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching branch detail data', error)
-        errorToast(create, this.$trans('Error fetching branch detail'))
+        errorToast(create, $trans('Error fetching branch detail'))
         this.isLoading = false
       }
     },
@@ -343,7 +343,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        errorToast(create, this.$trans('Error fetching orders'))
+        errorToast(create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     }

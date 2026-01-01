@@ -109,7 +109,7 @@ import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
 import {OrderService} from "@/models/orders/Order";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -167,7 +167,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching unsent email", error);
-        errorToast(create, this.$trans("Error fetching unsent email"));
+        errorToast(create, $trans("Error fetching unsent email"));
         this.isLoading = false;
       }
     },
@@ -218,7 +218,7 @@ export default {
       } catch(error) {
         this.isLoading = false
         console.log('error fetching invoice', error)
-        errorToast(create, this.$trans('Error fetching invoice'))
+        errorToast(create, $trans('Error fetching invoice'))
       }
     },
     async loadDocuments() {
@@ -232,7 +232,7 @@ export default {
       } catch (error) {
         this.isLoading = false;
         console.log("Error fetching documents", error);
-        errorToast(create, this.$trans("Error fetching documents"));
+        errorToast(create, $trans("Error fetching documents"));
       }
     },
     async submitForm() {
@@ -253,9 +253,9 @@ export default {
 
       this.email.recipients = validatedEmails
       this.isLoading = true;
-      const sentTitle = this.$trans("Sent")
-      const sentBody = this.$trans("Invoice has been sent")
-      const sendError = this.$trans("Error sending invoice")
+      const sentTitle = $trans("Sent")
+      const sentBody = $trans("Invoice has been sent")
+      const sendError = $trans("Error sending invoice")
 
       if (this.isCreate) {
         this.email.invoice = this.$route.query.invoiceId

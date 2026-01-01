@@ -455,7 +455,7 @@ import supplierModel from '@/models/inventory/Supplier.js'
 import materialModel from '@/models/inventory/Material.js'
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 const greaterThanZero = (value) => parseInt(value) > 0
@@ -479,7 +479,7 @@ export default {
   },
   data() {
     return {
-      chooseErrorText: this.$trans('Please select a supplier or reservation'),
+      chooseErrorText: $trans('Please select a supplier or reservation'),
       isLoading: false,
       buttonDisabled: false,
       submitClicked: false,
@@ -497,9 +497,9 @@ export default {
       editIndex: null,
       isEditMaterial: false,
       materialFields: [
-        { key: 'material_view.name', label: this.$trans('Name') },
-        { key: 'amount', label: this.$trans('Amount') },
-        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'material_view.name', label: $trans('Name') },
+        { key: 'amount', label: $trans('Amount') },
+        { key: 'remarks', label: $trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       materialsSearch: [],
@@ -556,7 +556,7 @@ export default {
 
       await this.getSuppliers('')
     } catch {
-      errorToast(create, this.$trans('Error fetching countries'))
+      errorToast(create, $trans('Error fetching countries'))
       this.buttonDisabled = false
     }
   },
@@ -619,7 +619,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching materials', error)
-        errorToast(create, this.$trans('Error fetching products'))
+        errorToast(create, $trans('Error fetching products'))
         this.isLoading = false
       }
     },
@@ -632,7 +632,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching suppliers', error)
-        errorToast(create, this.$trans('Error fetching suppliers'))
+        errorToast(create, $trans('Error fetching suppliers'))
         this.isLoading = false
       }
     },
@@ -664,7 +664,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error searching reservations', error)
-        errorToast(create, this.$trans('Error searching reservations'))
+        errorToast(create, $trans('Error searching reservations'))
         this.isLoading = false
       }
     },
@@ -709,14 +709,14 @@ export default {
             await purchaseOrderMaterialModel.insert(material)
           }
 
-          infoToast(create, this.$trans('Created'), this.$trans('Purchase order has been created'))
+          infoToast(create, $trans('Created'), $trans('Purchase order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating purchase order', error)
-          errorToast(create, this.$trans('Error creating purchase order'))
+          errorToast(create, $trans('Error creating purchase order'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -726,23 +726,23 @@ export default {
 
       try {
         await purchaseOrderModel.update(this.pk, this.purchaseOrder)
-        infoToast(create, this.$trans('Updated'), this.$trans('Purchase order has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Purchase order has been updated'))
 
         for (let material of this.purchaseOrder.materials) {
           material.purchase_order = this.pk
           if (material.id) {
             await purchaseOrderMaterialModel.update(material.id, material)
-            infoToast(create, this.$trans('Product updated'), this.$trans('Purchase order product has been updated'))
+            infoToast(create, $trans('Product updated'), $trans('Purchase order product has been updated'))
           } else {
             await purchaseOrderMaterialModel.insert(material)
-            infoToast(create, this.$trans('Product created'), this.$trans('Purchase order product has been created'))
+            infoToast(create, $trans('Product created'), $trans('Purchase order product has been created'))
           }
         }
 
         for (const material of this.deletedMaterials) {
           if (material.id) {
             await purchaseOrderMaterialModel.delete(material.id)
-            infoToast(create, this.$trans('Product removed'), this.$trans('Purchase order product has been removed'))
+            infoToast(create, $trans('Product removed'), $trans('Purchase order product has been removed'))
           }
         }
 
@@ -751,7 +751,7 @@ export default {
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating purchase order', error)
-        errorToast(create, this.$trans('Error updating purchase order'))
+        errorToast(create, $trans('Error updating purchase order'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -769,7 +769,7 @@ export default {
         await this.getMaterials('')
       } catch(error) {
         console.log('error fetching purchase order', error)
-        errorToast(create, this.$trans('Error fetching purchase order'))
+        errorToast(create, $trans('Error fetching purchase order'))
         this.isLoading = false
       }
     },

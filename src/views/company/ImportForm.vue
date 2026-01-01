@@ -163,7 +163,7 @@ export default {
           const created = await this.service.insert(this.importModel)
           this.importModel = new Import(created)
         } catch (e) {
-          errorToast(create, this.$trans('Error creating import'))
+          errorToast(create, $trans('Error creating import'))
           console.log(`Error creating import: ${e}`)
           this.isSubmitClicked = false
           return
@@ -176,7 +176,7 @@ export default {
 
           await this.service.update(this.pk, this.importModel)
         } catch (e) {
-          errorToast(create, this.$trans('Error updating import'))
+          errorToast(create, $trans('Error updating import'))
           console.log(`Error creating import: ${e}`)
           this.isSubmitClicked = false
           return

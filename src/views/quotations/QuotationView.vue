@@ -266,7 +266,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        errorToast(create, this.$trans('Error fetching quotation'))
+        errorToast(create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     }

@@ -176,7 +176,7 @@ import IconLinkPlus from "../../components/IconLinkPlus";
 import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -226,45 +226,45 @@ export default {
       equipmentObjects: [],
       equipmentFields: [],
       equipmentFieldsCustomerPlanning: [
-        {key: 'name', label: this.$trans('Equipment'), sortable: true},
-        {key: 'customer', label: this.$trans('Customer'), sortable: true},
-        {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'location_name', label: this.$trans('Location')},
-        {key: 'latest_state', label: this.$trans('State')},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
-        {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'customer', label: $trans('Customer'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchPlanning: [
-        {key: 'name', label: this.$trans('Equipment'), sortable: true},
-        {key: 'branch', label: this.$trans('Branch'), sortable: true},
-        {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'location_name', label: this.$trans('Location')},
-        {key: 'latest_state', label: this.$trans('State')},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
-        {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'branch', label: $trans('Branch'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsCustomerNonPlanning: [
-        {key: 'name', label: this.$trans('Equipment'), sortable: true},
-        {key: 'location_name', label: this.$trans('Location')},
-        {key: 'latest_state', label: this.$trans('State')},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchNonPlanning: [
-        {key: 'name', label: this.$trans('Equipment'), sortable: true},
-        {key: 'location_name', label: this.$trans('Location')},
-        {key: 'latest_state', label: this.$trans('State')},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipment_pk: null,
@@ -328,11 +328,11 @@ export default {
       try {
         await this.equipmentStateService.insert(this.state)
         this.state = new EquipmentStateModel({})
-        infoToast(create, this.$trans('Created'), this.$trans('State added'))
+        infoToast(create, $trans('Created'), $trans('State added'))
         await this.loadData()
       } catch(error) {
         console.log('Error adding state', error)
-        errorToast(create, this.$trans('Error adding state'))
+        errorToast(create, $trans('Error adding state'))
       }
     },
     // search
@@ -357,11 +357,11 @@ export default {
     async doDelete() {
       try {
         await this.equipmentService.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Equipment has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Equipment has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting equipment', error)
-        errorToast(create, this.$trans('Error deleting equipment'))
+        errorToast(create, $trans('Error deleting equipment'))
       }
     },
     // rest
@@ -374,7 +374,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)
-        errorToast(create, this.$trans('Error loading equipment'))
+        errorToast(create, $trans('Error loading equipment'))
         this.isLoading = false
       }
     }

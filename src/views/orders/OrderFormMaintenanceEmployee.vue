@@ -563,7 +563,7 @@ import Multiselect from "vue-multiselect";
 import {OrderlineService} from "@/models/orders/Orderline";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -610,9 +610,9 @@ export default {
 
       info: '',
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'product', label: $trans('Product') },
+        { key: 'location', label: $trans('Location') },
+        { key: 'remarks', label: $trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       submitClicked: false,
@@ -702,14 +702,14 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
             await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
             await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
           this.equipment = response.id
           this.product = response.name
         } else {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
             await this.equipmentService.quickAddBranchPlanning(this.newEquipmentName, this.order.branch) :
             await this.equipmentService.quickAddBranchNonPlanning(this.newEquipmentName)
 
@@ -718,7 +718,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding equipment', error)
-        errorToast(create, this.$trans('Error adding equipment'))
+        errorToast(create, $trans('Error adding equipment'))
       }
     },
     async getEquipment(query) {
@@ -727,7 +727,7 @@ export default {
 
       } catch(error) {
         console.log('Error searching equipment', error)
-        errorToast(create, this.$trans('Error searching equipment'))
+        errorToast(create, $trans('Error searching equipment'))
       }
     },
     equipmentLabel({ name }) {
@@ -757,14 +757,14 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
             await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
             await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
 
           this.equipment_location = response.id
           this.location = response.name
         } else {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
             await this.locationService.quickAddBranchPlanning(this.newLocationName, this.order.branch) :
             await this.locationService.quickAddBranchNonPlanning(this.newLocationName)
 
@@ -773,7 +773,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding location', error)
-        errorToast(create, this.$trans('Error adding location'))
+        errorToast(create, $trans('Error adding location'))
       }
     },
     async getLocation(query) {
@@ -781,7 +781,7 @@ export default {
         this.locationSearch = await this.locationService.searchBranchEmployee(query, this.order.branch)
       } catch(error) {
         console.log('Error searching location', error)
-        errorToast(create, this.$trans('Error searching location'))
+        errorToast(create, $trans('Error searching location'))
       }
     },
     locationLabel({ name }) {
@@ -887,13 +887,13 @@ export default {
           // insert documents
           this.$refs['documents-component'].orderCreated(newOrder)
 
-          infoToast(create, this.$trans('Created'), this.$trans('Order has been created'))
+          infoToast(create, $trans('Created'), $trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating order', error)
-          errorToast(create, this.$trans('Error creating order'))
+          errorToast(create, $trans('Error creating order'))
           this.isLoading = false
           this.buttonDisabled = false
           return
@@ -911,27 +911,27 @@ export default {
           orderline.order = this.pk
           if (orderline.id) {
             await this.orderlineService.update(orderline.id, orderline)
-            // infoToast(create, this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+            // infoToast(create, $trans('Orderline updated'), $trans('Orderline has been updated'))
           } else {
             await this.orderlineService.insert(orderline)
-            // infoToast(create, this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+            // infoToast(create, $trans('Orderline created'), $trans('Orderline has been created'))
           }
         }
 
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
             await this.orderlineService.delete(orderline.id)
-            // infoToast(create, this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+            // infoToast(create, $trans('Orderline removed'), $trans('Orderline has been removed'))
           }
         }
 
-        infoToast(create, this.$trans('Updated'), this.$trans('Order has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating order', error)
-        errorToast(create, this.$trans('Error updating order'))
+        errorToast(create, $trans('Error updating order'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -982,7 +982,7 @@ export default {
       this.isLoading = false
     } catch (error) {
       console.log('error loading order', error)
-      errorToast(create, this.$trans('Error fetching order data'))
+      errorToast(create, $trans('Error fetching order data'))
       this.isLoading = false
     }
   },

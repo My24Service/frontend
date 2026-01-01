@@ -88,7 +88,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -107,12 +107,12 @@ export default {
       isLoading: false,
       stockLocations: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'identifier', label: this.$trans('Identifier'), sortable: true},
-        {key: 'inventory', label: this.$trans('Inventory'), sortable: true},
-        {key: 'show_in_stats', label: this.$trans('In stats?'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'identifier', label: $trans('Identifier'), sortable: true},
+        {key: 'inventory', label: $trans('Inventory'), sortable: true},
+        {key: 'show_in_stats', label: $trans('In stats?'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -139,11 +139,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.stockLocationPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Stock location has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Stock location has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting stock location', error)
-        errorToast(create, this.$trans('Error deleting stock location'))
+        errorToast(create, $trans('Error deleting stock location'))
       }
     },
     // rest
@@ -156,7 +156,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching stock locations', error)
-        errorToast(create, this.$trans('Error loading stock locations'))
+        errorToast(create, $trans('Error loading stock locations'))
         this.isLoading = false
       }
     }

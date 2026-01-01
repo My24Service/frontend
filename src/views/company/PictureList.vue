@@ -100,7 +100,7 @@ import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {NO_IMAGE_URL} from "@/constants"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -120,9 +120,9 @@ export default {
       isLoading: false,
       pictures: [],
       fields: [
-        {key: 'picture', label: this.$trans('Picture'), sortable: true, },
-        {key: 'name', label: this.$trans('Name'), sortable: true, },
-        {key: 'created', label: this.$trans('Created'), sortable: true, },
+        {key: 'picture', label: $trans('Picture'), sortable: true, },
+        {key: 'name', label: $trans('Name'), sortable: true, },
+        {key: 'created', label: $trans('Created'), sortable: true, },
         {key: 'icons', label: '', thAttr: {width: '10%'}}
       ],
       NO_IMAGE_URL
@@ -150,11 +150,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.picturePk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Picture has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Picture has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting picture', error)
-        errorToast(create, this.$trans('Error deleting picture'))
+        errorToast(create, $trans('Error deleting picture'))
       }
     },
     // rest
@@ -167,7 +167,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching pictures', error)
-        errorToast(create, this.$trans('Error loading pictures'))
+        errorToast(create, $trans('Error loading pictures'))
         this.isLoading = false
       }
     }

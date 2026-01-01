@@ -348,7 +348,7 @@ import actionTripModel from '@/models/mobile/TripStatuscodeAction.js'
 import partnerModel from '@/models/company/Partner.js'
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -389,9 +389,9 @@ export default {
       condition_operator: '',
       condition_value: '',
       conditionFields: [
-        {key: 'field', label: this.$trans('Field')},
-        {key: 'operator', label: this.$trans('Operator')},
-        {key: 'value', label: this.$trans('Value')},
+        {key: 'field', label: $trans('Field')},
+        {key: 'operator', label: $trans('Operator')},
+        {key: 'value', label: $trans('Value')},
         {key: 'icons'}
       ],
 
@@ -399,23 +399,23 @@ export default {
       action: actionOrderModel.getFields(),
       operators: ['=', '!=', '<', '<=', '>', '>=', 'REGEXP', 'NOTREGEXP', 'CONTAINS'],
       querymodes: [
-        {value: 'and', text: this.$trans('must match all of the conditions')},
-        {value: 'or', text: this.$trans('match any of the conditions')},
+        {value: 'and', text: $trans('must match all of the conditions')},
+        {value: 'or', text: $trans('match any of the conditions')},
       ],
       actionTypes: null,
       actionTypesOrder: [
-        {value: 'email', text: this.$trans('send email')},
-        {value: 'email_assigned', text: this.$trans('email assigned engineers')},
-        {value: 'copy', text: this.$trans('copy order to partner')},
-        {value: 'status', text: this.$trans('status change original order')},
-        {value: 'email_workorders', text: this.$trans('email workorders')},
-        {value: 'send_sms', text: this.$trans('send sms')},
-        {value: 'send_fcm', text: this.$trans('send FCM')},
+        {value: 'email', text: $trans('send email')},
+        {value: 'email_assigned', text: $trans('email assigned engineers')},
+        {value: 'copy', text: $trans('copy order to partner')},
+        {value: 'status', text: $trans('status change original order')},
+        {value: 'email_workorders', text: $trans('email workorders')},
+        {value: 'send_sms', text: $trans('send sms')},
+        {value: 'send_fcm', text: $trans('send FCM')},
       ],
       actionTypesTrip: [
-        {value: 'email', text: this.$trans('send email')},
-        {value: 'send_sms', text: this.$trans('send sms')},
-        {value: 'send_fcm', text: this.$trans('send FCM')},
+        {value: 'email', text: $trans('send email')},
+        {value: 'send_sms', text: $trans('send sms')},
+        {value: 'send_fcm', text: $trans('send FCM')},
       ],
     }
   },
@@ -433,14 +433,14 @@ export default {
         this.actionTypes = this.actionTypesOrder.slice()
 
         const hasAccessToGripp = my24.hasAccessToModule({
-          isStaff: this.isStaff,
-          isSuperuser: this.isSuperuser,
+          isStaff: this.$store.getters.getIsStaff,
+          isSuperuser: this.$store.getters.getIsSuperuser,
           contract: this.$store.state.memberContract,
           module: 'company',
           part: 'connector-gripp'});
 
         if (hasAccessToGripp) {
-          this.actionTypes.push( {value: 'send_to_gripp', text: this.$trans('send to Gripp')} );
+          this.actionTypes.push( {value: 'send_to_gripp', text: $trans('send to Gripp')} );
         }
 
         this.actionModel = actionOrderModel
@@ -485,12 +485,12 @@ export default {
 
       try {
         await this.actionModel.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Action has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Action has been deleted'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error deleting action', error)
-        errorToast(create, this.$trans('Error deleting action'))
+        errorToast(create, $trans('Error deleting action'))
         this.isLoading = false
       }
     },
@@ -526,12 +526,12 @@ export default {
         try {
           this.action.statuscode = this.statuscode_pk
           await this.actionModel.insert(this.action)
-          infoToast(create, this.$trans('Created'), this.$trans('Action has been created'))
+          infoToast(create, $trans('Created'), $trans('Action has been created'))
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('error creating action', error)
-          errorToast(create, this.$trans('Error creating action'))
+          errorToast(create, $trans('Error creating action'))
           this.isLoading = false
         }
 
@@ -540,12 +540,12 @@ export default {
 
       try {
         await this.actionModel.update(this.pk, this.action)
-        infoToast(create, this.$trans('Updated'), this.$trans('Action has been updated'))
+        infoToast(create, $trans('Updated'), $trans('Action has been updated'))
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('error updating action', error)
-        errorToast(create, this.$trans('Error updating action'))
+        errorToast(create, $trans('Error updating action'))
         this.isLoading = false
       }
     },
@@ -557,7 +557,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching action', error)
-        errorToast(create, this.$trans('Error loading action'))
+        errorToast(create, $trans('Error loading action'))
         this.isLoading = false
       }
     },

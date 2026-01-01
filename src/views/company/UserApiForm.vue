@@ -161,7 +161,7 @@ import {email, helpers, required, sameAs} from '@vuelidate/validators'
 import {ApiUserService, ApiUserUserModel} from '@/models/company/UserApi'
 import {usernameExists} from "@/models/helpers";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -292,11 +292,11 @@ export default {
         try {
           this.apiuser.password = this.apiuser.password1
           await this.apiUserService.insert(this.apiuser)
-          infoToast(create, this.$trans('Created'), this.$trans('API user has been created'))
+          infoToast(create, $trans('Created'), $trans('API user has been created'))
           this.isLoading = false
           await this.$router.push({name: 'users-apiusers'})
         } catch(error) {
-          errorToast(create, this.$trans('Error creating API user'))
+          errorToast(create, $trans('Error creating API user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -306,12 +306,12 @@ export default {
 
       try {
         await this.apiUserService.update(this.pk, this.apiuser)
-        infoToast(create, this.$trans('Updated'), this.$trans('API user has been updated'))
+        infoToast(create, $trans('Updated'), $trans('API user has been updated'))
         this.isLoading = false
         await this.$router.push({name: 'users-apiusers'})
       } catch(error) {
         console.log(error)
-        errorToast(create, this.$trans('Error updating API user'))
+        errorToast(create, $trans('Error updating API user'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -325,7 +325,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching apiuser', error)
-        errorToast(create, this.$trans('Error loading API user'))
+        errorToast(create, $trans('Error loading API user'))
         this.isLoading = false
       }
     },

@@ -90,7 +90,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -111,11 +111,11 @@ export default {
       isLoading: false,
       planningusers: [],
       planninguserFields: [
-        {key: 'full_name', label: this.$trans('Name'), sortable: true},
-        {key: 'username', label: this.$trans('Username'), sortable: true},
-        {key: 'email', label: this.$trans('Email'), sortable: true},
-        {key: 'last_login', label: this.$trans('Last login'), sortable: true},
-        {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
+        {key: 'full_name', label: $trans('Name'), sortable: true},
+        {key: 'username', label: $trans('Username'), sortable: true},
+        {key: 'email', label: $trans('Email'), sortable: true},
+        {key: 'last_login', label: $trans('Last login'), sortable: true},
+        {key: 'date_joined', label: $trans('Date joined'), sortable: true},
         {key: 'icons', label: ''}
       ],
     }
@@ -142,11 +142,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('planning user has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('planning user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting planning user', error)
-        errorToast(create, this.$trans('Error deleting planning user'))
+        errorToast(create, $trans('Error deleting planning user'))
       }
     },
     // rest
@@ -159,7 +159,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching planningusers', error)
-        errorToast(create, this.$trans('Error loading planning users'))
+        errorToast(create, $trans('Error loading planning users'))
         this.isLoading = false
       }
     }

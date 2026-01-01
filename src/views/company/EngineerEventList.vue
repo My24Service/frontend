@@ -103,7 +103,7 @@ import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import my24 from "../../services/my24";
 import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 const memberNewDataSocket = new MemberNewDataSocket()
@@ -129,13 +129,13 @@ export default {
       isLoading: false,
       events: [],
       fields: [
-        {key: 'engineer_name', label: this.$trans('Engineer')},
-        {key: 'event_dts', label: this.$trans('Date')},
-        {key: 'event_type', label: this.$trans('Type')},
-        {key: 'measure_last_event_type', label: this.$trans('Last event')},
-        {key: 'secs_since_last_measure_event_type', label: this.$trans('Last event duration')},
-        {key: 'assigned_order', label: this.$trans('Order')},
-        {key: 'created', label: this.$trans('Created')},
+        {key: 'engineer_name', label: $trans('Engineer')},
+        {key: 'event_dts', label: $trans('Date')},
+        {key: 'event_type', label: $trans('Type')},
+        {key: 'measure_last_event_type', label: $trans('Last event')},
+        {key: 'secs_since_last_measure_event_type', label: $trans('Last event duration')},
+        {key: 'assigned_order', label: $trans('Order')},
+        {key: 'created', label: $trans('Created')},
         {key: 'icons'}
       ],
     }
@@ -147,7 +147,7 @@ export default {
   methods: {
     // download
     downloadList() {
-      if (confirm(this.$trans('Are you sure you want to export all events?'))) {
+      if (confirm($trans('Are you sure you want to export all events?'))) {
         const url = "/company/events-export-xls/"
 
         my24.downloadItem(url, 'events.xlsx')
@@ -158,7 +158,7 @@ export default {
       this.$refs['attach-order-modal'].show(event_id, engineer_user_id)
     },
     assignedOk() {
-      infoToast(create, this.$trans('Assigned'), this.$trans('Order created and assigned'))
+      infoToast(create, $trans('Assigned'), $trans('Order created and assigned'))
     },
 
     // delete
@@ -169,11 +169,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.engineerEventModelPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Event has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Event has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting event', error)
-        errorToast(create, this.$trans('Error deleting event'))
+        errorToast(create, $trans('Error deleting event'))
       }
     },
     // rest
@@ -189,7 +189,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching events', error)
-        errorToast(create, this.$trans('Error loading events'))
+        errorToast(create, $trans('Error loading events'))
         this.isLoading = false
       }
     },

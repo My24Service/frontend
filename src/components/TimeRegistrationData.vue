@@ -213,7 +213,7 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-              <p>{{ this.$trans('Enter a correction value in minutes or in the form hh:mm.')}}</p>
+              <p>{{ $trans('Enter a correction value in minutes or in the form hh:mm.')}}</p>
               <b-form-input size="sm" autofocus v-model="timeEntryCorrection" v-bind:placeholder="$trans('Enter time value')" @xxchange="onChangeTimeCorrection()" @update="onChangeTimeCorrection()" style="margin-top:1rem;margin-bottom:1rem;width:10rem;"/>
               <div class="dimmed"><span v-html="timeEntryCorrectionAsText"></span></div>
               <!--
@@ -222,7 +222,7 @@
                 name="notify-user"
                 v-model="timeEntryCorrectionNotify"
                 value="notify"
-                unchecked-value="no">{{ this.$trans('Notify user') }}</b-form-checkbox> -->
+                unchecked-value="no">{{ $trans('Notify user') }}</b-form-checkbox> -->
             </b-col>
           </b-row>
         </b-container>
@@ -263,19 +263,19 @@ export default {
   },
   data() {
     let workHourDataFields = [
-      {label: this.$trans('Date'), key: 'date', thClass: 'col-tight'},
-      {label: this.$trans('Source'), key: 'source', thClass: 'col-tight'},
-      {key: 'work_times', label: this.$trans('Work start') + ' - ' + this.$trans('Work end') + ' ±', thClass: 'col-wider'},
-      // {label: this.$trans('Work start'), key: 'work_start', thClass: 'col-wide'},
-      // {label: this.$trans('Work end'), key: 'work_end', thClass: 'col-wide'},
-      {key: 'work_travel', label: this.$trans('Travel to') + ' / ' + this.$trans('Travel back'), thClass: 'col-wide'},
-      // {label: this.$trans('Travel to'), key: 'travel_to', thClass: 'col-wide'},
-      // {label: this.$trans('Travel back'), key: 'travel_back', thClass: 'col-wide'},
-      {key: 'work_distance', label: this.$trans('Distance to / back'), thClass: 'col-wide'},
-      // {label: this.$trans('Distance to'), key: 'distance_to', thClass: 'col-wide'},
-      // {label: this.$trans('Distance back'), key: 'distance_back', thClass: 'col-wide'},
-      {label: this.$trans('Project'), key: 'project'},
-      {label: this.$trans('Description'), key: 'description'},
+      {label: $trans('Date'), key: 'date', thClass: 'col-tight'},
+      {label: $trans('Source'), key: 'source', thClass: 'col-tight'},
+      {key: 'work_times', label: $trans('Work start') + ' - ' + $trans('Work end') + ' ±', thClass: 'col-wider'},
+      // {label: $trans('Work start'), key: 'work_start', thClass: 'col-wide'},
+      // {label: $trans('Work end'), key: 'work_end', thClass: 'col-wide'},
+      {key: 'work_travel', label: $trans('Travel to') + ' / ' + $trans('Travel back'), thClass: 'col-wide'},
+      // {label: $trans('Travel to'), key: 'travel_to', thClass: 'col-wide'},
+      // {label: $trans('Travel back'), key: 'travel_back', thClass: 'col-wide'},
+      {key: 'work_distance', label: $trans('Distance to / back'), thClass: 'col-wide'},
+      // {label: $trans('Distance to'), key: 'distance_to', thClass: 'col-wide'},
+      // {label: $trans('Distance back'), key: 'distance_back', thClass: 'col-wide'},
+      {label: $trans('Project'), key: 'project'},
+      {label: $trans('Description'), key: 'description'},
       {key: 'work_correct', label:'', thClass:'col-tight'},
     ];
 
@@ -290,7 +290,7 @@ export default {
       && break_calculation_settings.after > 0
       && break_calculation_settings.duration > 0) {
       workHourDataFields.splice( 4, 0, {
-        label: this.$trans('Break'),
+        label: $trans('Break'),
         key: 'break_duration',
         thClass: 'col-tight'
       } );
@@ -314,9 +314,9 @@ export default {
       workhourDataFields: workHourDataFields,
       leaveData: [],
       leaveDataFields: [
-        {label: this.$trans('Date'), key: 'date'},
-        {label: this.$trans('Leave hours'), key: 'leave_duration'},
-        {label: this.$trans('Leave type'), key: 'leave_type'},
+        {label: $trans('Date'), key: 'date'},
+        {label: $trans('Leave hours'), key: 'leave_duration'},
+        {label: $trans('Leave type'), key: 'leave_type'},
       ],
       dateQueryMode: [
         {
@@ -345,14 +345,14 @@ export default {
     breadcrumb() {
       return [
         {
-          text: this.$trans('Time registration'),
+          text: $trans('Time registration'),
           to: {
             name: 'company-time-registration',
             query: {date: this.startDate, mode: this.activeDateQueryMode}
           }
         },
         {
-          text: this.$trans('User time registration'),
+          text: $trans('User time registration'),
           active: true
         },
       ]
@@ -413,9 +413,9 @@ export default {
         }
         const display_time = ''+hh+':'+(mm < 10 ? '0': '')+mm
         this.timeEntryParsed = (is_negative ? '-' : '')+display_time;
-        this.timeEntryCorrectionAsText = this.$trans( is_negative ? 'Subtract' : 'Add ') + ' ' + display_time;
+        this.timeEntryCorrectionAsText = $trans( is_negative ? 'Subtract' : 'Add ') + ' ' + display_time;
       } else {
-        this.timeEntryCorrectionAsText = this.$trans('Invalid time');
+        this.timeEntryCorrectionAsText = $trans('Invalid time');
       }
     },
     editCorrection(timeEntry) {
@@ -636,7 +636,7 @@ export default {
 
       header_columns.push({
         key: 'full_name',
-        label: this.$trans('User'),
+        label: $trans('User'),
         sortable: true
       })
 
@@ -655,7 +655,7 @@ export default {
 
       header_columns.push({
         key: 'total',
-        label: this.$trans('Total'),
+        label: $trans('Total'),
         sortable: true
       })
 
@@ -695,7 +695,7 @@ export default {
         return this.$moment(dateIn).format('YYYY-MM-DD')
       })
 
-      let header_columns = [{label: this.$trans('Field'), key: 'field'}]
+      let header_columns = [{label: $trans('Field'), key: 'field'}]
 
       // add intervals
       for(let i=0; i<data.date_list.length; i++) {
@@ -709,7 +709,7 @@ export default {
 
       header_columns.push({
         key: 'total',
-        label: this.$trans('Total'),
+        label: $trans('Total'),
         sortable: true
       })
 

@@ -53,7 +53,7 @@
 <script>
 import memberModel from '@/models/member/Member.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -65,8 +65,8 @@ export default {
       settings: {},
       dummy: [],
       settingsFields: [
-        { key: 'key', label: this.$trans('Key') },
-        { key: 'value', label: this.$trans('Value') },
+        { key: 'key', label: $trans('Key') },
+        { key: 'value', label: $trans('Value') },
       ],
       member: memberModel.getFields(),
     }
@@ -125,12 +125,12 @@ export default {
 
       try {
         await memberModel.updateSettings(newValues)
-        infoToast(create, this.$trans('Updated'), this.$trans('Settings updated'))
+        infoToast(create, $trans('Updated'), $trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('Error updating settings', error)
-        errorToast(create, this.$trans('Error updating settings'))
+        errorToast(create, $trans('Error updating settings'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -144,7 +144,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching settings', error)
-        errorToast(create, this.$trans('Error fetching settings'))
+        errorToast(create, $trans('Error fetching settings'))
         this.isLoading = false
       }
     },

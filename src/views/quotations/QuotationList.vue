@@ -142,7 +142,7 @@ import Pagination from "@/components/Pagination.vue"
 import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '@/components/TableStatusInfo.vue'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import {QuotationService} from '@/models/quotations/Quotation.js'
@@ -173,13 +173,13 @@ export default {
       quotations: [],
       statuscodes: [],
       fields: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'quotation_name', label: this.$trans('Customer')},
-        {key: 'quotation_reference', label: this.$trans('Reference')},
-        {key: 'quotation_city', label: this.$trans('City')},
-        {key: 'total', label: this.$trans('Total')},
-        {key: 'vat', label: this.$trans('Vat')},
-        {key: 'status', label: this.$trans('Status')},
+        {key: 'name', label: $trans('Name')},
+        {key: 'quotation_name', label: $trans('Customer')},
+        {key: 'quotation_reference', label: $trans('Reference')},
+        {key: 'quotation_city', label: $trans('City')},
+        {key: 'total', label: $trans('Total')},
+        {key: 'vat', label: $trans('Vat')},
+        {key: 'status', label: $trans('Status')},
         {key: 'icons', label: ''},
       ]
     }
@@ -188,11 +188,11 @@ export default {
     pageTitle() {
       switch (this.$route.name) {
         case 'quotations-sent':
-          return this.$trans("Sent quotations")
+          return $trans("Sent quotations")
         case 'preliminary-quotations':
-          return this.$trans("Preliminary quotations")
+          return $trans("Preliminary quotations")
         default:
-          return this.$trans("Definitive quotations")
+          return $trans("Definitive quotations")
       }
     },
   },
@@ -243,13 +243,13 @@ export default {
 
       try {
         await this.quotationService.delete(this.quotationPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Quotation has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Quotation has been deleted'))
         this.isLoading = false
         await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting quotation', error)
-        errorToast(create, this.$trans('Error deleting quotation'))
+        errorToast(create, $trans('Error deleting quotation'))
       }
     },
     // rest
@@ -262,7 +262,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotations', error)
-        errorToast(create, this.$trans('Error loading quotations'))
+        errorToast(create, $trans('Error loading quotations'))
         this.isLoading = false
       }
     },
@@ -280,7 +280,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscodes", error);
-        errorToast(create, this.$trans("Error loading statuscodes"));
+        errorToast(create, $trans("Error loading statuscodes"));
         this.isLoading = false;
       }
     }

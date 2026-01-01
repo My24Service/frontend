@@ -184,7 +184,7 @@ import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {DocumentModel, DocumentService} from "@/models/customer/Document.js";
 import {CustomerModel} from "@/models/customer/Customer"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -207,11 +207,11 @@ export default {
     return {
       isLoading: false,
       fields: [
-        {key: 'name', label: this.$trans('Name')},
+        {key: 'name', label: $trans('Name')},
         {key: 'icons', label: ""},
       ],
       fieldsView: [
-        {key: 'name', label: this.$trans('Name')},
+        {key: 'name', label: $trans('Name')},
       ],
       documentService: new DocumentService(),
       newItem: false,
@@ -251,7 +251,7 @@ export default {
     },
     deleteDocument(index) {
       this.documentService.deleteCollectionItem(index)
-      infoToast(create, this.$trans('Marked for delete'), this.$trans("Document marked for delete"))
+      infoToast(create, $trans('Marked for delete'), $trans("Document marked for delete"))
     },
     async loadData() {
       this.isLoading = true
@@ -264,7 +264,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching documents', error)
-        errorToast(create, this.$trans('Error loading documents'))
+        errorToast(create, $trans('Error loading documents'))
         this.isLoading = false
       }
     },
@@ -300,11 +300,11 @@ export default {
 
       try {
         await this.documentService.updateCollection()
-        infoToast(create, this.$trans('Updated'), this.$trans('Documents have been updated'))
+        infoToast(create, $trans('Updated'), $trans('Documents have been updated'))
         await this.loadData()
       } catch (e) {
         console.log('error updating documents', e)
-        errorToast(create, this.$trans('Error updating documents'))
+        errorToast(create, $trans('Error updating documents'))
       }
 
       this.isLoading = false

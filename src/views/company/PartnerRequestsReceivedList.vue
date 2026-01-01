@@ -123,7 +123,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -144,12 +144,12 @@ export default {
       isLoading: false,
       partnerRequests: [],
       partnerRequestsReceivedFields: [
-        {key: 'from_member_view.name', label: this.$trans('Name'), sortable: true},
-        {key: 'from_member_view.companycode', label: this.$trans('Company code'), sortable: true},
-        {key: 'from_member_view.city', label: this.$trans('City'), sortable: true},
-        {key: 'from_member_view.email', label: this.$trans('Email'), sortable: true},
-        {key: 'status', label: this.$trans('Status'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'from_member_view.name', label: $trans('Name'), sortable: true},
+        {key: 'from_member_view.companycode', label: $trans('Company code'), sortable: true},
+        {key: 'from_member_view.city', label: $trans('City'), sortable: true},
+        {key: 'from_member_view.email', label: $trans('Email'), sortable: true},
+        {key: 'status', label: $trans('Status'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'icons'},
       ],
     }
@@ -176,11 +176,11 @@ export default {
     async acceptRequest() {
       try {
         await this.model.accept(this.pk)
-        infoToast(create, this.$trans('Accepted'), this.$trans('Partner request has been accepted'))
+        infoToast(create, $trans('Accepted'), $trans('Partner request has been accepted'))
         await this.loadData()
       } catch(error) {
         console.log('Error accepting partner request', error)
-        errorToast(create, this.$trans('Error accepting partner request'))
+        errorToast(create, $trans('Error accepting partner request'))
       }
     },
     showRejectRequestModal(id) {
@@ -190,11 +190,11 @@ export default {
     async rejectRequest() {
       try {
         await this.model.reject(this.pk)
-        infoToast(create, this.$trans('Rejected'), this.$trans('Partner request has been rejected'))
+        infoToast(create, $trans('Rejected'), $trans('Partner request has been rejected'))
         await this.loadData()
       } catch(error) {
         console.log('Error rejecting partner request', error)
-        errorToast(create, this.$trans('Error rejecting partner request'))
+        errorToast(create, $trans('Error rejecting partner request'))
       }
     },
     // delete
@@ -205,11 +205,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Partner request has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Partner request has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting partner request', error)
-        errorToast(create, this.$trans('Error deleting partner request'))
+        errorToast(create, $trans('Error deleting partner request'))
       }
     },
     // rest
@@ -222,7 +222,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching partnerRequestsReceived', error);
-        errorToast(create, this.$trans('Error loading partner requests sent'))
+        errorToast(create, $trans('Error loading partner requests sent'))
         this.isLoading = false
       }
     }

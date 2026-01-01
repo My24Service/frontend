@@ -456,7 +456,7 @@ import Multiselect from 'vue-multiselect'
 import tripModel from '@/models/mobile/Trip.js'
 import orderModel from '@/models/orders/Order.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -477,10 +477,10 @@ export default {
       isLoading: false,
       buttonDisabled: false,
       tripOrderFields: [
-        { key: 'name', label: this.$trans('Customer') },
-        { key: 'address', label: this.$trans('Address') },
-        { key: 'city', label: this.$trans('City') },
-        { key: 'date', label: this.$trans('Date') },
+        { key: 'name', label: $trans('Customer') },
+        { key: 'address', label: $trans('Address') },
+        { key: 'city', label: $trans('City') },
+        { key: 'date', label: $trans('Date') },
         { key: 'icons', label: '' }
       ],
       submitClicked: false,
@@ -634,13 +634,13 @@ export default {
       if (this.isCreate) {
         try {
           const trip = await tripModel.insert(this.trip)
-          infoToast(create, this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
+          infoToast(create, $trans('Trip created'), $trans(`Trip ${trip.id} has been created`))
           this.isLoading = false
           this.buttonDisabled = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating trip', error)
-          errorToast(create, this.$trans('Error creating trip'))
+          errorToast(create, $trans('Error creating trip'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -650,13 +650,13 @@ export default {
 
       try {
         await tripModel.update(this.pk, this.trip)
-        infoToast(create, this.$trans('Trip updated'), this.$trans('Trip has been updated'))
+        infoToast(create, $trans('Trip updated'), $trans('Trip has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating trip', error)
-        errorToast(create, this.$trans('Error updating trip'))
+        errorToast(create, $trans('Error updating trip'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -670,7 +670,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching orders', error)
-        errorToast(create, this.$trans('Error fetching orders'))
+        errorToast(create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -694,7 +694,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        errorToast(create, this.$trans('Error fetching trip'))
+        errorToast(create, $trans('Error fetching trip'))
         this.isLoading = false
       }
     },

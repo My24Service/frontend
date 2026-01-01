@@ -99,9 +99,9 @@ export default {
       buttonDisabled: false,
       reservation: supplierReservationModel.getFields(),
       materialFields: [
-        { key: 'material_view.name', label: this.$trans('Name') },
-        { key: 'amount', label: this.$trans('Amount') },
-        { key: 'remarks', label: this.$trans('Remarks') }
+        { key: 'material_view.name', label: $trans('Name') },
+        { key: 'amount', label: $trans('Amount') },
+        { key: 'remarks', label: $trans('Remarks') }
       ],
     }
   },
@@ -123,7 +123,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching reservation', error)
-        errorToast(create, this.$trans('Error fetching reservation'))
+        errorToast(create, $trans('Error fetching reservation'))
         this.isLoading = false
       }
     }

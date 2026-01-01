@@ -42,9 +42,9 @@ export default {
       isLoading: false,
       materials: [],
       materialFields: [
-        {label: this.$trans('Material'), key: 'material_name', sortable: true},
-        {label: this.$trans('Identifier'), key: 'material_identifier', sortable: true},
-        {label: this.$trans('Amount'), key: 'amount', sortable: true},
+        {label: $trans('Material'), key: 'material_name', sortable: true},
+        {label: $trans('Identifier'), key: 'material_identifier', sortable: true},
+        {label: $trans('Amount'), key: 'amount', sortable: true},
       ],
     }
   },
@@ -84,7 +84,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching timesheet details', error)
-        errorToast(create, this.$trans('Error fetching timesheet details'))
+        errorToast(create, $trans('Error fetching timesheet details'))
         this.isLoading = false
       }
     }

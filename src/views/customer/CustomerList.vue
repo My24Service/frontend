@@ -140,7 +140,7 @@ import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 import Pagination from "../../components/Pagination.vue"
 import my24 from "../../services/my24";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -166,12 +166,12 @@ export default {
       isLoading: false,
       customers: [],
       customerFields: [
-        {key: 'id', label: this.$trans('Company'), sortable: true },
+        {key: 'id', label: $trans('Company'), sortable: true },
         {key: 'contract', label: ''},
         {key: 'city', label: ''},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true, },
-        {key: 'remarks', label: this.$trans('Remarks'), tdAttr: {style: 'max-width: 20ch; white-space: nowrap'}},
-        {key: 'contact', label: this.$trans('Contact')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true, },
+        {key: 'remarks', label: $trans('Remarks'), tdAttr: {style: 'max-width: 20ch; white-space: nowrap'}},
+        {key: 'contact', label: $trans('Contact')},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
       sortBy: 'name',
@@ -197,7 +197,7 @@ export default {
   methods: {
     // download
     downloadList() {
-      if (confirm(this.$trans('Are you sure you want to export all customers?'))) {
+      if (confirm($trans('Are you sure you want to export all customers?'))) {
         const url = this.customerService.getExportUrl()
         my24.downloadItemAuth(url, 'customers.xlsx')
       }
@@ -236,11 +236,11 @@ export default {
     async doDelete() {
       try {
         await this.customerService.delete(this.pk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Customer has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Customer has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting customer', error)
-        errorToast(create, this.$trans('Error deleting customer'))
+        errorToast(create, $trans('Error deleting customer'))
       }
     },
     // rest
@@ -258,7 +258,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customers', error)
-        errorToast(create, this.$trans('Error loading customers'))
+        errorToast(create, $trans('Error loading customers'))
         this.isLoading = false
       }
     }

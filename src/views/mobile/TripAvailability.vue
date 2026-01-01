@@ -63,10 +63,10 @@ export default {
       isLoading: false,
       tripAvailability: [],
       fields: [
-        {key: 'trip', label: this.$trans('Trip'), sortable: false},
-        {key: 'required_users', label: this.$trans('Required users'), sortable: true},
-        {key: 'users_trip_set_as_available', label: this.$trans('Available users'), sortable: true},
-        {key: 'assigned_user_count', label: this.$trans('Assigned users'), sortable: true},
+        {key: 'trip', label: $trans('Trip'), sortable: false},
+        {key: 'required_users', label: $trans('Required users'), sortable: true},
+        {key: 'users_trip_set_as_available', label: $trans('Available users'), sortable: true},
+        {key: 'assigned_user_count', label: $trans('Assigned users'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -91,7 +91,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching trips', error);
-        errorToast(create, this.$trans('Error loading trips'))
+        errorToast(create, $trans('Error loading trips'))
         this.isLoading = false
       }
     }

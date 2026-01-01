@@ -106,7 +106,7 @@ import {required} from "@vuelidate/validators";
 
 import my24 from '@/services/my24.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import {OfferModel, OfferService} from "@/models/quotations/Offer.js";
@@ -164,7 +164,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching unsent offer", error);
-        errorToast(create, this.$trans("Error fetching unsent offer"));
+        errorToast(create, $trans("Error fetching unsent offer"));
         this.isLoading = false;
       }
     },
@@ -203,7 +203,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        errorToast(create, this.$trans('Error fetching quotation'))
+        errorToast(create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     },
@@ -221,7 +221,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("Error fetching documents", error);
-        errorToast(create, this.$trans("Error fetching documents"));
+        errorToast(create, $trans("Error fetching documents"));
         this.isLoading = false;
       }
     },
@@ -243,9 +243,9 @@ export default {
 
       this.offer.recipients = validatedEmails
       this.isLoading = true;
-      const sentTitle = this.$trans("Sent")
-      const sentBody = this.$trans("Quotation has been sent")
-      const errorBody = this.$trans("Error sending quotation")
+      const sentTitle = $trans("Sent")
+      const sentBody = $trans("Quotation has been sent")
+      const errorBody = $trans("Error sending quotation")
 
       if (this.isCreate) {
         this.offer.quotation = this.$route.query.quotationId
@@ -281,7 +281,7 @@ export default {
         await this.$router.push({name: 'quotations-sent'});
       } catch(error) {
         console.log("Error sending quotation", error);
-        errorToast(create, this.$trans(errorBody));
+        errorToast(create, $trans(errorBody));
         this.isLoading = false;
       }
     },

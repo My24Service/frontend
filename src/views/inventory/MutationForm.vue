@@ -142,7 +142,7 @@ import Multiselect from 'vue-multiselect'
 import inventoryModel from '../../models/inventory/Inventory.js'
 import mutationModel from "../../models/inventory/Mutation";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 const greaterThanZero = (value) => parseInt(value) > 0
@@ -160,16 +160,16 @@ export default {
       buttonDisabled: false,
       submitClicked: false,
 
-      fromLocationText: this.$trans('From location'),
-      toLocationText: this.$trans('To location'),
+      fromLocationText: $trans('From location'),
+      toLocationText: $trans('To location'),
 
       mutation: mutationModel.getFields(),
       mutationTypes: [{
         value: 'correction-in',
-        text: this.$trans('Correction in')
+        text: $trans('Correction in')
       }, {
         value: 'correction-out',
-        text: this.$trans('Correction out')
+        text: $trans('Correction out')
       }],
 
       materials: [],
@@ -223,11 +223,11 @@ export default {
       } catch(error) {
         console.log('Error fetching materials', error)
         this.isLoading = false
-        errorToast(create, this.$trans('Error fetching materials'))
+        errorToast(create, $trans('Error fetching materials'))
       }
     },
     materialLabel(material) {
-      const text = this.$trans('in stock')
+      const text = $trans('in stock')
       return `${material.material_name}, ${text}: ${material.total_amount}`
     },
     // locations
@@ -238,7 +238,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching locations', error)
-        errorToast(create, this.$trans('Error fetching locations'))
+        errorToast(create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -264,13 +264,13 @@ export default {
 
       try {
         await mutationModel.insert(this.mutation)
-        infoToast(create, this.$trans('Created'), this.$trans('Mutation created'))
+        infoToast(create, $trans('Created'), $trans('Mutation created'))
         this.buttonDisabled = false
         this.isLoading = false
         await this.$router.push({name: 'mutation-list'})
       } catch(error) {
         console.log('error creating mutation', error)
-        errorToast(create, this.$trans('Error creating mutation'))
+        errorToast(create, $trans('Error creating mutation'))
         this.buttonDisabled = false
         this.isLoading = false
       }

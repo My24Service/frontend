@@ -126,7 +126,7 @@ import { LeaveTypeService } from "@/models/company/LeaveType.js";
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -143,7 +143,7 @@ export default {
   },
   computed: {
     leaveTypeFormText() {
-      return this.leaveTypePk ? this.$trans("Update leave type") : this.$trans("Create leave type");
+      return this.leaveTypePk ? $trans("Update leave type") : $trans("Create leave type");
     }
   },
   validations() {
@@ -169,7 +169,7 @@ export default {
         counts_as_leave: true
       },
       fields: [
-        { key: "name", label: this.$trans("Name"), thAttr: { width: "15%" } },
+        { key: "name", label: $trans("Name"), thAttr: { width: "15%" } },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -212,11 +212,11 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveTypeService.delete(this.leaveTypePk);
-        infoToast(create, this.$trans("Deleted"), this.$trans("Leave type has been deleted"));
+        infoToast(create, $trans("Deleted"), $trans("Leave type has been deleted"));
         this.loadData();
       } catch (error) {
         console.log("error deleting leave type", error);
-        errorToast(create, this.$trans("Error deleting leave type"));
+        errorToast(create, $trans("Error deleting leave type"));
         this.isLoading = false;
       }
     },
@@ -230,7 +230,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave types", error);
-        errorToast(create, this.$trans("Error loading leave types"));
+        errorToast(create, $trans("Error loading leave types"));
         this.isLoading = false;
       }
     },
@@ -247,7 +247,7 @@ export default {
       if (!this.leaveTypePk) {
         try {
           await this.leaveTypeService.insert(this.leaveTypeForm);
-          infoToast(create, this.$trans("Created"), this.$trans("Leave type has been created"));
+          infoToast(create, $trans("Created"), $trans("Leave type has been created"));
           this.isLoadingForm = false;
           this.$nextTick(() => {
             this.$bvModal.hide("add-edit-leave-type-modal");
@@ -255,7 +255,7 @@ export default {
           });
         } catch (error) {
           console.log("Error creating leave types", error);
-          errorToast(create, this.$trans("Error creating leave types"));
+          errorToast(create, $trans("Error creating leave types"));
           this.isLoadingForm = false;
         }
 
@@ -264,7 +264,7 @@ export default {
 
       try {
         await this.leaveTypeService.update(this.leaveTypePk, this.leaveTypeForm);
-        infoToast(create, this.$trans("Updated"), this.$trans("Leave type has been updated"));
+        infoToast(create, $trans("Updated"), $trans("Leave type has been updated"));
         this.isLoadingForm = false;
         this.$nextTick(() => {
           this.$bvModal.hide("add-edit-leave-type-modal");
@@ -272,7 +272,7 @@ export default {
         });
       } catch (error) {
         console.log("Error updating leave type", error);
-        errorToast(create, this.$trans("Error updating leave type"));
+        errorToast(create, $trans("Error updating leave type"));
         this.isLoadingForm = false;
       }
       this.resetLeaveTypeForm();

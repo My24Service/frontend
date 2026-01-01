@@ -28,7 +28,7 @@
 import accountModel from '../../models/account/Account.js'
 import my24 from "../../services/my24";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -49,10 +49,10 @@ export default {
       try {
         await accountModel.sendResetPasswordLink(this.params.user_id, true)
         this.passwordLinkSent = true
-        infoToast(create, this.$trans('Sent'), this.$trans('Password reset link sent'))
+        infoToast(create, $trans('Sent'), $trans('Password reset link sent'))
       } catch (e) {
         console.log('Error sending password reset link', e)
-        errorToast(create, this.$trans('Error sending password reset link'))
+        errorToast(create, $trans('Error sending password reset link'))
         this.sendPasswordResetError = true
       }
     },
@@ -61,10 +61,10 @@ export default {
         const result = await accountModel.verify(this.params)
         console.log('HOI')
         this.verifySuccess = true
-        infoToast(create, this.$trans('Verified'), this.$trans('Account has been verified'))
+        infoToast(create, $trans('Verified'), $trans('Account has been verified'))
       } catch (e) {
         console.log('Error verifying studentuser', e)
-        errorToast(create, this.$trans('Error verifying'))
+        errorToast(create, $trans('Error verifying'))
         this.verifyError = true
       }
     }

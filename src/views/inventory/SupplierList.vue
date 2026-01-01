@@ -82,7 +82,7 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -101,11 +101,11 @@ export default {
       isLoading: false,
       suppliers: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'address', label: this.$trans('Address'), sortable: true},
-        {key: 'city', label: this.$trans('City'), sortable: true},
-        {key: 'tel', label: this.$trans('Tel.')},
-        {key: 'mobile', label: this.$trans('Mobile')},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'address', label: $trans('Address'), sortable: true},
+        {key: 'city', label: $trans('City'), sortable: true},
+        {key: 'tel', label: $trans('Tel.')},
+        {key: 'mobile', label: $trans('Mobile')},
         {key: 'icons'}
       ],
     }
@@ -132,11 +132,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.supplierPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Supplier has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Supplier has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting supplier', error)
-        errorToast(create, this.$trans('Error deleting supplier'))
+        errorToast(create, $trans('Error deleting supplier'))
       }
     },
     // rest
@@ -149,7 +149,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching suppliers', error)
-        errorToast(create, this.$trans('Error loading suppliers'))
+        errorToast(create, $trans('Error loading suppliers'))
         this.isLoading = false
       }
     }

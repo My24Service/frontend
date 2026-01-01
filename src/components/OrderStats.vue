@@ -132,7 +132,7 @@ export default {
               return `${key} ${value}`
             },
             footer: (tooltipItems, data) => {
-              return `${this.$trans("Total") }: ${this.total}`
+              return `${$trans("Total") }: ${this.total}`
             }
           }
         },
@@ -323,7 +323,7 @@ export default {
       this.chartdataCountsBar = {
         labels,
         datasets: [{
-          // label: this.$trans('Total orders per month'),
+          // label: $trans('Total orders per month'),
           data: monthDataBar,
           backgroundColor: 'blue',
         }]
@@ -366,7 +366,7 @@ export default {
       this.chartdataOrderTypesBar = {
         labels: orderTypesLabels,
         datasets: [{
-          // label: this.$trans('Order types'),
+          // label: $trans('Order types'),
           data: orderTypesDataBar,
           backgroundColor: orderTypesColors,
         }]

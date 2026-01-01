@@ -166,7 +166,7 @@
 <script>
 import moment from 'moment'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 import {toDinero} from "@/utils";
@@ -289,9 +289,9 @@ export default {
     getTitle() {
       switch (this.type) {
         case COST_TYPE_WORK_HOURS:
-          return this.$trans("Work hours")
+          return $trans("Work hours")
         case COST_TYPE_TRAVEL_HOURS:
-          return this.$trans("Travel hours")
+          return $trans("Travel hours")
         default:
           throw `getTitle(), unknown type ${this.type}`
       }
@@ -323,13 +323,13 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        infoToast(create, this.$trans('Created'), this.$trans('Hours costs have been updated'))
+        infoToast(create, $trans('Created'), $trans('Hours costs have been updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error creating hours costs', error)
-        errorToast(create, this.$trans('Error creating hours costs'))
+        errorToast(create, $trans('Error creating hours costs'))
         this.isLoading = false
       }
     },
@@ -368,7 +368,7 @@ export default {
         this.isLoaded = true
       } catch(error) {
         console.log('error fetching hours costs', error)
-        errorToast(create, this.$trans('Error fetching hours cost'))
+        errorToast(create, $trans('Error fetching hours cost'))
         this.isLoading = false
         this.isLoaded = true
       }

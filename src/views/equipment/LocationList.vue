@@ -119,7 +119,7 @@ import Pagination from "../../components/Pagination.vue"
 import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast} from "@/utils";
+import {errorToast, infoToast, $trans} from "@/utils";
 const {create} = useToast()
 
 export default {
@@ -167,29 +167,29 @@ export default {
       isLoading: false,
       locations: [],
       fieldsCustomerPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'customer', label: this.$trans('Customer')},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'customer', label: $trans('Customer')},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'branch', label: this.$trans('Branch')},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'branch', label: $trans('Branch')},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsCustomerNonPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchNonPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fields: [],
@@ -250,11 +250,11 @@ export default {
     async doDelete() {
       try {
         await this.locationService.delete(this.locationPk)
-        infoToast(create, this.$trans('Deleted'), this.$trans('Location has been deleted'))
+        infoToast(create, $trans('Deleted'), $trans('Location has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting location', error)
-        errorToast(create, this.$trans('Error deleting location'))
+        errorToast(create, $trans('Error deleting location'))
       }
     },
     // rest
@@ -267,7 +267,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching locations', error)
-        errorToast(create, this.$trans('Error loading locations'))
+        errorToast(create, $trans('Error loading locations'))
         this.isLoading = false
       }
     }

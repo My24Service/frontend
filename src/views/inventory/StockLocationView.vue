@@ -64,8 +64,8 @@ export default {
       stockLocation: stockLocationModel.getFields(),
       inventory: [],
       inventoryFields: [
-        { key: 'material_name', label: this.$trans('Material') },
-        { key: 'total_amount', label: this.$trans('Total amount') },
+        { key: 'material_name', label: $trans('Material') },
+        { key: 'total_amount', label: $trans('Total amount') },
       ]
     }
   },
@@ -88,7 +88,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching stock location/inventory', error)
-        errorToast(create, this.$trans('Error fetching stock location/inventory'))
+        errorToast(create, $trans('Error fetching stock location/inventory'))
         this.isLoading = false
       }
     }

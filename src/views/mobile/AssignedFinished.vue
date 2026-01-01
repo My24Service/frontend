@@ -105,15 +105,15 @@ export default {
       isLoading: true,
       assignedOrders: [],
       fields: [
-        {key: 'order', label: this.$trans('Order'), sortable: true},
-        {key: 'engineer', label: this.$trans('Engineer'), sortable: true},
-        {key: 'started', label: this.$trans('Started'), sortable: true},
-        {key: 'ended', label: this.$trans('Ended'), sortable: true},
-        {key: 'activity_totals.work_total', label: this.$trans('Work hours'), sortable: true},
-        {key: 'activity_totals.travel_to_total', label: this.$trans('Travel to'), sortable: true},
-        {key: 'activity_totals.travel_back_total', label: this.$trans('Travel back'), sortable: true},
-        {key: 'activity_totals.distance_to_total', label: this.$trans('Distance to'), sortable: true},
-        {key: 'activity_totals.distance_back_total', label: this.$trans('Distance back'), sortable: true},
+        {key: 'order', label: $trans('Order'), sortable: true},
+        {key: 'engineer', label: $trans('Engineer'), sortable: true},
+        {key: 'started', label: $trans('Started'), sortable: true},
+        {key: 'ended', label: $trans('Ended'), sortable: true},
+        {key: 'activity_totals.work_total', label: $trans('Work hours'), sortable: true},
+        {key: 'activity_totals.travel_to_total', label: $trans('Travel to'), sortable: true},
+        {key: 'activity_totals.travel_back_total', label: $trans('Travel back'), sortable: true},
+        {key: 'activity_totals.distance_to_total', label: $trans('Distance to'), sortable: true},
+        {key: 'activity_totals.distance_back_total', label: $trans('Distance back'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -188,7 +188,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching assigned orders', error)
-        errorToast(create, this.$trans('Error loading orders'))
+        errorToast(create, $trans('Error loading orders'))
         this.isLoading = false
       }
     }

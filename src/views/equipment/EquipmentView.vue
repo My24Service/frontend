@@ -161,16 +161,16 @@ export default {
       equipment: null,
       orders: [],
       orderPastFields: [
-        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
       breadcrumb: [
         {
-          text: this.$trans('Equipment'),
+          text: $trans('Equipment'),
           to: {name: this.listLink()}
         },
         {
-          text: this.$trans('Detail'),
+          text: $trans('Detail'),
           active: true
         }
       ],
@@ -220,7 +220,7 @@ export default {
         // this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment stats data', error)
-        errorToast(create, `${this.$trans('Error fetching equipment stats:')} ${error}`)
+        errorToast(create, `${$trans('Error fetching equipment stats:')} ${error}`)
         // this.isLoading = false
       }
     },
@@ -265,7 +265,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching equipment detail data', error)
-        errorToast(create, `${this.$trans('Error fetching equipment detail:')} ${error}`)
+        errorToast(create, `${$trans('Error fetching equipment detail:')} ${error}`)
         this.isLoading = false
       }
     },
@@ -277,7 +277,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        errorToast(create, this.$trans('Error fetching orders'))
+        errorToast(create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     }
