@@ -167,7 +167,6 @@ import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 
@@ -176,8 +175,9 @@ import {EquipmentService} from '@/models/equipment/equipment'
 import IconLinkPlus from "../../components/IconLinkPlus";
 import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
-import unconfirmedSickLeaveList
-  from "@/views/company/time-registration/UnconfirmedSickLeaveList.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
@@ -188,7 +188,6 @@ export default {
     IconLinkEdit,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     IconLinkPlus,

@@ -231,7 +231,9 @@ import { LeaveTypeService } from "@/models/company/LeaveType.js";
 import { UserListService } from "@/models/company/UserList.js";
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 const isCorrectTime = value => {
   return /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(value);

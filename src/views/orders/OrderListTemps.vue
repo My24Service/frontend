@@ -182,7 +182,7 @@
 </template>
 
 <script>
-import { OrderService } from '../../models/orders/Order.js'
+import { OrderService } from '@/models/orders/Order'
 import statusModel from '../../models/orders/Status.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import my24 from '../../services/my24.js'
@@ -197,6 +197,9 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import Pagination from "../../components/Pagination.vue"
 import SearchModal from '../../components/SearchModal.vue'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   components: {

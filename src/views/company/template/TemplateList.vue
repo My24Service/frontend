@@ -100,7 +100,10 @@ import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
-import { TemplateService } from "../../../models/company/Template.js";
+import { TemplateService } from "@/models/company/Template";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   components: {

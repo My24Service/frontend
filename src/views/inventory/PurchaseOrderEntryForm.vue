@@ -348,6 +348,9 @@ import purchaseorderEntryModel from '../../models/inventory/PurchaseOrderEntry.j
 import purchaseOrderModel from '../../models/inventory/PurchaseOrder.js'
 import stockLocationModel from '../../models/inventory/StockLocation.js'
 import materialModel from '../../models/inventory/Material.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 const greaterThanZero = (value) => parseInt(value) > 0
 

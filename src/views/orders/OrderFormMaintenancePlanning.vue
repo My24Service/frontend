@@ -941,7 +941,9 @@ import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer'
 import {AssignService} from '@/models/mobile/Assign'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
-import Collapse from '@/components/Collapse'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 import {BranchService} from "@/models/company/Branch";
 import {EquipmentService} from "@/models/equipment/equipment";
@@ -972,8 +974,6 @@ export default {
     DocumentsComponent,
     Multiselect,
     OrderTypesSelect,
-    Collapse,
-    CustomerCard,
     ApiResult,
   },
   props: {

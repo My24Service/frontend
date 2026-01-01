@@ -171,6 +171,9 @@ import {LeaveStatuscodeService} from "@/models/company/LeaveStatuscode";
 import {SickLeaveStatuscodeService} from "@/models/company/SickLeaveStatuscode";
 import { InvoiceStatuscodeService } from "@/models/invoices/InvoiceStatuscode";
 import {WorkHoursStatuscodeService} from "@/models/company/WorkHoursStatuscode";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   props: {

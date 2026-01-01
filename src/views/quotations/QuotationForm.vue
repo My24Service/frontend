@@ -225,6 +225,9 @@ import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {ChapterService} from "@/models/quotations/Chapter";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 import CustomerForm from './quotation_form/CustomerForm.vue'
 import Hours from './quotation_form/Hours.vue'
@@ -243,7 +246,6 @@ import Chapter from "./quotation_form/Chapter.vue";
 import QuotationLine from "./quotation_form/QuotationLine.vue";
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import CustomerView from "./CustomerView.vue";
-import QuotationView from "./QuotationView.vue";
 import QuotationPDFViewer from "./QuotationPDFViewer.vue";
 
 export default {
@@ -261,7 +263,6 @@ export default {
     Distance,
     CallOutCosts,
     StatusesComponent,
-    QuotationView,
   },
   setup() {
     return { v$: useVuelidate() }

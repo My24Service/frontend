@@ -90,11 +90,11 @@
 
 <script>
 import my24 from "@/services/my24";
-
-
 import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
-
 import invoiceMixin from "./invoice_form/mixin";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 class PdfBlobError {
   template_error

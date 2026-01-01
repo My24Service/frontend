@@ -175,6 +175,9 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import supplierModel from '@/models/inventory/Supplier.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {

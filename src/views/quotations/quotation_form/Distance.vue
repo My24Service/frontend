@@ -166,13 +166,11 @@
   </b-overlay>
 </template>
 <script>
-import Multiselect from 'vue-multiselect'
-
 import {toDinero} from "@/utils";
-import DurationInput from "@/components/DurationInput.vue"
 import PriceInput from "@/components/PriceInput";
-import TotalsInputs from "@/components/TotalsInputs";
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
 import {ChapterModel} from "@/models/quotations/Chapter";
@@ -185,7 +183,6 @@ import {
   USE_PRICE_CUSTOMER
 } from "./constants";
 import quotationMixin from "./mixin.js";
-import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
@@ -201,13 +198,8 @@ export default {
     EmptyQuotationLinesContainer,
     SectionHeader,
     PriceInput,
-    IconLinkDelete,
-    HeaderCell,
     VAT,
     TotalRow,
-    TotalsInputs,
-    Multiselect,
-    DurationInput,
     AddToQuotationLines
   },
   props: {

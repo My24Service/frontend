@@ -172,15 +172,15 @@
 <script>
 
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
-import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
-import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
 import {EquipmentModel} from "@/models/equipment/equipment"
 
 import ApiResult from "@/components/ApiResult.vue";
 import {LocationModel} from "@/models/equipment/location";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
@@ -188,9 +188,6 @@ export default {
   components: {
     ApiResult,
     IconLinkEdit,
-    ButtonLinkAdd,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
     IconLinkDelete
   },
   props: {

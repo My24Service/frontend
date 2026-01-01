@@ -167,10 +167,10 @@
 <script>
 
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
-import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
-import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 import {DocumentModel, DocumentService} from "@/models/quotations/Document";
 import {QuotationModel} from "@/models/quotations/Quotation"
@@ -179,9 +179,6 @@ export default {
   name: "DocumentsComponent",
   components: {
     IconLinkEdit,
-    ButtonLinkAdd,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
     IconLinkDelete
   },
   props: {

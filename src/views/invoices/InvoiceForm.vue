@@ -456,7 +456,6 @@ import {useVuelidate} from "@vuelidate/core";
 import {toDinero} from "@/utils";
 import TotalsInputs from "@/components/TotalsInputs";
 import PriceInput from "@/components/PriceInput";
-import Collapse from "@/components/Collapse";
 import CustomerCard from "@/components/CustomerCard";
 
 import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
@@ -471,7 +470,9 @@ import DistanceComponent from "./invoice_form/Distance";
 import MaterialsComponent from "./invoice_form/Materials";
 import CallOutCostsComponent from "./invoice_form/CallOutCosts";
 import InvoiceLine from "./invoice_form/InvoiceLine";
-import VAT from "./invoice_form/VAT";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 import {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
@@ -487,12 +488,10 @@ export default {
   components: {
     InvoicePDFViewer,
     PriceInput,
-    Collapse,
     HoursComponent,
     MaterialsComponent,
     DistanceComponent,
     CallOutCostsComponent,
-    VAT,
     CustomerCard,
     TotalsInputs,
     InvoiceLine,

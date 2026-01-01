@@ -340,12 +340,15 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import { CustomerService } from '../../models/customer/Customer.js'
-import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
-import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
-import { EquipmentService } from "../../models/equipment/equipment"
+import { CustomerService } from '@/models/customer/Customer'
+import { MaintenanceContractService } from '@/models/customer/MaintenanceContract'
+import { MaintenanceEquipmentService } from "@/models/customer/MaintenanceEquipment";
+import { EquipmentService } from "@/models/equipment/equipment"
 import PriceInput from "../../components/PriceInput";
 import CustomerCard from '../../components/CustomerCard.vue'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 const greaterThanZero = (value) => parseInt(value) > 0
 

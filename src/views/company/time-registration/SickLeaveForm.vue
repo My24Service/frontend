@@ -101,7 +101,9 @@ import { required } from "@vuelidate/validators";
 import { UserListService } from "@/models/company/UserList.js";
 import { SickLeavesService } from "@/models/company/SickLeave.js";
 import Multiselect from 'vue-multiselect'
-
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {

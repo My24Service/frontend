@@ -131,7 +131,7 @@
 </template>
 
 <script>
-import {CustomerService} from '../../models/customer/Customer.js'
+import {CustomerService} from '@/models/customer/Customer'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -139,6 +139,9 @@ import SearchModal from '../../components/SearchModal.vue'
 import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 import Pagination from "../../components/Pagination.vue"
 import my24 from "../../services/my24";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'CustomerList',

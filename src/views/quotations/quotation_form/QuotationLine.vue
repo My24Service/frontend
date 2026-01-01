@@ -259,9 +259,6 @@ import {useVuelidate} from "@vuelidate/core";
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
-import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
-import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 
 import {QuotationModel} from '@/models/quotations/Quotation.js';
@@ -270,14 +267,14 @@ import {QuotationLineModel, QuotationLineService} from '@/models/quotations/Quot
 
 import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'QuotationLineForm',
   components: {
     IconLinkEdit,
-    ButtonLinkAdd,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
     IconLinkDelete,
     PriceInput,
     VAT,

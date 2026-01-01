@@ -85,6 +85,9 @@
 
 <script>
 import tripAvailabilityModel from '@/models/mobile/TripAvailability.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: "TripAvailabilityDetail",

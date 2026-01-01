@@ -165,13 +165,13 @@
 </template>
 <script>
 import moment from 'moment'
-import Multiselect from 'vue-multiselect'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 import {toDinero} from "@/utils";
 import DurationInput from "@/components/DurationInput.vue"
 import PriceInput from "@/components/PriceInput";
-import TotalsInputs from "@/components/TotalsInputs";
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
 
 import {ChapterModel} from "@/models/quotations/Chapter";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
@@ -187,7 +187,6 @@ import {
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS
 } from "./constants";
-import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
@@ -203,12 +202,8 @@ export default {
     EmptyQuotationLinesContainer,
     SectionHeader,
     PriceInput,
-    IconLinkDelete,
-    HeaderCell,
     VAT,
     TotalRow,
-    TotalsInputs,
-    Multiselect,
     DurationInput,
     AddToQuotationLines
   },

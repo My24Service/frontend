@@ -115,32 +115,26 @@
   </div>
 </template>
 <script>
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
-import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '@/components/TableStatusInfo.vue'
 
 import {InvoiceService} from '@/models/invoices/Invoice.js'
 import {InvoiceStatuscodeService} from '@/models/invoices/InvoiceStatuscode.js'
 import { InvoiceStatusService } from '@/models/invoices/InvoiceStatus.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: 'InvoiceList',
   components: {
-    SearchForm, ButtonLinkSort,
-    IconLinkEdit,
+    SearchForm,
     IconLinkDelete,
-    IconLinkDocuments,
     ButtonLinkRefresh,
-    ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     TableStatusInfo

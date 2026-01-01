@@ -372,7 +372,9 @@ import {LeaveActionModel} from "@/models/company/LeaveAction";
 import {SickLeaveActionModel} from "@/models/company/SickLeaveAction";
 import {InvoiceActionModel} from "@/models/invoices/InvoiceAction";
 import {WorkHoursActionModel} from "@/models/company/WorkHoursAction";
-
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {

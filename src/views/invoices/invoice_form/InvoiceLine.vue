@@ -204,7 +204,10 @@ import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
 import PriceInput from "../../../components/PriceInput";
 import VAT from "./VAT";
 import invoiceMixin from "./mixin";
-import {toDinero} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
+
 
 export default {
   components: {

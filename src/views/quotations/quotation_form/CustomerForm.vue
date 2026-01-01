@@ -172,18 +172,12 @@ import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import Multiselect from 'vue-multiselect'
-
-
-import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
-import Collapse from '@/components/Collapse.vue'
-import CustomerDetail from "@/components/CustomerDetail";
-import TotalsInputs from "@/components/TotalsInputs";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerService} from "@/models/customer/Customer";
-
-import QuotationData from './QuotationData.vue'
-import Chapter from './Chapter.vue'
 
 export default {
   name: "CustomerForm",
@@ -193,12 +187,6 @@ export default {
   },
   components: {
     Multiselect,
-    OrderTypesSelect,
-    Collapse,
-    QuotationData,
-    CustomerDetail,
-    Chapter,
-    TotalsInputs,
   },
   props: {
     pk: {

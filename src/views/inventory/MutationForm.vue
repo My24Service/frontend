@@ -141,6 +141,9 @@ import Multiselect from 'vue-multiselect'
 
 import inventoryModel from '../../models/inventory/Inventory.js'
 import mutationModel from "../../models/inventory/Mutation";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 const greaterThanZero = (value) => parseInt(value) > 0
 

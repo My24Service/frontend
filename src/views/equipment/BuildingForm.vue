@@ -247,10 +247,12 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import { BuildingService, BuildingModel } from '../../models/equipment/building.js'
-
-import { CustomerService } from "../../models/customer/Customer";
-import { BranchService } from "../../models/company/Branch";
+import { BuildingService, BuildingModel } from '@/models/equipment/building'
+import { CustomerService } from "@/models/customer/Customer";
+import { BranchService } from "@/models/company/Branch";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 

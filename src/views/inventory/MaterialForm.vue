@@ -271,7 +271,10 @@ import Multiselect from 'vue-multiselect'
 
 import materialService from '../../models/inventory/Material.js'
 import supplierModel from '../../models/inventory/Supplier.js'
-import {NO_IMAGE_URL} from "../../constants"
+import {NO_IMAGE_URL} from "@/constants"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {

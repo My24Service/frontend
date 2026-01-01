@@ -389,6 +389,9 @@ import {CustomerModel, CustomerService} from '@/models/customer/Customer'
 import partnerModel from '../../models/company/Partner.js'
 import PriceInput from "../../components/PriceInput";
 import DocumentsComponent from "@/views/customer/DocumentComponent.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   setup() {

@@ -233,20 +233,15 @@ import { OrderService } from '@/models/orders/Order'
 import {StatusService} from '@/models/orders/Status'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
-import IconLinkPlus from '../../components/IconLinkPlus.vue'
-import IconLinkDocuments from '../../components/IconLinkDocuments.vue'
 import IconLinkAssign from '../../components/IconLinkAssign.vue'
-import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
-import SearchModal from '../../components/SearchModal.vue'
 import SearchForm from '../../components/SearchForm.vue'
-import SubNavOrders from '../../components/SubNavOrders.vue'
 import UserFilters from "../../components/UserFilters.vue"
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
@@ -256,20 +251,12 @@ export default {
 
   components: {
     OrderTableInfo,
-    IconLinkEdit,
-    IconLinkPlus,
-    IconLinkDocuments,
     IconLinkAssign,
-    IconLinkDelete,
     ButtonLinkRefresh,
-    ButtonLinkSearch,
-    ButtonLinkAdd,
     ButtonLinkSort,
-    SearchModal,
     UserFilters,
     Pagination,
     SearchForm,
-    SubNavOrders
   },
   props: {
     dispatch: {

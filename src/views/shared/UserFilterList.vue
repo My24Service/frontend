@@ -83,14 +83,16 @@
 </template>
 
 <script>
-import {USER_FILTER_TYPE_ORDER} from "../../models/base_user_filter";
-import {OrderFilterModel, OrderFilterService} from "../../models/orders/OrderFilter";
+import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
+import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
 import IconLinkDelete from "../../components/IconLinkDelete";
 import ButtonLinkRefresh from "../../components/ButtonLinkRefresh";
 import ButtonLinkSearch from "../../components/ButtonLinkSearch";
-import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 import SearchModal from "../../components/SearchModal";
 import Pagination from "../../components/Pagination";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   name: "UserFilterList",
@@ -98,7 +100,6 @@ export default {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkDownload,
     SearchModal,
     Pagination,
   },

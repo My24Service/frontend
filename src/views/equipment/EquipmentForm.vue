@@ -503,16 +503,18 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import { CustomerService } from '../../models/customer/Customer.js'
+import { CustomerService } from '@/models/customer/Customer'
 import {
   EquipmentService,
   EquipmentModel
-} from '../../models/equipment/equipment.js'
-import { BranchService } from "../../models/company/Branch";
-
-import { LocationService } from "../../models/equipment/location";
+} from '@/models/equipment/equipment'
+import { BranchService } from "@/models/company/Branch";
+import { LocationService } from "@/models/equipment/location";
 import PriceInput from "../../components/PriceInput";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 

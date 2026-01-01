@@ -210,11 +210,11 @@
 <script>
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
-import AmountDecimalInput from "@/components/AmountDecimalInput.vue"
 import PriceInput from "@/components/PriceInput";
-import TotalsInputs from "@/components/TotalsInputs";
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {
@@ -242,13 +242,9 @@ export default {
     CostsTable,
     EmptyQuotationLinesContainer,
     PriceInput,
-    IconLinkDelete,
-    HeaderCell,
     VAT,
     TotalRow,
-    TotalsInputs,
     Multiselect,
-    AmountDecimalInput,
     AddToQuotationLines,
     SectionHeader
   },

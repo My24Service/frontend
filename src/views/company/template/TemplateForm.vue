@@ -212,6 +212,9 @@ import AwesomeDebouncePromise from "awesome-debounce-promise";
 import { QuotationService } from "@/models/quotations/Quotation";
 import { InvoiceService } from '@/models/invoices/Invoice'
 import Multiselect from "vue-multiselect";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
   components: {

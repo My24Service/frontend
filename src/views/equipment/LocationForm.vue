@@ -286,12 +286,14 @@ import { required } from '@vuelidate/validators'
 import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import { LocationService, LocationModel } from '../../models/equipment/location.js'
-
-import { CustomerService } from "../../models/customer/Customer";
-import { BranchService } from "../../models/company/Branch";
-import { BuildingService } from "../../models/equipment/building";
+import { LocationService, LocationModel } from '@/models/equipment/location'
+import { CustomerService } from "@/models/customer/Customer";
+import { BranchService } from "@/models/company/Branch";
+import { BuildingService } from "@/models/equipment/building";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast} from "@/utils";
+const {create} = useToast()
 
 export default {
 
