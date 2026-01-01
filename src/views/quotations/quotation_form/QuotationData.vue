@@ -3,71 +3,71 @@
     <h5>{{ $trans('Details') }}</h5>
 
     <div v-if="!isView">
-      <b-form-group
+      <BFormGroup
         v-bind:label="$trans('ID')"
         label-for="quotation_id"
         label-cols="3"
       >
-        <b-form-input
+        <BFormInput
           disabled
           v-model="quotationData.quotation_id"
           id="quotation_id"
           size="sm"
-        ></b-form-input>
-      </b-form-group>
-      <b-form-group
+        ></BFormInput>
+      </BFormGroup>
+      <BFormGroup
         v-bind:label="$trans('Name')"
         label-for="name"
         label-cols="3"
       >
-        <b-form-input
+        <BFormInput
           v-model="quotationData.name"
           id="name"
           size="sm"
           :state="isSubmitClicked ? !v$.quotationData.name.$error: null"
-        ></b-form-input>
+        ></BFormInput>
         <b-form-invalid-feedback
           :state="isSubmitClicked ? !v$.quotationData.name.$error : null">
           {{ $trans('Please enter a quotation name') }}
         </b-form-invalid-feedback>
-      </b-form-group>
+      </BFormGroup>
 
-      <b-form-group
+      <BFormGroup
         v-bind:label="$trans('Reference')"
         label-for="quotation_reference"
         label-cols="3"
       >
-        <b-form-input
+        <BFormInput
           v-model="quotationData.quotation_reference"
           id="quotation_reference"
           size="sm"
-        ></b-form-input>
-      </b-form-group>
+        ></BFormInput>
+      </BFormGroup>
 
-      <b-form-group
+      <BFormGroup
         label-cols="3"
         v-bind:label="$trans('Expiry days')"
         label-for="quotation_expiry"
       >
-        <b-form-input
+        <BFormInput
           v-model="quotationData.quotation_expire_days"
           :type="'number'"
           id="quotation_reference"
           size="sm"
-        ></b-form-input>
-      </b-form-group>
+        ></BFormInput>
+      </BFormGroup>
 
-      <b-form-group
+      <BFormGroup
         label-cols="3"
         v-bind:label="$trans('Description')"
         label-for="quotation_description"
       >
-        <b-form-textarea
+        <BFormTextarea
           id="quotation_description"
           v-model="quotationData.description"
           rows="1"
-        ></b-form-textarea>
-      </b-form-group>
+        ></BFormTextarea>
+      </BFormGroup>
 
       <footer
         class="modal-footer"

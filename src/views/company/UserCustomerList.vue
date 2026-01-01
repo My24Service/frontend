@@ -3,8 +3,8 @@
     <header>
       <div class="page-title">
         <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
-        <b-button-toolbar>
-          <b-button-group>
+        <BButton-toolbar>
+          <BButton-group>
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -12,9 +12,9 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
-          <b-link :to="{name: 'customeruser-add'}" class="btn primary" v-if="isStaff || isSuperuser">{{$trans('Add customer user')}}</b-link>
-        </b-button-toolbar>
+          </BButton-group>
+          <BLink :to="{name: 'customeruser-add'}" class="btn primary" v-if="isStaff || isSuperuser">{{$trans('Add customer user')}}</BLink>
+        </BButton-toolbar>
       </div>
     </header>
 

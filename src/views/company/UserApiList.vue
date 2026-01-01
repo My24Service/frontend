@@ -3,8 +3,8 @@
     <header>
       <div class="page-title">
         <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
-        <b-button-toolbar>
-          <b-button-group>
+        <BButton-toolbar>
+          <BButton-group>
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -12,11 +12,11 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
-          <b-link :to="{name: 'apiuser-add'}" class="btn primary" v-if="isStaff || isSuperuser">
+          </BButton-group>
+          <BLink :to="{name: 'apiuser-add'}" class="btn primary" v-if="isStaff || isSuperuser">
             {{$trans('Add API user')}}
-          </b-link>
-        </b-button-toolbar>
+          </BLink>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -61,8 +61,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="apiuser-add"
                   v-bind:title="$trans('New API user')"
@@ -74,8 +74,8 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(token)="data">
@@ -87,9 +87,9 @@
               size="60"
               :value="data.item.api_user.token"
             />
-            <b-link v-on:click="copyToken(data.item.token)">
+            <BLink v-on:click="copyToken(data.item.token)">
               <b-icon-back class="icon-th"></b-icon-back>
-            </b-link>
+            </BLink>
           </p>
           <br/>
 
@@ -101,7 +101,7 @@
             </span>
             <span v-else>
               {{ $trans('Active') }}&nbsp;-
-              <b-link v-on:click="function(){ showRevokeModal(data.item.id) }">{{ $trans('Revoke') }}</b-link>
+              <BLink v-on:click="function(){ showRevokeModal(data.item.id) }">{{ $trans('Revoke') }}</BLink>
               <p>
                 {{ $trans("Valid until") }}: {{ getValidUntil(data.item.api_user) }}
               </p>

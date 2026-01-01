@@ -9,12 +9,12 @@
           <span v-else>{{this.material.name}}</span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+          <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          </BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-          </b-button>
+          </BButton>
         </div>
       </div>
     </header>
@@ -23,64 +23,64 @@
       <b-overlay :show="isLoading" rounded="sm">
         <b-form class="flex-columns">
           <div class="panel col-1-3">
-            <b-form-group
+            <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Name')"
                 label-for="material_name"
               >
-                <b-form-input
+                <BFormInput
                   v-model="material.name"
                   id="material_name"
                   size="sm"
                   :state="isSubmitClicked ? !v$.material.name.$error : null">
-                </b-form-input>
+                </BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.material.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Name short')"
                 label-for="material_name_short"
               >
-                <b-form-input
+                <BFormInput
                   id="material_name_short"
                   size="sm"
                   v-model="material.name_short"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Identifier')"
                 label-for="material_identifier"
               >
-                <b-form-input
+                <BFormInput
                   id="material_identifier"
                   size="sm"
                   v-model="material.identifier"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Unit')"
                 label-for="material_unit"
               >
-                <b-form-input
+                <BFormInput
                   id="material_unit"
                   size="sm"
                   v-model="material.unit"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Search supplier')"
@@ -108,135 +108,135 @@
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                 </multiselect>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Supplier')"
                 label-for="material_supplier_name"
               >
-                <b-form-input
+                <BFormInput
                   readonly
                   id="material_supplier_name"
                   size="sm"
                   v-model="material.supplier_name"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Location')"
                 label-for="material-location"
               >
-                <b-form-input
+                <BFormInput
                   id="material-location"
                   size="sm"
                   v-model="material.location"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Product type')"
                 label-for="material-product-type"
               >
-                <b-form-input
+                <BFormInput
                   id="material-product-type"
                   size="sm"
                   v-model="material.product_type"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
 
               <h6>{{ $trans("Pricing") }}</h6>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Purchase price')"
                 label-for="price_purchase"
               >
-                <b-form-input
+                <BFormInput
                   v-model="material.price_purchase"
                   id="price_purchase"
                   size="sm"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Selling price')"
                 label-for="price_selling"
               >
-                <b-form-input
+                <BFormInput
                   id="price_selling"
                   size="sm"
                   v-model="material.price_selling"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Alt. selling price')"
                 label-for="price_selling_alt"
               >
-                <b-form-input
+                <BFormInput
                   id="price_selling_alt"
                   size="sm"
                   v-model="material.price_selling_alt"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Purchase price ex.')"
                 label-for="price_purchase_ex"
               >
-                <b-form-input
+                <BFormInput
                   id="price_purchase_ex"
                   size="sm"
                   v-model="material.price_purchase_ex"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Selling price ex.')"
                 label-for="price_selling_ex"
               >
-                <b-form-input
+                <BFormInput
                   id="price_selling_ex"
                   size="sm"
                   v-model="material.price_selling_ex"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Alt. selling price ex.')"
                 label-for="price_selling_alt_ex"
               >
-                <b-form-input
+                <BFormInput
                   id="price_selling_alt_ex"
                   size="sm"
                   v-model="material.price_selling_alt_ex"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
           </div>
 
           <div class="panel col-2-3">
             <h6>{{$trans('Image')}}</h6>
             <b-row>
               <b-col cols="12">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-for="material-image"
                 >
@@ -246,7 +246,7 @@
                     :placeholder="$trans('Choose a file or drop it here.')"
                     @input="imageSelected"
                   ></b-form-file>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="6">
                 <h3>{{ $trans('Current image') }}</h3>

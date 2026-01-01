@@ -10,16 +10,16 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Search')"
                 label-for="search-query"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   autofocus
                   v-model="query"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>

@@ -49,15 +49,15 @@
             </b-tabs>
           </b-card>
           <footer class="modal-footer">
-            <b-button @click="cancel" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button
+            <BButton @click="cancel" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton
               @click="importAll"
               type="button"
               variant="primary"
             >
               {{ $trans('Import all') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </div>

@@ -18,9 +18,9 @@
 
     <b-row align-v="center" v-if="activeDateQueryMode === 'year'">
       <b-col cols="2">
-        <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
+        <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
           <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
+        </BLink>
       </b-col>
       <b-col cols="8" class="text-center">
         <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('YYYY') }}</h4>
@@ -28,18 +28,18 @@
       </b-col>
       <b-col cols="2">
         <div class="float-right">
-          <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+          <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
             <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-          </b-link>
+          </BLink>
         </div>
       </b-col>
     </b-row>
 
     <b-row align-v="center" v-if="activeDateQueryMode === 'month'">
       <b-col cols="2">
-        <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+        <BLink @click.prevent="backMonth" v-bind:title="$trans('Month back')">
           <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
+        </BLink>
       </b-col>
       <b-col cols="8" class="text-center">
         <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('MMM YYYY') }}</h4>
@@ -47,18 +47,18 @@
       </b-col>
       <b-col cols="2">
         <div class="float-right">
-          <b-link @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+          <BLink @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
             <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-          </b-link>
+          </BLink>
         </div>
       </b-col>
     </b-row>
 
     <b-row align-v="center" v-if="activeDateQueryMode === 'week'">
       <b-col cols="2">
-        <b-link @click.prevent="backWeek" v-bind:title="$trans('Week back')">
+        <BLink @click.prevent="backWeek" v-bind:title="$trans('Week back')">
           <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
+        </BLink>
       </b-col>
       <b-col cols="8">
         <h4 align="center" v-if="!isDetail && listTitle">{{ listTitle }} - {{ today.format('[week] W') }}/{{ today.format('Y') }}</h4>
@@ -66,9 +66,9 @@
       </b-col>
       <b-col cols="2">
         <div class="float-right">
-          <b-link @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
+          <BLink @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
             <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-          </b-link>
+          </BLink>
         </div>
       </b-col>
     </b-row>
@@ -214,15 +214,15 @@
           <b-row role="group">
             <b-col size="12">
               <p>{{ $trans('Enter a correction value in minutes or in the form hh:mm.')}}</p>
-              <b-form-input size="sm" autofocus v-model="timeEntryCorrection" v-bind:placeholder="$trans('Enter time value')" @xxchange="onChangeTimeCorrection()" @update="onChangeTimeCorrection()" style="margin-top:1rem;margin-bottom:1rem;width:10rem;"/>
+              <BFormInput size="sm" autofocus v-model="timeEntryCorrection" v-bind:placeholder="$trans('Enter time value')" @xxchange="onChangeTimeCorrection()" @update="onChangeTimeCorrection()" style="margin-top:1rem;margin-bottom:1rem;width:10rem;"/>
               <div class="dimmed"><span v-html="timeEntryCorrectionAsText"></span></div>
               <!--
-              <b-form-checkbox
+              <BFormCheckbox
                 id="notify-user"
                 name="notify-user"
                 v-model="timeEntryCorrectionNotify"
                 value="notify"
-                unchecked-value="no">{{ $trans('Notify user') }}</b-form-checkbox> -->
+                unchecked-value="no">{{ $trans('Notify user') }}</BFormCheckbox> -->
             </b-col>
           </b-row>
         </b-container>

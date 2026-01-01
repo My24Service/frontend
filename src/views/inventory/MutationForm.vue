@@ -3,14 +3,14 @@
     <header>
       <div class='page-title'>
         <h3><b-icon icon="arrow-left-right"></b-icon>{{ $trans("Mutations") }}</h3>
-        <b-button-toolbar>
-          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+        <BButton-toolbar>
+          <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          </BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-          </b-button>
-        </b-button-toolbar>
+          </BButton>
+        </BButton-toolbar>
       </div>
     </header>
     <div class="page-detail">
@@ -19,7 +19,7 @@
           <div class="panel col-1-3">
             <h6>{{ $trans('Add mutation') }}</h6>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="12"
               label-for="add-mutation-material-search"
@@ -45,10 +45,10 @@
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
-            </b-form-group>
+            </BFormGroup>
 
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="12"
               label-for="add-mutation-material-name"
@@ -58,39 +58,39 @@
                 :state="isSubmitClicked ? !v$.mutation.material.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
             <div class="flex-columns">
-              <b-form-group
+              <BFormGroup
                 label-cols="3"
                 v-bind:label="$trans('Amount')"
                 label-for="add-mutation-amount"
               >
-                <b-form-input
+                <BFormInput
                   v-model="mutation.amount"
                   id="add-mutation-amount"
                   type="number"
                   ref="amount"
                   style="width: 6rem"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.mutation.amount.$error : null">
                   {{ $trans('Please enter an amount') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-cols="3"
                 label-align="right"
                 v-bind:label="$trans('Type')"
                 label-for="add-mutation-mutation_type"
               >
                 <b-form-select v-model="mutation.mutation_type" :options="mutationTypes"></b-form-select>
-              </b-form-group>
+              </BFormGroup>
             </div>
 
             <h6>{{ $trans(locationText)}}</h6>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="12"
               label-for="add-mutation-location-search"
@@ -112,21 +112,21 @@
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-for="add-mutation-location-name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="mutation.location_name"
                 id="add-mutation-location-name"
                 readonly
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.mutation.location.$error : null">
                 {{ $trans('Please select a location') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
         </b-form>
       </b-overlay>

@@ -20,7 +20,7 @@
           <h2 v-if="editMode">{{ $trans('Edit material') }}</h2>
           <b-row v-if="!editMode">
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Search assigned orders')"
                 label-for="assignedorder-search"
@@ -46,30 +46,30 @@
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                 </multiselect>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Assigned order')"
                 label-for="assignedorder-material-order-info"
               >
-                <b-form-input
+                <BFormInput
                   v-model="selectedAssignedOrderInfo"
                   id="assignedorder-material-order-info"
                   size="sm"
                   readonly
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.selectedAssignedOrderPk.$error : null">
                   {{ $trans('Please select an order') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
           <b-row>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Search location')"
                 label-for="assignedorder-material-location-search"
@@ -91,30 +91,30 @@
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                 </multiselect>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Location')"
                 label-for="assignedorder-material-location-name"
               >
-                <b-form-input
+                <BFormInput
                   v-model="selectedLocationName"
                   id="assignedorder-material-location-name"
                   size="sm"
                   readonly
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.selectedLocationPk.$error : null">
                   {{ $trans('Please select a location') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
           <b-row>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Search material')"
                 label-for="move-material-purchase-order-material-search"
@@ -140,53 +140,53 @@
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                 </multiselect>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Material')"
                 label-for="move-material-material-name"
               >
-                <b-form-input
+                <BFormInput
                   v-model="selectedMaterialName"
                   id="move-material-material-name"
                   size="sm"
                   readonly
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                   {{ $trans('Please select a material') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="2" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Amount')"
                 label-for="assignedorder-material-amount"
               >
-                <b-form-input
+                <BFormInput
                   v-model="amount"
                   id="assignedorder-material-amount"
                   size="sm"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.amount.$error : null">
                   {{ $trans('Please enter an amount') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
 
           <div class="mx-auto">
             <footer class="modal-footer">
-              <b-button @click="cancelEdit" v-if="editMode" class="btn btn-primary" type="button" variant="primary">
+              <BButton @click="cancelEdit" v-if="editMode" class="btn btn-primary" type="button" variant="primary">
                 {{ $trans('Cancel') }}
-              </b-button>
-              <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+              </BButton>
+              <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
                 {{ editMode ? $trans('Update') : $trans('Submit') }}
-              </b-button>
+              </BButton>
             </footer>
           </div>
         </b-form>

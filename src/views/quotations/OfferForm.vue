@@ -15,11 +15,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -32,7 +32,7 @@
               <strong><i>{{ $trans("Quotations can't be changed after having been sent") }}</i></strong>
             </p>
             <h6>{{ $trans("Email") }}</h6>
-            <b-form-group
+            <BFormGroup
               :label="$trans('Email recipients')"
               label-for="tags-validation"
               :state="isSubmitClicked ? !recipientInvalid : null"
@@ -51,40 +51,40 @@
               <template #invalid-feedback>
                 {{ $trans("You must provide at least 1 email recipient") }}
               </template>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               v-bind:label="$trans('Subject')"
               label-for="offer_subject"
               label-cols="3">
-              <b-form-input
+              <BFormInput
                 autofocus
                 id="offer_subject"
                 size="sm"
                 v-model="offer.subject"
                 :state="isSubmitClicked ? !v$.offer.subject.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.offer.subject.$error : null">
                 {{ $trans("Please enter the email subject") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Body')"
               label-for="offer_body"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="offer_body"
                 v-model="offer.body"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
             <h6>{{ $trans("Attachments") }}</h6>
             <p v-if="!documents.length">
               {{ $trans("No attached documents to this quotation") }}
             </p>
             <p v-for="document in documents" :key="document.id">
               {{ document.name }}
-              <b-button
+              <BButton
                 class="btn button btn-danger quotation-pdf-button"
                 @click="downloadPdf"
                 v-if="document.is_pdf"
@@ -92,7 +92,7 @@
               >
                 <b-spinner small v-if="loadingPdf"></b-spinner>
                 {{ $trans('Preview quotation PDF') }}
-              </b-button>
+              </BButton>
             </p>
           </div>
         </div>

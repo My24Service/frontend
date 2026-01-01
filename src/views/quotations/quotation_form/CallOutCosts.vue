@@ -23,38 +23,38 @@
           <b-container>
             <b-row>
               <b-col cols="2">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Amount')"
                   v-if="cost.quotation"
                 >
-                  <b-form-input
+                  <BFormInput
                     type="number"
                     @blur="amountChanged"
                     v-model="cost.amount_int"
                     size="sm"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="3">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Price')"
                 >
-                  <b-form-radio-group
+                  <BFormRadioGroup
                     @change="updateTotals"
                     v-model="cost.use_price"
                     v-if="!isView"
                   >
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
                       {{ $trans('Settings') }}
                       {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-                    </b-form-radio>
+                    </BFormRadio>
 
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
                       {{ $trans('Customer') }}
                       {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                    </b-form-radio>
+                    </BFormRadio>
 
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
                       {{ $trans("Other") }}
                       <PriceInput
                         v-model="cost.price_other"
@@ -62,42 +62,42 @@
                         @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, cost)"
                         @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
                       />
-                    </b-form-radio>
-                  </b-form-radio-group>
-                </b-form-group>
+                    </BFormRadio>
+                  </BFormRadioGroup>
+                </BFormGroup>
               </b-col>
               <b-col cols="2">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT type')"
                 >
                   <VAT
                     @vatChanged="(val) => changeVatType(cost, val)"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" class="text-right p-0">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT')"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     disabled
                     :value="cost.vat_dinero.toFormat('$0.00')"
                     class="text-right pr-0"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" class="text-right p-0">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Total')"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     disabled
                     class="text-right pr-0"
                     :value="cost.total_dinero.toFormat('$0.00')"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
@@ -105,37 +105,37 @@
           <b-container>
             <b-row>
               <b-col cols="12" class="text-center">
-                <b-button
+                <BButton
                   @click="() => deleteCost(index)"
                   type="button"
                   variant="danger"
                   size="sm"
                 >
                   {{ $trans("Delete cost") }}
-                </b-button>
+                </BButton>
               </b-col>
             </b-row>
             <hr/>
           </b-container>
         </div>
         <div class="text-center">
-          <b-button
+          <BButton
             :disabled="collectionHasEmptyItem"
             @click="addCost"
             class="btn btn-primary"
             type="button"
           >
             {{ $trans("Add call-out cost") }}
-          </b-button>
+          </BButton>
           <span style="width: 80px">&nbsp;</span>
-          <b-button
+          <BButton
             :disabled="showSaveButton"
             @click="() => saveCosts()"
             type="button"
             variant="primary"
           >
             {{ $trans("Save changes") }}
-          </b-button>
+          </BButton>
         </div>
         <hr/>
       </div>

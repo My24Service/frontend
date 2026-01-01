@@ -7,9 +7,9 @@
           <span class="backlink" @click="goBack">{{ $trans("Materials") }}</span> / {{  this.material.name }}
         </h3>
         <div class="flex-columns">
-          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
+          <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
             {{ $trans('Back') }}
-          </b-button>
+          </BButton>
           <router-link :to="{name: 'material-edit', params:{pk: this.pk}}" class="btn">{{ $trans('Edit material') }}</router-link>
         </div>
       </div>

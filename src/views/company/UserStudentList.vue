@@ -39,8 +39,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="studentuser-add"
                   v-bind:title="$trans('New student user')"
@@ -56,8 +56,8 @@
                   v-bind:method="function() { downloadList() }"
                   v-bind:title="$trans('Download')"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>
@@ -67,21 +67,21 @@
           </div>
         </template>
         <template #cell(full_name)="data">
-          <b-link :to="{name: 'studentuser-detail', params: {pk: data.item.id}}">{{ data.item.full_name }}</b-link>
+          <BLink :to="{name: 'studentuser-detail', params: {pk: data.item.id}}">{{ data.item.full_name }}</BLink>
         </template>
         <template #cell(active)="data">
-          <b-link
+          <BLink
             v-if="!data.item.is_active"
             @click="function() { setActive(data.item.id, data.item.email) }"
           >
             <b-icon-check-square></b-icon-check-square>
-          </b-link>
-          <b-link
+          </BLink>
+          <BLink
             v-if="data.item.is_active"
             @click="function() { setInActive(data.item.id, data.item.email) }"
           >
             <b-icon-check-square-fill></b-icon-check-square-fill>
-          </b-link>
+          </BLink>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">

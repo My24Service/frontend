@@ -12,19 +12,19 @@
         >
           <b-row>
             <b-col cols="4">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Year')"
                 label-for="model-year"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   id="model-year"
                   v-model="budget.year"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="8">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Amount')"
               >
                 <PriceInput
@@ -32,7 +32,7 @@
                   :currency="budget.amount_currency"
                   @priceChanged="(val) => budget.setAmount(val)"
                 />
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -56,8 +56,8 @@
     <header>
       <div class='page-title'>
         <h3><b-icon icon="credit-card2-front"></b-icon>{{ $trans("Budgets") }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
             :method="function() { loadData() }"
             :title="$trans('Refresh')"
@@ -65,14 +65,14 @@
             <ButtonLinkSearch
             :method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <button
             class="btn primary"
             @click="showAddModal"
             >
             <b-icon icon="plus"></b-icon>{{ $trans('New budget') }}
           </button>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 

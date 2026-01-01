@@ -13,12 +13,12 @@
             </b-dropdown-item-button>
           </b-dropdown>
           <!--
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
-            <b-button @click="submitFormBulk" :disabled="buttonDisabled" type="button" variant="success">
+            </BButton>
+            <BButton @click="submitFormBulk" :disabled="buttonDisabled" type="button" variant="success">
               {{ $trans('Bulk') }}
-            </b-button>
+            </BButton>
             -->
         </div>
       </div>
@@ -40,13 +40,13 @@
                 <dd v-if="selectedMaterial.material_identifier">{{ selectedMaterial.material_identifier }}</dd>
               </dl>
               <h6>{{$trans('Amount')}}</h6>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Number of items to move')"
                 label-for="move-material-amount"
               >
-                <b-form-input
+                <BFormInput
                   ref="amount"
                   v-model="amount"
                   id="move-material-amount"
@@ -54,19 +54,19 @@
                   type="number"
                   :max="selectedMaterial.total_amount"
                   min="1"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.amount.$error : null">
                   {{ $trans('Please enter an amount') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </div>
             <div v-else class="dimmed">
               <h3>
                 <span class='h1'><br><b-icon icon="box"></b-icon></span>
                 <br><br>{{ $trans("Material") }}</h3>
             </div>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-for="move-material-purchase-order-material-search"
               >
@@ -96,7 +96,7 @@
                 :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
         </div>
 
         <div class="panel col-1-3">
@@ -115,7 +115,7 @@
             </h3>
           </div>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-for="move-material-from-location-search"
             >
@@ -142,7 +142,7 @@
               :state="isSubmitClicked ? !v$.selectedFromLocationPk.$error : null">
               {{ $trans('Please select from location') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
         </div>
 
@@ -163,7 +163,7 @@
             </h3>
           </div>
 
-          <b-form-group
+          <BFormGroup
             label-for="move-material-to-location-search"
             >
             <multiselect
@@ -190,7 +190,7 @@
               :state="isSubmitClicked ? !v$.selectedToLocationPk.$error : null">
               {{ $trans('Please select to location') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
         </div>
       </b-form>

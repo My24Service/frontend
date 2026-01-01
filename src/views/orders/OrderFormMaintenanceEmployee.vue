@@ -11,16 +11,16 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Equipment name')"
                 label-for="maintenance_equipment_new_equipment"
               >
-                <b-form-input
+                <BFormInput
                   id="maintenance_equipment_new_equipment"
                   size="sm"
                   v-model="newEquipmentName"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -38,16 +38,16 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Location name')"
                 label-for="new_location"
               >
-                <b-form-input
+                <BFormInput
                   id="new_location"
                   size="sm"
                   v-model="newLocationName"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -60,7 +60,7 @@
         <h2 v-if="!isCreate">{{ $trans('Edit order') }}</h2>
         <b-row>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Start date')"
@@ -81,10 +81,10 @@
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null">
                 {{ $trans('Please enter a start date') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               :label="$trans('Start time')"
@@ -97,10 +97,10 @@
                 :placeholder="$trans('Choose a time')"
                 :hour12=false
               ></b-form-timepicker>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               :label="$trans('End date')"
@@ -120,10 +120,10 @@
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null">
                 {{ $trans('Please enter an end date') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               :label="$trans('End time')"
               label-class="p-sm-0"
@@ -137,10 +137,10 @@
                 :placeholder="$trans('Choose a time')"
                 :hour12=false
               ></b-form-timepicker>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Order type')"
@@ -152,185 +152,185 @@
                 :order-type="order.order_type"
                 :include-all="false"
               />
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Branch')"
               label-for="order_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="order.order_name"
                 id="order_name"
                 size="sm"
                 :state="isSubmitClicked ? !v$.order.order_name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_name.$error : null">
                 {{ $trans('Please enter the branch') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Address')"
               label-for="order_address"
             >
-              <b-form-input
+              <BFormInput
                 id="order_address"
                 size="sm"
                 v-model="order.order_address"
                 :state="isSubmitClicked ? !v$.order.order_address.$error: null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_address.$error : null">
                 {{ $trans('Please enter the address') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Postal')"
               label-for="order_postal"
             >
-              <b-form-input
+              <BFormInput
                 id="order_postal"
                 size="sm"
                 v-model="order.order_postal"
                 :state="isSubmitClicked ? !v$.order.order_postal.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_postal.$error : null">
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('City')"
               label-for="order_city"
             >
-              <b-form-input
+              <BFormInput
                 id="order_city"
                 size="sm"
                 v-model="order.order_city"
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null">
                 {{ $trans('Please enter the city') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Country')"
               label-for="order_country_code"
             >
               <b-form-select v-model="order.order_country_code" :options="countries" size="sm"></b-form-select>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Order number')"
               label-for="service_number"
             >
-              <b-form-input
+              <BFormInput
                 id="service_number"
                 size="sm"
                 v-model="order.service_number"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Reference')"
               label-for="order_reference"
             >
-              <b-form-input
+              <BFormInput
                 id="order_reference"
                 size="sm"
                 v-model="order.order_reference"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Email')"
               label-for="order_email"
             >
-              <b-form-input
+              <BFormInput
                 id="order_email"
                 size="sm"
                 v-model="order.order_email"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Mobile')"
               label-for="order_mobile"
             >
-              <b-form-input
+              <BFormInput
                 id="order_mobile"
                 size="sm"
                 v-model="order.order_mobile"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Tel.')"
               label-for="order_tel"
             >
-              <b-form-input
+              <BFormInput
                 id="order_tel"
                 size="sm"
                 v-model="order.order_tel"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="6" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Contacts')"
               label-for="order_contact"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="order_contact"
                 v-model="order.order_contact"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
           </b-col>
           <b-col cols="6" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Remarks')"
               label-for="remarks"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="remarks"
                 v-model="order.remarks"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
           </b-col>
         </b-row>
 
@@ -346,12 +346,12 @@
                   </template>
                   <template #cell(icons)="data">
                     <div class="float-right">
-                      <b-link class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
+                      <BLink class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
                         <b-icon-pencil></b-icon-pencil>
-                      </b-link>
-                      <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
+                      </BLink>
+                      <BLink class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
                         <b-icon-trash></b-icon-trash>
-                      </b-link>
+                      </BLink>
                     </div>
                   </template>
                 </b-table>
@@ -360,7 +360,7 @@
             <b-row>
               <!-- equipment -->
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-class="p-sm-2"
                   v-bind:label="$trans('Search equipment')"
@@ -389,7 +389,7 @@
                     <span slot="noResult">
                       <h5>{{ $trans('No equipment found') }}</h5>
                       <p v-if="canQuickCreateEquipment">
-                        <b-button
+                        <BButton
                           @click="showAddEquipmentModal"
                           class="btn btn-primary"
                           size="sm"
@@ -397,38 +397,38 @@
                           variant="primary"
                         >
                           {{ $trans("Add new equipment") }}
-                        </b-button>
+                        </BButton>
                       </p>
                     </span>
                   </multiselect>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Equipment')"
                   label-for="order-orderline-product"
                 >
                   <b-input-group class="sm">
-                    <b-form-input
+                    <BFormInput
                       id="order-orderline-product"
                       size="sm"
                       readonly
                       v-model="product"
-                    ></b-form-input>
+                    ></BFormInput>
                     <b-input-group-append>
-                      <b-button variant="outline-success" v-if="equipment" size="sm">
+                      <BButton variant="outline-success" v-if="equipment" size="sm">
                         <b-icon-check></b-icon-check>
-                      </b-button>
+                      </BButton>
                     </b-input-group-append>
                   </b-input-group>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <!-- end equipment -->
 
               <!-- equipment locations -->
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-class="p-sm-2"
                   v-bind:label="$trans('Search location')"
@@ -458,7 +458,7 @@
                     <span slot="noResult">
                       <h5>{{ $trans('No locations found') }}</h5>
                       <p v-if="canQuickCreateEquipmentLocation">
-                        <b-button
+                        <BButton
                           @click="showAddLocationModal"
                           class="btn btn-primary"
                           size="sm"
@@ -466,56 +466,56 @@
                           variant="primary"
                         >
                           {{ $trans("Add new location") }}
-                        </b-button>
+                        </BButton>
                       </p>
                     </span>
                   </multiselect>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Location')"
                   label-for="order-orderline-equipment-location"
                 >
                   <b-input-group class="sm">
-                    <b-form-input
+                    <BFormInput
                       id="order-orderline-equipment-location"
                       size="sm"
                       readonly
                       v-model="location"
-                    ></b-form-input>
+                    ></BFormInput>
                     <b-input-group-append>
-                      <b-button variant="outline-success" v-if="equipment_location" size="sm">
+                      <BButton variant="outline-success" v-if="equipment_location" size="sm">
                         <b-icon-check></b-icon-check>
-                      </b-button>
+                      </BButton>
                     </b-input-group-append>
                   </b-input-group>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <!-- end equipment locations -->
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
                   label-for="order-orderline-remarks"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="order-orderline-remarks"
                     v-model="remarks"
                     rows="1"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
               </b-col>
 
             </b-row>
             <footer class="modal-footer">
-              <b-button v-if="isEditOrderLine" @click="doEditOrderLine" class="btn btn-primary" size="sm" type="button" variant="warning">
+              <BButton v-if="isEditOrderLine" @click="doEditOrderLine" class="btn btn-primary" size="sm" type="button" variant="warning">
                 {{ $trans('Edit orderline') }}
-              </b-button>
-              <b-button v-if="!isEditOrderLine" @click="addOrderLine" class="btn btn-primary" size="sm" type="button" variant="primary">
+              </BButton>
+              <BButton v-if="!isEditOrderLine" @click="addOrderLine" class="btn btn-primary" size="sm" type="button" variant="primary">
                 {{ $trans('Add orderline') }}
-              </b-button>
+              </BButton>
             </footer>
           </Collapse>
         </div>
@@ -532,12 +532,12 @@
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>

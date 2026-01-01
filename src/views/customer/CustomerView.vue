@@ -50,7 +50,7 @@
               </b-tab>
               <b-tab :title="$trans('Equipment')">
                 <span class="button-container">
-                  <b-button
+                  <BButton
                     class="btn btn-outline-secondary"
                     :to="{name: 'customers-equipment-add'}"
                     size="sm"
@@ -58,10 +58,10 @@
                     variant="outline-secondary"
                   >
                     {{ $trans('Add equipment') }}
-                  </b-button>
+                  </BButton>
                 </span>
                 <span class="button-container">
-                  <b-button
+                  <BButton
                     class="btn btn-outline-secondary"
                     :to="{name: 'customers-equipment-list'}"
                     size="sm"
@@ -69,7 +69,7 @@
                     variant="outline-secondary"
                   >
                     {{ $trans('Manage equipment') }}
-                  </b-button>
+                  </BButton>
                 </span>
                 <hr/>
                 <b-table
@@ -90,7 +90,7 @@
                   <template #cell(icons)="data">
                     <div class="h2 float-right">
                       <span class="button-container">
-                        <b-button
+                        <BButton
                           :to="{name: 'customers-equipment-edit', params: {pk: data.item.id}}"
                           class="btn btn-outline-secondary"
                           size="sm"
@@ -98,7 +98,7 @@
                           variant="outline-secondary"
                         >
                           {{ $trans('Edit') }}
-                        </b-button>
+                        </BButton>
                       </span>
                     </div>
                   </template>
@@ -144,7 +144,7 @@
                         <b-col cols="3">
                           <div class="float-right">
                             <span class="button-container">
-                              <b-button
+                              <BButton
                                 class="btn btn-outline-primary"
                                 :to="{name: 'order-add-maintenance'}"
                                 size="sm"
@@ -152,11 +152,11 @@
                                 variant="outline-primary"
                               >
                                 {{ $trans('Create order') }}
-                              </b-button>
+                              </BButton>
                             </span>
 
                             <span class="button-container">
-                              <b-button
+                              <BButton
                                 :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}"
                                 class="btn btn-outline-secondary"
                                 size="sm"
@@ -164,7 +164,7 @@
                                 variant="outline-secondary"
                               >
                                 {{ $trans('Edit') }}
-                              </b-button>
+                              </BButton>
                             </span>
                           </div>
                         </b-col>
@@ -173,7 +173,7 @@
                 </b-table>
                 <hr/>
                 <span class="button-container">
-                <b-button
+                <BButton
                   class="btn btn-outline-secondary"
                   :to="{name: 'maintenance-contract-add'}"
                   size="sm"
@@ -181,10 +181,10 @@
                   variant="outline-secondary"
                 >
                   {{ $trans('Add contract') }}
-                </b-button>
+                </BButton>
               </span>
               <span class="button-container">
-                <b-button
+                <BButton
                   class="btn btn-outline-secondary"
                   :to="{name: 'maintenance-contracts'}"
                   size="sm"
@@ -192,7 +192,7 @@
                   variant="outline-secondary"
                 >
                   {{ $trans('Manage contracts') }}
-                </b-button>
+                </BButton>
               </span>
               </b-tab>
               <b-tab :title="$trans('Locations')">
@@ -213,7 +213,7 @@
                   <template #cell(icons)="data">
                     <div class="h2 float-right">
                       <span class="button-container">
-                        <b-button
+                        <BButton
                           :to="{name: 'customers-location-edit', params: {pk: data.item.id}}"
                           class="btn btn-outline-secondary"
                           size="sm"
@@ -221,14 +221,14 @@
                           variant="outline-secondary"
                         >
                           {{ $trans('Edit') }}
-                        </b-button>
+                        </BButton>
                       </span>
                     </div>
                   </template>
                 </b-table>
                 <b-row align-h="end">
                   <span class="button-container">
-                    <b-button
+                    <BButton
                       class="btn btn-outline-secondary"
                       :to="{name: 'customers-location-add'}"
                       size="sm"
@@ -236,10 +236,10 @@
                       variant="outline-secondary"
                     >
                       {{ $trans('New') }}
-                    </b-button>
+                    </BButton>
                   </span>
                   <span class="button-container">
-                    <b-button
+                    <BButton
                       class="btn btn-outline-secondary"
                       :to="{name: 'customers-location-list'}"
                       size="sm"
@@ -247,7 +247,7 @@
                       variant="outline-secondary"
                     >
                       {{ $trans('Manage >>') }}
-                    </b-button>
+                    </BButton>
                   </span>
                 </b-row>
               </b-tab>

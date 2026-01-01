@@ -13,11 +13,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -26,61 +26,61 @@
       <div class="page-detail flex-columns">
         <div class="panel">
           <h6>{{ $trans("Settings") }}</h6>
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Statuscode')"
             label-for="statuscode_statuscode"
             label-cols="3"
           >
-            <b-form-input
+            <BFormInput
               autofocus
               id="statuscode_statuscode"
               size="sm"
               v-model="statuscode.statuscode"
               :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null"
             >
               {{ $trans("Please enter a statuscode") }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('New status template')"
             label-for="statuscode_new_status_template"
             :description="$trans('For statuses that are not set by the application.')"
           >
-            <b-form-input
+            <BFormInput
               id="statuscode_new_status_template"
               size="sm"
               v-model="statuscode.new_status_template"
             >
-            </b-form-input>
-          </b-form-group>
+            </BFormInput>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Description')"
             label-for="statuscode_description"
           >
-            <b-form-textarea
+            <BFormTextarea
               id="statuscode_description"
               v-model="statuscode.description"
               rows="3"
-            ></b-form-textarea>
-          </b-form-group>
+            ></BFormTextarea>
+          </BFormGroup>
 
           <h6>{{ $trans("Label") }}</h6>
-          <b-form-group label-cols="3" label="Label preview">
+          <BFormGroup label-cols="3" label="Label preview">
             <small
               class="statuscode-preview"
               :style="`--bg-color: ${statuscode.color}; --text-color: ${statuscode.text_color}`"
             >
               {{ statuscode.statuscode || "statuscode text" }}
             </small>
-          </b-form-group>
-          <b-form-group
+          </BFormGroup>
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Label color')"
             label-for="statuscode_color"
@@ -93,9 +93,9 @@
               class="color-picker-placeholder"
               v-model="statuscode.color"
             ></color-picker>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Text color')"
             label-for="statuscode_text_color"
@@ -106,7 +106,7 @@
               class="color-picker-placeholder"
               v-model="statuscode.text_color"
             ></color-picker>
-          </b-form-group>
+          </BFormGroup>
           <ExpiryConditionForm
             :statuscode="statuscode"
             @expiry-condition-changed="updateStatuscode"

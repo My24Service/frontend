@@ -72,9 +72,9 @@
         </b-col>
       </b-row>
       <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
+        <BButton @click="goBack" class="btn btn-info" type="button" variant="primary">
           {{ $trans('Back') }}
-        </b-button>
+        </BButton>
       </footer>
     </div>
   </b-overlay>

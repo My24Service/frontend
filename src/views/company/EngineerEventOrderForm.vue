@@ -12,7 +12,7 @@
         <b-form>
           <b-row>
             <b-col cols="8" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-class="p-sm-0"
                 v-bind:label="$trans('Search existing address')"
@@ -37,22 +37,22 @@
                 >
                   <span slot="noResult">{{ $trans('Nothing found.') }}</span>
                 </multiselect>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-class="p-sm-0"
                 v-bind:label="$trans('Licence plate')"
                 label-for="order_reference"
               >
-                <b-form-input
+                <BFormInput
                   id="order_reference"
                   size="sm"
                   class="p-sm-0"
                   v-model="order.order_reference"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-form>

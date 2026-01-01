@@ -10,27 +10,27 @@
       <b-form class="page-detail panel">
         <b-row>
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-for="picture_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="picture.name"
                 id="picture_name"
                 size="sm"
                 :state="isSubmitClicked ? !v$.picture.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.picture.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="4">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Image')"
               label-for="picture-image"
@@ -41,7 +41,7 @@
                 :placeholder="$trans('Choose a file or drop it here...')"
                 @input="imageSelected"
               ></b-form-file>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="4">
             <h3>{{ $trans('Current image') }}</h3>
@@ -55,12 +55,12 @@
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>

@@ -18,10 +18,10 @@
           <b-row role="group">
             <b-col size="12">
               <div>
-                <b-form-group label="Individual radios">
-                  <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
-                  <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
-                </b-form-group>
+                <BFormGroup label="Individual radios">
+                  <BFormRadio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</BFormRadio>
+                  <BFormRadio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</BFormRadio>
+                </BFormGroup>
               </div>
             </b-col>
           </b-row>
@@ -48,7 +48,7 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="4">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('New status')"
                 label-for="change-status-status"
               >
@@ -60,19 +60,19 @@
                   value-field="statuscode"
                   text-field="statuscode"
                 ></b-form-select>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col size="8">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Extra text')"
                 label-for="change-status-extra-text"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   id="change-status-extra-text"
                   v-model="status.extra_text"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -84,11 +84,11 @@
         <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
         <span v-for="(order, index) in selectedOrders" :key="order.id">
           {{ order.order_id }}
-          <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
+          <BLink class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</BLink>
         </span>
-        <b-link v-if="dispatch" class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
+        <BLink v-if="dispatch" class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
           <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
-        </b-link>
+        </BLink>
       </b-col>
     </b-row>
 
@@ -115,8 +115,8 @@
         </template>
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="order-add"
                   v-bind:title="$trans('New order')"
@@ -131,8 +131,8 @@
                 <ButtonLinkSort
                   v-bind:method="function() { showSortModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>

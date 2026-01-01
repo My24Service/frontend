@@ -40,7 +40,7 @@
                     <template #cell(icons)="data">
                       <div class="h2 float-right">
                         <span class="button-container">
-                          <b-button
+                          <BButton
                             :to="{name: 'equipment-equipment-edit', params: {pk: data.item.id}}"
                             class="btn btn-outline-secondary"
                             size="sm"
@@ -48,7 +48,7 @@
                             variant="outline-secondary"
                           >
                             {{ $trans('Edit') }}
-                          </b-button>
+                          </BButton>
                         </span>
                       </div>
                     </template>
@@ -56,7 +56,7 @@
 
                   <b-row align-h="end">
                     <span class="button-container">
-                      <b-button
+                      <BButton
                         class="btn btn-outline-secondary"
                         :to="{name: 'equipment-equipment-add'}"
                         size="sm"
@@ -64,10 +64,10 @@
                         variant="outline-secondary"
                       >
                         {{ $trans('New') }}
-                      </b-button>
+                      </BButton>
                     </span>
                     <span class="button-container">
-                      <b-button
+                      <BButton
                         class="btn btn-outline-secondary"
                         :to="{name: 'equipment-equipment-list'}"
                         size="sm"
@@ -75,7 +75,7 @@
                         variant="outline-secondary"
                       >
                         {{ $trans('Manage >>') }}
-                      </b-button>
+                      </BButton>
                     </span>
                   </b-row>
               </b-tab>
@@ -92,7 +92,7 @@
                   <template #cell(icons)="data">
                     <div class="h2 float-right">
                       <span class="button-container">
-                        <b-button
+                        <BButton
                           :to="{name: 'equipment-location-edit', params: {pk: data.item.id}}"
                           class="btn btn-outline-secondary"
                           size="sm"
@@ -100,13 +100,13 @@
                           variant="outline-secondary"
                         >
                           {{ $trans('Edit') }}
-                        </b-button>
+                        </BButton>
                       </span>
                     </div>
                   </template>
                 </b-table>
                 <span class="button-container">
-                  <b-button
+                  <BButton
                     class="btn btn-outline-secondary"
                     :to="{name: 'equipment-location-add'}"
                     size="sm"
@@ -114,10 +114,10 @@
                     variant="outline-secondary"
                   >
                     {{ $trans('New') }}
-                  </b-button>
+                  </BButton>
                 </span>
                 <span class="button-container">
-                  <b-button
+                  <BButton
                     class="btn btn-outline-secondary"
                     :to="{name: 'equipment-location-list'}"
                     size="sm"
@@ -125,7 +125,7 @@
                     variant="outline-secondary"
                   >
                     {{ $trans('Manage >>') }}
-                  </b-button>
+                  </BButton>
                 </span>
               </b-tab>
               <b-tab :title="$trans('Past orders')">
@@ -141,8 +141,8 @@
                 <div class='flex-columns' style="justify-content: space-between;">
                   <span></span>
                   <span>
-                  <b-button-toolbar>
-                    <b-button-group class="mr-1">
+                  <BButton-toolbar>
+                    <BButton-group class="mr-1">
                       <ButtonLinkRefresh
                         v-bind:method="function() { loadData() }"
                         v-bind:title="$trans('Refresh')"
@@ -150,8 +150,8 @@
                       <ButtonLinkSearch
                         v-bind:method="function() { showSearchModal() }"
                       />
-                    </b-button-group>
-                  </b-button-toolbar>
+                    </BButton-group>
+                  </BButton-toolbar>
                   </span>
                 </div>
                 <br>

@@ -10,7 +10,7 @@
         </b-input-group-text>
       </template>
 
-      <b-form-input
+      <BFormInput
         v-model="number"
         class="input-number"
         :placeholder="$trans('Price')"
@@ -18,10 +18,10 @@
         @input="update"
         @focus="gotFocus"
         :state="v$.number.$error ? false : null"
-      ></b-form-input>
+      ></BFormInput>
 
       <template #append>
-        <b-form-input
+        <BFormInput
           v-model="decimal"
           class="input-decimal"
           type="number"
@@ -29,7 +29,7 @@
           :state="v$.decimal.$error ? false : null"
           @input="update"
           @focus="gotFocus"
-        ></b-form-input>
+        ></BFormInput>
       </template>
     </b-input-group>
   </p>

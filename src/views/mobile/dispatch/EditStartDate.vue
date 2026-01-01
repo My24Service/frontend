@@ -11,7 +11,7 @@
       <!-- <p>Order #<span>{{ order_id }}</span></p> -->
       <form ref="start-date-form">
         <b-container>
-          <b-form-group
+          <BFormGroup
             :label="$trans('Start date')"
             label-for="start_date"
             cols="1">
@@ -24,9 +24,9 @@
               :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
               @input="check_date_start()"
             ></b-form-datepicker>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-class=""
             v-bind:label="$trans('End date')"
             label-for="end_date"
@@ -42,7 +42,7 @@
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
                 @input="check_date_end()"
               ></b-form-datepicker>
-            </b-form-group>
+            </BFormGroup>
         </b-container>
       </form>
     </b-modal>

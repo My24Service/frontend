@@ -7,17 +7,17 @@
           <span v-if="member.name">{{ member.name }}</span>
           <span v-else class="dimmed">{{ $trans('Company name')}}</span>
         </h3>
-        <b-button-toolbar>
-          <b-button @click="() => isEditing = !isEditing" class="btn btn-primary" type="button" variant="primary" v-show="!isEditing">
+        <BButton-toolbar>
+          <BButton @click="() => isEditing = !isEditing" class="btn btn-primary" type="button" variant="primary" v-show="!isEditing">
             <b-icon icon="pencil"></b-icon>
             {{ $trans("Edit") }}
-          </b-button>
-          <b-button type="button" @click="cancelForm" v-if="isEditing" variant="outline">{{ $trans("Cancel") }}</b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary" v-if="isEditing">
+          </BButton>
+          <BButton type="button" @click="cancelForm" v-if="isEditing" variant="outline">{{ $trans("Cancel") }}</BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary" v-if="isEditing">
             <b-icon icon="save"></b-icon>
             {{ $trans('Save') }}
-          </b-button>
-        </b-button-toolbar>
+          </BButton>
+        </BButton-toolbar>
       </div>
     </header>
     <div class="page-detail">
@@ -35,7 +35,7 @@
             </span>
             <br>
 
-            <b-form-group
+            <BFormGroup
                 class="hidden"
                 v-if="isEditing"
                 label-size="sm"
@@ -50,182 +50,182 @@
                   :placeholder="$trans('Choose a file or drop it here...')"
                   @input="imageSelected"
                 ></b-form-file>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-cols="3"
               label-for="member_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="member.name"
                 id="member_name"
                 size="sm"
                 :state="isSubmitClicked ? !v$.member.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Company code')"
               label-cols="3"
               label-for="member_companycode"
             >
-              <b-form-input
+              <BFormInput
                 id="member_companycode"
                 readonly
                 size="sm"
                 v-model="member.companycode"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Chamber of commerce')"
               label-for="member_chamber_of_commerce"
             >
-              <b-form-input
+              <BFormInput
                 id="member_chamber_of_commerce"
                 size="sm"
                 v-model="member.chamber_of_commerce"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('VAT number')"
               label-for="member_vat_number"
             >
-              <b-form-input
+              <BFormInput
                 id="member_vat_number"
                 size="sm"
                 v-model="member.vat_number"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Address')"
               label-cols="3"
               label-for="member_address"
             >
-              <b-form-input
+              <BFormInput
                 id="member_address"
                 size="sm"
                 v-model="member.address"
                 :state="isSubmitClicked ? !v$.member.address.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.address.$error : null">
                 {{ $trans('Please enter an address') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Postal')"
               label-cols="3"
               label-for="member_postal"
             >
-              <b-form-input
+              <BFormInput
                 id="member_postal"
                 size="sm"
                 v-model="member.postal"
                 :state="isSubmitClicked ? !v$.member.postal.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.postal.$error : null">
                 {{ $trans('Please enter an postal code') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('City')"
               label-cols="3"
               label-for="member_city"
               >
-              <b-form-input
+              <BFormInput
                 id="member_city"
                 size="sm"
                 v-model="member.city"
                 :state="isSubmitClicked ? !v$.member.city.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.city.$error : null">
                 {{ $trans('Please enter a city') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Country')"
               label-cols="3"
               label-for="member_country"
             >
               <b-form-select v-model="member.country_code" :options="countries" size="sm"></b-form-select>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Phone')"
               label-cols="3"
               label-for="member_tel"
             >
-              <b-form-input
+              <BFormInput
                 v-model="member.tel"
                 id="member_tel"
                 size="sm"
                 :state="isSubmitClicked ? !v$.member.tel.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.tel.$error : null">
                 {{ $trans('Please enter a number') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Website')"
               label-cols="3"
               label-for="member_www"
             >
-              <b-form-input
+              <BFormInput
                 id="member_www"
                 size="sm"
                 v-model="member.www"
                 :state="isSubmitClicked ? !v$.member.www.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.www.$error : null">
                 {{ $trans('Please enter a website') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('E-mail')"
                 label-cols="3"
                 label-for="member_email"
               >
-                <b-form-input
+                <BFormInput
                   id="member_email"
                   size="sm"
                   v-model="member.email"
                   :state="isSubmitClicked ? !v$.member.email.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.member.email.$error : null">
                   {{ $trans('Please enter a valid email') }}
                 </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
           </fieldset>
         </div>
@@ -233,56 +233,56 @@
         <div class="panel col-1-3">
           <h6>{{ $trans('Contact') }} &amp; {{ $trans('Info') }} </h6>
           <fieldset :disabled="!isEditing">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Contacts')"
               label-for="member_contacts"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="member_contacts"
                 v-model="member.contacts"
                 rows="5"
                 :state="isSubmitClicked ? !v$.member.contacts.$error : null"
-              ></b-form-textarea>
+              ></BFormTextarea>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.contacts.$error : null">
                 {{ $trans('Please enter some contacts') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Info')"
               label-for="member_info"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="member_info"
                 v-model="member.info"
                 rows="5"
                 :state="isSubmitClicked ? !v$.member.info.$error : null"
-              ></b-form-textarea>
+              ></BFormTextarea>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.info.$error : null">
                 {{ $trans('Please enter some info') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Activities')"
               label-for="member_activities"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="member_activities"
                 v-model="member.activities"
                 rows="10"
                 :state="isSubmitClicked ? !v$.member.activities.$error : null"
-              ></b-form-textarea>
+              ></BFormTextarea>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.member.activities.$error : null">
                 {{ $trans('Please enter some activities') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </fieldset>
         </div>
 
@@ -296,7 +296,7 @@
                 icon="camera"
                 class="button-icon" style="width: 72px; height: 72px" v-show="isEditing"></b-icon>
 
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-show="isEditing"
                   label-for="member_companylogo_workorder"
@@ -308,7 +308,7 @@
                     :placeholder="$trans('Choose a file or drop it here...')"
                     @input="imageWorkorderSelected"
                   ></b-form-file>
-                </b-form-group>
+                </BFormGroup>
             </span>
             <small>{{$trans('Optional logo for on the workorder')}}</small>
           </fieldset>

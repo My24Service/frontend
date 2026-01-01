@@ -43,9 +43,9 @@
             <b-tr>
               <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
               <b-td>
-                <b-link class="px-1" v-bind:href="`mailto:${supplier.order_email}`">
+                <BLink class="px-1" v-bind:href="`mailto:${supplier.order_email}`">
                   {{ supplier.order_email }}
-                </b-link>
+                </BLink>
               </b-td>
             </b-tr>
             <b-tr>
@@ -62,8 +62,8 @@
           </b-col>
       </b-row>
       <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
+        <BButton @click="goBack" class="btn btn-info" type="button" variant="primary">
+          {{ $trans('Back') }}</BButton>
       </footer>
     </div>
   </b-overlay>

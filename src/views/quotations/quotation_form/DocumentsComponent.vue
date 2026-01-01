@@ -41,7 +41,7 @@
     <div v-if="showForm">
       <b-form v-if="!documentService.isEdit">
         <h6>{{ $trans("Add document(s)") }}</h6>
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Choose files')"
         >
@@ -51,12 +51,12 @@
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
             @input="filesSelected"
           ></b-form-file>
-        </b-form-group>
+        </BFormGroup>
       </b-form>
 
       <b-form v-if="documentService.isEdit">
         <h4>{{ $trans("Edit document") }}</h4>
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Choose files')"
         >
@@ -65,35 +65,35 @@
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
             @input="filesSelected"
           ></b-form-file>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Name')"
           label-for="quotation-document-name"
         >
-          <b-form-input
+          <BFormInput
             id="quotation-document-name"
             size="sm"
             v-model="documentService.editItem.name"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Description')"
           label-for="quotation-document-description"
         >
-          <b-form-textarea
+          <BFormTextarea
             id="quotation-document-description"
             v-model="documentService.editItem.description"
             rows="1"
-          ></b-form-textarea>
-        </b-form-group>
+          ></BFormTextarea>
+        </BFormGroup>
       </b-form>
 
       <footer class="modal-footer">
-        <b-button
+        <BButton
           :disabled="isLoading"
           @click="cancelEditDocument"
           class="btn btn-secondary update-button"
@@ -102,8 +102,8 @@
           variant="secondary"
         >
           {{ $trans('Cancel') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           v-if="documentService.isEdit"
           @click="doEditCollectionItem"
           class="btn btn-primary"
@@ -113,7 +113,7 @@
           :disabled="!isDocumentValid"
         >
           {{ $trans('Edit document') }}
-        </b-button>
+        </BButton>
       </footer>
 
     </div>
@@ -122,7 +122,7 @@
       class="modal-footer"
       v-if="!showForm && !isView"
     >
-      <b-button
+      <BButton
         @click="newDocument"
         :disabled="isLoading"
         class="btn btn-primary update-button"
@@ -130,7 +130,7 @@
         variant="primary"
       >
         {{ $trans('Add document(s)') }}
-      </b-button>
+      </BButton>
     </footer>
 
     <b-container
@@ -139,16 +139,16 @@
       <b-row>
         <b-col cols="2"></b-col>
         <b-col cols="10">
-          <b-button
+          <BButton
             @click="loadData"
             :disabled="isLoading"
             class="btn btn-secondary"
             type="button"
           >
             {{ $trans('Discard changes') }}
-          </b-button>
+          </BButton>
           &nbsp;
-          <b-button
+          <BButton
             @click="submitDocuments"
             :disabled="isLoading"
             class="btn btn-danger"
@@ -157,7 +157,7 @@
           >
             <b-spinner small v-if="isLoading"></b-spinner>
             {{ $trans('Save changes') }}
-          </b-button>
+          </BButton>
         </b-col>
       </b-row>
     </b-container>

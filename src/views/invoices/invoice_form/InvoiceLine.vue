@@ -43,9 +43,9 @@
             {{ invoiceLine.vat_dinero.toFormat('$0.00') }}
           </span>
           <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;vertical-align:middle">
-            <b-link class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
+            <BLink class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
               <b-icon-trash></b-icon-trash>
-            </b-link>
+            </BLink>
           </span>
           <span v-else>&nbsp;</span>
         </li>
@@ -63,24 +63,24 @@
         <b-container>
           <b-row>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-for="new-invoice-line-description"
               >
-                <b-form-input
+                <BFormInput
                   id="new-invoice-line-description"
                   size="sm"
                   v-model="invoiceLineService.editItem.description"
                   :placeholder="$trans('Item description')"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="2" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-for="new-invoice-line-amount"
               >
-                <b-form-input
+                <BFormInput
                   @input="invoiceLineAmountChanged"
                   id="new-invoice-line-amount"
                   size="sm"
@@ -88,11 +88,11 @@
                   v-model="invoiceLineService.editItem.amount"
                   :placeholder="$trans('Amount')"
 
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-for="new-invoice-line-price"
               >
@@ -102,27 +102,27 @@
                   :currency="invoiceLineService.editItem.price_currency"
                   @priceChanged="(val) => invoiceLineService.editItem.setPriceField('price', val) && invoiceLineService.editItem.calcTotal()"
                 />
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
           <b-row>
             <b-col cols="2" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-for="new-invoice-line-total"
               >
-                <b-form-input
+                <BFormInput
                   :placeholder="$trans('Total')"
                   id="new-invoice-line-total"
                   readonly
                   disabled
                   :value="invoiceLineService.editItem.total_dinero.toFormat('$0.00')"
                   size="sm"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 class="flex-columns vat"
                 label-size="sm"
                 v-bind:label="$trans('VAT %')"
@@ -133,14 +133,14 @@
 
                 {{ invoiceLineService.editItem.vat_dinero.toFormat('$0.00') }}
               </span>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-for="invoice-submit-button"
               >
-                <b-button
+                <BButton
                   v-if="invoiceLineService.isEdit"
                   @click="invoiceService.doEditCollectionItem"
                   class="btn "
@@ -150,8 +150,8 @@
                   id="invoice-submit-button"
                 >
                   {{ $trans('Edit') }}
-                </b-button>
-                <b-button
+                </BButton>
+                <BButton
                   v-else
                   @click="addInvoiceLine"
                   class="btn"
@@ -162,8 +162,8 @@
                   id="invoice-submit-button"
                 >
                   {{ $trans('Add') }}
-                </b-button>
-              </b-form-group>
+                </BButton>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -183,7 +183,7 @@
           </b-row>
           <b-row>
             <b-col cols="12" class="text-center">
-              <b-button
+              <BButton
                 @click="loadData"
                 class="btn btn-secondary"
                 type="button"
@@ -191,7 +191,7 @@
                 :disabled="!invoiceLineService.collectionHasChanges"
               >
                 {{ $trans('Discard changes') }}
-              </b-button>
+              </BButton>
             </b-col>
           </b-row>
         </b-container>

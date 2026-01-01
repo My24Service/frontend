@@ -4,10 +4,10 @@
       <div class="page-title">
         <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Leave Types") }}</h3>
         <div class="flex-columns">
-          <b-button @click="addNewLeave" type="button" variant="primary">
+          <BButton @click="addNewLeave" type="button" variant="primary">
             <b-icon icon="file-earmark-plus"></b-icon>
             {{ $trans("Add leave types") }}
-          </b-button>
+          </BButton>
         </div>
       </div>
     </header>
@@ -30,8 +30,8 @@
         </template>
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="
                     function() {
@@ -48,8 +48,8 @@
                     }
                   "
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(icons)="data">
@@ -91,24 +91,24 @@
     >
       <b-overlay :show="isLoadingForm" rounded="sm">
         <div class="flex-columns">
-          <b-form-group label-class="" :label="$trans('Name')" label-for="name" cols="4">
-            <b-form-input
+          <BFormGroup label-class="" :label="$trans('Name')" label-for="name" cols="4">
+            <BFormInput
               id="name"
               v-model="leaveTypeForm.name"
               placeholder="Name"
               :state="submitClicked ? !v$.leaveTypeForm.name.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback :state="submitClicked ? !v$.leaveTypeForm.name.$error : null">
               {{ $trans("Please enter a leave type name") }}
             </b-form-invalid-feedback>
-          </b-form-group>
-          <b-form-group :label="$trans('Counts as leave')" cols="4">
-            <b-form-checkbox
+          </BFormGroup>
+          <BFormGroup :label="$trans('Counts as leave')" cols="4">
+            <BFormCheckbox
               id="count_as_leave"
               v-model="leaveTypeForm.counts_as_leave"
               name="count_as_leave"
-            ></b-form-checkbox>
-          </b-form-group>
+            ></BFormCheckbox>
+          </BFormGroup>
         </div>
       </b-overlay>
     </b-modal>

@@ -11,28 +11,28 @@
         <b-container>
           <b-row>
             <b-col cols="7">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('State')"
                 label-for="add-state-state"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   id="add-state-state"
                   v-model="state.state"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="5">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Lifespan')"
                 label-for="add-state-replace_months"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   id="add-state-replace_months"
                   v-model="state.replace_months"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -60,8 +60,8 @@
           <b-icon icon="tools"></b-icon>
           {{ $trans("Equipment") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -73,9 +73,9 @@
               v-bind:method="function() { downloadList() }"
               v-bind:title="$trans('Download QR-codes')"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: newLink}" class="btn">{{ $trans("Add Equipment") }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 

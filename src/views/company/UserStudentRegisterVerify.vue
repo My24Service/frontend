@@ -8,9 +8,9 @@
       <h3>{{ $trans('Verify success') }}</h3>
       <p>{{ $trans('Your account is now verified. Next you have to set your password') }}</p>
       <p>
-        <b-button @click="sendResetPasswordLink" type="button" variant="primary">
+        <BButton @click="sendResetPasswordLink" type="button" variant="primary">
           {{ $trans('Send reset password link') }}
-        </b-button>
+        </BButton>
       </p>
     </div>
     <div v-if="passwordLinkSent && sendPasswordResetClicked">

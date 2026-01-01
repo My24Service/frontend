@@ -63,26 +63,26 @@
             <!-- {{ activity.amount_duration_read }}-->
           </b-col>
           <b-col cols="3">
-            <b-form-radio-group
+            <BFormRadioGroup
               @change="updateTotals"
               v-model="activity.use_price"
             >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_USER" v-if="!activity.is_partner">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_USER" v-if="!activity.is_partner">
                 {{ $trans('Engineer') }}
                 {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_USER).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
                 {{ $trans('Settings') }}
                 {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
                 {{ $trans('Customer') }}
                 {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
                 <p class="flex">
                   {{ $trans("Other") }}:&nbsp;&nbsp;
                   <PriceInput
@@ -91,8 +91,8 @@
                     @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
                   />
                 </p>
-              </b-form-radio>
-            </b-form-radio-group>
+              </BFormRadio>
+            </BFormRadioGroup>
           </b-col>
           <b-col cols="2">
             <VAT @vatChanged="(val) => changeVatType(activity, val)" />

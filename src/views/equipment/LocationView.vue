@@ -26,12 +26,12 @@
           <dt v-if="hasQr" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
           <dd v-if="hasQr">
             <div v-if="location.qr_path" class="qr-container">
-              <b-link
+              <BLink
                 class="btn btn-sm btn-outline" :href="location.qr_path"
                 target="_blank"
                 :title="$trans('Open QR in new tab')">
                 <img alt="QR code" class="qr-code-image" :src="location.qr_path" />
-              </b-link>
+              </BLink>
               <p>
                 <a href="javascript:" @click="download(location)">
                   {{ $trans("Download") }}
@@ -40,9 +40,9 @@
             </div>
             <img v-if="!location.qr_path" :alt="$trans('No QR yet')" class="qr-code-image" :src="NO_IMAGE_URL" />
             <p>
-              <b-button @click="recreate_qr">
+              <BButton @click="recreate_qr">
                 {{ $trans("Recreate")}}
-              </b-button>
+              </BButton>
             </p>
           </dd>
         </dl>
@@ -54,7 +54,7 @@
             <div class='flex-columns space-between align-items-center'>
               <h6>{{ $trans("Past orders") }}</h6>
               <span>
-                <b-button-group>
+                <BButton-group>
                   <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
@@ -62,7 +62,7 @@
                   <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                   />
-                </b-button-group>
+                </BButton-group>
               </span>
             </div>
             <ul class='listing order-list'>

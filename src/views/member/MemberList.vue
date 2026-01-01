@@ -20,8 +20,8 @@
         <h3>
           {{ $trans("Members") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -30,7 +30,7 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link
             v-if="isSuperuser && !requested && !deleted"
             :to="{name: 'member-add'}"
@@ -45,7 +45,7 @@
           >
             {{$trans('Request new member')}}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 

@@ -7,9 +7,9 @@
           <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ $trans('Maintenance contracts') }}</router-link> /
           <span>{{ maintenanceContract.name }}</span>
         </h3>
-        <b-button-toolbar>
+        <BButton-toolbar>
           <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">{{ $trans("Edit contract") }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -46,7 +46,7 @@
             <div class="flex-columns" style="justify-content: end;">
               <span>
                 {{ $trans('Create order?') }}&nbsp;
-                <b-button
+                <BButton
                   @click="selectEquipment"
                   class="btn btn-primary"
                   size="sm"
@@ -55,7 +55,7 @@
                   :disabled="isCreate ? 'disabled' : false"
                 >
                   {{ $trans("Select equipment") }}
-                </b-button>
+                </BButton>
               </span>
             </div>
             <hr/>
@@ -66,12 +66,12 @@
                 :items="orderLinesData" responsive="md"
               >
                 <template #cell(id)="data">
-                  <b-form-checkbox
+                  <BFormCheckbox
                     :id="`equipment${data.item.equipment_pk}`"
                     v-model="data.item.useAsOrderLine"
                   >
                     {{ data.item.id }}
-                  </b-form-checkbox>
+                  </BFormCheckbox>
                 </template>
                   <template #cell(frequency)="data">
                     <span>
@@ -80,24 +80,24 @@
                     <small class="dimmed">({{ data.item.num_order_equipment }} {{ $trans('in orders') }})</small>
                 </template>
                 <template #cell(amount)="data">
-                  <b-form-group
+                  <BFormGroup
                   label-cols="4">
-                  <b-form-input
+                  <BFormInput
                     :value="`${data.item.amount}`"
                     v-model="data.item.amount"
                     type="number"
                     min="1"
                   />
-                </b-form-group>
+                </BFormGroup>
                 </template>
               </b-table>
               <footer class="modal-footer">
-                <b-button @click="cancelForm" class="btn btn-secondary" type="reset" variant="secondary">
+                <BButton @click="cancelForm" class="btn btn-secondary" type="reset" variant="secondary">
                   {{ $trans('Cancel') }}
-                </b-button>
-                <b-button @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary">
+                </BButton>
+                <BButton @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary">
                   {{ $trans('Add equipment') }}
-                </b-button>
+                </BButton>
               </footer>
 
             </div>
@@ -135,8 +135,8 @@
             />
             <div class="flex-columns" style="justify-content: end;">
               <span>
-                <b-button-toolbar>
-                  <b-button-group class="mr-1">
+                <BButton-toolbar>
+                  <BButton-group class="mr-1">
                     <ButtonLinkRefresh
                       v-bind:method="function() { loadData() }"
                       v-bind:title="$trans('Refresh')"
@@ -144,8 +144,8 @@
                     <ButtonLinkSearch
                       v-bind:method="function() { showSearchModal() }"
                     />
-                  </b-button-group>
-                </b-button-toolbar>
+                  </BButton-group>
+                </BButton-toolbar>
               </span>
             </div>
             <hr/>

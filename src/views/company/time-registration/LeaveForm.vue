@@ -12,11 +12,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -25,7 +25,7 @@
       <div class="page-detail flex-columns">
         <div class="panel">
           <h6>{{ $trans("Request leave") }}</h6>
-          <b-form-group
+          <BFormGroup
             v-if="isCreate"
             label-size="sm"
             label-class="p-sm-0"
@@ -51,25 +51,25 @@
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
             </multiselect>
-          </b-form-group>
-          <b-form-group
+          </BFormGroup>
+          <BFormGroup
             v-if="isCreate"
             label-class=""
             :label="$trans('User')"
             label-for="user"
             cols="3"
           >
-            <b-form-input
+            <BFormInput
               id="total_time"
               v-model="userName"
               placeholder="User"
               :readonly="true"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.user.$error : null">
               {{ $trans("Please select a user") }}
             </b-form-invalid-feedback>
-          </b-form-group>
-          <b-form-group v-bind:label="$trans('Leave type')" label-for="leave_type" label-cols="3">
+          </BFormGroup>
+          <BFormGroup v-bind:label="$trans('Leave type')" label-for="leave_type" label-cols="3">
             <b-form-select
               v-model="leave.leave_type"
               :options="leaveTypes"
@@ -80,20 +80,20 @@
             <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.leave_type.$error : null">
               {{ $trans("Please select a leave type") }}
             </b-form-invalid-feedback>
-          </b-form-group>
-          <b-form-group
+          </BFormGroup>
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Description')"
             label-for="leave_description"
           >
-            <b-form-textarea
+            <BFormTextarea
               id="leave_description"
               v-model="leave.description"
               rows="3"
-            ></b-form-textarea>
-          </b-form-group>
+            ></BFormTextarea>
+          </BFormGroup>
           <div class="flex-columns">
-            <b-form-group :label="$trans('Start date')" label-for="start_date" cols="4">
+            <BFormGroup :label="$trans('Start date')" label-for="start_date" cols="4">
               <b-form-datepicker
                 id="start_date"
                 class=""
@@ -110,29 +110,29 @@
               >
                 {{ $trans("Please enter a start date") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group :label="$trans('Whole day')" cols="4">
-              <b-form-checkbox
+            </BFormGroup>
+            <BFormGroup :label="$trans('Whole day')" cols="4">
+              <BFormCheckbox
                 id="leave_start_date_is_whole_day"
                 v-model="leave.start_date_is_whole_day"
                 name="leave_start_date_is_whole_day"
-              ></b-form-checkbox>
-            </b-form-group>
-            <b-form-group
+              ></BFormCheckbox>
+            </BFormGroup>
+            <BFormGroup
               v-if="!leave.start_date_is_whole_day"
               label-class=""
               :label="$trans('Start time')"
               label-for="start_time"
               cols="4"
             >
-              <b-form-input
+              <BFormInput
                 id="start_time"
                 v-model="leave.start_time"
                 type="text"
                 placeholder="HH:mm"
                 @input="startTimeChanged"
                 :state="isSubmitClicked ? !startTimeInvalid : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-timepicker
                 button-only
                 right
@@ -145,10 +145,10 @@
               <b-form-invalid-feedback :state="isSubmitClicked ? !startTimeInvalid : null">
                 {{ $trans("Please enter a valid start time HH:mm") }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
           <div class="flex-columns">
-            <b-form-group :label="$trans('End date')" label-for="end_date" cols="4">
+            <BFormGroup :label="$trans('End date')" label-for="end_date" cols="4">
               <b-form-datepicker
                 id="end_date"
                 class=""
@@ -163,29 +163,29 @@
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.end_date.$error : null">
                 {{ $trans("Please enter a end date") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group :label="$trans('Whole day')" cols="4">
-              <b-form-checkbox
+            </BFormGroup>
+            <BFormGroup :label="$trans('Whole day')" cols="4">
+              <BFormCheckbox
                 id="leave_end_date_is_whole_day"
                 v-model="leave.end_date_is_whole_day"
                 name="leave_end_date_is_whole_day"
-              ></b-form-checkbox>
-            </b-form-group>
-            <b-form-group
+              ></BFormCheckbox>
+            </BFormGroup>
+            <BFormGroup
               v-if="!leave.end_date_is_whole_day"
               label-class=""
               :label="$trans('End time')"
               label-for="end_time"
               cols="4"
             >
-              <b-form-input
+              <BFormInput
                 id="end_time"
                 v-model="leave.end_time"
                 type="text"
                 placeholder="HH:mm"
                 @input="endTimeChanged"
                 :state="isSubmitClicked ? !endTimeInvalid : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-timepicker
                 button-only
                 right
@@ -198,23 +198,23 @@
               <b-form-invalid-feedback :state="isSubmitClicked ? !endTimeInvalid : null">
                 {{ $trans("Please enter a valid end time HH:mm") }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
           <b-overlay :show="loadingTotals" rounded="sm">
             <div class="flex-columns">
-              <b-form-group
+              <BFormGroup
                 label-class=""
                 :label="$trans('Total time')"
                 label-for="totla_time"
                 cols="4"
               >
-                <b-form-input
+                <BFormInput
                   id="total_time"
                   v-model="leave.total_time"
                   placeholder="Total time"
                   :readonly="true"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </div>
           </b-overlay>
         </div>

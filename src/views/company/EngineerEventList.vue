@@ -41,8 +41,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
@@ -51,8 +51,8 @@
                   v-bind:method="function() { downloadList() }"
                   v-bind:title="$trans('Download events')"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(secs_since_last_measure_event_type)="data">
@@ -68,11 +68,11 @@
             {{ data.item.assigned_order.order_name }}, {{ data.item.assigned_order.order_city }}
           </span>
           <span v-if="!data.item.assigned_order && data.item.last_measure_event">
-              <b-button @click="function() { showOrderModal(data.item.id, data.item.user_id) }"
+              <BButton @click="function() { showOrderModal(data.item.id, data.item.user_id) }"
                         class="btn btn-info" type="button" variant="primary"
               >
             {{ $trans("No order, create one") }}
-              </b-button>
+              </BButton>
           </span>
         </template>
         <template #cell(icons)="data">

@@ -4,7 +4,7 @@
       <b-form>
         <b-row>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Search existing address')"
@@ -32,10 +32,10 @@
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
               </multiselect>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Start date')"
@@ -56,10 +56,10 @@
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null">
                 {{ $trans('Please enter a start date') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Start time')"
@@ -72,10 +72,10 @@
                 placeholder="Choose a time"
                 :hour12=false
               ></b-form-timepicker>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('End date')"
@@ -95,10 +95,10 @@
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null">
                 {{ $trans('Please enter an end date') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('End time')"
               label-class="p-sm-0"
@@ -112,110 +112,110 @@
                 v-bind:placeholder="$trans('Choose a time')"
                 :hour12=false
               ></b-form-timepicker>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Customer')"
               label-for="order_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="order.order_name"
                 id="order_name"
                 size="sm"
                 :state="isSubmitClicked ? !v$.order.order_name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_name.$error : null">
                 {{ $trans('Please enter the customer') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Customer ID')"
               label-for="customer_id"
             >
-              <b-form-input
+              <BFormInput
                 v-model="order.customer_id"
                 readonly
                 id="customer_id"
                 size="sm"
                 :state="isSubmitClicked ? !v$.order.customer_id.$error : null"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Address')"
               label-for="order_address"
             >
-              <b-form-input
+              <BFormInput
                 id="order_address"
                 size="sm"
                 v-model="order.order_address"
                 :state="isSubmitClicked ? !v$.order.order_address.$error: null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_address.$error : null">
                 {{ $trans('Please enter the address') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Country')"
               label-for="order_country_code"
             >
               <b-form-select v-model="order.order_country_code" :options="countries" size="sm"></b-form-select>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Postal')"
               label-for="order_postal"
             >
-              <b-form-input
+              <BFormInput
                 id="order_postal"
                 size="sm"
                 v-model="order.order_postal"
                 :state="isSubmitClicked ? !v$.order.order_postal.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_postal.$error : null">
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('City')"
               label-for="order_city"
             >
-              <b-form-input
+              <BFormInput
                 id="order_city"
                 size="sm"
                 v-model="order.order_city"
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null">
                 {{ $trans('Please enter the city') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Order type')"
               label-for="order_type"
@@ -226,102 +226,102 @@
                 :order-type="order.order_type"
                 :include-all="false"
               />
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Required users')"
               label-for="required_users"
             >
-              <b-form-input
+              <BFormInput
                 id="required_users"
                 size="sm"
                 v-model="order.required_users"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Reference')"
               label-for="order_reference"
             >
-              <b-form-input
+              <BFormInput
                 id="order_reference"
                 size="sm"
                 v-model="order.order_reference"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Email')"
               label-for="order_email"
             >
-              <b-form-input
+              <BFormInput
                 id="order_email"
                 size="sm"
                 v-model="order.order_email"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Mobile')"
               label-for="order_mobile"
             >
-              <b-form-input
+              <BFormInput
                 id="order_mobile"
                 size="sm"
                 v-model="order.order_mobile"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Tel.')"
               label-for="order_tel"
             >
-              <b-form-input
+              <BFormInput
                 id="order_tel"
                 size="sm"
                 v-model="order.order_tel"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="6" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Contacts')"
               label-for="order_contact"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="order_contact"
                 v-model="order.order_contact"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
           </b-col>
           <b-col cols="6" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Customer remarks')"
               label-for="customer_remarks"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="customer_remarks"
                 v-model="order.customer_remarks"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
           </b-col>
         </b-row>
 
@@ -335,12 +335,12 @@
                 </template>
                 <template #cell(icons)="data">
                   <div class="float-right">
-                    <b-link class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
+                    <BLink class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
                       <b-icon-pencil></b-icon-pencil>
-                    </b-link>
-                    <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
+                    </BLink>
+                    <BLink class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
                       <b-icon-trash></b-icon-trash>
-                    </b-link>
+                    </BLink>
                   </div>
                 </template>
               </b-table>
@@ -348,66 +348,66 @@
           </b-row>
           <b-row>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Product')"
                 label-for="order-orderline-product"
               >
-                <b-form-input
+                <BFormInput
                   id="order-orderline-product"
                   size="sm"
                   v-model="product"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Location')"
                 label-for="order-orderline-location"
               >
-                <b-form-input
+                <BFormInput
                   id="order-orderline-location"
                   size="sm"
                   v-model="location"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Remarks')"
                 label-for="order-orderline-remarks"
               >
-                <b-form-textarea
+                <BFormTextarea
                   id="order-orderline-remarks"
                   v-model="remarks"
                   rows="1"
-                ></b-form-textarea>
-              </b-form-group>
+                ></BFormTextarea>
+              </BFormGroup>
             </b-col>
           </b-row>
           <footer class="modal-footer">
-            <b-button v-if="isEditOrderLine" @click="doEditOrderLine" class="btn btn-primary" size="sm" type="button" variant="warning">
+            <BButton v-if="isEditOrderLine" @click="doEditOrderLine" class="btn btn-primary" size="sm" type="button" variant="warning">
               {{ $trans('Edit orderline') }}
-            </b-button>
-            <b-button v-if="!isEditOrderLine" @click="addOrderLine" class="btn btn-primary" size="sm" type="button" variant="primary">
+            </BButton>
+            <BButton v-if="!isEditOrderLine" @click="addOrderLine" class="btn btn-primary" size="sm" type="button" variant="primary">
               {{ $trans('Add orderline') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
 
         <div class="mx-auto">
           <footer class="modal-footer" v-if="!unaccepted">
-            <b-button
+            <BButton
               @click="cancelForm"
               class="btn btn-secondary"
               type="button"
               variant="secondary"
             >
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button
+            </BButton>
+            <BButton
               @click="submitForm"
               :disabled="buttonDisabled"
               class="btn btn-primary"
@@ -415,18 +415,18 @@
               variant="primary"
             >
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
           <footer class="modal-footer" v-if="!isCreate && (unaccepted || !order.customer_order_accepted)">
-            <b-button
+            <BButton
               @click="reject"
               class="btn btn-danger"
               type="button"
               variant="danger"
             >
               {{ $trans('Reject') }}
-            </b-button>
-            <b-button
+            </BButton>
+            <BButton
               @click="editAndAccept"
               :disabled="buttonDisabled"
               class="btn btn-primary"
@@ -434,7 +434,7 @@
               variant="primary"
             >
               {{ $trans('Edit and accept') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>

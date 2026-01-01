@@ -24,7 +24,7 @@
           <b-container>
             <b-row>
               <b-col cols="12">
-                <b-form-group
+                <BFormGroup
                   label-cols="3"
                   v-bind:label="$trans('Material')"
                   label-for="material-search"
@@ -53,48 +53,48 @@
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                   </multiselect>
-                </b-form-group>
-                <b-form-group
+                </BFormGroup>
+                <BFormGroup
                   label-for="material-search"
                   v-if="cost.material"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     :value="cost.material_name"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row v-if="cost.material">
               <b-col cols="2">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="`${$trans('Amount')}`"
                   label-for="material-amount"
                 >
-                  <b-form-input
+                  <BFormInput
                     :value="Math.round(cost.amount_decimal)"
                     @change="(amount) => changeAmount(cost, amount)"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="3">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Price')"
                   label-for="material-price"
                 >
-                  <b-form-radio-group
+                  <BFormRadioGroup
                     @change="updateTotals"
                     v-model="cost.use_price"
                   >
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
                       {{ $trans('Pur.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-                    </b-form-radio>
+                    </BFormRadio>
 
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
                       {{ $trans('Sel.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-                    </b-form-radio>
+                    </BFormRadio>
 
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
                       {{ $trans("Other") }}
                       <PriceInput
                         style="margin-left: -24px; margin-top: 2px;"
@@ -103,42 +103,42 @@
                         @priceChanged="(val) => otherPriceChanged(val, cost)"
                         @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
                       />
-                    </b-form-radio>
-                  </b-form-radio-group>
-                </b-form-group>
+                    </BFormRadio>
+                  </BFormRadioGroup>
+                </BFormGroup>
               </b-col>
               <b-col cols="2">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT type')"
                 >
                   <VAT
                     @vatChanged="(val) => changeVatType(cost, val)"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" class="text-right p-0">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT')"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     disabled
                     :value="cost.vat_dinero.toFormat('$0.00')"
                     class="text-right pr-0"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" class="text-right p-0">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Total')"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     disabled
                     :value="cost.total_dinero.toFormat('$0.00')"
                     class="text-right pr-0"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
@@ -146,37 +146,37 @@
           <b-container>
             <b-row>
               <b-col cols="12" class="text-center">
-                <b-button
+                <BButton
                   @click="() => deleteCost(index)"
                   type="button"
                   variant="danger"
                   size="sm"
                 >
                   {{ $trans("Delete cost") }}
-                </b-button>
+                </BButton>
               </b-col>
             </b-row>
             <hr/>
           </b-container>
         </div>
         <div class="text-center">
-          <b-button
+          <BButton
             :disabled="collectionHasEmptyItem"
             @click="addCost"
             class="btn btn-primary"
             type="button"
           >
             {{ $trans("Add material") }}
-          </b-button>
+          </BButton>
           <span style="width: 80px">&nbsp;</span>
-          <b-button
+          <BButton
             :disabled="showSaveButton"
             @click="() => saveCosts()"
             type="button"
             variant="primary"
           >
             {{ $trans("Save changes") }}
-          </b-button>
+          </BButton>
         </div>
         <hr/>
       </div>

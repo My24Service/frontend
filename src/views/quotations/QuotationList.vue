@@ -10,20 +10,20 @@
           <span>{{ pageTitle }}</span>
         </h3>
 
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link
             class="btn button"
             :to="{name:'quotation-add'}"
           >
             <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add quotation') }}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -98,7 +98,7 @@
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
-            <b-link
+            <BLink
               class="mr-2"
               v-if="!data.item.preliminary"
               :title="$trans('Create order')"
@@ -108,7 +108,7 @@
                 aria-hidden="true"
                 class="edit-icon"
               ></b-icon-arrow-up-right-circle>
-            </b-link>
+            </BLink>
             <router-link
               class="mr-2"
               v-if="!data.item.preliminary"

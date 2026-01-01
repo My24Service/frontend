@@ -9,12 +9,12 @@
           <span v-if="!isCreate" class="dimmed">{{ $trans('edit') }}</span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+          <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          </BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-          </b-button>
+          </BButton>
         </div>
       </div>
     </header>
@@ -23,146 +23,146 @@
         <b-form class="flex-columns">
           <div class="panel">
             <h6>{{  $trans('Supplier') }}</h6>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Identifier')"
               label-for="supplier-identifier"
             >
-              <b-form-input
+              <BFormInput
                 id="supplier-identifier"
                 v-model="supplier.identifier"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Name')"
               label-for="supplier-name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="supplier.name"
                 id="supplier-name"
                 :state="isSubmitClicked ? !v$.supplier.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.supplier.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Address')"
               label-for="supplier-address"
             >
-              <b-form-input
+              <BFormInput
                 v-model="supplier.address"
                 id="supplier-address"
                 :state="isSubmitClicked ? !v$.supplier.address.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.supplier.address.$error : null">
                 {{ $trans('Please enter an address') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Postal')"
               label-for="supplier-postal"
             >
-              <b-form-input
+              <BFormInput
                 id="supplier-postal"
                 v-model="supplier.postal"
                 :state="isSubmitClicked ? !v$.supplier.postal.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.supplier.postal.$error : null">
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('City')"
               label-for="supplier-city"
             >
-              <b-form-input
+              <BFormInput
                 id="supplier-city"
                 v-model="supplier.city"
                 :state="isSubmitClicked ? !v$.supplier.city.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.supplier.city.$error : null">
                 {{ $trans('Please enter the city') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Country')"
               label-for="supplier-city"
             >
               <b-form-select v-model="supplier.country_code" :options="countries" size="sm"></b-form-select>
-            </b-form-group>
+            </BFormGroup>
           </div>
 
           <div class="panel">
             <h6>{{  $trans('Contact') }}</h6>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Email')"
               label-for="supplier-email"
             >
-              <b-form-input
+              <BFormInput
                 id="supplier-email"
                 v-model="supplier.email"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Tel.')"
               label-for="supplier-tel"
             >
-              <b-form-input
+              <BFormInput
                 id="supplier-tel"
                 v-model="supplier.tel"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Mobile')"
               label-for="supplier-mobile"
             >
-              <b-form-input
+              <BFormInput
                 id="supplier-mobile"
                 v-model="supplier.mobile"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="3"
               v-bind:label="$trans('Contact')"
               label-for="supplier-contact"
             >
-              <b-form-input
+              <BFormInput
                 id="supplier-contact"
                 v-model="supplier.contact"
                 rows="2"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </div>
         </b-form>
       </b-overlay>

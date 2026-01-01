@@ -20,14 +20,14 @@
             <span v-if="!isEdit">{{ $trans('New invoice') }} / {{ $trans('order') }} {{ order_id }}</span>
             <span v-if="isEdit">{{ $trans('Update invoice') }} / {{ $trans('order') }} {{ order_id }}</span>
             <span v-if="isEdit">
-              <b-link
+              <BLink
                 class="btn btn-sm btn-primary"
                 @click.prevent="showInvoiceDialog"
                 target="_blank"
               >
                 <b-icon icon="file-earmark"></b-icon>
                 {{ $trans('View Invoice') }}
-              </b-link>
+              </BLink>
             </span>
             <span>
               <router-link
@@ -40,12 +40,12 @@
               </router-link>
             </span>
           </h3>
-          <b-button-toolbar>
-            <b-button @click="cancelForm" type="button" variant="outline">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Save') }}</b-button>
-          </b-button-toolbar>
+          <BButton-toolbar>
+            <BButton @click="cancelForm" type="button" variant="outline">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton @click="submitForm" type="button" variant="primary">
+              {{ $trans('Save') }}</BButton>
+          </BButton-toolbar>
         </div>
       </header>
 
@@ -62,32 +62,32 @@
             <hr />
 
             <h6>{{ $trans('Invoice data')}}</h6>
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('ID')"
               label-for="invoice_id"
               label-cols="5"
             >
-              <b-form-input
+              <BFormInput
                 disabled
                 v-model="invoice.invoice_id"
                 id="invoice_id"
                 size="sm"
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
+              ></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-cols="5"
               v-bind:label="$trans('Reference')"
               label-for="invoice_reference"
             >
-              <b-form-input
+              <BFormInput
                 v-model="invoice.reference"
                 id="invoice_reference"
                 size="sm"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
 
-            <b-form-group
+            <BFormGroup
 
               label-cols="5"
               v-bind:label="$trans('Term of payment')"
@@ -95,13 +95,13 @@
             >
               <b-input-group>
 
-                <b-form-input
+                <BFormInput
                 id="invoice_term_of_payment_days"
 
                 v-model="invoice.term_of_payment_days"
                 type="number"
                 >
-                </b-form-input>
+                </BFormInput>
                 <template #append>
                   <b-input-group-text
                   >
@@ -109,19 +109,19 @@
                   </b-input-group-text>
                 </template>
               </b-input-group>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-cols="5"
               v-bind:label="$trans('Description')"
               label-for="invoice_description"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="invoice_description"
                 v-model="invoice.description"
                 rows="1"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
 
             <hr />
 
@@ -192,7 +192,7 @@
                 </b-col>
                 <b-col cols="1">
                   <p class="flex">
-                    <b-button
+                    <BButton
                       :disabled="materialUpdating"
                       @click="() => { updateMaterial(material.id) }"
                       class="btn update-button"
@@ -203,7 +203,7 @@
                     >
                       <b-spinner small v-if="materialUpdating"></b-spinner>
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
                   </p>
                 </b-col>
               </b-row>
@@ -235,7 +235,7 @@
                 </b-col>
                 <b-col cols="2">
 
-                    <b-button
+                    <BButton
                       @click="() => { updateEngineer(user.id) }"
                       class="btn update-button"
                       size="sm"
@@ -243,7 +243,7 @@
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
 
                 </b-col>
               </b-row>
@@ -275,7 +275,7 @@
                 </b-col>
                 <b-col cols="1">
                   <p class="flex">
-                    <b-button
+                    <BButton
                       @click="() => { updateCustomer() }"
                       class="btn update-button"
                       size="sm"
@@ -283,7 +283,7 @@
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
                   </p>
                 </b-col>
               </b-row>
@@ -300,7 +300,7 @@
                 </b-col>
                 <b-col cols="1">
                   <p class="flex">
-                    <b-button
+                    <BButton
                       @click="() => { updateCustomer() }"
                       class="btn update-button"
                       size="sm"
@@ -308,7 +308,7 @@
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
                   </p>
                 </b-col>
               </b-row>
@@ -325,7 +325,7 @@
                 </b-col>
                 <b-col cols="1">
                   <p class="flex">
-                    <b-button
+                    <BButton
                       @click="() => { updateCustomer() }"
                       class="btn update-button"
                       size="sm"
@@ -333,7 +333,7 @@
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
                   </p>
                 </b-col>
               </b-row>

@@ -21,8 +21,8 @@
         <h3>
           <b-icon icon="file-arrow-down"></b-icon> {{ $trans("Imports") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -31,12 +31,12 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'company-import-add'}" class="btn">
             <b-icon icon="file-arrow-down"></b-icon>
             {{$trans('Add import')}}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -73,9 +73,9 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <span v-if="Object.keys(data.item.result_inserts).length > 0">
-              <b-link v-bind:title="$trans('Revert import')" v-on:click="revertImport(data.item.id)">
+              <BLink v-bind:title="$trans('Revert import')" v-on:click="revertImport(data.item.id)">
                 <b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise>
-              </b-link>
+              </BLink>
             </span>
             <IconLinkEdit
               v-if="Object.keys(data.item.result_inserts).length === 0"

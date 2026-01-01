@@ -4,8 +4,8 @@
       <div class="page-title">
         <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
         <div>
-          <b-button-toolbar class="flex-columns">
-            <b-button-group>
+          <BButton-toolbar class="flex-columns">
+            <BButton-group>
               <ButtonLinkRefresh
                 v-bind:method="function() { loadData() }"
                 v-bind:title="$trans('Refresh')"
@@ -13,9 +13,9 @@
               <ButtonLinkSearch
                 v-bind:method="function() { showSearchModal() }"
               />
-            </b-button-group>
-            <b-link :to="{name: 'employee-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add employee") }}</b-link>
-          </b-button-toolbar>
+            </BButton-group>
+            <BLink :to="{name: 'employee-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add employee") }}</BLink>
+          </BButton-toolbar>
         </div>
       </div>
 

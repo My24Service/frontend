@@ -42,28 +42,28 @@
       </b-row>
       <b-row>
         <b-col cols="2">
-          <b-form-input
+          <BFormInput
             @blur="updateTotals"
             v-model="coc_item.amount_int"
             size="sm"
-          ></b-form-input>
+          ></BFormInput>
         </b-col>
         <b-col cols="5">
-          <b-form-radio-group
+          <BFormRadioGroup
             @change="updateTotals"
             v-model="coc_item.use_price"
           >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
               {{ $trans('Settings') }}
               {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-            </b-form-radio>
+            </BFormRadio>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
               {{ $trans('Customer') }}
               {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-            </b-form-radio><br/>
+            </BFormRadio><br/>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
@@ -72,8 +72,8 @@
                   @priceChanged="(val) => otherPriceChanged(val)"
                 />
               </p>
-            </b-form-radio>
-          </b-form-radio-group>
+            </BFormRadio>
+          </BFormRadioGroup>
         </b-col>
         <b-col cols="2">
           <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />

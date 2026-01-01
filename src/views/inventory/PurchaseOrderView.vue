@@ -8,8 +8,8 @@
           {{ purchaseOrder.purchase_order_id }} <span class="dimmed">{{ purchaseOrder.order_name }}</span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
-          {{ $trans('Back') }}</b-button>
+          <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
+          {{ $trans('Back') }}</BButton>
           <router-link :to="{name: 'purchaseorder-edit', params: {pk: this.pk}}" class="btn">
             <b-icon icon="pencil"></b-icon>
             {{ $trans('Edit purchase order') }}
@@ -52,9 +52,9 @@
 
             <dt>{{ $trans('Email') }}</dt>
             <dd>
-              <b-link class="px-1" v-bind:href="`mailto:${purchaseOrder.order_email}`">
+              <BLink class="px-1" v-bind:href="`mailto:${purchaseOrder.order_email}`">
                 {{ purchaseOrder.order_email }}
-              </b-link>
+              </BLink>
             </dd>
 
             <dt>{{ $trans('Order reference') }}</dt>

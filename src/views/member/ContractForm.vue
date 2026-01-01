@@ -6,22 +6,22 @@
         <h2 v-if="!isCreate">{{ $trans('Edit contract') }}</h2>
         <b-row>
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-for="contract_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="contract.name"
                 id="contract_name"
                 size="sm"
                 :state="isSubmitClicked ? !v$.contract.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.contract.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
 
@@ -29,44 +29,44 @@
           <b-col cols="12" role="group">
             <ul v-for="module in moduleData" :key="module.id">
               <li>
-                <b-form-checkbox
+                <BFormCheckbox
                   :id="`module${module.id}`"
                   :value="`${module.id}`"
                   v-model="selected_modules"
                 >
                   {{ module.name }}
-                </b-form-checkbox>
-                (<b-link @click="selectAll(module.id)">{{ $trans('all') }}</b-link> /
-                <b-link @click="selectNone(module.id)">{{ $trans('none') }}</b-link>)
+                </BFormCheckbox>
+                (<BLink @click="selectAll(module.id)">{{ $trans('all') }}</BLink> /
+                <BLink @click="selectNone(module.id)">{{ $trans('none') }}</BLink>)
               </li>
-              <b-form-checkbox-group
+              <BFormCheckboxGroup
                 v-model="selected[module.id]"
               >
                 <ul v-for="part in module.parts" :key="part.id">
                   <li>
-                    <b-form-checkbox
+                    <BFormCheckbox
                       :id="`el${part.id}`"
                       :value="part.id"
                       @change="checkClicked"
                       :disabled="always_selected[module.id] && always_selected[module.id].indexOf(part.id) !== -1"
                     >
                       {{ part.name }}
-                    </b-form-checkbox>
+                    </BFormCheckbox>
                   </li>
                 </ul>
-              </b-form-checkbox-group>
+              </BFormCheckboxGroup>
             </ul>
           </b-col>
         </b-row>
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>

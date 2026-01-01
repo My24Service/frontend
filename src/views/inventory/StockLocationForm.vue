@@ -9,12 +9,12 @@
             <span v-if="!isCreate">{{ $trans('Edit stock location') }}</span>
           </h3>
           <div class="flex-columns">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </div>
         </div>
       </header>
@@ -22,44 +22,44 @@
         <b-form>
           <b-row>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Name')"
                 label-for="stock-location-name"
               >
-                <b-form-input
+                <BFormInput
                   v-model="stockLocation.name"
                   id="stock-location-name"
                   size="sm"
                   :state="isSubmitClicked ? !v$.stockLocation.name.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.stockLocation.name.$error : null">
                   {{ $trans('Please enter a name') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Identifier')"
                 label-for="stock-location-identifier"
               >
-                <b-form-input
+                <BFormInput
                   id="stock-location-identifier"
                   size="sm"
                   v-model="stockLocation.identifier"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-for="stock-location-show_in_stats"
                 v-bind:label="$trans('Stats')"
               >
-                <b-form-checkbox v-model="stockLocation.show_in_stats">{{ $trans('Show in stats') }}</b-form-checkbox>
-              </b-form-group>
+                <BFormCheckbox v-model="stockLocation.show_in_stats">{{ $trans('Show in stats') }}</BFormCheckbox>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-form>

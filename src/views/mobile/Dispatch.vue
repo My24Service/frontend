@@ -9,34 +9,34 @@
             {{ mode }}
           </h3>
           <div class="flex-columns">
-            <b-button @click="function() { showSearchModal() }">
+            <BButton @click="function() { showSearchModal() }">
               <b-icon icon="search"></b-icon>
               {{ $trans('search') }}
-            </b-button>
+            </BButton>
 
-            <b-button @click="function() { loadToday() }">
+            <BButton @click="function() { loadToday() }">
               <b-icon icon="patch-exclamation-fill" v-if="newData" :title="$trans('dispatch changed, refresh now')"></b-icon>
               <b-icon icon="arrow-repeat" v-else></b-icon>
               {{ $trans('refresh') }}
-            </b-button>
+            </BButton>
 
-            <b-button-group>
-              <b-button
+            <BButton-group>
+              <BButton
                 variant="primary"
                 v-for="item in this.modeOptions"
                 :key="item.name"
                 :disabled="item.item === mode"
-                @click="() => changeViewMode(item.item)">{{  item.name }}</b-button>
-            </b-button-group>
+                @click="() => changeViewMode(item.item)">{{  item.name }}</BButton>
+            </BButton-group>
 
-            <b-button-group>
-              <b-button
+            <BButton-group>
+              <BButton
                 variant="primary"
                 v-for="item in this.showUsersOptions"
                 :key="item.name"
                 :disabled="item.item === showUsersMode"
-                @click="() => changeShowUsersMode(item.item)">{{  item.name }}</b-button>
-            </b-button-group>
+                @click="() => changeShowUsersMode(item.item)">{{  item.name }}</BButton>
+            </BButton-group>
           </div>
         </div>
       </header>
@@ -48,7 +48,7 @@
               <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
               <span v-for="(order, index) in selectedOrders" :key="order.id">
                 {{ order.order_id }}
-                <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
+                <BLink class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</BLink>
               </span>
             </b-col>
           </b-row>
@@ -57,7 +57,7 @@
               <strong>{{ $trans('Selected users') }}:</strong>&nbsp;
               <span v-for="(user, index) in selectedUsers" :key="user.user_id">
                 {{ user.full_name }} {{ user.user_id }}
-                <b-link class="px-1" @click.prevent="removeSelectedUser(index)">[ x ]</b-link>
+                <BLink class="px-1" @click.prevent="removeSelectedUser(index)">[ x ]</BLink>
               </span>
             </b-col>
             <b-col cols="6">
@@ -70,10 +70,10 @@
           <b-row>
             <b-col cols="12">
               <footer class="modal-footer">
-                <b-button @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
-                  {{ $trans('Cancel') }}</b-button>
-                <b-button @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
-                  {{ $trans('Submit') }}</b-button>
+                <BButton @click="cancelAssign" :disabled="buttonDisabled" class="btn btn-secondary" type="button" variant="secondary">
+                  {{ $trans('Cancel') }}</BButton>
+                <BButton @click="assignToUsers" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+                  {{ $trans('Submit') }}</BButton>
               </footer>
             </b-col>
           </b-row>
@@ -81,14 +81,14 @@
 
         <div class="flex-columns" style="justify-content: space-between;">
 
-          <b-link class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
+          <BLink class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
             <b-icon icon="arrow-left-square-fill" font-scale="1.2"></b-icon> week {{ this.startWeek - 1 }}
-          </b-link>
+          </BLink>
 
           <span class="flex-columns">
-            <b-link class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
+            <BLink class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
               <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
-            </b-link>
+            </BLink>
             <b-form-datepicker
               v-model="startDate"
               size="sm"
@@ -96,19 +96,19 @@
               locale="nl"
               :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
             ></b-form-datepicker>
-            <b-button @click="function() { loadToday() }" variant="primary" size="sm" style="color: white; white-space: nowrap;">
+            <BButton @click="function() { loadToday() }" variant="primary" size="sm" style="color: white; white-space: nowrap;">
               <b-icon icon="calendar2-date-fill"></b-icon>&nbsp;
               {{ $trans('today') }}
-            </b-button>
-            <b-link class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
+            </BButton>
+            <BLink class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
               <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
-            </b-link>
+            </BLink>
           </span>
 
-          <b-link class="" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
+          <BLink class="" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
             week {{ (+this.startWeek + 1) }}
             <b-icon icon="arrow-right-square-fill" font-scale="1.2"></b-icon>
-          </b-link>
+          </BLink>
 
         </div>
         <hr/>
@@ -150,7 +150,7 @@
           <b-container fluid v-if="assignedOrder">
             <b-row role="group">
               <b-col size="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Start date')"
                   label-for="dates-order-start-date"
                 >
@@ -166,10 +166,10 @@
                     :max="maxDate"
                     value-as-date
                   ></b-form-datepicker>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col size="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Start time')"
                   label-for="dates-order-start-time"
                 >
@@ -178,12 +178,12 @@
                     :time-in="assignedOrder.start_time"
                     @timeChanged="(val) => assignedOrder.alt_start_time = val"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col size="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('End date')"
                   label-for="dates-order-end-date"
                 >
@@ -199,10 +199,10 @@
                     :max="maxDate"
                     value-as-date
                   ></b-form-datepicker>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col size="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('End time')"
                   label-for="dates-order-end-time"
                 >
@@ -211,15 +211,15 @@
                     :time-in="assignedOrder.end_time"
                     @timeChanged="(val) => assignedOrder.alt_end_time = val"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col size="6"></b-col>
               <b-col size="6" class="text-right">
-                <b-link class="px-1" title="clear" v-on:click="clearAssignedorderDates()">
+                <BLink class="px-1" title="clear" v-on:click="clearAssignedorderDates()">
                   {{ $trans('clear') }}
-                </b-link>
+                </BLink>
               </b-col>
             </b-row>
           </b-container>
@@ -245,7 +245,7 @@
           <b-container fluid v-if="assignedOrder">
             <b-row role="group">
               <b-col size="12">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Engineer')"
                   label-for="split-order-engineer"
                 >
@@ -266,12 +266,12 @@
                     </span>
                   </multiselect>
 
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row role="group">
               <b-col size="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Start date')"
                   label-for="split-order-start-date"
                 >
@@ -287,10 +287,10 @@
                     :max="maxDate"
                     value-as-date
                   ></b-form-datepicker>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col size="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Start time')"
                   label-for="split-order-start-time"
                 >
@@ -299,12 +299,12 @@
                     :time-in="assignedOrder.start_time"
                     @timeChanged="(val) => assignedOrder.alt_start_time = val"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col size="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('End date')"
                   label-for="split-order-end-date"
                 >
@@ -320,10 +320,10 @@
                     :max="maxDate"
                     value-as-date
                   ></b-form-datepicker>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col size="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('End time')"
                   label-for="split-order-end-time"
                 >
@@ -332,35 +332,35 @@
                     :time-in="assignedOrder.end_time"
                     @timeChanged="(val) => assignedOrder.alt_end_time = val"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col size="6"></b-col>
               <b-col size="6" class="text-right">
-                <b-link class="px-1" title="clear" v-on:click="clearAssignedorderSplit()">
+                <BLink class="px-1" title="clear" v-on:click="clearAssignedorderSplit()">
                   {{ $trans('clear') }}
-                </b-link>
+                </BLink>
               </b-col>
             </b-row>
           </b-container>
         </form>
         <footer class="modal-footer">
-          <b-button
+          <BButton
             @click="cancelSplitOrder"
             class="btn btn-secondary"
             type="button"
             variant="secondary"
           >
-            {{ $trans('Cancel') }}</b-button>
-          <b-button
+            {{ $trans('Cancel') }}</BButton>
+          <BButton
             @click="splitOrderSubmit"
             :disabled="selectedEngineers.length <= 0"
             class="btn btn-primary"
             type="button"
             variant="primary"
           >
-            {{ $trans('Submit') }}</b-button>
+            {{ $trans('Submit') }}</BButton>
         </footer>
 
       </b-modal>
@@ -385,30 +385,30 @@
           <b-container>
             <b-row v-if="selectedOrderIsPartner">
               <b-col cols="1" class="mx-2">
-                <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
+                <BButton size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</BButton>
               </b-col>
               <b-col cols="1" class="mx-2">
-                <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
+                <BButton size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</BButton>
               </b-col>
               <b-col cols="6" class="mx-1">
                 <div class="float-right">
-                  <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
+                  <BButton size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</BButton>
                 </div>
               </b-col>
             </b-row>
             <b-row v-else>
               <b-col cols="8">
                 <div class="flex-columns" style="justify-content: space-between;">
-                  <b-button size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</b-button>
-                  <b-button size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</b-button>
-                  <b-button size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</b-button>
-                  <b-button size="sm" variant="primary" @click="splitOrder">{{ $trans('Split') }}</b-button>
+                  <BButton size="sm" variant="info" @click="viewOrder">{{ $trans('Info') }}</BButton>
+                  <BButton size="sm" variant="primary" @click="editOrder">{{ $trans('Edit') }}</BButton>
+                  <BButton size="sm" variant="primary" @click="changeDate">{{ $trans('Change date') }}</BButton>
+                  <BButton size="sm" variant="primary" @click="splitOrder">{{ $trans('Split') }}</BButton>
                 </div>
               </b-col>
               <b-col cols="4" v-if="selectedAssignedOrder">
                 <div class="flex-columns" style="justify-content: space-between;">
-                  <b-button size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</b-button>
-                  <b-button size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</b-button>
+                  <BButton size="sm" variant="danger" @click="postUnassign">{{ $trans('Remove') }}</BButton>
+                  <BButton size="sm" variant="secondary" @click="cancel()">{{ $trans('Close') }}</BButton>
                 </div>
               </b-col>
             </b-row>

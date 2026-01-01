@@ -1,6 +1,6 @@
 <template>
 	<div>
-    <b-link @click="isOpen = !isOpen">
+    <BLink @click="isOpen = !isOpen">
       <div class="section-header bg-primary">
         <h4>{{ title }}</h4>
         <div class="section-header-icon float-right h4 mb-2">
@@ -8,7 +8,7 @@
           <IBiArrowDownShort v-if="!isOpen"></IBiArrowDownShort>
         </div>
       </div>
-    </b-link>
+    </BLink>
     <collapse-transition>
       <div v-show="isOpen">
       	<slot />

@@ -3,8 +3,8 @@
     <header>
       <div class="page-title">
         <h3><b-icon icon="person-square"></b-icon>{{ $trans('Partners') }}</h3>
-        <b-button-toolbar>
-          <b-button-group>
+        <BButton-toolbar>
+          <BButton-group>
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -12,9 +12,9 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'partner-request-add'}" class="btn">{{$trans('New partner request')}}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -76,7 +76,7 @@
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
-            <b-button
+            <BButton
               v-if="data.item.status === 'requested'"
               @click="function() { showAcceptRequestModal(data.item.id) }"
               type="button"
@@ -84,9 +84,9 @@
               variant="secondary"
             >
               {{ $trans('Accept') }}
-            </b-button>
+            </BButton>
             &nbsp;
-            <b-button
+            <BButton
               v-if="data.item.status === 'requested'"
               @click="function() { showRejectRequestModal(data.item.id) }"
               type="button"
@@ -94,7 +94,7 @@
               variant="warning"
             >
               {{ $trans('Reject') }}
-            </b-button>
+            </BButton>
 
           </div>
         </template>

@@ -1,18 +1,18 @@
 <template>
   <span>
     <span v-if="type === 'th'">
-      <b-link v-if="method" class="icon-th" v-bind:title="title" v-on:click="method()">
+      <BLink v-if="method" class="icon-th" v-bind:title="title" v-on:click="method()">
         <IBiPlus variant="info"></IBiPlus>
-      </b-link>
+      </BLink>
       <router-link v-if="router_name" class="icon-th" v-bind:title="title" :to="{name: router_name, params: router_params}">
         <IBiPlus variant="info"></IBiPlus>
       </router-link>
     </span>
 
     <span v-if="type === 'tr'">
-      <b-link v-if="method" v-bind:title="title" v-on:click="method()">
+      <BLink v-if="method" v-bind:title="title" v-on:click="method()">
         <IBiPlus class="edit-icon"></IBiPlus>
-      </b-link>
+      </BLink>
       <router-link v-if="router_name" v-bind:title="title" :to="{name: router_name, params: router_params}">
         <IBiPlus class="edit-icon"></IBiPlus>
       </router-link>

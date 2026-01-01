@@ -13,7 +13,7 @@
         <div class='panel col-1-3'>
           <h6>{{ $trans('New partner request') }}</h6>
           <br>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-class="p-sm-0"
                 label-for="partner_request_member_search"
@@ -41,32 +41,32 @@
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                 </multiselect>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 v-if="this.member_info"
                 label-size="sm"
                 label-for="partner_request_company_info"
               >
-                <b-form-input
+                <BFormInput
                   id="partner_request_company_info"
                   size="sm"
                   readonly
                   v-model="member_info"
                   :state="isSubmitClicked ? !v$.partnerRequest.to_member.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.partnerRequest.to_member.$error : null">
                   {{ $trans('Please select a member') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
-              <b-button-toolbar class="flex-columns" v-if="this.member_info">
+              </BFormGroup>
+              <BButton-toolbar class="flex-columns" v-if="this.member_info">
                 <div></div>
-                <b-button @click="cancelForm" type="button" variant="secondary">
-                  {{ $trans('Cancel') }}</b-button>
-                <b-button @click="submitForm" type="button" variant="primary">
-                  {{ $trans('Submit') }}</b-button>
-            </b-button-toolbar>
+                <BButton @click="cancelForm" type="button" variant="secondary">
+                  {{ $trans('Cancel') }}</BButton>
+                <BButton @click="submitForm" type="button" variant="primary">
+                  {{ $trans('Submit') }}</BButton>
+            </BButton-toolbar>
         </div>
 
         <div class='col-1-3'></div>

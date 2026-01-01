@@ -3,22 +3,22 @@
     <b-input-group
       size="sm"
     >
-      <b-form-input
+      <BFormInput
         v-model="number"
         class="input-number"
         size="sm"
         @blur="update"
         :state="v$.number.$error ? false : null"
-      ></b-form-input>
+      ></BFormInput>
 
       <template #append>
-        <b-form-input
+        <BFormInput
           v-model="decimal"
           class="input-decimal"
           size="sm"
           :state="v$.decimal.$error ? false : null"
           @blur="update"
-        ></b-form-input>
+        ></BFormInput>
       </template>
     </b-input-group>
   </p>

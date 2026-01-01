@@ -7,8 +7,8 @@
           <span class="backlink" @click="goBack">{{ $trans('Suppliers') }}</span> / {{ supplier.name }}
         </h3>
         <div class="flex-columns">
-          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
-            {{ $trans('Back') }}</b-button>
+          <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
+            {{ $trans('Back') }}</BButton>
           <router-link :to="{name: 'supplier-edit', params: {pk: this.pk}}" class="btn"> {{$trans('Edit supplier') }}</router-link>
           </div>
       </div>
@@ -47,9 +47,9 @@
 
           <dt>{{ $trans('Email') }}</dt>
           <dd>
-            <b-link class="px-1" v-bind:href="`mailto:${supplier.order_email}`">
+            <BLink class="px-1" v-bind:href="`mailto:${supplier.order_email}`">
               {{ supplier.order_email }}
-            </b-link>
+            </BLink>
           </dd>
 
           <dt>{{ $trans('Remarks') }}</dt>

@@ -5,31 +5,31 @@
         <h2>{{ $trans('Reset password') }}</h2>
         <b-row>
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('E-mail')"
               label-for="email"
             >
-              <b-form-input
+              <BFormInput
                 v-model="email"
                 id="email"
                 size="sm"
                 autofocus
                 :state="isSubmitClicked ? !v$.email.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.email.$error : null">
                 {{ $trans('Please enter an email') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Send reset link') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>

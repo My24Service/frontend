@@ -62,15 +62,15 @@
             <dd v-if="!isCustomer">{{ order.customer_remarks }}</dd>
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
             <dd class="flex-columns">
-              <b-link class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank">
+              <BLink class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank">
                 <b-icon icon="file-earmark"></b-icon>
                 {{ $trans('View workorder') }}
-              </b-link>
+              </BLink>
             </dd>
             <dd v-if="!hasBranches" class="flex-columns">
-              <b-link class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+              <BLink class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
                 <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
-              </b-link>
+              </BLink>
             </dd>
             <dt>{{ $trans("Original order ID") }}</dt>
             <dd class="flex-columns">
@@ -81,14 +81,14 @@
             <dt v-if="hasBranches">{{ $trans("Workorder original order ") }}</dt>
             <dd v-if="hasBranches" class="flex-columns">
               <div v-if="order.workorder_url_org_order">
-                <b-link
+                <BLink
                   class="btn btn-sm btn-outline"
                   v-if="order.workorder_url_org_order.url"
                   :href="order.workorder_url_org_order.url"
                   target="_blank"
                   :title="`${$trans('Download PDF')}(${order.workorder_url_org_order.url}`">
                   <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
-                </b-link>
+                </BLink>
               </div>
             </dd>
             <dt>{{ $trans("Partner order ID(s)") }}</dt>
@@ -110,11 +110,11 @@
               <div v-for="workorder in order.workorder_pdf_url_partner" :key="workorder.companycode">
                 {{ workorder.companycode }}
                 <span v-if="workorder.via">({{ $trans("via") }} {{ workorder.via }})</span>
-                <b-link class="btn btn-sm btn-outline" :href="workorder.url" target="_blank" :title="$trans('Download PDF') + ' (' + workorder.url + ')'">
+                <BLink class="btn btn-sm btn-outline" :href="workorder.url" target="_blank" :title="$trans('Download PDF') + ' (' + workorder.url + ')'">
                   <b-icon icon="file-earmark-pdf"></b-icon>
 
                   {{ $trans('Download PDF') }}
-                </b-link>
+                </BLink>
               </div>
             </dd>
             <dt v-if="isPlanning">{{ $trans("Order email extra") }}</dt>
@@ -126,7 +126,7 @@
           <div class="flex-columns space-between" style="max-width: 60ch; margin-inline: auto">
             <p>
               {{ order.order_contact }}<br/>
-              <b-link v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</b-link><br/>
+              <BLink v-bind:href="`mailto:${order.order_email}`">{{ order.order_email }}</BLink><br/>
               {{ order.order_tel }}<br/>
               {{ order.order_mobile }}<br/>
             </p>
@@ -186,15 +186,15 @@
             >
               <template #head(icons)="">
                 <div class="float-right">
-                  <b-button-toolbar>
-                    <b-button-group class="mr-1">
+                  <BButton-toolbar>
+                    <BButton-group class="mr-1">
                       <IconLinkPlus
                         type="th"
                         :method="addPurchaseInvoice"
                         :title="$trans('New purchase invoice')"
                       />
-                    </b-button-group>
-                  </b-button-toolbar>
+                    </BButton-group>
+                  </BButton-toolbar>
                 </div>
               </template>
               <template #cell(reference)="data">
@@ -225,10 +225,10 @@
           <div v-if="order.workorder_documents.length > 0">
             <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents" responsive="sm">
               <template #cell(url)="data">
-                <b-link :href="data.item.url" target="_blank" class="flex-columns">
+                <BLink :href="data.item.url" target="_blank" class="flex-columns">
                   {{ $trans('Order') }} {{ order.order_id }}
                   <small class="dimmed">{{ data.item.name }}</small>
-                </b-link>
+                </BLink>
               </template>
 
             </b-table>
@@ -239,10 +239,10 @@
             <h6>{{ $trans('Workorder documents partner') }}</h6>
             <b-table borderless small :fields="workorderDocumentFields" :items="order.workorder_documents_partners" responsive="sm">
               <template #cell(url)="data">
-                <b-link :href="data.item.url" target="_blank"  class="flex-columns">
+                <BLink :href="data.item.url" target="_blank"  class="flex-columns">
                   {{ $trans('Order') }} {{ order.order_id }}
                   <small class="dimmed">{{ data.item.name }}</small>
-                </b-link>
+                </BLink>
               </template>
             </b-table>
           </div>
@@ -255,10 +255,10 @@
               :fields="workorderDocumentFields"
               :items="order.workorder_documents_org_order" responsive="sm">
               <template #cell(url)="data">
-                <b-link :href="data.item.url" target="_blank"  class="flex-columns">
+                <BLink :href="data.item.url" target="_blank"  class="flex-columns">
                   {{ $trans('Order') }} {{ order.order_id }}
                   <small class="dimmed">{{ data.item.name }}</small>
-                </b-link>
+                </BLink>
               </template>
             </b-table>
           </div>
@@ -357,7 +357,7 @@
           <b-container>
             <b-row>
               <b-col cols="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT')"
                   label-for="add-purchase-invoice-vat"
                 >
@@ -367,10 +367,10 @@
                     :currency="purchaseInvoice.vat_currency"
                     @priceChanged="(val) => vatChanged(val)"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="6">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Total')"
                   label-for="add-purchase-invoice-total"
                 >
@@ -380,33 +380,33 @@
                     :currency="purchaseInvoice.total_currency"
                     @priceChanged="(val) => totalChanged(val)"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="4">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Reference')"
                   label-for="add-purchase-invoice-reference"
                 >
-                  <b-form-input
+                  <BFormInput
                     size="sm"
                     id="add-purchase-invoice-reference"
                     v-model="purchaseInvoice.reference"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="8">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Description')"
                   label-for="add-purchase-invoice-description"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="add-purchase-invoice-description"
                     v-model="purchaseInvoice.description"
                     rows="1"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
@@ -420,10 +420,10 @@
         <iframe :src="this.workorderURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
 
         <template #modal-footer="{ ok }">
-          <b-button class="btn button btn-secondary" @click="openWorkorder()" target="_blank">
+          <BButton class="btn button btn-secondary" @click="openWorkorder()" target="_blank">
               {{ $trans('Open in a new tab') }}
-          </b-button>
-          <b-button
+          </BButton>
+          <BButton
             v-if="!past && !isCustomer && !isBranchEmployee"
             id="recreateWorkorderPdfButtonGotenberg"
             @click="recreateWorkorderPdfGotenberg"
@@ -435,14 +435,14 @@
           <b-spinner small v-if="isGeneratingPDF"></b-spinner>
           {{ $trans('re-generate PDF') }}
 
-          </b-button>
-          <b-link class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+          </BButton>
+          <BLink class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
             <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
-          </b-link>
+          </BLink>
           <!-- Emulate built in modal footer ok and cancel button actions -->
-          <b-button @click="ok()" variant="primary">
+          <BButton @click="ok()" variant="primary">
             {{ $trans("close") }}
-          </b-button>
+          </BButton>
         </template>
       </b-modal>
     </div>

@@ -2,14 +2,14 @@
   <div class="component-container">
     <h5><i>{{ $trans("Remove quotation lines to change items") }}</i></h5>
 
-    <b-button
+    <BButton
         @click="() => { buttonClicked() }"
         variant="danger"
         type="button"
         size="sm"
       >
         {{ $trans("Remove quotation lines") }}
-      </b-button>
+      </BButton>
   </div>
 </template>
 

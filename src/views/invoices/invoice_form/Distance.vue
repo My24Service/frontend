@@ -70,21 +70,21 @@
             {{ distance.distance_total }}
           </b-col>
           <b-col cols="3">
-            <b-form-radio-group
+            <BFormRadioGroup
               @change="updateTotals"
               v-model="distance.use_price"
             >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
                 {{ $trans('Settings') }}
                 {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
                 {{ $trans('Customer') }}
                 {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
                 <p class="flex">
                   {{ $trans("Other") }}:&nbsp;&nbsp;
                   <PriceInput
@@ -93,8 +93,8 @@
                     @priceChanged="(val) => otherPriceChanged(val, distance)"
                   />
                 </p>
-              </b-form-radio>
-            </b-form-radio-group>
+              </BFormRadio>
+            </BFormRadioGroup>
           </b-col>
           <b-col cols="2">
             <VAT @vatChanged="(val) => changeVatType(distance, val)" />

@@ -6,57 +6,57 @@
         <h2 v-if="!isCreate">{{ $trans('Edit module part') }}</h2>
         <b-row>
           <b-col cols="6" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-for="module-part_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="modulePart.name"
                 id="module-part_name"
                 size="sm"
                 autofocus
                 :state="isSubmitClicked ? !v$.modulePart.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.modulePart.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Module')"
               label-for="module-part_module"
             >
               <b-form-select v-model="modulePart.module" :options="modules" size="sm"></b-form-select>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Always selected?')"
               label-for="module-part_is_always_selected"
             >
-              <b-form-checkbox
+              <BFormCheckbox
                 id="module-part_is_always_selected"
                 size="sm"
                 v-model="modulePart.is_always_selected"
               >
-              </b-form-checkbox>
-            </b-form-group>
+              </BFormCheckbox>
+            </BFormGroup>
           </b-col>
         </b-row>
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>

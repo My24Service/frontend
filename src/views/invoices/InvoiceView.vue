@@ -19,14 +19,14 @@
             /
             <strong>{{ invoice.invoice_id }}</strong>
             <span>
-              <b-link
+              <BLink
                 class="btn btn-sm btn-primary"
                 @click.prevent="showInvoiceDialog"
                 target="_blank"
               >
                 <b-icon icon="file-earmark"></b-icon>
                 {{ $trans('View PDF') }}
-              </b-link>
+              </BLink>
             </span>
             <span>
               <router-link
@@ -37,14 +37,14 @@
                 {{ $trans('Order') }}
               </router-link>
             </span>
-            <b-button
+            <BButton
               @click="sendInvoice"
               type="button"
               variant="primary"
               class="send-quotation-button"
             >
               {{ $trans('Send invoice') }}
-            </b-button>
+            </BButton>
           </h3>
         </div>
       </header>

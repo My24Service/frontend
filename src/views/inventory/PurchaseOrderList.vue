@@ -5,8 +5,8 @@
         <h3>
           <b-icon icon="file-earmark-medical"></b-icon>{{ $trans("Purchase orders") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -14,9 +14,9 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'purchaseorder-add'}" class="btn">{{$trans('Add purchase order')}}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -44,17 +44,17 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="6">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('New status')"
                 label-for="change-status-status"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   autofocus
                   id="change-status-status"
                   v-model="status.status"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>

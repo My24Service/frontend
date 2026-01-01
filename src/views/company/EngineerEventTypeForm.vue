@@ -6,38 +6,38 @@
         <h2 v-if="!isCreate">{{ $trans('Edit event type') }}</h2>
         <b-row>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Event type')"
               label-for="event-type-event_type"
             >
-              <b-form-input
+              <BFormInput
                 v-model="materialEventType.event_type"
                 id="event-type-event_type"
                 size="sm"
                 :state="isSubmitClicked ? !v$.materialEventType.event_type.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.materialEventType.event_type.$error : null">
                 {{ $trans('Please enter a type') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Measure last event type')"
               label-for="event-type-measure_last_event_type"
             >
-              <b-form-input
+              <BFormInput
                 id="event-type-measure_last_event_type"
                 size="sm"
                 v-model="materialEventType.measure_last_event_type"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col size="4">
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Status?')"
               label-for="event-type-statuscode"
             >
@@ -49,17 +49,17 @@
                 value-field="id"
                 text-field="statuscode"
               ></b-form-select>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>

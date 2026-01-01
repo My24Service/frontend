@@ -3,9 +3,9 @@
       <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
       <b-row>
         <b-col cols="2">
-          <b-link class="px-1" @click.prevent="backWeek" v-bind:title="$trans('Week back')">
+          <BLink class="px-1" @click.prevent="backWeek" v-bind:title="$trans('Week back')">
             <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          </BLink>
         </b-col>
         <b-col cols="8">
           {{ $trans('Totals in') }}
@@ -14,9 +14,9 @@
         </b-col>
         <b-col cols="2">
           <div class="float-right">
-            <b-link class="px-1" @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
+            <BLink class="px-1" @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
               <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            </BLink>
           </div>
         </b-col>
       </b-row>

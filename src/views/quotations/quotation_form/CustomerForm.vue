@@ -2,7 +2,7 @@
   <div>
     <h5>{{ $trans('Customer') }}</h5>
     <b-form>
-      <b-form-group
+      <BFormGroup
         label-size="sm"
         label-class="p-sm-0"
         v-bind:label="$trans('Search existing address')"
@@ -27,140 +27,140 @@
         >
           <span slot="noResult">{{ $trans('Nothing found.') }}</span>
         </multiselect>
-      </b-form-group>
+      </BFormGroup>
 
-      <b-form-group :label="$trans('Customer')"
+      <BFormGroup :label="$trans('Customer')"
           label-for="quotation_name"
           label-cols="3"
       >
         <b-input-group>
-          <b-form-input
+          <BFormInput
             v-model="quotation.quotation_name"
             id="quotation_name"
 
             :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-input-group-append>
-            <b-form-input
+            <BFormInput
               v-model="quotation.customer_id"
               readonly
               :title="$trans('Customer ID')"
               id="customer_id"
               style="max-width: 9ch"
               :state="isSubmitClicked ? !v$.quotation.customer_id.$error : null">
-            </b-form-input>
+            </BFormInput>
           </b-input-group-append>
         </b-input-group>
         <b-form-invalid-feedback
           :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null">
           {{ $trans('Please enter the customer') }}
         </b-form-invalid-feedback>
-      </b-form-group>
+      </BFormGroup>
 
       <div v-if="quotation.customer_id">
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Address')"
           label-for="order_address"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_address"
             v-model="quotation.quotation_address"
             :state="isSubmitClicked ? !v$.quotation.quotation_address.$error: null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.quotation.quotation_address.$error : null">
             {{ $trans('Please enter the address') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Postal')"
           label-for="order_postal"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_postal"
             v-model="quotation.quotation_postal"
             :state="isSubmitClicked ? !v$.quotation.quotation_postal.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.quotation.quotation_postal.$error : null">
             {{ $trans('Please enter the postal') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Country')"
           label-for="order_country_code"
           label-cols="3"
         >
           <b-form-select v-model="quotation.quotation_country_code" :options="countries" ></b-form-select>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('City')"
           label-for="order_city"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_city"
 
             v-model="quotation.quotation_city"
             :state="isSubmitClicked ? !v$.quotation.quotation_city.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.quotation.quotation_city.$error : null">
             {{ $trans('Please enter the city') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Contacts')"
           label-for="order_contact"
           label-cols="3">
-          <b-form-input
+          <BFormInput
             id="order_contact"
             v-model="quotation.quotation_contact">
-          </b-form-input>
-        </b-form-group>
+          </BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Email')"
           label-for="order_email"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_email"
 
             v-model="quotation.quotation_email"
             placeholder="email address">
-          </b-form-input>
-        </b-form-group>
+          </BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Mobile')"
           label-for="order_mobile"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_mobile"
 
             v-model="quotation.quotation_mobile"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Phone')"
           label-for="order_tel"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_tel"
 
             v-model="quotation.quotation_tel"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
       </div>
     </b-form>
   </div>

@@ -18,8 +18,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="
                     function() {
@@ -35,8 +35,8 @@
                     }
                   "
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(date)="data">
@@ -51,18 +51,18 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <b-link
+            <BLink
               :title="$trans('Accept')"
               @click="() => showAcceptModal(data.item.id)"
             >
               <b-icon-check-lg class="edit-icon"></b-icon-check-lg>
-            </b-link>
-            <b-link
+            </BLink>
+            <BLink
               :title="$trans('Reject')"
               @click="() => showRejectModal(data.item.id)"
             >
               <b-icon-x-lg class="edit-icon"></b-icon-x-lg>
-            </b-link>
+            </BLink>
           </div>
         </template>
       </b-table>

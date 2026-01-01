@@ -7,9 +7,9 @@
           {{ $trans('Settings') }}
         </h3>
 
-        <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+        <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-        </b-button>
+        </BButton>
       </div>
 
     </header>
@@ -27,17 +27,17 @@
                   {{ index+1 }}: {{ key.split('_').join(' ') }}
                 </b-td>
                 <b-td class="border px-4 py-2">
-                  <b-form-checkbox
+                  <BFormCheckbox
                     v-if="typeof value === 'boolean'"
                     size="sm"
                     v-model="settings[key]"
                   >
-                  </b-form-checkbox>
-                  <b-form-input
+                  </BFormCheckbox>
+                  <BFormInput
                     v-if="typeof value !== 'boolean'"
                     size="sm"
                     v-model="settings[key]"
-                  ></b-form-input>
+                  ></BFormInput>
                 </b-td>
 
               </b-tr>

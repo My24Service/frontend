@@ -1,13 +1,13 @@
 <template>
   <div
   >
-    <b-form-input
+    <BFormInput
       v-model="time"
       type="text"
       placeholder="HH:mm"
       class="time-input"
       @input="update"
-    ></b-form-input>
+    ></BFormInput>
     <span style="float:left !important;"></span>
     <b-form-timepicker
       button-only

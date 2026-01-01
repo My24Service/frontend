@@ -8,14 +8,14 @@
           <span v-if="isCreate">{{ $trans('New entry') }}</span>
           <span v-if="!isCreate">{{ $trans('Edit entry') }}</span>
         </h3>
-        <b-button-toolbar>
-          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+        <BButton-toolbar>
+          <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          </BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-          </b-button>
-        </b-button-toolbar>
+          </BButton>
+        </BButton-toolbar>
       </div>
     </header>
     <div class='page-details panel'>
@@ -25,7 +25,7 @@
 
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Purchase order')"
                   label-for="purchaseorder-entry-order-search"
@@ -51,68 +51,68 @@
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                   </multiselect>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="1" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Order ID')"
                   label-for="purchaseorder-entry-order-id"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedPurchaseOrder.purchase_order_id"
                     id="purchaseorder-entry-order-id"
                     readonly
                     size="sm"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="3" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Supplier')"
                   label-for="purchaseorder-entry-supplier"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedPurchaseOrder.order_name"
                     id="purchaseorder-entry-supplier"
                     readonly
                     size="sm"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="3" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('City')"
                   label-for="purchaseorder-entry-city"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedPurchaseOrder.order_city"
                     id="purchaseorder-entry-city"
                     size="sm"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Expected entry date')"
                   label-for="purchaseorder-entry-expected_entry_date"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedPurchaseOrder.expected_entry_date"
                     id="purchaseorder-entry-expected_entry_date"
                     size="sm"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="3" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Default location')"
                   label-for="purchaseorder-entry-default-location"
@@ -125,7 +125,7 @@
                     value-field="id"
                     text-field="name"
                   ></b-form-select>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
 
@@ -144,12 +144,12 @@
                     </template>
                     <template #cell(icons)="data">
                       <div class="float-right">
-                        <b-link class="h5 mx-2" @click="editEntry(data.item, data.index)">
+                        <BLink class="h5 mx-2" @click="editEntry(data.item, data.index)">
                           <b-icon-pencil></b-icon-pencil>
-                        </b-link>
-                        <b-link class="h5 mx-2" @click.prevent="deleteEntry(data.index)">
+                        </BLink>
+                        <BLink class="h5 mx-2" @click.prevent="deleteEntry(data.index)">
                           <b-icon-trash></b-icon-trash>
-                        </b-link>
+                        </BLink>
                       </div>
                     </template>
                   </b-table>
@@ -157,7 +157,7 @@
               </b-row>
               <b-row>
                 <b-col cols="12" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Product')"
                     label-for="purchaseorder-entry-material-search"
@@ -186,73 +186,73 @@
                       :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
                       {{ $trans('Please select a product') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
                 </b-col>
               </b-row>
               <b-row>
                 <b-col cols="3" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Name')"
                     label-for="purchaseorder-entry-material-name"
                   >
-                    <b-form-input
+                    <BFormInput
                       v-model="entry.purchase_order_material_view.name"
                       id="purchaseorder-entry-material-name"
                       readonly
                       size="sm"
-                    ></b-form-input>
-                  </b-form-group>
+                    ></BFormInput>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="1" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Ordered')"
                     label-for="purchaseorder-entry-material-amount"
                   >
-                    <b-form-input
+                    <BFormInput
                       v-model="entry.ordered_amount"
                       id="purchaseorder-entry-material-amount"
                       readonly
                       size="sm"
-                    ></b-form-input>
-                  </b-form-group>
+                    ></BFormInput>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="2" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Unit')"
                     label-for="purchaseorder-entry-material-unit"
                   >
-                    <b-form-input
+                    <BFormInput
                       v-model="entry.purchase_order_material_view.unit"
                       id="purchaseorder-entry-material-unit"
                       size="sm"
                       readonly
-                    ></b-form-input>
-                  </b-form-group>
+                    ></BFormInput>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="1" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Entry')"
                     label-for="purchaseorder-entry-amount"
                   >
-                    <b-form-input
+                    <BFormInput
                       ref="amount"
                       v-model="entry.amount"
                       id="purchaseorder-entry-amount"
                       size="sm"
                       :state="isSubmitClicked ? !v$.entry.amount.$error : null"
-                    ></b-form-input>
+                    ></BFormInput>
                     <b-form-invalid-feedback
                       :state="isSubmitClicked ? !v$.entry.amount.$error : null">
                       {{ $trans('Please enter an amount') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="2" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Date')"
                     label-for="purchaseorder-entry-date"
@@ -272,10 +272,10 @@
                       :state="isSubmitClicked ? !v$.entry.entry_date.$error : null">
                       {{ $trans('Please enter a date') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="3" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Move to location')"
                     label-for="purchaseorder-entry-location"
@@ -288,11 +288,11 @@
                       value-field="id"
                       text-field="name"
                     ></b-form-select>
-                  </b-form-group>
+                  </BFormGroup>
                 </b-col>
               </b-row>
               <footer class="modal-footer">
-                <b-button
+                <BButton
                   @click="cancelEditEntry"
                   class="btn btn-primary"
                   size="sm"
@@ -300,9 +300,9 @@
                   variant="secondary"
                 >
                   {{ $trans('Cancel') }}
-                </b-button>
+                </BButton>
                 &nbsp;
-                <b-button
+                <BButton
                   v-if="isEditEntry"
                   @click="doEditEntry"
                   class="btn btn-primary"
@@ -310,8 +310,8 @@
                   type="button"
                   variant="warning">
                   {{ $trans('Edit entry') }}
-                </b-button>
-                <b-button
+                </BButton>
+                <BButton
                   v-if="!isEditEntry"
                   @click="addEntry"
                   class="btn btn-primary"
@@ -321,7 +321,7 @@
                   :disabled="!isEntryValid"
                 >
                   {{ $trans('Add entry') }}
-                </b-button>
+                </BButton>
               </footer>
             </div>
 

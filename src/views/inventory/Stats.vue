@@ -8,15 +8,15 @@
     <div class="app-detail panel">
       <b-row align-v="center">
         <b-col cols="1">
-          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
+          <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
             <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          </BLink>
         </b-col>
         <b-col cols="10" class="text-center">
 
           <b-row>
             <b-col cols="6">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Graph type')"
                 label-for="graph-type"
@@ -27,31 +27,31 @@
                   :options="modes"
                   size="sm"
                 ></b-form-select>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="6">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Show')"
                 label-for="graph-field"
               >
-                <b-form-radio-group
+                <BFormRadioGroup
                   id="graph-field"
                   v-model="graphField"
                   :options="graphFieldOptions"
                   class="mb-3"
                   value-field="item"
                   text-field="name"
-                ></b-form-radio-group>
-              </b-form-group>
+                ></BFormRadioGroup>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-col>
         <b-col cols="1">
           <div class="float-right">
-            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+            <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
               <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            </BLink>
           </div>
         </b-col>
       </b-row>

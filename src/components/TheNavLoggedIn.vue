@@ -11,53 +11,53 @@
       @ok="handleOk"
     >
       <form ref="password-change-form" @submit.stop.prevent="doPasswordChange">
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Old password')"
           label-for="old-password-input"
         >
-          <b-form-input
+          <BFormInput
             autofocus
             id="old-password-input"
             v-model="old_password"
             type="password"
             :state="isSubmitClicked ? !v$.old_password.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.old_password.$error : null">
             {{ $trans('Please enter your old password') }}
           </b-form-invalid-feedback>
-        </b-form-group>
-        <b-form-group
+        </BFormGroup>
+        <BFormGroup
           v-bind:label="$trans('New password')"
           label-for="new-password1-input"
         >
-          <b-form-input
+          <BFormInput
             id="new-password1-input"
             type="password"
             v-model="new_password1"
             :state="isSubmitClicked ? !v$.new_password1.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <password v-model="new_password1" :strength-meter-only="true"/>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.new_password1.$error : null">
             {{ $trans('Please enter a new password') }}
           </b-form-invalid-feedback>
-        </b-form-group>
-        <b-form-group
+        </BFormGroup>
+        <BFormGroup
           v-bind:label="$trans('Password again')"
           label-for="new-password2-input"
         >
-          <b-form-input
+          <BFormInput
             id="new-password2-input"
             type="password"
             v-model="new_password2"
             :state="isSubmitClicked ? !v$.new_password2.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? v$.new_password2.sameAs.$invalid : null">
             {{ $trans('Passwords do not match') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
       </form>
       {{ v$.new_password2.sameAs }}
     </b-modal>
@@ -79,14 +79,14 @@
     ok-disabled
     >
       <template #modal-footer>
-        <b-button
+        <BButton
           variant="secondary"
           size="sm"
           class="float-right"
           @click="$bvModal.hide('lang-modal')"
         >
           {{ $trans('Close') }}
-        </b-button>
+        </BButton>
       </template>
       <TheLanguageChooser />
   </b-modal>

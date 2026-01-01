@@ -11,10 +11,10 @@
             <span class="dimmed" v-if="!isCreate && !salesuser.username">{{ $trans('edit') }}</span>
           </h3>
           <div class='flex-columns'>
-            <b-button @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
+            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+              {{ $trans('Submit') }}</BButton>
         </div>
         </div>
       </header>
@@ -23,17 +23,17 @@
         <div class='flex-columns'>
           <div class="panel">
               <h6>{{ $trans('User info')}}</h6>
-              <b-form-group
+              <BFormGroup
                 label-cols="4"
                 v-bind:label="$trans('Username')"
                 label-for="salesuser_username"
               >
-                <b-form-input
+                <BFormInput
                   id="salesuser_username"
                   size="sm"
                   v-model="salesuser.username"
                   :state="isSubmitClicked ? !v$.salesuser.username.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   v-if="salesuser.username === ''"
                   :state="isSubmitClicked ? v$.salesuser.username.required : null">
@@ -44,138 +44,138 @@
                   :state="isSubmitClicked ? !v$.salesuser.username.isUnique.$invalid : null">
                   {{ $trans('Username is already in use') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
 
-              <b-form-group
+              <BFormGroup
                 label-cols="4"
                 v-bind:label="$trans('Password')"
                 label-for="salesuser_password"
               >
-                <b-form-input
+                <BFormInput
                   id="salesuser_password"
                   size="sm"
                   type="password"
                   v-model="salesuser.password1"
                   @blur="v$.salesuser.password1.$touch()"
                   :state="isSubmitClicked && v$.salesuser.password1 ? !v$.salesuser.password1.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked && v$.salesuser.password1 ? !v$.salesuser.password1.$error : null">
                   {{ $trans('Please enter a password') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
 
-              <b-form-group
+              <BFormGroup
 
                 label-cols="4"
                 v-bind:label="$trans('Confirm password')"
                 label-for="salesuser_password_again"
               >
-                <b-form-input
+                <BFormInput
                   id="salesuser_password_again"
                   size="sm"
                   type="password"
                   v-model="salesuser.password2"
                   @blur="v$.salesuser.password2.$touch()"
                   :state="isSubmitClicked ? !v$.salesuser.password2.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   v-if="salesuser.password2 !== '' && salesuser.password2"
                   :state="isSubmitClicked ? !v$.salesuser.password2.sameAs.$invalid : null">
                   {{ $trans('Passwords do not match') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
           </div>
 
           <div class="panel">
               <h6>{{ $trans('Personal details')}}</h6>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('First name')"
                 label-for="salesuser_first_name"
               >
-                <b-form-input
+                <BFormInput
                   id="salesuser_first_name"
                   size="sm"
                   v-model="salesuser.first_name"
                   :state="isSubmitClicked ? !v$.salesuser.first_name.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.salesuser.first_name.$error : null">
                   {{ $trans('Please enter a first name') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Last name')"
                 label-for="salesuser_last_name"
               >
-                <b-form-input
+                <BFormInput
                   id="salesuser_last_name"
                   size="sm"
                   v-model="salesuser.last_name"
                   :state="isSubmitClicked ? !v$.salesuser.last_name.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.salesuser.last_name.$error : null">
                   {{ $trans('Please enter a last name') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Email address')"
                 label-for="salesuser_email"
               >
-                <b-form-input
+                <BFormInput
                   id="salesuser_email"
                   size="sm"
                   v-model="salesuser.email"
                   :state="isSubmitClicked ? !v$.salesuser.email.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.salesuser.email.$error : null">
                   {{ $trans('Please enter a valid email address') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
           </div>
 
           <div class="panel">
               <h6>{{ $trans('Contract')}} &amp; {{  $trans('Time registration') }} </h6>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Contract hours per week')"
                 label-for="sales_user_contract_hours_week"
               >
-                <b-form-input
+                <BFormInput
                   id="sales_user_contract_hours_week"
                   size="sm"
                   v-model="salesuser.sales_user.contract_hours_week"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Uses time registration')"
                 label-for="sales_user_uses_time_registration"
               >
-                <b-form-checkbox
+                <BFormCheckbox
                   id="sales_user_uses_time_registration"
                   size="sm"
                   v-model="salesuser.sales_user.uses_time_registration"
                 >
-                </b-form-checkbox>
-              </b-form-group>
+                </BFormCheckbox>
+              </BFormGroup>
 
           </div>
         </div>

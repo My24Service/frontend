@@ -10,18 +10,18 @@
     <div class="panel overflow-auto">
       <b-row>
         <b-col cols="2">
-          <b-link class="px-1" @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+          <BLink class="px-1" @click.prevent="backMonth" v-bind:title="$trans('Month back')">
             <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          </BLink>
         </b-col>
         <b-col cols="8">
           {{ $trans('Assigned finished') }} {{ monthText}} {{ year }}
         </b-col>
         <b-col cols="2">
           <div class="float-right">
-            <b-link class="px-1" @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+            <BLink class="px-1" @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
               <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            </BLink>
           </div>
         </b-col>
       </b-row>
@@ -37,8 +37,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
@@ -46,8 +46,8 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>

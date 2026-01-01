@@ -23,8 +23,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="
                     function() {
@@ -40,14 +40,14 @@
                     }
                   "
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(full_name)="data">
-          <b-link :to="{ name: 'leave-edit', params: { pk: data.item.id } }">{{
+          <BLink :to="{ name: 'leave-edit', params: { pk: data.item.id } }">{{
             data.item.full_name
-          }}</b-link>
+          }}</BLink>
         </template>
         <template #cell(date)="data">
           <span v-if="data.item.start_date == data.item.end_date">

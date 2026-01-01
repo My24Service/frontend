@@ -10,10 +10,10 @@
           <span class="dimmed" v-if="!isCreate && !apiuser.username">{{ $trans('edit') }}</span>
         </h3>
         <div class='flex-columns'>
-          <b-button @click="cancelForm" type="button" variant="secondary" class="outline">
-            {{ $trans('Cancel') }}</b-button>
-          <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-            {{ $trans('Submit') }}</b-button>
+          <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
+            {{ $trans('Cancel') }}</BButton>
+          <BButton @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+            {{ $trans('Submit') }}</BButton>
         </div>
       </div>
     </header>
@@ -22,18 +22,18 @@
         <div class="panel col-1-3">
           <h6>{{ $trans('User info')}}</h6>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Username')"
             label-for="apiuser_username"
           >
-            <b-form-input
+            <BFormInput
               id="apiuser_username"
               size="sm"
               v-model="apiuser.username"
               :state="isSubmitClicked ? !v$.apiuser.username.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               v-if="apiuser.username === ''"
               :state="isSubmitClicked ? v$.apiuser.username.required : null">
@@ -44,70 +44,70 @@
               :state="isSubmitClicked ? !v$.apiuser.username.isUnique.$invalid : null">
               {{ $trans('Username is already in use') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Password')"
             label-for="apiuser_password"
           >
-            <b-form-input
+            <BFormInput
               id="apiuser_password"
               size="sm"
               type="password"
               v-model="apiuser.password1"
               @blur="v$.apiuser.password1.$touch()"
               :state="isSubmitClicked && v$.apiuser.password1 ? !v$.apiuser.password1.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               :state="isSubmitClicked && v$.apiuser.password1 ? !v$.apiuser.password1.$error : null">
               {{ $trans('Please enter a password') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Password again')"
             label-for="apiuser_password_again"
           >
-            <b-form-input
+            <BFormInput
               id="apiuser_password_again"
               size="sm"
               type="password"
               v-model="apiuser.password2"
               @blur="v$.apiuser.password2.$touch()"
               :state="isSubmitClicked ? !v$.apiuser.password2.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               v-if="apiuser.password2 !== '' && apiuser.password2"
               :state="isSubmitClicked ? !v$.apiuser.password2.sameAs.$invalid : null">
               {{ $trans('Passwords do not match') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
         </div>
 
         <div class="panel col-1-3">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Name')"
               label-for="apiuser_name"
             >
-              <b-form-input
+              <BFormInput
                 id="apiuser_name"
                 size="sm"
                 v-model="apiuser.api_user.name"
                 :state="isSubmitClicked ? !v$.apiuser.api_user.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? v$.apiuser.api_user.name.required : null">
                 {{ $trans('Name is required') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               :label="$trans('Valid from')"
@@ -128,24 +128,24 @@
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_start_dt.$error : null">
                 {{ $trans('Please enter date') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Expire in days')"
               label-for="apiuser_expire_in_days"
             >
-              <b-form-input
+              <BFormInput
                 id="apiuser_expire_in_days"
                 v-model="apiuser.api_user.expire_in_days"
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_in_days.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? v$.apiuser.api_user.expire_in_days.required : null">
                 {{ $trans('Name is required') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
         </div>
       </div>
     </form>

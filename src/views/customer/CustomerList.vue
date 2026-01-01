@@ -20,8 +20,8 @@
         <h3>
           <b-icon icon="building"></b-icon> {{ $trans("Customers") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -34,9 +34,9 @@
               v-bind:method="function() { downloadList() }"
               v-bind:title="$trans('Download')"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'customer-add'}" class="btn"><b-icon icon="building"></b-icon>{{$trans('Add customer')}}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -81,7 +81,7 @@
                 <b>{{ $trans('Contact') }}</b>: {{ data.item.branch_view.contact }}<br/>
             </span>
             <span v-if="data.item.branch_view.email">
-              {{ $trans('Email') }}: <b-link class="px-1" v-bind:href="`mailto:${data.item.branch_view.email}`">{{ data.item.branch_view.email }}</b-link><br/>
+              {{ $trans('Email') }}: <BLink class="px-1" v-bind:href="`mailto:${data.item.branch_view.email}`">{{ data.item.branch_view.email }}</BLink><br/>
             </span>
             <span v-if="data.item.branch_view.tel && data.item.branch_view.tel.trim() !== ''">
                 <b>{{ $trans('Tel') }}</b>: {{ data.item.branch_view.tel }}<br/>

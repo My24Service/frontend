@@ -18,23 +18,23 @@
             /
             <strong>{{ quotation.quotation_id }} {{ quotation.quotation_name }}</strong>
             <span>
-              <b-link
+              <BLink
                 class="btn btn-sm btn-primary"
                 @click.prevent="showQuotationDialog"
                 target="_blank"
               >
                 <b-icon icon="file-earmark"></b-icon>
                 {{ $trans('View PDF') }}
-              </b-link>
+              </BLink>
             </span>
-            <b-button
+            <BButton
               @click="sendQuotation"
               type="button"
               variant="primary"
               class="send-quotation-button"
             >
               {{ $trans('Send quotation') }}
-            </b-button>
+            </BButton>
           </h3>
           <div
             class="flex-columns"

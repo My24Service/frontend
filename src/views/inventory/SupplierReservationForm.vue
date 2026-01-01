@@ -9,12 +9,12 @@
           {{ this.pk }} <span v-if="!isCreate" class="dimmed">{{ $trans('edit') }}</span>
         </h3>
         <div class='flex-columns'>
-          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+          <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          </BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-          </b-button>
+          </BButton>
         </div>
       </div>
     </header>
@@ -25,7 +25,7 @@
             <div class='panel col-1-3'>
               <h6>{{  $trans('Supplier') }}</h6>
               <fieldset>
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-cols="12"
                   label-cols-md="3"
@@ -53,94 +53,94 @@
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
                   </multiselect>
-                </b-form-group>
+                </BFormGroup>
 
-                <b-form-group
+                <BFormGroup
                 label-cols="12"
                   label-cols-md="3"
                   label-size="sm"
                   v-bind:label="$trans('Supplier')"
                   label-for="supplier-reservation-supplier-name"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedSupplier.name"
                     id="supplier-reservation-supplier-name"
                     readonly
                     size="sm"
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="!v$.supplierReservation.supplier.$error">
                     {{ $trans('Please select a supplier') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
 
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-cols="12"
                   label-cols-md="3"
                   v-bind:label="$trans('Address')"
                   label-for="supplier-reservation-supplier-address"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedSupplier.address"
                     id="supplier-reservation-supplier-address"
                     readonly
                     size="sm"
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
 
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-cols="12"
                   label-cols-md="3"
                   v-bind:label="$trans('City')"
                   label-for="supplier-reservation-supplier-city"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedSupplier.city"
                     id="supplier-reservation-supplier-city"
                     size="sm"
                     readonly
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
 
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-cols="12"
                   label-cols-md="3"
                   v-bind:label="$trans('Email')"
                   label-for="supplier-reservation-supplier-email"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedSupplier.email"
                     id="supplier-reservation-supplier-email"
                     size="sm"
                     readonly
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </fieldset>
             </div>
             <div class='panel col-1-3'>
               <div class="reservation-materials">
                 <h6>{{$trans('Add product(s)')}}</h6>
 
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Search product')"
                   >
@@ -170,57 +170,57 @@
                       :state="!v$.material.material.$error">
                       {{ $trans('Please select a product') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
 
 
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Name')"
                     label-for="reservation-material-name"
                     >
-                  <b-form-input
+                  <BFormInput
                     id="reservation-material-name"
                     size="sm"
                     v-model="material.material_view.name"
                     readonly
                     :state="!v$.material.material.$error"
-                    ></b-form-input>
+                    ></BFormInput>
 
-                  </b-form-group>
+                  </BFormGroup>
 
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     label-cols="3"
                     v-bind:label="$trans('Amount')"
                     label-for="reservation-material-amount"
                   >
-                  <b-form-input
+                  <BFormInput
                     id="reservation-material-amount"
                     size="sm"
                     v-model="material.amount"
                     :state="!v$.material.amount.$error"
                     ref="amount"
-                      ></b-form-input>
+                      ></BFormInput>
                       <b-form-invalid-feedback
                       :state="!v$.material.amount.$error">
                       {{ $trans('Please enter an amount') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
 
-                  <b-form-group
+                  <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
                   label-for="reservation-material-remarks"
                   >
-                  <b-form-textarea
+                  <BFormTextarea
                   id="reservation-material-remarks"
                   v-model="material.remarks"
                   rows="1"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
 
                 <footer class="modal-footer">
-                  <b-button
+                  <BButton
                     @click="cancelEditMaterial"
                     class="btn btn-primary"
                     size="sm"
@@ -228,9 +228,9 @@
                     variant="secondary"
                   >
                     {{ $trans('Cancel') }}
-                  </b-button>
+                  </BButton>
                   &nbsp;
-                  <b-button
+                  <BButton
                     v-if="isEditMaterial"
                     @click="doEditMaterial"
                     class="btn btn-primary"
@@ -238,8 +238,8 @@
                     type="button"
                     variant="warning">
                     {{ $trans('Edit product') }}
-                  </b-button>
-                  <b-button
+                  </BButton>
+                  <BButton
                     v-if="!isEditMaterial"
                     @click="addMaterial"
                     class="btn btn-primary"
@@ -249,7 +249,7 @@
                     :disabled="!isMaterialValid"
                   >
                     {{ $trans('Add product') }}
-                  </b-button>
+                  </BButton>
                 </footer>
 
               </div>
@@ -265,12 +265,12 @@
               >
                 <template #cell(icons)="data">
                   <div class="float-right">
-                    <b-link class="h5 mx-2" @click="editMaterial(data.item, data.index)">
+                    <BLink class="h5 mx-2" @click="editMaterial(data.item, data.index)">
                       <b-icon-pencil></b-icon-pencil>
-                    </b-link>
-                    <b-link class="h5 mx-2" @click.prevent="deleteMaterial(data.index)">
+                    </BLink>
+                    <BLink class="h5 mx-2" @click.prevent="deleteMaterial(data.index)">
                       <b-icon-trash></b-icon-trash>
-                    </b-link>
+                    </BLink>
                   </div>
                 </template>
               </b-table>

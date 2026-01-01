@@ -6,8 +6,8 @@
           <router-link :to="{name:'supplier-reservation-list'}">{{ $trans("Reservations") }}</router-link> / {{this.pk}}
         </h3>
         <div class="flex-columns">
-          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
-            {{ $trans('Back') }}</b-button>
+          <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
+            {{ $trans('Back') }}</BButton>
           <router-link class="btn primary" :to="{name: 'supplier-reservation-edit', params: {pk:this.pk}}">{{ $trans("Edit") }}</router-link>
         </div>
       </div>
@@ -61,9 +61,9 @@
               <b-tr>
                 <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
                 <b-td>
-                  <b-link class="px-1" v-bind:href="`mailto:${reservation.supplier_view.email}`">
+                  <BLink class="px-1" v-bind:href="`mailto:${reservation.supplier_view.email}`">
                     {{ reservation.supplier_view.email }}
-                  </b-link>
+                  </BLink>
                 </b-td>
               </b-tr>
             </b-table-simple>

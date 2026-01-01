@@ -2,18 +2,18 @@
   <div class="app-grid">
     <b-row>
       <b-col cols="2">
-        <b-link @click.prevent="backWeek" v-bind:title="$trans('Week back')">
+        <BLink @click.prevent="backWeek" v-bind:title="$trans('Week back')">
           <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
+        </BLink>
       </b-col>
       <b-col cols="8">
         {{ hoursTitle }} - {{ week }}/{{ today.format('Y') }}
       </b-col>
       <b-col cols="2">
         <div class="float-right">
-          <b-link @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
+          <BLink @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
             <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-          </b-link>
+          </BLink>
         </div>
       </b-col>
     </b-row>

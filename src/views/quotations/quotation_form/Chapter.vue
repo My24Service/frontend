@@ -32,9 +32,9 @@
       >
         <template #cell(chapter)="data">
           <h6>
-            <b-link @click="function() { loadChapter(data.item) }">
+            <BLink @click="function() { loadChapter(data.item) }">
               {{ data.item.name }}
-            </b-link>
+            </BLink>
           </h6>
           <p>{{ data.item.description }}</p>
         </template>
@@ -59,38 +59,38 @@
       <div v-if="showForm">
         <h3>{{ $trans("New chapter" )}}</h3>
         <div>
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Name')"
             label-for="name"
             label-cols="3"
           >
-            <b-form-input
+            <BFormInput
               id="name"
               size="sm"
               v-model="chapterService.editItem.name"
               :state="submitClicked ? !v$.chapterService.editItem.name.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               :state="submitClicked ? !v$.chapterService.editItem.name.$error : null">
               {{ $trans('Please enter the chapter name') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Description')"
             label-for="description"
             label-cols="3"
           >
-            <b-form-textarea
+            <BFormTextarea
               id="description"
               size="sm"
               v-model="chapterService.editItem.description"
               placeholder="Chapter description"
-            ></b-form-textarea>
-          </b-form-group>
+            ></BFormTextarea>
+          </BFormGroup>
 
           <footer class="modal-footer">
-            <b-button
+            <BButton
               :disabled="isLoading"
               @click="cancelEditChapter"
               class="btn btn-secondary update-button"
@@ -99,8 +99,8 @@
               variant="secondary"
             >
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button
+            </BButton>
+            <BButton
               v-if="chapterService.isEdit"
               @click="doEditChapter"
               class="btn btn-primary"
@@ -109,8 +109,8 @@
               variant="warning"
             >
               {{ $trans('Edit chapter') }}
-            </b-button>
-            <b-button
+            </BButton>
+            <BButton
               v-if="!chapterService.isEdit"
               @click="addChapter"
               class="btn btn-primary"
@@ -119,7 +119,7 @@
               variant="primary"
             >
               {{ $trans('Add chapter') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </div>
@@ -128,14 +128,14 @@
         class="modal-footer"
         v-if="!showForm && !isView && quotation.preliminary"
       >
-        <b-button
+        <BButton
           @click="newChapter"
           class="btn btn-primary update-button"
           type="button"
           variant="primary"
         >
           {{ $trans('New chapter') }}
-        </b-button>
+        </BButton>
       </footer>
     </div>
   </b-overlay>

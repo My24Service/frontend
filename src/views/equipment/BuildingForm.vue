@@ -6,7 +6,7 @@
         <h2 v-if="!isCreate">{{ $trans('Edit building') }}</h2>
         <b-row v-if="!hasBranches && !isCustomer">
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Search customer')"
@@ -39,12 +39,12 @@
                 :state="isSubmitClicked ? !v$.building.customer.$error : null">
                 {{ $trans('Please select a customer') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row v-if="hasBranches && !isEmployee">
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Search branches')"
@@ -77,155 +77,155 @@
                 :state="isSubmitClicked ? !v$.building.branch.$error : null">
                 {{ $trans('Please select a branch') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row v-if="customer && !hasBranches">
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Customer')"
               label-for="building_customer_name"
             >
-              <b-form-input
+              <BFormInput
                 id="building_customer_name"
                 size="sm"
                 v-model="customer.name"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Address')"
               label-for="building_customer_address"
             >
-              <b-form-input
+              <BFormInput
                 id="building_customer_address"
                 size="sm"
                 v-model="customer.address"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('City')"
               label-for="building_customer_city"
             >
-              <b-form-input
+              <BFormInput
                 id="building_customer_city"
                 size="sm"
                 v-model="customer.city"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Country')"
               label-for="building_customer_country_code"
             >
-              <b-form-input
+              <BFormInput
                 id="building_customer_country_code"
                 size="sm"
                 v-model="customer.country_code"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row v-if="branch && hasBranches">
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Branch')"
               label-for="building_branch_name"
             >
-              <b-form-input
+              <BFormInput
                 id="building_branch_name"
                 size="sm"
                 v-model="branch.name"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Address')"
               label-for="building_branch_address"
             >
-              <b-form-input
+              <BFormInput
                 id="building_branch_address"
                 size="sm"
                 v-model="branch.address"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('City')"
               label-for="building_branch_city"
             >
-              <b-form-input
+              <BFormInput
                 id="building_branch_city"
                 size="sm"
                 v-model="branch.city"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Country')"
               label-for="building_branch_country_code"
             >
-              <b-form-input
+              <BFormInput
                 id="building_branch_country_code"
                 size="sm"
                 v-model="branch.country_code"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-for="building-name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="building.name"
                 id="building-name"
                 size="sm"
                 ref="name"
                 :state="isSubmitClicked ? !v$.building.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.building.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
-            <b-button
+            </BButton>
+            <BButton
               @click="submitFormBulk"
               :disabled="buttonDisabled"
               type="button"
@@ -233,7 +233,7 @@
               v-if="isCreate"
             >
               {{ $trans('Bulk') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>

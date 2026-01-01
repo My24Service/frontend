@@ -1,11 +1,11 @@
 <template>
   <p class="flex">
-    <b-form-input
+    <BFormInput
       @blur="inputChanged"
       v-model="margin_perc"
       size="sm"
       class="input-margin"
-    ></b-form-input>
+    ></BFormInput>
     <span class="percentage-container">%</span>
   </p>
 </template>

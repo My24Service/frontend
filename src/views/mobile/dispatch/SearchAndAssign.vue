@@ -14,11 +14,11 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-                <b-form-input size="sm" autofocus v-model="query"
+                <BFormInput size="sm" autofocus v-model="query"
                               v-bind:placeholder="$trans('Type to search orders')"
                               @keydown.enter="search"
                               @change="searchDebounced"
-                              @update="searchDebounced"></b-form-input>
+                              @update="searchDebounced"></BFormInput>
             </b-col>
           </b-row>
         </b-container>
@@ -55,9 +55,9 @@
               <span class="order-company-name">{{ order.order_name }}</span>
               <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
                 {{ order.start_date }}
-                <b-link v-bind:title="$trans('Edit start and end dates')" v-on:click="editStartDate(order)">
+                <BLink v-bind:title="$trans('Edit start and end dates')" v-on:click="editStartDate(order)">
                   <b-icon-pencil class="edit-icon"></b-icon-pencil>
-                </b-link>
+                </BLink>
               </span>
               <span class="order-status" :title="order.last_status_full">
                 <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`"></b-icon>
@@ -88,10 +88,10 @@
               <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
         </span>
           <!--
-          <b-button variant="primary" v-if="selectedOrders.length > 0" @click.prevent="searchAndAssignDone()">
+          <BButton variant="primary" v-if="selectedOrders.length > 0" @click.prevent="searchAndAssignDone()">
             <b-icon-person-lines-fill></b-icon-person-lines-fill>
             {{ $trans('Assign these orders') }}
-          </b-button>
+          </BButton>
           -->
         </b-row>
         <b-btn class="float-right" variant="primary" @click="searchAndAssignDone()" :data-non-zero="hasSelectedOrders()?'1':'0'"><b-icon-person-lines-fill class="assign-icon"></b-icon-person-lines-fill>&nbsp;<span>{{ buttonLabel }}</span></b-btn>

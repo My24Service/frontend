@@ -13,10 +13,10 @@
           </span>
         </h3>
         <div class="flex-columns" v-if="isCreate || isEdit">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button
+          <BButton
             @click="submitForm"
             type="button"
             variant="primary"
@@ -24,12 +24,12 @@
           >
             <b-spinner small v-if="isLoading"></b-spinner>
             {{ $trans("Submit") }}
-          </b-button
+          </BButton
           >
         </div>
         <div class="flex-columns" v-if="!isCreate && !isEdit">
-          <b-button @click="isEdit = true" type="button" variant="primary">
-            {{ $trans("Edit template") }}</b-button
+          <BButton @click="isEdit = true" type="button" variant="primary">
+            {{ $trans("Edit template") }}</BButton
           >
         </div>
       </div>
@@ -39,30 +39,30 @@
         <div class="flex-columns">
           <div class="panel" v-if="isCreate || isEdit">
             <h6>{{ $trans("Template") }}</h6>
-            <b-form-group v-bind:label="$trans('Name')" label-for="template_name" label-cols="3">
-              <b-form-input
+            <BFormGroup v-bind:label="$trans('Name')" label-for="template_name" label-cols="3">
+              <BFormInput
                 autofocus
                 id="template_name"
                 size="sm"
                 v-model="template.name"
                 :state="isSubmitClicked ? !v$.template.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.template.name.$error : null">
                 {{ $trans("Please enter a template name") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Description')"
               label-for="template_description"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="template_description"
                 v-model="template.description"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
-            <b-form-group
+              ></BFormTextarea>
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Type')"
               label-for="template_type"
@@ -80,8 +80,8 @@
               >
                 {{ $trans("Please select a template type") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group v-bind:label="$trans('Choose template')" label-cols="3">
+            </BFormGroup>
+            <BFormGroup v-bind:label="$trans('Choose template')" label-cols="3">
               <b-form-file
                 v-model="file"
                 v-bind:placeholder="$trans('Choose a word document or drop it here...')"
@@ -96,20 +96,20 @@
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.template.file.$error : null">
                 {{ $trans("Please select a file") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Set template as active')"
               class="template_active"
               label-for="template_active"
             >
-              <b-form-checkbox
+              <BFormCheckbox
                 id="template_active"
                 v-model="template.is_active"
                 rows="3"
               >
-              </b-form-checkbox>
-            </b-form-group>
+              </BFormCheckbox>
+            </BFormGroup>
             <div>
               <h4>{{ $trans("Template fields documentation") }}</h4>
               <ul>
@@ -151,7 +151,7 @@
           </div>
           <div class="panel" v-if="!isCreate && !isEdit">
             <h6>{{ $trans("Template preview") }}</h6>
-            <b-form-group
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Template')"
               label-for="template-search"
@@ -178,13 +178,13 @@
                 ref="searchTemplate"
               >
               </multiselect>
-            </b-form-group>
+            </BFormGroup>
             <b-row>
               <b-col cols="3" v-if="result">
                 {{ result.name }}
               </b-col>
               <b-col cols="3" v-if="result">
-                <b-button
+                <BButton
                   @click="previewPdf"
                   type="button"
                   variant="primary"
@@ -192,7 +192,7 @@
                 >
                   <b-spinner small v-if="loadingPdf"></b-spinner>
                   {{ $trans("Preview pdf") }}
-                </b-button>
+                </BButton>
               </b-col>
             </b-row>
           </div>

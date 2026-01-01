@@ -1,8 +1,8 @@
 <template>
   <span>
-    <b-link v-if="method" v-bind:title="title" v-on:click="method()">
+    <BLink v-if="method" v-bind:title="title" v-on:click="method()">
       <IBiPencil class="edit-icon"></IBiPencil>
-    </b-link>
+    </BLink>
     <router-link v-if="router_name" :to="{name: router_name, params: router_params}" v-bind:title="title">
       <IBiPencil class="edit-icon"></IBiPencil>
     </router-link>

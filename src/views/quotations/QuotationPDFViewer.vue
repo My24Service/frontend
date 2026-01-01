@@ -37,15 +37,15 @@
       ok-only
     >
       <template #modal-footer="{ ok }">
-        <b-button
+        <BButton
           class="btn button btn-danger"
           @click="showMakeDefinitiveModal"
           v-if="quotation.preliminary"
           variant="danger"
         >
           {{ $trans('Make definitive') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           class="btn button btn-danger"
           @click="generatePdf"
           v-if="!quotation.preliminary"
@@ -53,8 +53,8 @@
         >
           <b-spinner small v-if="isLoading"></b-spinner>
           {{ $trans('Recreate PDF') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           class="btn button btn-danger"
           @click="downloadPdf"
           v-if="quotation.definitive_pdf_filename"
@@ -62,10 +62,10 @@
         >
           <b-spinner small v-if="isLoading"></b-spinner>
           {{ $trans('Download PDF') }}
-        </b-button>
-        <b-button @click="ok()" variant="primary">
+        </BButton>
+        <BButton @click="ok()" variant="primary">
           {{ $trans("Close") }}
-        </b-button>
+        </BButton>
       </template>
 
       <b-overlay :show="isLoading" rounded="sm">

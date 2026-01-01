@@ -3,12 +3,12 @@
     <h2>{{ $trans('Reset password') }}</h2>
     <b-row>
       <b-col cols="6" role="group">
-        <b-form-group
+        <BFormGroup
           label-size="sm"
           v-bind:label="$trans('Password')"
           label-for="password1"
         >
-          <b-form-input
+          <BFormInput
             v-model="password1"
             id="password1"
             size="sm"
@@ -16,43 +16,43 @@
             autofocus
             @blur="v$.password1.$touch()"
             :state="isSubmitClicked ? !v$.password1.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <password v-model="password1" :strength-meter-only="true"/>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.password1.$error : null">
             {{ $trans('Please enter a password') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
       </b-col>
     </b-row>
     <b-row>
       <b-col cols="6" role="group">
-        <b-form-group
+        <BFormGroup
           label-size="sm"
           v-bind:label="$trans('Password again')"
           label-for="password2"
         >
-          <b-form-input
+          <BFormInput
             v-model="password2"
             id="password2"
             size="sm"
             type='password'
             @blur="v$.password2.$touch()"
             :state="isSubmitClicked ? !v$.password2.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? v$.password2.sameAs : null">
             {{ $trans('Passwords do not match') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
       </b-col>
     </b-row>
 
     <div class="mx-auto">
       <footer class="modal-footer">
-        <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+        <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
           {{ $trans('Reset password') }}
-        </b-button>
+        </BButton>
       </footer>
     </div>
   </b-form>

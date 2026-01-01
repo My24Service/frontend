@@ -29,8 +29,8 @@
         <b-col cols="6">
           <p><strong>{{ $trans('Assign to') }} {{ selectedUser.full_name }}?</strong></p>
           <p>
-            <b-button type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Assign') }}</b-button>&nbsp;
-            <b-button type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</b-button>
+            <BButton type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Assign') }}</BButton>&nbsp;
+            <BButton type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</BButton>
           </p>
         </b-col>
       </b-row>
@@ -44,9 +44,9 @@
         responsive="sm"
       >
         <template #cell(icons)="data">
-          <b-link class="px-1" @click.prevent="assign(data.item)" v-bind:title="$trans('Assign')">
+          <BLink class="px-1" @click.prevent="assign(data.item)" v-bind:title="$trans('Assign')">
             <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
-          </b-link>
+          </BLink>
         </template>
       </b-table>
 
@@ -54,8 +54,8 @@
         <b-col cols="6">
           <p><strong>{{ $trans('Unassign') }} {{ selectedUser.full_name }}?</strong></p>
           <p>
-            <b-button type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Unassign') }}</b-button>&nbsp;
-            <b-button type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</b-button>
+            <BButton type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Unassign') }}</BButton>&nbsp;
+            <BButton type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</BButton>
           </p>
         </b-col>
       </b-row>
@@ -69,15 +69,15 @@
         responsive="sm"
       >
         <template #cell(icons)="data">
-          <b-link class="px-1" @click.prevent="unAssign(data.item)" v-bind:title="$trans('Unassign')">
+          <BLink class="px-1" @click.prevent="unAssign(data.item)" v-bind:title="$trans('Unassign')">
             <b-icon-trash font-scale="1"></b-icon-trash>
-          </b-link>
+          </BLink>
         </template>
       </b-table>
 
       <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
+        <BButton @click="goBack" class="btn btn-info" type="button" variant="primary">
+          {{ $trans('Back') }}</BButton>
       </footer>
     </div>
   </b-overlay>

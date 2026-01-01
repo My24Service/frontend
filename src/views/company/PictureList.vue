@@ -7,8 +7,8 @@
           <b-icon icon="images"></b-icon> {{ $trans('Pictures') }}
         </h3>
 
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
@@ -16,11 +16,11 @@
             <ButtonLinkSearch
             v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'company-picture-add'}" class="btn">
             <b-icon icon="image"></b-icon>
             {{ $trans('Add picture') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
 
       </div>
     </header>

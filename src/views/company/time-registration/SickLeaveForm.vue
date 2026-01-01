@@ -12,11 +12,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -25,7 +25,7 @@
       <div class="page-detail flex-columns">
         <div class="panel">
           <h6>{{ $trans("Sick leave") }}</h6>
-          <b-form-group
+          <BFormGroup
             v-if="isCreate"
             label-size="sm"
             label-class="p-sm-0"
@@ -51,26 +51,26 @@
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
             </multiselect>
-          </b-form-group>
-          <b-form-group
+          </BFormGroup>
+          <BFormGroup
             v-if="isCreate"
             label-class=""
             :label="$trans('User')"
             label-for="user"
             cols="4"
           >
-            <b-form-input
+            <BFormInput
               id="total_time"
               v-model="userName"
               placeholder="User"
               :readonly="true"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.user.$error : null">
               {{ $trans("Please select a user") }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
           <div class="flex-columns">
-            <b-form-group :label="$trans('Start date')" label-for="start_date" cols="4">
+            <BFormGroup :label="$trans('Start date')" label-for="start_date" cols="4">
               <b-form-datepicker
                 id="start_date"
                 class=""
@@ -86,7 +86,7 @@
               >
                 {{ $trans("Please enter a start date") }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
         </div>
       </div>

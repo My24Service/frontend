@@ -79,9 +79,9 @@
             <b-tr>
               <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
               <b-td>
-                <b-link class="px-1" v-bind:href="`mailto:${order.order_email}`">
+                <BLink class="px-1" v-bind:href="`mailto:${order.order_email}`">
                   {{ order.order_email }}
-                </b-link>
+                </BLink>
               </b-td>
             </b-tr>
           </b-table-simple>
@@ -116,17 +116,17 @@
       <b-row class="my-2">
         <b-col cols="2"><strong>{{ $trans('Workorder online') }}</strong></b-col>
         <b-col cols="9">
-          <b-link class="px-1" :href="order.workorder_url" target="_blank">
+          <BLink class="px-1" :href="order.workorder_url" target="_blank">
             {{ order.order_id }}
-          </b-link>
+          </BLink>
         </b-col>
       </b-row>
       <b-row class="my-2" v-if="order.workorder_pdf_url != ''">
         <b-col cols="2"><strong>{{ $trans('Download PDF') }}</strong></b-col>
         <b-col cols="9">
-          <b-link class="px-1" :href="order.workorder_pdf_url" target="_blank">
+          <BLink class="px-1" :href="order.workorder_pdf_url" target="_blank">
             {{ $trans('Order') }} {{ order.order_id }}
-          </b-link>
+          </BLink>
         </b-col>
       </b-row>
     </div>

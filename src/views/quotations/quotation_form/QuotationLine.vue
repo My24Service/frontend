@@ -1,6 +1,6 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <b-button
+    <BButton
       style="width: 100%"
       :variant="quotationLineService.collectionHasChanges ? 'danger' : 'success'"
       :disabled="quotationLineService.collectionHasChanges"
@@ -8,7 +8,7 @@
     >
       <b-icon-arrow-left-circle-fill></b-icon-arrow-left-circle-fill>
       {{ $trans("Back to quotation and chapters") }}
-    </b-button>
+    </BButton>
 
     <h5 class="pt-2">{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h5>
 
@@ -59,28 +59,28 @@
       </b-table>
 
       <div v-if="showForm">
-        <b-form-group
+        <BFormGroup
           label-cols="0"
           label-for="new-invoice-line-amount"
         >
           <b-container>
             <b-row>
               <b-col cols="3">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Amount')"
                   label-for="new-invoice-line-price"
                 >
-                  <b-form-input
+                  <BFormInput
                     autofocus
                     @blur="quotationLineAmountChanged"
                     id="new-invoice-line-amount"
                     size="sm"
                     v-model="quotationLineService.editItem.amount"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="5">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Price')"
                   label-for="new-invoice-line-price"
                 >
@@ -90,42 +90,42 @@
                     :currency="quotationLineService.editItem.price_currency"
                     @priceChanged="quotationLinePriceChanged"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT type')"
                   label-for="new-invoice-line-total"
                 >
                   <VAT @vatChanged="changeVatTypeQuotationLine" />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Info')"
           label-for="new-invoice-line-description"
         >
-          <b-form-input
+          <BFormInput
             id="new-invoice-line-description"
             size="sm"
             v-model="quotationLineService.editItem.info"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Extra description')"
           label-for="new-invoice-line-description"
         >
-          <b-form-textarea
+          <BFormTextarea
             id="new-invoice-line-description"
             v-model="quotationLineService.editItem.extra_description"
-          ></b-form-textarea>
-        </b-form-group>
+          ></BFormTextarea>
+        </BFormGroup>
 
         <hr/>
 
@@ -141,7 +141,7 @@
         </b-container>
 
         <footer class="modal-footer">
-          <b-button
+          <BButton
             :disabled="isLoading"
             @click="cancelEditQuotationLine"
             class="btn btn-secondary update-button"
@@ -150,8 +150,8 @@
             variant="secondary"
           >
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button
+          </BButton>
+          <BButton
             v-if="quotationLineService.isEdit"
             @click="doEditCollectionItem"
             class="btn btn-primary"
@@ -161,8 +161,8 @@
             :disabled="!isQuotationLineValid"
           >
             {{ $trans('Edit quotation line') }}
-          </b-button>
-          <b-button
+          </BButton>
+          <BButton
             v-if="!quotationLineService.isEdit"
             @click="addQuotationLine"
             class="btn btn-primary"
@@ -172,7 +172,7 @@
             :disabled="!isQuotationLineValid"
           >
             {{ $trans('Add quotation line') }}
-          </b-button>
+          </BButton>
         </footer>
       </div>
 
@@ -213,7 +213,7 @@
         <b-row>
           <b-col cols="2"></b-col>
           <b-col cols="10">
-            <b-button
+            <BButton
               @click="loadData"
               class="btn btn-secondary"
               type="button"
@@ -221,9 +221,9 @@
               :disabled="!quotationLineService.collectionHasChanges"
             >
               {{ $trans('Discard changes') }}
-            </b-button>
+            </BButton>
             &nbsp;
-            <b-button
+            <BButton
               @click="submitQuotationLines"
               class="btn btn-danger"
               type="button"
@@ -231,7 +231,7 @@
               :disabled="!quotationLineService.collectionHasChanges"
             >
               {{ $trans('Save changes') }}
-            </b-button>
+            </BButton>
           </b-col>
         </b-row>
       </b-container>
@@ -240,14 +240,14 @@
         class="modal-footer"
         v-if="!showForm && !isView && quotation.preliminary"
       >
-        <b-button
+        <BButton
           @click="newQuotationLine"
           class="btn btn-primary update-button"
           type="button"
           variant="primary"
         >
           {{ $trans('New quotation line') }}
-        </b-button>
+        </BButton>
       </footer>
 
     </div>

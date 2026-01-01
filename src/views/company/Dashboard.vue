@@ -13,9 +13,9 @@
     <div class="panel app-grid">
       <b-row align-v="center">
         <b-col cols="1">
-          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
+          <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
             <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          </BLink>
         </b-col>
         <b-col cols="10" class="text-center">
           <h4>{{ $trans(`Dashboard for ${year}`) }}</h4>
@@ -28,9 +28,9 @@
         </b-col>
         <b-col cols="1">
           <div class="float-right">
-            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+            <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
               <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            </BLink>
           </div>
         </b-col>
       </b-row>

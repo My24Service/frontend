@@ -53,19 +53,19 @@
           <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material,$event)" />
         </b-col>
         <b-col cols="4">
-          <b-form-radio-group
+          <BFormRadioGroup
             @change="updateTotals"
             v-model="material.use_price"
           >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
               {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-            </b-form-radio>
+            </BFormRadio>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
               {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-            </b-form-radio>
+            </BFormRadio>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
@@ -74,8 +74,8 @@
                   @priceChanged="(val) => otherPriceChanged(val, material)"
                 />
               </p>
-            </b-form-radio>
-          </b-form-radio-group>
+            </BFormRadio>
+          </BFormRadioGroup>
         </b-col>
         <b-col cols="2">
           <VAT @vatChanged="(val) => changeVatType(material, val)" />

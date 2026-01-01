@@ -31,8 +31,8 @@
           </template>
           <template #head(icons)="">
             <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
+              <BButton-toolbar>
+                <BButton-group class="mr-1">
                   <ButtonLinkRefresh
                     v-bind:method="function() { loadData() }"
                     v-bind:title="$trans('Refresh')"
@@ -40,8 +40,8 @@
                   <ButtonLinkSearch
                     v-bind:method="function() { showSearchModal() }"
                   />
-                </b-button-group>
-              </b-button-toolbar>
+                </BButton-group>
+              </BButton-toolbar>
             </div>
           </template>
           <template #cell(statuscode)="data">

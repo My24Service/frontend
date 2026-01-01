@@ -17,9 +17,9 @@
           style="padding-bottom: 10px"
         >
           <b-col :cols="isView ? 12 : 9">
-            <b-link v-bind:href="document.url" target="_blank">
+            <BLink v-bind:href="document.url" target="_blank">
               {{ document.name }} <b-icon-download font-scale=".8"></b-icon-download>
-            </b-link>
+            </BLink>
           </b-col>
           <b-col cols="3" v-if="!isView">
             <div
@@ -50,7 +50,7 @@
     <div v-if="showForm">
       <b-form v-if="!documentService.isEdit">
         <p>{{ $trans("Add document(s)") }}</p>
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Choose files')"
         >
@@ -60,12 +60,12 @@
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
             @input="filesSelected"
           ></b-form-file>
-        </b-form-group>
+        </BFormGroup>
       </b-form>
 
       <b-form v-if="documentService.isEdit">
         <p>{{ $trans("Edit document") }}</p>
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Choose files')"
         >
@@ -74,35 +74,35 @@
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
             @input="filesSelected"
           ></b-form-file>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Name')"
           label-for="equipment-document-name"
         >
-          <b-form-input
+          <BFormInput
             id="equipment-document-name"
             size="sm"
             v-model="documentService.editItem.name"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Description')"
           label-for="equipment-document-description"
         >
-          <b-form-textarea
+          <BFormTextarea
             id="equipment-document-description"
             v-model="documentService.editItem.description"
             rows="1"
-          ></b-form-textarea>
-        </b-form-group>
+          ></BFormTextarea>
+        </BFormGroup>
       </b-form>
 
       <footer class="modal-footer">
-        <b-button
+        <BButton
           :disabled="isLoading"
           @click="cancelEditDocument"
           class="btn btn-secondary update-button"
@@ -111,8 +111,8 @@
           variant="secondary"
         >
           {{ $trans('Cancel') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           v-if="documentService.isEdit"
           @click="doEditCollectionItem"
           class="btn btn-primary"
@@ -122,7 +122,7 @@
           :disabled="!isDocumentValid"
         >
           {{ $trans('Edit document') }}
-        </b-button>
+        </BButton>
       </footer>
 
     </div>
@@ -131,14 +131,14 @@
       class="modal-footer"
       v-if="!showForm && !isView"
     >
-      <b-button
+      <BButton
         @click="newDocument"
         class="btn btn-primary update-button"
         type="button"
         variant="primary"
       >
         {{ $trans('Add document(s)') }}
-      </b-button>
+      </BButton>
     </footer>
 
     <b-container
@@ -147,22 +147,22 @@
       <b-row>
         <b-col cols="2"></b-col>
         <b-col cols="10">
-          <b-button
+          <BButton
             @click="loadData"
             class="btn btn-secondary"
             type="button"
           >
             {{ $trans('Discard changes') }}
-          </b-button>
+          </BButton>
           &nbsp;
-          <b-button
+          <BButton
             @click="submitDocuments"
             class="btn btn-danger"
             type="button"
             variant="danger"
           >
             {{ $trans('Save changes') }}
-          </b-button>
+          </BButton>
         </b-col>
       </b-row>
     </b-container>

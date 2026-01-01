@@ -56,8 +56,8 @@
         >
           <template #head(icons)="">
             <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
+              <BButton-toolbar>
+                <BButton-group class="mr-1">
                   <ButtonLinkRefresh
                     v-bind:method="function() { loadData() }"
                     v-bind:title="$trans('Refresh')"
@@ -65,8 +65,8 @@
                   <ButtonLinkSearch
                     v-bind:method="function() { showSearchModal() }"
                   />
-                </b-button-group>
-              </b-button-toolbar>
+                </BButton-group>
+              </BButton-toolbar>
             </div>
           </template>
           <template #table-busy>
@@ -84,8 +84,8 @@
       </div>
 
       <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
+        <BButton @click="goBack" class="btn btn-info" type="button" variant="primary">
+          {{ $trans('Back') }}</BButton>
       </footer>
     </div>
   </b-overlay>

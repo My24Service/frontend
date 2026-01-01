@@ -39,15 +39,15 @@
       ok-only
     >
       <template #modal-footer="{ ok }">
-        <b-button
+        <BButton
           class="btn button btn-danger"
           @click="showMakeDefinitiveModal"
           v-if="invoice.preliminary"
           variant="danger"
         >
           {{ $trans('Make definitive') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           v-if="!isCustomer && !isBranchEmployee && !invoice.preliminary"
           id="recreateInvoicePdf"
           @click="recreateInvoicePdf"
@@ -58,8 +58,8 @@
         >
           <b-spinner small v-if="isLoading"></b-spinner>
           {{ $trans('Recreate PDF') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           v-if="!isCustomer && !isBranchEmployee && !invoice.preliminary && invoice.invoice_pdf_from_docx_filename"
           @click="downloadPdf"
           :disabled="isLoading"
@@ -69,11 +69,11 @@
           <b-spinner small v-if="isLoading"></b-spinner>
           <b-icon icon="file-earmark-pdf"></b-icon>
           {{ $trans('Download PDF') }}
-        </b-button>
+        </BButton>
         <!-- Emulate built in modal footer ok and cancel button actions -->
-        <b-button @click="ok()" variant="primary">
+        <BButton @click="ok()" variant="primary">
           {{ $trans("close") }}
-        </b-button>
+        </BButton>
       </template>
 
       <b-overlay :show="isLoading" rounded="sm">

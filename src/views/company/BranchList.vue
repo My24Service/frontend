@@ -22,8 +22,8 @@
           <b-icon icon="shop"></b-icon>
           {{  $trans('Branches') }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group>
+        <BButton-toolbar>
+          <BButton-group>
             <ButtonLinkRefresh
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
@@ -31,12 +31,12 @@
             <ButtonLinkSearch
             v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link
             :to="{name: 'company-branch-add'}"
             class="btn"
             >{{ $trans('New branch') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -74,7 +74,7 @@
         <template #cell(contact)="data">
           <span v-if="data.item.contact && data.item.contact.trim() !== ''">
             <span v-if="data.item.email">
-              <b-link class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.contact }} <b-icon icon="envelope"></b-icon></b-link>
+              <BLink class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.contact }} <b-icon icon="envelope"></b-icon></BLink>
             </span>
             <span v-else>
               {{ data.item.contact }}

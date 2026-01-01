@@ -30,45 +30,45 @@
               <span v-if="isEdit && !quotation.id">{{ $trans('edit')}}</span>
             </span>
             <span v-if="quotation.id">
-              <b-link
+              <BLink
                 class="btn btn-sm btn-primary"
                 @click.prevent="showQuotationDialog"
                 target="_blank"
               >
                 <b-icon icon="file-earmark"></b-icon>
                 {{ $trans('View quotation') }}
-              </b-link>
+              </BLink>
             </span>
-            <b-button
+            <BButton
               v-if="!quotation.preliminary && !isNew"
               @click="sendQuotation"
               type="button"
               variant="primary"
             >
               {{ $trans('Send quotation') }}
-            </b-button>
+            </BButton>
           </h3>
           <div
             class="flex-columns"
             v-if="!isView && (quotation.preliminary || isNew)"
           >
-            <b-button @click="cancelForm" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button
+            <BButton @click="cancelForm" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton
               @click="submitQuotation"
               type="button"
               variant="primary"
             >
               {{ $trans('Save') }}
-            </b-button>
-            <b-button
+            </BButton>
+            <BButton
               @click="submitQuotationAndRecreate"
               type="button"
               variant="primary"
               v-if="isEdit && !quotation.preliminary"
             >
               {{ $trans('Submit and recreate PDF') }}
-            </b-button>
+            </BButton>
           </div>
         </div>
       </header>

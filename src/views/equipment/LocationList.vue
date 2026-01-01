@@ -3,8 +3,8 @@
     <header>
       <div class="page-title">
         <h3><b-icon icon="shop-window"></b-icon>{{ $trans("Locations") }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -17,9 +17,9 @@
               v-bind:method="function() { downloadList() }"
               v-bind:title="$trans('Download QR-codes')"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: newLink}" class="btn btn-primary">{{ $trans('Add location') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 

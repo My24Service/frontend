@@ -14,12 +14,12 @@
           <span class="backlink" @click="goBack">{{ $trans('Equipment') }}</span> /
           <span v-if="equipment">{{ equipment.name }}</span>
         </h3>
-        <b-button-toolbar>
+        <BButton-toolbar>
           <router-link
           :to="{name: editLink, params:{pk: this.pk}}"
           class="btn"
           >{{ `${$trans('Edit')} ${$trans('equipment')}`}}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -50,12 +50,12 @@
           <dt v-if="hasQr" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
           <dd v-if="hasQr">
             <div v-if="equipment.qr_path" class="qr-container">
-              <b-link
+              <BLink
                 class="btn btn-sm btn-outline" :href="equipment.qr_path"
                 target="_blank"
                 :title="$trans('Open QR in new tab')">
                 <img alt="QR code" class="qr-code-image" :src="equipment.qr_path" />
-              </b-link>
+              </BLink>
               <p>
                 <a href="javascript:" @click="download(equipment)">
                   {{ $trans("Download") }}
@@ -64,9 +64,9 @@
             </div>
             <img v-if="!equipment.qr_path" :alt="$trans('No QR yet')" class="qr-code-image" :src="NO_IMAGE_URL" />
             <p>
-              <b-button @click="recreate_qr">
+              <BButton @click="recreate_qr">
                 {{ $trans("Recreate")}}
-              </b-button>
+              </BButton>
             </p>
           </dd>
         </dl>
@@ -78,12 +78,12 @@
             <div class='flex-columns space-between align-items-center'>
               <h6>{{ $trans('Orders')}}</h6>
               <span>
-                <b-button-group class="">
+                <BButton-group class="">
                   <ButtonLinkRefresh
                     v-bind:method="function() { loadData() }"
                     v-bind:title="$trans('Refresh')" />
                   <ButtonLinkSearch v-bind:method="function() { showSearchModal() }"/>
-                </b-button-group>
+                </BButton-group>
               </span>
             </div>
             <hr>

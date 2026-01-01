@@ -10,8 +10,8 @@
           <span>{{ $trans("Orders") }}</span>
         </h3>
 
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -19,11 +19,11 @@
             <ButtonLinkSort
               v-bind:method="function() { showSortModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link class="btn button" :to="{name:'order-add'}">
             <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add order') }}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
 
     </header>
@@ -42,13 +42,13 @@
             <b-row role="group">
               <b-col size="12">
                 <div>
-                  <b-form-group :label="$trans('Sort')">
-                    <b-form-radio v-model="sortMode" value="default">{{ $trans('Start date (default)') }}</b-form-radio>
-                    <b-form-radio v-model="sortMode" value="last_update">{{ $trans('Last update') }}</b-form-radio>
-                  </b-form-group>
-                  <b-form-group :label="$trans('Display only orders since')">
+                  <BFormGroup :label="$trans('Sort')">
+                    <BFormRadio v-model="sortMode" value="default">{{ $trans('Start date (default)') }}</BFormRadio>
+                    <BFormRadio v-model="sortMode" value="last_update">{{ $trans('Last update') }}</BFormRadio>
+                  </BFormGroup>
+                  <BFormGroup :label="$trans('Display only orders since')">
                     <b-form-datepicker v-model="sinceDate" id="sort-filter-since" value="" locale="nl" :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }" />
-                  </b-form-group>
+                  </BFormGroup>
                 </div>
               </b-col>
             </b-row>
@@ -79,7 +79,7 @@
           <b-container fluid>
             <b-row role="group">
               <b-col size="4">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('New status')"
                   label-for="change-status-status"
                 >
@@ -91,19 +91,19 @@
                     value-field="statuscode"
                     text-field="statuscode"
                   ></b-form-select>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col size="8">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Extra text')"
                   label-for="change-status-extra-text"
                 >
-                  <b-form-input
+                  <BFormInput
                     size="sm"
                     id="change-status-extra-text"
                     v-model="status.extra_text"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
@@ -165,10 +165,10 @@
               <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
             </span>
 
-          <b-button variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
+          <BButton variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
             <b-icon-person-lines-fill></b-icon-person-lines-fill>
             {{ $trans('Assign these orders') }}
-          </b-button>
+          </BButton>
 
         </div>
 

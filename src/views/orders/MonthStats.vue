@@ -13,9 +13,9 @@
     <div class="panel">
       <b-row align-v="center">
         <b-col cols="2">
-          <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+          <BLink @click.prevent="backMonth" v-bind:title="$trans('Month back')">
             <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          </BLink>
         </b-col>
         <b-col cols="8" class="text-center">
           <h4>{{ $trans('Total orders in ') }} {{ monthTxt }} {{ year }}</h4>
@@ -37,9 +37,9 @@
         </b-col>
         <b-col cols="2">
           <div class="float-right">
-            <b-link @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+            <BLink @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
               <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            </BLink>
           </div>
         </b-col>
       </b-row>
