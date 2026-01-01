@@ -2,7 +2,6 @@ import {OPTION_NONE, OPTION_ONLY_TOTAL, OPTION_USER_TOTALS} from "./constants";
 import {QuotationLineModel} from "@/models/quotations/QuotationLine";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 let quotationMixin = {
   emits: [

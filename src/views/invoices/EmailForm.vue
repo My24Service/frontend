@@ -110,11 +110,14 @@ import {OrderService} from "@/models/orders/Order";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   computed: {
     isCreate() {

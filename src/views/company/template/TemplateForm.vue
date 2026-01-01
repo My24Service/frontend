@@ -214,14 +214,17 @@ import { InvoiceService } from '@/models/invoices/Invoice'
 import Multiselect from "vue-multiselect";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
   components: {
     Multiselect
   },
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     pk: {

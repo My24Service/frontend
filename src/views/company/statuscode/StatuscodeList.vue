@@ -155,7 +155,6 @@ import IconLinkPlus from "../../../components/IconLinkPlus.vue";
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
-import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import { PIXEL_URL } from "@/constants";
@@ -173,9 +172,16 @@ import { InvoiceStatuscodeService } from "@/models/invoices/InvoiceStatuscode";
 import {WorkHoursStatuscodeService} from "@/models/company/WorkHoursStatuscode";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   props: {
     list_type: {
       type: [String],
@@ -187,7 +193,6 @@ export default {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     PillsStatuscode

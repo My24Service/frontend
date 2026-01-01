@@ -440,7 +440,6 @@ import {UserListService} from "@/models/company/UserList";
 import TimeInput from "@/components/TimeInput.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
@@ -450,6 +449,14 @@ class SelectedUser {
 }
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'DispatchNew',
   components: {
     Multiselect,

@@ -107,14 +107,17 @@ import {required} from "@vuelidate/validators";
 import my24 from '@/services/my24.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 import {OfferModel, OfferService} from "@/models/quotations/Offer.js";
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   computed: {
     isCreate() {

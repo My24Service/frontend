@@ -98,18 +98,24 @@ import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import PillsEngineer from "./PillsEngineer";
 
 import EngineerEventOrderForm from "./EngineerEventOrderForm";
-import {NEW_DATA_EVENTS} from "../../constants";
+import {NEW_DATA_EVENTS} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import my24 from "../../services/my24";
 import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
+  setup() {
+    const {create} = useToast()
 
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkDelete,
     ButtonLinkRefresh,

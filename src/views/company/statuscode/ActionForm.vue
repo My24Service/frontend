@@ -374,11 +374,15 @@ import {InvoiceActionModel} from "@/models/invoices/InvoiceAction";
 import {WorkHoursActionModel} from "@/models/company/WorkHoursAction";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
   },
   props: {
     list_type: {

@@ -212,7 +212,6 @@ import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 import PriceInput from "@/components/PriceInput";
 
@@ -227,7 +226,6 @@ import {ChapterModel} from "@/models/quotations/Chapter";
 
 import quotationMixin from "./mixin.js";
 import {USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING} from "./constants";
-import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
@@ -236,6 +234,14 @@ import CostsTable from "./CostsTable.vue";
 import SectionHeader from "./SectionHeader.vue";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "MaterialsCreateComponent",
   mixins: [quotationMixin],
   components: {

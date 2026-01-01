@@ -167,7 +167,6 @@
 import moment from 'moment'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 import {toDinero} from "@/utils";
 import DurationInput from "@/components/DurationInput.vue"
@@ -195,6 +194,14 @@ import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "HoursComponent",
   mixins: [quotationMixin],
   components: {

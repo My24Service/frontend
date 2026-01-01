@@ -85,11 +85,14 @@ import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent.js'
 import memberModel from '@/models/member/Member.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
     Multiselect,

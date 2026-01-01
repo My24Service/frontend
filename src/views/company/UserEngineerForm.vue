@@ -330,11 +330,14 @@ import stockLocationModel from '../../models/inventory/StockLocation.js'
 import PriceInput from "../../components/PriceInput";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
     PriceInput,

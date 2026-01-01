@@ -170,7 +170,6 @@ import {toDinero} from "@/utils";
 import PriceInput from "@/components/PriceInput";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 import {COST_TYPE_CALL_OUT_COSTS, CostService} from "@/models/quotations/Cost";
 import {ChapterModel} from "@/models/quotations/Chapter";
@@ -191,6 +190,14 @@ import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "CallOutCosts",
   mixins: [quotationMixin],
   components: {

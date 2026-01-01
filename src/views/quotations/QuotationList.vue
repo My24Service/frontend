@@ -143,7 +143,6 @@ import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '@/components/TableStatusInfo.vue'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 import {QuotationService} from '@/models/quotations/Quotation.js'
 import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
@@ -151,6 +150,14 @@ import { StatusService } from '@/models/quotations/Status.js'
 import PillsQuotationTypes from "@/components/PillsQuotationTypes.vue";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'QuotationList',
   components: {
     PillsQuotationTypes,

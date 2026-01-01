@@ -89,10 +89,16 @@ import IconLinkDelete from './IconLinkDelete.vue'
 import {OrderService} from "@/models/orders/Order";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
+  setup() {
+    const {create} = useToast()
 
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkDelete
   },

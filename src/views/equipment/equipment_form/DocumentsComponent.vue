@@ -180,10 +180,16 @@ import ApiResult from "@/components/ApiResult.vue";
 import {LocationModel} from "@/models/equipment/location";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
+  setup() {
+    const {create} = useToast()
 
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "DocumentsComponent",
   components: {
     ApiResult,

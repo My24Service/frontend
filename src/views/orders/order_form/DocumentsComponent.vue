@@ -179,12 +179,18 @@ import {DocumentModel, DocumentService} from "@/models/orders/Document";
 import {OrderModel} from "@/models/orders/Order"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 import ApiResult from "@/components/ApiResult.vue";
 
 export default {
+  setup() {
+    const {create} = useToast()
 
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "DocumentsComponent",
   components: {
     ApiResult,

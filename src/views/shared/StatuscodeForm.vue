@@ -251,11 +251,14 @@ import statuscodeOrderModel from '@/models/orders/Statuscode.js'
 import statuscodeTripModel from '@/models/mobile/TripStatuscode.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     list_type: {

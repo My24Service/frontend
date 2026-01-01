@@ -252,15 +252,17 @@ import { CustomerService } from "@/models/customer/Customer";
 import { BranchService } from "@/models/company/Branch";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
-
   components: {
     Multiselect,
   },
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     pk: {

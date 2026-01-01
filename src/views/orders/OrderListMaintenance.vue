@@ -241,14 +241,20 @@ import UserFilters from "../../components/UserFilters.vue"
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import {OrderFilterService} from "@/models/orders/OrderFilter";
 
 export default {
+  setup() {
+    const {create} = useToast()
 
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     OrderTableInfo,
     IconLinkAssign,

@@ -299,12 +299,15 @@ import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter"
 import Multiselect from "vue-multiselect";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 export default {
   name: "UserFilterForm",
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
     Multiselect,

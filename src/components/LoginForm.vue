@@ -40,7 +40,7 @@
 
 <script setup>
 import accountModel from "../models/account/Account"
-import {reactive, useTemplateRef} from "vue";
+import {reactive} from "vue";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 import {$trans, errorToast, infoToast, isEmpty} from "@/utils";

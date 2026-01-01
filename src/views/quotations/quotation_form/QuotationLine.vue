@@ -288,7 +288,11 @@ export default {
     'quotationLinesLoaded'
   ],
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   validations() {
     return {
