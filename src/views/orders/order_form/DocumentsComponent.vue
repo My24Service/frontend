@@ -2,7 +2,7 @@
   <details open>
     <summary class="flex-columns space-between">
       <h6>{{ $trans('Documents') }}</h6>
-      <b-icon-paperclip></b-icon-paperclip>
+      <IBiPaperclip></IBiPaperclip>
     </summary>
 
     <!-- list -->
@@ -21,7 +21,7 @@
         >
           <b-col :cols="isView ? 12 : 9">
             <BLink v-bind:href="document.url" target="_blank">
-              {{ document.name }} <b-icon-download font-scale=".8"></b-icon-download>
+              {{ document.name }} <IBiDownload font-scale=".8"></IBiDownload>
             </BLink>
           </b-col>
           <b-col cols="3" v-if="!isView">

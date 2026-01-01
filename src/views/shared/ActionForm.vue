@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="minecart-loaded"></b-icon>
+          <IBiMinecartLoaded></IBiMinecartLoaded>
           <span class="backlink" @click="cancelForm">{{ $trans("Actions") }}</span> /
           <strong>{{ action.name  }}</strong>
           <span class="dimmed">
@@ -13,13 +13,13 @@
         </h3>
         <div class="flex-columns">
           <BButton @click="cancelForm" type="button" variant="secondary">
-            <b-icon icon="x"></b-icon>
+            <IBiX></IBiX>
             {{ $trans('Cancel') }}</BButton>
           <BButton v-if="!isCreate" @click="showDeleteModal" type="button" variant="danger">
-            <b-icon icon="trash"></b-icon>
+            <IBiTrash></IBiTrash>
             {{ $trans('Delete') }}</BButton>
           <BButton @click="submitForm" type="button" variant="primary">
-            <b-icon icon="check"></b-icon>
+            <IBiCheck></IBiCheck>
             {{ isCreate ? $trans('Create action') : $trans('Save') }}
           </BButton>
         </div>
@@ -82,7 +82,7 @@
                   <template #cell(icons)="data">
                     <div class="float-right">
                       <BLink class="h5 mx-2" @click.prevent="deleteCondition(data.index)">
-                        <b-icon-trash></b-icon-trash>
+                        <IBiTrash></IBiTrash>
                       </BLink>
                     </div>
                   </template>

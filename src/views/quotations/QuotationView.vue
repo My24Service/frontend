@@ -11,7 +11,7 @@
       <header v-if="quotation">
         <div class="page-title">
           <h3>
-            <b-icon icon="file-earmark-check-fill"></b-icon>
+            <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
             <router-link
               :to="{name: 'quotations-sent' }"
             >{{ $trans('Quotation') }}</router-link>
@@ -23,7 +23,7 @@
                 @click.prevent="showQuotationDialog"
                 target="_blank"
               >
-                <b-icon icon="file-earmark"></b-icon>
+                <IBiFileEarmarkPdf></IBiFileEarmarkPdf>
                 {{ $trans('View PDF') }}
               </BLink>
             </span>

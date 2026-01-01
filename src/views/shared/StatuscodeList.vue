@@ -3,11 +3,11 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Statuscodes") }}
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Statuscodes") }}
         </h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="'/orders/statuscodes/form'">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add statuscode") }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add statuscode") }}
           </router-link>
         </div>
       </div>

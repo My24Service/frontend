@@ -18,7 +18,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="building"></b-icon> {{ $trans("Filters") }}
+          <IBiBuilding></IBiBuilding> {{ $trans("Filters") }}
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">

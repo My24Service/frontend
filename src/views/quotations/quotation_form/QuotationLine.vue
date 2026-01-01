@@ -6,7 +6,7 @@
       :disabled="quotationLineService.collectionHasChanges"
       @click="backToChapters"
     >
-      <b-icon-arrow-left-circle-fill></b-icon-arrow-left-circle-fill>
+      <IBiArrowLeftCircleFill></IBiArrowLeftCircleFill>
       {{ $trans("Back to quotation and chapters") }}
     </BButton>
 

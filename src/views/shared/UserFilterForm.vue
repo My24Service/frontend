@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="filter-square"></b-icon>
+          <IBiFilterSquare></IBiFilterSquare>
           <span v-if="isCreate">{{ $trans('New filter') }}</span>
           <span v-else>{{ $trans('Edit filter') }}</span>
         </h3>
@@ -206,7 +206,7 @@
                         {{ condition.values[index].bool_value ? $trans("yes") : $trans("no") }}
                       </BFormCheckbox>
                       <BLink :title="$trans('delete')" @click="removeConditionValue(condition, index)">
-                        <b-icon-trash-fill class="edit-icon"></b-icon-trash-fill>
+                        <IBiTrashFill class="edit-icon"></IBiTrashFill>
                       </BLink>
                       <br/>
                     </div>

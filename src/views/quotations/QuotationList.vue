@@ -6,7 +6,7 @@
       </div>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <span>{{ pageTitle }}</span>
         </h3>
 
@@ -21,7 +21,7 @@
             class="btn button"
             :to="{name:'quotation-add'}"
           >
-            <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add quotation') }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add quotation') }}
           </router-link>
         </BButton-toolbar>
       </div>
@@ -104,10 +104,10 @@
               :title="$trans('Create order')"
               @click="function() { createOrder(data.item.id) }"
             >
-              <b-icon-arrow-up-right-circle
+              <IBiArrowUpRightCircle
                 aria-hidden="true"
                 class="edit-icon"
-              ></b-icon-arrow-up-right-circle>
+              ></IBiArrowUpRightCircle>
             </BLink>
             <router-link
               class="mr-2"
@@ -116,10 +116,10 @@
               :to="{name: 'quotation-send',
                 query: {quotationId: data.item.id}}"
             >
-              <b-icon-mailbox
+              <IBiMailbox
                 aria-hidden="true"
                 class="edit-icon"
-              ></b-icon-mailbox>
+              ></IBiMailbox>
             </router-link>
           </div>
         </template>

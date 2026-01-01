@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{name: 'order-statuscode-list'}">{{ $trans('Statuscodes') }}</router-link> /
           <strong>{{ statuscode.statuscode }}</strong>
           <span class="dimmed">
@@ -117,7 +117,7 @@
               id="statuscode_color_for_assignedorders"
               v-model="statuscode.color_for_assignedorders"
             >
-            <b-icon icon="check" v-if="statuscode.color_for_assignedorders"></b-icon>
+            <IBiCheck v-if="statuscode.color_for_assignedorders"></IBiCheck>
             {{ $trans('Use in dispatch') }}
             </BFormCheckbox>
           </BFormGroup>
@@ -137,7 +137,7 @@
               id="statuscode_start_order"
               v-model="statuscode.start_order"
             >
-              <b-icon icon="check" v-if="statuscode.start_order"></b-icon>
+              <IBiCheck v-if="statuscode.start_order"></IBiCheck>
 
               {{ $trans('Start order') }}
             </BFormCheckbox>
@@ -155,7 +155,7 @@
               id="statuscode_start_trip"
               v-model="statuscode.start_trip"
             >
-            <b-icon icon="check" v-if="statuscode.start_trip"></b-icon>
+            <IBiCheck v-if="statuscode.start_trip"></IBiCheck>
 
             {{ $trans('Starts trip') }}
             </BFormCheckbox>
@@ -174,7 +174,7 @@
               id="statuscode_end_order"
               v-model="statuscode.end_order"
             >
-            <b-icon icon="check" v-if="statuscode.end_order"></b-icon>
+            <IBiCheck v-if="statuscode.end_order"></IBiCheck>
 
             {{ $trans('Completes order') }}
             </BFormCheckbox>
@@ -208,7 +208,7 @@
               id="statuscode_after_end_order"
               v-model="statuscode.after_end_order"
             >
-            <b-icon icon="check" v-if="statuscode.after_end_order"></b-icon>
+            <IBiCheck v-if="statuscode.after_end_order"></IBiCheck>
 
             {{$trans('After end order') }}
             </BFormCheckbox>
@@ -227,7 +227,7 @@
               id="statuscode_can_be_reassigned_after_end"
               v-model="statuscode.can_be_reassigned_after_end"
             >
-            <b-icon icon="check" v-if="statuscode.can_be_reassigned_after_end"></b-icon>
+            <IBiCheck v-if="statuscode.can_be_reassigned_after_end"></IBiCheck>
 
             {{ $trans('Re-assignable') }}
             </BFormCheckbox>
