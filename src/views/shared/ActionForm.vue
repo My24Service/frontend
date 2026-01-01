@@ -56,7 +56,7 @@
                   v-bind:label="$trans('Type')"
                   label-for="action_type"
                   >
-                  <b-form-select v-model="action.type" :options="actionTypes" size="sm"></b-form-select>
+                  <BFormSelect v-model="action.type" :options="actionTypes" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>
@@ -109,7 +109,7 @@
                   v-bind:label="$trans('operator')"
                   label-for="action-condition-operator"
                   >
-                  <b-form-select v-model="condition_operator" :options="operators" size="sm"></b-form-select>
+                  <BFormSelect v-model="condition_operator" :options="operators" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
@@ -139,7 +139,7 @@
               v-bind:label="$trans('Condition handling')"
               label-for="action_type"
               >
-                <b-form-select v-model="action.querymode" :options="querymodes" size="sm"></b-form-select>
+                <BFormSelect v-model="action.querymode" :options="querymodes" size="sm"></BFormSelect>
               </BFormGroup>
             </b-col>
           </b-col>
@@ -187,7 +187,7 @@
                 v-bind:label="$trans('Partner')"
                 label-for="action_partner"
                 >
-                <b-form-select v-model="action.company_partner" :options="partners" size="sm"></b-form-select>
+                <BFormSelect v-model="action.company_partner" :options="partners" size="sm"></BFormSelect>
               </BFormGroup>
             </b-col>
             </b-row>

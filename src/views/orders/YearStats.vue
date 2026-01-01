@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-bar-graph-fill"></b-icon>{{ $trans("Order stats") }}</h3>
+        <h3><IBiFileEarmarkBarGraphFill></IBiFileEarmarkBarGraphFill>{{ $trans("Order stats") }}</h3>
         <div class="flex-columns">
           <a>{{ $trans("view") }}</a>
           <router-link class="btn button" to="./year-stats" disabled>{{ $trans("year") }}</router-link>
@@ -15,7 +15,7 @@
       <b-row align-v="center">
         <b-col cols="2">
           <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
           </BLink>
         </b-col>
         <b-col cols="8" class="text-center">
@@ -39,7 +39,7 @@
         <b-col cols="2">
           <div class="float-right">
             <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
             </BLink>
           </div>
         </b-col>

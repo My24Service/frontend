@@ -56,11 +56,11 @@
               <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
                 {{ order.start_date }}
                 <BLink v-bind:title="$trans('Edit start and end dates')" v-on:click="editStartDate(order)">
-                  <b-icon-pencil class="edit-icon"></b-icon-pencil>
+                  <IBiPencil class="edit-icon"></IBiPencil>
                 </BLink>
               </span>
               <span class="order-status" :title="order.last_status_full">
-                <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`"></b-icon>
+                <IBiCircleFill v-bind:style="`color:${orderStatusColorCode}`"></IBiCircleFill>
                 {{ order.last_status_full }}
               </span>
 
@@ -84,8 +84,8 @@
           <span class="dimmed">{{ $trans('Selected') }} ({{ selectedOrders.length }}):</span>
           <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
               {{ order.order_id }}
-              <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
-              <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+              <IBiXCircle class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircle>
+              <IBiXCircleFill class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircleFill>
         </span>
           <!--
           <BButton variant="primary" v-if="selectedOrders.length > 0" @click.prevent="searchAndAssignDone()">
@@ -94,7 +94,9 @@
           </BButton>
           -->
         </b-row>
-        <b-btn class="float-right" variant="primary" @click="searchAndAssignDone()" :data-non-zero="hasSelectedOrders()?'1':'0'"><b-icon-person-lines-fill class="assign-icon"></b-icon-person-lines-fill>&nbsp;<span>{{ buttonLabel }}</span></b-btn>
+        <BButton class="float-right" variant="primary" @click="searchAndAssignDone()" :data-non-zero="hasSelectedOrders()?'1':'0'">
+          <IBiPersonLinesFill class="assign-icon"></IBiPersonLinesFill>&nbsp;<span>{{ buttonLabel }}</span>
+        </BButton>
       </div>
       <EditStartDate id="edit-start-date" ref="edit-start-date" @edit-start-date-done="editStartDateDone"></EditStartDate>
     </b-modal>

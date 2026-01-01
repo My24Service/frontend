@@ -164,7 +164,7 @@
                   v-bind:label="$trans('Country')"
                   label-for="start_country_code"
                 >
-                  <b-form-select v-model="trip.start_country_code" :options="countries" size="sm"></b-form-select>
+                  <BFormSelect v-model="trip.start_country_code" :options="countries" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>
@@ -328,7 +328,7 @@
                   v-bind:label="$trans('Country')"
                   label-for="end_country_code"
                 >
-                  <b-form-select v-model="trip.end_country_code" :options="countries" size="sm"></b-form-select>
+                  <BFormSelect v-model="trip.end_country_code" :options="countries" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>
@@ -377,7 +377,7 @@
               <template #cell(icons)="data">
                 <div class="float-right">
                   <BLink class="h5 mx-2" @click.prevent="deleteOrder(data.index)">
-                    <b-icon-trash></b-icon-trash>
+                    <IBiTrash></IBiTrash>
                   </BLink>
                 </div>
               </template>

@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="people"></b-icon>
+          <IBiPeople></IBiPeople>
           <span class="backlink"  @click="cancelForm">{{ $trans("People") }}</span> /
           <strong> {{ apiuser.username }}</strong>
           <span class="dimmed" v-if="isCreate && !apiuser.username">{{ $trans('new') }}</span>

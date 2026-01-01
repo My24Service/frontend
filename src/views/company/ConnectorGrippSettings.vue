@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="tools"></b-icon>
+          <IBiTools></IBiTools>
           {{ $trans("Gripp API settings") }}
         </h3>
         <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">

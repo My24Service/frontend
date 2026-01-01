@@ -4,7 +4,7 @@
       <header>
         <div class='page-title'>
           <h3>
-          <b-icon icon="people"></b-icon>
+          <IBiPeople></IBiPeople>
           <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
           {{  engineer.username }}
           <span class="dimmed" v-if="isCreate && !engineer.username">{{ $trans('new') }}</span>
@@ -178,9 +178,9 @@
               label-cols="4"
               v-bind:label="$trans('Country')"
               label-for="engineer_country_code">
-              <b-form-select
+              <BFormSelect
                 v-model="engineer.engineer.country_code"
-                :options="countries" size="sm"></b-form-select>
+                :options="countries" size="sm"></BFormSelect>
             </BFormGroup>
             <BFormGroup
               label-size="sm"
@@ -264,13 +264,13 @@
               label-cols="4"
               v-bind:label="$trans('Preferred location')"
               label-for="engineer_preferred_location">
-              <b-form-select
+              <BFormSelect
                 id="engineer_preferred_location"
                 v-model="engineer.engineer.preferred_location"
                 :options="locations"
                 size="sm"
                 value-field="id"
-                text-field="name"></b-form-select>
+                text-field="name"></BFormSelect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.engineer.engineer.preferred_location.$error : null">
                 {{ $trans('Please select a preferred location') }}

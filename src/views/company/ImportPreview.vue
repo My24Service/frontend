@@ -4,7 +4,7 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="file-arrow-down"></b-icon>
+            <IBiFileArrowDown></IBiFileArrowDown>
             <span>{{ $trans('Import preview') }}</span>
           </h3>
         </div>

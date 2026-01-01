@@ -4,11 +4,11 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="building"></b-icon>
+            <IBiBuilding></IBiBuilding>
             <span class="backlink" @click="goBack">{{ $trans("Customers") }}</span> / {{  customer.name }}
           </h3>
           <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
-            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit customer') }}
+            <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit customer') }}
           </router-link>
         </div>
       </header>

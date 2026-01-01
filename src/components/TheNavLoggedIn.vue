@@ -97,7 +97,7 @@
       <hr />
       <b-nav-item-dropdown dropup v-bind:text="username" right>
         <template slot="button-content">
-          <b-icon icon="person-circle"></b-icon>
+          <IBiPersonCircle></IBiPersonCircle>
           <span>{{ username }}</span>
         </template>
         <li style="text-align: center;">

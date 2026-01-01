@@ -4,7 +4,7 @@
       <div class='page-title'>
 
         <h3>
-          <b-icon icon="images"></b-icon> {{ $trans('Pictures') }}
+          <IBiImage></IBiImage> {{ $trans('Pictures') }}
         </h3>
 
         <BButton-toolbar>
@@ -18,7 +18,7 @@
             />
           </BButton-group>
           <router-link :to="{name: 'company-picture-add'}" class="btn">
-            <b-icon icon="image"></b-icon>
+            <IBiImage></IBiImage>
             {{ $trans('Add picture') }}</router-link>
         </BButton-toolbar>
 

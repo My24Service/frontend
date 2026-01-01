@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Unconfirmed sick leave") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Unconfirmed sick leave") }}</h3>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -60,7 +60,7 @@
               :title="$trans('Confirm')"
               @click="() => showConfirmModal(data.item.id)"
             >
-              <b-icon-check-lg class="edit-icon"></b-icon-check-lg>
+              <IBiCheckLg class="edit-icon"></IBiCheckLg>
             </BLink>
           </div>
         </template>

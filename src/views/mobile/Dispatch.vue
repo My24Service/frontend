@@ -4,19 +4,19 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="calendar2-week"></b-icon>
+            <IBiCalendar2Week></IBiCalendar2Week>
             {{ $trans("Dispatch") }} &ndash; {{ $trans("week") }}<strong>{{ +this.startWeek }}</strong>
             {{ mode }}
           </h3>
           <div class="flex-columns">
             <BButton @click="function() { showSearchModal() }">
-              <b-icon icon="search"></b-icon>
+              <IBiSearch></IBiSearch>
               {{ $trans('search') }}
             </BButton>
 
             <BButton @click="function() { loadToday() }">
-              <b-icon icon="patch-exclamation-fill" v-if="newData" :title="$trans('dispatch changed, refresh now')"></b-icon>
-              <b-icon icon="arrow-repeat" v-else></b-icon>
+              <IBiPatchExclamationFill v-if="newData" :title="$trans('dispatch changed, refresh now')"></IBiPatchExclamationFill>
+              <IBiArrowRepeat v-else></IBiArrowRepeat>
               {{ $trans('refresh') }}
             </BButton>
 
@@ -82,12 +82,12 @@
         <div class="flex-columns" style="justify-content: space-between;">
 
           <BLink class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
-            <b-icon icon="arrow-left-square-fill" font-scale="1.2"></b-icon> week {{ this.startWeek - 1 }}
+            <IBiArrowLeftSquareFill font-scale="1.2"></IBiArrowLeftSquareFill> week {{ this.startWeek - 1 }}
           </BLink>
 
           <span class="flex-columns">
             <BLink class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
-              <b-icon-arrow-left-short font-scale="1.8"></b-icon-arrow-left-short>
+              <IBiArrowLeftShort font-scale="1.8"></IBiArrowLeftShort>
             </BLink>
             <b-form-datepicker
               v-model="startDate"
@@ -97,17 +97,17 @@
               :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
             ></b-form-datepicker>
             <BButton @click="function() { loadToday() }" variant="primary" size="sm" style="color: white; white-space: nowrap;">
-              <b-icon icon="calendar2-date-fill"></b-icon>&nbsp;
+              <IBiCalendar2DateFill></IBiCalendar2DateFill>&nbsp;
               {{ $trans('today') }}
             </BButton>
             <BLink class="px-1" @click.prevent="timeForward" :title="$trans('Day forward')">
-              <b-icon-arrow-right-short font-scale="1.8"></b-icon-arrow-right-short>
+              <IBiArrowRightShort font-scale="1.8"></IBiArrowRightShort>
             </BLink>
           </span>
 
           <BLink class="" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
             week {{ (+this.startWeek + 1) }}
-            <b-icon icon="arrow-right-square-fill" font-scale="1.2"></b-icon>
+            <IBiArrowRightSquareFill font-scale="1.2"></IBiArrowRightSquareFill>
           </BLink>
 
         </div>

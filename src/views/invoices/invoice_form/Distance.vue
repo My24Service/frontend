@@ -2,7 +2,7 @@
   <details>
     <summary class='flex-columns space-between'>
       <h6>{{$trans('Distance')}}</h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
+      <IBiChevronDown></IBiChevronDown>
     </summary>
     <b-overlay :show="isLoading" rounded="sm">
       <div

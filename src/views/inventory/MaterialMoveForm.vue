@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="box-arrow-right"></b-icon>{{ $trans('Move materials') }}</h3>
+        <h3><IBiBoxArrowRight></IBiBoxArrowRight>{{ $trans('Move materials') }}</h3>
         <div class="flex-columns" style="z-index:1000">
           <b-dropdown split :text="$trans('Submit')" class="m-2" variant="primary" @click="submitForm" :disabled="canSubmit">
             <b-dropdown-item-button
@@ -63,7 +63,7 @@
             </div>
             <div v-else class="dimmed">
               <h3>
-                <span class='h1'><br><b-icon icon="box"></b-icon></span>
+                <span class='h1'><br><IBiBox></IBiBox></span>
                 <br><br>{{ $trans("Material") }}</h3>
             </div>
             <BFormGroup
@@ -104,13 +104,13 @@
 
           <div v-if="selectedFromLocation.location_name">
             <h3>
-              <span class="h1 text-danger"><br><b-icon icon="box-arrow-up-right"></b-icon></span>
+              <span class="h1 text-danger"><br><IBiBoxArrowUpRight></IBiBoxArrowUpRight></span>
               <br/><br/>{{ selectedFromLocation.location_name }}
             </h3>
           </div>
           <div v-else class="dimmed">
             <h3>
-              <span class='h1'><br><b-icon icon="box-arrow-right"></b-icon></span>
+              <span class='h1'><br><IBiBoxArrowUpRight></IBiBoxArrowUpRight></span>
               <br/><br/>{{ $trans('Departure location') }}
             </h3>
           </div>
@@ -151,14 +151,14 @@
 
           <div v-if="selectedToLocation.name">
             <h3>
-              <span class="h1 text-success"><br><b-icon icon="box-arrow-in-down-right"></b-icon></span>
+              <span class="h1 text-success"><br><IBiBoxArrowInRight></IBiBoxArrowInRight></span>
               <br/><br/>{{ selectedToLocation.name }}
             </h3>
           </div>
 
           <div v-else class="dimmed">
             <h3>
-              <span class="h1"><br><b-icon icon="box-arrow-in-right"></b-icon></span>
+              <span class="h1"><br><IBiBoxArrowInRight></IBiBoxArrowInRight></span>
               <br/><br/>{{ $trans('Arrival location') }}
             </h3>
           </div>

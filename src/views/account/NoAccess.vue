@@ -1,7 +1,7 @@
 <template>
   <div class='app-page'>
-    <h1><b-icon-lock></b-icon-lock></h1>
-    
+    <h1><IBiLock></IBiLock></h1>
+
       <div class="panel no-access">
         <div class="text-center" v-if="isLoggedIn">
           <h3>{{ $trans('No access') }}</h3>

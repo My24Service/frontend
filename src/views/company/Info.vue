@@ -170,7 +170,7 @@
               label-cols="3"
               label-for="member_country"
             >
-              <b-form-select v-model="member.country_code" :options="countries" size="sm"></b-form-select>
+              <BFormSelect v-model="member.country_code" :options="countries" size="sm"></BFormSelect>
             </BFormGroup>
 
             <BFormGroup

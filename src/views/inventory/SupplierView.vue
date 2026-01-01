@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="shop"></b-icon>
+          <IBiShop></IBiShop>
           <span class="backlink" @click="goBack">{{ $trans('Suppliers') }}</span> / {{ supplier.name }}
         </h3>
         <div class="flex-columns">

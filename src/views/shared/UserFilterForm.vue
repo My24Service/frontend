@@ -43,11 +43,11 @@
             :label="$trans('Base filter')"
             label-for="filter_base_filter"
           >
-            <b-form-select
+            <BFormSelect
               id="filter_base_filter"
               v-model="filter.base_filter"
               :options="baseFilterOptions"
-              size="sm"></b-form-select>
+              size="sm"></BFormSelect>
           </BFormGroup>
 
           <BFormGroup
@@ -56,11 +56,11 @@
             :label="$trans('Query mode')"
             label-for="filter_querymode"
           >
-            <b-form-select
+            <BFormSelect
               id="filter_query_mode"
               v-model="filter.querymode"
               :options="queryModes"
-              size="sm"></b-form-select>
+              size="sm"></BFormSelect>
           </BFormGroup>
 
           <h6>{{ $trans("Conditions")}}</h6>
@@ -77,12 +77,12 @@
                     v-bind:label="$trans('Field')"
                     :label-for="`filter_field_${index}`"
                   >
-                    <b-form-select
+                    <BFormSelect
                       :id="`filter_field_${index}`"
                       v-model="condition.field"
                       :options="allFields"
                       @change="checkCondition(condition)"
-                      size="sm"></b-form-select>
+                      size="sm"></BFormSelect>
                   </BFormGroup>
                 </b-col>
                 <b-col cols="6">
@@ -91,13 +91,13 @@
                     v-bind:label="$trans('Operator')"
                     :label-for="`filter_operator${index}`"
                   >
-                    <b-form-select
+                    <BFormSelect
                       :id="`filter_operator${index}`"
                       v-model="condition.operator"
                       :options="getOperators(condition.field)"
                       size="sm"
                       @change="checkCondition(condition)"
-                    ></b-form-select>
+                    ></BFormSelect>
                   </BFormGroup>
                 </b-col>
               </b-row>
@@ -149,12 +149,12 @@
                     v-bind:label="$trans('Values')"
                     :label-for="`filter_values_query_mode${index}`"
                   >
-                    <b-form-select
+                    <BFormSelect
                       :disabled="condition.valuesQueryModeDisabled"
                       :id="`filter_values_query_mode${index}`"
                       v-model="condition.values_query_mode"
                       :options="queryModes"
-                      size="sm"></b-form-select>
+                      size="sm"></BFormSelect>
                   </BFormGroup>
                 </b-col>
                 <b-col cols="3">

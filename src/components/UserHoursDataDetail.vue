@@ -4,7 +4,7 @@
       <b-row>
         <b-col cols="2">
           <BLink class="px-1" @click.prevent="backWeek" v-bind:title="$trans('Week back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
           </BLink>
         </b-col>
         <b-col cols="8">
@@ -15,7 +15,7 @@
         <b-col cols="2">
           <div class="float-right">
             <BLink class="px-1" @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
             </BLink>
           </div>
         </b-col>

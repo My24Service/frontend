@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="arrow-left-right"></b-icon>{{ $trans("Mutations") }}</h3>
+        <h3><IBiArrowLeftRight></IBiArrowLeftRight>{{ $trans("Mutations") }}</h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
             <ButtonLinkRefresh

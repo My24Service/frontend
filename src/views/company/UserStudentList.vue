@@ -74,13 +74,13 @@
             v-if="!data.item.is_active"
             @click="function() { setActive(data.item.id, data.item.email) }"
           >
-            <b-icon-check-square></b-icon-check-square>
+            <IBiCheckSquare></IBiCheckSquare>
           </BLink>
           <BLink
             v-if="data.item.is_active"
             @click="function() { setInActive(data.item.id, data.item.email) }"
           >
-            <b-icon-check-square-fill></b-icon-check-square-fill>
+            <IBiCheckSquareFill></IBiCheckSquareFill>
           </BLink>
         </template>
         <template #cell(icons)="data">

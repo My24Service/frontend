@@ -4,7 +4,7 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="file-arrow-down"></b-icon>
+            <IBiFileArrowDown></IBiFileArrowDown>
             <span v-if="isCreate">{{ $trans('New import') }}</span>
             <span v-else>{{ $trans('Edit import') }}</span>
           </h3>

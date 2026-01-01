@@ -41,14 +41,14 @@
               v-bind:label="$trans('Status?')"
               label-for="event-type-statuscode"
             >
-              <b-form-select
+              <BFormSelect
                 id="event-type-statuscode"
                 v-model="materialEventType.statuscode"
                 :options="statuscodes"
                 size="sm"
                 value-field="id"
                 text-field="statuscode"
-              ></b-form-select>
+              ></BFormSelect>
             </BFormGroup>
           </b-col>
         </b-row>

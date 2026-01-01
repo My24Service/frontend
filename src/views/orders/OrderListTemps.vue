@@ -52,14 +52,14 @@
                 v-bind:label="$trans('New status')"
                 label-for="change-status-status"
               >
-                <b-form-select
+                <BFormSelect
                   id="change-status-status"
                   v-model="status.statuscode"
                   :options="statuscodes"
                   size="sm"
                   value-field="statuscode"
                   text-field="statuscode"
-                ></b-form-select>
+                ></BFormSelect>
               </BFormGroup>
             </b-col>
             <b-col size="8">
@@ -87,7 +87,7 @@
           <BLink class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</BLink>
         </span>
         <BLink v-if="dispatch" class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
-          <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
+          <IBiArrowBarRight font-scale="1"></IBiArrowBarRight>
         </BLink>
       </b-col>
     </b-row>

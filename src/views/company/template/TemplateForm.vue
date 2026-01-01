@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: 'company-templates' }">{{ $trans("Templates") }}</router-link>
           /
           <strong>{{ template.name }}</strong>
@@ -68,13 +68,13 @@
               label-for="template_type"
               v-if="isCreate"
             >
-              <b-form-select
+              <BFormSelect
                 id="template_type"
                 v-model="template.template_type"
                 :options="templateTypes"
                 size="sm"
                 :state="isSubmitClicked ? !v$.template.template_type.$error : null"
-              ></b-form-select>
+              ></BFormSelect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.template.template_type.$error : null"
               >

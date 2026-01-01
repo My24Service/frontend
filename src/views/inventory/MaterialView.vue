@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="box"></b-icon>
+          <IBiBox></IBiBox>
           <span class="backlink" @click="goBack">{{ $trans("Materials") }}</span> / {{  this.material.name }}
         </h3>
         <div class="flex-columns">

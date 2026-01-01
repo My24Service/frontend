@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-lock"></b-icon>
+          <IBiFileLock></IBiFileLock>
           <span class="backlink" @click="cancelForm">{{ $trans('Reservations') }}</span> /
           <span v-if="isCreate">{{ $trans('New reservation') }}</span>
           {{ this.pk }} <span v-if="!isCreate" class="dimmed">{{ $trans('edit') }}</span>
@@ -266,10 +266,10 @@
                 <template #cell(icons)="data">
                   <div class="float-right">
                     <BLink class="h5 mx-2" @click="editMaterial(data.item, data.index)">
-                      <b-icon-pencil></b-icon-pencil>
+                      <IBiPencil></IBiPencil>
                     </BLink>
                     <BLink class="h5 mx-2" @click.prevent="deleteMaterial(data.index)">
-                      <b-icon-trash></b-icon-trash>
+                      <IBiTrash></IBiTrash>
                     </BLink>
                   </div>
                 </template>

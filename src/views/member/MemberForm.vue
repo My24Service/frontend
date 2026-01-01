@@ -4,7 +4,7 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="building"></b-icon>
+            <IBiBuilding></IBiBuilding>
             <span v-if="isCreate">{{ $trans('New member') }}</span>
             <span v-else>{{ $trans('Edit member') }}</span>
           </h3>
@@ -82,7 +82,7 @@
                   v-bind:label="$trans('Contract')"
                   label-for="member_contract"
                 >
-                  <b-form-select v-model="member.contract" :options="contracts" size="sm"></b-form-select>
+                  <BFormSelect v-model="member.contract" :options="contracts" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
@@ -91,7 +91,7 @@
                   v-bind:label="$trans('Type')"
                   label-for="member_member_type"
                 >
-                  <b-form-select v-model="member.member_type" :options="memberTypes" size="sm"></b-form-select>
+                  <BFormSelect v-model="member.member_type" :options="memberTypes" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group" v-if="showRequestedList">
@@ -100,7 +100,7 @@
                   v-bind:label="$trans('Requested')"
                   label-for="member_is_requested"
                 >
-                  <b-form-select v-model="member.is_requested" :options="isRequestedOptions" size="sm"></b-form-select>
+                  <BFormSelect v-model="member.is_requested" :options="isRequestedOptions" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group" v-if="showDeletedList">
@@ -109,7 +109,7 @@
                   v-bind:label="$trans('Deleted')"
                   label-for="member_is_deleted"
                 >
-                  <b-form-select v-model="member.is_deleted" :options="isDeletedOptions" size="sm"></b-form-select>
+                  <BFormSelect v-model="member.is_deleted" :options="isDeletedOptions" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="1" role="group" v-if="isRequest || (!showRequestedList && !showDeletedList)">
@@ -187,7 +187,7 @@
                   v-bind:label="$trans('Country')"
                   label-for="member_country"
                 >
-                  <b-form-select v-model="member.country_code" :options="countries" size="sm"></b-form-select>
+                  <BFormSelect v-model="member.country_code" :options="countries" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
@@ -332,7 +332,7 @@
                   v-bind:label="$trans('Equipment QR code type')"
                   label-for="member_country"
                 >
-                  <b-form-select v-model="member.equipment_qr_type" :options="equipmentQrTypes" size="sm"></b-form-select>
+                  <BFormSelect v-model="member.equipment_qr_type" :options="equipmentQrTypes" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>

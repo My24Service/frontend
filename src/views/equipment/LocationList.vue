@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="shop-window"></b-icon>{{ $trans("Locations") }}</h3>
+        <h3><IBiShopWindow></IBiShopWindow>{{ $trans("Locations") }}</h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
 

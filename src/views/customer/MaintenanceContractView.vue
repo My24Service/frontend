@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="file-earmark-lock"></b-icon>
+          <IBiFileEarmarkLock></IBiFileEarmarkLock>
           <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ $trans('Maintenance contracts') }}</router-link> /
           <span>{{ maintenanceContract.name }}</span>
         </h3>
@@ -32,7 +32,7 @@
             <router-link
               class="btn btn-primary"
               :to="{name: 'customer-view', params: {pk: customer.id}}">
-              <b-icon icon="building"></b-icon>
+              <IBiBuilding></IBiBuilding>
               {{ $trans('view customer details') }}
             </router-link>
           </dd>

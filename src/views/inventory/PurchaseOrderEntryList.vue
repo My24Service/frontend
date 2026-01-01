@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="receipt"></b-icon>{{ $trans('Entries') }}</h3>
+        <h3><IBiReceipt></IBiReceipt>{{ $trans('Entries') }}</h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
             <ButtonLinkRefresh

@@ -4,7 +4,7 @@
       <header>
         <div class="page-title">
             <h3>
-              <b-icon icon="tools"></b-icon>
+              <IBiTools></IBiTools>
               <span class="backlink" @click=cancelForm>{{ $trans("Equipment") }}</span> /
               <span v-if="isCreate && !equipment.name">{{ $trans('new') }}</span>
               <span v-if="!isCreate && !equipment.name"><span class="dimmed">{{ $trans('edit') }}</span></span>
@@ -468,14 +468,14 @@
               v-bind:label="$trans('Location')"
               label-for="equipment_location"
             >
-              <b-form-select
+              <BFormSelect
                 id="equipment_location"
                 v-model="equipment.location"
                 :options="locations"
                 size="sm"
                 value-field="id"
                 text-field="name"
-              ></b-form-select>
+              ></BFormSelect>
             </BFormGroup>
         </div>
         <div class="panel col-1-3">

@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="receipt"></b-icon>
+          <IBiReceipt></IBiReceipt>
           <span @click="cancelForm" class="backlink">{{ $trans('Entries') }}</span> /
           <span v-if="isCreate">{{ $trans('New entry') }}</span>
           <span v-if="!isCreate">{{ $trans('Edit entry') }}</span>
@@ -117,14 +117,14 @@
                   v-bind:label="$trans('Default location')"
                   label-for="purchaseorder-entry-default-location"
                 >
-                  <b-form-select
+                  <BFormSelect
                     id="purchaseorder-entry-default-location"
                     v-model="defaultLocation"
                     :options="stockLocations"
                     size="sm"
                     value-field="id"
                     text-field="name"
-                  ></b-form-select>
+                  ></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>
@@ -145,10 +145,10 @@
                     <template #cell(icons)="data">
                       <div class="float-right">
                         <BLink class="h5 mx-2" @click="editEntry(data.item, data.index)">
-                          <b-icon-pencil></b-icon-pencil>
+                          <IBiPencil></IBiPencil>
                         </BLink>
                         <BLink class="h5 mx-2" @click.prevent="deleteEntry(data.index)">
-                          <b-icon-trash></b-icon-trash>
+                          <IBiTrash></IBiTrash>
                         </BLink>
                       </div>
                     </template>
@@ -280,14 +280,14 @@
                     v-bind:label="$trans('Move to location')"
                     label-for="purchaseorder-entry-location"
                   >
-                    <b-form-select
+                    <BFormSelect
                       id="purchaseorder-entry-location"
                       v-model="entry.stock_location"
                       :options="stockLocations"
                       size="sm"
                       value-field="id"
                       text-field="name"
-                    ></b-form-select>
+                    ></BFormSelect>
                   </BFormGroup>
                 </b-col>
               </b-row>

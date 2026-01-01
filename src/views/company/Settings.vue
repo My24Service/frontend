@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="terminal"></b-icon>
+          <IBiTerminal></IBiTerminal>
           {{ $trans('Settings') }}
         </h3>
 

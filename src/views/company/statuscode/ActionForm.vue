@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="minecart-loaded"></b-icon>
+          <IBiMinecartLoaded></IBiMinecartLoaded>
           <span class="backlink" @click="cancelForm">{{ $trans("Actions") }}</span> /
           <strong>{{ action.name }}</strong>
           <span class="dimmed">
@@ -13,15 +13,15 @@
         </h3>
         <div class="flex-columns">
           <BButton @click="cancelForm" type="button" variant="secondary">
-            <b-icon icon="x"></b-icon>
+            <IBiX></IBiX>
             {{ $trans("Cancel") }}</BButton
           >
           <BButton v-if="!isCreate" @click="showDeleteModal" type="button" variant="danger">
-            <b-icon icon="trash"></b-icon>
+            <IBiTrash></IBiTrash>
             {{ $trans("Delete") }}</BButton
           >
           <BButton @click="submitForm" type="button" variant="primary">
-            <b-icon icon="check"></b-icon>
+            <IBiCheck></IBiCheck>
             {{ isCreate ? $trans("Create action") : $trans("Save") }}
           </BButton>
         </div>
@@ -48,11 +48,11 @@
               </b-col>
               <b-col cols="6" role="group">
                 <BFormGroup label-size="sm" v-bind:label="$trans('Type')" label-for="action_type">
-                  <b-form-select
+                  <BFormSelect
                     v-model="action.type"
                     :options="actionTypes"
                     size="sm"
-                  ></b-form-select>
+                  ></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>
@@ -83,7 +83,7 @@
                   <template #cell(icons)="data">
                     <div class="float-right">
                       <BLink class="h5 mx-2" @click.prevent="deleteCondition(data.index)">
-                        <b-icon-trash></b-icon-trash>
+                        <IBiTrash></IBiTrash>
                       </BLink>
                     </div>
                   </template>
@@ -110,11 +110,11 @@
                   v-bind:label="$trans('operator')"
                   label-for="action-condition-operator"
                 >
-                  <b-form-select
+                  <BFormSelect
                     v-model="condition_operator"
                     :options="operators"
                     size="sm"
-                  ></b-form-select>
+                  ></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
@@ -150,11 +150,11 @@
                 v-bind:label="$trans('Condition handling')"
                 label-for="action_type"
               >
-                <b-form-select
+                <BFormSelect
                   v-model="action.querymode"
                   :options="querymodes"
                   size="sm"
-                ></b-form-select>
+                ></BFormSelect>
               </BFormGroup>
             </b-col>
           </b-col>
@@ -199,11 +199,11 @@
                   v-bind:label="$trans('Partner')"
                   label-for="action_partner"
                 >
-                  <b-form-select
+                  <BFormSelect
                     v-model="action.company_partner"
                     :options="partners"
                     size="sm"
-                  ></b-form-select>
+                  ></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>

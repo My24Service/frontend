@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Leave") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Leave") }}</h3>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -55,13 +55,13 @@
               :title="$trans('Accept')"
               @click="() => showAcceptModal(data.item.id)"
             >
-              <b-icon-check-lg class="edit-icon"></b-icon-check-lg>
+              <IBiCheckLg class="edit-icon"></IBiCheckLg>
             </BLink>
             <BLink
               :title="$trans('Reject')"
               @click="() => showRejectModal(data.item.id)"
             >
-              <b-icon-x-lg class="edit-icon"></b-icon-x-lg>
+              <IBiXLg class="edit-icon"></IBiXLg>
             </BLink>
           </div>
         </template>

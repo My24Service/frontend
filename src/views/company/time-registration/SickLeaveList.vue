@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Sick leave") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Sick leave") }}</h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{ name: 'sick-leave-list-add' }">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add sick leave") }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add sick leave") }}
           </router-link>
         </div>
       </div>

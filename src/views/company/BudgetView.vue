@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="credit-card2-front"></b-icon>
+          <IBiCreditCard2Front></IBiCreditCard2Front>
           <span class="backlink" @click="goBack">{{ $trans("Budgets") }}</span> /
           <strong>{{ budget.year }}</strong>
         </h3>

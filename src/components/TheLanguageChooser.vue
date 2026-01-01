@@ -1,7 +1,7 @@
 <template>
   <b-form ref='language-chooser'>
     <div class="flex-columns">
-      <b-form-select size="sm" v-model="selected" :options="languages"></b-form-select>
+      <BFormSelect size="sm" v-model="selected" :options="languages"></BFormSelect>
       <BButton variant="primary" size="sm" @click="setLanguage">{{ $trans('Go') }}</BButton>
     </div>
   </b-form>

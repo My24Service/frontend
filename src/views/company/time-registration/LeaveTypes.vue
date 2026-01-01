@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Leave Types") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Leave Types") }}</h3>
         <div class="flex-columns">
           <BButton @click="addNewLeave" type="button" variant="primary">
-            <b-icon icon="file-earmark-plus"></b-icon>
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>
             {{ $trans("Add leave types") }}
           </BButton>
         </div>
@@ -54,8 +54,8 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <b-icon-pencil class="edit-icon" @click="() => editLeaveType(data.item)">
-            </b-icon-pencil>
+            <IBiPencil class="edit-icon" @click="() => editLeaveType(data.item)">
+            </IBiPencil>
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="

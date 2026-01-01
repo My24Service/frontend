@@ -2,7 +2,7 @@
   <div class='app-page'>
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="file-earmark-lock"></b-icon>
+        <h3><IBiFileEarmarkLock></IBiFileEarmarkLock>
           <router-link :to="{name:'supplier-reservation-list'}">{{ $trans("Reservations") }}</router-link> / {{this.pk}}
         </h3>
         <div class="flex-columns">

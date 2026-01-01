@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Statuscodes") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Statuscodes") }}</h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{ name: linkAdd }">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add statuscode") }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add statuscode") }}
           </router-link>
         </div>
       </div>

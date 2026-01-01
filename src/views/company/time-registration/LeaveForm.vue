@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: 'leave-list' }">{{ $trans("Leave") }}</router-link>
           /
           <span class="dimmed">
@@ -70,13 +70,13 @@
             </b-form-invalid-feedback>
           </BFormGroup>
           <BFormGroup v-bind:label="$trans('Leave type')" label-for="leave_type" label-cols="3">
-            <b-form-select
+            <BFormSelect
               v-model="leave.leave_type"
               :options="leaveTypes"
               value-field="id"
               text-field="name"
               :state="isSubmitClicked ? !v$.leave.leave_type.$error : null"
-            ></b-form-select>
+            ></BFormSelect>
             <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.leave_type.$error : null">
               {{ $trans("Please select a leave type") }}
             </b-form-invalid-feedback>

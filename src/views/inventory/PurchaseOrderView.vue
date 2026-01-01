@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-medical"></b-icon>
+          <IBiFileEarmarkMedical></IBiFileEarmarkMedical>
           <span class="backlink" @click="goBack">{{ $trans('Purchase orders') }}</span> /
           {{ purchaseOrder.purchase_order_id }} <span class="dimmed">{{ purchaseOrder.order_name }}</span>
         </h3>
@@ -11,7 +11,7 @@
           <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
           {{ $trans('Back') }}</BButton>
           <router-link :to="{name: 'purchaseorder-edit', params: {pk: this.pk}}" class="btn">
-            <b-icon icon="pencil"></b-icon>
+            <IBiPencil></IBiPencil>
             {{ $trans('Edit purchase order') }}
           </router-link>
         </div>

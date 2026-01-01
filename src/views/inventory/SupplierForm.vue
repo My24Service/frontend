@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="shop"></b-icon>
+          <IBiShop></IBiShop>
           <span class="backlink" @click="cancelForm">{{ $trans('Suppliers') }}</span> /
           {{ supplier.name }}
           <span v-if="!isCreate" class="dimmed">{{ $trans('edit') }}</span>
@@ -109,7 +109,7 @@
               v-bind:label="$trans('Country')"
               label-for="supplier-city"
             >
-              <b-form-select v-model="supplier.country_code" :options="countries" size="sm"></b-form-select>
+              <BFormSelect v-model="supplier.country_code" :options="countries" size="sm"></BFormSelect>
             </BFormGroup>
           </div>
 

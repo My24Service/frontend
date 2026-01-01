@@ -3,7 +3,7 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="people"></b-icon>
+            <IBiPeople></IBiPeople>
             <span class="backlink"  @click="cancelForm">{{ $trans("People") }}</span> /
             <strong> {{ customeruser.username }}</strong>
             <span class="dimmed" v-if="isCreate && !customeruser.username">{{ $trans('new') }}</span>
@@ -191,7 +191,7 @@
                 </multiselect>
               </BFormGroup>
               <BButton @click="clearCustomer" size="sm" type="button" variant="danger" :title="$trans('Clear customer')">
-                  <b-icon icon="backspace"></b-icon>
+                  <IBiBackspace></IBiBackspace>
               </BButton>
             </div>
 

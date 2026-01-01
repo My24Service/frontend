@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="bar-chart-line-fill"></b-icon>{{ $trans('Stats in ' + year ) }}</h3>
+        <h3><IBiBarChartLineFill></IBiBarChartLineFill>{{ $trans('Stats in ' + year ) }}</h3>
       </div>
     </header>
 
@@ -15,14 +15,14 @@
       <b-row align-v="center">
         <b-col cols="1">
           <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
           </BLink>
         </b-col>
 
         <b-col cols="1">
           <div class="float-right">
             <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
             </BLink>
           </div>
         </b-col>

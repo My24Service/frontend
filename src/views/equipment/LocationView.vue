@@ -4,7 +4,7 @@
 
       <div class='page-title' v-if="location">
         <h3>
-          <b-icon icon="shop-window"></b-icon>
+          <IBiShopWindow></IBiShopWindow>
           <span @click="goBack" class="backlink">{{ $trans("Locations") }}</span>
           / {{ location.name }}
         </h3>

@@ -3,17 +3,17 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <router-link :to="{name: 'order-list'}">{{ $trans("Orders") }}</router-link> /
           <span>#<strong>{{ order.order_id }}</strong></span>
         </h3>
         <div class="flex-columns">
           <router-link class="btn button outline" :to="{name:'order-edit', pk: pk}">
-            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit order') }}
+            <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit order') }}
           </router-link>
           <router-link class="btn" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
               :to="{name: 'invoice-create', params: {uuid: order.uuid}}">
-            <b-icon-receipt-cutoff></b-icon-receipt-cutoff> {{ $trans('Create invoice') }}
+            <IBiReceiptCutoff></IBiReceiptCutoff> {{ $trans('Create invoice') }}
           </router-link>
         </div>
       </div>
@@ -63,13 +63,13 @@
             <dt v-if="!hasBranches">{{ $trans("Workorder") }}</dt>
             <dd class="flex-columns">
               <BLink class="btn btn-sm btn-primary" @click.prevent="showWorkorderDialog()" target="_blank">
-                <b-icon icon="file-earmark"></b-icon>
+                <IBiFileEarmark></IBiFileEarmark>
                 {{ $trans('View workorder') }}
               </BLink>
             </dd>
             <dd v-if="!hasBranches" class="flex-columns">
               <BLink class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
-                <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+                <IBiFileEarmarkPdf></IBiFileEarmarkPdf>{{ $trans('Download PDF') }}
               </BLink>
             </dd>
             <dt>{{ $trans("Original order ID") }}</dt>
@@ -87,7 +87,7 @@
                   :href="order.workorder_url_org_order.url"
                   target="_blank"
                   :title="`${$trans('Download PDF')}(${order.workorder_url_org_order.url}`">
-                  <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+                  <IBiFileEarmarkPdf></IBiFileEarmarkPdf>{{ $trans('Download PDF') }}
                 </BLink>
               </div>
             </dd>
@@ -111,8 +111,7 @@
                 {{ workorder.companycode }}
                 <span v-if="workorder.via">({{ $trans("via") }} {{ workorder.via }})</span>
                 <BLink class="btn btn-sm btn-outline" :href="workorder.url" target="_blank" :title="$trans('Download PDF') + ' (' + workorder.url + ')'">
-                  <b-icon icon="file-earmark-pdf"></b-icon>
-
+                  <IBiFileEarmarkPdf></IBiFileEarmarkPdf>
                   {{ $trans('Download PDF') }}
                 </BLink>
               </div>
@@ -122,7 +121,7 @@
           </dl>
           <hr/>
 
-          <h6><b-icon-person></b-icon-person>{{ $trans("Contact") }}</h6>
+          <h6><IBiPerson></IBiPerson>{{ $trans("Contact") }}</h6>
           <div class="flex-columns space-between" style="max-width: 60ch; margin-inline: auto">
             <p>
               {{ order.order_contact }}<br/>
@@ -141,7 +140,7 @@
 
         <div class="panel col-1-3">
           <h6>
-            <b-icon-receipt-cutoff></b-icon-receipt-cutoff>
+            <IBiReceiptCutoff></IBiReceiptCutoff>
             {{ $trans('Invoices') }}
           </h6>
 
@@ -168,7 +167,7 @@
             <small class="dimmed">{{ $trans('No invoice(s) for this order yet.')}}</small> <br><br>
             <router-link class="btn btn-primary" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
               :to="{name: 'invoice-create', params: {uuid: order.uuid}}">
-              <b-icon-receipt-cutoff></b-icon-receipt-cutoff> {{ $trans('Create invoice') }}
+              <IBiReceiptCutoff></IBiReceiptCutoff> {{ $trans('Create invoice') }}
             </router-link>
           </div>
 
@@ -437,7 +436,7 @@
 
           </BButton>
           <BLink class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
-            <b-icon icon="file-earmark-pdf"></b-icon>{{ $trans('Download PDF') }}
+            <IBiFileEarmarkPdf></IBiFileEarmarkPdf>{{ $trans('Download PDF') }}
           </BLink>
           <!-- Emulate built in modal footer ok and cancel button actions -->
           <BButton @click="ok()" variant="primary">

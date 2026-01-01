@@ -2,8 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="person-square"></b-icon>{{ $trans('Partners') }}</h3>
-
+        <h3><IBiPersonSquare></IBiPersonSquare>{{ $trans('Partners') }}</h3>
       </div>
     </header>
 

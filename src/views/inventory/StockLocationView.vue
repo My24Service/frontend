@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="bookshelf"></b-icon>
+          <IBiBookshelf></IBiBookshelf>
           <span class="backlink" @click="goBack">{{ $trans('Stock Locations') }}</span> /
           {{ stockLocation.name }} <small class="dimmed">({{ stockLocation.identifier }})</small>
         </h3>

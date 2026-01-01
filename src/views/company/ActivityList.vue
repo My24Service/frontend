@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="receipt-cutoff"></b-icon>
+          <IBiReceiptCutoff></IBiReceiptCutoff>
           {{$trans('Activity')}}
         </h3>
         <BButton-toolbar>

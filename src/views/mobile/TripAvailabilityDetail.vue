@@ -45,7 +45,7 @@
       >
         <template #cell(icons)="data">
           <BLink class="px-1" @click.prevent="assign(data.item)" v-bind:title="$trans('Assign')">
-            <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
+            <IBiArrowBarRight font-scale="1"></IBiArrowBarRight>
           </BLink>
         </template>
       </b-table>
@@ -70,7 +70,7 @@
       >
         <template #cell(icons)="data">
           <BLink class="px-1" @click.prevent="unAssign(data.item)" v-bind:title="$trans('Unassign')">
-            <b-icon-trash font-scale="1"></b-icon-trash>
+            <IBiTrash font-scale="1"></IBiTrash>
           </BLink>
         </template>
       </b-table>

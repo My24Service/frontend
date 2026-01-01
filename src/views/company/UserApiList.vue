@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
         <BButton-toolbar>
           <BButton-group>
             <ButtonLinkRefresh
@@ -88,7 +88,7 @@
               :value="data.item.api_user.token"
             />
             <BLink v-on:click="copyToken(data.item.token)">
-              <b-icon-back class="icon-th"></b-icon-back>
+              <IBiBack class="icon-th"></IBiBack>
             </BLink>
           </p>
           <br/>

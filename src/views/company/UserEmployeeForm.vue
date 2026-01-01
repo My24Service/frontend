@@ -5,7 +5,7 @@
 
         <div class="page-title">
           <h3>
-            <b-icon icon="people"></b-icon>
+            <IBiPeople></IBiPeople>
             <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
             <strong>{{ employee.username }}</strong>
             <span class="dimmed" v-if="isCreate && !employee.username">{{ $trans('new') }}</span>
@@ -172,12 +172,12 @@
             v-bind:label="$trans('Branch')"
             label-for="employee_branch"
           >
-            <b-form-select
+            <BFormSelect
               id="employee_branch"
               v-model="employee.employee_user.branch"
               :options="branches"
               size="sm"
-            ></b-form-select>
+            ></BFormSelect>
           </BFormGroup>
 
 

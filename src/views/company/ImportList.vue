@@ -19,7 +19,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-arrow-down"></b-icon> {{ $trans("Imports") }}
+          <IBiFileArrowDown></IBiFileArrowDown> {{ $trans("Imports") }}
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
@@ -33,7 +33,7 @@
             />
           </BButton-group>
           <router-link :to="{name: 'company-import-add'}" class="btn">
-            <b-icon icon="file-arrow-down"></b-icon>
+            <IBiFileArrowDown></IBiFileArrowDown>
             {{$trans('Add import')}}
           </router-link>
         </BButton-toolbar>
@@ -74,7 +74,7 @@
           <div class="h2 float-right">
             <span v-if="Object.keys(data.item.result_inserts).length > 0">
               <BLink v-bind:title="$trans('Revert import')" v-on:click="revertImport(data.item.id)">
-                <b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise>
+                <IBiArrowCounterclockwise></IBiArrowCounterclockwise>
               </BLink>
             </span>
             <IconLinkEdit

@@ -57,12 +57,12 @@
     <header>
       <div class="page-title">
         <h3 v-if="!pk">
-          <b-icon icon="file-earmark-plus"></b-icon>
+          <IBiFileEarmarkPlus></IBiFileEarmarkPlus>
           <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
           <strong>{{ $trans("new") }}</strong>
         </h3>
         <h3 v-if="pk">
-          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
           <router-link :to="{name: 'order-view', pk:pk}">#<strong>{{ pk }}</strong></router-link>
         / {{ $trans("edit") }}
@@ -229,7 +229,7 @@
           <details v-if="order.customer_id" open>
             <summary class="flex-columns space-between">
               <h6>{{ $trans('Customer details') }}</h6>
-              <b-icon-chevron-down></b-icon-chevron-down>
+              <IBiChevron-down></IBiChevron-down>
             </summary>
             <BFormGroup
               v-bind:label="$trans('Address')"
@@ -268,7 +268,7 @@
               label-for="order_country_code"
               label-cols="3"
             >
-              <b-form-select v-model="order.order_country_code" :options="countries" ></b-form-select>
+              <BFormSelect v-model="order.order_country_code" :options="countries" ></BFormSelect>
             </BFormGroup>
 
             <BFormGroup
@@ -557,10 +557,10 @@
                 >
                   {{ engineer.full_name }}
                   <span v-if="engineer.hasOwnProperty('apiOk') && engineer.apiOk">
-                    <b-icon icon="check-circle" />
+                    <IBiCheckCircle></IBiCheckCircle>
                   </span>
                   <span v-else>
-                    <b-icon icon="exclamation-circle" />
+                    <IBiExclamationCircle></IBiExclamationCircle>
                   </span>
                 </li>
               </ul>
@@ -576,7 +576,9 @@
             <div v-if="order.assigned_user_info && order.assigned_user_info.length>0">
               <div class="col-form-label order-assignee" v-for="(engineer, index) in order.assigned_user_info" :key="index">
                 <span>{{ engineer.full_name }}</span>
-                <BLink v-if="engineer.booked===0" @click="unassignEngineer(engineer, $event)" class="float-right h5 mx-2"><b-icon-trash-fill></b-icon-trash-fill></BLink>
+                <BLink v-if="engineer.booked===0" @click="unassignEngineer(engineer, $event)" class="float-right h5 mx-2">
+                  <IBiTrashFill></IBiTrashFill>
+                </BLink>
               </div>
             </div>
           </BFormGroup>
@@ -650,10 +652,10 @@
                 <b-col cols="3">
                   <div class="float-right">
                     <BLink class="h5 mx-2" @click="editOrderLine(orderline, index)">
-                      <b-icon-pencil></b-icon-pencil>
+                      <IBiPencil></IBiPencil>
                     </BLink>
                     <BLink class="h5 mx-2" @click.prevent="deleteOrderLine(index)">
-                      <b-icon-trash></b-icon-trash>
+                      <IBiTrash></IBiTrash>
                     </BLink>
                   </div>
                 </b-col>
@@ -715,7 +717,7 @@
 
                   <span>
                     <strong>{{ product }}</strong>
-                    <b-icon-check v-if="equipment"></b-icon-check>
+                    <IBiCheck v-if="equipment"></IBiCheck>
                   </span>
 
               </BFormGroup>
@@ -765,7 +767,7 @@
 
                   <span>
                     <strong>{{ location }}</strong>
-                    <b-icon-check v-if="equipment_location"></b-icon-check>
+                    <IBiCheck v-if="equipment_location"></IBiCheck>
                   </span>
               </BFormGroup>
 
@@ -881,10 +883,10 @@
                 <b-col cols="3">
                   <div class="float-right">
                     <BLink class="h5 mx-2" @click="editInfoLine(infoline, index)">
-                      <b-icon-pencil></b-icon-pencil>
+                      <IBiPencil></IBiPencil>
                     </BLink>
                     <BLink class="h5 mx-2" @click.prevent="deleteInfoLine(index)">
-                      <b-icon-trash></b-icon-trash>
+                      <IBiTrash></IBiTrash>
                     </BLink>
                   </div>
                 </b-col>

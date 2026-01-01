@@ -3,7 +3,7 @@
     <header>
         <div class='page-title'>
           <h3>
-            <b-icon icon="shop"></b-icon>
+            <IBiShop></IBiShop>
             {{ $trans("Branches") }} / <strong>{{branch.name}}</strong>
             <span class="dimmed" v-if="!branch.name">{{ $trans("branch name") }}</span>
           </h3>
@@ -98,7 +98,7 @@
                 v-bind:label="$trans('Country')"
                 label-for="branch_country"
               >
-                <b-form-select v-model="branch.country_code" :options="countries" size="sm"></b-form-select>
+                <BFormSelect v-model="branch.country_code" :options="countries" size="sm"></BFormSelect>
               </BFormGroup>
             </b-col>
           </b-row>

@@ -3,7 +3,7 @@
      <details open>
       <summary class="flex-columns space-between">
         <h6>{{ $trans('Invoice lines')}} </h6>
-        <b-icon-chevron-down></b-icon-chevron-down>
+        <IBiChevronDown></IBiChevronDown>
       </summary>
       <ul class="listing invoice-lines full-size" v-if="invoiceLineService.collection.length">
         <li class="headings">
@@ -44,7 +44,7 @@
           </span>
           <span v-if="invoiceLine.type === INVOICE_LINE_TYPE_MANUAL" style="text-align: right;vertical-align:middle">
             <BLink class="h5 mx-2" @click.prevent="deleteInvoiceLine(invoiceLine.id)">
-              <b-icon-trash></b-icon-trash>
+              <IBiTrash></IBiTrash>
             </BLink>
           </span>
           <span v-else>&nbsp;</span>
@@ -52,7 +52,7 @@
 
         <li v-if="invoiceLinesHaveTotals" >
           <i>
-            <b-icon-info-square-fill variant="primary"></b-icon-info-square-fill>
+            <IBiInfoSquareFill variant="primary"></IBiInfoSquareFill>
             * <span class="dimmed">{{ $trans("Prices are combined in totals") }}</span>
           </i>
         </li>

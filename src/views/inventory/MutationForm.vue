@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="arrow-left-right"></b-icon>{{ $trans("Mutations") }}</h3>
+        <h3><IBiArrowLeftRight></IBiArrowLeftRight>{{ $trans("Mutations") }}</h3>
         <BButton-toolbar>
           <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
@@ -85,7 +85,7 @@
                 v-bind:label="$trans('Type')"
                 label-for="add-mutation-mutation_type"
               >
-                <b-form-select v-model="mutation.mutation_type" :options="mutationTypes"></b-form-select>
+                <BFormSelect v-model="mutation.mutation_type" :options="mutationTypes"></BFormSelect>
               </BFormGroup>
             </div>
 

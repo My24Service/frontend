@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: statusCodeListLink }">{{ $trans("Statuscodes") }}</router-link>
           /
           <strong>{{ statuscode.statuscode }}</strong>

@@ -12,7 +12,7 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon-receipt-cutoff></b-icon-receipt-cutoff>
+            <IBiReceiptCutoff></IBiReceiptCutoff>
               <router-link
               :to="{name: 'invoice-list' }"
             >{{ $trans('Invoices') }}</router-link>
@@ -25,7 +25,7 @@
                 @click.prevent="showInvoiceDialog"
                 target="_blank"
               >
-                <b-icon icon="file-earmark"></b-icon>
+                <IBiFileEarmark></IBiFileEarmark>
                 {{ $trans('View Invoice') }}
               </BLink>
             </span>
@@ -34,8 +34,7 @@
                 v-if="order_pk"
                 class="btn btn-sm btn-primary"
                 :to="{name:'order-view', params: {pk: order_pk}}">
-                <b-icon-arrow-up-right-circle
-                ></b-icon-arrow-up-right-circle>
+                <IBiArrowUpRightCircle></IBiArrowUpRightCircle>
                 {{ $trans('Order') }}
               </router-link>
             </span>
@@ -149,7 +148,7 @@
           <details>
             <summary class="flex-columns space-between">
               <h6>{{ $trans('Manage prices') }}</h6>
-              <b-icon-chevron-down></b-icon-chevron-down>
+              <IBiChevronDown></IBiChevronDown>
             </summary>
             <b-container fluid>
               <h5>{{ $trans("Materials") }}</h5>
@@ -343,7 +342,7 @@
           <details v-if="used_materials.length > 0">
             <summary class="flex-columns space-between">
               <h6>{{ $trans("Used materials") }}</h6>
-              <b-icon-chevron-down></b-icon-chevron-down>
+              <IBiChevronDown></IBiChevronDown>
             </summary>
             <MaterialsComponent
               v-if="material_models"
@@ -428,7 +427,7 @@
           <details v-if="order_pk">
             <summary class="flex-columns space-between">
               <h6>{{ $trans('Call out costs') }}</h6>
-              <b-icon-chevron-down></b-icon-chevron-down>
+              <IBiChevronDown></IBiChevronDown>
             </summary>
             <CallOutCostsComponent
               v-if="!isLoading"

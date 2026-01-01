@@ -6,7 +6,7 @@
       </div>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <span>{{ pageTitle }}</span>
         </h3>
 
@@ -84,10 +84,10 @@
               :to="{name: 'invoice-send',
                 query: {invoiceId: data.item.id}}"
             >
-              <b-icon-mailbox
+              <IBiMailbox
                 aria-hidden="true"
                 class="edit-icon"
-              ></b-icon-mailbox>
+              ></IBiMailbox>
             </router-link>
             <IconLinkDelete
               v-if="data.item.preliminary"
@@ -98,10 +98,10 @@
               class="icon-link"
               :title="$trans('Order')"
               :to="{name:'order-view', params: {pk: data.item.order}}">
-              <b-icon-arrow-up-right-circle
+              <IBiArrowUpRightCircle
                 aria-hidden="true"
                 class="edit-icon"
-              ></b-icon-arrow-up-right-circle>
+              ></IBiArrowUpRightCircle>
             </router-link>
           </div>
         </template>

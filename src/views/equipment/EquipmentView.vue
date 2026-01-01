@@ -10,7 +10,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="tools"></b-icon>
+          <IBiTools></IBiTools>
           <span class="backlink" @click="goBack">{{ $trans('Equipment') }}</span> /
           <span v-if="equipment">{{ equipment.name }}</span>
         </h3>

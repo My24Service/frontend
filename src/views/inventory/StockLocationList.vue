@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="bookshelf"></b-icon>{{ $trans("Stock Locations") }}
+          <IBiBookshelf></IBiBookshelf>{{ $trans("Stock Locations") }}
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
@@ -59,7 +59,7 @@
         </template>
         <template #cell(show_in_stats)="data">
           <span v-if="data.item.show_in_stats">
-            <b-icon-check-square-fill></b-icon-check-square-fill>
+            <IBiCheckSquareFill></IBiCheckSquareFill>
           </span>
         </template>
         <template #cell(icons)="data">

@@ -30,7 +30,7 @@
       <header>
         <div class='page-title'>
           <h3>
-            <b-icon icon="file-earmark-lock"></b-icon><router-link :to="{name: 'maintenance-contracts'}">{{ $trans("Maintenance contracts") }}</router-link> /
+            <IBiFileEarmarkLock></IBiFileEarmarkLock><router-link :to="{name: 'maintenance-contracts'}">{{ $trans("Maintenance contracts") }}</router-link> /
             <span class="dimmed" v-if="isCreate && !maintenanceContractService.editItem.name">{{ $trans('new') }}</span>
             <span class="dimmed" v-if="!isCreate && !maintenanceContractService.editItem.name">{{ $trans('edit') }}</span>
             <span v-else>{{ maintenanceContractService.editItem.name }}</span>
@@ -137,7 +137,7 @@
             <hr />
 
             <h3 v-if="!customer.id" class="text-center">
-              <b-icon icon="info-square" variant="primary"></b-icon> &nbsp;
+              <IBiInfoSquare variant="primary"></IBiInfoSquare> &nbsp;
               <span class="dimmed">{{ $trans('Select a customer to add equipment to this contract.') }}</span>
             </h3>
 
@@ -156,10 +156,10 @@
                     <template #cell(icons)="data">
                       <div class="float-right">
                         <BLink class="h5 mx-2" @click="editEquipment(data.item, data.index)">
-                          <b-icon-pencil></b-icon-pencil>
+                          <IBiPencil></IBiPencil>
                         </BLink>
                         <BLink class="h5 mx-2" @click.prevent="deleteEquipment(data.index)">
-                          <b-icon-trash></b-icon-trash>
+                          <IBiTrash></IBiTrash>
                         </BLink>
                       </div>
                     </template>
@@ -196,7 +196,7 @@
                     >
                       <span slot="noResult">
                         <p>
-                          <b-icon icon="info-square" variant="primary"></b-icon>
+                          <IBiInfoSquare variant="primary"></IBiInfoSquare>
                           {{ $trans('No equipment found. Consider changing the search query, or add a new equipment:')}}
                         </p>
                         <p>

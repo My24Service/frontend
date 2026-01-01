@@ -170,12 +170,19 @@ import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
-const {create} = useToast()
 
 import {DocumentModel, DocumentService} from "@/models/quotations/Document";
 import {QuotationModel} from "@/models/quotations/Quotation"
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "DocumentsComponent",
   components: {
     IconLinkEdit,

@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-medical"></b-icon>{{ $trans("Purchase orders") }}
+          <IBiFileEarmarkMedical></IBiFileEarmarkMedical>{{ $trans("Purchase orders") }}
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">

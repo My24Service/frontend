@@ -59,7 +59,7 @@
           </div>
         </template>
         <template #cell(is_always_selected)="data">
-          <b-icon-check-square v-if="data.item.is_always_selected"></b-icon-check-square>
+          <IBiCheckSquare v-if="data.item.is_always_selected"></IBiCheckSquare>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">

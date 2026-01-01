@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="box"></b-icon>
+          <IBiBox></IBiBox>
           {{ $trans("Materials") }}
         </h3>
         <BButton-toolbar>

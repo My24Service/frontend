@@ -19,7 +19,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="shop"></b-icon>
+          <IBiShop></IBiShop>
           {{  $trans('Branches') }}
         </h3>
         <BButton-toolbar>
@@ -74,7 +74,9 @@
         <template #cell(contact)="data">
           <span v-if="data.item.contact && data.item.contact.trim() !== ''">
             <span v-if="data.item.email">
-              <BLink class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.contact }} <b-icon icon="envelope"></b-icon></BLink>
+              <BLink class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.contact }}
+                <IBiEnvelope></IBiEnvelope>
+              </BLink>
             </span>
             <span v-else>
               {{ data.item.contact }}

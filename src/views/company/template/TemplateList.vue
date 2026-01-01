@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Templates") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Templates") }}</h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{ name: 'customer-template-add' }">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add template") }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add template") }}
           </router-link>
         </div>
       </div>
@@ -55,7 +55,7 @@
           </router-link>
         </template>
         <template #cell(is_active)="data">
-          <b-icon-check v-if="data.item.is_active"></b-icon-check>
+          <IBiCheck v-if="data.item.is_active"></IBiCheck>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">

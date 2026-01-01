@@ -25,12 +25,12 @@
           v-bind:label="$trans('operator')"
           label-for="action-condition-operator"
         >
-          <b-form-select
+          <BFormSelect
             v-model="form.num_days_operator"
             :options="operators"
             size="sm"
             @input="handleInputChange"
-          ></b-form-select>
+          ></BFormSelect>
         </BFormGroup>
       </b-col>
       <b-col cols="4" role="group">

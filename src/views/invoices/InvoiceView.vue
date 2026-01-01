@@ -12,7 +12,7 @@
       <header v-if="invoice">
         <div class="page-title">
           <h3>
-            <b-icon icon="file-earmark-check-fill"></b-icon>
+            <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
             <router-link
               :to="{name: 'invoice-list' }"
             >{{ $trans('Invoices') }}</router-link>
@@ -24,7 +24,7 @@
                 @click.prevent="showInvoiceDialog"
                 target="_blank"
               >
-                <b-icon icon="file-earmark"></b-icon>
+                <IBiFileEarmark></IBiFileEarmark>
                 {{ $trans('View PDF') }}
               </BLink>
             </span>
@@ -32,8 +32,8 @@
               <router-link
                 class="btn btn-sm btn-primary"
                 :to="{name:'order-view', params: {pk: invoice.order}}">
-                <b-icon-arrow-up-right-circle
-                ></b-icon-arrow-up-right-circle>
+                <IBiArrowUpRightCircle
+                ></IBiArrowUpRightCircle>
                 {{ $trans('Order') }}
               </router-link>
             </span>

@@ -57,7 +57,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="tools"></b-icon>
+          <IBiTools></IBiTools>
           {{ $trans("Equipment") }}
         </h3>
         <BButton-toolbar>

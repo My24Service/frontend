@@ -30,7 +30,7 @@
               v-bind:label="$trans('Module')"
               label-for="module-part_module"
             >
-              <b-form-select v-model="modulePart.module" :options="modules" size="sm"></b-form-select>
+              <BFormSelect v-model="modulePart.module" :options="modules" size="sm"></BFormSelect>
             </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">

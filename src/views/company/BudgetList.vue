@@ -55,7 +55,7 @@
 
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="credit-card2-front"></b-icon>{{ $trans("Budgets") }}</h3>
+        <h3><IBiCreditCard2Front></IBiCreditCard2Front>{{ $trans("Budgets") }}</h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
             <ButtonLinkRefresh
@@ -70,7 +70,7 @@
             class="btn primary"
             @click="showAddModal"
             >
-            <b-icon icon="plus"></b-icon>{{ $trans('New budget') }}
+            <IBiPlus></IBiPlus>{{ $trans('New budget') }}
           </button>
         </BButton-toolbar>
       </div>

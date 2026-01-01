@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="shop-window"></b-icon>
+          <IBiShopWindow></IBiShopWindow>
           <span class="backlink" @click="cancelForm">{{ $trans('Locations') }}</span> /
           <span v-if="isCreate">{{ $trans('New location') }}</span>
           <span v-if="!isCreate">{{ location.name }} <span class="dimmed">{{ $trans('edit') }} </span></span>
@@ -253,14 +253,14 @@
                   label-size="sm"
                   label-for="location_building"
                 >
-                  <b-form-select
+                  <BFormSelect
                     id="location_building"
                     v-model="location.building"
                     :options="buildings"
                     size="sm"
                     value-field="id"
                     text-field="name"
-                  ></b-form-select>
+                  ></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>

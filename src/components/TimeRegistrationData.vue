@@ -19,7 +19,7 @@
     <b-row align-v="center" v-if="activeDateQueryMode === 'year'">
       <b-col cols="2">
         <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
-          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+          <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
         </BLink>
       </b-col>
       <b-col cols="8" class="text-center">
@@ -29,7 +29,7 @@
       <b-col cols="2">
         <div class="float-right">
           <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            <IBiArrowRight font-scale="1.8"></IBiArrowRight>
           </BLink>
         </div>
       </b-col>
@@ -38,7 +38,7 @@
     <b-row align-v="center" v-if="activeDateQueryMode === 'month'">
       <b-col cols="2">
         <BLink @click.prevent="backMonth" v-bind:title="$trans('Month back')">
-          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+          <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
         </BLink>
       </b-col>
       <b-col cols="8" class="text-center">
@@ -48,7 +48,7 @@
       <b-col cols="2">
         <div class="float-right">
           <BLink @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
-            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            <IBiArrowRight font-scale="1.8"></IBiArrowRight>
           </BLink>
         </div>
       </b-col>
@@ -57,7 +57,7 @@
     <b-row align-v="center" v-if="activeDateQueryMode === 'week'">
       <b-col cols="2">
         <BLink @click.prevent="backWeek" v-bind:title="$trans('Week back')">
-          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+          <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
         </BLink>
       </b-col>
       <b-col cols="8">
@@ -67,7 +67,7 @@
       <b-col cols="2">
         <div class="float-right">
           <BLink @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
-            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+            <IBiArrowRight font-scale="1.8"></IBiArrowRight>
           </BLink>
         </div>
       </b-col>

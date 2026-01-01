@@ -95,7 +95,7 @@
           label-for="order_country_code"
           label-cols="3"
         >
-          <b-form-select v-model="quotation.quotation_country_code" :options="countries" ></b-form-select>
+          <BFormSelect v-model="quotation.quotation_country_code" :options="countries" ></BFormSelect>
         </BFormGroup>
 
         <BFormGroup

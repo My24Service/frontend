@@ -21,7 +21,9 @@
 
     <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
       {{ order.start_date }}
-      <b v-if="order.start_time !== null" :title="order.start_time"><b-icon icon="clock"></b-icon></b>
+      <b v-if="order.start_time !== null" :title="order.start_time">
+        <IBiClock></IBiClock>
+      </b>
     </span>
 
       <!-- fixme -->
@@ -46,14 +48,14 @@
 
       <span class="order-documents">
         <span v-if="order.documents.length" >
-          <b-icon icon="paperclip"></b-icon>
+          <IBipaperclip></IBipaperclip>
           {{ order.documents.length && order.documents.length }} {{ $trans("document") }}{{ order.documents.length === 1 ? '' : 's' }}
         </span>
         <span v-else>&ndash;</span>
       </span>
       <span class="order-status">
-        <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`" :title="order.last_status_full"></b-icon>
-        <b-form-select
+        <IBiCircleFill v-bind:style="`color:${orderStatusColorCode}`" :title="order.last_status_full"></IBiCircleFill>
+        <BFormSelect
           :title="orderStatusCodeComputed.statuscode"
           :id="order.id + '-change-status'"
           v-model="orderStatusCode"
@@ -63,7 +65,7 @@
           text-field="statuscode"
           style="border-color: transparent;"
           @change="handleStatusChange(order.id, $event)"
-        ></b-form-select>
+        ></BFormSelect>
         <IconLinkDelete
           v-if="!isCustomer && !isBranchEmployee && withDelete"
           v-bind:title="$trans('Delete')"

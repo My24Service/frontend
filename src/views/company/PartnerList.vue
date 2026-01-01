@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="person-square"></b-icon>{{ $trans('Partners') }}</h3>
+        <h3><IBiPersonSquare></IBiPersonSquare>{{ $trans('Partners') }}</h3>
         <BButton-toolbar>
           <BButton-group>
             <ButtonLinkRefresh
@@ -68,9 +68,9 @@
           </div>
         </template>
         <template #cell(has_branches)="data">
-          <b-icon-check-square-fill
+          <IBiCheckSquareFill
             v-if="data.item.partner_view.has_branches"
-          ></b-icon-check-square-fill>
+          ></IBiCheckSquareFill>
         </template>
       </b-table>
       <Pagination

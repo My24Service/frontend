@@ -1,11 +1,11 @@
 <template>
-  <b-form-select
+  <BFormSelect
     @change="update"
     :value="defaultVat"
     v-model="vatType"
     :options="vatTypes"
     size="sm"
-  ></b-form-select>
+  ></BFormSelect>
 </template>
 
 <script>

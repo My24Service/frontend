@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
         <div>
           <BButton-toolbar class="flex-columns">
             <BButton-group>
@@ -14,7 +14,7 @@
                 v-bind:method="function() { showSearchModal() }"
               />
             </BButton-group>
-            <BLink :to="{name: 'employee-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add employee") }}</BLink>
+            <BLink :to="{name: 'employee-add'}" class="btn primary"><IBiPersonPlus></IBiPersonPlus>{{ $trans("Add employee") }}</BLink>
           </BButton-toolbar>
         </div>
       </div>

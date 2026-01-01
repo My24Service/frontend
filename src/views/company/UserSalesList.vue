@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
         <div>
           <BButton-toolbar>
             <BButton-group class="mr-1">
@@ -19,7 +19,7 @@
               :to="{name: 'salesuser-add'}"
               class="btn primary"
             >
-              <b-icon icon="person-plus"></b-icon>
+              <IBiPersonPlus></IBiPersonPlus>
               {{ $trans("Add sales user") }}
             </BLink>
           </BButton-toolbar>

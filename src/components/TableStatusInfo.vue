@@ -5,13 +5,12 @@
     class="status"
     :title="model.last_status_full"
   >
-    <b-icon
-      icon="circle-fill"
+    <IBiCircleFill
       class="color-icon"
       v-bind:style="`color:${statusColorCode}`"
       :title="model.last_status_full"
-    ></b-icon>
-    <b-form-select
+    ></IBiCircleFill>
+    <BFormSelect
       v-if="statuscodes.length"
       :title="statusCodeComputed.statuscode"
       :id="model.id + '-change-status'"
@@ -22,7 +21,7 @@
       text-field="statuscode"
       style="border-color: transparent;"
       @change="handleStatusChange(model.id, $event)"
-    ></b-form-select>
+    ></BFormSelect>
   </b-overlay>
 </template>
 <script>

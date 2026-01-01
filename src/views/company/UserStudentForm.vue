@@ -176,7 +176,7 @@
                   v-bind:label="$trans('Country')"
                   label-for="studentuser_country_code"
                 >
-                  <b-form-select v-model="studentuser.student_user.country_code" :options="countries" size="sm"></b-form-select>
+                  <BFormSelect v-model="studentuser.student_user.country_code" :options="countries" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>
@@ -427,7 +427,7 @@
                   v-bind:label="$trans('Country')"
                   label-for="studentuser_country_code"
                 >
-                  <b-form-select v-model="studentuser.student_user.country_code" :options="countries" size="sm"></b-form-select>
+                  <BFormSelect v-model="studentuser.student_user.country_code" :options="countries" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
             </b-row>
@@ -438,7 +438,7 @@
                   v-bind:label="$trans('Gender')"
                   label-for="studentuser_gender"
                 >
-                  <b-form-select v-model="studentuser.student_user.gender" :options="genderOptions" size="sm"></b-form-select>
+                  <BFormSelect v-model="studentuser.student_user.gender" :options="genderOptions" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
@@ -460,7 +460,7 @@
                   v-bind:label="$trans('Drivers licence')"
                   label-for="studentuser_drivers_licence"
                 >
-                  <b-form-select v-model="studentuser.student_user.drivers_licence" :options="yesNoOptions" size="sm"></b-form-select>
+                  <BFormSelect v-model="studentuser.student_user.drivers_licence" :options="yesNoOptions" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
@@ -484,7 +484,7 @@
                   v-bind:label="$trans('Box truck')"
                   label-for="studentuser_box_truck"
                 >
-                  <b-form-select v-model="studentuser.student_user.box_truck" :options="yesNoOptions" size="sm"></b-form-select>
+                  <BFormSelect v-model="studentuser.student_user.box_truck" :options="yesNoOptions" size="sm"></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">

@@ -18,7 +18,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="building"></b-icon> {{ $trans("Customers") }}
+          <IBiBuilding></IBiBuilding> {{ $trans("Customers") }}
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
@@ -35,7 +35,9 @@
               v-bind:title="$trans('Download')"
             />
           </BButton-group>
-          <router-link :to="{name: 'customer-add'}" class="btn"><b-icon icon="building"></b-icon>{{$trans('Add customer')}}</router-link>
+          <router-link :to="{name: 'customer-add'}" class="btn">
+            <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
+          </router-link>
         </BButton-toolbar>
       </div>
     </header>
@@ -104,7 +106,7 @@
         </template>
         <template #cell(remarks)="data">
           <span v-if="data.item.remarks && data.item.remarks.trim() != ''" :title="data.item.remarks">
-            <b-icon icon="info-square"></b-icon>
+            <IBiInfoSquare></IBiInfoSquare>
             <small> {{ data.item.remarks }}</small>
           </span>
         </template>

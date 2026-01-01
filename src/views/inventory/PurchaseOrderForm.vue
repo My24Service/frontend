@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="file-earmark-medical"></b-icon>
+          <IBiFileEarmarkMedical></IBiFileEarmarkMedical>
           <span class="backlink" @click="cancelForm">{{ $trans('Purchase orders') }}</span> /
           <span v-if="isCreate">{{ $trans('New purchase order') }}</span>
           <span v-if="!isCreate">{{ $trans('Edit purchase order') }}</span>
@@ -306,10 +306,10 @@
                       <template #cell(icons)="data">
                         <div class="float-right">
                           <BLink class="h5 mx-2" @click="editMaterial(data.item, data.index)">
-                            <b-icon-pencil></b-icon-pencil>
+                            <IBiPencil></IBiPencil>
                           </BLink>
                           <BLink class="h5 mx-2" @click.prevent="deleteMaterial(data.index)">
-                            <b-icon-trash></b-icon-trash>
+                            <IBiTrash></IBiTrash>
                           </BLink>
                         </div>
                       </template>

@@ -4,7 +4,7 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="people"></b-icon>
+            <IBiPeople></IBiPeople>
             <span class="backlink"  @click="cancelForm">{{ $trans("People") }}</span> /
             <strong> {{ salesuser.username }}</strong>
             <span class="dimmed" v-if="isCreate && !salesuser.username">{{ $trans('new') }}</span>

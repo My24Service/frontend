@@ -2,14 +2,14 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="bar-chart-line-fill"></b-icon>{{ $trans('Total sales in ' + year ) }}</h3>
+        <h3><IBiBarChartLineFill></IBiBarChartLineFill>{{ $trans('Total sales in ' + year ) }}</h3>
       </div>
     </header>
     <div class="app-detail panel">
       <b-row align-v="center">
         <b-col cols="1">
           <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
           </BLink>
         </b-col>
         <b-col cols="10" class="text-center">
@@ -21,12 +21,12 @@
                 v-bind:label="$trans('Graph type')"
                 label-for="graph-type"
               >
-                <b-form-select
+                <BFormSelect
                   id="graph-type"
                   v-model="currentMode"
                   :options="modes"
                   size="sm"
-                ></b-form-select>
+                ></BFormSelect>
               </BFormGroup>
             </b-col>
             <b-col cols="6">
@@ -50,7 +50,7 @@
         <b-col cols="1">
           <div class="float-right">
             <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
             </BLink>
           </div>
         </b-col>

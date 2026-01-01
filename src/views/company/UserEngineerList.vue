@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
         <BButton-toolbar class="flex-columns">
           <BButton-group class="mr-1">
 
@@ -15,8 +15,12 @@
             />
 
           </BButton-group>
-          <BButton @click="()=>{ downloadList()}" class="btn primary mr-1"><b-icon icon="save"></b-icon> {{$trans('Download')}}</BButton>
-          <BLink :to="{name: 'engineer-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add engineer") }}</BLink>
+          <BButton @click="()=>{ downloadList()}" class="btn primary mr-1">
+            <IBiSave></IBiSave> {{$trans('Download')}}
+          </BButton>
+          <BLink :to="{name: 'engineer-add'}" class="btn primary">
+            <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add engineer") }}
+          </BLink>
         </BButton-toolbar>
       </div>
     </header>

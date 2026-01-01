@@ -234,7 +234,7 @@
               v-bind:label="$trans('Country')"
               label-for="order_country_code"
             >
-              <b-form-select v-model="order.order_country_code" :options="countries" size="sm"></b-form-select>
+              <BFormSelect v-model="order.order_country_code" :options="countries" size="sm"></BFormSelect>
             </BFormGroup>
           </b-col>
         </b-row>
@@ -347,10 +347,10 @@
                   <template #cell(icons)="data">
                     <div class="float-right">
                       <BLink class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
-                        <b-icon-pencil></b-icon-pencil>
+                        <IBiPencil></IBiPencil>
                       </BLink>
                       <BLink class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
-                        <b-icon-trash></b-icon-trash>
+                        <IBiTrash></IBiTrash>
                       </BLink>
                     </div>
                   </template>
@@ -418,7 +418,7 @@
                     ></BFormInput>
                     <b-input-group-append>
                       <BButton variant="outline-success" v-if="equipment" size="sm">
-                        <b-icon-check></b-icon-check>
+                        <IBiCheck></IBiCheck>
                       </BButton>
                     </b-input-group-append>
                   </b-input-group>
@@ -487,7 +487,7 @@
                     ></BFormInput>
                     <b-input-group-append>
                       <BButton variant="outline-success" v-if="equipment_location" size="sm">
-                        <b-icon-check></b-icon-check>
+                        <IBiCheck></IBiCheck>
                       </BButton>
                     </b-input-group-append>
                   </b-input-group>

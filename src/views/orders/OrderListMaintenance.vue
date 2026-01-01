@@ -83,14 +83,14 @@
                   v-bind:label="$trans('New status')"
                   label-for="change-status-status"
                 >
-                  <b-form-select
+                  <BFormSelect
                     id="change-status-status"
                     v-model="status.statuscode"
                     :options="statuscodes"
                     size="sm"
                     value-field="statuscode"
                     text-field="statuscode"
-                  ></b-form-select>
+                  ></BFormSelect>
                 </BFormGroup>
               </b-col>
               <b-col size="8">
@@ -161,12 +161,12 @@
 
           <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
               {{ order.order_id }}
-              <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
-              <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+              <IBiXCircle class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircle>
+              <IBiXCircleFill class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircleFill>
             </span>
 
           <BButton variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
-            <b-icon-person-lines-fill></b-icon-person-lines-fill>
+            <IBiPersonLinesFill></IBiPersonLinesFill>
             {{ $trans('Assign these orders') }}
           </BButton>
 

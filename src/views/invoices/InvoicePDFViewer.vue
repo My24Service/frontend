@@ -67,7 +67,7 @@
           variant="primary"
         >
           <b-spinner small v-if="isLoading"></b-spinner>
-          <b-icon icon="file-earmark-pdf"></b-icon>
+          <IBiFileEarmarkPdf></IBiFileEarmarkPdf>
           {{ $trans('Download PDF') }}
         </BButton>
         <!-- Emulate built in modal footer ok and cancel button actions -->

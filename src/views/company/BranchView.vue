@@ -4,7 +4,7 @@
         <header v-if="branch">
           <div class='page-title'>
             <h3>
-              <b-icon icon="shop"></b-icon>
+              <IBiShop></IBiShop>
               <span class='backlink' @click="goBack">{{ $trans("Branches") }}</span> /
               <strong>{{ branch.name }}</strong>
             </h3>

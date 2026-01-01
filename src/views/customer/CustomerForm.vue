@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="building"></b-icon>
+          <IBiBuilding></IBiBuilding>
           <span v-if="isCreate">{{ $trans('New customer') }}</span>
           <span v-else>{{ $trans('Edit customer') }}</span>
         </h3>
@@ -135,11 +135,11 @@
             v-bind:label="$trans('Country')"
             label-for="customer_country"
           >
-            <b-form-select
+            <BFormSelect
               :disabled="useBranchAddress"
               v-model="customer.country_code"
               :options="countries"
-              size="sm"></b-form-select>
+              size="sm"></BFormSelect>
 
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.customer.country_code.$error : null">
@@ -247,7 +247,7 @@
               ></BFormInput>
 
               <template #append>
-                <b-form-select v-model="customer.standard_hours_minute" :options="minutes" size="sm"></b-form-select>
+                <BFormSelect v-model="customer.standard_hours_minute" :options="minutes" size="sm"></BFormSelect>
               </template>
             </b-input-group>
           </BFormGroup>
@@ -315,7 +315,7 @@
                 :disabled="syncingOrders"
                 >
                 <b-spinner v-if="syncingOrders" small></b-spinner>
-                <b-icon-arrow-repeat v-else></b-icon-arrow-repeat>
+                <IBiArrowRepeat v-else></IBiArrowRepeat>
                 &nbsp; {{ $trans('Synchronize orders') }}
               </BButton>
 
@@ -323,19 +323,19 @@
             <hr/>
             <details open>
               <summary class="flex-columns space-between">
-                <h6>{{ $trans('branch') }} </h6><b-icon-chevron-down></b-icon-chevron-down>
+                <h6>{{ $trans('branch') }} </h6><IBiChevronDown></IBiChevronDown>
               </summary>
               <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Partner')"
                 label-for="customer_branch_partners"
               >
-                <b-form-select
+                <BFormSelect
                   id="customer_branch_partners"
                   v-model="customer.branch_partner"
                   :options="branchPartners"
                   size="sm"
-                ></b-form-select>
+                ></BFormSelect>
               </BFormGroup>
 
               <BFormGroup label="Branches" v-if="customer.branch_partner !== null && branches.length > 0">
