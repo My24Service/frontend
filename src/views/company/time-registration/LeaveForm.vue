@@ -94,7 +94,7 @@
           </BFormGroup>
           <div class="flex-columns">
             <BFormGroup :label="$trans('Start date')" label-for="start_date" cols="4">
-              <b-form-datepicker
+              <VueDatePicker
                 id="start_date"
                 class=""
                 v-model="leave.start_date"
@@ -104,7 +104,7 @@
                 @input="() => loadTotals(leave)"
                 :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
               >
@@ -149,7 +149,7 @@
           </div>
           <div class="flex-columns">
             <BFormGroup :label="$trans('End date')" label-for="end_date" cols="4">
-              <b-form-datepicker
+              <VueDatePicker
                 id="end_date"
                 class=""
                 v-model="leave.end_date"
@@ -159,7 +159,7 @@
                 @input="() => loadTotals(leave)"
                 :state="isSubmitClicked ? !v$.leave.end_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.end_date.$error : null">
                 {{ $trans("Please enter a end date") }}
               </b-form-invalid-feedback>
@@ -337,7 +337,7 @@ export default {
         this.compLoading = false
       } catch(error) {
         console.log('Error fetching users', error)
-        errorToast(create, $trans('Error fetching users'))
+        errorToast(this.create, $trans('Error fetching users'))
         this.compLoading = false
       }
     },
@@ -366,12 +366,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.leaveHoursService.insert(this.leave);
-          infoToast(create, $trans("Created"), $trans("Leave has been created"));
+          infoToast(this.create, $trans("Created"), $trans("Leave has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating leave", error);
-          errorToast(create, $trans("Error creating leave"));
+          errorToast(this.create, $trans("Error creating leave"));
           this.isLoading = false;
         }
 
@@ -380,12 +380,12 @@ export default {
 
       try {
         await this.leaveHoursService.update(this.pk, this.leave);
-        infoToast(create, $trans("Updated"), $trans("Leave has been updated"));
+        infoToast(this.create, $trans("Updated"), $trans("Leave has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("Error updating leave", error);
-        errorToast(create, $trans("Error updating leave"));
+        errorToast(this.create, $trans("Error updating leave"));
         this.isLoading = false;
       }
     },
@@ -403,7 +403,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave", error);
-        errorToast(create, $trans("Error loading leave"));
+        errorToast(this.create, $trans("Error loading leave"));
         this.isLoading = false;
       }
     },
@@ -416,7 +416,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave types", error);
-        errorToast(create, $trans("Error loading leave types"));
+        errorToast(this.create, $trans("Error loading leave types"));
         this.isLoading = false;
       }
     },

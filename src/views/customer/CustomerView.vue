@@ -429,7 +429,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching orders or customer detail', error)
-        errorToast(create, $trans('Error fetching orders'))
+        errorToast(this.create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -441,7 +441,7 @@ export default {
         this.maintenanceContracts = data.results
       } catch(error) {
         console.log('error fetching maintenance contracts', error)
-        errorToast(create, $trans('Error fetching maintenance contracts'))
+        errorToast(this.create, $trans('Error fetching maintenance contracts'))
         this.isLoading = false
       }
     },
@@ -453,7 +453,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer orders', error)
-        errorToast(create, $trans('Error fetching customer orders'))
+        errorToast(this.create, $trans('Error fetching customer orders'))
         this.isLoading = false
       }
     }

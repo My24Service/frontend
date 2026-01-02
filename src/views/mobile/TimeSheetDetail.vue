@@ -84,7 +84,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching timesheet details', error)
-        errorToast(create, $trans('Error fetching timesheet details'))
+        errorToast(this.create, $trans('Error fetching timesheet details'))
         this.isLoading = false
       }
     }

@@ -130,7 +130,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching members', error)
-        errorToast(create, $trans('Error fetching members'))
+        errorToast(this.create, $trans('Error fetching members'))
         this.isLoading = false
       }
     },
@@ -157,12 +157,12 @@ export default {
         delete this.partnerRequest.status
 
         await partnerRequestsSentModel.insert(this.partnerRequest)
-        infoToast(create, $trans('Created'), $trans('Partner request has been sent'))
+        infoToast(this.create, $trans('Created'), $trans('Partner request has been sent'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error sending partner request', error)
-        errorToast(create, $trans('Error sending partner request'))
+        errorToast(this.create, $trans('Error sending partner request'))
         this.isLoading = false
       }
     },

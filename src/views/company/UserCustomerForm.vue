@@ -352,7 +352,7 @@ export default {
         this.customers = response
         this.isLoading = false
       }).catch(() => {
-        errorToast(create, $trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
         this.isLoading = false
       })
     },
@@ -388,11 +388,11 @@ export default {
 
         try {
           await customerUserModel.insert(this.customeruser)
-          infoToast(create, $trans('Created'), $trans('Customer user has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Customer user has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
-          errorToast(create, $trans('Error creating customer user'))
+          errorToast(this.create, $trans('Error creating customer user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -411,11 +411,11 @@ export default {
         }
 
         await customerUserModel.update(this.pk, this.customeruser)
-        infoToast(create, $trans('Updated'), $trans('Customer user has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Customer user has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
-        errorToast(create, $trans('Error updating customer user'))
+        errorToast(this.create, $trans('Error updating customer user'))
         this.isLoading = false
       }
     },
@@ -431,7 +431,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customeruser', error)
-        errorToast(create, $trans('Error loading customer user'))
+        errorToast(this.create, $trans('Error loading customer user'))
         this.isLoading = false
       }
     },

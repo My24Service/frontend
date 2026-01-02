@@ -188,11 +188,11 @@ export default {
       if (confirm($trans("Import these records?"))) {
         try {
           await this.service.doImport(this.pk)
-          infoToast(create, $trans('Imported'), $trans('Data has been imported'))
+          infoToast(this.create, $trans('Imported'), $trans('Data has been imported'))
           await this.$router.push({name: 'company-import-list'})
         } catch (error) {
           console.log('Error importing data', error)
-          errorToast(create, $trans('Error importing data'))
+          errorToast(this.create, $trans('Error importing data'))
         }
       }
     },

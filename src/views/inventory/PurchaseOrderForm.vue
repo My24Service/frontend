@@ -231,7 +231,7 @@
                   v-bind:label="$trans('Expected entry date')"
                   label-for="expected_entry_date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="expected_entry_date"
                     size="sm"
                     class="p-sm-0"
@@ -241,7 +241,7 @@
                     locale="nl"
                     :state="isSubmitClicked ? !v$.purchaseOrder.expected_entry_date.$error : null"
                     :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.purchaseOrder.expected_entry_date.$error : null">
                     {{ $trans('Please enter a date') }}
@@ -559,7 +559,7 @@ export default {
 
       await this.getSuppliers('')
     } catch {
-      errorToast(create, $trans('Error fetching countries'))
+      errorToast(this.create, $trans('Error fetching countries'))
       this.buttonDisabled = false
     }
   },
@@ -622,7 +622,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching materials', error)
-        errorToast(create, $trans('Error fetching products'))
+        errorToast(this.create, $trans('Error fetching products'))
         this.isLoading = false
       }
     },
@@ -635,7 +635,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching suppliers', error)
-        errorToast(create, $trans('Error fetching suppliers'))
+        errorToast(this.create, $trans('Error fetching suppliers'))
         this.isLoading = false
       }
     },
@@ -667,7 +667,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error searching reservations', error)
-        errorToast(create, $trans('Error searching reservations'))
+        errorToast(this.create, $trans('Error searching reservations'))
         this.isLoading = false
       }
     },
@@ -712,14 +712,14 @@ export default {
             await purchaseOrderMaterialModel.insert(material)
           }
 
-          infoToast(create, $trans('Created'), $trans('Purchase order has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Purchase order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating purchase order', error)
-          errorToast(create, $trans('Error creating purchase order'))
+          errorToast(this.create, $trans('Error creating purchase order'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -729,23 +729,23 @@ export default {
 
       try {
         await purchaseOrderModel.update(this.pk, this.purchaseOrder)
-        infoToast(create, $trans('Updated'), $trans('Purchase order has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Purchase order has been updated'))
 
         for (let material of this.purchaseOrder.materials) {
           material.purchase_order = this.pk
           if (material.id) {
             await purchaseOrderMaterialModel.update(material.id, material)
-            infoToast(create, $trans('Product updated'), $trans('Purchase order product has been updated'))
+            infoToast(this.create, $trans('Product updated'), $trans('Purchase order product has been updated'))
           } else {
             await purchaseOrderMaterialModel.insert(material)
-            infoToast(create, $trans('Product created'), $trans('Purchase order product has been created'))
+            infoToast(this.create, $trans('Product created'), $trans('Purchase order product has been created'))
           }
         }
 
         for (const material of this.deletedMaterials) {
           if (material.id) {
             await purchaseOrderMaterialModel.delete(material.id)
-            infoToast(create, $trans('Product removed'), $trans('Purchase order product has been removed'))
+            infoToast(this.create, $trans('Product removed'), $trans('Purchase order product has been removed'))
           }
         }
 
@@ -754,7 +754,7 @@ export default {
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating purchase order', error)
-        errorToast(create, $trans('Error updating purchase order'))
+        errorToast(this.create, $trans('Error updating purchase order'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -772,7 +772,7 @@ export default {
         await this.getMaterials('')
       } catch(error) {
         console.log('error fetching purchase order', error)
-        errorToast(create, $trans('Error fetching purchase order'))
+        errorToast(this.create, $trans('Error fetching purchase order'))
         this.isLoading = false
       }
     },

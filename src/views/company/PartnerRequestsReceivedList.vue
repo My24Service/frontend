@@ -183,11 +183,11 @@ export default {
     async acceptRequest() {
       try {
         await this.model.accept(this.pk)
-        infoToast(create, $trans('Accepted'), $trans('Partner request has been accepted'))
+        infoToast(this.create, $trans('Accepted'), $trans('Partner request has been accepted'))
         await this.loadData()
       } catch(error) {
         console.log('Error accepting partner request', error)
-        errorToast(create, $trans('Error accepting partner request'))
+        errorToast(this.create, $trans('Error accepting partner request'))
       }
     },
     showRejectRequestModal(id) {
@@ -197,11 +197,11 @@ export default {
     async rejectRequest() {
       try {
         await this.model.reject(this.pk)
-        infoToast(create, $trans('Rejected'), $trans('Partner request has been rejected'))
+        infoToast(this.create, $trans('Rejected'), $trans('Partner request has been rejected'))
         await this.loadData()
       } catch(error) {
         console.log('Error rejecting partner request', error)
-        errorToast(create, $trans('Error rejecting partner request'))
+        errorToast(this.create, $trans('Error rejecting partner request'))
       }
     },
     // delete
@@ -212,11 +212,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('Partner request has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Partner request has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting partner request', error)
-        errorToast(create, $trans('Error deleting partner request'))
+        errorToast(this.create, $trans('Error deleting partner request'))
       }
     },
     // rest
@@ -229,7 +229,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching partnerRequestsReceived', error);
-        errorToast(create, $trans('Error loading partner requests sent'))
+        errorToast(this.create, $trans('Error loading partner requests sent'))
         this.isLoading = false
       }
     }

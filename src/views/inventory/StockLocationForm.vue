@@ -143,13 +143,13 @@ export default {
       if (this.isCreate) {
         try {
           await stockLocationModel.insert(this.stockLocation)
-          infoToast(create, $trans('Created'), $trans('Stock location has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Stock location has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating stock location', error)
-          errorToast(create, $trans('Error creating stock location'))
+          errorToast(this.create, $trans('Error creating stock location'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -159,13 +159,13 @@ export default {
 
       try {
         await stockLocationModel.update(this.pk, this.stockLocation)
-        infoToast(create, $trans('Updated'), $trans('Stock location has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Stock location has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating stock location', error)
-        errorToast(create, $trans('Error updating stock location'))
+        errorToast(this.create, $trans('Error updating stock location'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -178,7 +178,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching stock location', error)
-        errorToast(create, $trans('Error fetching stock location'))
+        errorToast(this.create, $trans('Error fetching stock location'))
         this.isLoading = false
       }
     },

@@ -164,7 +164,7 @@ export default {
       this.$refs['attach-order-modal'].show(event_id, engineer_user_id)
     },
     assignedOk() {
-      infoToast(create, $trans('Assigned'), $trans('Order created and assigned'))
+      infoToast(this.create, $trans('Assigned'), $trans('Order created and assigned'))
     },
 
     // delete
@@ -175,11 +175,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.engineerEventModelPk)
-        infoToast(create, $trans('Deleted'), $trans('Event has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Event has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting event', error)
-        errorToast(create, $trans('Error deleting event'))
+        errorToast(this.create, $trans('Error deleting event'))
       }
     },
     // rest
@@ -195,7 +195,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching events', error)
-        errorToast(create, $trans('Error loading events'))
+        errorToast(this.create, $trans('Error loading events'))
         this.isLoading = false
       }
     },

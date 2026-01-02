@@ -298,7 +298,7 @@ export default {
       } catch(error) {
         console.log('Error fetching materials', error)
         this.isLoading = false
-        errorToast(create, $trans('Error fetching materials'))
+        errorToast(this.create, $trans('Error fetching materials'))
       }
     },
     materialLabel(material) {
@@ -322,7 +322,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching locations', error)
-        errorToast(create, $trans('Error fetching locations'))
+        errorToast(this.create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -339,7 +339,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching locations', error)
-        errorToast(create, $trans('Error fetching locations'))
+        errorToast(this.create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -364,7 +364,7 @@ export default {
           this.selectedFromLocationPk,
           this.selectedToLocationPk,
           this.amount)
-        infoToast(create, $trans('Moved'), $trans('Material moved'))
+        infoToast(this.create, $trans('Moved'), $trans('Material moved'))
         this.buttonDisabled = true
         this.isLoading = false
 
@@ -382,7 +382,7 @@ export default {
         }
       } catch(error) {
         console.log('error moving', error)
-        errorToast(create, $trans('Error moving material'))
+        errorToast(this.create, $trans('Error moving material'))
         this.buttonDisabled = false
         this.isLoading = false
       }

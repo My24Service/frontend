@@ -183,7 +183,7 @@ export default {
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user active', error)
-        errorToast(create, $trans('Error setting student user active'))
+        errorToast(this.create, $trans('Error setting student user active'))
       }
     },
     async setInActive(pk, email) {
@@ -192,7 +192,7 @@ export default {
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user inactive', error)
-        errorToast(create, $trans('Error setting student user inactive'))
+        errorToast(this.create, $trans('Error setting student user inactive'))
       }
     },
     // delete
@@ -203,11 +203,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('studentuser has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('studentuser has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting studentuser', error)
-        errorToast(create, $trans('Error deleting studentuser'))
+        errorToast(this.create, $trans('Error deleting studentuser'))
       }
     },
     // rest
@@ -220,7 +220,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentusers', error)
-        errorToast(create, $trans('Error loading student users'))
+        errorToast(this.create, $trans('Error loading student users'))
         this.isLoading = false
       }
     }

@@ -170,11 +170,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.importPk)
-        infoToast(create, $trans('Deleted'), $trans('Import has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Import has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('error deleting import', error)
-        errorToast(create, $trans('Error deleting import'))
+        errorToast(this.create, $trans('Error deleting import'))
       }
     },
     async loadData() {
@@ -186,7 +186,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching imports', error)
-        errorToast(create, $trans('Error loading imports'))
+        errorToast(this.create, $trans('Error loading imports'))
         this.isLoading = false
       }
     },
@@ -194,12 +194,12 @@ export default {
       if (confirm($trans("Revert this import? All created and related data will be deleted."))) {
         try {
           await this.service.revertImport(id)
-          infoToast(create, $trans('Reverted'), $trans('Import has been reverted'))
+          infoToast(this.create, $trans('Reverted'), $trans('Import has been reverted'))
           // await this.$router.push({name: 'company-import-list'})
           await this.loadData()
         } catch (error) {
           console.log('Error reverting import', error)
-          errorToast(create, $trans('Error reverting import'))
+          errorToast(this.create, $trans('Error reverting import'))
         }
       }
     }

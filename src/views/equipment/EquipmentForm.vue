@@ -420,7 +420,7 @@
               v-bind:label="$trans('Installation date')"
               label-for="equipment_installation_date"
             >
-              <b-form-datepicker
+              <VueDatePicker
                 id="equipment_installation_date"
                 size="sm"
                 class="p-sm-0"
@@ -429,7 +429,7 @@
                 value="equipment.installation_date"
                 locale="nl"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
             </BFormGroup>
 
             <BFormGroup
@@ -438,7 +438,7 @@
               v-bind:label="$trans('Production date')"
               label-for="equipment_production_date"
             >
-              <b-form-datepicker
+              <VueDatePicker
                 id="equipment_production_date"
                 size="sm"
                 class="p-sm-0"
@@ -447,7 +447,7 @@
                 value="equipment.production_date"
                 locale="nl"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
             </BFormGroup>
 
           <BFormGroup
@@ -628,7 +628,7 @@ export default {
         this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
-        errorToast(create, $trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
       }
     },
     customerLabel({ name, city}) {
@@ -646,7 +646,7 @@ export default {
         this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
-        errorToast(create, $trans('Error fetching branches'))
+        errorToast(this.create, $trans('Error fetching branches'))
       }
     },
     branchLabel({ name, city}) {
@@ -678,7 +678,7 @@ export default {
       if (this.isCreate) {
         try {
           await this.equipmentService.insert(this.equipment)
-          infoToast(create, $trans('Created'), $trans('Equipment has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Equipment has been created'))
           this.isLoading = false
 
           if (isBulk) {
@@ -693,7 +693,7 @@ export default {
           }
         } catch(error) {
           console.log('Error creating equipment', error)
-          errorToast(create, $trans('Error creating equipment'))
+          errorToast(this.create, $trans('Error creating equipment'))
           this.isLoading = false
         }
 
@@ -702,12 +702,12 @@ export default {
 
       try {
         await this.equipmentService.update(this.pk, this.equipment)
-        infoToast(create, $trans('Updated'), $trans('Equipment has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Equipment has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating equipment', error)
-        errorToast(create, $trans('Error updating equipment'))
+        errorToast(this.create, $trans('Error updating equipment'))
         this.isLoading = false
       }
     },
@@ -734,7 +734,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)
-        errorToast(create, $trans('Error loading equipment'))
+        errorToast(this.create, $trans('Error loading equipment'))
         this.isLoading = false
       }
     },

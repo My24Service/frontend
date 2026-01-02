@@ -120,13 +120,13 @@ export default {
       this.isLoading = true
       try {
         const result = await accountModel.resetPassword(this.password1)
-        infoToast(create, $trans('Password reset'), $trans('Reset password successful'))
+        infoToast(this.create, $trans('Password reset'), $trans('Reset password successful'))
 
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.push({path: '/'})
       } catch(error) {
-        errorToast(create, $trans('Something went wrong, please try again'))
+        errorToast(this.create, $trans('Something went wrong, please try again'))
 
         this.buttonDisabled = false
         this.isLoading = false

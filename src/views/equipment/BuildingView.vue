@@ -193,7 +193,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching building detail data', error)
-        errorToast(create, $trans('Error fetching building detail'))
+        errorToast(this.create, $trans('Error fetching building detail'))
         this.isLoading = false
       }
     },
@@ -206,7 +206,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        errorToast(create, $trans('Error fetching orders'))
+        errorToast(this.create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     }

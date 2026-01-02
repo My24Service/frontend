@@ -15,7 +15,7 @@
             :label="$trans('Start date')"
             label-for="start_date"
             cols="1">
-            <b-form-datepicker
+            <VueDatePicker
               id="start_date"
               v-model="start_date"
               :placeholder="$trans('Select date')"
@@ -23,7 +23,7 @@
               value-as-date=true
               :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
               @input="check_date_start()"
-            ></b-form-datepicker>
+            ></VueDatePicker>
           </BFormGroup>
 
           <BFormGroup
@@ -31,7 +31,7 @@
             v-bind:label="$trans('End date')"
             label-for="end_date"
             cols="2">
-              <b-form-datepicker
+              <VueDatePicker
                 id="end_date"
                 v-model="end_date"
                 class="mb-2"
@@ -41,7 +41,7 @@
                 :state="this.error == null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
                 @input="check_date_end()"
-              ></b-form-datepicker>
+              ></VueDatePicker>
             </BFormGroup>
         </b-container>
       </form>

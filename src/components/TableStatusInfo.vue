@@ -85,7 +85,7 @@ export default {
         await this.statusService.insert(status)
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(create, $trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     }
   },

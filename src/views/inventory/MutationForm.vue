@@ -226,7 +226,7 @@ export default {
       } catch(error) {
         console.log('Error fetching materials', error)
         this.isLoading = false
-        errorToast(create, $trans('Error fetching materials'))
+        errorToast(this.create, $trans('Error fetching materials'))
       }
     },
     materialLabel(material) {
@@ -241,7 +241,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching locations', error)
-        errorToast(create, $trans('Error fetching locations'))
+        errorToast(this.create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -267,13 +267,13 @@ export default {
 
       try {
         await mutationModel.insert(this.mutation)
-        infoToast(create, $trans('Created'), $trans('Mutation created'))
+        infoToast(this.create, $trans('Created'), $trans('Mutation created'))
         this.buttonDisabled = false
         this.isLoading = false
         await this.$router.push({name: 'mutation-list'})
       } catch(error) {
         console.log('error creating mutation', error)
-        errorToast(create, $trans('Error creating mutation'))
+        errorToast(this.create, $trans('Error creating mutation'))
         this.buttonDisabled = false
         this.isLoading = false
       }

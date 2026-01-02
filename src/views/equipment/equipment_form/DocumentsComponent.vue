@@ -278,7 +278,7 @@ export default {
     deleteDocument(index) {
       this.documentService.deleteCollectionItem(index)
       if (this.getParentId()) {
-        infoToast(create, $trans('Marked for delete'), $trans("Document marked for delete"))
+        infoToast(this.create, $trans('Marked for delete'), $trans("Document marked for delete"))
       }
     },
     async loadData() {
@@ -312,7 +312,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching documents', error)
-        errorToast(create, $trans('Error loading documents'))
+        errorToast(this.create, $trans('Error loading documents'))
         this.isLoading = false
       }
     },
@@ -382,7 +382,7 @@ export default {
 
       if (documentErrors.length > 0) {
         console.log('no equipment/locations to update documents', documentErrors)
-        errorToast(create, $trans('Error updating documents (no equipment or location)'))
+        errorToast(this.create, $trans('Error updating documents (no equipment or location)'))
         return documentErrors
       }
 
@@ -392,16 +392,16 @@ export default {
         errors = this.documentService.collection.filter((d) => d.error)
 
         if (errors.length > 0) {
-          errorToast(create, $trans('Error updating documents'))
+          errorToast(this.create, $trans('Error updating documents'))
         } else {
-          infoToast(create, $trans('Updated'), $trans('Documents have been updated'))
+          infoToast(this.create, $trans('Updated'), $trans('Documents have been updated'))
           this.documentService.collectionHasChanges = false
         }
         // await this.loadData()
       } catch (e) {
         errors.push(e)
         console.log('error updating documents', e)
-        errorToast(create, $trans('Error updating documents'))
+        errorToast(this.create, $trans('Error updating documents'))
       }
 
       this.isLoading = false

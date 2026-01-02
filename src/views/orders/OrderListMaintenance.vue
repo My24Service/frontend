@@ -47,7 +47,12 @@
                     <BFormRadio v-model="sortMode" value="last_update">{{ $trans('Last update') }}</BFormRadio>
                   </BFormGroup>
                   <BFormGroup :label="$trans('Display only orders since')">
-                    <b-form-datepicker v-model="sinceDate" id="sort-filter-since" value="" locale="nl" :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }" />
+                    <VueDatePicker
+                      v-model="sinceDate"
+                      id="sort-filter-since"
+                      value="" locale="nl"
+                      :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    />
                   </BFormGroup>
                 </div>
               </b-col>
@@ -240,11 +245,12 @@ import SearchForm from '../../components/SearchForm.vue'
 import UserFilters from "../../components/UserFilters.vue"
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast, $trans, doFetchUnacceptedCountAndUpdateStore} from "@/utils";
 
 import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import {OrderFilterService} from "@/models/orders/OrderFilter";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -255,6 +261,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   components: {
     OrderTableInfo,
     IconLinkAssign,
@@ -366,11 +373,11 @@ export default {
 
       try {
         await this.statusService.insert(status)
-        infoToast(create, $trans('Created'), $trans('Status has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(create, $trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     },
     rowStyle(item, type) {
@@ -394,11 +401,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.orderPk)
-        infoToast(create, $trans('Deleted'), $trans('Order has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
-        errorToast(create, $trans('Error deleting order'))
+        errorToast(this.create, $trans('Error deleting order'))
       }
     },
     async loadData() {
@@ -407,7 +414,7 @@ export default {
       // get filters
       this.userFilters = await this.filterService.getSimpleList()
 
-      await this.doFetchUnacceptedCountAndUpdateStore()
+      await doFetchUnacceptedCountAndUpdateStore(this.$store)
       this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
 
       this.model.setUserFilter(this.$route.query.user_filter)
@@ -418,7 +425,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
-        errorToast(create, $trans('Error loading orders'))
+        errorToast(this.create, $trans('Error loading orders'))
         this.isLoading = false
       }
     },

@@ -257,7 +257,7 @@
                     v-bind:label="$trans('Date')"
                     label-for="purchaseorder-entry-date"
                   >
-                    <b-form-datepicker
+                    <VueDatePicker
                       id="purchaseorder-entry-date"
                       size="sm"
                       class="p-sm-0"
@@ -267,7 +267,7 @@
                       locale="nl"
                       :state="isSubmitClicked ? !v$.entry.entry_date.$error : null"
                       :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                    ></b-form-datepicker>
+                    ></VueDatePicker>
                     <b-form-invalid-feedback
                       :state="isSubmitClicked ? !v$.entry.entry_date.$error : null">
                       {{ $trans('Please enter a date') }}
@@ -480,7 +480,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching purchase order products', error)
-        errorToast(create, $trans('Error fetching purchase order products'))
+        errorToast(this.create, $trans('Error fetching purchase order products'))
         this.isLoading = false
       }
     },
@@ -545,7 +545,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching purchase orders', error)
-        errorToast(create, $trans('Error fetching purchase orders'))
+        errorToast(this.create, $trans('Error fetching purchase orders'))
         this.isLoading = false
       }
     },
@@ -574,14 +574,14 @@ export default {
         try {
           for (const entry of this.purchaseorderEntries) {
             await purchaseorderEntryModel.insert(entry)
-            infoToast(create, $trans('Created'), $trans('Entry has been created'))
+            infoToast(this.create, $trans('Created'), $trans('Entry has been created'))
           }
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating entry', error)
-          errorToast(create, $trans('Error creating entry'))
+          errorToast(this.create, $trans('Error creating entry'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -604,13 +604,13 @@ export default {
 
       try {
         await purchaseorderEntryModel.update(this.pk, this.purchaseorderEntry)
-        infoToast(create, $trans('Updated'), $trans('Entry has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Entry has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating entry', error)
-        errorToast(create, $trans('Error updating entry'))
+        errorToast(this.create, $trans('Error updating entry'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -628,7 +628,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching entry', error)
-        errorToast(create, $trans('Error fetching entry'))
+        errorToast(this.create, $trans('Error fetching entry'))
         this.isLoading = false
       }
     },

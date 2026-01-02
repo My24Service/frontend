@@ -142,13 +142,13 @@ export default {
       if (this.isCreate) {
         try {
           await materialEventTypeModel.insert(this.materialEventType)
-          infoToast(create, $trans('Created'), $trans('Event type has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Event type has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating event type', error)
-          errorToast(create, $trans('Error creating event type'))
+          errorToast(this.create, $trans('Error creating event type'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -158,13 +158,13 @@ export default {
 
       try {
         await materialEventTypeModel.update(this.pk, this.materialEventType)
-        infoToast(create, $trans('Updated'), $trans('Event type has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Event type has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating event type', error)
-        errorToast(create, $trans('Error updating event type'))
+        errorToast(this.create, $trans('Error updating event type'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -177,7 +177,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching event type', error)
-        errorToast(create, $trans('Error fetching event type'))
+        errorToast(this.create, $trans('Error fetching event type'))
         this.isLoading = false
       }
     },

@@ -183,11 +183,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('Branch has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Branch has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting branch', error)
-        errorToast(create, $trans('Error deleting branch'))
+        errorToast(this.create, $trans('Error deleting branch'))
       }
     },
     // rest
@@ -200,7 +200,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching branches', error)
-        errorToast(create, $trans('Error loading branches'))
+        errorToast(this.create, $trans('Error loading branches'))
         this.isLoading = false
       }
     }

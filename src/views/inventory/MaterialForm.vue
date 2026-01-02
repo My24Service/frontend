@@ -369,13 +369,13 @@ export default {
       if (this.isCreate) {
         try {
           await materialService.insert(this.material)
-          infoToast(create, $trans('Created'), $trans('Material has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Material has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating material', error)
-          errorToast(create, $trans('Error creating material'))
+          errorToast(this.create, $trans('Error creating material'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -389,13 +389,13 @@ export default {
         }
 
         await materialService.update(this.pk, this.material)
-        infoToast(create, $trans('Updated'), $trans('Material has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Material has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating material', error)
-        errorToast(create, $trans('Error updating material'))
+        errorToast(this.create, $trans('Error updating material'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -407,7 +407,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching suppliers', error)
-        errorToast(create, $trans('Error fetching suppliers'))
+        errorToast(this.create, $trans('Error fetching suppliers'))
         this.isLoading = false
       }
     },
@@ -420,7 +420,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching material', error)
-        errorToast(create, $trans('Error fetching material'))
+        errorToast(this.create, $trans('Error fetching material'))
         this.isLoading = false
       }
     },

@@ -722,11 +722,11 @@ export default {
           this.studentuser.username = this.studentuser.email
 
           await studentUserModel.register(this.studentuser)
-          infoToast(create, $trans('Registered'), $trans('Registration success'))
+          infoToast(this.create, $trans('Registered'), $trans('Registration success'))
           this.registrationSuccess = true
         } catch(error) {
           console.log('Error creating studentuser', error)
-          errorToast(create, $trans('Error registering'))
+          errorToast(this.create, $trans('Error registering'))
           this.buttonDisabled = false
         }
 
@@ -754,12 +754,12 @@ export default {
         this.studentuser.password = this.studentuser.password1
         try {
           await studentUserModel.insert(this.studentuser)
-          infoToast(create, $trans('Created'), $trans('studentuser has been created'))
+          infoToast(this.create, $trans('Created'), $trans('studentuser has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating studentuser', error)
-          errorToast(create, $trans('Error creating studentuser'))
+          errorToast(this.create, $trans('Error creating studentuser'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -780,12 +780,12 @@ export default {
         }
 
         await studentUserModel.update(this.pk, this.studentuser)
-        infoToast(create, $trans('Updated'), $trans('studentuser has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('studentuser has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating studentuser', error)
-        errorToast(create, $trans('Error updating studentuser'))
+        errorToast(this.create, $trans('Error updating studentuser'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -799,7 +799,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentuser', error)
-        errorToast(create, $trans('Error loading studentuser'))
+        errorToast(this.create, $trans('Error loading studentuser'))
         this.isLoading = false
       }
     },

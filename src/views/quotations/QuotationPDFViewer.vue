@@ -144,17 +144,17 @@ export default {
 
       try {
         await this.quotationService.makeDefinitive(this.quotation.id)
-        infoToast(create, $trans('Success'), $trans('Quotation is now definitive'))
+        infoToast(this.create, $trans('Success'), $trans('Quotation is now definitive'))
         this.isLoading = false
         await this.$router.push({ name: 'quotation-view', params: {pk: this.quotation.id }})
       } catch(error) {
-        errorToast(create, $trans('Error making quotation definitive'))
+        errorToast(this.create, $trans('Error making quotation definitive'))
         this.isLoading = false
         if (error.response?.data?.template_error) {
-          errorToast(create, error.response.data.template_error)
+          errorToast(this.create, error.response.data.template_error)
           return
         }
-        errorToast(create, $trans('Error generating pdf'))
+        errorToast(this.create, $trans('Error generating pdf'))
       }
     },
     async generatePdf() {
@@ -168,12 +168,12 @@ export default {
         if (!result_ok) {
           this.$refs['pdf-error-modal'].show()
         } else {
-          infoToast(create, $trans('Success'), $trans('PDF created'))
+          infoToast(this.create, $trans('Success'), $trans('PDF created'))
         }
       } catch(error) {
         console.log('error generating pdf', error)
         this.isLoading = false
-        errorToast(create, $trans('Error creating PDF'))
+        errorToast(this.create, $trans('Error creating PDF'))
       }
     },
     async downloadPdf() {
@@ -264,7 +264,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        errorToast(create, $trans('Error fetching quotation'))
+        errorToast(this.create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     },

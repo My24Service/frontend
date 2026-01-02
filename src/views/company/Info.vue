@@ -446,13 +446,13 @@ export default {
         }
 
         await memberModel.updateMe(this.member)
-        infoToast(create, $trans('Updated'), $trans('Info updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Info updated'))
 
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('error updating member/me', error)
-        errorToast(create, $trans('Error updating info'))
+        errorToast(this.create, $trans('Error updating info'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -472,7 +472,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching member/me', error)
-        errorToast(create, $trans('Error fetching member info'))
+        errorToast(this.create, $trans('Error fetching member info'))
         this.isLoading = false
       }
     },

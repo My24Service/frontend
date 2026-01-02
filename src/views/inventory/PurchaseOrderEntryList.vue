@@ -147,11 +147,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.entryPk)
-        infoToast(create, $trans('Deleted'), $trans('Entry has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Entry has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting entry', error)
-        errorToast(create, $trans('Error deleting entry'))
+        errorToast(this.create, $trans('Error deleting entry'))
       }
     },
     // rest
@@ -164,7 +164,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching entries', error)
-        errorToast(create, $trans('Error loading entries'))
+        errorToast(this.create, $trans('Error loading entries'))
         this.isLoading = false
       }
     }

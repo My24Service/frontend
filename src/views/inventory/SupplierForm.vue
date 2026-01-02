@@ -261,13 +261,13 @@ export default {
       if (this.isCreate) {
         try {
           await supplierModel.insert(this.supplier)
-          infoToast(create, $trans('Created'), $trans('Supplier has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Supplier has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating supplier', error)
-          errorToast(create, $trans('Error creating supplier'))
+          errorToast(this.create, $trans('Error creating supplier'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -277,13 +277,13 @@ export default {
 
       try {
         await supplierModel.update(this.pk, this.supplier)
-        infoToast(create, $trans('Updated'), $trans('Supplier has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Supplier has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating supplier', error)
-        errorToast(create, $trans('Error updating supplier'))
+        errorToast(this.create, $trans('Error updating supplier'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -296,7 +296,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching supplier', error)
-        errorToast(create, $trans('Error fetching supplier'))
+        errorToast(this.create, $trans('Error fetching supplier'))
         this.isLoading = false
       }
     },

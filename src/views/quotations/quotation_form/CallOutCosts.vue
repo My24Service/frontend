@@ -308,13 +308,13 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        infoToast(create, $trans('Created'), $trans('Call-out costs have been updated'))
+        infoToast(this.create, $trans('Created'), $trans('Call-out costs have been updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error creating call out costs', error)
-        errorToast(create, $trans('Error creating call-out costs'))
+        errorToast(this.create, $trans('Error creating call-out costs'))
         this.isLoading = false
       }
     },
@@ -347,7 +347,7 @@ export default {
         this.isLoaded = true
       } catch(error) {
         console.log('error fetching call out costs costs', error)
-        errorToast(create, $trans('Error fetching costs'))
+        errorToast(this.create, $trans('Error fetching costs'))
         this.isLoading = false
         this.isLoaded = true
       }

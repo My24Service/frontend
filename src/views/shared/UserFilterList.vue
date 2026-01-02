@@ -159,11 +159,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('Filter has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Filter has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting filter', error)
-        errorToast(create, $trans('Error deleting filter'))
+        errorToast(this.create, $trans('Error deleting filter'))
       }
     },
     async loadData() {
@@ -175,7 +175,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching filters', error)
-        errorToast(create, $trans('Error loading filters'))
+        errorToast(this.create, $trans('Error loading filters'))
         this.isLoading = false
       }
     }

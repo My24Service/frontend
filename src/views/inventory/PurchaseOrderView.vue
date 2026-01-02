@@ -161,7 +161,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching purchase order', error)
-        errorToast(create, $trans('Error fetching purchase order'))
+        errorToast(this.create, $trans('Error fetching purchase order'))
         this.isLoading = false
       }
     }

@@ -320,12 +320,12 @@ export default {
         this.salesuser.password = this.salesuser.password1
         try {
           await salesUserModel.insert(this.salesuser)
-          infoToast(create, $trans('Created'), $trans('sales user has been created'))
+          infoToast(this.create, $trans('Created'), $trans('sales user has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating sales user', error)
-          errorToast(create, $trans('Error creating sales user'))
+          errorToast(this.create, $trans('Error creating sales user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -344,12 +344,12 @@ export default {
         }
 
         await salesUserModel.update(this.pk, this.salesuser)
-        infoToast(create, $trans('Updated'), $trans('sales user has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('sales user has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating sales user', error)
-        errorToast(create, $trans('Error updating sales user'))
+        errorToast(this.create, $trans('Error updating sales user'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -363,7 +363,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching salesuser', error)
-        errorToast(create, $trans('Error loading sales user'))
+        errorToast(this.create, $trans('Error loading sales user'))
         this.isLoading = false
       }
     },

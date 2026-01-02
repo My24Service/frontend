@@ -89,13 +89,13 @@ export default {
       this.isLoading = true
       try {
         const result = await accountModel.sendResetPasswordLink(this.email)
-        infoToast(create, $trans('Reset link sent'), $trans('Password reset link has been sent'))
+        infoToast(this.create, $trans('Reset link sent'), $trans('Password reset link has been sent'))
 
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
-        errorToast(create, $trans('Something went wrong, please try again'))
+        errorToast(this.create, $trans('Something went wrong, please try again'))
 
         this.buttonDisabled = false
         this.isLoading = false

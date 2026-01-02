@@ -143,12 +143,12 @@ export default {
        this.isLoading = true;
       try {
         await this.sickLeavesService.setAsConfirmed(this.leavePk);
-        infoToast(create, $trans("Accepted"), $trans("Leave as been marked as confirmed"));
+        infoToast(this.create, $trans("Accepted"), $trans("Leave as been marked as confirmed"));
         await this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error confirming leave", error);
-        errorToast(create, $trans("Error confirming sick leave"));
+        errorToast(this.create, $trans("Error confirming sick leave"));
       }
     },
     async loadData() {
@@ -160,7 +160,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching unconfirmed sick leave request", error);
-        errorToast(create, $trans("Error loading unconfirmed sick leave request"));
+        errorToast(this.create, $trans("Error loading unconfirmed sick leave request"));
         this.isLoading = false;
       }
     }

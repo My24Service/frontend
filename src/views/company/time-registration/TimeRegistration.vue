@@ -87,7 +87,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching time data', error)
-        errorToast(create, $trans('Error loading time data'))
+        errorToast(this.create, $trans('Error loading time data'))
         this.isLoading = false
       }
     }

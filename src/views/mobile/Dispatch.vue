@@ -89,13 +89,13 @@
             <BLink class="px-1" @click.prevent="timeBack" v-bind:title="$trans('Day back') ">
               <IBiArrowLeftShort font-scale="1.8"></IBiArrowLeftShort>
             </BLink>
-            <b-form-datepicker
+            <VueDatePicker
               v-model="startDate"
               size="sm"
               placeholder="Start date"
               locale="nl"
               :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
-            ></b-form-datepicker>
+            ></VueDatePicker>
             <BButton @click="function() { loadToday() }" variant="primary" size="sm" style="color: white; white-space: nowrap;">
               <IBiCalendar2DateFill></IBiCalendar2DateFill>&nbsp;
               {{ $trans('today') }}
@@ -154,7 +154,7 @@
                   v-bind:label="$trans('Start date')"
                   label-for="dates-order-start-date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="dates-order-start-date"
                     size="sm"
                     class="p-sm-0"
@@ -165,7 +165,7 @@
                     :min="minDate"
                     :max="maxDate"
                     value-as-date
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                 </BFormGroup>
               </b-col>
               <b-col size="6">
@@ -187,7 +187,7 @@
                   v-bind:label="$trans('End date')"
                   label-for="dates-order-end-date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="dates-order-end-date"
                     size="sm"
                     class="p-sm-0"
@@ -198,7 +198,7 @@
                     :min="minDate"
                     :max="maxDate"
                     value-as-date
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                 </BFormGroup>
               </b-col>
               <b-col size="6">
@@ -275,7 +275,7 @@
                   v-bind:label="$trans('Start date')"
                   label-for="split-order-start-date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="split-order-start-date"
                     size="sm"
                     class="p-sm-0"
@@ -286,7 +286,7 @@
                     :min="minDate"
                     :max="maxDate"
                     value-as-date
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                 </BFormGroup>
               </b-col>
               <b-col size="6">
@@ -308,7 +308,7 @@
                   v-bind:label="$trans('End date')"
                   label-for="split-order-end-date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="split-order-end-date"
                     size="sm"
                     class="p-sm-0"
@@ -319,7 +319,7 @@
                     :min="minDate"
                     :max="maxDate"
                     value-as-date
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                 </BFormGroup>
               </b-col>
               <b-col size="6">
@@ -541,7 +541,7 @@ export default {
         this.searchingEngineers = false
       } catch(error) {
         console.log('Error fetching engineers', error)
-        errorToast(create, $trans('Error fetching engineers'))
+        errorToast(this.create, $trans('Error fetching engineers'))
         this.searchingEngineers = false
       }
     },
@@ -588,7 +588,7 @@ export default {
 
       } catch(error) {
         console.log('error updating assignedOrder dates', error)
-        errorToast(create, $trans('Error updating dates'))
+        errorToast(this.create, $trans('Error updating dates'))
         this.showOverlay = false
       }
     },
@@ -634,12 +634,12 @@ export default {
           await this.assignedOrderService.insert(obj)
         }
         this.$refs['dispatch-split-order-modal'].hide();
-        infoToast(create, $trans('Success'), $trans('Order split'))
+        infoToast(this.create, $trans('Success'), $trans('Order split'))
         this.refreshData()
         this.showOverlay = false
       } catch(error) {
         console.log('error creating assignedOrder', error)
-        errorToast(create, $trans('Error splitting order'))
+        errorToast(this.create, $trans('Error splitting order'))
         this.showOverlay = false
       }
     },
@@ -705,12 +705,12 @@ export default {
         this.$refs['dispatch-order-actions-modal'].show();
       } catch (error) {
         console.log('error fetching order', error)
-        errorToast(create, $trans('Error fetching order'))
+        errorToast(this.create, $trans('Error fetching order'))
       }
     },
     addSelectedUser(user) {
       if (this.userAlreadyAssigned(user.user_id)) {
-        infoToast(create, $trans('Already assigned'), $trans('Order(s) already assigned'))
+        infoToast(this.create, $trans('Already assigned'), $trans('Order(s) already assigned'))
         return
       }
       if (!this.userAlreadySelected(user.user_id)) {
@@ -737,13 +737,13 @@ export default {
           await this.assignService.assignToUser(user_id, this.selectedOrderIds, true)
         }
 
-        infoToast(create, $trans('Success'), $trans('Order(s) assigned'))
+        infoToast(this.create, $trans('Success'), $trans('Order(s) assigned'))
         this.cancelAssign()
         this.refreshData()
         this.buttonDisabled = false
         this.showOverlay = false
       } catch (e) {
-        errorToast(create, $trans('Error assigning order(s)'))
+        errorToast(this.create, $trans('Error assigning order(s)'))
         this.showOverlay = false
         this.buttonDisabled = false
       }
@@ -755,12 +755,12 @@ export default {
       this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
         try {
           await this.assignService.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
-          infoToast(create, $trans('Success'), $trans('Order removed from planning'))
+          infoToast(this.create, $trans('Success'), $trans('Order removed from planning'))
           this.refreshData()
           this.showOverlay = false
         } catch (error) {
           console.log('error un-assigning', error)
-          errorToast(create, $trans('Error un-assigning order'))
+          errorToast(this.create, $trans('Error un-assigning order'))
           this.showOverlay = false
         }
       })

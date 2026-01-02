@@ -199,6 +199,7 @@ import Pagination from "../../components/Pagination.vue"
 import SearchModal from '../../components/SearchModal.vue'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -209,6 +210,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   components: {
     OrderTableInfo,
     IconLinkEdit,
@@ -318,11 +320,11 @@ export default {
 
       try {
         await statusModel.insert(status)
-        infoToast(create, $trans('Created'), $trans('Status has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(create, $trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     },
     rowStyle(item, type) {
@@ -346,11 +348,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.orderPk)
-        infoToast(create, $trans('Deleted'), $trans('Order has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
-        errorToast(create, $trans('Error deleting order'))
+        errorToast(this.create, $trans('Error deleting order'))
       }
     },
     async loadData() {
@@ -363,7 +365,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
-        errorToast(create, $trans('Error loading orders'))
+        errorToast(this.create, $trans('Error loading orders'))
         this.isLoading = false
       }
     }

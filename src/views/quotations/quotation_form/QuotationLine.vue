@@ -428,7 +428,7 @@ export default {
       this.updateChapterTotals()
       const addedTxt = $trans('Added')
       const txt = newQuotationLines.length === 1 ? $trans('invoice line') : $trans('invoice lines')
-      infoToast(create, addedTxt, `${newQuotationLines.length} ${txt} ${addedTxt.toLowerCase()}`)
+      infoToast(this.create, addedTxt, `${newQuotationLines.length} ${txt} ${addedTxt.toLowerCase()}`)
       this.quotationLineService.collectionHasChanges = true
     },
     updateChapterTotals() {
@@ -467,13 +467,13 @@ export default {
             quotationLine.chapter = this.chapter.id
           }
           await this.quotationLineService.updateCollection()
-          infoToast(create, $trans('Updated'), $trans('chapter has been updated'))
+          infoToast(this.create, $trans('Updated'), $trans('chapter has been updated'))
           this.isLoading = false
           this.quotationLineService.collection = []
           await this.loadData()
           this.$emit('quotationLineSubmitted')
         } catch(error) {
-          errorToast(create, $trans('Error updating chapter'))
+          errorToast(this.create, $trans('Error updating chapter'))
           this.isLoading = false
       }
     },
@@ -492,7 +492,7 @@ export default {
           this.$emit('quotationLinesLoaded', this.quotationLineService.collection)
         } catch(error) {
           console.log('error fetching quotation lines', error)
-          errorToast(create, $trans('Error loading quotation lines'))
+          errorToast(this.create, $trans('Error loading quotation lines'))
           this.isLoading = false
         }
         this.quotationLineService.listArgs = []

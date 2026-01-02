@@ -86,7 +86,7 @@ async function doLogin(e) {
 
     // loader.hide()
 
-    infoToast(create, $trans('Logged in'), $trans('You are now logged in'))
+    infoToast(this.create, $trans('Logged in'), $trans('You are now logged in'))
 
     if (document.location.hash.indexOf('?') !== -1) {
       const nextPart = document.location.hash.split('?')[1]
@@ -101,7 +101,7 @@ async function doLogin(e) {
     await store.dispatch('auth/loginFailure');
     // loader.hide()
 
-    errorToast(create, $trans('Error logging you in'))
+    errorToast(this.create, $trans('Error logging you in'))
   }
 }
 </script>

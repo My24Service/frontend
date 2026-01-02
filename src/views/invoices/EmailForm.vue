@@ -170,7 +170,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching unsent email", error);
-        errorToast(create, $trans("Error fetching unsent email"));
+        errorToast(this.create, $trans("Error fetching unsent email"));
         this.isLoading = false;
       }
     },
@@ -221,7 +221,7 @@ export default {
       } catch(error) {
         this.isLoading = false
         console.log('error fetching invoice', error)
-        errorToast(create, $trans('Error fetching invoice'))
+        errorToast(this.create, $trans('Error fetching invoice'))
       }
     },
     async loadDocuments() {
@@ -235,7 +235,7 @@ export default {
       } catch (error) {
         this.isLoading = false;
         console.log("Error fetching documents", error);
-        errorToast(create, $trans("Error fetching documents"));
+        errorToast(this.create, $trans("Error fetching documents"));
       }
     },
     async submitForm() {
@@ -267,15 +267,15 @@ export default {
           this.isLoading = false;
 
           if (!this.email.is_sent) {
-            errorToast(create, sendError);
+            errorToast(this.create, sendError);
             return;
           }
-          infoToast(create, sentTitle, sentBody);
+          infoToast(this.create, sentTitle, sentBody);
           await this.$router.push({name: 'invoices-sent'});
         } catch (error) {
           console.log("Error sending invoice", error);
           this.isLoading = false;
-          errorToast(create, sendError);
+          errorToast(this.create, sendError);
         }
         return
       }
@@ -287,15 +287,15 @@ export default {
 
         this.isLoading = false
         if (!this.email.is_sent) {
-          errorToast(create, sendError);
+          errorToast(this.create, sendError);
           return;
         }
-        infoToast(create, sentTitle, sentBody);
+        infoToast(this.create, sentTitle, sentBody);
         await this.$router.push({name: 'invoices-sent'});
       } catch(error) {
         console.log("Error sending invoice", error);
         this.isLoading = false;
-        errorToast(create, sendError);
+        errorToast(this.create, sendError);
       }
     },
   }

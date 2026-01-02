@@ -275,11 +275,11 @@ export default {
     async doDelete() {
       try {
         await this.statuscodeService.delete(this.statuscodePk);
-        infoToast(create, $trans("Deleted"), $trans("Statuscode has been deleted"));
+        infoToast(this.create, $trans("Deleted"), $trans("Statuscode has been deleted"));
         await this.loadData();
       } catch (error) {
         console.log("error deleting statuscodes", error);
-        errorToast(create, $trans("Error deleting statuscode"));
+        errorToast(this.create, $trans("Error deleting statuscode"));
       }
     },
     // rest
@@ -292,7 +292,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscodes", error);
-        errorToast(create, $trans("Error loading statuscodes"));
+        errorToast(this.create, $trans("Error loading statuscodes"));
         this.isLoading = false;
       }
     }

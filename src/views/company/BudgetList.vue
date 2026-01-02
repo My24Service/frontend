@@ -200,15 +200,15 @@ export default {
       try {
         if (this.isEdit) {
           await this.service.update(this.budget.id, this.budget)
-          infoToast(create, $trans('Updated'), $trans('Budget modified'))
+          infoToast(this.create, $trans('Updated'), $trans('Budget modified'))
         } else {
           await this.service.insert(this.budget)
-          infoToast(create, $trans('Created'), $trans('Budget added'))
+          infoToast(this.create, $trans('Created'), $trans('Budget added'))
         }
         await this.loadData()
       } catch(error) {
         console.log('Error handling budget', error)
-        errorToast(create, $trans('Error handling budget'))
+        errorToast(this.create, $trans('Error handling budget'))
       }
     },
     // search
@@ -228,11 +228,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('Budget has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Budget has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting budget', error)
-        errorToast(create, $trans('Error deleting budget'))
+        errorToast(this.create, $trans('Error deleting budget'))
       }
     },
     // rest
@@ -242,7 +242,7 @@ export default {
         this.budgets = data.results.map((m) => new this.service.model(m))
       } catch(error) {
         console.log('error fetching budgets', error)
-        errorToast(create, $trans('Error loading budgets'))
+        errorToast(this.create, $trans('Error loading budgets'))
       }
     }
   }

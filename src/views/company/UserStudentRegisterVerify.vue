@@ -56,10 +56,10 @@ export default {
       try {
         await accountModel.sendResetPasswordLink(this.params.user_id, true)
         this.passwordLinkSent = true
-        infoToast(create, $trans('Sent'), $trans('Password reset link sent'))
+        infoToast(this.create, $trans('Sent'), $trans('Password reset link sent'))
       } catch (e) {
         console.log('Error sending password reset link', e)
-        errorToast(create, $trans('Error sending password reset link'))
+        errorToast(this.create, $trans('Error sending password reset link'))
         this.sendPasswordResetError = true
       }
     },
@@ -68,10 +68,10 @@ export default {
         const result = await accountModel.verify(this.params)
         console.log('HOI')
         this.verifySuccess = true
-        infoToast(create, $trans('Verified'), $trans('Account has been verified'))
+        infoToast(this.create, $trans('Verified'), $trans('Account has been verified'))
       } catch (e) {
         console.log('Error verifying studentuser', e)
-        errorToast(create, $trans('Error verifying'))
+        errorToast(this.create, $trans('Error verifying'))
         this.verifyError = true
       }
     }

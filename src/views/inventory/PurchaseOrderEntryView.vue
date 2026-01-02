@@ -105,7 +105,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching supplier/products', error)
-        errorToast(create, $trans('Error fetching supplier/products'))
+        errorToast(this.create, $trans('Error fetching supplier/products'))
         this.isLoading = false
       }
     }

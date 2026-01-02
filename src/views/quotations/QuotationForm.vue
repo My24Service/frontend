@@ -389,7 +389,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        errorToast(create, $trans('Error fetching quotation'))
+        errorToast(this.create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     },
@@ -405,11 +405,11 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.updateAndRecreate(this.quotation.id, quotation)
-        infoToast(create, $trans('Updated and recreated'), $trans('Quotation has been updated and the PDF recreated'))
+        infoToast(this.create, $trans('Updated and recreated'), $trans('Quotation has been updated and the PDF recreated'))
         this.isLoading = false
       } catch(error) {
         console.log('error updating quotation', error)
-        errorToast(create, $trans('Error updating quotation'))
+        errorToast(this.create, $trans('Error updating quotation'))
         this.isLoading = false
       }
     },
@@ -427,7 +427,7 @@ export default {
           this.isLoading = false
         } catch(error) {
           console.log('error creating quotation', error)
-          errorToast(create, $trans('Error creating quotation'))
+          errorToast(this.create, $trans('Error creating quotation'))
           this.isLoading = false
         }
         return
@@ -436,12 +436,12 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.update(this.quotation.id, quotation)
-        infoToast(create, $trans('Updated'), $trans('Quotation has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Quotation has been updated'))
         this.isLoading = false
         this.showQuotationDialog()
       } catch(error) {
         console.log('error updating quotation', error)
-        errorToast(create, $trans('Error updating quotation'))
+        errorToast(this.create, $trans('Error updating quotation'))
         this.isLoading = false
       }
     },

@@ -194,7 +194,7 @@ export default {
         // this.isLoading = false
       } catch(error) {
         console.log('error fetching location stats', error)
-        errorToast(create, `${$trans('Error fetching location insights:')} ${error}`)
+        errorToast(this.create, `${$trans('Error fetching location insights:')} ${error}`)
         // this.isLoading = false
       }
     },
@@ -236,7 +236,7 @@ export default {
         this.location = await this.locationService.detail(this.pk)
       } catch(error) {
         console.log('error fetching location detail data', error)
-        errorToast(create, $trans('Error fetching location detail'))
+        errorToast(this.create, $trans('Error fetching location detail'))
         this.isLoading = false
       }
     },
@@ -248,7 +248,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        errorToast(create, $trans('Error fetching orders'))
+        errorToast(this.create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     }

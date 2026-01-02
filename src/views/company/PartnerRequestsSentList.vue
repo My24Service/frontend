@@ -146,11 +146,11 @@ export default {
     async doDelete() {
       try {
         this.model.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('Partner request has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Partner request has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting partner request', error)
-        errorToast(create, $trans('Error deleting partner request'))
+        errorToast(this.create, $trans('Error deleting partner request'))
       }
     },
     // rest
@@ -163,7 +163,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching partnerRequestsSent', error)
-        errorToast(create, $trans('Error loading partner requests sent'))
+        errorToast(this.create, $trans('Error loading partner requests sent'))
         this.isLoading = false
       }
     }

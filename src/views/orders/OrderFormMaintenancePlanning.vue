@@ -407,7 +407,7 @@
                 label-for="start_date"
                 cols="2"
               >
-                <b-form-datepicker
+                <VueDatePicker
                   id="start_date"
                   v-model="order.start_date"
                   :placeholder="$trans('Select date')"
@@ -415,7 +415,7 @@
                   locale="nl"
                   :state="isSubmitClicked ? !v$.order.start_date.$error : null"
                   :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                ></b-form-datepicker>
+                ></VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.start_date.$error : null">
                   {{ $trans('Please enter a start date') }}
@@ -463,7 +463,7 @@
                 label-for="end_date"
                 cols="2"
               >
-                <b-form-datepicker
+                <VueDatePicker
                   id="end_date"
 
                   v-model="order.end_date"
@@ -472,7 +472,7 @@
                   locale="nl"
                   :state="isSubmitClicked ? !v$.order.end_date.$error : null"
                   :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                ></b-form-datepicker>
+                ></VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.end_date.$error : null">
                   {{ $trans('Please enter an end date') }}
@@ -1288,7 +1288,7 @@ export default {
         // this.engineers = await this.engineerService.search(query)
       } catch(error) {
         console.log('Error searching engineers', error)
-        errorToast(create, $trans('Error searching engineers'))
+        errorToast(this.create, $trans('Error searching engineers'))
       }
       this.isLookupLoading.engineers = false
     },
@@ -1327,7 +1327,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding equipment', error)
-        errorToast(create, $trans('Error adding equipment'))
+        errorToast(this.create, $trans('Error adding equipment'))
       }
     },
     async getEquipment(query) {
@@ -1340,7 +1340,7 @@ export default {
 
       } catch(error) {
         console.log('Error searching equipment', error)
-        errorToast(create, $trans('Error searching equipment'))
+        errorToast(this.create, $trans('Error searching equipment'))
       }
     },
     equipmentLabel({ name }) {
@@ -1386,7 +1386,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding location', error)
-        errorToast(create, $trans('Error adding location'))
+        errorToast(this.create, $trans('Error adding location'))
       }
     },
     async getSalesUsers(query) {
@@ -1399,7 +1399,7 @@ export default {
         this.searchingSalesUsers = false
       } catch(error) {
         console.log('Error fetching sales users', error)
-        errorToast(create, $trans('Error fetching sales users'))
+        errorToast(this.create, $trans('Error fetching sales users'))
         this.searchingSalesUsers = false
       }
     },
@@ -1412,7 +1412,7 @@ export default {
         }
       } catch(error) {
         console.log('Error searching location', error)
-        errorToast(create, $trans('Error searching location'))
+        errorToast(this.create, $trans('Error searching location'))
       }
     },
     locationLabel({ name }) {
@@ -1634,7 +1634,7 @@ export default {
           this.buttonDisabled = false
           this.isLoading = false
           console.log('Error creating order', error)
-          // errorToast(create, $trans('Error creating order'))
+          // errorToast(this.create, $trans('Error creating order'))
           return
         }
       } else {
@@ -1668,17 +1668,17 @@ export default {
       if (!this.isCreate && this.acceptOrder) {
         try {
           await this.orderService.setAccepted(this.pk)
-          infoToast(create, $trans('Accepted'), $trans('Order has been accepted'))
+          infoToast(this.create, $trans('Accepted'), $trans('Order has been accepted'))
         } catch(error) {
           errors.push(error)
           console.log('Error accepting order', error)
-          errorToast(create, $trans('Error accepting order'))
+          errorToast(this.create, $trans('Error accepting order'))
         }
       }
 
       if (errors.length > 0) {
         // TODO do we want this message? the errors in the form are obvious
-        errorToast(create, $trans('There were errors'))
+        errorToast(this.create, $trans('There were errors'))
         console.log('There were errors', errors)
         this.buttonDisabled = false
         this.isLoading = false
@@ -1686,9 +1686,9 @@ export default {
       }
 
       if (this.isCreate) {
-        infoToast(create, $trans('Created'), $trans('Order has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Order has been created'))
       } else {
-        infoToast(create, $trans('Updated'), $trans('Order has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Order has been updated'))
       }
 
       if (this.nextField === 'dispatch') {
@@ -1831,10 +1831,10 @@ export default {
       }
 
       if (errors.length === 0) {
-        infoToast(create, $trans('Engineers unassigned'), `${unassigned_total} ${$trans('engineer(s) have been unassigned')}`)
+        infoToast(this.create, $trans('Engineers unassigned'), `${unassigned_total} ${$trans('engineer(s) have been unassigned')}`)
       } else {
         console.log('errors un-assigning engineers', errors)
-        errorToast(create, errors.join(', '), $trans('There were errors unassigning engineers'))
+        errorToast(this.create, errors.join(', '), $trans('There were errors unassigning engineers'))
       }
 
       // unsure what assignResult does elsewhere?
@@ -1869,10 +1869,10 @@ export default {
       }
 
       if (errors.length === 0) {
-        infoToast(create, $trans('Assigned'), $trans('Order assigned'))
+        infoToast(this.create, $trans('Assigned'), $trans('Order assigned'))
       } else {
         console.log('errors assigning to users', errors)
-        errorToast(create, $trans('There were errors assigning to users'))
+        errorToast(this.create, $trans('There were errors assigning to users'))
       }
 
       this.assignResult = newSelectedEngineers
@@ -1889,7 +1889,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.warn('Error fetching customers', error)
-        errorToast(create, $trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
         this.isLoading = false
       }
     },
@@ -1902,7 +1902,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching branches', error)
-        errorToast(create, $trans('Error fetching branches'))
+        errorToast(this.create, $trans('Error fetching branches'))
         this.isLoading = false
       }
     },
@@ -1924,7 +1924,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.warn('error fetching order', error)
-        errorToast(create, $trans('Error fetching order'))
+        errorToast(this.create, $trans('Error fetching order'))
         this.isLoading = false
       }
     },

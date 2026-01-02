@@ -153,11 +153,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('Customer user has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Customer user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting customer user', error)
-        errorToast(create, $trans('Error deleting customer user'))
+        errorToast(this.create, $trans('Error deleting customer user'))
       }
     },
     // rest
@@ -170,7 +170,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customerusers', error)
-        errorToast(create, $trans('Error loading customer users'))
+        errorToast(this.create, $trans('Error loading customer users'))
         this.isLoading = false
       }
     }

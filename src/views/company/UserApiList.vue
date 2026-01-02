@@ -203,11 +203,11 @@ export default {
     async doDelete() {
       try {
         await this.apiUserService.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('API user has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('API user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting API user', error)
-        errorToast(create, $trans('Error deleting API user'))
+        errorToast(this.create, $trans('Error deleting API user'))
       }
     },
     // rest
@@ -218,11 +218,11 @@ export default {
     async doRevoke() {
       try {
         await this.apiUserService.revoke(this.revokeId)
-        infoToast(create, $trans('Revoked'), $trans('API key has been revoked'))
+        infoToast(this.create, $trans('Revoked'), $trans('API key has been revoked'))
         await this.loadData()
       } catch(error) {
         console.log('Error revoking API key', error)
-        errorToast(create, $trans('Error revoking API key'))
+        errorToast(this.create, $trans('Error revoking API key'))
       }
     },
     getValidUntil(api_user) {
@@ -232,7 +232,7 @@ export default {
       this.$refs.clone.focus();
       document.execCommand('copy');
       // navigator.clipboard.writeText(token)
-      infoToast(create, $trans('Copy'), $trans('Token copied to clipboard'))
+      infoToast(this.create, $trans('Copy'), $trans('Token copied to clipboard'))
     },
     async loadData() {
       this.isLoading = true;
@@ -243,7 +243,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching api users', error)
-        errorToast(create, $trans('Error loading API keys'))
+        errorToast(this.create, $trans('Error loading API keys'))
         this.isLoading = false
       }
     }

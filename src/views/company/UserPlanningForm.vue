@@ -331,11 +331,11 @@ export default {
         this.planninguser.password = this.planninguser.password1
         try {
           await planningUserModel.insert(this.planninguser)
-          infoToast(create, $trans('Created'), $trans('planning user has been created'))
+          infoToast(this.create, $trans('Created'), $trans('planning user has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
-          errorToast(create, $trans('Error creating planning user'))
+          errorToast(this.create, $trans('Error creating planning user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -354,11 +354,11 @@ export default {
 
       try {
         await planningUserModel.update(this.pk, this.planninguser)
-        infoToast(create, $trans('Updated'), $trans('planning user has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('planning user has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
-        errorToast(create, $trans('Error updating planning user'))
+        errorToast(this.create, $trans('Error updating planning user'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -372,7 +372,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching planninguser', error)
-        errorToast(create, $trans('Error loading planning user'))
+        errorToast(this.create, $trans('Error loading planning user'))
         this.isLoading = false
       }
     },

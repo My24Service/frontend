@@ -145,11 +145,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.tripPk)
-        infoToast(create, $trans('Deleted'), $trans('Trip has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Trip has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting trip', error)
-        errorToast(create, $trans('Error deleting trip'))
+        errorToast(this.create, $trans('Error deleting trip'))
       }
     },
     // rest
@@ -162,7 +162,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching trips', error)
-        errorToast(create, $trans('Error loading trips'))
+        errorToast(this.create, $trans('Error loading trips'))
         this.isLoading = false
       }
     }

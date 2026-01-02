@@ -5,8 +5,15 @@
 </template>
 
 <script>
+import componentMixin from "@/mixins/common";
+
 export default {
-  name: "IconLinkSort",
+  setup() {
+    return {
+    }
+  },
+  mixins: [componentMixin],
+  name: "ButtonLinkSort",
   props: {
     method: {
       type: Function

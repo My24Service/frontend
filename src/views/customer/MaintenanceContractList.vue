@@ -182,11 +182,11 @@ export default {
     async doDelete() {
       try {
         await this.maintenanceContractService.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('Maintenance contract has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Maintenance contract has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting maintenance contract', error)
-        errorToast(create, $trans('Error deleting maintenance contract'))
+        errorToast(this.create, $trans('Error deleting maintenance contract'))
       }
     },
     // rest
@@ -202,7 +202,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)
-        errorToast(create, $trans('Error loading maintenance contracts'))
+        errorToast(this.create, $trans('Error loading maintenance contracts'))
         this.isLoading = false
       }
     }

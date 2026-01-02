@@ -184,11 +184,11 @@ export default {
     async doDelete() {
       try {
         await this.orderService.delete(this.order.id)
-        infoToast(create, $trans('Deleted'), $trans('Order has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Order has been deleted'))
         this.$emit('reload-data')
       } catch(error) {
         console.log('Error deleting order', error)
-        errorToast(create, $trans('Error deleting order'))
+        errorToast(this.create, $trans('Error deleting order'))
       }
     },
     handleStatusChange(id, value) {
@@ -205,7 +205,7 @@ export default {
         await this.statusService.insert(status)
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(create, $trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     }
   }

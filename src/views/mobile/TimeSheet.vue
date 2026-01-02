@@ -77,7 +77,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching assigned orders', error)
-        errorToast(create, $trans('Error loading orders'))
+        errorToast(this.create, $trans('Error loading orders'))
         this.isLoading = false
       }
     }

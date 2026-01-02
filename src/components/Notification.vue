@@ -18,17 +18,17 @@ const store = useStore()
 
 function handleMessageUser(data) {
   if (data.level === 'error') {
-    errorToast(create, data.message, $trans('User message'))
+    errorToast(this.create, data.message, $trans('User message'))
   } else {
-    infoToast(create, $trans('User message'), data.message)
+    infoToast(this.create, $trans('User message'), data.message)
   }
 }
 
 function handleMessageMember(data) {
   if (data.level === 'error') {
-    errorToast(create, data.message, $trans('Company message'))
+    errorToast(this.create, data.message, $trans('Company message'))
   } else {
-    infoToast(create, $trans('Company message'), data.message)
+    infoToast(this.create, $trans('Company message'), data.message)
   }
 }
 
@@ -40,18 +40,18 @@ async function setupPolling() {
   }
 
   setTimeout(async () => {
-    await doFetchUnacceptedCountAndUpdateStore()
+    await doFetchUnacceptedCountAndUpdateStore(store)
   }, 1000)
 
   console.debug('setting up polling: doFetchUnacceptedCountAndUpdateStore')
   this.intervalId = setInterval(async () => {
-    await doFetchUnacceptedCountAndUpdateStore()
+    await doFetchUnacceptedCountAndUpdateStore(store)
   }, 5*60*1000)
 }
 
 function onNewData(data) {
   if (data.type === NEW_DATA_EVENTS.UNACCEPTED_ORDER) {
-    doFetchUnacceptedCountAndUpdateStore()
+    doFetchUnacceptedCountAndUpdateStore(store)
   }
 
   if (data.type === NEW_DATA_EVENTS.REFRESH_INITIAL) {

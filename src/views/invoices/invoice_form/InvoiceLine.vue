@@ -335,7 +335,7 @@ export default {
         }
         this.updateInvoiceTotals()
         const txt = invoiceLines.length === 1 ? $trans('invoice line') : $trans('invoice lines')
-        infoToast(create, $trans('Added'), $trans(`${invoiceLines.length} ${txt} added`))
+        infoToast(this.create, $trans('Added'), $trans(`${invoiceLines.length} ${txt} added`))
       }
     },
     updateInvoiceTotals() {
@@ -358,7 +358,7 @@ export default {
     emptyCollectionClicked(type) {
       this.invoiceLineService.collection = this.invoiceLineService.collection.filter((m) => m.type !== type)
       this.updateInvoiceTotals()
-      infoToast(create, $trans('Removed'), $trans(`invoice lines removed`))
+      infoToast(this.create, $trans('Removed'), $trans(`invoice lines removed`))
     },
     getInvoiceLineId() {
       if (this.invoiceLineService.collection.length === 0) {
@@ -386,7 +386,7 @@ export default {
           this.updateInvoiceTotals()
         } catch(error) {
           console.log('error fetching invoice lines', error)
-          errorToast(create, $trans('Error loading invoice lines'))
+          errorToast(this.create, $trans('Error loading invoice lines'))
           this.isLoading = false
         }
         this.invoiceLineService.listArgs = []

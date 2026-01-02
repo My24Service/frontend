@@ -360,13 +360,13 @@ export default {
           (cost) => cost.material !== null
         )
         await this.costService.updateCollection()
-        infoToast(create, $trans('Updated'), $trans('Materials costs have been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Materials costs have been updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error updating material costs', error)
-        errorToast(create, $trans('Error updating material costs'))
+        errorToast(this.create, $trans('Error updating material costs'))
         this.isLoading = false
       }
       this.scrollToHeader()
@@ -407,7 +407,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching material', error)
-        errorToast(create, $trans('Error fetching material'))
+        errorToast(this.create, $trans('Error fetching material'))
         this.isLoading = false
       }
       this.updateTotals()
@@ -422,7 +422,7 @@ export default {
         this.fetchingMaterials = false
       } catch(error) {
         console.log('Error fetching materials', error)
-        errorToast(create, $trans('Error fetching materials'))
+        errorToast(this.create, $trans('Error fetching materials'))
         this.fetchingMaterials = false
       }
     },
@@ -467,7 +467,7 @@ export default {
         this.hasChanges = false
       } catch(error) {
         console.log('error fetching material cost:', error)
-        errorToast(create, $trans('Error fetching material cost'))
+        errorToast(this.create, $trans('Error fetching material cost'))
         this.isLoading = false
         this.isLoaded = true
       }

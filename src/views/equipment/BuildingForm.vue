@@ -350,7 +350,7 @@ export default {
         this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
-        errorToast(create, $trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
       }
     },
     customerLabel({ name, city}) {
@@ -367,7 +367,7 @@ export default {
         this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
-        errorToast(create, $trans('Error fetching branches'))
+        errorToast(this.create, $trans('Error fetching branches'))
       }
     },
     branchLabel({ name, city}) {
@@ -399,7 +399,7 @@ export default {
       if (this.isCreate) {
         try {
           await this.buildingService.insert(this.building)
-          infoToast(create, $trans('Created'), $trans('building has been created'))
+          infoToast(this.create, $trans('Created'), $trans('building has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
@@ -415,7 +415,7 @@ export default {
           }
         } catch(error) {
           console.log('Error creating building', error)
-          errorToast(create, $trans('Error creating building'))
+          errorToast(this.create, $trans('Error creating building'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -425,13 +425,13 @@ export default {
 
       try {
         await this.buildingService.update(this.pk, this.building)
-        infoToast(create, $trans('Updated'), $trans('building has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('building has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating building', error)
-        errorToast(create, $trans('Error updating building'))
+        errorToast(this.create, $trans('Error updating building'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -450,7 +450,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching building', error)
-        errorToast(create, $trans('Error fetching building'))
+        errorToast(this.create, $trans('Error fetching building'))
         this.isLoading = false
       }
     },

@@ -230,11 +230,11 @@ export default {
 
       try {
         await this.model.insert(status)
-        infoToast(create, $trans('Created'), $trans('Status has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(create, $trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     },
     showChangeStatusModal(id) {
@@ -249,11 +249,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.purchaseOrderPk)
-        infoToast(create, $trans('Deleted'), $trans('Purchase order has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Purchase order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting purchase order', error)
-        errorToast(create, $trans('Error deleting purchase order'))
+        errorToast(this.create, $trans('Error deleting purchase order'))
       }
     },
     // rest
@@ -266,7 +266,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching purchase orders', error)
-        errorToast(create, $trans('Error loading purchase orders'))
+        errorToast(this.create, $trans('Error loading purchase orders'))
         this.isLoading = false
       }
     }

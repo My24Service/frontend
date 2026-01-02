@@ -157,11 +157,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.picturePk)
-        infoToast(create, $trans('Deleted'), $trans('Picture has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Picture has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting picture', error)
-        errorToast(create, $trans('Error deleting picture'))
+        errorToast(this.create, $trans('Error deleting picture'))
       }
     },
     // rest
@@ -174,7 +174,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching pictures', error)
-        errorToast(create, $trans('Error loading pictures'))
+        errorToast(this.create, $trans('Error loading pictures'))
         this.isLoading = false
       }
     }

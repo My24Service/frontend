@@ -131,7 +131,7 @@ export default {
         this.hide()
       } catch(error) {
         console.log('Error creating/assigning order', error)
-        errorToast(create, $trans('Error creating/assigning order'))
+        errorToast(this.create, $trans('Error creating/assigning order'))
         this.isLoading = false
       }
     },
@@ -168,7 +168,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching customers', error)
-        errorToast(create, $trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
         this.isLoading = false
       }
     },

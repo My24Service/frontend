@@ -246,7 +246,7 @@ export default {
     },
     deleteDocument(index) {
       this.documentService.deleteCollectionItem(index)
-      infoToast(create, $trans('Marked for delete'), $trans("Document marked for delete"))
+      infoToast(this.create, $trans('Marked for delete'), $trans("Document marked for delete"))
     },
     async loadData() {
       this.isLoading = true
@@ -259,7 +259,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching documents', error)
-        errorToast(create, $trans('Error loading documents'))
+        errorToast(this.create, $trans('Error loading documents'))
         this.isLoading = false
       }
     },
@@ -295,11 +295,11 @@ export default {
 
       try {
         await this.documentService.updateCollection()
-        infoToast(create, $trans('Updated'), $trans('Documents have been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Documents have been updated'))
         await this.loadData()
       } catch (e) {
         console.log('error updating documents', e)
-        errorToast(create, $trans('Error updating documents'))
+        errorToast(this.create, $trans('Error updating documents'))
       }
 
       this.isLoading = false

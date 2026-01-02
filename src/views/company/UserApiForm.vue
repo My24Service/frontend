@@ -113,7 +113,7 @@
               :label="$trans('Valid from')"
               label-for="expire_start_dt"
             >
-              <b-form-datepicker
+              <VueDatePicker
                 id="expire_start_dt"
                 size="sm"
                 class="p-sm-0"
@@ -123,7 +123,7 @@
                 locale="nl"
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_start_dt.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_start_dt.$error : null">
                 {{ $trans('Please enter date') }}
@@ -295,11 +295,11 @@ export default {
         try {
           this.apiuser.password = this.apiuser.password1
           await this.apiUserService.insert(this.apiuser)
-          infoToast(create, $trans('Created'), $trans('API user has been created'))
+          infoToast(this.create, $trans('Created'), $trans('API user has been created'))
           this.isLoading = false
           await this.$router.push({name: 'users-apiusers'})
         } catch(error) {
-          errorToast(create, $trans('Error creating API user'))
+          errorToast(this.create, $trans('Error creating API user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -309,12 +309,12 @@ export default {
 
       try {
         await this.apiUserService.update(this.pk, this.apiuser)
-        infoToast(create, $trans('Updated'), $trans('API user has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('API user has been updated'))
         this.isLoading = false
         await this.$router.push({name: 'users-apiusers'})
       } catch(error) {
         console.log(error)
-        errorToast(create, $trans('Error updating API user'))
+        errorToast(this.create, $trans('Error updating API user'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -328,7 +328,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching apiuser', error)
-        errorToast(create, $trans('Error loading API user'))
+        errorToast(this.create, $trans('Error loading API user'))
         this.isLoading = false
       }
     },

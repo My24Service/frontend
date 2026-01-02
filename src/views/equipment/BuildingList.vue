@@ -235,11 +235,11 @@ export default {
     async doDelete() {
       try {
         await this.buildingService.delete(this.buildingPk)
-        infoToast(create, $trans('Deleted'), $trans('building has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('building has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting building', error)
-        errorToast(create, $trans('Error deleting building'))
+        errorToast(this.create, $trans('Error deleting building'))
       }
     },
     // rest
@@ -252,7 +252,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching buildings', error)
-        errorToast(create, $trans('Error loading buildings'))
+        errorToast(this.create, $trans('Error loading buildings'))
         this.isLoading = false
       }
     }

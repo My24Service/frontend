@@ -154,11 +154,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('Sales user has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Sales user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting sales user', error)
-        errorToast(create, $trans('Error deleting sales user'))
+        errorToast(this.create, $trans('Error deleting sales user'))
       }
     },
     // rest
@@ -171,7 +171,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching salesusers', error)
-        errorToast(create, $trans('Error loading sales users'))
+        errorToast(this.create, $trans('Error loading sales users'))
         this.isLoading = false
       }
     }

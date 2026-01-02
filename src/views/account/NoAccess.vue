@@ -20,9 +20,11 @@
 
 <script>
 import LoginForm from "@/components/LoginForm";
+import {$trans} from "@/utils";
 
 export default {
   name: 'NoAccess',
+  methods: {$trans},
   components: {
     LoginForm
   },

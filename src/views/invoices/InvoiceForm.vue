@@ -629,7 +629,7 @@ export default {
 
       const customerData = await this.customerService.update(this.customerPk, minimalModel)
       this.customer = new CustomerModel(customerData)
-      infoToast(create, $trans('Updated'), $trans('Customer data has been updated'))
+      infoToast(this.create, $trans('Updated'), $trans('Customer data has been updated'))
     },
     // activity
     async updateEngineer(user_id) {
@@ -641,7 +641,7 @@ export default {
       let updatedEngineerUserJson = await this.engineerService.update(user_id, minimalModel)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
 
-      infoToast(create, $trans('Updated'), $trans('Hourly rate engineer has been updated'))
+      infoToast(this.create, $trans('Updated'), $trans('Hourly rate engineer has been updated'))
     },
     // materials
     async updateMaterial(material_id) {
@@ -651,7 +651,7 @@ export default {
       const updatedMaterialJson = await this.materialService.update(material_id, material)
       material.setPriceFields(updatedMaterialJson)
 
-      infoToast(create, $trans('Updated'), $trans('Material prices have been updated'))
+      infoToast(this.create, $trans('Updated'), $trans('Material prices have been updated'))
       this.materialUpdating = false
     },
     async loadData() {
@@ -711,14 +711,14 @@ export default {
             await this.invoiceLineService.insert(invoiceLine)
           }
 
-          infoToast(create, $trans('Created'), $trans('Invoice has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Invoice has been created'))
           this.isLoading = false
           await this.$router.push({
             name: 'invoice-edit',
             params: {pk: invoice.id, uuid: this.uuid}
           })
         } catch(error) {
-          errorToast(create, $trans('Error creating invoice'))
+          errorToast(this.create, $trans('Error creating invoice'))
           this.isLoading = false
         }
 
@@ -731,10 +731,10 @@ export default {
         await invoiceLineService.updateCollection(this.invoice.id)
         await this.loadData()
         this.isLoading = false
-        infoToast(create, $trans('Updated'), $trans('Invoice has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Invoice has been updated'))
       } catch(error) {
         console.log(error)
-        errorToast(create, $trans('Error updated invoice'))
+        errorToast(this.create, $trans('Error updated invoice'))
         this.isLoading = false
       }
     },
@@ -747,7 +747,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoice', error)
-        errorToast(create, $trans('Error loading invoice'))
+        errorToast(this.create, $trans('Error loading invoice'))
         this.isLoading = false
       }
     },

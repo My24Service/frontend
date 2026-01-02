@@ -12,7 +12,7 @@
               v-bind:label="$trans('Start date')"
               label-for="start_date"
             >
-              <b-form-datepicker
+              <VueDatePicker
                 id="start_date"
                 size="sm"
                 class="p-sm-0"
@@ -22,7 +22,7 @@
                 locale="nl"
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null">
                 {{ $trans('Please enter a start date') }}
@@ -52,7 +52,7 @@
               :label="$trans('End date')"
               label-for="end_date"
             >
-              <b-form-datepicker
+              <VueDatePicker
                 id="end_date"
                 size="sm"
                 v-model="order.end_date"
@@ -61,7 +61,7 @@
                 locale="nl"
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null">
                 {{ $trans('Please enter an end date') }}
@@ -623,13 +623,13 @@ export default {
           // add documents
           this.$refs['documents-component'].orderCreated(newOrder)
 
-          infoToast(create, $trans('Created'), $trans('Order has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating order', error)
-          errorToast(create, $trans('Error creating order'))
+          errorToast(this.create, $trans('Error creating order'))
           this.isLoading = false
           this.buttonDisabled = false
           return
@@ -648,27 +648,27 @@ export default {
           orderline.order = this.pk
           if (orderline.id) {
             await this.orderlineService.update(orderline.id, orderline)
-            // infoToast(create, $trans('Orderline updated'), $trans('Orderline has been updated'))
+            // infoToast(this.create, $trans('Orderline updated'), $trans('Orderline has been updated'))
           } else {
             await this.orderlineService.insert(orderline)
-            // infoToast(create, $trans('Orderline created'), $trans('Orderline has been created'))
+            // infoToast(this.create, $trans('Orderline created'), $trans('Orderline has been created'))
           }
         }
 
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
             await this.orderlineService.delete(orderline.id)
-            // infoToast(create, $trans('Orderline removed'), $trans('Orderline has been removed'))
+            // infoToast(this.create, $trans('Orderline removed'), $trans('Orderline has been removed'))
           }
         }
 
-        infoToast(create, $trans('Updated'), $trans('Order has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating order', error)
-        errorToast(create, $trans('Error updating order'))
+        errorToast(this.create, $trans('Error updating order'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -719,7 +719,7 @@ export default {
       this.isLoading = false
     } catch (error) {
       console.log('error loading order', error)
-      errorToast(create, $trans('Error fetching order data'))
+      errorToast(this.create, $trans('Error fetching order data'))
       this.isLoading = false
     }
   },

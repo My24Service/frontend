@@ -475,7 +475,7 @@ export default {
         this.customers = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
-        errorToast(create, $trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
       }
     },
     customerLabel({ name, city}) {
@@ -504,7 +504,7 @@ export default {
     async submitCreateEquipment() {
       // assuming we don't manage maintenance contracts from branches
       if (!this.hasBranches) {
-        errorToast(create, $trans('Not creating equipment from branch environment'))
+        errorToast(this.create, $trans('Not creating equipment from branch environment'))
         return
       }
 
@@ -521,7 +521,7 @@ export default {
         this.$refs.times_per_year.focus()
       }  catch(error) {
         console.log('Error adding equipment', error)
-        errorToast(create, $trans('Error adding equipment'))
+        errorToast(this.create, $trans('Error adding equipment'))
       }
     },
     async getEquipment(query) {
@@ -529,7 +529,7 @@ export default {
         this.equipmentSearch = await this.equipmentService.searchCustomer(query, this.customer.id)
       } catch(error) {
         console.log('Error searching equipment', error)
-        errorToast(create, $trans('Error searching equipment'))
+        errorToast(this.create, $trans('Error searching equipment'))
       }
     },
     equipmentLabel({ name, city}) {
@@ -599,12 +599,12 @@ export default {
           )
           await this.maintenanceEquipmentService.updateCollection()
 
-          infoToast(create, $trans('Created'), $trans('Maintenance contract has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Maintenance contract has been created'))
           this.isLoading = false
           this.goBack()
         } catch(error) {
           console.log('Error creating maintenance_contract', error)
-          errorToast(create, $trans('Error creating maintenance contract'))
+          errorToast(this.create, $trans('Error creating maintenance contract'))
           this.isLoading = false
         }
 
@@ -621,13 +621,13 @@ export default {
         )
         await this.maintenanceEquipmentService.updateCollection()
 
-        infoToast(create, $trans('Updated'), $trans('Maintenance contract has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Maintenance contract has been updated'))
         this.isLoading = false
         this.goBack()
       } catch(error) {
         console.log('Error updating maintenance_contract', error)
         if (error.response.data[0])
-        errorToast(create, $trans('Error updating maintenance_contract:', error.response.data[0]))
+        errorToast(this.create, $trans('Error updating maintenance_contract:', error.response.data[0]))
         this.isLoading = false
       }
     },
@@ -652,7 +652,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)
-        errorToast(create, `${$trans('Error loading maintenance contract')}, ${error.message}`)
+        errorToast(this.create, `${$trans('Error loading maintenance contract')}, ${error.message}`)
         this.isLoading = false
       }
     },

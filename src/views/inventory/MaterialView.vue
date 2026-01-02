@@ -105,7 +105,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching inventory', error)
-        errorToast(create, $trans('Error fetching inventory'))
+        errorToast(this.create, $trans('Error fetching inventory'))
         this.isLoading = false
       }
     }

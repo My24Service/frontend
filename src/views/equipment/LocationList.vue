@@ -256,11 +256,11 @@ export default {
     async doDelete() {
       try {
         await this.locationService.delete(this.locationPk)
-        infoToast(create, $trans('Deleted'), $trans('Location has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Location has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting location', error)
-        errorToast(create, $trans('Error deleting location'))
+        errorToast(this.create, $trans('Error deleting location'))
       }
     },
     // rest
@@ -273,7 +273,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching locations', error)
-        errorToast(create, $trans('Error loading locations'))
+        errorToast(this.create, $trans('Error loading locations'))
         this.isLoading = false
       }
     }

@@ -186,11 +186,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.supplierReservationPk)
-        infoToast(create, $trans('Deleted'), $trans('Entry Reservation been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Entry Reservation been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting reservation', error)
-        errorToast(create, $trans('Error deleting reservation'))
+        errorToast(this.create, $trans('Error deleting reservation'))
       }
     },
     // rest
@@ -203,7 +203,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching reservations', error)
-        errorToast(create, $trans('Error loading reservations'))
+        errorToast(this.create, $trans('Error loading reservations'))
         this.isLoading = false
       }
     }

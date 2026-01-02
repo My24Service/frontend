@@ -234,12 +234,12 @@ export default {
         }
 
         await memberModel.updateSettings(allSettings);
-        infoToast(create, $trans('Updated'), $trans('Settings updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('Error updating settings', error)
-        errorToast(create, $trans('Error updating settings'))
+        errorToast(this.create, $trans('Error updating settings'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -282,7 +282,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching settings', error)
-        errorToast(create, $trans('Error fetching settings'))
+        errorToast(this.create, $trans('Error fetching settings'))
         this.isLoading = false
       }
     },

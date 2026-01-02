@@ -517,10 +517,10 @@ export default {
       try {
         const syncResult = await partnerModel.copy_customer_orders(this.pk, this.customer.branch_partner)
         await this.getBranchesForPartner()
-        infoToast(create, $trans('Synced'), $trans('Orders synced'))
+        infoToast(this.create, $trans('Synced'), $trans('Orders synced'))
       } catch (error) {
         console.log('Error syncing orders', error)
-        errorToast(create, $trans('Error syncing orders'))
+        errorToast(this.create, $trans('Error syncing orders'))
       }
       this.syncingOrders = false
     },
@@ -562,12 +562,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.customerService.insert(this.customer)
-          infoToast(create, $trans('Created'), $trans('Customer has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Customer has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating customer', error)
-          errorToast(create, $trans('Error creating customer'))
+          errorToast(this.create, $trans('Error creating customer'))
           this.isLoading = false
         }
 
@@ -579,12 +579,12 @@ export default {
           this.customer.branch_id = null
         }
         await this.customerService.update(this.pk, this.customer)
-        infoToast(create, $trans('Updated'), $trans('Customer has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Customer has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating customer', error)
-        errorToast(create, $trans('Error updating customer'))
+        errorToast(this.create, $trans('Error updating customer'))
         this.isLoading = false
       }
     },
@@ -598,7 +598,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer', error)
-        errorToast(create, $trans('Error loading customer'))
+        errorToast(this.create, $trans('Error loading customer'))
         this.isLoading = false
       }
     },

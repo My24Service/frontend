@@ -176,10 +176,10 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, $trans('Removed engineer'), `${$trans('Engineer has been removed')}`)
+        infoToast(this.create, $trans('Removed engineer'), `${$trans('Engineer has been removed')}`)
         await this.loadData()
       } catch(error) {
-        errorToast(create, `${$trans('Error deleting engineer:')} ${error}`);
+        errorToast(this.create, `${$trans('Error deleting engineer:')} ${error}`);
       }
     },
     // rest
@@ -195,7 +195,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineers', error)
-        errorToast(create, $trans('Error loading engineers'))
+        errorToast(this.create, $trans('Error loading engineers'))
         this.isLoading = false
       }
     }

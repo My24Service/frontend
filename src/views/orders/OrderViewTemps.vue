@@ -167,7 +167,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        errorToast(create, $trans('Error fetching order'))
+        errorToast(this.create, $trans('Error fetching order'))
         this.isLoading = false
       }
     }

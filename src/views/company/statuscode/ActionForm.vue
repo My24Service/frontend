@@ -516,12 +516,12 @@ export default {
 
       try {
         await this.actionService.delete(this.pk);
-        infoToast(create, $trans("Deleted"), $trans("Action has been deleted"));
+        infoToast(this.create, $trans("Deleted"), $trans("Action has been deleted"));
         this.isLoading = false;
         this.cancelForm();
       } catch (error) {
         console.log("Error deleting action", error);
-        errorToast(create, $trans("Error deleting action"));
+        errorToast(this.create, $trans("Error deleting action"));
         this.isLoading = false;
       }
     },
@@ -549,12 +549,12 @@ export default {
         try {
           this.action.statuscode = this.statuscode_pk;
           await this.actionService.insert(this.action);
-          infoToast(create, $trans("Created"), $trans("Action has been created"));
+          infoToast(this.create, $trans("Created"), $trans("Action has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("error creating action", error);
-          errorToast(create, $trans("Error creating action"));
+          errorToast(this.create, $trans("Error creating action"));
           this.isLoading = false;
         }
 
@@ -563,12 +563,12 @@ export default {
 
       try {
         await this.actionService.update(this.pk, this.action);
-        infoToast(create, $trans("Updated"), $trans("Action has been updated"));
+        infoToast(this.create, $trans("Updated"), $trans("Action has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("error updating action", error);
-        errorToast(create, $trans("Error updating action"));
+        errorToast(this.create, $trans("Error updating action"));
         this.isLoading = false;
       }
     },
@@ -580,7 +580,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching action", error);
-        errorToast(create, $trans("Error loading action"));
+        errorToast(this.create, $trans("Error loading action"));
         this.isLoading = false;
       }
     },

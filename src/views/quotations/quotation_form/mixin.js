@@ -63,7 +63,7 @@ let quotationMixin = {
         await this.loadData()
       } catch (e) {
         console.log(e)
-        errorToast(create, $trans('Error removing costs'))
+        errorToast(this.create, $trans('Error removing costs'))
       }
       this.isLoading = false
     },
@@ -72,10 +72,10 @@ let quotationMixin = {
       try {
         await this.costService.updateCollection()
         await this.loadData()
-        infoToast(create, $trans('Saved'), $trans('Costs saved'))
+        infoToast(this.create, $trans('Saved'), $trans('Costs saved'))
       } catch (e) {
         console.log(e)
-        errorToast(create, $trans('Error saving costs'))
+        errorToast(this.create, $trans('Error saving costs'))
       }
       this.isLoading = false
     },

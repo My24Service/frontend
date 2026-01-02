@@ -146,11 +146,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.stockLocationPk)
-        infoToast(create, $trans('Deleted'), $trans('Stock location has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Stock location has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting stock location', error)
-        errorToast(create, $trans('Error deleting stock location'))
+        errorToast(this.create, $trans('Error deleting stock location'))
       }
     },
     // rest
@@ -163,7 +163,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching stock locations', error)
-        errorToast(create, $trans('Error loading stock locations'))
+        errorToast(this.create, $trans('Error loading stock locations'))
         this.isLoading = false
       }
     }

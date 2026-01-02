@@ -225,13 +225,13 @@ export default {
 
       try {
         await this.chapterService.delete(this.deletePk)
-        infoToast(create, $trans('Deleted'), $trans('Chapter has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Chapter has been deleted'))
         await this.loadData()
         this.isLoading = false
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting chapter', error)
-        errorToast(create, $trans('Error deleting chapter'))
+        errorToast(this.create, $trans('Error deleting chapter'))
       }
     },
     async doEditChapter() {

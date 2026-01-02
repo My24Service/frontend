@@ -30,7 +30,7 @@
                   v-bind:label="$trans('Start date')"
                   label-for="trip_start_date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="trip_start_date"
                     size="sm"
                     class="p-sm-0"
@@ -40,7 +40,7 @@
                     locale="nl"
                     :state="isSubmitClicked ? !v$.trip.start_date.$error && !trip.start_datetime_from_first_order : null"
                     :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.start_date.$error : null">
                     {{ $trans('Please enter a start date') }}
@@ -194,7 +194,7 @@
                   v-bind:label="$trans('End date')"
                   label-for="trip_end_date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="trip_end_date"
                     size="sm"
                     v-model="trip.end_date"
@@ -203,7 +203,7 @@
                     locale="nl"
                     :state="isSubmitClicked ? !v$.trip.end_date.$error : null"
                     :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.end_date.$error : null">
                     {{ $trans('Please enter an end date') }}
@@ -637,13 +637,13 @@ export default {
       if (this.isCreate) {
         try {
           const trip = await tripModel.insert(this.trip)
-          infoToast(create, $trans('Trip created'), $trans(`Trip ${trip.id} has been created`))
+          infoToast(this.create, $trans('Trip created'), $trans(`Trip ${trip.id} has been created`))
           this.isLoading = false
           this.buttonDisabled = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating trip', error)
-          errorToast(create, $trans('Error creating trip'))
+          errorToast(this.create, $trans('Error creating trip'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -653,13 +653,13 @@ export default {
 
       try {
         await tripModel.update(this.pk, this.trip)
-        infoToast(create, $trans('Trip updated'), $trans('Trip has been updated'))
+        infoToast(this.create, $trans('Trip updated'), $trans('Trip has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating trip', error)
-        errorToast(create, $trans('Error updating trip'))
+        errorToast(this.create, $trans('Error updating trip'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -673,7 +673,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching orders', error)
-        errorToast(create, $trans('Error fetching orders'))
+        errorToast(this.create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -697,7 +697,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        errorToast(create, $trans('Error fetching trip'))
+        errorToast(this.create, $trans('Error fetching trip'))
         this.isLoading = false
       }
     },

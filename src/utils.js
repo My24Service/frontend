@@ -124,10 +124,13 @@ function displayDuration(duration, exclude_seconds) {
   return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
 }
 
-async function doFetchUnacceptedCountAndUpdateStore() {
+async function doFetchUnacceptedCountAndUpdateStore(store) {
   const service = new OrderService()
   const countResult = await service.getUnacceptedCount()
-  const store = useStore()
+  if (!store) {
+    console.warn("help, no store")
+    return
+  }
   if (countResult && 'count' in countResult) {
     await store.dispatch('setUnacceptedCount', countResult.count)
   }
@@ -135,6 +138,10 @@ async function doFetchUnacceptedCountAndUpdateStore() {
 
 function hasAccessToModule(module, part) {
   const store = useStore()
+  if (!store) {
+    console.warn("help, no store")
+    return
+  }
   return my24.hasAccessToModule({
     isStaff: store.getters.getIsStaff,
     isSuperuser: store.getters.getIsSuperuser,

@@ -150,11 +150,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.engineerEventTypeModelPk)
-        infoToast(create, $trans('Deleted'), $trans('Event type has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Event type has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting event type', error)
-        errorToast(create, $trans('Error deleting event type'))
+        errorToast(this.create, $trans('Error deleting event type'))
       }
     },
     // rest
@@ -170,7 +170,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching event types', error)
-        errorToast(create, $trans('Error loading event types'))
+        errorToast(this.create, $trans('Error loading event types'))
         this.isLoading = false
       }
     }

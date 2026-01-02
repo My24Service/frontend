@@ -133,11 +133,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.modulePk)
-        infoToast(create, $trans('Deleted'), $trans('Module has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Module has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting module', error)
-        errorToast(create, $trans('Error deleting module'))
+        errorToast(this.create, $trans('Error deleting module'))
       }
     },
     // rest
@@ -150,7 +150,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching modules', error)
-        errorToast(create, $trans('Error loading modules'))
+        errorToast(this.create, $trans('Error loading modules'))
         this.isLoading = false
       }
     }

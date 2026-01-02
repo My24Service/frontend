@@ -133,11 +133,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.contractPk)
-        infoToast(create, $trans('Deleted'), $trans('Contract has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Contract has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting contract', error)
-        errorToast(create, $trans('Error deleting contract'))
+        errorToast(this.create, $trans('Error deleting contract'))
       }
     },
     // rest
@@ -150,7 +150,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching contracts', error)
-        errorToast(create, $trans('Error loading contracts'))
+        errorToast(this.create, $trans('Error loading contracts'))
         this.isLoading = false
       }
     }

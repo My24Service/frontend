@@ -151,11 +151,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        infoToast(create, $trans('Deleted'), $trans('planning user has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('planning user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting planning user', error)
-        errorToast(create, $trans('Error deleting planning user'))
+        errorToast(this.create, $trans('Error deleting planning user'))
       }
     },
     // rest
@@ -168,7 +168,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching planningusers', error)
-        errorToast(create, $trans('Error loading planning users'))
+        errorToast(this.create, $trans('Error loading planning users'))
         this.isLoading = false
       }
     }
