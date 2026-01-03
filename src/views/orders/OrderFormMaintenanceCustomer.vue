@@ -427,13 +427,17 @@ import {OrderlineService} from "@/models/orders/Orderline";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -521,12 +525,6 @@ export default {
     }
   },
   computed: {
-    // canQuickCreateEquipment() {
-    //   return this.$store.getters.getSettingEquipmentQuickCreate
-    // },
-    // canQuickCreateEquipmentLocation() {
-    //   return this.$store.getters.getSettingEquipmentLocationQuickCreate
-    // },
     startDate() {
       return this.order.start_date
     },
@@ -687,12 +685,12 @@ export default {
   async created () {
     this.isLoading = true
 
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     try {
-      this.countries = await this.$store.dispatch('getCountries')
+      this.countries = await this.mainStore.getCountries()
       const user = await accountModel.getUserDetails()
       const customer = await this.customerService.detail(user.user.customer_user.customer)
 

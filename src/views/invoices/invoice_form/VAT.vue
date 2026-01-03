@@ -9,14 +9,27 @@
 </template>
 
 <script>
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
+
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "VAT",
   emits: ['vatChanged'],
   data() {
     return {
       vatType: null,
-      vatTypes: this.$store.getters.getVATTypes,
-      defaultVat: this.$store.getters.getInvoiceDefaultVat,
+      vatTypes: this.mainStore.getVATTypes,
+      defaultVat: this.mainStore.getInvoiceDefaultVat,
     }
   },
   created() {

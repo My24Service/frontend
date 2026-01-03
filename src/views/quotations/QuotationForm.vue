@@ -246,6 +246,7 @@ import QuotationLine from "./quotation_form/QuotationLine.vue";
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import CustomerView from "./CustomerView.vue";
 import QuotationPDFViewer from "./QuotationPDFViewer.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationForm',
@@ -265,9 +266,12 @@ export default {
   },
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   validations() {
@@ -300,10 +304,10 @@ export default {
       errorMessage: null,
       quotationPK: null,
       quotation: new QuotationModel({}),
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
-      invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
+      invoice_default_margin: this.mainStore.getInvoiceDefaultMargin,
+      invoice_default_term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
       customerPk: null,
       customer: null,
       loadChapterModel: null,

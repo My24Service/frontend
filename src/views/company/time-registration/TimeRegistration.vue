@@ -19,11 +19,21 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import { TimeRegistrationService } from "../../../models/company/TimeRegistration";
+import { TimeRegistrationService } from "@/models/company/TimeRegistration";
 import TimeRegistrationData from "../../../components/TimeRegistrationData.vue";
 import SubNav from "./SubNav";
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
+  mixins: [componentMixin],
   name: "TimeRegistration",
   props: {
     user_id: {
@@ -45,7 +55,7 @@ export default {
     SubNav
   },
   async created() {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)

@@ -188,14 +188,17 @@ import AddToQuotationLines from './AddToQuotationLines.vue'
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   name: "DistanceComponent",
@@ -252,9 +255,9 @@ export default {
         USE_PRICE_CUSTOMER,
         USE_PRICE_OTHER,
       },
-      default_currency: this.$store.getters.getDefaultCurrency,
-      default_vat: this.$store.getters.getQuotationDefaultVat,
-      default_price_per_km: this.$store.getters.getQuotationDefaultPricePerKm,
+      default_currency: this.mainStore.getDefaultCurrency,
+      default_vat: this.mainStore.getQuotationDefaultVat,
+      default_price_per_km: this.mainStore.getQuotationDefaultPricePerKm,
       quotationLineType: COST_TYPE_DISTANCE,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),

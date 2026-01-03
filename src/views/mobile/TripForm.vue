@@ -457,13 +457,17 @@ import tripModel from '@/models/mobile/Trip.js'
 import orderModel from '@/models/orders/Order.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -493,6 +497,7 @@ export default {
       ordersSearch: '',
       selectedOrder: {},
       countries: [],
+      getOrdersDebounced: null,
     }
   },
   validations() {
@@ -577,20 +582,18 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
-    const lang = this.$store.getters.getCurrentLanguage
+  async created() {
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     this.getOrdersDebounced = AwesomeDebouncePromise(this.getOrders, 500)
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
-      if (this.isCreate) {
-        this.trip = tripModel.getFields()
-      } else {
-        this.loadData()
-      }
-    })
+    this.countries = await this.mainStore.getCountries()
+    if (this.isCreate) {
+      this.trip = tripModel.getFields()
+    } else {
+      this.loadData()
+    }
   },
   methods: {
     // orders

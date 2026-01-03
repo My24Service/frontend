@@ -233,6 +233,7 @@ import Multiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 const isCorrectTime = value => {
   return /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(value);
@@ -241,9 +242,12 @@ const isCorrectTime = value => {
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -309,7 +313,7 @@ export default {
     }
   },
   created() {
-    const lang = this.$store.getters.getCurrentLanguage;
+    const lang = this.mainStore.getCurrentLanguage;
     this.$moment = moment;
     this.$moment.locale(lang);
 

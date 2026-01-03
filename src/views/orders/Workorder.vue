@@ -5,9 +5,17 @@
 </template>
 <script>
 import WorkorderMaintenance from "./WorkorderMaintenance.vue"
+import {useMainStore} from "@/stores/main";
 
 export default {
-  name: "Workorder",
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   components: {
   	WorkorderMaintenance,
   },
@@ -22,7 +30,7 @@ export default {
 		}
 	},
 	async created() {
-    this.memberType = await this.$store.dispatch('getMemberType')
+    this.memberType = await this.mainStore.getMemberType()
 	}
 }
 </script>

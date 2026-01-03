@@ -4,11 +4,11 @@
       <div class='page-title'>
         <h3>
           <IBiFileEarmarkLock></IBiFileEarmarkLock>
-          <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ $trans('Maintenance contracts') }}</router-link> /
+          <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ this.$trans('Maintenance contracts') }}</router-link> /
           <span>{{ maintenanceContract.name }}</span>
         </h3>
         <BButton-toolbar>
-          <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">{{ $trans("Edit contract") }}</router-link>
+          <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">{{ this.$trans("Edit contract") }}</router-link>
         </BButton-toolbar>
       </div>
     </header>
@@ -17,14 +17,14 @@
 
       <div class='flex-columns'>
       <div class='panel col-1-3 sidebar'>
-        <h6>{{ $trans('Contract')}}</h6>
+        <h6>{{ this.$trans('Contract')}}</h6>
         <dl>
-          <dt>{{ $trans('Value') }}</dt>
+          <dt>{{ this.$trans('Value') }}</dt>
           <dd>{{ maintenanceContract.sum_tariffs_dinero.toFormat('$0.00') }}</dd>
-          <dt>{{ $trans('Remarks') }}</dt>
+          <dt>{{ this.$trans('Remarks') }}</dt>
           <dd>{{ maintenanceContract.remarks }}</dd>
         </dl>
-        <h6>{{ $trans('Customer') }}</h6>
+        <h6>{{ this.$trans('Customer') }}</h6>
         <CustomerCard :customer="customer"/>
         <dl>
           <dt></dt>
@@ -33,7 +33,7 @@
               class="btn btn-primary"
               :to="{name: 'customer-view', params: {pk: customer.id}}">
               <IBiBuilding></IBiBuilding>
-              {{ $trans('view customer details') }}
+              {{ this.$trans('view customer details') }}
             </router-link>
           </dd>
         </dl>
@@ -45,7 +45,7 @@
             <!-- equipment select -->
             <div class="flex-columns" style="justify-content: end;">
               <span>
-                {{ $trans('Create order?') }}&nbsp;
+                {{ this.$trans('Create order?') }}&nbsp;
                 <BButton
                   @click="selectEquipment"
                   class="btn btn-primary"
@@ -54,7 +54,7 @@
                   variant="primary"
                   :disabled="isCreate ? 'disabled' : false"
                 >
-                  {{ $trans("Select equipment") }}
+                  {{ this.$trans("Select equipment") }}
                 </BButton>
               </span>
             </div>
@@ -75,9 +75,9 @@
                 </template>
                   <template #cell(frequency)="data">
                     <span>
-                      <strong>{{ data.item.times_per_year }}</strong> &times; {{ $trans('yearly') }}
+                      <strong>{{ data.item.times_per_year }}</strong> &times; {{ this.$trans('yearly') }}
                     </span>
-                    <small class="dimmed">({{ data.item.num_order_equipment }} {{ $trans('in orders') }})</small>
+                    <small class="dimmed">({{ data.item.num_order_equipment }} {{ this.$trans('in orders') }})</small>
                 </template>
                 <template #cell(amount)="data">
                   <BFormGroup
@@ -93,10 +93,10 @@
               </b-table>
               <footer class="modal-footer">
                 <BButton @click="cancelForm" class="btn btn-secondary" type="reset" variant="secondary">
-                  {{ $trans('Cancel') }}
+                  {{ this.$trans('Cancel') }}
                 </BButton>
                 <BButton @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary">
-                  {{ $trans('Add equipment') }}
+                  {{ this.$trans('Add equipment') }}
                 </BButton>
               </footer>
 
@@ -111,9 +111,9 @@
               >
                 <template #cell(times_per_year)="data">
                   <span>
-                    <strong>{{ data.item.times_per_year }}</strong> &times; {{ $trans('yearly') }}
+                    <strong>{{ data.item.times_per_year }}</strong> &times; {{ this.$trans('yearly') }}
                   </span>
-                  <small class="dimmed">({{ data.item.num_order_equipment }} {{ $trans('in orders') }})</small>
+                  <small class="dimmed">({{ data.item.num_order_equipment }} {{ this.$trans('in orders') }})</small>
                 </template>
                 <template #cell(tariff)="data">
                   <div style="text-align: end;">{{ data.item.tariff_dinero.toFormat('$0.00')}}</div>
@@ -151,7 +151,7 @@
             <hr/>
             <ul class='listing order-list' v-if="!isLoading">
               <li v-if="!maintenanceOrders.length">
-                <div style="text-align: center;">{{ $trans('No orders for') }} {{ $trans('contract')}}.</div>
+                <div style="text-align: center;">{{ this.$trans('No orders for') }} {{ this.$trans('contract')}}.</div>
               </li>
               <li v-for="item in maintenanceOrders" >
                 <OrderTableInfo v-bind:order="item" />
@@ -177,21 +177,30 @@
 </template>
 
 <script>
-import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
-import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
+import { MaintenanceContractService } from '@/models/customer/MaintenanceContract'
+import { MaintenanceEquipmentService } from "@/models/customer/MaintenanceEquipment";
 
-import CustomerDetail from "../../components/CustomerDetail";
 import CustomerCard from "../../components/CustomerCard";
-import {OrdersMaintenanceService} from '../../models/orders/OrdersMaintenance'
+import {OrdersMaintenanceService} from '@/models/orders/OrdersMaintenance'
 import ButtonLinkRefresh from "../../components/ButtonLinkRefresh";
 import ButtonLinkSearch from "../../components/ButtonLinkSearch";
 import OrderTableInfo from "../../components/OrderTableInfo";
 import SearchModal from "../../components/SearchModal";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
 
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   components: {
-    CustomerDetail,
     CustomerCard,
     ButtonLinkRefresh,
     ButtonLinkSearch,
@@ -217,22 +226,22 @@ export default {
       isCreate: false,
 
       equipmentFields: [
-        { key: 'equipment_name', label: $trans('Name') },
-        { key: 'times_per_year', label: $trans('Frequency') },
-        { key: 'tariff', label: $trans('Tariff'), thAttr: {style: 'text-align: right;'}},
-        { key: 'remarks', label: $trans('Remarks') },
+        { key: 'equipment_name', label: this.$trans('Name') },
+        { key: 'times_per_year', label: this.$trans('Frequency') },
+        { key: 'tariff', label: this.$trans('Tariff'), thAttr: {style: 'text-align: right;'}},
+        { key: 'remarks', label: this.$trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       equipmentFieldsCreate: [
-        { key: 'id', label: $trans('id'), thAttr: {width: '5%'} },
-        { key: 'name', label: $trans('Name'), },
-        { key: 'frequency', label: $trans('Frequency'), thAttr: {width: '50%'} },
-        { key: 'amount', label: $trans('Amount'), thAttr: {width: '15%'} },
+        { key: 'id', label: this.$trans('id'), thAttr: {width: '5%'} },
+        { key: 'name', label: this.$trans('Name'), },
+        { key: 'frequency', label: this.$trans('Frequency'), thAttr: {width: '50%'} },
+        { key: 'amount', label: this.$trans('Amount'), thAttr: {width: '15%'} },
       ],
       orderLinesData: [],
       selectedData: [],
       maintenanceOrdersFields: [
-        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', label: ''},
       ],
       maintenanceOrders: []
@@ -271,7 +280,7 @@ export default {
         customer_pk: this.customer.id,
         contract_pk: this.pk,
       }
-      await this.$store.dispatch('setMaintenanceEquipment', data)
+      this.mainStore.setMaintenanceEquipment(data)
 
       // route to order form in maintenance mode
       await this.$router.push({name: 'order-add-maintenance'})
@@ -297,7 +306,7 @@ export default {
       try {
         const data = await this.maintenanceContractService.detail(this.pk)
         this.maintenanceContract = new this.maintenanceContractService.model(
-          {...data, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
+          {...data, sum_tariffs_currency: this.mainStore.getDefaultCurrency}
         )
         this.customer = this.maintenanceContract.customer_view
 
@@ -305,7 +314,7 @@ export default {
         const equipmentData = await this.maintenanceEquipmentService.list()
         this.maintenanceEquipmentService.collection = equipmentData.results.map(
           (m) => new this.maintenanceEquipmentService.model({
-            ...m, default_currency: this.$store.getters.getDefaultCurrency
+            ...m, default_currency: this.mainStore.getDefaultCurrency
           })
         )
 

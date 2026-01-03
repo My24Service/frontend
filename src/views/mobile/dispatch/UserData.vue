@@ -34,8 +34,17 @@
 import moment from 'moment/min/moment-with-locales';
 import my24 from '@/services/my24'
 import OrderInfo from "@/views/mobile/dispatch/OrderInfo.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   name: "DispatchOrders",
   components: {
     OrderInfo
@@ -161,7 +170,7 @@ export default {
   },
   async created() {
     this.personOrders = []
-    this.statuscodes = await this.$store.dispatch('getStatuscodes');
+    this.statuscodes = await this.mainStore.getStatuscodes();
     this.loadData();
   }
 }

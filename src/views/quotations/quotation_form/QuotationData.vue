@@ -122,12 +122,17 @@ import {required} from "@vuelidate/validators";
 import {QuotationModel} from '@/models/quotations/Quotation.js';
 
 import quotationMixin from "./mixin";
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationDataForm',
   mixins: [quotationMixin],
   setup() {
-    return { v$: useVuelidate() }
+    const mainStore = useMainStore()
+    return {
+      v$: useVuelidate(),
+      mainStore
+    }
   },
   validations() {
     return {
@@ -173,7 +178,7 @@ export default {
     }
 
     if (!this.quotationData.quotation_expire_days) {
-      this.quotationData.quotation_expire_days = this.$store.getters.getQuotationDefaultExpireDays
+      this.quotationData.quotation_expire_days = this.mainStore.getQuotationDefaultExpireDays
     }
   },
   methods: {

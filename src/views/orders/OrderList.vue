@@ -18,8 +18,17 @@
 <script>
 import OrderListMaintenance from "./OrderListMaintenance.vue"
 import OrderListTemps from "./OrderListTemps.vue"
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   props: {
     dispatch: {
       type: [Boolean],
@@ -40,7 +49,7 @@ export default {
     OrderListTemps,
   },
   async created() {
-    this.memberType = await this.$store.dispatch('getMemberType')
+    this.memberType = await this.mainStore.getMemberType()
   },
 }
 </script>

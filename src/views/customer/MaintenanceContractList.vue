@@ -118,14 +118,17 @@ import Pagination from "../../components/Pagination.vue"
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   name: 'MaintenanceContractList',
@@ -197,7 +200,7 @@ export default {
         const data = await this.maintenanceContractService.list()
         this.maintenanceContracts = data.results.map(
           (m) => new this.maintenanceContractService.model(
-            {...m, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
+            {...m, sum_tariffs_currency: this.mainStore.getDefaultCurrency}
           ))
         this.isLoading = false
       } catch(error) {

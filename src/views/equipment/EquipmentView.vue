@@ -11,7 +11,7 @@
       <div class='page-title'>
         <h3>
           <IBiTools></IBiTools>
-          <span class="backlink" @click="goBack">{{ $trans('Equipment') }}</span> /
+          <span class="backlink" @click="goBack">{{ this.$trans('Equipment') }}</span> /
           <span v-if="equipment">{{ equipment.name }}</span>
         </h3>
         <BButton-toolbar>
@@ -25,29 +25,29 @@
 
     <div class='page-detail flex-columns' v-if="equipment && !isLoading">
       <div class='panel sidebar col-1-3'>
-        <h6>{{ $trans("Equipment details") }}</h6>
+        <h6>{{ this.$trans("Equipment details") }}</h6>
         <dl>
-          <dt>{{ $trans('Name') }}</dt>
+          <dt>{{ this.$trans('Name') }}</dt>
           <dd>{{ equipment.name }}</dd>
-          <dt>{{ $trans('Brand') }}</dt>
+          <dt>{{ this.$trans('Brand') }}</dt>
           <dd>{{ equipment.brand }}</dd>
-          <dt>{{ $trans('Identifier') }}</dt>
+          <dt>{{ this.$trans('Identifier') }}</dt>
           <dd>{{ equipment.identifier }}</dd>
-          <dt>{{ $trans('Description') }}</dt>
+          <dt>{{ this.$trans('Description') }}</dt>
           <dd>{{ equipment.description }}</dd>
-          <dt>{{ $trans('Installation date') }}</dt>
+          <dt>{{ this.$trans('Installation date') }}</dt>
           <dd>{{ equipment.installation_date ? this.$moment(equipment.installation_date).format('DD-MM-YYYY') : '' }}</dd>
-          <dt>{{ $trans('Production date') }}</dt>
+          <dt>{{ this.$trans('Production date') }}</dt>
           <dd>{{ equipment.production_date ? this.$moment(equipment.production_date).format('DD-MM-YYYY') : ''}}</dd>
-          <dt>{{ $trans('Serial number') }}</dt>
+          <dt>{{ this.$trans('Serial number') }}</dt>
           <dd>{{ equipment.serialnumber }}</dd>
-          <dt>{{ $trans('Standard hours') }}</dt>
+          <dt>{{ this.$trans('Standard hours') }}</dt>
           <dd>{{ equipment.standard_hours }}</dd>
-          <dt>{{ $trans('Lifespan (months)') }}</dt>
+          <dt>{{ this.$trans('Lifespan (months)') }}</dt>
           <dd>{{ equipment.default_replace_months }}</dd>
-          <dt>{{ $trans('Price') }}</dt>
+          <dt>{{ this.$trans('Price') }}</dt>
           <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
-          <dt v-if="hasQr" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
+          <dt v-if="hasQr" class="align-top-verdomme">{{ this.$trans('QR code') }}</dt>
           <dd v-if="hasQr">
             <div v-if="equipment.qr_path" class="qr-container">
               <BLink
@@ -58,14 +58,14 @@
               </BLink>
               <p>
                 <a href="javascript:" @click="download(equipment)">
-                  {{ $trans("Download") }}
+                  {{ this.$trans("Download") }}
                 </a>
               </p>
             </div>
             <img v-if="!equipment.qr_path" :alt="$trans('No QR yet')" class="qr-code-image" :src="NO_IMAGE_URL" />
             <p>
               <BButton @click="recreate_qr">
-                {{ $trans("Recreate")}}
+                {{ this.$trans("Recreate")}}
               </BButton>
             </p>
           </dd>
@@ -76,7 +76,7 @@
         <b-tabs>
           <b-tab :title="$trans('Orders')">
             <div class='flex-columns space-between align-items-center'>
-              <h6>{{ $trans('Orders')}}</h6>
+              <h6>{{ this.$trans('Orders')}}</h6>
               <span>
                 <BButton-group class="">
                   <ButtonLinkRefresh
@@ -138,10 +138,38 @@ import { EquipmentService } from "@/models/equipment/equipment";
 
 import moment from 'moment/min/moment-with-locales'
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
+import {
+  BButton,
+  BButtonGroup,
+  BButtonToolbar, BLink,
+  BPagination,
+  BTab,
+  BTabs,
+  useToast
+} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
 
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
+  mixins: [componentMixin],
   components: {
+    BLink,
+    BButton,
+    BTabs,
+    BButtonGroup,
+    BPagination,
+    BTab,
+    BButtonToolbar,
     DocumentsComponent,
     ButtonLinkRefresh,
     ButtonLinkSearch,
@@ -161,16 +189,16 @@ export default {
       equipment: null,
       orders: [],
       orderPastFields: [
-        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
       breadcrumb: [
         {
-          text: $trans('Equipment'),
+          text: this.$trans('Equipment'),
           to: {name: this.listLink()}
         },
         {
-          text: $trans('Detail'),
+          text: this.$trans('Detail'),
           active: true
         }
       ],
@@ -179,7 +207,7 @@ export default {
   },
   computed: {
     hasQr() {
-      const qrType = this.$store.getters.getEquipmentQrType;
+      const qrType = this.mainStore.getEquipmentQrType;
       return qrType !== 'none'
     },
     editLink() {
@@ -277,14 +305,14 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        errorToast(this.create, $trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     }
   },
   created() {
     this.loadData()
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment;
     this.$moment.locale(lang)
   },

@@ -514,13 +514,17 @@ import PriceInput from "../../components/PriceInput";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -614,9 +618,9 @@ export default {
   methods: {
     newModel() {
       return new EquipmentModel({
-        default_currency: this.$store.getters.getDefaultCurrency,
+        default_currency: this.mainStore.getDefaultCurrency,
         price: '0.00',
-        price_currency: this.$store.getters.getDefaultCurrency,
+        price_currency: this.mainStore.getDefaultCurrency,
       })
     },
     priceChanged(priceDinero) {

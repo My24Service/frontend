@@ -479,6 +479,7 @@ import {
 } from "@/models/orders/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'InvoiceForm',
@@ -496,9 +497,12 @@ export default {
   },
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   validations() {
@@ -538,10 +542,10 @@ export default {
       submitClicked: false,
       invoice: new InvoiceModel({
         total: "0.00",
-        total_currency: this.$store.getters.getDefaultCurrency,
+        total_currency: this.mainStore.getDefaultCurrency,
         vat: "0.00",
-        vat_currency: this.$store.getters.getDefaultCurrency,
-        term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+        vat_currency: this.mainStore.getDefaultCurrency,
+        term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
       }),
       errorMessage: null,
 
@@ -550,9 +554,9 @@ export default {
       order_id: null,
       order_reference: null,
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
+      invoice_default_term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
 
       invoice_default_partner_hourly_rate: null,
       invoice_default_partner_hourly_rate_dinero: null,

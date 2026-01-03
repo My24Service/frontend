@@ -177,13 +177,17 @@ import { required } from '@vuelidate/validators'
 import supplierModel from '@/models/inventory/Supplier.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   props: {
@@ -226,17 +230,14 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
-    this.$store.dispatch('getCountries')
-      .then((countries) => {
-        this.countries = countries
+  async created() {
+    this.countries = await this.mainStore.getCountries()
 
-        if (!this.isCreate) {
-          this.loadData()
-        } else {
-          this.supplier = supplierModel.getFields()
-        }
-      })
+    if (!this.isCreate) {
+      await this.loadData()
+    } else {
+      this.supplier = supplierModel.getFields()
+    }
   },
   methods: {
     async submitForm() {

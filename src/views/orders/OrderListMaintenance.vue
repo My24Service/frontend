@@ -251,14 +251,17 @@ import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import {OrderFilterService} from "@/models/orders/OrderFilter";
 import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   mixins: [componentMixin],
@@ -324,7 +327,7 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.statuscodes = await this.mainStore.getStatuscodes()
     this.model.currentPage = this.$route.query.page || 1
 
     this.sinceDate = this.$route.query.since || null
@@ -348,7 +351,7 @@ export default {
       this.loadData()
     },
     doAssign() {
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
       this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
     },
     selectOrder(order) {
@@ -359,11 +362,11 @@ export default {
       }
 
       this.selectedOrders.push(order)
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     async changeStatus() {
       const status = {
@@ -414,8 +417,8 @@ export default {
       // get filters
       this.userFilters = await this.filterService.getSimpleList()
 
-      await doFetchUnacceptedCountAndUpdateStore(this.$store)
-      this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
+      await doFetchUnacceptedCountAndUpdateStore()
+      this.selectedOrders = await this.mainStore.getAssignOrders() || []
 
       this.model.setUserFilter(this.$route.query.user_filter)
 

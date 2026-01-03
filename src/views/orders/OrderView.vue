@@ -1,6 +1,6 @@
 <template>
   <div v-if="isLoaded">
-    
+
     <OrderViewMaintenance
       v-if="memberType === 'maintenance'"
       v-bind:pk="pk"
@@ -19,8 +19,17 @@
 <script>
 import OrderViewMaintenance from "./OrderViewMaintenance.vue"
 import OrderViewTemps from "./OrderViewTemps.vue"
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   name: "OrderView",
   data() {
     return {
@@ -53,7 +62,7 @@ export default {
   },
   async created() {
     // get member type
-    this.memberType = await this.$store.dispatch('getMemberType')
+    this.memberType = await this.mainStore.getMemberType()
     this.isLoaded = true
   },
 }

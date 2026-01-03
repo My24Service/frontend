@@ -96,11 +96,19 @@ import BarChart from "../../components/BarChart.vue"
 import PieChart from "../../components/PieChart.vue"
 import OrderStatusColorSpan from '../../components/OrderStatusColorSpan.vue'
 import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
-
+import {useMainStore} from "@/stores/main";
 
 let d = new Date();
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       isLoading: false,
@@ -251,12 +259,12 @@ export default {
     }
   },
   async mounted () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     // get statuscodes and load orders
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.statuscodes = await this.mainStore.getStatuscodes()
     this.loadData()
   }
 }

@@ -28,8 +28,17 @@ import moment from 'moment/min/moment-with-locales'
 
 import timeSheetModel from '../../models/mobile/TimeSheet.js'
 import UserHoursDataDetail from "../../components/UserHoursDataDetail";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   name: "TimeSheetDetail",
   components: {
     UserHoursDataDetail
@@ -55,7 +64,7 @@ export default {
     },
   },
   async created() {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)

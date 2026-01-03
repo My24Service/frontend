@@ -200,14 +200,17 @@ import SearchModal from '../../components/SearchModal.vue'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   mixins: [componentMixin],
@@ -264,7 +267,7 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.statuscodes = await this.mainStore.getStatuscodes()
     this.model.currentPage = this.$route.query.page || 1
 
     this.sinceDate = this.$route.query.since || null
@@ -295,7 +298,7 @@ export default {
     },
     // rest
     doAssign() {
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
       this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
     },
     selectOrder(order) {
@@ -306,11 +309,11 @@ export default {
       }
 
       this.selectedOrders.push(order)
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     async changeStatus() {
       const status = {
@@ -361,7 +364,7 @@ export default {
       try {
         const data = await this.model.list()
         this.orders = data.results
-        this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
+        this.selectedOrders = await this.mainStore.getAssignOrders() || []
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)

@@ -177,14 +177,18 @@ import {errorToast, infoToast, $trans} from "@/utils";
 
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerService} from "@/models/customer/Customer";
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: "CustomerForm",
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -260,11 +264,11 @@ export default {
     }
   },
   async created () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = await this.mainStore.getCountries()
   },
   mounted () {
     if (!this.isCreate) {

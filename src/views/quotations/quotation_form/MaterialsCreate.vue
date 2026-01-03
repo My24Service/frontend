@@ -232,14 +232,17 @@ import AddToQuotationLines from './AddToQuotationLines.vue'
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
 import SectionHeader from "./SectionHeader.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   name: "MaterialsCreateComponent",
@@ -293,8 +296,8 @@ export default {
         USE_PRICE_SELLING,
         USE_PRICE_OTHER,
       },
-      default_currency: this.$store.getters.getDefaultCurrency,
-      default_vat: this.$store.getters.getQuotationDefaultVat,
+      default_currency: this.mainStore.getDefaultCurrency,
+      default_vat: this.mainStore.getQuotationDefaultVat,
       hasStoredData: false,
       getMaterialsDebounced: '',
       parentHasQuotationLines: false,

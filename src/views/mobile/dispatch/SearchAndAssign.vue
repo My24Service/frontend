@@ -29,28 +29,28 @@
           <li><!-- FIXME -->
 
             <div class="headings">
-              <span class="order-id">{{ $trans("order id") }}</span>
-              <span class="order-type">{{ $trans("type") }}</span>
-              <span class="order-company-name">{{ $trans("company") }}</span>
-              <span class="order-start-date">{{ $trans("start date") }}</span>
-              <span class="order-status">{{ $trans("status") }}</span>
+              <span class="order-id">{{ this.$trans("order id") }}</span>
+              <span class="order-type">{{ this.$trans("type") }}</span>
+              <span class="order-company-name">{{ this.$trans("company") }}</span>
+              <span class="order-start-date">{{ this.$trans("start date") }}</span>
+              <span class="order-status">{{ this.$trans("status") }}</span>
               <span class="order-actions">&nbsp;</span>
             </div>
           </li>
           <li v-if="isLoading" class="text-center my-2 list-loading">
             <div>
               <b-spinner class="align-middle"></b-spinner><br>
-              <span>{{ $trans('loading orders') }}</span>
+              <span>{{ this.$trans('loading orders') }}</span>
             </div>
           </li>
           <li v-if="orders.length === 0" class="list-empty">
             <div>
-              <span>{{ $trans('No results') }}</span>
+              <span>{{ this.$trans('No results') }}</span>
             </div>
           </li>
           <li v-if="!isLoading" v-for="order in orders" :key="order.id" style="">
             <div class="listing-item" style="">
-              <span class="order-id">#{{ order.order_id }}<span v-if="$store.getters.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span></span>
+              <span class="order-id">#{{ order.order_id }}<span v-if="mainStore.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span></span>
               <span class="order-type">{{ order.order_type }}</span>
               <span class="order-company-name">{{ order.order_name }}</span>
               <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
@@ -81,7 +81,7 @@
       </div>
       <div slot="modal-footer" class="w-100">
         <b-row v-if="selectedOrders.length > 0" class="selected-orders float-left">
-          <span class="dimmed">{{ $trans('Selected') }} ({{ selectedOrders.length }}):</span>
+          <span class="dimmed">{{ this.$trans('Selected') }} ({{ selectedOrders.length }}):</span>
           <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
               {{ order.order_id }}
               <IBiXCircle class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircle>
@@ -90,7 +90,7 @@
           <!--
           <BButton variant="primary" v-if="selectedOrders.length > 0" @click.prevent="searchAndAssignDone()">
             <b-icon-person-lines-fill></b-icon-person-lines-fill>
-            {{ $trans('Assign these orders') }}
+            {{ this.$trans('Assign these orders') }}
           </BButton>
           -->
         </b-row>
@@ -104,34 +104,36 @@
 </template>
 
 <script>
-import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
-import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
-import IconLinkDocuments from "@/components/IconLinkDocuments.vue";
-import IconLinkEdit from "@/components/IconLinkEdit.vue";
-import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
 import IconLinkAssign from "@/components/IconLinkAssign.vue";
 import my24 from "@/services/my24";
 import {OrderService} from "@/models/orders/Order";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import EditStartDate from "@/views/mobile/dispatch/EditStartDate.vue";
+import {useMainStore} from "@/stores/main";
+import {errorToast} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   components: {
     EditStartDate,
     IconLinkAssign,
-    ButtonLinkSearch,
-    IconLinkEdit,
-    IconLinkDocuments,
-    ButtonLinkSort,
-    ButtonLinkRefresh
   },
   async mounted() {
     this.searchDebounced = AwesomeDebouncePromise(this.search, 500)
   },
   async created() {
-    this.lang = this.$store.getters.getCurrentLanguage;
+    this.lang = this.mainStore.getCurrentLanguage;
     this.orderStatusColorCode = my24.status2color(this.statuscodes, this.orderStatusCode);
   },
+  mixins: [componentMixin],
   data() {
     return {
       model: new OrderService(),
@@ -143,7 +145,7 @@ export default {
       orderStatusColorCode: '#666',
       orders: [],
       selectedOrders: [],
-      buttonLabel: $trans('Close')
+      buttonLabel: this.$trans('Close')
     }
   },
   methods: {
@@ -152,9 +154,9 @@ export default {
     },
     updateButtonLabel() {
       if (this.hasSelectedOrders()) {
-        this.buttonLabel = $trans('Assign these orders')
+        this.buttonLabel = this.$trans('Assign these orders')
       } else {
-        this.buttonLabel = $trans('Close')
+        this.buttonLabel = this.$trans('Close')
       }
     },
     handleOk(bvModalEvent) {
@@ -211,13 +213,13 @@ export default {
       this.selectedOrders.push(order)
       this.updateButtonLabel();
 
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
       this.updateButtonLabel();
 
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     search() {
       // At least 2 characters and prevent searching the same thing over and over,
@@ -238,7 +240,7 @@ export default {
       }
     },
     searchAndAssignDone() {
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
       this.$emit('search-and-assign-done', this.selectedOrders.length>0 )
       this.hide();
     },
@@ -246,7 +248,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
+        this.selectedOrders = await this.mainStore.getAssignOrders() || []
 
         const data = await this.model.list()
         this.orders = data.results
@@ -255,7 +257,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
-        errorToast(this.create, $trans('Error loading orders'))
+        errorToast(this.create, this.$trans('Error loading orders'))
         this.isLoading = false
       }
     },

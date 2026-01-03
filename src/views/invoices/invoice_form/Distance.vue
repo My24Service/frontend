@@ -144,8 +144,20 @@ import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 import TotalsInputs from "../../../components/TotalsInputs";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "DistanceComponent",
   emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
@@ -202,8 +214,8 @@ export default {
 
       invoice_default_price_per_km_dinero: null,
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
 
       usePriceOptions: {
         USE_PRICE_SETTINGS,

@@ -143,20 +143,31 @@ import CostService, {
   COST_TYPE_WORK_HOURS
 } from "../../../models/orders/Cost";
 import PriceInput from "../../../components/PriceInput";
-import {toDinero} from "../../../utils";
+import {toDinero} from "@/utils";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 import TotalsInputs from "../../../components/TotalsInputs";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "HoursComponent",
   emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
   components: {
     TotalsInputs,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -230,9 +241,9 @@ export default {
       costService: new CostService(),
       totalHours: null,
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
+      default_hourly_rate: this.mainStore.getInvoiceDefaultHourlyRate,
 
       total_dinero: null,
       totalVAT_dinero: null,

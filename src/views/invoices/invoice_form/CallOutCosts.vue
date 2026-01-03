@@ -108,25 +108,35 @@ import {
   USE_PRICE_SETTINGS
 } from "./constants";
 import PriceInput from "../../../components/PriceInput";
-import Collapse from "../../../components/Collapse";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
 import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
-import {InvoiceLineService} from "../../../models/invoices/InvoiceLine";
+import {InvoiceLineService} from "@/models/invoices/InvoiceLine";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 import TotalsInputs from "../../../components/TotalsInputs";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "CallOutCostsComponent",
   mixins: [invoiceMixin],
   components: {
     PriceInput,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -157,9 +167,9 @@ export default {
   data() {
     return {
       isLoading: false,
-      default_currency: this.$store.getters.getDefaultCurrency,
+      default_currency: this.mainStore.getDefaultCurrency,
       invoice_default_call_out_costs_dinero: null,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
 
       costService: new CostService(),
       coc_item: null,

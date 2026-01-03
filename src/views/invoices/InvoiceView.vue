@@ -15,7 +15,7 @@
             <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
             <router-link
               :to="{name: 'invoice-list' }"
-            >{{ $trans('Invoices') }}</router-link>
+            >{{ this.$trans('Invoices') }}</router-link>
             /
             <strong>{{ invoice.invoice_id }}</strong>
             <span>
@@ -25,7 +25,7 @@
                 target="_blank"
               >
                 <IBiFileEarmark></IBiFileEarmark>
-                {{ $trans('View PDF') }}
+                {{ this.$trans('View PDF') }}
               </BLink>
             </span>
             <span>
@@ -34,7 +34,7 @@
                 :to="{name:'order-view', params: {pk: invoice.order}}">
                 <IBiArrowUpRightCircle
                 ></IBiArrowUpRightCircle>
-                {{ $trans('Order') }}
+                {{ this.$trans('Order') }}
               </router-link>
             </span>
             <BButton
@@ -43,7 +43,7 @@
               variant="primary"
               class="send-quotation-button"
             >
-              {{ $trans('Send invoice') }}
+              {{ this.$trans('Send invoice') }}
             </BButton>
           </h3>
         </div>
@@ -62,37 +62,37 @@
                     {{ invoice.member.address }}<br/>
                     {{ invoice.member.postal }} {{ invoice.member.city }}<br/>
                     {{ invoice.member.tel }} - {{ invoice.member.email}}<br/>
-                  <b>{{ $trans('VAT number') }}</b> {{ invoice.member.vat_number }}<br/>
-                  <b>{{ $trans('Chamber of commerce') }}</b> {{ invoice.member.chamber_of_commerce }}<br/>
+                  <b>{{ this.$trans('VAT number') }}</b> {{ invoice.member.vat_number }}<br/>
+                  <b>{{ this.$trans('Chamber of commerce') }}</b> {{ invoice.member.chamber_of_commerce }}<br/>
                 </div>
                 <div class="col-sm-6 panel panel-default">
                   <div class="panel-body">
                     <div class="row">
-                      <span class="pull-left col-sm-4"><b>{{ $trans('Invoice number') }}</b></span>
+                      <span class="pull-left col-sm-4"><b>{{ this.$trans('Invoice number') }}</b></span>
                       <span class="col-sm-6 underline">
                         <span class="pull-right">{{ invoice.invoice_id }}</span>
                       </span>
                     </div>
                     <div class="row">
-                      <span class="pull-left col-sm-4"><b>{{ $trans('Reference') }}</b></span>
+                      <span class="pull-left col-sm-4"><b>{{ this.$trans('Reference') }}</b></span>
                       <span class="col-sm-6 underline">
                         <span class="pull-right">{{ invoice.reference }}&nbsp;</span>
                       </span>
                     </div>
                     <div class="row">
-                      <span class="pull-left col-sm-4"><b>{{ $trans('Description') }}</b></span>
+                      <span class="pull-left col-sm-4"><b>{{ this.$trans('Description') }}</b></span>
                       <span class="col-sm-6 underline">
                         <span class="pull-right">{{ invoice.description }}&nbsp;</span>
                       </span>
                     </div>
                     <div class="row">
-                      <span class="pull-left col-sm-4"><b>{{ $trans('Order ID') }}</b></span>
+                      <span class="pull-left col-sm-4"><b>{{ this.$trans('Order ID') }}</b></span>
                       <span class="col-sm-6 underline">
                         <span class="pull-right">{{ invoice.order_id }}</span>
                       </span>
                     </div>
                     <div class="row">
-                      <span class="pull-left col-sm-4"><b>{{ $trans('Order reference') }}</b></span>
+                      <span class="pull-left col-sm-4"><b>{{ this.$trans('Order reference') }}</b></span>
                       <span class="col-sm-6 underline">
                         <span class="pull-right">{{ invoice.order_reference }}</span>
                       </span>
@@ -103,25 +103,25 @@
               <div class="row">
                   <div class="col-sm-6">
                     <div class="row">
-                      <span class="pull-left col-sm-6"><b>{{ $trans('Customer') }}</b></span>
+                      <span class="pull-left col-sm-6"><b>{{ this.$trans('Customer') }}</b></span>
                       <span class="col-sm-6 underline">
                           <span class="pull-right">{{ invoice.customer.name }}</span>
                       </span>
                     </div>
                     <div class="row">
-                      <span class="pull-left col-sm-6"><b>{{ $trans('Address') }}</b></span>
+                      <span class="pull-left col-sm-6"><b>{{ this.$trans('Address') }}</b></span>
                       <span class="col-sm-6 underline">
                           <span class="pull-right">{{ invoice.customer.address }}</span>
                       </span>
                     </div>
                     <div class="row">
-                      <span class="pull-left col-sm-6"><b>{{ $trans('Postal') }}/{{ $trans('city') }}</b></span>
+                      <span class="pull-left col-sm-6"><b>{{ this.$trans('Postal') }}/{{ this.$trans('city') }}</b></span>
                       <span class="col-sm-6 underline">
                           <span class="pull-right">{{ invoice.customer.country_code }}-{{ invoice.customer.postal }} {{ invoice.customer.city }}</span>
                       </span>
                     </div>
                     <div class="row">
-                      <span class="pull-left col-sm-6"><b>{{ $trans('Term of payment') }}</b></span>
+                      <span class="pull-left col-sm-6"><b>{{ this.$trans('Term of payment') }}</b></span>
                       <span class="col-sm-6 underline">
                           <span class="pull-right">{{ invoice.term_of_payment_days }} days</span>
                       </span>
@@ -132,14 +132,14 @@
                   </div>
               </div>
               <div class="row" v-if="invoice.invoicelines.length">
-                  <p><b>{{ $trans('Invoice lines') }}</b></p>
+                  <p><b>{{ this.$trans('Invoice lines') }}</b></p>
                   <table class="table table-bordered">
                       <thead>
-                          <th>{{ $trans('Description') }}</th>
-                          <th>{{ $trans('Amount') }}</th>
-                          <th>{{ $trans('Price') }}</th>
-                          <th>{{ $trans('Total') }}</th>
-                          <th>{{ $trans('VAT') }}</th>
+                          <th>{{ this.$trans('Description') }}</th>
+                          <th>{{ this.$trans('Amount') }}</th>
+                          <th>{{ this.$trans('Price') }}</th>
+                          <th>{{ this.$trans('Total') }}</th>
+                          <th>{{ this.$trans('VAT') }}</th>
                       </thead>
                       <tbody>
                           <tr v-for="invoiceline in invoice.invoicelines" :key="invoiceline.id">
@@ -153,7 +153,7 @@
                   </table>
               </div>
               <div class='flex-columns space-between'>
-                <span class="total-text">{{ $trans('Invoice total') }}</span>
+                <span class="total-text">{{ this.$trans('Invoice total') }}</span>
 
                 <TotalsInputs
                   :total="invoice.total_dinero"
@@ -189,8 +189,23 @@ import StatusesComponent from "@/components/StatusesComponent.vue";
 import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
 
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
+import {errorToast} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
+  mixins: [componentMixin],
   name: "InvoiceView",
   components: {
     InvoicePDFViewer,
@@ -227,12 +242,12 @@ export default {
         const data = await this.invoiceService.getByUuid(this.uuid, createPDFHeader)
 
         this.invoice = new InvoiceModel(data)
-        this.companyLogo = this.$store.getters.getMemberLogo
+        this.companyLogo = this.mainStore.getMemberLogo
         this.isLoading = false
       }
       catch(err) {
         console.log('error loading invoice', err)
-        errorToast(this.create, $trans('Error loading invoice'))
+        errorToast(this.create, this.$trans('Error loading invoice'))
         this.isLoading = false
       }
     },

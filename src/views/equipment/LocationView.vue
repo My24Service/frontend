@@ -112,9 +112,20 @@ import { OrderService } from '@/models/orders/Order'
 import { LocationService } from "@/models/equipment/location";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import my24 from "@/services/my24";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
 
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   components: {
     DocumentsComponent,
     ButtonLinkRefresh,
@@ -165,7 +176,7 @@ export default {
   },
   computed: {
     hasQr() {
-      const qrType = this.$store.getters.getEquipmentQrType;
+      const qrType = this.mainStore.getEquipmentQrType;
       return qrType !== 'none'
     },
     editLink() {

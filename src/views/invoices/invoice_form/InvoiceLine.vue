@@ -206,15 +206,18 @@ import VAT from "./VAT";
 import invoiceMixin from "./mixin";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -259,12 +262,12 @@ export default {
     // init new model for manual entry
     this.invoiceLineService.modelDefaults = {
       price: '0.00',
-      price_currency: this.$store.getters.getDefaultCurrency,
+      price_currency: this.mainStore.getDefaultCurrency,
       total: '0.00',
-      total_currency: this.$store.getters.getDefaultCurrency,
+      total_currency: this.mainStore.getDefaultCurrency,
       vat: '0.00',
-      vat_currency: this.$store.getters.getDefaultCurrency,
-      vat_type: this.$store.getters.getInvoiceDefaultVat,
+      vat_currency: this.mainStore.getDefaultCurrency,
+      vat_type: this.mainStore.getInvoiceDefaultVat,
     }
     this.invoiceLineService.newEditItem()
 
@@ -287,7 +290,7 @@ export default {
           // as well?
           let vat_percentage = parseFloat(line.vat_type)
           if (vat_percentage === 0.0 && line.vat > 0.0) {
-            vat_percentage = parseFloat(this.$store.getters.getInvoiceDefaultVat)
+            vat_percentage = parseFloat(this.mainStore.getInvoiceDefaultVat)
           }
 
           // Normalize to 1.0:

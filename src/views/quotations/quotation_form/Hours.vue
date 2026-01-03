@@ -192,14 +192,17 @@ import AddToQuotationLines from './AddToQuotationLines.vue'
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   name: "HoursComponent",
@@ -263,9 +266,9 @@ export default {
         USE_PRICE_CUSTOMER,
         USE_PRICE_OTHER,
       },
-      default_currency: this.$store.getters.getDefaultCurrency,
-      default_vat: this.$store.getters.getQuotationDefaultVat,
-      default_hourly_rate: this.$store.getters.getQuotationDefaultHourlyRate,
+      default_currency: this.mainStore.getDefaultCurrency,
+      default_vat: this.mainStore.getQuotationDefaultVat,
+      default_hourly_rate: this.mainStore.getQuotationDefaultHourlyRate,
       hasStoredData: false,
       costService: new CostService(),
       quotationLineService: new QuotationLineService(),

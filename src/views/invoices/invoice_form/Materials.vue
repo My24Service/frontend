@@ -103,7 +103,6 @@
 
 <script>
 import {toDinero} from "@/utils";
-import Collapse from "@/components/Collapse";
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
 
@@ -125,15 +124,26 @@ import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "MaterialsComponent",
   emits: ['invoiceLinesCreated', 'emptyCollectionClicked'],
   mixins: [invoiceMixin],
   components: {
     PriceInput,
     TotalsInputs,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -196,8 +206,8 @@ export default {
         USE_PRICE_OTHER,
       },
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
 
       hasStoredData: false,
       costType: COST_TYPE_USED_MATERIALS,

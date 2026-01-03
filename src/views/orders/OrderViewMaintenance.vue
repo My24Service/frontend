@@ -458,14 +458,17 @@ import StatusesComponent from "@/components/StatusesComponent.vue";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -585,7 +588,7 @@ export default {
         order: this.order.id,
         vat: '0.00',
         total: '0.00',
-        default_currency: this.$store.getters.getDefaultCurrency
+        default_currency: this.mainStore.getDefaultCurrency
       })
     },
     addPurchaseInvoice() {
@@ -609,7 +612,7 @@ export default {
         this.order = this.pk !== null ? await this.orderService.detail(this.pk) : await this.orderService.detailUuid(this.uuid)
 
         // set location based on setting
-        if (this.$store.getters.getMemberUsesEquipment) {
+        if (this.mainStore.getMemberUsesEquipment) {
           for (let i=0; i<this.order.orderlines.length; i++) {
             if (this.order.orderlines[i].equipment_location_view.name !== "" && this.order.orderlines[i].equipment_location_view.name !== null) {
               console.debug(`overriding orderline location from '${this.order.orderlines[i].location} to ${this.order.orderlines[i].equipment_location_view.name}`)
@@ -628,7 +631,7 @@ export default {
           const purchaseInvoiceData = await this.purchaseInvoiceService.list()
           this.order.purchaseInvoices = purchaseInvoiceData.results.map(
             (m) => new this.purchaseInvoiceService.model({
-              ...m, default_currency: this.$store.getters.getDefaultCurrency
+              ...m, default_currency: this.mainStore.getDefaultCurrency
             })
           )
           this.purchaseInvoice = this.newPurchaseInvoiceModel()

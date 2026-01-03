@@ -440,6 +440,7 @@ import {UserListService} from "@/models/company/UserList";
 import TimeInput from "@/components/TimeInput.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
@@ -451,10 +452,12 @@ class SelectedUser {
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   name: 'DispatchNew',
@@ -649,7 +652,7 @@ export default {
 
       if (this.assignMode) {
         this.alreadyAssignedUsers = []
-        this.selectedOrders = await this.$store.dispatch('getAssignOrders')
+        this.selectedOrders = await this.mainStore.getAssignOrders()
         for (const order of this.selectedOrders) {
           this.alreadyAssignedUsers.push(...order.assigned_user_info.map((userInfo) => {
             return {
@@ -770,7 +773,7 @@ export default {
       this.selectedOrders = []
       this.alreadyAssignedUsers = []
       this.assignMode = false;
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1);
@@ -812,7 +815,7 @@ export default {
     const showUsersMode = JSON.parse(localStorage.getItem('showUsersMode'))
     this.showUsersMode = showUsersMode ? showUsersMode : 'active'
 
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
@@ -823,7 +826,7 @@ export default {
 
     if (this.assignMode) {
       this.alreadyAssignedUsers = []
-      this.selectedOrders = await this.$store.dispatch('getAssignOrders')
+      this.selectedOrders = await this.mainStore.getAssignOrders()
       for (const order of this.selectedOrders) {
         this.alreadyAssignedUsers.push(...order.assigned_user_info.map((userInfo) => {
           return {
@@ -836,7 +839,7 @@ export default {
       this.alreadyAssignedUsers = []
     }
 
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.statuscodes = await this.mainStore.getStatuscodes()
 
     this.loadDone = true
   },

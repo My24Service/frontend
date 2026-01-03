@@ -269,6 +269,7 @@ import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationLineForm',
@@ -288,9 +289,12 @@ export default {
   ],
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   validations() {
@@ -356,12 +360,12 @@ export default {
     this.quotationLineService.modelDefaults = {
       amount: '0',
       price: '0.00',
-      price_currency: this.$store.getters.getDefaultCurrency,
+      price_currency: this.mainStore.getDefaultCurrency,
       total: '0.00',
-      total_currency: this.$store.getters.getDefaultCurrency,
+      total_currency: this.mainStore.getDefaultCurrency,
       vat: '0.00',
-      vat_currency: this.$store.getters.getDefaultCurrency,
-      vat_type: this.$store.getters.getInvoiceDefaultVat,
+      vat_currency: this.mainStore.getDefaultCurrency,
+      vat_type: this.mainStore.getInvoiceDefaultVat,
     }
 
     await this.loadData()
