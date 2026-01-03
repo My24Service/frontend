@@ -564,15 +564,20 @@ import {OrderlineService} from "@/models/orders/Orderline";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     DocumentsComponent,
     Multiselect,
@@ -672,10 +677,10 @@ export default {
   },
   computed: {
     canQuickCreateEquipment() {
-      return this.$store.getters.getSettingEquipmentQuickCreate
+      return this.mainStore.getSettingEquipmentQuickCreate
     },
     canQuickCreateEquipmentLocation() {
-      return this.$store.getters.getSettingEquipmentLocationQuickCreate
+      return this.mainStore.getSettingEquipmentLocationQuickCreate
     },
     startDate() {
       return this.order.start_date
@@ -705,14 +710,14 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
             await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
           this.equipment = response.id
           this.product = response.name
         } else {
-          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.equipmentService.quickAddBranchPlanning(this.newEquipmentName, this.order.branch) :
             await this.equipmentService.quickAddBranchNonPlanning(this.newEquipmentName)
 
@@ -760,14 +765,14 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
             await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
 
           this.equipment_location = response.id
           this.location = response.name
         } else {
-          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.locationService.quickAddBranchPlanning(this.newLocationName, this.order.branch) :
             await this.locationService.quickAddBranchNonPlanning(this.newLocationName)
 
@@ -956,12 +961,12 @@ export default {
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
 
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     try {
-      this.countries = await this.$store.dispatch('getCountries')
+      this.countries = await this.mainStore.getCountries()
       const branch = await this.branchService.getMyBranch()
 
       if (this.isCreate) {

@@ -348,22 +348,27 @@ import PriceInput from "../../components/PriceInput";
 import CustomerCard from '../../components/CustomerCard.vue'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     Multiselect,
     PriceInput,
     CustomerCard,
-},
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -443,7 +448,7 @@ export default {
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.maintenanceEquipmentService.modelDefaults = {
       tariff: '0.00',
-      tariff_currency: this.$store.getters.getDefaultCurrency,
+      tariff_currency: this.mainStore.getDefaultCurrency,
     }
     this.maintenanceEquipmentService.newEditItem()
     this.maintenanceEquipmentService.deletedItems = []
@@ -511,7 +516,7 @@ export default {
       this.$refs.multiselect_equipment.deactivate()
 
       try {
-        const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
+        const response = this.isPlanning || this.isAdmin ?
           await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.customer.id) :
           await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
@@ -637,7 +642,7 @@ export default {
       try {
         const data = await this.maintenanceContractService.detail(this.pk)
         this.maintenanceContractService.editItem = new this.maintenanceContractService.model(
-          {...data, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
+          {...data, sum_tariffs_currency: this.mainStore.getDefaultCurrency}
         )
         this.customer = await this.customerService.detail(this.maintenanceContractService.editItem.customer)
 
@@ -645,7 +650,7 @@ export default {
         const equipmentData = await this.maintenanceEquipmentService.list()
         this.maintenanceEquipmentService.collection = equipmentData.results.map(
           (m) => new this.maintenanceEquipmentService.model({
-            ...m, default_currency: this.$store.getters.getDefaultCurrency
+            ...m, default_currency: this.mainStore.getDefaultCurrency
           })
         )
         this.updateTotals()

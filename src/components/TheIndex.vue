@@ -32,14 +32,16 @@ import NavBrand from '@/components/NavBrand.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import Version from "./Version.vue"
 import {computed, onMounted} from "vue";
-import {useStore} from "vuex";
+import {useAuthStore} from "@/stores/auth";
+import {useMainStore} from "@/stores/main";
 
-const store = useStore()
-const memberInfo = computed(() => store.state.memberInfo)
+const authStore = useAuthStore()
+const mainStore = useMainStore()
+const memberInfo = computed(() => mainStore.memberInfo)
 
 onMounted(() => {
   setTimeout(() => {
-    if (store.getters.getIsPlanning) {
+    if (authStore.isPlanning) {
       console.info(`planning, redirecting to 'order-list'`)
       this.$router.push({ name: 'material-list' });
     }

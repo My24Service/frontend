@@ -44,9 +44,10 @@
 <script>
 
 import {MemberService} from "@/models/member/Member";
+import componentMixin from "@/mixins/common";
 
 export default {
-
+  mixins: [componentMixin],
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')
@@ -65,22 +66,22 @@ export default {
   },
   computed: {
     hasMembers() {
-      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
+      return this.isAdmin
     },
     hasDeletedMembers() {
-      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
+      return this.isAdmin
     },
     hasRequestedMembers() {
-      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
+      return this.isAdmin
     },
     hasContracts() {
-      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
+      return this.isAdmin
     },
     hasModules() {
-      return this.$store.getters.getIsSuperuser
+      return this.isSuperuser
     },
     hasModuleParts() {
-      return this.$store.getters.getIsSuperuser
+      return this.isSuperuser
     },
   },
 }

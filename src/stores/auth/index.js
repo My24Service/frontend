@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', {
     ...initialState
   }),
   getters: {
-    getIsAdmin: (state) => {
+    isAdmin: (state) => {
       return state.userInfo.user.is_superuser || state.userInfo.user.is_staff
     },
     getUserName: (state) => {

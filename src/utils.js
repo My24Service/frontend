@@ -131,15 +131,12 @@ async function doFetchUnacceptedCountAndUpdateStore() {
 }
 
 function hasAccessToModule(module, part) {
-  const store = useStore()
-  if (!store) {
-    console.warn("help, no store")
-    return
-  }
+  const authStore = useAuthStore()
+  const mainStore = useMainStore()
   return my24.hasAccessToModule({
-    isStaff: useAuthStore.getIsStaff,
-    isSuperuser: useAuthStore.getIsSuperuser,
-    contract: store.state.memberContract,
+    isStaff: authStore.isStaff,
+    isSuperuser: authStore.isSuperuser,
+    contract: mainStore.memberContract,
     module,
     part,
   })

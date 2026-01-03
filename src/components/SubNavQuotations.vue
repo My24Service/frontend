@@ -20,34 +20,16 @@
     </b-nav-item>
   </div>
 </template>
-
 <script>
-
+import componentMixin from "@/mixins/common";
 
 export default {
-
+  mixins: [componentMixin],
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')
       return parts[parts.length - 1] === item
     }
-  },
-  computed: {
-    hasMembers() {
-      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
-    },
-    hasDeletedMembers() {
-      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
-    },
-    hasContracts() {
-      return this.$store.getters.getIsSuperuser || this.$store.getters.getIsStaff
-    },
-    hasModules() {
-      return this.$store.getters.getIsSuperuser
-    },
-    hasModuleParts() {
-      return this.$store.getters.getIsSuperuser
-    },
   },
 }
 </script>

@@ -42,7 +42,10 @@
 
 <script>
 
+import componentMixin from "@/mixins/common";
+
 export default {
+  mixins: [componentMixin],
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')
@@ -56,9 +59,6 @@ export default {
     hasEquipmentLocations() {
       return this.hasAccessToModule('customers', 'locations') && !this.isCustomer
     },
-    hasCustomers() {
-      return this.hasAccessToModule('customers', 'customers')
-    },
     hasMaintenanceContracts() {
       return this.hasAccessToModule('customers', 'maintenance-contracts')
     },
@@ -68,9 +68,6 @@ export default {
     showCustomerDashBoard() {
       return !this.hasBranches && this.isCustomer
     },
-    hasUpload() {
-      return this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser
-    }
   },
 }
 </script>

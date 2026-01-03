@@ -14,7 +14,8 @@ let componentMixin = {
       return store.isSuperuser
     },
     isAdmin() {
-      return this.isStaff || this.isSuperuser
+      const store = useAuthStore()
+      return store.isAdmin
     },
     isPlanning() {
       const store = useAuthStore()

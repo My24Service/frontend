@@ -957,6 +957,8 @@ import {EngineerService} from "@/models/company/UserEngineer";
 import DocumentsComponent from "./order_form/DocumentsComponent.vue";
 import ApiResult from "@/components/ApiResult";
 import { UserListService } from "@/models/company/UserList.js";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 const isCorrectTime = (value) => {
   if (!value || value === "") {
@@ -969,11 +971,14 @@ const isCorrectTime = (value) => {
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     DocumentsComponent,
     Multiselect,
@@ -1177,10 +1182,10 @@ export default {
   },
   computed: {
     canQuickCreateEquipment() {
-      return this.$store.getters.getSettingEquipmentPlanningQuickCreate
+      return this.mainStore.getSettingEquipmentPlanningQuickCreate
     },
     canQuickCreateEquipmentLocation() {
-      return this.$store.getters.getSettingEquipmentLocationPlanningQuickCreate
+      return this.mainStore.getSettingEquipmentLocationPlanningQuickCreate
     },
     equipmentFormSearchOk() {
       if (!this.hasBranches) {
@@ -1190,7 +1195,7 @@ export default {
       }
     },
     usesEquipment() {
-      return this.$store.getters.getMemberUsesEquipment
+      return this.mainStore.getMemberUsesEquipment
     },
     startDate() {
       if (!this.order) {
@@ -1217,7 +1222,7 @@ export default {
     }
   },
   async created () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
@@ -1228,7 +1233,7 @@ export default {
     this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
     this.getEngineersDebounced = AwesomeDebouncePromise(this.getEngineers, 500)
 
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = await this.mainStore.getCountries()
 
     if (this.isCreate) {
       this.order = new OrderModel()
@@ -1250,7 +1255,7 @@ export default {
 
       if (this.maintenance) {
         this.isLoading = true
-        const data = this.$store.getters.getMaintenanceEquipment
+        const data = this.mainStore.getMaintenanceEquipment
 
         if (data) {
           const {maintenanceEquipment, customer_pk, contract_pk} = data
@@ -1313,7 +1318,7 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
             await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
@@ -1372,7 +1377,7 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
             await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
 
