@@ -14,9 +14,9 @@
   "dependencies": {
     "@ivanv/vue-collapse-transition": "^1.0.2",
     "@vuepic/vue-datepicker": "^12.1.0",
-    "async": "^3.2.1",
+    "async": "3.2.2",
     "awesome-debounce-promise": "^2.1.0",
-    "axios": "^0.27.2",
+    "axios": "1.12.0",
     "bootstrap": "^5.3.8",
     "bootstrap-vue-next": "^0.42.0",
     "chart.js": "2",
@@ -25,6 +25,7 @@
     "is-ci": "^3.0.1",
     "mutationobserver-shim": "^0.3.7",
     "one-colorpicker": "^1.0.12",
+    "pinia": "^3.0.4",
     "popper.js": "^2.0.0-next.4",
     "portal-vue": "^3.0.0",
     "realpath-native": "^3.0.0",
@@ -40,7 +41,6 @@
     "vue-password-strength-meter": "^1.7.2",
     "vue-router": "^4.6.4",
     "vue-spinners": "^1.0.2",
-    "vuex": "^4.0.2",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

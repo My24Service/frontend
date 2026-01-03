@@ -2,9 +2,15 @@ import authHeader from './auth-header'
 import {useStore} from "vuex";
 
 async function errorHandler(error) {
+  console.error(`got error: ${error}`)
   if (error.response.status === 401) {
     console.log('doing logout with reload and redirect to home')
     const store = useStore();
+    if (!store) {
+      console.warn("no store, return")
+      // document.location.href = "/"
+      return
+    }
     await store.dispatch('auth/logout');
     // auth.logout(false, true, true)
   } else {

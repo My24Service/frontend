@@ -1,8 +1,7 @@
 import {createRouter, createWebHashHistory, createWebHistory} from 'vue-router'
-
+import {useMainStore} from "@/stores/main";
 import TheIndexLayout from '../components/TheIndexLayout.vue'
 
-// import store from '../store'
 import orders from './orders'
 import quotations from './quotations'
 import invoices from './invoices'
@@ -19,8 +18,8 @@ import webshop from './webshop'
 import bim from './bim'
 import docks from './docks'
 import {AUTH_LEVELS} from "@/constants";
-import {getIsLoggedIn, getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
-import {useStore} from "vuex";
+import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
+import { useAuthStore } from '@/stores/auth'
 
 const routes = [
   {
@@ -51,14 +50,15 @@ export const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  const store = useStore()
-  const isAllowedMemberPath = await store.dispatch('hasAccessToRoute', to.path)
+  const authStore = useAuthStore()
+  const mainStore = useMainStore()
+  const isAllowedMemberPath = await mainStore.hasAccessToRoute(to.path)
   const path = to.path;
   const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
   const authLevelNeeded = to.meta.hasOwnProperty('authLevelNeeded') ? to.meta.authLevelNeeded : AUTH_LEVELS.PLANNING
   const pathAuthLevel = authLevelNeeded;
-  const userIsLoggedIn = getIsLoggedIn(store);
-  const userAuthLevel = userIsLoggedIn ? getUserAuthLevel(store) : null;
+  const userIsLoggedIn = authStore.isLoggedIn;
+  const userAuthLevel = userIsLoggedIn ? getUserAuthLevel() : null;
 
   if (!needsAuth) {
     console.debug('route allowed, no auth needed', {path})
@@ -72,14 +72,14 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  if (!getIsLoggedIn(store)) {
+  if (!userIsLoggedIn) {
     console.warn('route not allowed for user (not logged in)',{path, needsAuth, userIsLoggedIn})
     next(`/no-access?next=${to.path}`)
     return
   }
 
   // check user type if needed
-  if (hasAccessRouteAuthLevel(authLevelNeeded, store)) {
+  if (hasAccessRouteAuthLevel(authLevelNeeded)) {
     console.debug('route allowed', {path, pathAuthLevel, userAuthLevel})
     next()
     return

@@ -1,47 +1,64 @@
 import my24 from "@/services/my24";
-import {OrderService} from "@/models/orders/Order";
-import {$trans, getIsLoggedIn} from "@/utils";
+import {$trans} from "@/utils";
+import {useAuthStore} from "@/stores/auth";
+import {useMainStore} from "@/stores/main";
 
 let componentMixin = {
   computed: {
     isStaff() {
-      return this.$store.getters.getIsStaff
+      const store = useAuthStore()
+      return store.isStaff
     },
     isSuperuser() {
-      return this.$store.getters.getIsSuperuser
+      const store = useAuthStore()
+      return store.isSuperuser
+    },
+    isAdmin() {
+      return this.isStaff || this.isSuperuser
     },
     isPlanning() {
-      return this.$store.getters.getIsPlanning
+      const store = useAuthStore()
+      return store.isPlanning
     },
     isCustomer() {
-      return this.$store.getters.getIsCustomer
+      const store = useAuthStore()
+      return store.isCustomer
     },
     isEngineer() {
-      return this.$store.getters.getIsEngineer
+      const store = useAuthStore()
+      return store.isEngineer
     },
     isSales() {
-      return this.$store.getters.getIsSales
+      const store = useAuthStore()
+      return store.isSales
     },
     isStudent() {
-      return this.$store.getters.getIsStudent
+      const store = useAuthStore()
+      return store.isStudent
     },
     isEmployee() {
-      return this.$store.getters.getIsEmployee
+      const store = useAuthStore()
+      return store.isEmployee
     },
     isBranchEmployee() {
-      return this.$store.getters.getIsBranchEmployee
+      const store = useAuthStore()
+      return store.isBranchEmployee
     },
     isLoggedIn() {
-      return getIsLoggedIn(this.$store)
+      const store = useAuthStore()
+      return store.isLoggedIn
     },
     username() {
-      return this.$store.getters.getUserName
+      const store = useAuthStore()
+      return store.getUserName
     },
     hasBranches() {
-      return this.$store.getters.getMemberHasBranches
+      const store = useMainStore()
+      return store.getMemberHasBranches
     },
     companyIsDemo() {
-      return this.$store.getters.getMemberCompanycode === 'demo'
+      const store = useMainStore()
+      return store.getMemberCompanycode === 'demo'
     }
   },
   methods: {
@@ -71,18 +88,12 @@ let componentMixin = {
       const format = exclude_seconds ? 'mm' : 'mm:ss'
       return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
     },
-    async doFetchUnacceptedCountAndUpdateStore() {
-      const service = new OrderService()
-      const countResult = await service.getUnacceptedCount()
-      if (countResult && 'count' in countResult) {
-        await this.$store.dispatch('setUnacceptedCount', countResult.count)
-      }
-    },
     hasAccessToModule(module, part) {
+      const store = useMainStore()
       return my24.hasAccessToModule({
         isStaff: this.isStaff,
         isSuperuser: this.isSuperuser,
-        contract: this.$store.state.memberContract,
+        contract: store.memberContract,
         module,
         part,
       })

@@ -207,12 +207,18 @@
 <script>
 
 import SubNav from '@/components/SubNav';
-import SubNavCustomers from '@/components/SubNavCustomers';
-import SubNavInventory from '@/components/SubNavInventory';
 import {MemberService} from "@/models/member/Member";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
-
+  mixins: [componentMixin],
+  setup() {
+    const mainStore = useMainStore()
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       memberService: new MemberService(),
@@ -236,26 +242,23 @@ export default {
     }
   },
   computed: {
-    showCustomerDashBoard() {
-      return !this.hasBranches && this.isCustomer
-    },
     showBranchEmployeeDashBoard() {
       return this.hasBranches && this.isBranchEmployee
     },
     showCustomers() {
       return !this.hasBranches && (
-        (this.hasCustomers && this.$store.getters.getIsPlanning) ||
-        this.hasOrders && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser)
+        (this.hasCustomers && this.isPlanning) ||
+        this.hasOrders && (this.isPlanning || this.isAdmin)
       );
     },
     showEquipment() {
       return this.hasBranches;
     },
     showInventory() {
-      return this.hasInventory && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser);
+      return this.hasInventory && (this.isPlanning || this.isAdmin);
     },
     showMobile() {
-      return this.hasMobile && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser)
+      return this.hasMobile && (this.isPlanning || this.isAdmin)
     },
     showCompany() {
       return !this.isCustomer && !this.isEmployee;
@@ -281,23 +284,20 @@ export default {
     hasInvoices() {
       return this.hasAccessToModule('invoices')
     },
-    hasCompany() {
-      return this.hasAccessToModule('company')
-    },
     hasMembers() {
-      return this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser
+      return this.isAdmin
     },
     unacceptedCount() {
-      return this.$store.state.unacceptedCount
+      return this.mainStore.unacceptedCount
     },
     hasBranches() {
-      return this.$store.getters.getMemberHasBranches
+      return this.mainStore.getMemberHasBranches
     },
     hasBim() {
-      return this.hasAccessToModule('3d') && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser)
+      return this.hasAccessToModule('3d') && (this.isPlanning || this.isAdmin)
     },
     hasWebshop() {
-      return this.hasAccessToModule('webshop') && (this.$store.getters.getIsPlanning || this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser)
+      return this.hasAccessToModule('webshop') && (this.isPlanning || this.isAdmin)
     }
   },
   watch: {
@@ -306,8 +306,6 @@ export default {
   },
   components: {
     SubNav,
-    SubNavCustomers,
-    SubNavInventory
   }
 }
 </script>

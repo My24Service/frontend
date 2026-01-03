@@ -16,7 +16,7 @@
           label-for="old-password-input"
         >
           <BFormInput
-            autofocus
+            :autofocus="true"
             id="old-password-input"
             v-model="old_password"
             type="password"
@@ -76,7 +76,7 @@
     id="lang-modal"
     ref="lang-modal"
     v-bind:title="$trans('Change language')"
-    ok-disabled
+    :ok-disabled="true"
     >
       <template #modal-footer>
         <BButton
@@ -123,7 +123,7 @@ import accountModel from '../models/account/Account.js'
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
-import {NEW_DATA_EVENTS} from "../constants";
+import {NEW_DATA_EVENTS} from "@/constants";
 
 import TheLanguageChooser from "../components/TheLanguageChooser.vue"
 import Version from "../components/Version.vue"
@@ -131,12 +131,16 @@ import NavItems from "../components/NavItems.vue"
 import NavBrand from "../components/NavBrand.vue"
 import Notification from '../components/Notification'
 import TokenRefresh from '../components/TokenRefresh'
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    return {
+      v$: useVuelidate(),
+    }
   },
-
+  mixins: [componentMixin],
   components: {
     TheLanguageChooser,
     NavItems,
@@ -203,11 +207,11 @@ export default {
 
       try {
         await accountModel.changePassword(this.old_password, this.new_password1)
-        infoToast(this.create, $trans('Password changed'), $trans('Your password is changed'))
-        this.$refs['password-change-modal'].hide()
+        infoToast(this.create, this.$trans('Password changed'), this.$trans('Your password is changed'))
+        await this.$refs['password-change-modal'].hide()
       } catch(error) {
         console.log(error)
-        errorToast(this.create, $trans('Error changing your password'))
+        errorToast(this.create, this.$trans('Error changing your password'))
       }
     },
     logout() {
@@ -245,7 +249,7 @@ export default {
       } catch (error) {
         console.log(error)
         loader.hide()
-        errorToast(this.create, $trans('Error logging you out'))
+        errorToast(this.create, this.$trans('Error logging you out'))
       }
     },
     onContractChange(data) {

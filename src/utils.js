@@ -7,53 +7,50 @@ import {
   AUTH_LEVELS
 } from "./constants";
 import Dinero from "dinero.js";
-import {useStore} from "vuex";
-import {useToast} from "bootstrap-vue-next";
+import {useAuthStore} from "@/stores/auth";
+import {useMainStore} from "@/stores/main";
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
 }
 
-function getIsLoggedIn(store) {
-  return store.getters.isLoggedIn
-}
-
-function getUserAuthLevel(store) {
-  if (store.getters.getIsStudent) {
+function getUserAuthLevel() {
+  const store = useAuthStore()
+  if (store.isStudent) {
     return AUTH_LEVELS.STUDENT
   }
 
-  if (store.getters.getIsSales) {
+  if (store.isSales) {
     return AUTH_LEVELS.SALES
   }
 
-  if (store.getters.getIsEngineer) {
+  if (store.isEngineer) {
     return AUTH_LEVELS.ENGINEER
   }
 
-  if (store.getters.getIsCustomer) {
+  if (store.isCustomer) {
     return AUTH_LEVELS.CUSTOMER
   }
 
-  if (store.getters.getIsPlanning) {
+  if (store.isPlanning) {
     return AUTH_LEVELS.PLANNING
   }
 
-  if (store.getters.getIsEmployee) {
+  if (store.isEmployee) {
     return AUTH_LEVELS.EMPLOYEE
   }
 
-  if (store.getters.getIsSuperuser) {
+  if (store.isSuperuser) {
     return AUTH_LEVELS.SUPERUSER
   }
 
-  if (store.getters.getIsStaff) {
+  if (store.isStaff) {
     return AUTH_LEVELS.STAFF
   }
 }
 
-function hasAccessRouteAuthLevel(authLevelNeeded, store) {
-  const authLevelUser = getUserAuthLevel(store)
+function hasAccessRouteAuthLevel(authLevelNeeded) {
+  const authLevelUser = getUserAuthLevel()
 
   // TODO in the future use ONLY arrays?
   // let needed = typeof authLevelNeeded === 'string' ? [ authLevelNeeded ] : authLevelNeeded
@@ -124,15 +121,12 @@ function displayDuration(duration, exclude_seconds) {
   return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
 }
 
-async function doFetchUnacceptedCountAndUpdateStore(store) {
+async function doFetchUnacceptedCountAndUpdateStore() {
+  const store = useMainStore()
   const service = new OrderService()
   const countResult = await service.getUnacceptedCount()
-  if (!store) {
-    console.warn("help, no store")
-    return
-  }
   if (countResult && 'count' in countResult) {
-    await store.dispatch('setUnacceptedCount', countResult.count)
+    store.setUnacceptedCount(countResult.count)
   }
 }
 
@@ -143,8 +137,8 @@ function hasAccessToModule(module, part) {
     return
   }
   return my24.hasAccessToModule({
-    isStaff: store.getters.getIsStaff,
-    isSuperuser: store.getters.getIsSuperuser,
+    isStaff: useAuthStore.getIsStaff,
+    isSuperuser: useAuthStore.getIsSuperuser,
     contract: store.state.memberContract,
     module,
     part,
@@ -198,7 +192,6 @@ export {
   displayDuration,
   doFetchUnacceptedCountAndUpdateStore,
   hasAccessToModule,
-  getIsLoggedIn,
   hasAccessRouteAuthLevel,
   getUserAuthLevel,
   toDinero,

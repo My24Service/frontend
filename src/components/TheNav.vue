@@ -6,10 +6,11 @@
 
 <script>
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
+import componentMixin from "@/mixins/common";
 
 export default {
   name: "TheNav",
-
+  mixins: [componentMixin],
 	components: {
 	  TheNavLoggedIn,
 	},

@@ -20,17 +20,16 @@ import { createApp } from 'vue'
 // Vue.use(VCalendar)
 
 import App from './App.vue'
-import store from './store'
 import {router} from './router'
 import componentMixin from "@/mixins/common";
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
 function createOurApp() {
-  const app = createApp(App).use(store);
-    app.use(router)
-    app.mixin(componentMixin)
-    app.component('VueDatePicker', VueDatePicker);
+  const app = createApp(App)
+      .use(router)
+      .mixin(componentMixin)
+      .component('VueDatePicker', VueDatePicker);
 
   // app.use(VueSpinners)
   // app.use(Loading)

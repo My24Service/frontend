@@ -20,19 +20,14 @@
 
 <script>
 import LoginForm from "@/components/LoginForm";
-import {$trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   name: 'NoAccess',
-  methods: {$trans},
   components: {
     LoginForm
   },
-  computed: {
-    isLoggedIn() {
-      return this.$store.getters.isLoggedIn
-    },
-  },
+  mixins: [componentMixin]
 }
 </script>
 
