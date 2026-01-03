@@ -75,11 +75,19 @@ import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
 
 import BarChart from "./BarChart.vue"
 import PieChart from "./PieChart.vue"
+import {useMainStore} from "@/stores/main";
 
 Chart.defaults.global.datasets.bar.categoryPercentage = 0.5;
 Chart.defaults.global.datasets.bar.barPercentage = 1
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   components: {
     BarChart,
     PieChart,
@@ -385,10 +393,9 @@ export default {
     }
   },
   async mounted () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-
   }
 }
 </script>

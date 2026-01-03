@@ -133,11 +133,18 @@ import Notification from '../components/Notification'
 import TokenRefresh from '../components/TokenRefresh'
 import componentMixin from "@/mixins/common";
 import {errorToast, infoToast} from "@/utils";
+import {useMainStore} from "@/stores/main";
+import {useAuthStore} from "@/stores/auth";
 
 export default {
   setup() {
+    const mainStore = useMainStore()
+    const authStore = useAuthStore()
+
     return {
       v$: useVuelidate(),
+      mainStore,
+      authStore
     }
   },
   mixins: [componentMixin],
@@ -171,7 +178,7 @@ export default {
   },
   data() {
     return {
-      memberInfo: this.$store.state.memberInfo,
+      memberInfo: this.mainStore.memberInfo,
       memberNewDataSocket: new MemberNewDataSocket(),
       old_password: null,
       new_password1: null,
@@ -222,8 +229,8 @@ export default {
       let loader = this.$loading.show()
 
       try {
-        await this.$store.dispatch('auth/logout');
-        await this.$store.dispatch('getInitialData')
+        this.authStore.logout();
+        await this.mainStore.getInitialData()
 
         loader.hide()
 
@@ -254,7 +261,7 @@ export default {
     },
     onContractChange(data) {
       if (data.type === NEW_DATA_EVENTS.CONTRACT) {
-        this.$store.dispatch('getInitialData')
+        this.mainStore.getInitialData()
       }
     },
   },

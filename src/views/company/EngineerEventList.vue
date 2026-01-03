@@ -104,16 +104,19 @@ import my24 from "../../services/my24";
 import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -185,7 +188,7 @@ export default {
     // rest
     async loadData() {
       // get companycode
-      this.companycode = await this.$store.getters.getMemberCompanycode
+      this.companycode = await this.mainStore.getMemberCompanycode
 
       this.isLoading = true;
 

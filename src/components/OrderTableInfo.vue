@@ -11,7 +11,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
     </b-modal>
     <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-id">
-        #{{ order.order_id }}<span v-if="this.$store.getters.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span>
+        #{{ order.order_id }}<span v-if="mainStore.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span>
     </router-link>
     <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-type">
       <strong>{{ order.order_type }}</strong>
@@ -91,22 +91,25 @@ import IconLinkDelete from './IconLinkDelete.vue'
 import {OrderService} from "@/models/orders/Order";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   components: {
     IconLinkDelete
   },
   async created() {
-    this.memberType = await this.$store.dispatch('getMemberType')
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.memberType = await this.mainStore.getMemberType()
+    this.statuscodes = await this.mainStore.getStatuscodes()
     this.assignedUsers = this.getAssignedUsersList()
     this.isLoaded = true;
     this.orderStatusCode = this.orderStatusCodeComputed

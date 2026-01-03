@@ -197,8 +197,10 @@ import employeeModel from '../../models/company/UserEmployee.js'
 import branchModel from '../../models/company/Branch.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
+  mixins: [componentMixin],
   setup() {
     const {create} = useToast()
     return {
@@ -295,7 +297,7 @@ export default {
       return this.submitClicked
     },
     hasBranches() {
-      return this.$store.getters.getMemberHasBranches
+      return this.hasBranches
     },
   },
   async created() {

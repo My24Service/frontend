@@ -330,13 +330,17 @@ import stockLocationModel from '../../models/inventory/StockLocation.js'
 import PriceInput from "../../components/PriceInput";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -442,7 +446,7 @@ export default {
   },
   async created() {
     this.isLoading = true
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = await this.mainStore.getCountries()
 
     await this.getLocations()
 

@@ -4,23 +4,23 @@
       <div class="page-title">
         <h3>
           <IBiMinecartLoaded></IBiMinecartLoaded>
-          <span class="backlink" @click="cancelForm">{{ $trans("Actions") }}</span> /
+          <span class="backlink" @click="cancelForm">{{ this.$trans("Actions") }}</span> /
           <strong>{{ action.name  }}</strong>
           <span class="dimmed">
-            <span v-if="isCreate && !action.name"> ({{ $trans('new') }})</span>
-            <span v-if="!isCreate"> ({{ $trans('edit')}})</span>
+            <span v-if="isCreate && !action.name"> ({{ this.$trans('new') }})</span>
+            <span v-if="!isCreate"> ({{ this.$trans('edit')}})</span>
           </span>
         </h3>
         <div class="flex-columns">
           <BButton @click="cancelForm" type="button" variant="secondary">
             <IBiX></IBiX>
-            {{ $trans('Cancel') }}</BButton>
+            {{ this.$trans('Cancel') }}</BButton>
           <BButton v-if="!isCreate" @click="showDeleteModal" type="button" variant="danger">
             <IBiTrash></IBiTrash>
-            {{ $trans('Delete') }}</BButton>
+            {{ this.$trans('Delete') }}</BButton>
           <BButton @click="submitForm" type="button" variant="primary">
             <IBiCheck></IBiCheck>
-            {{ isCreate ? $trans('Create action') : $trans('Save') }}
+            {{ isCreate ? this.$trans('Create action') : this.$trans('Save') }}
           </BButton>
         </div>
       </div>
@@ -46,7 +46,7 @@
                     ></BFormInput>
                     <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.action.name.$error : null">
-                    {{ $trans('Please enter a name') }}
+                    {{ this.$trans('Please enter a name') }}
                   </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
@@ -77,7 +77,7 @@
             </b-row>
             <b-row>
               <b-col cols="12" role="group">
-                <h4>{{ $trans('Conditions') }}</h4>
+                <h4>{{ this.$trans('Conditions') }}</h4>
                 <b-table small :fields="conditionFields" :items="action.json_conditions" responsive="md">
                   <template #cell(icons)="data">
                     <div class="float-right">
@@ -128,7 +128,7 @@
             <b-col cols="12">
               <footer class="modal-footer">
                 <BButton @click="addCondition" class="btn btn-primary" size="sm" type="button" variant="warning">
-                  {{ $trans('Add condition') }}
+                  {{ this.$trans('Add condition') }}
                 </BButton>
               </footer>
             </b-col>
@@ -321,7 +321,7 @@
 
           <div>
             <a href="https://my24service.github.io/docs/#orders" target="_blank">
-              {{ $trans("documentation") }}
+              {{ this.$trans("documentation") }}
             </a>
           </div>
 
@@ -333,7 +333,7 @@
         v-bind:title="$trans('Delete?')"
         @ok="doDelete"
       >
-        <p class="my-4">{{ $trans('Are you sure you want to delete this action?') }}</p>
+        <p class="my-4">{{ this.$trans('Are you sure you want to delete this action?') }}</p>
       </b-modal>
     </div>
   </div>
@@ -349,13 +349,18 @@ import partnerModel from '@/models/company/Partner.js'
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  mixins: [componentMixin],
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   props: {
@@ -392,9 +397,9 @@ export default {
       condition_operator: '',
       condition_value: '',
       conditionFields: [
-        {key: 'field', label: $trans('Field')},
-        {key: 'operator', label: $trans('Operator')},
-        {key: 'value', label: $trans('Value')},
+        {key: 'field', label: this.$trans('Field')},
+        {key: 'operator', label: this.$trans('Operator')},
+        {key: 'value', label: this.$trans('Value')},
         {key: 'icons'}
       ],
 
@@ -402,23 +407,23 @@ export default {
       action: actionOrderModel.getFields(),
       operators: ['=', '!=', '<', '<=', '>', '>=', 'REGEXP', 'NOTREGEXP', 'CONTAINS'],
       querymodes: [
-        {value: 'and', text: $trans('must match all of the conditions')},
-        {value: 'or', text: $trans('match any of the conditions')},
+        {value: 'and', text: this.$trans('must match all of the conditions')},
+        {value: 'or', text: this.$trans('match any of the conditions')},
       ],
       actionTypes: null,
       actionTypesOrder: [
-        {value: 'email', text: $trans('send email')},
-        {value: 'email_assigned', text: $trans('email assigned engineers')},
-        {value: 'copy', text: $trans('copy order to partner')},
-        {value: 'status', text: $trans('status change original order')},
-        {value: 'email_workorders', text: $trans('email workorders')},
-        {value: 'send_sms', text: $trans('send sms')},
-        {value: 'send_fcm', text: $trans('send FCM')},
+        {value: 'email', text: this.$trans('send email')},
+        {value: 'email_assigned', text: this.$trans('email assigned engineers')},
+        {value: 'copy', text: this.$trans('copy order to partner')},
+        {value: 'status', text: this.$trans('status change original order')},
+        {value: 'email_workorders', text: this.$trans('email workorders')},
+        {value: 'send_sms', text: this.$trans('send sms')},
+        {value: 'send_fcm', text: this.$trans('send FCM')},
       ],
       actionTypesTrip: [
-        {value: 'email', text: $trans('send email')},
-        {value: 'send_sms', text: $trans('send sms')},
-        {value: 'send_fcm', text: $trans('send FCM')},
+        {value: 'email', text: this.$trans('send email')},
+        {value: 'send_sms', text: this.$trans('send sms')},
+        {value: 'send_fcm', text: this.$trans('send FCM')},
       ],
     }
   },
@@ -436,14 +441,14 @@ export default {
         this.actionTypes = this.actionTypesOrder.slice()
 
         const hasAccessToGripp = my24.hasAccessToModule({
-          isStaff: this.$store.getters.getIsStaff,
-          isSuperuser: this.$store.getters.getIsSuperuser,
-          contract: this.$store.state.memberContract,
+          isStaff: this.isStaff,
+          isSuperuser: this.isSuperuser,
+          contract: this.mainStore.memberContract,
           module: 'company',
           part: 'connector-gripp'});
 
         if (hasAccessToGripp) {
-          this.actionTypes.push( {value: 'send_to_gripp', text: $trans('send to Gripp')} );
+          this.actionTypes.push( {value: 'send_to_gripp', text: this.$trans('send to Gripp')} );
         }
 
         this.actionModel = actionOrderModel
@@ -488,12 +493,12 @@ export default {
 
       try {
         await this.actionModel.delete(this.pk)
-        infoToast(this.create, $trans('Deleted'), $trans('Action has been deleted'))
+        infoToast(this.create, this.$trans('Deleted'), this.$trans('Action has been deleted'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error deleting action', error)
-        errorToast(this.create, $trans('Error deleting action'))
+        errorToast(this.create, this.$trans('Error deleting action'))
         this.isLoading = false
       }
     },
@@ -529,12 +534,12 @@ export default {
         try {
           this.action.statuscode = this.statuscode_pk
           await this.actionModel.insert(this.action)
-          infoToast(this.create, $trans('Created'), $trans('Action has been created'))
+          infoToast(this.create, this.$trans('Created'), this.$trans('Action has been created'))
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('error creating action', error)
-          errorToast(this.create, $trans('Error creating action'))
+          errorToast(this.create, this.$trans('Error creating action'))
           this.isLoading = false
         }
 
@@ -543,12 +548,12 @@ export default {
 
       try {
         await this.actionModel.update(this.pk, this.action)
-        infoToast(this.create, $trans('Updated'), $trans('Action has been updated'))
+        infoToast(this.create, this.$trans('Updated'), this.$trans('Action has been updated'))
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('error updating action', error)
-        errorToast(this.create, $trans('Error updating action'))
+        errorToast(this.create, this.$trans('Error updating action'))
         this.isLoading = false
       }
     },
@@ -560,7 +565,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching action', error)
-        errorToast(this.create, $trans('Error loading action'))
+        errorToast(this.create, this.$trans('Error loading action'))
         this.isLoading = false
       }
     },

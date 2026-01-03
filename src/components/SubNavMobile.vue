@@ -92,9 +92,17 @@
 <script>
 
 
+import {useMainStore} from "@/stores/main";
+
 export default {
   name: "OrdersSubNav",
+  setup() {
+    const mainStore = useMainStore()
 
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       isLoaded: false,
@@ -103,7 +111,7 @@ export default {
   },
   created() {
     // get member type
-    this.$store.dispatch('getMemberType').then((memberType) => {
+    this.mainStore.getMemberType().then((memberType) => {
       this.memberType = memberType
       this.isLoaded = true
     })
@@ -117,7 +125,7 @@ export default {
   computed: {
     hasMap() {
       const notHasMap = ['viavandalen']
-      return notHasMap.indexOf(this.$store.getters.getMemberCompanycode) === -1
+      return notHasMap.indexOf(this.mainStore.getMemberCompanycode) === -1
     },
     hasDispatch() {
       return this.hasAccessToModule('mobile', 'dispatch')

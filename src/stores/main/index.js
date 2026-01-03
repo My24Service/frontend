@@ -164,6 +164,7 @@ export const useMainStore = defineStore('main', {
     async getInitialData() {
       return new Promise(async (resolve, reject) => {
         try {
+          const authStore = useAuthStore()
           const languageVars = await my24.getLanguageVars()
           const initialData = await my24.getInitialData()
 
@@ -172,7 +173,7 @@ export const useMainStore = defineStore('main', {
           document.title = initialData.memberInfo.name
           window.member_type_text = initialData.memberInfo.member_texts
 
-          useAuthStore.setUserInfo(initialData.userInfo)
+          authStore.setUserInfo(initialData.userInfo)
           this.setLanguageUrl(languageVars.set_language_url)
           this.setLanguage(languageVars.current_language)
           this.setLanguages(languageVars.languages)
@@ -186,27 +187,26 @@ export const useMainStore = defineStore('main', {
       })
     },
     hasAccessToRoute(route) {
+      const authStore = useAuthStore()
       let parts = route.split('/')
       parts.shift()
       const lenParts = parts.length
       const [mod, part] = parts
-      const isStaff = state.userInfo && state.userInfo.user ? state.userInfo.user.is_staff : false
-      const isSuperuser = state.userInfo && state.userInfo.user ? state.userInfo.user.is_superuser : false
 
       const result = my24.hasAccessToModule({
         contract: state.memberContract,
         module: mod,
         part,
         lenParts,
-        isStaff,
-        isSuperuser,
+        isStaff: authStore.isStaff,
+        isSuperuser: authStore.isSuperuser,
       })
 
       return new Promise((resolve) => {
         resolve(result)
       })
     },
-    status2color({ state }, status) {
+    status2color(status) {
       // return new Promise((resolve) => {
       if (!status) {
         console.log('no status')
@@ -231,45 +231,23 @@ export const useMainStore = defineStore('main', {
       }
       return ''
     },
-    getStatuscodes({ state }) {
-      return new Promise((resolve) => {
-        resolve(state.statuscodes)
-      })
+    getStatuscodes() {
+      return this.statuscodes
     },
-    getCountries({ state }) {
-      return new Promise((resolve) => {
-        resolve(state.memberInfo.countries)
-      })
+    getCountries() {
+      return this.memberInfo.countries
     },
-    getOrderTypes({ state }) {
-      return new Promise((resolve) => {
-        resolve(state.memberInfo.order_types)
-      })
+    getOrderTypes() {
+      return this.memberInfo.order_types
     },
-    getMemberType({ state }) {
-      return new Promise((resolve) => {
-        resolve(state.memberInfo.member_type)
-      })
+    getMemberType() {
+      return this.memberInfo.member_type
     },
-    getIsStaff({ state }) {
-      return new Promise((resolve) => {
-        resolve(state.userInfo.user.is_staff)
-      })
+    getMaintenanceProducts() {
+      return this.maintenanceProducts
     },
-    getIsSuperuser({ state }) {
-      return new Promise((resolve) => {
-        resolve(state.userInfo.user.is_superuser)
-      })
-    },
-    getMaintenanceProducts({ state }) {
-      return new Promise((resolve) => {
-        resolve(state.maintenanceProducts)
-      })
-    },
-    getAssignOrders({state}) {
-      return new Promise((resolve) => {
-        resolve(state.assignOrders)
-      })
-    },
+    getAssignOrders() {
+      return this.assignOrders
+    }
   }
 })

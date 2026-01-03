@@ -8,7 +8,16 @@
 </template>
 
 <script>
+import {useMainStore} from "@/stores/main";
+
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   props: {
     includeAll: {
       type: [Boolean],
@@ -26,7 +35,7 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('getOrderTypes')
+    this.mainStore.getOrderTypes()
       .then((order_types) => {
         this.orderTypes = this.includeAll ? ['all', ...order_types] : order_types
         this.orderType = this.orderTypeIn !== null ? this.orderTypeIn : this.orderTypes[0]

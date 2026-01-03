@@ -48,10 +48,19 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 
 export default {
+  setup() {
+    const store = useMainStore()
 
+    return {
+      store
+    }
+  },
+  mixins: [componentMixin],
   name: "UserHoursData",
   props: {
     detail_route_name: {
@@ -84,7 +93,7 @@ export default {
     }
   },
   created() {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.store.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)

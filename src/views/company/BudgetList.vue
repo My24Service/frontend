@@ -136,14 +136,17 @@ import PriceInput from "../../components/PriceInput";
 
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   name: 'BudgetList',
@@ -190,8 +193,8 @@ export default {
       this.budget = new this.service.model({
         year: d.getFullYear(),
         amount: '0.00',
-        amount_currency: this.$store.getters.getDefaultCurrency,
-        default_currency: this.$store.getters.getDefaultCurrency
+        amount_currency: this.mainStore.getDefaultCurrency,
+        default_currency: this.mainStore.getDefaultCurrency
       })
       this.isEdit = false
       this.$refs['model-modal'].show()

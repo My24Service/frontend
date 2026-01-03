@@ -23,8 +23,16 @@
 
 <script>
 import {$trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   methods: {
     $trans,
     isActive(item) {
@@ -62,7 +70,7 @@ export default {
       return this.hasAccessToModule('orders', 'month-stats');
     },
     unacceptedCount() {
-      return this.$store.state.unacceptedCount
+      return this.mainStore.unacceptedCount
     }
   },
   watch: {

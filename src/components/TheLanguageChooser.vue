@@ -9,20 +9,28 @@
 
 <script>
 import accountModel from '../models/account/Account.js'
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: "TheLanguageChooser",
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       languages: [],
-      selected: this.$store.getters.getCurrentLanguage
+      selected: this.mainStore.getCurrentLanguage
     }
   },
   methods: {
     async setLanguage(event) {
       try {
         await accountModel.setLanguage(this.selected)
-        await this.$store.dispatch('setLanguage', this.selected)
+        this.mainStore.setLanguage(this.selected)
         window.location.reload()
       } catch (error) {
         console.log(error)
@@ -30,7 +38,7 @@ export default {
     }
   },
   mounted() {
-    const languagesIn = this.$store.getters.getLanguages
+    const languagesIn = this.mainStore.getLanguages
     let languages = [];
 
     for (let i=0;i<languagesIn.length; i++) {

@@ -169,13 +169,16 @@ import { required } from '@vuelidate/validators'
 import branchModel from '../../models/company/Branch.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   props: {
@@ -220,7 +223,7 @@ export default {
     }
   },
   async created() {
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = await this.mainStore.getCountries()
 
     if (this.isCreate) {
       this.branch = branchModel.getFields()

@@ -479,12 +479,18 @@ import { ContractService } from '@/models/member/Contract'
 import {NO_IMAGE_URL} from "@/constants";
 
 import ApiResult from "@/components/ApiResult.vue";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
   components: {ApiResult},
-
+  mixins: [componentMixin],
   setup() {
-    return { v$: useVuelidate() }
+    const mainStore = useMainStore()
+    return {
+      v$: useVuelidate(),
+      mainStore
+    }
   },
   props: {
     pk: {
@@ -616,15 +622,15 @@ export default {
       return this.submitClicked
     },
     showRequestedList() {
-      return this.$store.getters.getIsSuperuser && this.memberIsRequest
+      return this.isSuperuser && this.memberIsRequest
     },
     showDeletedList() {
-      return this.$store.getters.getIsSuperuser && this.isDeleted
+      return this.isSuperuser && this.isDeleted
     }
   },
   async created() {
     this.isLoading = true
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = await this.mainStore.getCountries()
 
     try {
       const data = await this.contractService.list()

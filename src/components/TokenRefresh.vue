@@ -5,8 +5,18 @@
 
 <script>
 import accountModel from "../models/account/Account";
+import componentMixin from "@/mixins/common";
+import {useAuthStore} from "@/stores/auth";
 
 export default {
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       intervalIdToken: null,
@@ -39,7 +49,7 @@ export default {
         try {
           const result = await accountModel.refreshToken(token)
           console.debug('token refresh result', result)
-          await this.$store.dispatch('auth/authenticate', { accessToken: result.token });
+          this.authStore.authenticate({ accessToken: result.token });
           console.debug('token refreshed')
         } catch (e) {
           console.error('error refreshing token', e)

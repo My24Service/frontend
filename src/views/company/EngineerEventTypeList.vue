@@ -89,14 +89,17 @@ import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import PillsEngineer from "./PillsEngineer";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
 
     // expose to template and other options API hooks
     return {
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -160,7 +163,7 @@ export default {
     // rest
     async loadData() {
       // get companycode
-      this.companycode = await this.$store.getters.getMemberCompanycode
+      this.companycode = await this.mainStore.getMemberCompanycode
 
       this.isLoading = true;
 

@@ -12,13 +12,13 @@
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
+      <p class="my-4">{{ this.$trans('Are you sure you want to delete this member?') }}</p>
     </b-modal>
 
     <header>
       <div class="page-title">
         <h3>
-          {{ $trans("Members") }}
+          {{ this.$trans("Members") }}
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
@@ -67,15 +67,15 @@
           </template>
           <template #cell(member_info)="data">
             <router-link :to="{name: 'member-edit', params: {pk: data.item.id}}">
-              {{ $trans('Companycode') }}: {{ data.item.companycode }} <span v-if="!data.item.is_public">({{ $trans('private') }})</span> <br/>
-              {{ $trans('Name') }}: {{ data.item.name }}<br/>
+              {{ this.$trans('Companycode') }}: {{ data.item.companycode }} <span v-if="!data.item.is_public">({{ this.$trans('private') }})</span> <br/>
+              {{ this.$trans('Name') }}: {{ data.item.name }}<br/>
               {{ data.item.country_code }}-{{ data.item.postal }} {{ data.item.city }}<br/>
               {{ data.item.email }}<br/>
               <p v-if="data.item.has_api_users">
-                <strong>{{ $trans('Has API users') }}</strong>
+                <strong>{{ this.$trans('Has API users') }}</strong>
               </p>
               <p v-if="data.item.has_branches">
-                <strong>{{ $trans('Has branches') }}</strong>
+                <strong>{{ this.$trans('Has branches') }}</strong>
               </p>
             </router-link>
           </template>
@@ -100,23 +100,29 @@
 
 <script>
 import {MemberService} from '@/models/member/Member'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
+import componentMixin from "../../mixins/common";
+import {errorToast, infoToast} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
 
 export default {
+  setup() {
+    const create = useToast()
 
+    return {
+      create
+    }
+  },
+  mixins: [componentMixin],
   components: {
     IconLinkDelete,
-    IconLinkEdit,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -139,32 +145,25 @@ export default {
       members: [],
       fields: [
         {key: 'member_logo', label: '', thAttr: {width: '20%'}},
-        {key: 'member_info', label: $trans('Member'), thAttr: {width: '20%'}},
-        {key: 'contract_text', label: $trans('Contract'), thAttr: {width: '30%'}},
-        {key: 'member_type', label: $trans('Type'), thAttr: {width: '10%'}},
-        {key: 'created', label: $trans('Created'), thAttr: {width: '10%'}},
+        {key: 'member_info', label: this.$trans('Member'), thAttr: {width: '20%'}},
+        {key: 'contract_text', label: this.$trans('Contract'), thAttr: {width: '30%'}},
+        {key: 'member_type', label: this.$trans('Type'), thAttr: {width: '10%'}},
+        {key: 'created', label: this.$trans('Created'), thAttr: {width: '10%'}},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
     }
   },
   computed: {
-    showDelete() {
-      if ((this.$store.getters.getIsStaff || this.$store.getters.getIsSuperuser) && this.requested) {
-        return true
-      }
-
-      return !!(this.$store.getters.getIsSuperuser && !this.requested && !this.deleted);
-    },
     modelName() {
       if (this.requested) {
-        return $trans('Requested member')
+        return this.$trans('Requested member')
       }
 
       if (this.deleted) {
-        return $trans('Deleted member')
+        return this.$trans('Deleted member')
       }
 
-      return $trans('Member')
+      return this.$trans('Member')
     }
   },
   created() {
@@ -180,11 +179,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.memberPk)
-        infoToast(this.create, $trans('Deleted'), $trans('Member has been deleted'))
+        infoToast(this.create, this.$trans('Deleted'), this.$trans('Member has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting member', error)
-        errorToast(this.create, $trans('Error deleting member'))
+        errorToast(this.create, this.$trans('Error deleting member'))
       }
     },
     // search
@@ -208,7 +207,7 @@ export default {
           this.service.setListArgs('is_requested=True')
         }
 
-        if (this.$store.getters.getIsSuperuser && !this.requested && !this.deleted) {
+        if (this.isSuperuser && !this.requested && !this.deleted) {
           this.service.setListArgs('is_requested=False&is_deleted=False')
         }
 
@@ -217,7 +216,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching members', error)
-        errorToast(this.create, $trans('Error loading members'))
+        errorToast(this.create, this.$trans('Error loading members'))
         this.isLoading = false
       }
     }

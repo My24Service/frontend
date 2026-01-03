@@ -88,8 +88,16 @@
 <script>
 
 
-export default {
+import {useMainStore} from "@/stores/main";
 
+export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       isLoaded: false,
@@ -104,7 +112,7 @@ export default {
   },
   created() {
     // get member type
-    this.$store.dispatch('getMemberType').then((memberType) => {
+    this.mainStore.getMemberType().then((memberType) => {
       this.memberType = memberType
       this.isLoaded = true
     })
@@ -112,7 +120,7 @@ export default {
   computed: {
     hasStatuscodes() {
       const has = ['demo', 'viavandalen']
-      return has.indexOf(this.$store.getters.getMemberCompanycode) !== -1;
+      return has.indexOf(this.mainStore.getMemberCompanycode) !== -1;
     },
     getToRouteMaintenanceUsers() {
       if (this.hasAccessToModule('company', 'engineer-users') && !this.hasBranches) {
@@ -137,7 +145,7 @@ export default {
       return { name: 'users-planningusers' }
     },
     hasBranches() {
-      return this.$store.getters.getMemberHasBranches
+      return this.hasBranches()
     },
     hasPartners() {
       return this.hasAccessToModule('company', 'partners')

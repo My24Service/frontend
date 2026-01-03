@@ -162,13 +162,17 @@ import {ApiUserService, ApiUserUserModel} from '@/models/company/UserApi'
 import {usernameExists} from "@/models/helpers";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
     const {create} = useToast()
+    const mainStore = useMainStore()
+
     return {
       v$: useVuelidate(),
-      create
+      create,
+      mainStore
     }
   },
   components: {
@@ -262,7 +266,7 @@ export default {
     }
   },
   async created() {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
