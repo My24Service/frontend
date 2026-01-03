@@ -46,6 +46,16 @@ onMounted(() => {
       this.$router.push({ name: 'material-list' });
     }
   }, 100);
+
+  mainStore.getInitialData()
+    .catch(async (error) => {
+      if (error.response && error.response.status === 401) {
+        console.log('401 in main')
+        // try to refresh token
+        authStore.refreshToken()
+      }
+    })
+
 })
 </script>
 

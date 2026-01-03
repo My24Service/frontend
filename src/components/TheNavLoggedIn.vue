@@ -118,7 +118,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs } from '@vuelidate/validators'
 import Password from 'vue-password-strength-meter'
 
-import accountModel from '../models/account/Account.js'
+import {AccountService} from '../models/account/Account.js'
 
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
@@ -185,6 +185,7 @@ export default {
       new_password2: null,
       buttonDisabled: false,
       submitClicked: false,
+      accountService: new AccountService()
     }
   },
   methods: {
@@ -213,7 +214,7 @@ export default {
       this.isLoading = true
 
       try {
-        await accountModel.changePassword(this.old_password, this.new_password1)
+        await this.accountService.changePassword(this.old_password, this.new_password1)
         infoToast(this.create, this.$trans('Password changed'), this.$trans('Your password is changed'))
         await this.$refs['password-change-modal'].hide()
       } catch(error) {

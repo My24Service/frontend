@@ -63,7 +63,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs } from '@vuelidate/validators'
 import Password from 'vue-password-strength-meter'
 
-import accountModel from '../models/account/Account.js'
+import {AccountService} from '@/models/account/Account'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
@@ -85,6 +85,7 @@ export default {
       isLoading: false,
       buttonDisabled: false,
       submitClicked: false,
+      accountService: new AccountService()
     }
   },
   validations() {
@@ -119,7 +120,7 @@ export default {
       this.buttonDisabled = true
       this.isLoading = true
       try {
-        const result = await accountModel.resetPassword(this.password1)
+        const result = await this.accountService.resetPassword(this.password1)
         infoToast(this.create, $trans('Password reset'), $trans('Reset password successful'))
 
         this.buttonDisabled = false

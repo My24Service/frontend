@@ -40,7 +40,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import accountModel from '@/models/account/Account.js'
+import {AccountService} from '@/models/account/Account.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
@@ -58,6 +58,7 @@ export default {
       isLoading: false,
       buttonDisabled: false,
       submitClicked: false,
+      accountService: new AccountService()
     }
   },
   validations() {
@@ -88,7 +89,7 @@ export default {
 
       this.isLoading = true
       try {
-        const result = await accountModel.sendResetPasswordLink(this.email)
+        await this.accountService.sendResetPasswordLink(this.email)
         infoToast(this.create, $trans('Reset link sent'), $trans('Password reset link has been sent'))
 
         this.buttonDisabled = false

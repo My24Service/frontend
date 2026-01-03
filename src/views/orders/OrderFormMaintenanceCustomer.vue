@@ -419,7 +419,7 @@ import moment from 'moment'
 import {OrderService, OrderModel} from '@/models/orders/Order'
 
 import {CustomerService} from '@/models/customer/Customer.js'
-import accountModel from '@/models/account/Account.js'
+import {AccountService} from '@/models/account/Account.js'
 
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import Collapse from '@/components/Collapse.vue'
@@ -493,8 +493,8 @@ export default {
 
       orderService: new OrderService(),
       orderlineService: new OrderlineService(),
-      customerService: new CustomerService()
-
+      customerService: new CustomerService(),
+      accountService: new AccountService()
     }
   },
   validations() {
@@ -691,7 +691,7 @@ export default {
 
     try {
       this.countries = await this.mainStore.getCountries()
-      const user = await accountModel.getUserDetails()
+      const user = await this.accountService.getUserDetails()
       const customer = await this.customerService.detail(user.user.customer_user.customer)
 
       if (this.isCreate) {

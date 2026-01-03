@@ -1,8 +1,6 @@
 import BaseModel from '@/models/base'
-import my24 from '@/services/my24'
 
-
-class Account extends BaseModel {
+class AccountService extends BaseModel {
   fields = {
   }
 
@@ -94,6 +92,4 @@ class Account extends BaseModel {
   }
 }
 
-let accountModel = new Account()
-
-export default accountModel
+export {AccountService}

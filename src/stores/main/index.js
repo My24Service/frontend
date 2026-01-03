@@ -188,13 +188,14 @@ export const useMainStore = defineStore('main', {
     },
     hasAccessToRoute(route) {
       const authStore = useAuthStore()
+      const mainStore = useMainStore()
       let parts = route.split('/')
       parts.shift()
       const lenParts = parts.length
       const [mod, part] = parts
 
       const result = my24.hasAccessToModule({
-        contract: state.memberContract,
+        contract: mainStore.memberContract,
         module: mod,
         part,
         lenParts,

@@ -6,11 +6,11 @@
 
 <script setup>
 import {computed} from "vue";
-import {useStore} from "vuex";
+import {useMainStore} from "@/stores/main";
 
-const store = useStore()
-const memberLogo = computed(() => store.getters.getMemberLogo)
-const memberName = computed( () => store.getters.getMemberName)
+const store = useMainStore()
+const memberLogo = computed(() => store.getMemberLogo)
+const memberName = computed( () => store.getMemberName)
 </script>
 <style scoped>
 .memberLogo {

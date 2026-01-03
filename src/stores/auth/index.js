@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import AuthService from '@/services/auth2/service';
-import accountModel from "@/models/account/Account";
+import {AccountService} from "@/models/account/Account";
 
 const token = localStorage.getItem('accessToken')
 const initialState = token
@@ -9,7 +9,8 @@ const initialState = token
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    ...initialState
+    ...initialState,
+    accountService: new AccountService()
   }),
   getters: {
     isAdmin: (state) => {
@@ -73,6 +74,9 @@ export const useAuthStore = defineStore('auth', {
     },
   },
   actions: {
+    loginFailure: () => {
+
+    },
     setToken: (token) => {
       this.token = token
     },
@@ -90,7 +94,7 @@ export const useAuthStore = defineStore('auth', {
     refreshToken() {
       const token = localStorage.getItem('accessToken')
       if (token) {
-        accountModel.refreshToken(token).then((result) => {
+        this.state.accountService.refreshToken(token).then((result) => {
           console.debug('token refresh result', result)
           this.authenticate(result.token)
           console.debug('token refreshed, reload window')

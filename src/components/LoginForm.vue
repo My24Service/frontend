@@ -39,15 +39,17 @@
 </template>
 
 <script setup>
-import accountModel from "../models/account/Account"
+import {AccountService} from "@/models/account/Account"
 import {reactive} from "vue";
-import {useStore} from "vuex";
 import {useRouter} from "vue-router";
 import {$trans, errorToast, infoToast, isEmpty} from "@/utils";
+import {useAuthStore} from "@/stores/auth";
+import {useMainStore} from "@/stores/main";
 import {useToast} from "bootstrap-vue-next";
-const {create} = useToast()
 
-const store = useStore()
+const authStore = useAuthStore()
+const mainStore = useMainStore()
+const create = useToast()
 const router = useRouter()
 
 const form = reactive({
@@ -78,15 +80,16 @@ async function doLogin(e) {
   // const loader = this.$loading.show()
 
   try {
-    const loginResult = await accountModel.login(form.username, form.password)
-    await store.dispatch('auth/authenticate', { accessToken: loginResult.token });
-    await store.dispatch('getInitialData')
-    const userDetails = await accountModel.getUserDetails()
-    await store.dispatch('setStreamInfo', userDetails.stream)
+    const accountService = new AccountService()
+    const loginResult = await accountService.login(form.username, form.password)
+    authStore.authenticate({ accessToken: loginResult.token });
+    await mainStore.getInitialData()
+    const userDetails = await accountService.getUserDetails()
+    mainStore.setStreamInfo(userDetails.stream)
 
     // loader.hide()
 
-    infoToast(this.create, $trans('Logged in'), $trans('You are now logged in'))
+    infoToast(create, $trans('Logged in'), $trans('You are now logged in'))
 
     if (document.location.hash.indexOf('?') !== -1) {
       const nextPart = document.location.hash.split('?')[1]
@@ -98,10 +101,10 @@ async function doLogin(e) {
 
   } catch (error) {
     console.log(error)
-    await store.dispatch('auth/loginFailure');
+    await authStore.loginFailure();
     // loader.hide()
 
-    errorToast(this.create, $trans('Error logging you in'))
+    errorToast(create, $trans('Error logging you in'))
   }
 }
 </script>

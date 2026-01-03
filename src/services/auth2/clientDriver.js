@@ -1,5 +1,4 @@
 import authHeader from './auth-header'
-import {useStore} from "vuex";
 
 async function errorHandler(error) {
   console.error(`got error: ${error}`)
@@ -11,7 +10,7 @@ async function errorHandler(error) {
       // document.location.href = "/"
       return
     }
-    await store.dispatch('auth/logout');
+    await store.logout();
     // auth.logout(false, true, true)
   } else {
     console.log(error)

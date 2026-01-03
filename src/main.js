@@ -26,7 +26,9 @@ import { VueDatePicker } from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 
 function createOurApp() {
+  const pinia = createPinia()
   const app = createApp(App)
+      .use(pinia)
       .use(router)
       .mixin(componentMixin)
       .component('VueDatePicker', VueDatePicker);
@@ -67,19 +69,9 @@ const themes = {
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 
 import { toggleTheme } from "@zougt/vite-plugin-theme-preprocessor/dist/browser-utils";
+import {createPinia} from "pinia";
 toggleTheme({
   scopeName: theme,
 });
 
-store.dispatch('getInitialData')
-  .then(() => {
-    const app = createOurApp();
-    app.mount('#app')
-  })
-  .catch(async (error) => {
-    if (error.response && error.response.status === 401) {
-      console.log('401 in main')
-      // try to refresh token
-      await store.dispatch('refreshToken')
-    }
-  })
+createOurApp()

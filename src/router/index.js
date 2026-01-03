@@ -52,12 +52,12 @@ export const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const mainStore = useMainStore()
-  const isAllowedMemberPath = await mainStore.hasAccessToRoute(to.path)
+  const userIsLoggedIn = authStore.isLoggedIn;
+  const isAllowedMemberPath = userIsLoggedIn ? await mainStore.hasAccessToRoute(to.path) : false;
   const path = to.path;
   const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
   const authLevelNeeded = to.meta.hasOwnProperty('authLevelNeeded') ? to.meta.authLevelNeeded : AUTH_LEVELS.PLANNING
   const pathAuthLevel = authLevelNeeded;
-  const userIsLoggedIn = authStore.isLoggedIn;
   const userAuthLevel = userIsLoggedIn ? getUserAuthLevel() : null;
 
   if (!needsAuth) {

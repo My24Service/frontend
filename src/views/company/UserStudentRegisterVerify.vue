@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import accountModel from '../../models/account/Account.js'
+import {AccountService} from '../../models/account/Account.js'
 import my24 from "../../services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
@@ -47,14 +47,15 @@ export default {
       sendPasswordResetError: false,
       sendPasswordResetClicked: false,
       passwordLinkSent: false,
-      params: {}
+      params: {},
+      accountService: new AccountService()
     }
   },
   methods: {
     async sendResetPasswordLink() {
       this.sendPasswordResetClicked = true
       try {
-        await accountModel.sendResetPasswordLink(this.params.user_id, true)
+        await this.accountService.sendResetPasswordLink(this.params.user_id, true)
         this.passwordLinkSent = true
         infoToast(this.create, $trans('Sent'), $trans('Password reset link sent'))
       } catch (e) {
@@ -65,7 +66,7 @@ export default {
     },
     async doVerify() {
       try {
-        const result = await accountModel.verify(this.params)
+        await this.accountService.verify(this.params)
         console.log('HOI')
         this.verifySuccess = true
         infoToast(this.create, $trans('Verified'), $trans('Account has been verified'))
