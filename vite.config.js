@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite'
 import visualizer from 'rollup-plugin-visualizer'
-import themePreprocessorPlugin from "@zougt/vite-plugin-theme-preprocessor"
+import {
+  themePreprocessorPlugin,
+  themePreprocessorHmrPlugin
+} from "@zougt/vite-plugin-theme-preprocessor";
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
 import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
@@ -20,11 +23,11 @@ export default defineConfig({
       'stormy.my24service-dev.com',
       'riedel.my24service-dev.com',
       '*.my24service.com',
-    ]
-    // hmr: {
-    //   host: "localhost",
-    //   port: 3000
-    // }
+    ],
+    hmr: {
+      host: "localhost",
+      port: 3000
+    }
   },
   plugins: [
     vue(),
@@ -49,7 +52,7 @@ export default defineConfig({
           {
             scopeName: "theme-default",
             // path or varscontent must be selected
-            path: path.resolve("./src/scss/default.scss"),
+            path: path.resolve("./src/scss/app.scss"),
             // varsContent same as content in path
             // varsContent:`@primary-color:${defaultPrimaryColor};`
           },
@@ -73,12 +76,13 @@ export default defineConfig({
         // custom css file name.
         customThemeCssFileName: (scopeName) => scopeName,
       }
-    })
+    }),
+    themePreprocessorHmrPlugin(),
   ],
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     alias: {
-      "@": path.resolve(__dirname, "./src")
+      "@": path.resolve("./src")
     },
   },
   css: {
