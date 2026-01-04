@@ -69,7 +69,7 @@ export default {
     this.hasApiUsers = await this.mainStore.getMemberHasApiUsers
 
     // get member type
-    this.memberType = await this.mainStore.getMemberType()
+    this.memberType = await this.mainStore.getMemberType
 
     this.isLoaded = true
   },

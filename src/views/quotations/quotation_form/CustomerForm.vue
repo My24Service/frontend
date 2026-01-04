@@ -268,7 +268,7 @@ export default {
     this.$moment = moment
     this.$moment.locale(lang)
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
-    this.countries = await this.mainStore.getCountries()
+    this.countries = this.mainStore.getCountries
   },
   mounted () {
     if (!this.isCreate) {

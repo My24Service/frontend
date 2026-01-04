@@ -569,8 +569,8 @@ export default {
     this.$moment = moment
     this.$moment.locale(lang)
 
-    this.countries = await this.mainStore.getCountries()
-    this.orderTypes = await this.mainStore.getOrderTypes()
+    this.countries = this.mainStore.getCountries
+    this.orderTypes = await this.mainStore.getOrderTypes
 
     if (this.isCreate) {
       this.order = new OrderModel({})

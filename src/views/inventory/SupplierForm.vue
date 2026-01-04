@@ -231,7 +231,7 @@ export default {
     }
   },
   async created() {
-    this.countries = await this.mainStore.getCountries()
+    this.countries = this.mainStore.getCountries
 
     if (!this.isCreate) {
       await this.loadData()

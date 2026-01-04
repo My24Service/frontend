@@ -62,7 +62,7 @@ export default {
   },
   async created() {
     // get member type
-    this.memberType = await this.mainStore.getMemberType()
+    this.memberType = this.mainStore.getMemberType
     this.isLoaded = true
   },
 }

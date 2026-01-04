@@ -185,7 +185,7 @@ export default {
     this.loadData();
   },
   async mounted() {
-    this.statuscodes = await this.mainStore.getStatuscodes();
+    this.statuscodes = await this.mainStore.getStatuscodes
   }
 }
 </script>

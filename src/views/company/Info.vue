@@ -400,7 +400,7 @@ export default {
     }
   },
   async created() {
-    this.countries = await this.mainStore.getCountries()
+    this.countries = this.mainStore.getCountries
     await this.loadData()
   },
   methods: {

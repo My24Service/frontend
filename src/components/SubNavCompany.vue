@@ -112,10 +112,8 @@ export default {
   },
   created() {
     // get member type
-    this.mainStore.getMemberType().then((memberType) => {
-      this.memberType = memberType
-      this.isLoaded = true
-    })
+    this.memberType = this.mainStore.getMemberType
+    this.isLoaded = true
   },
   computed: {
     hasStatuscodes() {

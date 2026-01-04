@@ -588,7 +588,7 @@ export default {
     this.$moment.locale(lang)
 
     this.getOrdersDebounced = AwesomeDebouncePromise(this.getOrders, 500)
-    this.countries = await this.mainStore.getCountries()
+    this.countries = this.mainStore.getCountries
     if (this.isCreate) {
       this.trip = tripModel.getFields()
     } else {

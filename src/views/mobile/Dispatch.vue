@@ -652,7 +652,7 @@ export default {
 
       if (this.assignMode) {
         this.alreadyAssignedUsers = []
-        this.selectedOrders = await this.mainStore.getAssignOrders()
+        this.selectedOrders = await this.mainStore.getAssignOrders
         for (const order of this.selectedOrders) {
           this.alreadyAssignedUsers.push(...order.assigned_user_info.map((userInfo) => {
             return {
@@ -826,7 +826,7 @@ export default {
 
     if (this.assignMode) {
       this.alreadyAssignedUsers = []
-      this.selectedOrders = await this.mainStore.getAssignOrders()
+      this.selectedOrders = await this.mainStore.getAssignOrders
       for (const order of this.selectedOrders) {
         this.alreadyAssignedUsers.push(...order.assigned_user_info.map((userInfo) => {
           return {
@@ -839,7 +839,7 @@ export default {
       this.alreadyAssignedUsers = []
     }
 
-    this.statuscodes = await this.mainStore.getStatuscodes()
+    this.statuscodes = await this.mainStore.getStatuscodes
 
     this.loadDone = true
   },

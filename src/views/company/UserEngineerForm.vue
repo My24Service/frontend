@@ -446,7 +446,7 @@ export default {
   },
   async created() {
     this.isLoading = true
-    this.countries = await this.mainStore.getCountries()
+    this.countries = this.mainStore.getCountries
 
     await this.getLocations()
 

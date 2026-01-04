@@ -63,7 +63,7 @@ export default {
     OrderFormTemps,
   },
   async created() {
-    this.memberType = await this.mainStore.getMemberType()
+    this.memberType = this.mainStore.getMemberType
   },
 }
 </script>

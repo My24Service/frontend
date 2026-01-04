@@ -118,7 +118,7 @@ export default {
     }
   },
   async created() {
-    const statuscodes = await this.mainStore.getStatuscodes()
+    const statuscodes = await this.mainStore.getStatuscodes
     this.statuscodes = [{id: null, statuscode: ''}, ...statuscodes]
     if (!this.isCreate) {
       await this.loadData()

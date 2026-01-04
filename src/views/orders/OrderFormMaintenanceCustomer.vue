@@ -417,10 +417,7 @@ import { required } from '@vuelidate/validators'
 import moment from 'moment'
 
 import {OrderService, OrderModel} from '@/models/orders/Order'
-
 import {CustomerService} from '@/models/customer/Customer.js'
-import {AccountService} from '@/models/account/Account.js'
-
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import Collapse from '@/components/Collapse.vue'
 import {OrderlineService} from "@/models/orders/Orderline";
@@ -428,16 +425,19 @@ import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import {useAuthStore} from "@/stores/auth";
 
 export default {
   setup() {
     const {create} = useToast()
     const mainStore = useMainStore()
+    const authStore = useAuthStore()
 
     return {
       v$: useVuelidate(),
       create,
-      mainStore
+      mainStore,
+      authStore
     }
   },
   components: {
@@ -494,7 +494,6 @@ export default {
       orderService: new OrderService(),
       orderlineService: new OrderlineService(),
       customerService: new CustomerService(),
-      accountService: new AccountService()
     }
   },
   validations() {
@@ -690,8 +689,8 @@ export default {
     this.$moment.locale(lang)
 
     try {
-      this.countries = await this.mainStore.getCountries()
-      const user = await this.accountService.getUserDetails()
+      this.countries = this.mainStore.getCountries
+      const user = this.authStore.userInfo
       const customer = await this.customerService.detail(user.user.customer_user.customer)
 
       if (this.isCreate) {

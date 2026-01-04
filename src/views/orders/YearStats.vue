@@ -264,8 +264,8 @@ export default {
     this.$moment.locale(lang)
 
     // get statuscodes and load orders
-    this.statuscodes = await this.mainStore.getStatuscodes()
-    this.loadData()
+    this.statuscodes = await this.mainStore.getStatuscodes
+    await this.loadData()
   }
 }
 </script>

@@ -35,11 +35,9 @@ export default {
     }
   },
   mounted() {
-    this.mainStore.getOrderTypes()
-      .then((order_types) => {
-        this.orderTypes = this.includeAll ? ['all', ...order_types] : order_types
-        this.orderType = this.orderTypeIn !== null ? this.orderTypeIn : this.orderTypes[0]
-      })
+    const order_types = this.mainStore.getOrderTypes
+    this.orderTypes = this.includeAll ? ['all', ...order_types] : order_types
+    this.orderType = this.orderTypeIn !== null ? this.orderTypeIn : this.orderTypes[0]
   }
 }
 </script>

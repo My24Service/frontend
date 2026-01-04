@@ -553,7 +553,7 @@ export default {
     this.$moment.locale(lang)
 
     try {
-      this.countries = await this.mainStore.getCountries()
+      this.countries = this.mainStore.getCountries
 
       if (!this.isCreate) {
         return this.loadOrder()

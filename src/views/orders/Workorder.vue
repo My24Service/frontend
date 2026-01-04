@@ -30,7 +30,7 @@ export default {
 		}
 	},
 	async created() {
-    this.memberType = await this.mainStore.getMemberType()
+    this.memberType = this.mainStore.getMemberType
 	}
 }
 </script>

@@ -170,7 +170,7 @@ export default {
   },
   async created() {
     this.personOrders = []
-    this.statuscodes = await this.mainStore.getStatuscodes();
+    this.statuscodes = await this.mainStore.getStatuscodes
     this.loadData();
   }
 }

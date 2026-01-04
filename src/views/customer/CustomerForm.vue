@@ -486,7 +486,7 @@ export default {
     }
   },
   async created() {
-    this.countries = await this.mainStore.getCountries()
+    this.countries = this.mainStore.getCountries
     const partnerData = await partnerModel.list()
     this.branchPartners = [{
       value: null,

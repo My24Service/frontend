@@ -349,7 +349,7 @@ export default {
     this.year = this.today.year()
 
     // get statuscodes and load orders
-    this.statuscodes = await this.mainStore.getStatuscodes()
+    this.statuscodes = await this.mainStore.getStatuscodes
     await this.loadData()
   }
 }

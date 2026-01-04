@@ -1233,7 +1233,7 @@ export default {
     this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
     this.getEngineersDebounced = AwesomeDebouncePromise(this.getEngineers, 500)
 
-    this.countries = await this.mainStore.getCountries()
+    this.countries = this.mainStore.getCountries
 
     if (this.isCreate) {
       this.order = new OrderModel()

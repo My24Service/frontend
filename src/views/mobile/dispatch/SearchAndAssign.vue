@@ -248,7 +248,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.selectedOrders = await this.mainStore.getAssignOrders() || []
+        this.selectedOrders = await this.mainStore.getAssignOrders || []
 
         const data = await this.model.list()
         this.orders = data.results

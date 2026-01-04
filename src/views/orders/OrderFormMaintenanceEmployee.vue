@@ -966,7 +966,7 @@ export default {
     this.$moment.locale(lang)
 
     try {
-      this.countries = await this.mainStore.getCountries()
+      this.countries = this.mainStore.getCountries
       const branch = await this.branchService.getMyBranch()
 
       if (this.isCreate) {

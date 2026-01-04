@@ -267,7 +267,7 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.statuscodes = await this.mainStore.getStatuscodes()
+    this.statuscodes = await this.mainStore.getStatuscodes
     this.model.currentPage = this.$route.query.page || 1
 
     this.sinceDate = this.$route.query.since || null
@@ -364,7 +364,7 @@ export default {
       try {
         const data = await this.model.list()
         this.orders = data.results
-        this.selectedOrders = await this.mainStore.getAssignOrders() || []
+        this.selectedOrders = await this.mainStore.getAssignOrders || []
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
