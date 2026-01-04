@@ -112,7 +112,7 @@ import {useToast} from "bootstrap-vue-next";
 
 export default {
   setup() {
-    const create = useToast()
+    const {create} = useToast()
 
     return {
       create

@@ -327,7 +327,7 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.statuscodes = await this.mainStore.getStatuscodes()
+    this.statuscodes = await this.mainStore.getStatuscodes
     this.model.currentPage = this.$route.query.page || 1
 
     this.sinceDate = this.$route.query.since || null
@@ -418,7 +418,7 @@ export default {
       this.userFilters = await this.filterService.getSimpleList()
 
       await doFetchUnacceptedCountAndUpdateStore()
-      this.selectedOrders = await this.mainStore.getAssignOrders() || []
+      this.selectedOrders = await this.mainStore.getAssignOrders || []
 
       this.model.setUserFilter(this.$route.query.user_filter)
 

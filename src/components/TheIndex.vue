@@ -52,7 +52,6 @@ onMounted(async () => {
   } catch(error) {
     if (error.response && error.response.status === 401) {
       await authStore.refreshToken()
-      document.location.href = "/"
     }
   }
 })

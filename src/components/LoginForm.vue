@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import {AccountService} from "@/models/account/Account"
+import {useLoading} from 'vue-loading-overlay'
 import {reactive} from "vue";
 import {useRouter} from "vue-router";
 import {$trans, errorToast, infoToast, isEmpty} from "@/utils";
@@ -47,9 +47,13 @@ import {useAuthStore} from "@/stores/auth";
 import {useMainStore} from "@/stores/main";
 import {useToast} from "bootstrap-vue-next";
 
+const $loading = useLoading({
+  // options
+});
+
 const authStore = useAuthStore()
 const mainStore = useMainStore()
-const create = useToast()
+const {create} = useToast()
 const router = useRouter()
 
 const form = reactive({
@@ -77,7 +81,7 @@ async function doLogin(e) {
     return;
   }
 
-  let loader = this.$loading.show({
+  let loader = $loading.show({
     // Optional parameters
     // container: this.fullPage ? null : this.$refs.formContainer,
     // canCancel: true,

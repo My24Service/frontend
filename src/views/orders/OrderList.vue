@@ -49,7 +49,7 @@ export default {
     OrderListTemps,
   },
   async created() {
-    this.memberType = await this.mainStore.getMemberType()
+    this.memberType = await this.mainStore.getMemberType
   },
 }
 </script>

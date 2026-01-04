@@ -1,6 +1,6 @@
 import BaseModel from '@/models/base';
 import {normalClient} from "@/services/api";
-import setInterceptors from '@/services/auth2/clientDriver'
+import setInterceptors from '@/services/auth/clientDriver'
 
 class My24 extends BaseModel {
   getInitialData() {

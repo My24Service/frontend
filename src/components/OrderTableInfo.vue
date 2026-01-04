@@ -108,8 +108,8 @@ export default {
     IconLinkDelete
   },
   async created() {
-    this.memberType = await this.mainStore.getMemberType()
-    this.statuscodes = await this.mainStore.getStatuscodes()
+    this.memberType = await this.mainStore.getMemberType
+    this.statuscodes = await this.mainStore.getStatuscodes
     this.assignedUsers = this.getAssignedUsersList()
     this.isLoaded = true;
     this.orderStatusCode = this.orderStatusCodeComputed

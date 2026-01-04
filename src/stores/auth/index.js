@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
-import AuthService from '@/services/auth2/service';
 import client from '@/services/api'
-import authHeader from "@/services/auth2/auth-header";
 import {useMainStore} from "@/stores/main";
 
 const token = localStorage.getItem('accessToken')
@@ -85,12 +83,14 @@ export const useAuthStore = defineStore('auth', {
       this.userInfo = userInfo
     },
     authenticate(accessToken) {
-      AuthService.authenticate({accessToken})
+      console.log('authenticate accesstoken', accessToken)
+      localStorage.setItem('accessToken', JSON.stringify(accessToken))
       this.token = accessToken
     },
     logout() {
       this.token = null
-      AuthService.logout();
+      this.userInfo = null
+      localStorage.removeItem('accessToken')
     },
     async fetchUserInfo() {
       const result = await client.get('/company/user-info-me/')
@@ -99,7 +99,6 @@ export const useAuthStore = defineStore('auth', {
       mainStore.setStreamInfo(result.data.stream)
     },
     async login(username, password) {
-      const headers = authHeader()
       const url = '/jwt-token/'
 
       const postData = {
@@ -109,8 +108,8 @@ export const useAuthStore = defineStore('auth', {
       }
 
       const loginResult = await client.post(url, postData)
-      console.debug('login result', loginResult)
-      this.authenticate({ accessToken: loginResult.data.token });
+      console.debug('login result', loginResult.data)
+      this.authenticate(loginResult.data.token);
       this.setToken(loginResult.data.token)
     },
     async refreshToken() {
@@ -120,7 +119,7 @@ export const useAuthStore = defineStore('auth', {
         const postData = { token }
         const result = await client.post(url, postData)
         console.debug('token refresh result', result)
-        this.authenticate(result.token)
+        this.authenticate(result.data.token)
         console.debug('token refreshed, reload window')
         window.location.reload()
       } else {

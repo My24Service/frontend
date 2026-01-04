@@ -37,7 +37,7 @@
             v-model="new_password1"
             :state="isSubmitClicked ? !v$.new_password1.$error : null"
           ></BFormInput>
-          <password v-model="new_password1" :strength-meter-only="true"/>
+          <password-meter :password="password1" />
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.new_password1.$error : null">
             {{ $trans('Please enter a new password') }}
@@ -118,9 +118,8 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs } from '@vuelidate/validators'
-import Password from 'vue-password-strength-meter'
 
-import {AccountService} from '../models/account/Account.js'
+import {AccountService} from '@/models/account/Account'
 
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
@@ -138,6 +137,7 @@ import {errorToast, infoToast} from "@/utils";
 import {useMainStore} from "@/stores/main";
 import {useAuthStore} from "@/stores/auth";
 import {computed} from "vue";
+import PasswordMeter from "vue-simple-password-meter";
 
 export default {
   setup() {
@@ -154,10 +154,10 @@ export default {
   },
   mixins: [componentMixin],
   components: {
+    PasswordMeter,
     TheLanguageChooser,
     NavItems,
     NavBrand,
-    Password,
     Version,
     Notification,
     TokenRefresh,

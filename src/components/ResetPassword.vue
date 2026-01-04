@@ -13,11 +13,11 @@
             id="password1"
             size="sm"
             type='password'
-            autofocus
+            :autofocus="true"
             @blur="v$.password1.$touch()"
             :state="isSubmitClicked ? !v$.password1.$error : null"
           ></BFormInput>
-          <password v-model="password1" :strength-meter-only="true"/>
+          <password-meter :password="password1" />
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.password1.$error : null">
             {{ $trans('Please enter a password') }}
@@ -61,7 +61,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs } from '@vuelidate/validators'
-import Password from 'vue-password-strength-meter'
+import PasswordMeter from 'vue-simple-password-meter';
 
 import {AccountService} from '@/models/account/Account'
 import {useToast} from "bootstrap-vue-next";
@@ -76,7 +76,7 @@ export default {
     }
   },
   components: {
-    Password,
+    PasswordMeter,
   },
   data() {
     return {
