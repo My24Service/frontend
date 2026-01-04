@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import AuthService from '@/services/auth2/service';
-import {AccountService} from "@/models/account/Account";
+import client from '@/services/api'
+import authHeader from "@/services/auth2/auth-header";
+import {useMainStore} from "@/stores/main";
 
 const token = localStorage.getItem('accessToken')
 const initialState = token
@@ -9,8 +11,7 @@ const initialState = token
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    ...initialState,
-    accountService: new AccountService()
+    ...initialState
   }),
   getters: {
     isAdmin: (state) => {
@@ -74,13 +75,13 @@ export const useAuthStore = defineStore('auth', {
     },
   },
   actions: {
-    loginFailure: () => {
+    loginFailure() {
 
     },
-    setToken: (token) => {
+    setToken(token) {
       this.token = token
     },
-    setUserInfo: (userInfo) => {
+    setUserInfo(userInfo) {
       this.userInfo = userInfo
     },
     authenticate(accessToken) {
@@ -91,15 +92,37 @@ export const useAuthStore = defineStore('auth', {
       this.token = null
       AuthService.logout();
     },
-    refreshToken() {
+    async fetchUserInfo() {
+      const result = await client.get('/company/user-info-me/')
+      this.setUserInfo(result.data)
+      const mainStore = useMainStore()
+      mainStore.setStreamInfo(result.data.stream)
+    },
+    async login(username, password) {
+      const headers = authHeader()
+      const url = '/jwt-token/'
+
+      const postData = {
+        username: username,
+        password: password,
+        app: 'web'
+      }
+
+      const loginResult = await client.post(url, postData)
+      console.debug('login result', loginResult)
+      this.authenticate({ accessToken: loginResult.data.token });
+      this.setToken(loginResult.data.token)
+    },
+    async refreshToken() {
       const token = localStorage.getItem('accessToken')
       if (token) {
-        this.state.accountService.refreshToken(token).then((result) => {
-          console.debug('token refresh result', result)
-          this.authenticate(result.token)
-          console.debug('token refreshed, reload window')
-          window.location.reload()
-        })
+        const url = '/jwt-token/refresh/'
+        const postData = { token }
+        const result = await client.post(url, postData)
+        console.debug('token refresh result', result)
+        this.authenticate(result.token)
+        console.debug('token refreshed, reload window')
+        window.location.reload()
       } else {
         console.log('no token, logout and reload')
         this.logout()

@@ -1,7 +1,9 @@
 <template>
-  <div ref="index" v-if="!store.state.auth.loggedIn">
+  <div ref="index" v-if="!authStore.isLoggedIn">
     <b-container class="d-flex justify-center flex-column" v-if="memberInfo">
-      <NavBrand />
+      <NavBrand
+        :member-info="memberInfo"
+      />
       <h4>{{  memberInfo.name }}</h4>
     </b-container>
     <b-container class="d-flex">
@@ -22,7 +24,6 @@
           </h3>
         </div>
       </header>
-
     </div>
   </div>
 </template>
@@ -37,25 +38,23 @@ import {useMainStore} from "@/stores/main";
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()
-const memberInfo = computed(() => mainStore.memberInfo)
+const memberInfo = computed(() => mainStore.memberInfo);
 
-onMounted(() => {
-  setTimeout(() => {
-    if (authStore.isPlanning) {
-      console.info(`planning, redirecting to 'order-list'`)
-      this.$router.push({ name: 'material-list' });
-    }
-  }, 100);
-
-  mainStore.getInitialData()
-    .catch(async (error) => {
-      if (error.response && error.response.status === 401) {
-        console.log('401 in main')
-        // try to refresh token
-        authStore.refreshToken()
+onMounted(async () => {
+  try {
+    await mainStore.getInitialData()
+    setTimeout(() => {
+      if (authStore.isLoggedIn && authStore.isPlanning) {
+        console.debug(`planning, redirecting to 'order-list'`)
+        this.$router.push({ name: 'order-list' });
       }
-    })
-
+    }, 100);
+  } catch(error) {
+    if (error.response && error.response.status === 401) {
+      await authStore.refreshToken()
+      document.location.href = "/"
+    }
+  }
 })
 </script>
 

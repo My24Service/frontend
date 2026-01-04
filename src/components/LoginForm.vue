@@ -77,17 +77,19 @@ async function doLogin(e) {
     return;
   }
 
-  // const loader = this.$loading.show()
+  let loader = this.$loading.show({
+    // Optional parameters
+    // container: this.fullPage ? null : this.$refs.formContainer,
+    // canCancel: true,
+    // onCancel: this.onCancel,
+  });
 
   try {
-    const accountService = new AccountService()
-    const loginResult = await accountService.login(form.username, form.password)
-    authStore.authenticate({ accessToken: loginResult.token });
+    await authStore.login(form.username, form.password)
     await mainStore.getInitialData()
-    const userDetails = await accountService.getUserDetails()
-    mainStore.setStreamInfo(userDetails.stream)
+    await authStore.fetchUserInfo()
 
-    // loader.hide()
+    loader.hide()
 
     infoToast(create, $trans('Logged in'), $trans('You are now logged in'))
 
@@ -100,9 +102,9 @@ async function doLogin(e) {
     await router.push({ name: 'order-list' });
 
   } catch (error) {
-    console.log(error)
+    console.log({error})
     await authStore.loginFailure();
-    // loader.hide()
+    loader.hide()
 
     errorToast(create, $trans('Error logging you in'))
   }

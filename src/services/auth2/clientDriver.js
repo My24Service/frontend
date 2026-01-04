@@ -1,17 +1,13 @@
 import authHeader from './auth-header'
+import {useAuthStore} from "@/stores/auth";
 
 async function errorHandler(error) {
   console.error(`got error: ${error}`)
   if (error.response.status === 401) {
-    console.log('doing logout with reload and redirect to home')
-    const store = useStore();
-    if (!store) {
-      console.warn("no store, return")
-      // document.location.href = "/"
-      return
-    }
-    await store.logout();
-    // auth.logout(false, true, true)
+    console.log('doing logout')
+    const authStore = useAuthStore()
+    authStore.logout();
+    document.location.href = "/"
   } else {
     console.log(error)
   }

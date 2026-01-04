@@ -1,8 +1,8 @@
 import BASE_URL from './services/base-url'
 const companycode = BASE_URL.split('//')[1].split('.')[0]
-const base = document.createElement("base")
-base.href = BASE_URL
-document.head.appendChild(base)
+// const base = document.createElement("base")
+// base.href = BASE_URL
+// document.head.appendChild(base)
 
 const script = document.createElement("script")
 script.src = `${BASE_URL}/api/jsi18n/`
@@ -10,8 +10,6 @@ script.async = false
 document.head.appendChild(script)
 
 import { createApp } from 'vue'
-// import Loading from 'vue-loading-overlay'
-// import { ColorPicker, ColorPanel } from "one-colorpicker"
 
 // import 'vue-spinners/dist/vue-spinners.css'
 // import VueSpinners from 'vue-spinners/dist/vue-spinners.common'
@@ -23,12 +21,14 @@ import App from './App.vue'
 import {router} from './router'
 import componentMixin from "@/mixins/common";
 import { VueDatePicker } from '@vuepic/vue-datepicker';
+import {LoadingPlugin} from 'vue-loading-overlay';
 import '@vuepic/vue-datepicker/dist/main.css'
 
 function createOurApp() {
   const pinia = createPinia()
   const app = createApp(App)
       .use(pinia)
+      .use(LoadingPlugin)
       .use(router)
       .mixin(componentMixin)
       .component('VueDatePicker', VueDatePicker);
@@ -47,7 +47,7 @@ function createOurApp() {
 }
 
 import './scss/default.scss'
-// import 'vue-loading-overlay/dist/vue-loading.css'
+import 'vue-loading-overlay/dist/css/index.css';
 import "./scss/shared.scss";
 
 // themes
@@ -70,8 +70,11 @@ const theme = companycode in themes ? themes[companycode] : defaultTheme
 
 import { toggleTheme } from "@zougt/vite-plugin-theme-preprocessor/dist/browser-utils";
 import {createPinia} from "pinia";
+import {useMainStore} from "@/stores/main";
+import {useAuthStore} from "@/stores/auth";
 toggleTheme({
   scopeName: theme,
 });
 
-createOurApp()
+const app = createOurApp()
+app.mount('#app')

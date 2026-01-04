@@ -1,16 +1,15 @@
 <template>
-  <b-navbar-brand ref="nav-brand" to="/" :title="memberName" v-if="memberLogo">
-    <img class="memberLogo" v-bind:src="memberLogo" v-bind:alt="memberName" >
+  <b-navbar-brand ref="nav-brand" to="/" :title="props.memberInfo.name">
+    <img
+      class="memberLogo"
+      :src="props.memberInfo.companylogo_url"
+      :alt="props.memberInfo.name"
+    >
   </b-navbar-brand>
 </template>
 
 <script setup>
-import {computed} from "vue";
-import {useMainStore} from "@/stores/main";
-
-const store = useMainStore()
-const memberLogo = computed(() => store.getMemberLogo)
-const memberName = computed( () => store.getMemberName)
+const props = defineProps(['memberInfo'])
 </script>
 <style scoped>
 .memberLogo {

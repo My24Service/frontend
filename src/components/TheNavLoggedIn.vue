@@ -92,7 +92,9 @@
   </b-modal>
 
     <nav class="app-sidebar">
-      <NavBrand />
+      <NavBrand
+        :member-info="memberInfo"
+      />
       <NavItems />
       <hr />
       <b-nav-item-dropdown dropup v-bind:text="username" right>
@@ -135,16 +137,19 @@ import componentMixin from "@/mixins/common";
 import {errorToast, infoToast} from "@/utils";
 import {useMainStore} from "@/stores/main";
 import {useAuthStore} from "@/stores/auth";
+import {computed} from "vue";
 
 export default {
   setup() {
     const mainStore = useMainStore()
     const authStore = useAuthStore()
+    const memberInfo = computed(() => mainStore.memberInfo);
 
     return {
       v$: useVuelidate(),
       mainStore,
-      authStore
+      authStore,
+      memberInfo
     }
   },
   mixins: [componentMixin],
@@ -178,7 +183,6 @@ export default {
   },
   data() {
     return {
-      memberInfo: this.mainStore.memberInfo,
       memberNewDataSocket: new MemberNewDataSocket(),
       old_password: null,
       new_password1: null,
@@ -226,7 +230,6 @@ export default {
       this.$refs['logout-modal'].show()
     },
     async doLogout() {
-      // do logout
       let loader = this.$loading.show()
 
       try {

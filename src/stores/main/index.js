@@ -129,9 +129,27 @@ export const useMainStore = defineStore('main', {
 
       return {after: 0, duration: 0};
     },
+    getStatuscodes() {
+      return this.statuscodes
+    },
+    getCountries() {
+      return this.memberInfo.countries
+    },
+    getOrderTypes() {
+      return this.memberInfo.order_types
+    },
+    getMemberType() {
+      return this.memberInfo.member_type
+    },
+    getMaintenanceProducts() {
+      return this.maintenanceProducts
+    },
+    getAssignOrders() {
+      return this.assignOrders
+    }
   },
   actions: {
-    setMemberInfo: (memberInfo) => {
+    setMemberInfo(memberInfo) {
       this.memberInfo = memberInfo
     },
     setStreamInfo(streamInfo) {
@@ -155,10 +173,10 @@ export const useMainStore = defineStore('main', {
     setLanguages(languages) {
       this.languages = languages
     },
-    setMemberContract: (contract) => {
+    setMemberContract(contract) {
       this.memberContract = contract
     },
-    setStatuscodes: (statuscodes) => {
+    setStatuscodes(statuscodes) {
       this.statuscodes = statuscodes
     },
     async getInitialData() {
@@ -232,23 +250,5 @@ export const useMainStore = defineStore('main', {
       }
       return ''
     },
-    getStatuscodes() {
-      return this.statuscodes
-    },
-    getCountries() {
-      return this.memberInfo.countries
-    },
-    getOrderTypes() {
-      return this.memberInfo.order_types
-    },
-    getMemberType() {
-      return this.memberInfo.member_type
-    },
-    getMaintenanceProducts() {
-      return this.maintenanceProducts
-    },
-    getAssignOrders() {
-      return this.assignOrders
-    }
   }
 })
