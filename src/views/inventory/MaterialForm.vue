@@ -86,7 +86,7 @@
                 v-bind:label="$trans('Search supplier')"
                 label-for="material-supplier-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="material-supplier-search"
                   track-by="id"
                   :placeholder="$trans('Type to search')"
@@ -107,7 +107,7 @@
                   label="name"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
+                </VueMultiselect>
               </BFormGroup>
 
               <BFormGroup
@@ -267,7 +267,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import materialService from '../../models/inventory/Material.js'
 import supplierModel from '../../models/inventory/Supplier.js'
@@ -284,7 +284,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {

@@ -36,13 +36,13 @@
               :label="$trans('Start time')"
               label-for="start_time"
             >
-              <b-form-timepicker
-                id="start_time"
-                size="sm"
+              <VueDatePicker
                 v-model="order.start_time"
-                :placeholder="$trans('Choose a time')"
-                :hour12=false
-              ></b-form-timepicker>
+                id="start_time"
+                class="mb-2"
+                :placeholder="$trans('Set time')"
+                time-picker
+              />
             </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
@@ -75,14 +75,13 @@
               label-class="p-sm-0"
               label-for="end_time"
             >
-              <b-form-timepicker
-                id="end_time"
-                size="sm"
-                v-model="order.end_time"
+              <VueDatePicker
+                v-model="order.start_time"
+                id="start_time"
                 class="mb-2"
-                :placeholder="$trans('Choose a time')"
-                :hour12=false
-              ></b-form-timepicker>
+                :placeholder="$trans('Set time')"
+                time-picker
+              />
             </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">

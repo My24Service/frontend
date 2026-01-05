@@ -8,7 +8,7 @@
         v-bind:label="$trans('Search existing address')"
         label-for="order-customer-search"
       >
-        <multiselect
+        <VueMultiselect
           id="order-customer-search"
           track-by="id"
           :placeholder="$trans('Type to search')"
@@ -26,7 +26,7 @@
           :custom-label="customerLabel"
         >
           <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-        </multiselect>
+        </VueMultiselect>
       </BFormGroup>
 
       <BFormGroup :label="$trans('Customer')"
@@ -171,7 +171,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
@@ -192,7 +192,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {

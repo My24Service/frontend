@@ -185,7 +185,7 @@
                         size="sm"
                         v-model="condition.values[index].char_value"
                       ></BFormInput>
-                      <multiselect
+                      <VueMultiselect
                         v-if="condition.fieldInputType === FIELD_TYPE_CHAR && isStatusField(condition.field)"
                         :placeholder="$trans('Type to search status..')"
                         open-direction="bottom"
@@ -198,7 +198,7 @@
                         v-model="condition.values[index].char_value"
                         @select="selectStatus"
                       >
-                      </multiselect>
+                      </VueMultiselect>
                       <BFormCheckbox
                         v-if="condition.fieldInputType === FIELD_TYPE_BOOL"
                         v-model="condition.values[index].bool_value"
@@ -296,7 +296,7 @@ import {
   USER_FILTER_TYPE_ORDER
 } from "@/models/base_user_filter";
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
-import Multiselect from "vue-multiselect";
+import VueMultiselect from "vue-multiselect";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
@@ -310,7 +310,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   validations() {
     return {

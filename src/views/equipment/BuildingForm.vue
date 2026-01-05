@@ -12,7 +12,7 @@
               v-bind:label="$trans('Search customer')"
               label-for="building_customer_search"
             >
-              <multiselect
+              <VueMultiselect
                 v-if="!isLoading"
                 id="building_customer_search"
                 track-by="id"
@@ -34,7 +34,7 @@
                 :custom-label="customerLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.building.customer.$error : null">
                 {{ $trans('Please select a customer') }}
@@ -50,7 +50,7 @@
               v-bind:label="$trans('Search branches')"
               label-for="building_branch_search"
             >
-              <multiselect
+              <VueMultiselect
                 v-if="!isLoading"
                 id="building_branch_search"
                 track-by="id"
@@ -72,7 +72,7 @@
                 :custom-label="branchLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.building.branch.$error : null">
                 {{ $trans('Please select a branch') }}
@@ -244,7 +244,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
 import { BuildingService, BuildingModel } from '@/models/equipment/building'
@@ -255,7 +255,7 @@ import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   setup() {
     const {create} = useToast()

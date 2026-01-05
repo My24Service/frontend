@@ -249,7 +249,7 @@
                   v-bind:label="$trans('Engineer')"
                   label-for="split-order-engineer"
                 >
-                  <multiselect
+                  <VueMultiselect
                     v-model="selectedEngineers"
                     track-by="id"
                     :max-height="600"
@@ -264,7 +264,7 @@
                     <span slot="noResult">
                       {{ $trans('Oops! No elements found. Consider changing the search query.') }}
                     </span>
-                  </multiselect>
+                  </VueMultiselect>
 
                 </BFormGroup>
               </b-col>
@@ -434,7 +434,7 @@ import { AssignService } from '@/models/mobile/Assign'
 import SearchAndAssign from "@/views/mobile/dispatch/SearchAndAssign.vue";
 import MemberNewDataSocket from '../../services/websocket/MemberNewDataSocket.js'
 import {NEW_DATA_EVENTS} from '@/constants';
-import Multiselect from "vue-multiselect";
+import VueMultiselect from  "vue-multiselect";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {UserListService} from "@/models/company/UserList";
 import TimeInput from "@/components/TimeInput.vue";
@@ -462,7 +462,7 @@ export default {
   },
   name: 'DispatchNew',
   components: {
-    Multiselect,
+    VueMultiselect,
     // SearchModal,
     SearchAndAssign,
     DispatchWeek,

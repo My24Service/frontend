@@ -24,7 +24,7 @@
               label-cols="12"
               label-for="add-mutation-material-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="add-mutation-material-search"
                 track-by="id"
                 :placeholder="`${$trans('Select product')} ${$trans('(type to search)')}`"
@@ -44,7 +44,7 @@
                 :custom-label="materialLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
             </BFormGroup>
 
 
@@ -95,7 +95,7 @@
               label-cols="12"
               label-for="add-mutation-location-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="add-mutation-location-search"
                 track-by="id"
                 open-direction="bottom"
@@ -111,7 +111,7 @@
                 :custom-label="locationLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
             </BFormGroup>
 
             <BFormGroup
@@ -137,7 +137,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import inventoryModel from '../../models/inventory/Inventory.js'
 import mutationModel from "../../models/inventory/Mutation";
@@ -155,7 +155,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   data() {
     return {

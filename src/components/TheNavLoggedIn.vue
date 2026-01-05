@@ -20,6 +20,7 @@
             id="old-password-input"
             v-model="old_password"
             type="password"
+            autocomplete="false"
             :state="isSubmitClicked ? !v$.old_password.$error : null"
           ></BFormInput>
           <b-form-invalid-feedback
@@ -34,10 +35,11 @@
           <BFormInput
             id="new-password1-input"
             type="password"
+            autocomplete="false"
             v-model="new_password1"
             :state="isSubmitClicked ? !v$.new_password1.$error : null"
           ></BFormInput>
-          <password-meter :password="password1" />
+          <password-meter :password="new_password1" />
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.new_password1.$error : null">
             {{ $trans('Please enter a new password') }}
@@ -50,6 +52,7 @@
           <BFormInput
             id="new-password2-input"
             type="password"
+            autocomplete="false"
             v-model="new_password2"
             :state="isSubmitClicked ? !v$.new_password2.$error : null"
           ></BFormInput>

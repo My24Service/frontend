@@ -392,7 +392,7 @@
               v-bind:label="$trans('Search orders')"
               label-for="trip-order-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="trip-order-search"
                 track-by="id"
                 :placeholder="$trans('Type to search')"
@@ -413,7 +413,7 @@
                 :custom-label="orderLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
             </BFormGroup>
           </b-col>
         </b-row>
@@ -451,7 +451,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import tripModel from '@/models/mobile/Trip.js'
 import orderModel from '@/models/orders/Order.js'
@@ -471,7 +471,7 @@ export default {
     }
   },
   components: {
-    Multiselect
+    VueMultiselect
   },
   props: {
     pk: {

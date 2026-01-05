@@ -133,7 +133,7 @@
             v-bind:label="$trans('Customer')"
             label-for="order-customer-search"
           >
-            <multiselect
+            <VueMultiselect
               id="order-customer-search"
               track-by="id"
               :placeholder="$trans('Type to search name, address..')"
@@ -151,7 +151,7 @@
               :custom-label="customerLabel"
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-            </multiselect>
+            </VueMultiselect>
           </BFormGroup>
 
 
@@ -161,7 +161,7 @@
             v-bind:label="$trans('Branch')"
             label-for="order-branch-search"
           >
-            <multiselect
+            <VueMultiselect
               id="order-branch-search"
               track-by="id"
               :placeholder="$trans('Type to search name, address..')"
@@ -179,7 +179,7 @@
               :custom-label="branchLabel"
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-            </multiselect>
+            </VueMultiselect>
           </BFormGroup>
 
           <BFormGroup :label="!hasBranches ? $trans('Customer') : $trans('Branch')"
@@ -201,16 +201,16 @@
 
                 :state="isSubmitClicked ? !v$.order.branch.$error : null"
               ></BFormInput>
-              <b-input-group-append v-if="!hasBranches">
+              <template #append v-if="!hasBranches">
                 <BFormInput
                   v-model="order.customer_id"
-                  readonly
+                  :readonly="true"
                   :title="$trans('Customer ID')"
                   id="customer_id"
                   style="max-width: 9ch"
                   :state="isSubmitClicked ? !v$.order.customer_id.$error : null">
                 </BFormInput>
-              </b-input-group-append>
+              </template>
             </b-input-group>
 
             <b-form-invalid-feedback
@@ -413,6 +413,7 @@
                   :placeholder="$trans('Select date')"
                   value="order.start_date"
                   locale="nl"
+                  :vertical="true"
                   :state="isSubmitClicked ? !v$.order.start_date.$error : null"
                   :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
                 ></VueDatePicker>
@@ -437,16 +438,13 @@
                   class="time-input"
                 ></BFormInput>
                 <span style="float:left !important;"></span>
-                <b-form-timepicker
+                <VueDatePicker
                   v-model="order.start_time"
-                  button-only
-                  right
-                  locale="en"
                   id="start_time"
+                  class="mb-2"
                   :placeholder="$trans('Set time')"
-                  :hour12=false
-                ></b-form-timepicker>
-
+                  time-picker
+                />
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.start_time.$error : null">
                   {{ $trans('Please enter a valid start time HH:mm') }}
@@ -495,16 +493,13 @@
                   placeholder="HH:mm"
                 ></BFormInput>
                 <span style="float:left !important;"></span>
-                <b-form-timepicker
+                <VueDatePicker
                   v-model="order.end_time"
-                  button-only
-                  right
-                  locale="en"
                   id="end_time"
                   class="mb-2"
                   :placeholder="$trans('Set time')"
-                  :hour12=false
-                ></b-form-timepicker>
+                  time-picker
+                />
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.end_time.$error : null">
                   {{ $trans('Please enter a valid end time HH:mm') }}
@@ -530,7 +525,7 @@
               label-cols="3"
               v-if="assignResult.length === 0"
             >
-              <multiselect
+              <VueMultiselect
                 v-model="selectedEngineers"
                 id="order-assign"
                 track-by="id"
@@ -544,7 +539,7 @@
                 @search-change="getEngineersDebounced"
                 >
                 <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-              </multiselect>
+              </VueMultiselect>
             </BFormGroup>
             <div v-if="assignResult.length > 0">
               <h4>{{ $trans("Assign result") }}</h4>
@@ -597,7 +592,7 @@
             v-bind:label="$trans('Order email extra')"
             label-for="order-assign"
           >
-            <multiselect
+            <VueMultiselect
               v-model="selectedSalesUsers"
               id="order-assign"
               track-by="id"
@@ -614,7 +609,7 @@
               <span slot="noResult">
                 {{ $trans('Oops! No elements found. Consider changing the search query.') }}
               </span>
-            </multiselect>
+            </VueMultiselect>
           </BFormGroup>
         </div>
 
@@ -677,7 +672,7 @@
               <BFormGroup
                 v-bind:label="$trans('Equipment')"
                 cols="12">
-                  <multiselect
+                  <VueMultiselect
                     id="maintenance-contract-equipment-name"
                     ref="multiselect_equipment"
                     track-by="id"
@@ -713,7 +708,7 @@
                         </BButton>
                       </p>
                     </span>
-                  </multiselect>
+                  </VueMultiselect>
 
                   <span>
                     <strong>{{ product }}</strong>
@@ -727,7 +722,7 @@
                 v-bind:label="$trans('Location')"
                 cols="12"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="location-name"
                     ref="multiselect_location"
                     track-by="id"
@@ -763,7 +758,7 @@
                         </BButton>
                       </p>
                     </span>
-                  </multiselect>
+                  </VueMultiselect>
 
                   <span>
                     <strong>{{ location }}</strong>
@@ -937,7 +932,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, helpers } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer'
@@ -981,7 +976,7 @@ export default {
   mixins: [componentMixin],
   components: {
     DocumentsComponent,
-    Multiselect,
+    VueMultiselect,
     OrderTypesSelect,
     ApiResult,
   },

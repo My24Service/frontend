@@ -90,13 +90,13 @@
               :label="$trans('Start time')"
               label-for="start_time"
             >
-              <b-form-timepicker
-                id="start_time"
-                size="sm"
+              <VueDatePicker
                 v-model="order.start_time"
-                :placeholder="$trans('Choose a time')"
-                :hour12=false
-              ></b-form-timepicker>
+                id="start_time"
+                class="mb-2"
+                :placeholder="$trans('Set time')"
+                time-picker
+              />
             </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
@@ -129,14 +129,13 @@
               label-class="p-sm-0"
               label-for="end_time"
             >
-              <b-form-timepicker
-                id="end_time"
-                size="sm"
+              <VueDatePicker
                 v-model="order.end_time"
+                id="end_time"
                 class="mb-2"
-                :placeholder="$trans('Choose a time')"
-                :hour12=false
-              ></b-form-timepicker>
+                :placeholder="$trans('Set time')"
+                time-picker
+              />
             </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
@@ -365,7 +364,7 @@
                   label-class="p-sm-2"
                   v-bind:label="$trans('Search equipment')"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="maintenance-contract-equipment-name"
                     ref="multiselect_equipment"
                     track-by="id"
@@ -400,7 +399,7 @@
                         </BButton>
                       </p>
                     </span>
-                  </multiselect>
+                  </VueMultiselect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
@@ -433,7 +432,7 @@
                   label-class="p-sm-2"
                   v-bind:label="$trans('Search location')"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="location-name"
                     ref="multiselect_location"
                     track-by="id"
@@ -469,7 +468,7 @@
                         </BButton>
                       </p>
                     </span>
-                  </multiselect>
+                  </VueMultiselect>
                 </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
@@ -559,7 +558,7 @@ import Collapse from '@/components/Collapse.vue'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {EquipmentService} from "@/models/equipment/equipment";
 import {LocationService} from "@/models/equipment/location";
-import Multiselect from "vue-multiselect";
+import VueMultiselect from "vue-multiselect";
 import {OrderlineService} from "@/models/orders/Orderline";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
@@ -580,7 +579,7 @@ export default {
   mixins: [componentMixin],
   components: {
     DocumentsComponent,
-    Multiselect,
+    VueMultiselect,
     OrderTypesSelect,
     Collapse
   },

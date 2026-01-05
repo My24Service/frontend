@@ -32,7 +32,7 @@
             v-bind:label="$trans('Search existing user')"
             label-for="user-search"
           >
-            <multiselect
+            <VueMultiselect
               id="user-search"
               track-by="id"
               :placeholder="$trans('Type to search')"
@@ -50,7 +50,7 @@
               :custom-label="userLabel"
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-            </multiselect>
+            </VueMultiselect>
           </BFormGroup>
           <BFormGroup
             v-if="isCreate"
@@ -100,7 +100,7 @@ import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { UserListService } from "@/models/company/UserList.js";
 import { SickLeavesService } from "@/models/company/SickLeave.js";
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
@@ -117,7 +117,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {

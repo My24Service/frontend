@@ -69,7 +69,7 @@
               label-size="sm"
               label-for="maintenance_contract_customer_search"
             >
-              <multiselect
+              <VueMultiselect
                 v-if="!isLoading"
                 id="maintenance_contract_customer_search"
                 track-by="id"
@@ -92,7 +92,7 @@
                 required
               >
                 <span slot="noResult">{{ $trans('No customers found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
               <b-form-invalid-feedback
                 :state="!v$.maintenanceContractService.editItem.customer.$error">
                 {{ $trans('Please select a customer') }}
@@ -172,7 +172,7 @@
                     label-size="sm"
                     v-bind:label="$trans('Add equipment')"
                   >
-                    <multiselect
+                    <VueMultiselect
                       id="maintenance-contract-equipment-name"
                       ref="multiselect_equipment"
                       :key="customer.id"
@@ -211,7 +211,7 @@
                           </BButton>
                         </p>
                       </span>
-                    </multiselect>
+                    </VueMultiselect>
                   </BFormGroup>
                 </b-col>
               </b-row>
@@ -337,7 +337,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
 import { CustomerService } from '@/models/customer/Customer'
@@ -365,7 +365,7 @@ export default {
   },
   mixins: [componentMixin],
   components: {
-    Multiselect,
+    VueMultiselect,
     PriceInput,
     CustomerCard,
   },

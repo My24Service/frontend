@@ -25,7 +25,7 @@
                 v-bind:label="$trans('Search assigned orders')"
                 label-for="assignedorder-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="assignedorder-search"
                   track-by="id"
                   :placeholder="$trans('Type to search')"
@@ -45,7 +45,7 @@
                   :custom-label="assignedOrderLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
+                </VueMultiselect>
               </BFormGroup>
             </b-col>
             <b-col cols="6" role="group">
@@ -74,7 +74,7 @@
                 v-bind:label="$trans('Search location')"
                 label-for="assignedorder-material-location-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="assignedorder-material-location-search"
                   track-by="id"
                   open-direction="bottom"
@@ -90,7 +90,7 @@
                   :custom-label="locationLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
+                </VueMultiselect>
               </BFormGroup>
             </b-col>
             <b-col cols="6" role="group">
@@ -119,7 +119,7 @@
                 v-bind:label="$trans('Search material')"
                 label-for="move-material-purchase-order-material-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="move-material-purchase-order-material-search"
                   track-by="id"
                   :placeholder="$trans('Type to search')"
@@ -139,7 +139,7 @@
                   :custom-label="materialLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
+                </VueMultiselect>
               </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
@@ -227,7 +227,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
 import inventoryModel from '@/models/inventory/Inventory.js'
@@ -250,7 +250,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
     IconLinkEdit,
     IconLinkDelete,
   },

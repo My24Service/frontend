@@ -30,7 +30,7 @@
                   label-for="material-search"
                   v-if="!cost.material"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="material-search"
                     track-by="id"
                     :placeholder="$trans('Type to search')"
@@ -52,7 +52,7 @@
                     ref="searchMaterial"
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                  </multiselect>
+                  </VueMultiselect>
                 </BFormGroup>
                 <BFormGroup
                   label-for="material-search"
@@ -208,7 +208,7 @@
 </template>
 
 <script>
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
@@ -253,7 +253,7 @@ export default {
     PriceInput,
     VAT,
     TotalRow,
-    Multiselect,
+    VueMultiselect,
     AddToQuotationLines,
     SectionHeader
   },

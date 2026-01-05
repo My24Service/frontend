@@ -11,7 +11,7 @@
       ref="reload-modal"
       v-bind:title="$trans('Reload page?')"
       @ok="doReload"
-      ok-only="true"
+      :ok-only="true"
     >
       <p class="my-4">
         {{ $trans(message) }}: {{ newVersion }}

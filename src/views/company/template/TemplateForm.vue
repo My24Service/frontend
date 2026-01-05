@@ -156,7 +156,7 @@
               v-bind:label="$trans('Template')"
               label-for="template-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="template-search"
                 track-by="id"
                 :placeholder="$trans('Type to search')"
@@ -177,7 +177,7 @@
                 :custom-label="result => result.name"
                 ref="searchTemplate"
               >
-              </multiselect>
+              </VueMultiselect>
             </BFormGroup>
             <b-row>
               <b-col cols="3" v-if="result">
@@ -211,13 +211,13 @@ import {
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import { QuotationService } from "@/models/quotations/Quotation";
 import { InvoiceService } from '@/models/invoices/Invoice'
-import Multiselect from "vue-multiselect";
+import VueMultiselect from  "vue-multiselect";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   components: {
-    Multiselect
+    VueMultiselect
   },
   setup() {
     const {create} = useToast()

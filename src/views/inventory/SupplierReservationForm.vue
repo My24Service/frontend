@@ -32,7 +32,7 @@
                   v-bind:label="$trans('Search supplier')"
                   label-for="supplier-reservation-supplier-search"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="supplier-reservation-supplier-search"
                     track-by="id"
                     :placeholder="$trans('Type to search')"
@@ -52,7 +52,7 @@
                     :custom-label="supplierLabel"
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                  </multiselect>
+                  </VueMultiselect>
                 </BFormGroup>
 
                 <BFormGroup
@@ -144,7 +144,7 @@
                     label-size="sm"
                     v-bind:label="$trans('Search product')"
                   >
-                    <multiselect
+                    <VueMultiselect
                       id="reservation-material-name"
                       track-by="id"
                       label="name"
@@ -165,7 +165,7 @@
                       @select="selectMaterial"
                     >
                       <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                    </multiselect>
+                    </VueMultiselect>
                     <b-form-invalid-feedback
                       :state="!v$.material.material.$error">
                       {{ $trans('Please select a product') }}
@@ -285,7 +285,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial.js'
@@ -305,7 +305,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {

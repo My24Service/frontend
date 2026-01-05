@@ -199,7 +199,7 @@ export default {
   },
   props: {
     order: {
-      type: OrderModel,
+      type: Object,
       default: null
     },
     isView: {

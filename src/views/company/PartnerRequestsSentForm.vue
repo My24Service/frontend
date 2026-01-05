@@ -18,7 +18,7 @@
                 label-for="partner_request_member_search"
                 :label="$trans('Send partner request to')"
               >
-                <multiselect
+                <VueMultiselect
                   id="partner_request_member_search"
                   track-by="id"
                   :placeholder="`${$trans('Member')} ${$trans('(type to search)')}`"
@@ -39,7 +39,7 @@
                   :custom-label="memberLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
+                </VueMultiselect>
               </BFormGroup>
 
               <BFormGroup
@@ -78,7 +78,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent.js'
 import memberModel from '@/models/member/Member.js'
@@ -94,7 +94,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   validations: {
     partnerRequest: {

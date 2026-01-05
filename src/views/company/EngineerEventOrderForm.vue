@@ -18,7 +18,7 @@
                 v-bind:label="$trans('Search existing address')"
                 label-for="order-customer-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="order-customer-search"
                   track-by="id"
                   :placeholder="$trans('Type to search')"
@@ -36,7 +36,7 @@
                   :custom-label="customerLabel"
                 >
                   <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-                </multiselect>
+                </VueMultiselect>
               </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
@@ -68,7 +68,7 @@
 
 <script>
 
-import Multiselect from "vue-multiselect";
+import VueMultiselect from  "vue-multiselect";
 import moment from "moment";
 import orderModel from "../../models/orders/Order";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
@@ -81,7 +81,7 @@ export default {
   name: "EngineerEventOrderForm",
 
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   data() {
     return {

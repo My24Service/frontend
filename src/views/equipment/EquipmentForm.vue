@@ -37,7 +37,7 @@
                 label-size="sm"
                 label-for="equipment_customer_search"
               >
-                <multiselect
+                <VueMultiselect
                   v-if="!isLoading"
                   id="equipment_customer_search"
                   track-by="id"
@@ -59,7 +59,7 @@
                   :custom-label="customerLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
+                </VueMultiselect>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.equipment.customer.$error : null">
                   {{ $trans('Please select a customer') }}
@@ -75,7 +75,7 @@
                 v-bind:label="$trans('Search branches')"
                 label-for="equipment_branch_search"
               >
-                <multiselect
+                <VueMultiselect
                   v-if="!isLoading"
                   id="equipment_branch_search"
                   track-by="id"
@@ -97,7 +97,7 @@
                   :custom-label="branchLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
+                </VueMultiselect>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.equipment.branch.$error : null">
                   {{ $trans('Please select a branch') }}
@@ -501,7 +501,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import { CustomerService } from '@/models/customer/Customer'
 import {
@@ -528,7 +528,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
     PriceInput,
     DocumentsComponent
   },

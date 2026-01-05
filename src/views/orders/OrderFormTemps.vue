@@ -10,7 +10,7 @@
               v-bind:label="$trans('Search existing address')"
               label-for="order-customer-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="order-customer-search"
                 track-by="id"
                 :placeholder="$trans('Type to search')"
@@ -31,7 +31,7 @@
                 :custom-label="customerLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
             </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
@@ -446,7 +446,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import {OrderService} from '@/models/orders/Order.js'
 import customerModel from '@/models/customer/Customer.js'
@@ -470,7 +470,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
     OrderTypesSelect
   },
   props: {

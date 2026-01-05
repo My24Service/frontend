@@ -3,7 +3,7 @@
     <b-modal
       ref="pdf-error-modal"
       :title="$trans('Error creating PDF')"
-      ok-only
+      :ok-only="true"
     >
       <div
         class="d-block text-center"
@@ -36,7 +36,7 @@
       size="xl"
       v-b-modal.modal-scrollable
       :title="viewerTitle"
-      ok-only
+      :ok-only="true"
     >
       <template #modal-footer="{ ok }">
         <BButton

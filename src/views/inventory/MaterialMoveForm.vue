@@ -70,7 +70,7 @@
               label-size="sm"
               label-for="move-material-purchase-order-material-search"
               >
-              <multiselect
+              <VueMultiselect
               id="move-material-purchase-order-material-search"
               track-by="id"
                   :placeholder="$trans('Select material (type to search)')"
@@ -91,7 +91,7 @@
                   ref="searchMaterial"
                   >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                 {{ $trans('Please select a material') }}
@@ -119,7 +119,7 @@
             label-size="sm"
             label-for="move-material-from-location-search"
             >
-            <multiselect
+            <VueMultiselect
               id="move-material-from-location-search"
               track-by="id"
               open-direction="bottom"
@@ -137,7 +137,7 @@
               :custom-label="fromLocationLabel"
             >
               <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-            </multiselect>
+            </VueMultiselect>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.selectedFromLocationPk.$error : null">
               {{ $trans('Please select from location') }}
@@ -166,7 +166,7 @@
           <BFormGroup
             label-for="move-material-to-location-search"
             >
-            <multiselect
+            <VueMultiselect
               id="move-material-to-location-search"
               track-by="id"
               :placeholder="$trans('Type to search')"
@@ -185,7 +185,7 @@
               :custom-label="toLocationLabel"
             >
               <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-            </multiselect>
+            </VueMultiselect>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.selectedToLocationPk.$error : null">
               {{ $trans('Please select to location') }}
@@ -212,7 +212,7 @@ header {
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import inventoryModel from '@/models/inventory/Inventory.js'
 import materialService from '@/models/inventory/Material.js'
@@ -231,7 +231,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   data() {
     return {

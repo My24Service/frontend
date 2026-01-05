@@ -30,7 +30,7 @@
                   v-bind:label="$trans('Purchase order')"
                   label-for="purchaseorder-entry-order-search"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="purchaseorder-entry-order-search"
                     track-by="id"
                     :placeholder="$trans('Type to search')"
@@ -50,7 +50,7 @@
                     :custom-label="purchaseOrderLabel"
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                  </multiselect>
+                  </VueMultiselect>
                 </BFormGroup>
               </b-col>
             </b-row>
@@ -162,7 +162,7 @@
                     v-bind:label="$trans('Product')"
                     label-for="purchaseorder-entry-material-search"
                   >
-                    <multiselect
+                    <VueMultiselect
                       id="purchaseorder-entry-material-search"
                       track-by="id"
                       :placeholder="$trans('Type to search')"
@@ -181,7 +181,7 @@
                       :custom-label="purchaseOrderMaterialLabel"
                     >
                       <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                    </multiselect>
+                    </VueMultiselect>
                     <b-form-invalid-feedback
                       :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">
                       {{ $trans('Please select a product') }}
@@ -341,7 +341,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import moment from 'moment'
 
 import purchaseorderEntryModel from '../../models/inventory/PurchaseOrderEntry.js'
@@ -362,7 +362,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {

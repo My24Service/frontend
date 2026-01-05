@@ -167,7 +167,7 @@
                 label-for="customeruser_customer_search"
                 class="inline"
               >
-                <multiselect
+                <VueMultiselect
                   id="customeruser_customer_search"
                   track-by="id"
                   :placeholder="$trans('Type to search customer')"
@@ -188,7 +188,7 @@
                   :custom-label="customerLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
+                </VueMultiselect>
               </BFormGroup>
               <BButton @click="clearCustomer" size="sm" type="button" variant="danger" :title="$trans('Clear customer')">
                   <IBiBackspace></IBiBackspace>
@@ -224,7 +224,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import { usernameExists } from '@/models/helpers'
 import customerUserModel from '../../models/company/UserCustomer.js'
@@ -241,7 +241,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {

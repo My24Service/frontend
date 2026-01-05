@@ -32,7 +32,7 @@
                     v-bind:label="$trans('Search suppliers')"
                     label-for="purchaseorder-supplier-search"
                   >
-                    <multiselect
+                    <VueMultiselect
                       id="purchaseorder-supplier-search"
                       track-by="id"
                       :placeholder="$trans('Type to search')"
@@ -53,7 +53,7 @@
                       :custom-label="supplierLabel"
                     >
                       <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                    </multiselect>
+                    </VueMultiselect>
                   </BFormGroup>
                 </b-col>
                 <b-col cols="6" role="group">
@@ -63,7 +63,7 @@
                     v-bind:label="$trans('Search reservations')"
                     label-for="purchaseorder-reservation-search"
                   >
-                    <multiselect
+                    <VueMultiselect
                       id="purchaseorder-reservation-search"
                       track-by="id"
                       :placeholder="$trans('Type to search')"
@@ -84,7 +84,7 @@
                       :custom-label="reservationLabel"
                     >
                       <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                    </multiselect>
+                    </VueMultiselect>
                   </BFormGroup>
                 </b-col>
               </b-row>
@@ -322,7 +322,7 @@
                       label-size="sm"
                       v-bind:label="$trans('Search product')"
                     >
-                      <multiselect
+                      <VueMultiselect
                         id="purchaseorder-material-name"
                         track-by="id"
                         label="name"
@@ -343,7 +343,7 @@
                         @select="selectMaterial"
                       >
                         <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                      </multiselect>
+                      </VueMultiselect>
                     </BFormGroup>
                   </b-col>
                 </b-row>
@@ -447,7 +447,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
 import purchaseOrderMaterialModel from '@/models/inventory/PurchaseOrderMaterial.js'
@@ -472,7 +472,7 @@ export default {
     }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {
