@@ -39,13 +39,16 @@
 
       <b-table
         id="building-table"
-        small
+        :small="true"
         :busy='isLoading'
         :fields="fields"
         :items="buildings"
         responsive="md"
         class="data-table"
+        :no-local-sorting="true"
         sort-icon-left
+        :sort-by="sortBy"
+        @sorted="sortingChanged"
       >
         <template #head(icons)="">
           <div class="float-right">
@@ -183,6 +186,7 @@ export default {
         {key: 'icons'}
       ],
       fields: [],
+      sortBy: [{key: 'name', order: 'asc'}],
     }
   },
   created() {
@@ -190,11 +194,10 @@ export default {
     this.buildingService.currentPage = this.$route.query.page || 1
     this.buildingService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      this.sortBy = this.$route.query.sort_field
-      if (this.$route.query.sort_dir) {
-        this.sortDesc = this.$route.query.sort_dir === 'desc'
-      }
-      this.buildingService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+      const sortBy = this.$route.query.sort_field ?? 'name'
+      const sortDir = this.$route.query.sort_dir ?? 'asc'
+      this.sortBy = [{key: sortBy, order: sortDir}]
+      this.buildingService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
     }
 
     if (this.hasBranches) {
@@ -213,6 +216,19 @@ export default {
     this.loadData()
   },
   methods: {
+    // sorting
+    async sortingChanged(ctx) {
+      this.sortBy = [{key: ctx.key, order: ctx.order}]
+      // set sorting and reset current page
+      this.buildingService.setSorting(ctx.key, ctx.order, true)
+      const query = {
+        ...this.$route.query,
+        ...this.buildingService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
+      // await this.loadData()
+    },
     // search
     async handleSearchOk(val) {
       this.$refs['search-modal'].hide()

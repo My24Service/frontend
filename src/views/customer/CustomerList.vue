@@ -184,7 +184,7 @@ export default {
     this.customerService.currentPage = this.$route.query.page || 1
     this.customerService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      const sortBy = this.$route.query.sort_field
+      const sortBy = this.$route.query.sort_field ?? 'name'
       const sortDir = this.$route.query.sort_dir ?? 'asc'
       this.sortBy = [{key: sortBy, order: sortDir}]
       this.customerService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
@@ -202,8 +202,8 @@ export default {
     },
     // sorting
     async sortingChanged(ctx) {
-      // set sorting and reset current page
       this.sortBy = [{key: ctx.key, order: ctx.order}]
+      // set sorting and reset current page
       this.customerService.setSorting(ctx.key, ctx.order, true)
       const query = {
         ...this.$route.query,

@@ -83,7 +83,7 @@
 
       <b-table
         id="equipment-table"
-        small
+        :small="true"
         :busy='isLoading'
         :fields="equipmentFields"
         :items="equipmentObjects"
@@ -91,9 +91,8 @@
         class="data-table"
         sort-icon-left
         :no-local-sorting="true"
-        @sort-changed="sortingChanged"
+        @sorted="sortingChanged"
         :sort-by="sortBy"
-        :sort-desc="sortDesc"
       >
         <template #head(icons)="">
           <div class="float-right">
@@ -275,8 +274,7 @@ export default {
       ],
       equipment_pk: null,
       state: new EquipmentStateModel({}),
-      sortBy: 'name',
-      sortDesc: false,
+      sortBy: [{key: 'name', order: 'asc'}],
     }
   },
   async created() {
@@ -284,11 +282,10 @@ export default {
     this.equipmentService.currentPage = this.$route.query.page || 1
     this.equipmentService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      this.sortBy = this.$route.query.sort_field
-      if (this.$route.query.sort_dir) {
-        this.sortDesc = this.$route.query.sort_dir === 'desc'
-      }
-      this.equipmentService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+      const sortBy = this.$route.query.sort_field ?? 'name'
+      const sortDir = this.$route.query.sort_dir ?? 'asc'
+      this.sortBy = [{key: sortBy, order: sortDir}]
+      this.equipmentService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
     }
 
     if (this.hasBranches) {
@@ -315,8 +312,9 @@ export default {
     },
     // sorting
     async sortingChanged(ctx) {
+      this.sortBy = [{key: ctx.key, order: ctx.order}]
       // set sorting and reset current page
-      this.equipmentService.setSorting(ctx.sortBy, ctx.sortDesc, true)
+      this.equipmentService.setSorting(ctx.key, ctx.order, true)
       const query = {
         ...this.$route.query,
         ...this.equipmentService.getQueryArgs()

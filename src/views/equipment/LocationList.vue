@@ -33,6 +33,9 @@
         responsive="md"
         class="data-table"
         sort-icon-left
+        :no-local-sorting="true"
+        @sorted="sortingChanged"
+        :sort-by="sortBy"
       >
         <template #head(icons)="">
           <div class="float-right">
@@ -199,6 +202,7 @@ export default {
         {key: 'icons'}
       ],
       fields: [],
+      sortBy: [{key: 'name', order: 'asc'}],
     }
   },
   created() {
@@ -206,11 +210,10 @@ export default {
     this.locationService.currentPage = this.$route.query.page || 1
     this.locationService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      this.sortBy = this.$route.query.sort_field
-      if (this.$route.query.sort_dir) {
-        this.sortDesc = this.$route.query.sort_dir === 'desc'
-      }
-      this.locationService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+      const sortBy = this.$route.query.sort_field ?? 'name'
+      const sortDir = this.$route.query.sort_dir ?? 'asc'
+      this.sortBy = [{key: sortBy, order: sortDir}]
+      this.locationService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
     }
 
     if (this.hasBranches) {
@@ -229,6 +232,19 @@ export default {
     this.loadData()
   },
   methods: {
+    // sorting
+    async sortingChanged(ctx) {
+      this.sortBy = [{key: ctx.key, order: ctx.order}]
+      // set sorting and reset current page
+      this.locationService.setSorting(ctx.key, ctx.order, true)
+      const query = {
+        ...this.$route.query,
+        ...this.locationService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
+      // await this.loadData()
+    },
     // download
     downloadList() {
       const url = this.locationService.getExportUrl()

@@ -26,7 +26,6 @@
       responsive="md"
       class="data-table"
       :sort-by="sortBy"
-      :sort-desc="sortDesc"
     >
       <template #table-busy>
         <div class="text-center text-danger my-2">
@@ -74,15 +73,13 @@ export default {
       startDate: null,
       data: [],
       fields: [],
-      sortBy: "full_name",
-      sortDesc: false,
+      sortBy: [{key: "full_name", order: 'asc'}],
       day_fields: [],
       day_field_types: []
     }
   },
   computed: {
     hoursTitle() {
-
       let result = []
       if (this.day_fields) {
         for(let i=0; i<this.day_fields.length; i++) {
@@ -100,6 +97,9 @@ export default {
     this.today = this.$route.query.date ? this.$moment(this.$route.query.date) : this.$moment().weekday(monday)
     this.startDate = this.today.format('YYYY-MM-DD')
     this.week = this.today.format('[week] W')
+    const sortBy = this.$route.query.sort_field ?? 'full_name'
+    const sortDir = this.$route.query.sort_dir ?? 'asc'
+    this.sortBy = [{key: sortBy, order: sortDir}]
   },
   methods: {
     nextWeek() {

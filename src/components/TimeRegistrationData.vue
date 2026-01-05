@@ -75,13 +75,12 @@
 
     <b-table
       id="time-registration-table"
-      small
+      :small="true"
       :fields="fields"
       :items="data"
       responsive="md"
       class="data-table"
       :sort-by="sortBy"
-      :sort-desc="sortDesc"
       v-if="!isDetail"
     >
       <template #cell(full_name)="data">
@@ -311,8 +310,7 @@ export default {
       data: [],
       fields: [],
       dataFields: [],
-      sortBy: "full_name",
-      sortDesc: false,
+      sortBy: [{key: 'full_name', order: 'asc'}],
       date_list: [],
       date_list_moment: [],
       activeDateQueryMode: 'week',
@@ -377,6 +375,9 @@ export default {
     this.$moment.locale(lang)
     this.today = this.$route.query.date ? this.$moment(this.$route.query.date) : this.$moment().weekday(monday)
     this.activeDateQueryMode = this.$route.query.mode ? this.$route.query.mode : 'week'
+    const sortBy = this.$route.query.sort_field ?? 'full_name'
+    const sortDir = this.$route.query.sort_dir ?? 'asc'
+    this.sortBy = [{key: sortBy, order: sortDir}]
   },
   methods: {
     async commitTimeCorrection() {

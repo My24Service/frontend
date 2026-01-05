@@ -31,7 +31,7 @@ class BaseModel {
   beforeEditModel
   collectionHasChanges = false
   sortField = null
-  sortDesc = false
+  sortOrder = 'asc'
 
   // TODO: finish this for managing items in invoice form
   // TODO: also implement this for orderlines/infolines/etc
@@ -207,12 +207,12 @@ class BaseModel {
     this.listArgs = []
   }
 
-  setSorting(field, sortDesc, reset=true) {
+  setSorting(field, order, reset=true) {
     if (reset) {
       this.currentPage = 1
     }
     this.sortField = field
-    this.sortDesc = sortDesc === 'desc'
+    this.sortOrder = order
   }
 
   getCsrfToken() {
@@ -281,7 +281,7 @@ class BaseModel {
 
     if (this.sortField !== null) {
       this.queryArgs['sort_field'] = this.sortField
-      this.queryArgs['sort_dir'] = this.sortDesc ? 'desc' : 'asc'
+      this.queryArgs['sort_dir'] = this.sortOrder
     }
 
     // HVG20250312:
