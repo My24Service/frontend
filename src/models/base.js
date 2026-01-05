@@ -212,7 +212,7 @@ class BaseModel {
       this.currentPage = 1
     }
     this.sortField = field
-    this.sortDesc = sortDesc
+    this.sortDesc = sortDesc === 'desc'
   }
 
   getCsrfToken() {

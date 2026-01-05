@@ -46,7 +46,7 @@
 
       <BTable
         id="customer-table"
-        small
+        :small="true"
         primary-key="id"
         :busy='isLoading'
         :fields="customerFields"
@@ -59,7 +59,7 @@
         sort-icon-left
         :tbody-tr-class="rowClass"
       >
-        <template #cell(id)="data">
+        <template #cell(name)="data">
           <div v-if="data.item.branch_view" class="listing-item">
             <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
               {{ data.item.branch_view.name }}, {{ data.item.branch_view.city }}, {{ data.item.branch_view.country_code }}
@@ -132,6 +132,7 @@ import Pagination from "../../components/Pagination.vue"
 import my24 from "../../services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -142,6 +143,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   name: 'CustomerList',
   components: {
     IconLinkDelete,
@@ -164,7 +166,7 @@ export default {
       isLoading: false,
       customers: [],
       customerFields: [
-        {key: 'id', label: $trans('Company'), sortable: true },
+        {key: 'name', label: $trans('Company'), sortable: true },
         {key: 'contract', label: ''},
         {key: 'city', label: ''},
         {key: 'num_orders', label: $trans('Orders'), sortable: true, },
@@ -200,8 +202,8 @@ export default {
     },
     // sorting
     async sortingChanged(ctx) {
-      console.log({ctx})
       // set sorting and reset current page
+      this.sortBy = [{key: ctx.key, order: ctx.order}]
       this.customerService.setSorting(ctx.key, ctx.order, true)
       const query = {
         ...this.$route.query,
