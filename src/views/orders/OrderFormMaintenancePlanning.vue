@@ -412,10 +412,9 @@
                   v-model="order.start_date"
                   :placeholder="$trans('Select date')"
                   value="order.start_date"
-                  locale="nl"
-                  :vertical="true"
+                  :locale="nl"
                   :state="isSubmitClicked ? !v$.order.start_date.$error : null"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  :formats="{ input: 'dd/MM/yyyy' }"
                 ></VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.start_date.$error : null">
@@ -463,13 +462,12 @@
               >
                 <VueDatePicker
                   id="end_date"
-
                   v-model="order.end_date"
                   class="mb-2"
                   :placeholder="$trans('Select date')"
-                  locale="nl"
+                  :locale="nl"
                   :state="isSubmitClicked ? !v$.order.end_date.$error : null"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                  :formats="{ input: 'dd/MM/yyyy' }"
                 ></VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.end_date.$error : null">
@@ -940,6 +938,7 @@ import {AssignService} from '@/models/mobile/Assign'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import { nl } from "date-fns/locale"
 
 import {BranchService} from "@/models/company/Branch";
 import {EquipmentService} from "@/models/equipment/equipment";
@@ -1102,7 +1101,8 @@ export default {
       infolineService: new InfolineService(),
       assignService: new AssignService(),
       getSalesUserDebounced: null,
-      searchingSalesUsers: false
+      searchingSalesUsers: false,
+      nl
     }
   },
   validations() {
@@ -1911,8 +1911,8 @@ export default {
 
       try {
         this.order = await this.orderService.detail(this.pk)
-        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
+        // this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        // this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.order.order_type = this.order.order_type.trim()
 
         for (const email of this.order.order_email_extra) {
