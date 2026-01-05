@@ -1,4 +1,4 @@
-import {createRouter, createWebHashHistory, createWebHistory} from 'vue-router'
+import {createRouter, createWebHashHistory} from 'vue-router'
 import {useMainStore} from "@/stores/main";
 import TheIndexLayout from '../components/TheIndexLayout.vue'
 
@@ -45,15 +45,18 @@ const routes = [
 ]
 
 export const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 })
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const mainStore = useMainStore()
+
+  await mainStore.checkInitialData()
+
   const userIsLoggedIn = authStore.isLoggedIn;
-  const isAllowedMemberPath = userIsLoggedIn ? await mainStore.hasAccessToRoute(to.path) : false;
+  const isAllowedMemberPath = userIsLoggedIn ? mainStore.hasAccessToRoute(to.path) : false;
   const path = to.path;
   const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
   const authLevelNeeded = to.meta.hasOwnProperty('authLevelNeeded') ? to.meta.authLevelNeeded : AUTH_LEVELS.PLANNING

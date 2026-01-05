@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 import my24 from "@/services/my24";
 import {useAuthStore} from "@/stores/auth";
 import {isEmpty} from "@/utils";
@@ -20,7 +20,8 @@ export const useMainStore = defineStore('main', {
     token: undefined,
     unacceptedCount: null,
     streamInfo: null,
-    maintenanceEquipment: []
+    maintenanceEquipment: [],
+    initialDataFetched: false
   }),
   getters: {
     getStreamInfo: (state) => {
@@ -146,9 +147,15 @@ export const useMainStore = defineStore('main', {
     },
     getAssignOrders() {
       return this.assignOrders
+    },
+    isInitialDataFetched: (state) => {
+      return state.initialDataFetched
     }
   },
   actions: {
+    setInitialDataFetched() {
+      this.initialDataFetched = true
+    },
     setMemberInfo(memberInfo) {
       this.memberInfo = memberInfo
     },
@@ -179,6 +186,11 @@ export const useMainStore = defineStore('main', {
     setStatuscodes(statuscodes) {
       this.statuscodes = statuscodes
     },
+    async checkInitialData() {
+      if (!this.isInitialDataFetched) {
+        await this.getInitialData()
+      }
+    },
     async getInitialData() {
       return new Promise(async (resolve, reject) => {
         try {
@@ -198,6 +210,7 @@ export const useMainStore = defineStore('main', {
           this.setMemberInfo(initialData.memberInfo)
           this.setMemberContract(memberContract)
           this.setStatuscodes(initialData.statuscodes)
+          this.setInitialDataFetched()
           resolve()
         } catch(e) {
           reject(e)
@@ -212,17 +225,13 @@ export const useMainStore = defineStore('main', {
       const lenParts = parts.length
       const [mod, part] = parts
 
-      const result = my24.hasAccessToModule({
+      return my24.hasAccessToModule({
         contract: mainStore.memberContract,
         module: mod,
         part,
         lenParts,
         isStaff: authStore.isStaff,
         isSuperuser: authStore.isSuperuser,
-      })
-
-      return new Promise((resolve) => {
-        resolve(result)
       })
     },
     status2color(status) {

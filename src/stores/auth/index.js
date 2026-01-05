@@ -2,14 +2,22 @@ import { defineStore } from 'pinia'
 import client from '@/services/api'
 import {useMainStore} from "@/stores/main";
 
-const token = localStorage.getItem('accessToken')
-const initialState = token
-  ? { token, userInfo: null, }
-  : { token: null, userInfo: null, };
+
+const initialState = { token: null, userInfo: null, };
+
+function getToken() {
+  const token = localStorage.getItem('accessToken')
+  if (token) {
+    return JSON.parse(token)
+  }
+
+  return null
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    ...initialState
+    ...initialState,
+    token: getToken()
   }),
   getters: {
     isAdmin: (state) => {

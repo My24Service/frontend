@@ -42,11 +42,11 @@ const memberInfo = computed(() => mainStore.memberInfo);
 
 onMounted(async () => {
   try {
-    await mainStore.getInitialData()
+    await mainStore.checkInitialData()
     setTimeout(() => {
       if (authStore.isLoggedIn && authStore.isPlanning) {
         console.debug(`planning, redirecting to 'order-list'`)
-        this.$router.push({ name: 'order-list' });
+        this.$router.replace({ name: 'order-list' });
       }
     }, 100);
   } catch(error) {

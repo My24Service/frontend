@@ -44,32 +44,21 @@
 
     <div class="app-detail panel overflow-auto">
 
-      <b-table
+      <BTable
         id="customer-table"
         small
+        primary-key="id"
         :busy='isLoading'
         :fields="customerFields"
         :items="customers"
         responsive="md"
         class="data-table"
         :no-local-sorting="true"
-        @sort-changed="sortingChanged"
+        @sorted="sortingChanged"
         :sort-by="sortBy"
-        :sort-desc="sortDesc"
         sort-icon-left
         :tbody-tr-class="rowClass"
       >
-        <template #head(icons)="">
-          <div class="float-right">
-
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
         <template #cell(id)="data">
           <div v-if="data.item.branch_view" class="listing-item">
             <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
@@ -122,7 +111,7 @@
             />
           </div>
         </template>
-      </b-table>
+      </BTable>
     </div>
     <Pagination
       v-if="!isLoading && service"
@@ -183,8 +172,7 @@ export default {
         {key: 'contact', label: $trans('Contact')},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
-      sortBy: 'name',
-      sortDesc: false,
+      sortBy: [{key: 'name', order: 'asc'}],
     }
   },
   created() {
@@ -194,11 +182,10 @@ export default {
     this.customerService.currentPage = this.$route.query.page || 1
     this.customerService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      this.sortBy = this.$route.query.sort_field
-      if (this.$route.query.sort_dir) {
-        this.sortDesc = this.$route.query.sort_dir === 'desc'
-      }
-      this.customerService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+      const sortBy = this.$route.query.sort_field
+      const sortDir = this.$route.query.sort_dir ?? 'asc'
+      this.sortBy = [{key: sortBy, order: sortDir}]
+      this.customerService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
     }
 
     this.loadData()
@@ -213,8 +200,9 @@ export default {
     },
     // sorting
     async sortingChanged(ctx) {
+      console.log({ctx})
       // set sorting and reset current page
-      this.customerService.setSorting(ctx.sortBy, ctx.sortDesc, true)
+      this.customerService.setSorting(ctx.key, ctx.order, true)
       const query = {
         ...this.$route.query,
         ...this.customerService.getQueryArgs()

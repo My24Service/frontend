@@ -93,6 +93,7 @@
 
     <nav class="app-sidebar">
       <NavBrand
+        v-if="memberInfo"
         :member-info="memberInfo"
       />
       <NavItems />
