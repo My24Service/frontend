@@ -35,18 +35,20 @@ import Version from "./Version.vue"
 import {computed, onMounted} from "vue";
 import {useAuthStore} from "@/stores/auth";
 import {useMainStore} from "@/stores/main";
+import {useRouter} from "vue-router";
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()
 const memberInfo = computed(() => mainStore.memberInfo);
+const router = useRouter()
 
 onMounted(async () => {
   try {
     await mainStore.checkInitialData()
     setTimeout(() => {
-      if (authStore.isLoggedIn && authStore.isPlanning) {
+      if (authStore.isLoggedIn) {
         console.debug(`planning, redirecting to 'order-list'`)
-        this.$router.replace({ name: 'order-list' });
+        router.replace({ name: 'order-list' });
       }
     }, 100);
   } catch(error) {

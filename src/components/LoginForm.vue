@@ -91,7 +91,6 @@ async function doLogin(e) {
   try {
     await authStore.login(form.username, form.password)
     await mainStore.getInitialData()
-    await authStore.fetchUserInfo()
 
     loader.hide()
 
@@ -101,10 +100,9 @@ async function doLogin(e) {
       const nextPart = document.location.hash.split('?')[1]
       const nextPath = decodeURIComponent(nextPart.split('=')[1])
       await router.push({path: nextPath})
+    } else{
+      await router.push({ name: 'order-list' });
     }
-
-    await router.push({ name: 'order-list' });
-
   } catch (error) {
     console.log({error})
     await authStore.loginFailure();

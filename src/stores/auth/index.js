@@ -21,6 +21,9 @@ export const useAuthStore = defineStore('auth', {
   }),
   getters: {
     isAdmin: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.user.is_superuser || state.userInfo.user.is_staff
     },
     getUserName: (state) => {
@@ -28,7 +31,7 @@ export const useAuthStore = defineStore('auth', {
         return 'superuser'
       }
 
-      if (state.userInfo.user.first_name) {
+      if (state.userInfo.user && state.userInfo.user.first_name) {
         return state.userInfo.user.first_name
       }
 
@@ -41,38 +44,65 @@ export const useAuthStore = defineStore('auth', {
       return state.token !== null && state.userInfo !== null
     },
     isStaff: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'staff' && state.userInfo.user.is_staff
       // return state.userInfo.hasOwnProperty('is_staff') && state.userInfo.is_staff
     },
     isSuperuser: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'superuser' && state.userInfo.user.is_superuser
       // return state.userInfo.hasOwnProperty('is_superuser') && state.userInfo.is_superuser
     },
     isPlanning: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'planning_user' && state.userInfo.user.planning_user
       // return state.userInfo.hasOwnProperty('planning_user') && state.userInfo.planning_user
     },
     isCustomer: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'customer_user' && state.userInfo.user.customer_user
       // return state.userInfo.hasOwnProperty('customer_user') && state.userInfo.customer_user
     },
     isEngineer: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'engineer' && state.userInfo.user.engineer
       // return state.userInfo.hasOwnProperty('engineer') && state.userInfo.engineer
     },
     isSales: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'sales_user' && state.userInfo.user.sales_user
       // return state.userInfo.hasOwnProperty('sales_user') && state.userInfo.sales_user
     },
     isStudent: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'student_user' && state.userInfo.user.student_user
       // return state.userInfo.hasOwnProperty('student_user') && state.userInfo.student_user
     },
     isEmployee: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'employee_user' && state.userInfo.user.employee_user
       // return state.userInfo.hasOwnProperty() && state.userInfo.employee_user
     },
     isBranchEmployee: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
       return state.userInfo.submodel === 'employee_user' && state.userInfo.user.employee_user && state.userInfo.user.employee_user.branch
       // return state.userInfo.user.hasOwnProperty('employee_user') && state.userInfo.employee_user && state.userInfo.employee_user.branch
     },
@@ -91,9 +121,8 @@ export const useAuthStore = defineStore('auth', {
       this.userInfo = userInfo
     },
     authenticate(accessToken) {
-      console.log('authenticate accesstoken', accessToken)
       localStorage.setItem('accessToken', JSON.stringify(accessToken))
-      this.token = accessToken
+      this.setToken(accessToken)
     },
     logout() {
       this.token = null
@@ -116,9 +145,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       const loginResult = await client.post(url, postData)
-      console.debug('login result', loginResult.data)
       this.authenticate(loginResult.data.token);
-      this.setToken(loginResult.data.token)
     },
     async refreshToken() {
       const token = localStorage.getItem('accessToken')

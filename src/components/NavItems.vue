@@ -1,5 +1,5 @@
 <template>
-  <div class="nav-items" ref="nav-items">
+  <div class="nav-items" ref="nav-items" v-if="userInfo.user">
     <!-- Orders -->
     <b-nav-item
       :active="isActive('orders')"
@@ -210,13 +210,18 @@ import SubNav from '@/components/SubNav';
 import {MemberService} from "@/models/member/Member";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
+import {computed} from "vue";
+import {useAuthStore} from "@/stores/auth";
 
 export default {
   mixins: [componentMixin],
   setup() {
     const mainStore = useMainStore()
+    const authStore = useAuthStore()
+    const userInfo = computed(() => authStore.userInfo);
     return {
-      mainStore
+      mainStore,
+      userInfo
     }
   },
   data() {

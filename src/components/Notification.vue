@@ -23,6 +23,7 @@ const intervalId = ref(null)
 const authStore = useAuthStore()
 const mainStore = useMainStore()
 const {create} = useToast()
+console.log('memberNewDataSocket CREATED')
 
 function handleMessageUser(data) {
   if (data.level === 'error') {
@@ -68,6 +69,7 @@ function onNewData(data) {
 }
 
 onMounted(async () => {
+  console.log("MOUNTED")
   await userSocket.init()
   userSocket.setOnmessageHandler(handleMessageUser)
   userSocket.getSocket()
@@ -85,7 +87,8 @@ onMounted(async () => {
 })
 
 onUnmounted(async () => {
-  await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+  console.log("UNMOUNT")
+  // await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
   memberNewDataSocket.removeOnmessageHandler()
   memberNewDataSocket.removeSocket()
 

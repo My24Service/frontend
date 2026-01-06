@@ -101,10 +101,10 @@
       />
       <NavItems />
       <hr />
-      <b-nav-item-dropdown dropup v-bind:text="username" right>
+      <b-nav-item-dropdown dropup :text="getUsername" right v-if="userInfo.user">
         <template slot="button-content">
           <IBiPersonCircle></IBiPersonCircle>
-          <span>{{ username }}</span>
+          <span>{{ getUsername }}</span>
         </template>
         <li style="text-align: center;">
           {{ memberInfo.name }}
@@ -148,12 +148,14 @@ export default {
     const mainStore = useMainStore()
     const authStore = useAuthStore()
     const memberInfo = computed(() => mainStore.memberInfo);
+    const userInfo = computed(() => authStore.userInfo);
 
     return {
       v$: useVuelidate(),
       mainStore,
       authStore,
-      memberInfo
+      memberInfo,
+      userInfo
     }
   },
   mixins: [componentMixin],
@@ -183,6 +185,9 @@ export default {
   computed: {
     isSubmitClicked() {
       return this.submitClicked
+    },
+    getUsername() {
+      return this.authStore.getUserName
     }
   },
   data() {
@@ -274,6 +279,7 @@ export default {
     },
   },
   async created() {
+    await this.mainStore.checkInitialData()
     await this.memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
     this.memberNewDataSocket.setOnmessageHandler(this.onContractChange)
     this.memberNewDataSocket.getSocket()
