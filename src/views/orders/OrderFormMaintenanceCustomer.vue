@@ -14,14 +14,13 @@
             >
               <VueDatePicker
                 id="start_date"
-                size="sm"
-                class="p-sm-0"
                 v-model="order.start_date"
-                v-bind:placeholder="$trans('Choose a date')"
-                value="order.start_date"
-                locale="nl"
+                :placeholder="$trans('Select date')"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null">
@@ -36,13 +35,30 @@
               :label="$trans('Start time')"
               label-for="start_time"
             >
-              <VueDatePicker
-                v-model="order.start_time"
+              <BFormInput
                 id="start_time"
-                class="mb-2"
+                v-model="order.start_time"
+                type="text"
+                placeholder="HH:mm"
+                class="time-input"
+              ></BFormInput>
+              <VueDatePicker
+                v-model="start_time_date"
+                id="start_time"
                 :placeholder="$trans('Set time')"
                 time-picker
-              />
+                arrow-navigation
+              >
+                <template #trigger>
+                  <p class="clock-icon">
+                    <IBiClock></IBiClock>
+                  </p>
+                </template>
+              </VueDatePicker>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.order.start_time.$error : null">
+                {{ $trans('Please enter a valid start time HH:mm') }}
+              </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
@@ -54,13 +70,13 @@
             >
               <VueDatePicker
                 id="end_date"
-                size="sm"
                 v-model="order.end_date"
-                class="mb-2"
-                :placeholder="$trans('Choose a date')"
-                locale="nl"
+                :placeholder="$trans('Select date')"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null">
@@ -75,13 +91,32 @@
               label-class="p-sm-0"
               label-for="end_time"
             >
+              <BFormInput
+                id="end_time"
+                v-model="order.end_time"
+                type="text"
+                class="time-input"
+                placeholder="HH:mm"
+              ></BFormInput>
               <VueDatePicker
-                v-model="order.start_time"
-                id="start_time"
+                v-model="end_time_date"
+                id="end_time"
                 class="mb-2"
                 :placeholder="$trans('Set time')"
                 time-picker
-              />
+                arrow-navigation
+                :formats="{ input: 'HH:mm' }"
+              >
+                <template #trigger>
+                  <p class="clock-icon">
+                    <IBiClock></IBiClock>
+                  </p>
+                </template>
+              </VueDatePicker>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.order.end_time.$error : null">
+                {{ $trans('Please enter a valid end time HH:mm') }}
+              </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
@@ -414,6 +449,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
+import { nl } from "date-fns/locale"
 
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer.js'
@@ -493,6 +529,9 @@ export default {
       orderService: new OrderService(),
       orderlineService: new OrderlineService(),
       customerService: new CustomerService(),
+      nl,
+      start_time_date: null,
+      end_time_date: null,
     }
   },
   validations() {

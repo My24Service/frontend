@@ -48,10 +48,7 @@ export default {
         console.debug(`refreshing token (${debugStr})`)
 
         try {
-          const result = await this.accountService.refreshToken(token)
-          console.debug('token refresh result', result)
-          this.authStore.authenticate({ accessToken: result.token });
-          console.debug('token refreshed')
+          await this.authStore.refreshToken(token)
         } catch (e) {
           console.error('error refreshing token', e)
         }

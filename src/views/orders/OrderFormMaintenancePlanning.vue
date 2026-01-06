@@ -405,14 +405,16 @@
               <BFormGroup
                 :label="$trans('Start date')"
                 label-for="start_date"
-                cols="2"
+                label-cols="3"
+                :state="isSubmitClicked ? !v$.order.start_date.$error : null"
               >
                 <VueDatePicker
                   id="start_date"
                   v-model="order.start_date"
                   :placeholder="$trans('Select date')"
-                  value="order.start_date"
                   :locale="nl"
+                  auto-apply
+                  arrow-navigation
                   :state="isSubmitClicked ? !v$.order.start_date.$error : null"
                   :formats="{ input: 'dd/MM/yyyy' }"
                 ></VueDatePicker>
@@ -427,7 +429,7 @@
               <BFormGroup
                 :label="$trans('Start time')"
                 label-for="start_time"
-                cols="2"
+                label-cols="3"
               >
                 <BFormInput
                   id="start_time"
@@ -436,14 +438,19 @@
                   placeholder="HH:mm"
                   class="time-input"
                 ></BFormInput>
-                <span style="float:left !important;"></span>
                 <VueDatePicker
-                  v-model="order.start_time"
+                  v-model="start_time_date"
                   id="start_time"
-                  class="mb-2"
                   :placeholder="$trans('Set time')"
                   time-picker
-                />
+                  arrow-navigation
+                >
+                  <template #trigger>
+                    <p class="clock-icon">
+                      <IBiClock></IBiClock>
+                    </p>
+                  </template>
+                </VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.start_time.$error : null">
                   {{ $trans('Please enter a valid start time HH:mm') }}
@@ -458,14 +465,15 @@
                 label-class=""
                 v-bind:label="$trans('End date')"
                 label-for="end_date"
-                cols="2"
+                label-cols="3"
               >
                 <VueDatePicker
                   id="end_date"
                   v-model="order.end_date"
-                  class="mb-2"
                   :placeholder="$trans('Select date')"
                   :locale="nl"
+                  auto-apply
+                  arrow-navigation
                   :state="isSubmitClicked ? !v$.order.end_date.$error : null"
                   :formats="{ input: 'dd/MM/yyyy' }"
                 ></VueDatePicker>
@@ -481,7 +489,7 @@
                 :label="$trans('End time')"
                 label-class=""
                 label-for="end_time"
-                cols="2"
+                label-cols="3"
               >
                 <BFormInput
                   id="end_time"
@@ -490,14 +498,21 @@
                   class="time-input"
                   placeholder="HH:mm"
                 ></BFormInput>
-                <span style="float:left !important;"></span>
                 <VueDatePicker
-                  v-model="order.end_time"
+                  v-model="end_time_date"
                   id="end_time"
                   class="mb-2"
                   :placeholder="$trans('Set time')"
                   time-picker
-                />
+                  arrow-navigation
+                  :formats="{ input: 'HH:mm' }"
+                >
+                  <template #trigger>
+                    <p class="clock-icon">
+                      <IBiClock></IBiClock>
+                    </p>
+                  </template>
+                </VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.end_time.$error : null">
                   {{ $trans('Please enter a valid end time HH:mm') }}
@@ -1002,6 +1017,12 @@ export default {
     },
   },
   watch: {
+    start_time_date(val) {
+      this.order.start_time = this.formatTime(val.hours, val.minutes)
+    },
+    end_time_date(val) {
+      this.order.end_time = this.formatTime(val.hours, val.minutes)
+    },
     startDate(val) {
       if (this.endDate && new Date(this.endDate) < new Date(val)) {
         this.order.end_date = val
@@ -1102,7 +1123,9 @@ export default {
       assignService: new AssignService(),
       getSalesUserDebounced: null,
       searchingSalesUsers: false,
-      nl
+      nl,
+      start_time_date: null,
+      end_time_date: null,
     }
   },
   validations() {
@@ -1280,6 +1303,11 @@ export default {
     }
   },
   methods: {
+    formatTime(hours, minutes) {
+      const hoursOut = hours < 10 ? `0${hours}` : `${hours}`
+      const minutesOut = minutes < 10 ? `0${minutes}` : `${minutes}`
+      return `${hoursOut}:${minutesOut}`
+    },
     // Search engineers
     async getEngineers(query) {
       this.isLookupLoading.engineers = true
@@ -1911,8 +1939,8 @@ export default {
 
       try {
         this.order = await this.orderService.detail(this.pk)
-        // this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
-        // this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
+        this.order.start_date = this.$moment(this.order.start_date, 'DD/MM/YYYY').toDate()
+        this.order.end_date = this.$moment(this.order.end_date, 'DD/MM/YYYY').toDate()
         this.order.order_type = this.order.order_type.trim()
 
         for (const email of this.order.order_email_extra) {
@@ -1943,5 +1971,8 @@ export default {
 .time-input {
   width: 100px !important;
   float:left !important;
+}
+.clock-icon {
+  margin: .5em auto auto;
 }
 </style>
