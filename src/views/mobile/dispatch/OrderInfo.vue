@@ -31,7 +31,7 @@ export default {
   name: "OrderInfo",
   props: {
     gridSlot: {
-      type: String
+      type: [String, Number]
     },
     order: {
       type: [Object]

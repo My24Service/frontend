@@ -444,6 +444,7 @@
                   :placeholder="$trans('Set time')"
                   time-picker
                   arrow-navigation
+                  :formats="{ input: 'HH:mm' }"
                 >
                   <template #trigger>
                     <p class="clock-icon">

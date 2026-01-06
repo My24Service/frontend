@@ -8,19 +8,24 @@
       class="time-input"
       @input="update"
     ></BFormInput>
-    <span style="float:left !important;"></span>
-    <b-form-timepicker
-      button-only
+    <VueDatePicker
       v-model="time"
-      right
-      locale="en"
       :placeholder="$trans('Set time')"
-      :hour12=false
-      @input="update"
-    ></b-form-timepicker>
+      time-picker
+      arrow-navigation
+      :formats="{ input: 'HH:mm' }"
+    >
+      <template #trigger>
+        <p class="clock-icon">
+          <IBiClock></IBiClock>
+        </p>
+      </template>
+    </VueDatePicker>
   </div>
 </template>
 <script>
+import componentMixin from "@/mixins/common";
+
 export default {
   name: "TimeInput",
   emits: ['timeChanged'],
@@ -29,6 +34,7 @@ export default {
       type: String
     }
   },
+  mixins: [componentMixin],
   data() {
     return {
       time: null
@@ -52,6 +58,7 @@ export default {
   },
   created() {
     this.time = this.cleanTime(this.timeIn)
+    console.log(this.time, this.timeIn)
   }
 }
 </script>

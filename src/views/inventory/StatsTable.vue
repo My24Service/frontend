@@ -86,6 +86,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
 import my24 from "../../services/my24";
+import componentMixin from "@/mixins/common";
 
 let d = new Date();
 
@@ -96,21 +97,22 @@ export default {
     ButtonLinkDownload,
     SearchModal,
   },
+  mixins: [componentMixin],
   data() {
     return {
       model: materialModel,
       inventoryHeaders: null,
       isLoading: false,
       tableFields: [
-        {thAttr: {width: '20%'}, key: 'supplier.name', label: $trans('Supplier'), sortable: true},
-        {thAttr: {width: '20%'}, key: 'name', label: $trans('Product'), sortable: true},
-        // {thAttr: {width: '10%'}, key: 'num_entries', label: $trans('Total purchase'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'num_sales', label: $trans('Total sales'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'turnover', label: $trans('Turnover'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'profit', label: $trans('Profit'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'margin_product', label: $trans('Margin product'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'current_stock', label: $trans('Stock'), sortable: true},
-        {thAttr: {width: '10%'}, key: 'sum_inventory', label: $trans('Locations'), sortable: false},
+        {thAttr: {width: '20%'}, key: 'supplier.name', label: this.$trans('Supplier'), sortable: true},
+        {thAttr: {width: '20%'}, key: 'name', label: this.$trans('Product'), sortable: true},
+        // {thAttr: {width: '10%'}, key: 'num_entries', label: this.$trans('Total purchase'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'num_sales', label: this.$trans('Total sales'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'turnover', label: this.$trans('Turnover'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'profit', label: this.$trans('Profit'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'margin_product', label: this.$trans('Margin product'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'current_stock', label: this.$trans('Stock'), sortable: true},
+        {thAttr: {width: '10%'}, key: 'sum_inventory', label: this.$trans('Locations'), sortable: false},
         {key: 'icons'},
       ],
       tableData: [],

@@ -92,9 +92,11 @@
             <VueDatePicker
               v-model="startDate"
               size="sm"
-              placeholder="Start date"
-              locale="nl"
-              :date-format-options="{ day: '2-digit', month: '2-digit', year: 'numeric' }"
+              :placeholder="$trans('Start date')"
+              :locale="nl"
+              auto-apply
+              arrow-navigation
+              :formats="{ input: 'dd/MM/yyyy' }"
             ></VueDatePicker>
             <BButton @click="function() { loadToday() }" variant="primary" size="sm" style="color: white; white-space: nowrap;">
               <IBiCalendar2DateFill></IBiCalendar2DateFill>&nbsp;
@@ -159,12 +161,11 @@
                     size="sm"
                     class="p-sm-0"
                     v-model="assignedOrder.alt_start_date"
-                    v-bind:placeholder="$trans('Choose a date')"
-                    locale="nl"
-                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                    :min="minDate"
-                    :max="maxDate"
-                    value-as-date
+                    :placeholder="$trans('Choose a date')"
+                    :locale="nl"
+                    auto-apply
+                    arrow-navigation
+                    :formats="{ input: 'dd/MM/yyyy' }"
                   ></VueDatePicker>
                 </BFormGroup>
               </b-col>
@@ -192,12 +193,11 @@
                     size="sm"
                     class="p-sm-0"
                     v-model="assignedOrder.alt_end_date"
-                    v-bind:placeholder="$trans('Choose a date')"
-                    locale="nl"
-                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                    :min="minDate"
-                    :max="maxDate"
-                    value-as-date
+                    :placeholder="$trans('Choose a date')"
+                    :locale="nl"
+                    auto-apply
+                    arrow-navigation
+                    :formats="{ input: 'dd/MM/yyyy' }"
                   ></VueDatePicker>
                 </BFormGroup>
               </b-col>
@@ -231,7 +231,7 @@
         id="dispatch-split-order-modal"
         :title="$trans('Split order')"
         :hide-footer="true"
-        v-if="selectedAssignedOrder&& selectedOrder"
+        v-if="selectedAssignedOrder && selectedOrder"
       >
         <form ref="split-order-form">
           <p>
@@ -281,11 +281,11 @@
                     class="p-sm-0"
                     v-model="assignedOrder.alt_start_date"
                     :placeholder="$trans('Choose a date')"
-                    locale="nl"
-                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                    :min="minDate"
-                    :max="maxDate"
-                    value-as-date
+                    :locale="nl"
+                    auto-apply
+                    arrow-navigation
+                    :state="isSubmitClicked ? !v$.assignedOrder.alt_start_date.$error : null"
+                    :formats="{ input: 'dd/MM/yyyy' }"
                   ></VueDatePicker>
                 </BFormGroup>
               </b-col>
@@ -313,12 +313,13 @@
                     size="sm"
                     class="p-sm-0"
                     v-model="assignedOrder.alt_end_date"
-                    v-bind:placeholder="$trans('Choose a date')"
-                    locale="nl"
-                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    :placeholder="$trans('Choose a date')"
+                    :locale="nl"
+                    auto-apply
+                    arrow-navigation
                     :min="minDate"
                     :max="maxDate"
-                    value-as-date
+                    :formats="{ input: 'dd/MM/yyyy' }"
                   ></VueDatePicker>
                 </BFormGroup>
               </b-col>
@@ -368,6 +369,7 @@
       <b-modal
         id="dispatch-order-actions-modal"
         ref="dispatch-order-actions-modal"
+        v-if="selectedAssignedOrder"
         v-bind:title="`${$trans('Order')} ${selectedAssignedOrder && selectedAssignedOrder.order.order_id || '' }`"
       >
         <template #default="">
@@ -423,6 +425,7 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
+import { nl } from "date-fns/locale"
 
 import DispatchWeek from './dispatch/DispatchWeek.vue'
 import {OrderService} from '@/models/orders/Order'
@@ -441,6 +444,7 @@ import TimeInput from "@/components/TimeInput.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 const memberNewDataSocket = new MemberNewDataSocket()
 
@@ -460,6 +464,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   name: 'DispatchNew',
   components: {
     VueMultiselect,
@@ -517,6 +522,7 @@ export default {
       getEngineersDebounced: null,
       searchingEngineers: false,
       userListService: new UserListService(),
+      nl
     }
   },
   watch: {
@@ -697,6 +703,7 @@ export default {
       })
     },
     async openActionsModal(userId, order_pk, assignedorder, is_partner) {
+      console.log('hai?')
       this.selectedAssignedOrder = assignedorder
       this.selectedOrderUserId = userId
       this.selectedOrderIsPartner = is_partner
@@ -819,8 +826,8 @@ export default {
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
-    this.startDate = this.$moment().weekday(monday)
-    this.startWeek = this.startDate.format('w')
+    this.startDate = this.$moment().weekday(monday).toDate()
+    this.startWeek = this.$moment(this.startDate).format('w')
 
     this.assignMode = this.assignModeProp
 
