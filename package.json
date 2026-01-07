@@ -12,6 +12,9 @@
     "ci:build": "export NODE_OPTIONS=--openssl-legacy-provider; vite build"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/vue3": "^6.1.20",
     "@ivanv/vue-collapse-transition": "^1.0.2",
     "@vuepic/vue-datepicker": "^12.1.0",
     "async": "3.2.2",
