@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite'
-import visualizer from 'rollup-plugin-visualizer'
 import {
   themePreprocessorPlugin,
   themePreprocessorHmrPlugin
@@ -42,7 +41,6 @@ export default defineConfig({
       compiler: 'vue3',
       autoInstall: true,
     }),
-    visualizer(),
     themePreprocessorPlugin({
       scss: {
         // close arbitraryMode
