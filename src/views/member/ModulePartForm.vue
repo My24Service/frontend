@@ -70,11 +70,20 @@ import { required } from '@vuelidate/validators'
 
 import modulePartModel from '@/models/member/ModulePart.js'
 import moduleModel from '@/models/member/Module.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
+  mixins: [componentMixin],
   props: {
     pk: {
       type: [String, Number],
@@ -146,13 +155,13 @@ export default {
         this.isLoading = true
         try {
           await modulePartModel.insert(this.modulePart)
-          infoToast(this.create, $trans('Created'), $trans('Module part has been created'))
+          infoToast(this.create, this.$trans('Created'), this.$trans('Module part has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating module part', error)
-          errorToast(this.create, $trans('Error creating module part'))
+          errorToast(this.create, this.$trans('Error creating module part'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -164,13 +173,13 @@ export default {
         this.isLoading = true
 
         await modulePartModel.update(this.pk, this.modulePart)
-        infoToast(this.create, $trans('Updated'), $trans('Module part has been updated'))
+        infoToast(this.create, this.$trans('Updated'), this.$trans('Module part has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating module part', error)
-        errorToast(this.create, $trans('Error updating module part'))
+        errorToast(this.create, this.$trans('Error updating module part'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -181,7 +190,7 @@ export default {
         this.modulePart = await modulePartModel.detail(this.pk)
         this.isLoading = false
       } catch {
-        errorToast(this.create, $trans('Error fetching module part'))
+        errorToast(this.create, this.$trans('Error fetching module part'))
         this.isLoading = false
       }
     },

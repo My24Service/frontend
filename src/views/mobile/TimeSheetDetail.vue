@@ -29,16 +29,22 @@ import moment from 'moment/min/moment-with-locales'
 import timeSheetModel from '../../models/mobile/TimeSheet.js'
 import UserHoursDataDetail from "../../components/UserHoursDataDetail";
 import {useMainStore} from "@/stores/main";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
   setup() {
     const mainStore = useMainStore()
+    const {create} = useToast()
 
     // expose to template and other options API hooks
     return {
-      mainStore
+      mainStore,
+      create
     }
   },
+  mixins: [componentMixin],
   name: "TimeSheetDetail",
   components: {
     UserHoursDataDetail
@@ -51,9 +57,9 @@ export default {
       isLoading: false,
       materials: [],
       materialFields: [
-        {label: $trans('Material'), key: 'material_name', sortable: true},
-        {label: $trans('Identifier'), key: 'material_identifier', sortable: true},
-        {label: $trans('Amount'), key: 'amount', sortable: true},
+        {label: this.$trans('Material'), key: 'material_name', sortable: true},
+        {label: this.$trans('Identifier'), key: 'material_identifier', sortable: true},
+        {label: this.$trans('Amount'), key: 'amount', sortable: true},
       ],
     }
   },
@@ -93,7 +99,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching timesheet details', error)
-        errorToast(this.create, $trans('Error fetching timesheet details'))
+        errorToast(this.create, this.$trans('Error fetching timesheet details'))
         this.isLoading = false
       }
     }

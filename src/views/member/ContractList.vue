@@ -81,17 +81,27 @@ import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   components: {
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -103,10 +113,10 @@ export default {
       isLoading: false,
       contracts: [],
       fields: [
-        {key: 'name', label: $trans('Name'), thAttr: {width: '20%'}, sortable: true},
-        {key: 'modules_text', label: $trans('Modules'), thAttr: {width: '50%'}, sortable: true},
-        {key: 'created', label: $trans('Created'), thAttr: {width: '10%'}, sortable: true},
-        {key: 'modified', label: $trans('Modified'), thAttr: {width: '10%'}, sortable: true},
+        {key: 'name', label: this.$trans('Name'), thAttr: {width: '20%'}, sortable: true},
+        {key: 'modules_text', label: this.$trans('Modules'), thAttr: {width: '50%'}, sortable: true},
+        {key: 'created', label: this.$trans('Created'), thAttr: {width: '10%'}, sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), thAttr: {width: '10%'}, sortable: true},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
     }
@@ -133,11 +143,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.contractPk)
-        infoToast(this.create, $trans('Deleted'), $trans('Contract has been deleted'))
+        infoToast(this.create, this.$trans('Deleted'), this.$trans('Contract has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting contract', error)
-        errorToast(this.create, $trans('Error deleting contract'))
+        errorToast(this.create, this.$trans('Error deleting contract'))
       }
     },
     // rest
@@ -150,7 +160,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching contracts', error)
-        errorToast(this.create, $trans('Error loading contracts'))
+        errorToast(this.create, this.$trans('Error loading contracts'))
         this.isLoading = false
       }
     }

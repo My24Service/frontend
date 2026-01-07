@@ -88,8 +88,20 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   components: {
     IconLinkEdit,
     IconLinkDelete,
@@ -107,11 +119,11 @@ export default {
       isLoading: false,
       moduleParts: [],
       fields: [
-        {key: 'name', label: $trans('Name'), thAttr: {width: '30%'}, sortable: true},
-        {key: 'module_name', label: $trans('Module'), thAttr: {width: '20%'}, sortable: true},
-        {key: 'is_always_selected', label: $trans('Always selected?'), thAttr: {width: '20%'}, sortable: true},
-        {key: 'created', label: $trans('Created'), thAttr: {width: '10%'}, sortable: true},
-        {key: 'modified', label: $trans('Modified'), thAttr: {width: '10%'}, sortable: true},
+        {key: 'name', label: this.$trans('Name'), thAttr: {width: '30%'}, sortable: true},
+        {key: 'module_name', label: this.$trans('Module'), thAttr: {width: '20%'}, sortable: true},
+        {key: 'is_always_selected', label: this.$trans('Always selected?'), thAttr: {width: '20%'}, sortable: true},
+        {key: 'created', label: this.$trans('Created'), thAttr: {width: '10%'}, sortable: true},
+        {key: 'modified', label: this.$trans('Modified'), thAttr: {width: '10%'}, sortable: true},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
     }
@@ -138,11 +150,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.modulePartPk)
-        infoToast(this.create, $trans('Deleted'), $trans('Module part has been deleted'))
-        this.loadData()
+        infoToast(this.create, this.$trans('Deleted'), this.$trans('Module part has been deleted'))
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting module part', error)
-        errorToast(this.create, $trans('Error deleting module part'))
+        errorToast(this.create, this.$trans('Error deleting module part'))
       }
     },
     // rest
@@ -155,7 +167,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching module parts', error)
-        errorToast(this.create, $trans('Error loading module parts'))
+        errorToast(this.create, this.$trans('Error loading module parts'))
         this.isLoading = false
       }
     }

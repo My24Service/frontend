@@ -46,11 +46,20 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import moduleModel from '@/models/member/Module.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
+  mixins: [componentMixin],
   props: {
     pk: {
       type: [String, Number],
@@ -111,13 +120,13 @@ export default {
         this.isLoading = true
         try {
           await moduleModel.insert(this.module)
-          infoToast(this.create, $trans('Created'), $trans('Module has been created'))
+          infoToast(this.create, this.$trans('Created'), this.$trans('Module has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating module', error)
-          errorToast(this.create, $trans('Error creating module'))
+          errorToast(this.create, this.$trans('Error creating module'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -129,13 +138,13 @@ export default {
         this.isLoading = true
 
         await moduleModel.update(this.pk, this.module)
-        infoToast(this.create, $trans('Updated'), $trans('Module has been updated'))
+        infoToast(this.create, this.$trans('Updated'), this.$trans('Module has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating module', error)
-        errorToast(this.create, $trans('Error updating module'))
+        errorToast(this.create, this.$trans('Error updating module'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -147,7 +156,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching module', error)
-        errorToast(this.create, $trans('Error fetching module'))
+        errorToast(this.create, this.$trans('Error fetching module'))
         this.isLoading = false
       }
     },

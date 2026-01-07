@@ -79,11 +79,20 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import contractModel from '@/models/member/Contract.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
+  mixins: [componentMixin],
   props: {
     pk: {
       type: [String, Number],
@@ -202,13 +211,13 @@ export default {
         this.isLoading = true
         try {
           await contractModel.insert(this.contract)
-          infoToast(this.create, $trans('Created'), $trans('contract has been created'))
+          infoToast(this.create, this.$trans('Created'), this.$trans('contract has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating contract', error)
-          errorToast(this.create, $trans('Error creating contract'))
+          errorToast(this.create, this.$trans('Error creating contract'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -220,13 +229,13 @@ export default {
         this.isLoading = true
 
         await contractModel.update(this.pk, this.contract)
-        infoToast(this.create, $trans('Updated'), $trans('contract has been updated'))
+        infoToast(this.create, this.$trans('Updated'), this.$trans('contract has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating contract', error)
-        errorToast(this.create, $trans('Error updating contract'))
+        errorToast(this.create, this.$trans('Error updating contract'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -237,7 +246,7 @@ export default {
         this.fillSelected(this.contract.module_paths_pks)
       } catch(error) {
         console.log('error fetching contract', error)
-        errorToast(this.create, $trans('Error fetching contract'))
+        errorToast(this.create, this.$trans('Error fetching contract'))
       }
     },
     getPathsFromModel() {
