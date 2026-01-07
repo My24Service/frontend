@@ -71,17 +71,29 @@ img[src*="no-img.png"] {
 <script>
 import materialService from '../../models/inventory/Material.js'
 import inventoryModel from '../../models/inventory/Inventory.js'
-import {NO_IMAGE_URL} from "../../constants";
+import {NO_IMAGE_URL} from "@/constants";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
       material: materialService.getFields(),
       inventory: [],
       inventoryFields: [
-        { key: 'location_name', label: $trans('Location') },
-        { key: 'total_amount', label: $trans('Total amount') },
+        { key: 'location_name', label: this.$trans('Location') },
+        { key: 'total_amount', label: this.$trans('Total amount') },
       ],
       NO_IMAGE_URL
     }
@@ -105,7 +117,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching inventory', error)
-        errorToast(this.create, $trans('Error fetching inventory'))
+        errorToast(this.create, this.$trans('Error fetching inventory'))
         this.isLoading = false
       }
     }

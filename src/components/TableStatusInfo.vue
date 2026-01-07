@@ -26,8 +26,20 @@
 </template>
 <script>
 import my24 from '@/services/my24.js'
+import {errorToast} from "@/utils";
+import componentMixin from "@/mixins/common";
+import {useToast} from "bootstrap-vue-next";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   props: {
     statusCodeService: {
       type: Object,
@@ -85,7 +97,7 @@ export default {
         await this.statusService.insert(status)
       } catch(error) {
         console.log('Error creating status', error)
-        errorToast(this.create, $trans('Error creating status'))
+        errorToast(this.create, this.$trans('Error creating status'))
       }
     }
   },

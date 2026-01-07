@@ -56,16 +56,28 @@
 <script>
 import stockLocationModel from '@/models/inventory/StockLocation.js'
 import inventoryModel from '@/models/inventory/Inventory.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
       stockLocation: stockLocationModel.getFields(),
       inventory: [],
       inventoryFields: [
-        { key: 'material_name', label: $trans('Material') },
-        { key: 'total_amount', label: $trans('Total amount') },
+        { key: 'material_name', label: this.$trans('Material') },
+        { key: 'total_amount', label: this.$trans('Total amount') },
       ]
     }
   },
@@ -88,7 +100,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching stock location/inventory', error)
-        errorToast(this.create, $trans('Error fetching stock location/inventory'))
+        errorToast(this.create, this.$trans('Error fetching stock location/inventory'))
         this.isLoading = false
       }
     }

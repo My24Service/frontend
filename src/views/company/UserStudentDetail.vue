@@ -82,8 +82,20 @@
 
 <script>
 import studentUserModel from '../../models/company/UserStudent.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       studentuser: studentUserModel.getFields(),
@@ -107,7 +119,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentuser', error)
-        errorToast(this.create, $trans('Error loading studentuser'))
+        errorToast(this.create, this.$trans('Error loading studentuser'))
         this.isLoading = false
       }
     },

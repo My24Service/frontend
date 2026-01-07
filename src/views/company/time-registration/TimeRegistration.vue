@@ -24,13 +24,17 @@ import TimeRegistrationData from "../../../components/TimeRegistrationData.vue";
 import SubNav from "./SubNav";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast} from "@/utils";
 
 export default {
   setup() {
     const mainStore = useMainStore()
+    const {create} = useToast()
 
     return {
-      mainStore
+      mainStore,
+      create
     }
   },
   mixins: [componentMixin],
@@ -97,7 +101,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching time data', error)
-        errorToast(this.create, $trans('Error loading time data'))
+        errorToast(this.create, this.$trans('Error loading time data'))
         this.isLoading = false
       }
     }

@@ -148,7 +148,7 @@ export default {
       try {
         await this.model.delete(this.materialPk)
         infoToast(this.create, $trans('Deleted'), $trans('Material has been deleted'))
-        this.loadData()
+        await this.loadData()
       } catch(error) {
         console.log('error deleting material', error)
         errorToast(this.create, $trans('Error deleting material'))

@@ -84,11 +84,9 @@
     </b-nav>
   </div>
 </template>
-
 <script>
-
-
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -98,6 +96,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   data() {
     return {
       isLoaded: false,
@@ -141,9 +140,6 @@ export default {
       }
 
       return { name: 'users-planningusers' }
-    },
-    hasBranches() {
-      return this.hasBranches()
     },
     hasPartners() {
       return this.hasAccessToModule('company', 'partners')

@@ -91,17 +91,29 @@
 
 <script>
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
       buttonDisabled: false,
       reservation: supplierReservationModel.getFields(),
       materialFields: [
-        { key: 'material_view.name', label: $trans('Name') },
-        { key: 'amount', label: $trans('Amount') },
-        { key: 'remarks', label: $trans('Remarks') }
+        { key: 'material_view.name', label: this.$trans('Name') },
+        { key: 'amount', label: this.$trans('Amount') },
+        { key: 'remarks', label: this.$trans('Remarks') }
       ],
     }
   },
@@ -123,7 +135,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching reservation', error)
-        errorToast(this.create, $trans('Error fetching reservation'))
+        errorToast(this.create, this.$trans('Error fetching reservation'))
         this.isLoading = false
       }
     }

@@ -171,7 +171,7 @@ export default {
       try {
         await this.leaveHoursService.acceptLeave(this.leavePk);
         infoToast(this.create, $trans("Accepted"), $trans("Leave as been accepted"));
-        this.loadData();
+        await this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error accepting leave", error);

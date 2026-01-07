@@ -162,7 +162,7 @@ export default {
       try {
         await this.leaveHoursService.delete(this.leavePk);
         infoToast(this.create, $trans("Deleted"), $trans("Leave has been deleted"));
-        this.loadData();
+        await this.loadData();
       } catch (error) {
         console.log("error deleting leave", error);
         errorToast(this.create, $trans("Error deleting leave"));

@@ -114,6 +114,7 @@ import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsCompon
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
+import {errorToast} from "@/utils";
 
 export default {
   setup() {
@@ -144,16 +145,16 @@ export default {
       location: null,
       orders: [],
       orderPastFields: [
-        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
       breadcrumb: [
         {
-          text: $trans('Location'),
+          text: this.$trans('Location'),
           to: {name: this.listLink()}
         },
         {
-          text: $trans('Detail'),
+          text: this.$trans('Detail'),
           active: true
         },
       ],
@@ -205,7 +206,7 @@ export default {
         // this.isLoading = false
       } catch(error) {
         console.log('error fetching location stats', error)
-        errorToast(this.create, `${$trans('Error fetching location insights:')} ${error}`)
+        errorToast(this.create, `${this.$trans('Error fetching location insights:')} ${error}`)
         // this.isLoading = false
       }
     },
@@ -247,7 +248,7 @@ export default {
         this.location = await this.locationService.detail(this.pk)
       } catch(error) {
         console.log('error fetching location detail data', error)
-        errorToast(this.create, $trans('Error fetching location detail'))
+        errorToast(this.create, this.$trans('Error fetching location detail'))
         this.isLoading = false
       }
     },
@@ -259,7 +260,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        errorToast(this.create, $trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     }

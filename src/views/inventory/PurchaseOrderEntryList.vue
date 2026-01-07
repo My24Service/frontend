@@ -56,7 +56,7 @@
           </div>
         </template>
         <template #cell(order_id)="data">
-          <router-link :to="{name: 'purchaseorder-entry-edit', params: {pk: data.item.pk}}">{{data.item.order_id}}</router-link>
+          <router-link :to="{name: 'purchaseorder-entry-edit', params: {pk: data.item.id}}">{{data.item.order_id}}</router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">

@@ -63,7 +63,7 @@
           sort-icon-left
         >
           <template #cell(member_logo)="data">
-            <img :src="data.item.companylogo_url" width="100" alt=""/>
+            <img :src="data.item.companylogo" width="100" alt=""/>
           </template>
           <template #cell(member_info)="data">
             <router-link :to="{name: 'member-edit', params: {pk: data.item.id}}">

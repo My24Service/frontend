@@ -79,11 +79,20 @@
 import {Import, ImportService} from '@/models/company/Import'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
+  mixins: [componentMixin],
   props: {
     pk: {
       type: [String, Number],
@@ -163,7 +172,7 @@ export default {
           const created = await this.service.insert(this.importModel)
           this.importModel = new Import(created)
         } catch (e) {
-          errorToast(this.create, $trans('Error creating import'))
+          errorToast(this.create, this.$trans('Error creating import'))
           console.log(`Error creating import: ${e}`)
           this.isSubmitClicked = false
           return
@@ -176,7 +185,7 @@ export default {
 
           await this.service.update(this.pk, this.importModel)
         } catch (e) {
-          errorToast(this.create, $trans('Error updating import'))
+          errorToast(this.create, this.$trans('Error updating import'))
           console.log(`Error creating import: ${e}`)
           this.isSubmitClicked = false
           return

@@ -101,9 +101,20 @@ import OrderStats from "../../components/OrderStats";
 
 import { OrderService } from '@/models/orders/Order'
 import { BuildingService } from "@/models/equipment/building";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
 
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
@@ -122,16 +133,16 @@ export default {
       building: null,
       orders: [],
       orderFields: [
-        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
       breadcrumb: [
         {
-          text: $trans('Buildings'),
+          text: this.$trans('Buildings'),
           to: {name: this.listLink()}
         },
         {
-          text: $trans('Detail'),
+          text: this.$trans('Detail'),
           active: true
         },
       ],
@@ -193,7 +204,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching building detail data', error)
-        errorToast(this.create, $trans('Error fetching building detail'))
+        errorToast(this.create, this.$trans('Error fetching building detail'))
         this.isLoading = false
       }
     },
@@ -206,7 +217,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        errorToast(this.create, $trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     }

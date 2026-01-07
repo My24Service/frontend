@@ -24,8 +24,8 @@
     />
 
     <b-modal
-      id="delete-receievd-partner-request-modal"
-      ref="delete-receievd-partner-request-modal"
+      id="delete-received-partner-request-modal"
+      ref="delete-received-partner-request-modal"
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
@@ -33,8 +33,8 @@
     </b-modal>
 
     <b-modal
-      id="accept-receievd-partner-request-modal"
-      ref="accept-receievd-partner-request-modal"
+      id="accept-received-partner-request-modal"
+      ref="accept-received-partner-request-modal"
       v-bind:title="$trans('Accept?')"
       @ok="acceptRequest"
     >
@@ -42,8 +42,8 @@
     </b-modal>
 
     <b-modal
-      id="reject-receievd-partner-request-modal"
-      ref="reject-receievd-partner-request-modal"
+      id="reject-received-partner-request-modal"
+      ref="reject-received-partner-request-modal"
       v-bind:title="$trans('Accept?')"
       @ok="rejectRequest"
     >
@@ -178,7 +178,7 @@ export default {
     // requests
     showAcceptRequestModal(id) {
       this.pk = id
-      this.$refs['accept-receievd-partner-request-modal'].show()
+      this.$refs['accept-received-partner-request-modal'].show()
     },
     async acceptRequest() {
       try {
@@ -192,7 +192,7 @@ export default {
     },
     showRejectRequestModal(id) {
       this.pk = id
-      this.$refs['reject-receievd-partner-request-modal'].show()
+      this.$refs['reject-received-partner-request-modal'].show()
     },
     async rejectRequest() {
       try {
@@ -207,7 +207,7 @@ export default {
     // delete
     showDeleteModal(id) {
       this.pk = id
-      this.$refs['delete-receievd-partner-request-modal'].show()
+      this.$refs['delete-received-partner-request-modal'].show()
     },
     async doDelete() {
       try {

@@ -64,18 +64,28 @@
 import mutationModel from '@/models/inventory/Mutation.js'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
     Pagination,
-    ButtonLinkAdd,
   },
+  mixins: [componentMixin],
   data() {
     return {
       searchQuery: null,
@@ -83,10 +93,10 @@ export default {
       isLoading: false,
       mutations: [],
       fields: [
-        {key: 'material_name', label: $trans('Material'), sortable: true},
-        {key: 'summary', label: $trans('Mutation'), sortable: true},
-        {key: 'amount', label: $trans('Amount'), sortable: true},
-        {key: 'modified', label: $trans('Date'), sortable: true},
+        {key: 'material_name', label: this.$trans('Material'), sortable: true},
+        {key: 'summary', label: this.$trans('Mutation'), sortable: true},
+        {key: 'amount', label: this.$trans('Amount'), sortable: true},
+        {key: 'modified', label: this.$trans('Date'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -115,7 +125,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching mutations', error)
-        errorToast(this.create, $trans('Error loading mutations'))
+        errorToast(this.create, this.$trans('Error loading mutations'))
         this.isLoading = false
       }
     }

@@ -158,7 +158,7 @@ export default {
       try {
         await this.sickLeavesService.delete(this.leavePk);
         infoToast(this.create, $trans("Deleted"), $trans("Sick leave has been deleted"));
-        this.loadData();
+        await this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error deleting sick leave", error);

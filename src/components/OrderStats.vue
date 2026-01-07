@@ -20,6 +20,7 @@
     <b-row>
       <b-col cols="12">
         <bar-chart
+          v-if="chartdataCountsOrderTypesBar"
           id="bar-chart-order-types-month"
           :chart-data="chartdataCountsOrderTypesBar"
           :options="optionsStacked"
@@ -33,6 +34,7 @@
     <b-row>
       <b-col cols="6">
         <bar-chart
+          v-if="chartdataCountsBar"
           id="bar-chart-order-types"
           :chart-data="chartdataCountsBar"
           :options="options"
@@ -40,6 +42,7 @@
       </b-col>
       <b-col cols="6">
         <pie-chart
+          v-if="chartdataCountsPie"
           id="pie-chart-order-types"
           :chart-data="chartdataCountsPie"
           :options="pieOptions"
@@ -53,6 +56,7 @@
     <b-row>
       <b-col cols="6">
         <bar-chart
+          v-if="chartdataOrderTypesBar"
           id="bar-chart-order-types"
           :chart-data="chartdataOrderTypesBar"
           :options="options"
@@ -60,6 +64,7 @@
       </b-col>
       <b-col cols="6">
         <pie-chart
+          v-if="chartdataOrderTypesPie"
           id="pie-chart-order-types"
           :chart-data="chartdataOrderTypesPie"
           :options="pieOptions"
@@ -71,14 +76,18 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
-import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
+// import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
+import {Chart} from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+Chart.register(ChartDataLabels);
 
 import BarChart from "./BarChart.vue"
 import PieChart from "./PieChart.vue"
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
-Chart.defaults.global.datasets.bar.categoryPercentage = 0.5;
-Chart.defaults.global.datasets.bar.barPercentage = 1
+// Chart.defaults.global.datasets.bar.categoryPercentage = 0.5;
+// Chart.defaults.global.datasets.bar.barPercentage = 1
 
 export default {
   setup() {
@@ -88,10 +97,11 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     BarChart,
     PieChart,
-    ChartJsPluginDataLabels,
+    // ChartJsPluginDataLabels,
   },
   props: {
     dataIn: {
@@ -140,7 +150,7 @@ export default {
               return `${key} ${value}`
             },
             footer: (tooltipItems, data) => {
-              return `${$trans("Total") }: ${this.total}`
+              return `${this.$trans("Total") }: ${this.total}`
             }
           }
         },

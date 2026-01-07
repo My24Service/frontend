@@ -9,8 +9,8 @@ import Components from 'unplugin-vue-components/vite'
 import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
+import * as path from "node:path";
 
-const path = require("path");
 export default defineConfig({
   base: '',
   // build: {

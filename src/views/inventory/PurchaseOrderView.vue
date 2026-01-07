@@ -124,22 +124,34 @@
 
 <script>
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
       buttonDisabled: false,
       purchaseOrder: purchaseOrderModel.getFields(),
       materialFields: [
-        { key: 'material_view.name', label: $trans('Name') },
-        { key: 'amount', label: $trans('Amount') },
-        { key: 'remarks', label: $trans('Remarks') }
+        { key: 'material_view.name', label: this.$trans('Name') },
+        { key: 'amount', label: this.$trans('Amount') },
+        { key: 'remarks', label: this.$trans('Remarks') }
       ],
       entryFields: [
-        { key: 'material_name', label: $trans('Product') },
-        { key: 'amount', label: $trans('Amount') },
-        { key: 'entry_date', label: $trans('Date') },
+        { key: 'material_name', label: this.$trans('Product') },
+        { key: 'amount', label: this.$trans('Amount') },
+        { key: 'entry_date', label: this.$trans('Date') },
       ]
     }
   },
@@ -161,7 +173,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching purchase order', error)
-        errorToast(this.create, $trans('Error fetching purchase order'))
+        errorToast(this.create, this.$trans('Error fetching purchase order'))
         this.isLoading = false
       }
     }

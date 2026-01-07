@@ -272,22 +272,30 @@ import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
 
-import CustomerDetail from "../../components/CustomerDetail";
-
 import {MaintenanceContractService} from '@/models/customer/MaintenanceContract'
 import { OrderService } from '@/models/orders/Order'
 import {CustomerModel, CustomerService} from '@/models/customer/Customer'
 import {LocationService} from "@/models/equipment/location";
 import {EquipmentService} from "@/models/equipment/equipment";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
 
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   components: {
     CustomerCard,
     OrderTableInfo,
     SearchModal,
     OrderStats,
-    CustomerDetail,
   },
   data() {
     return {
@@ -303,39 +311,39 @@ export default {
       customer: new CustomerModel({}),
       orders: [],
       orderFields: [
-        { key: 'id', label: $trans('Order'), thAttr: {width: '95%'} },
+        { key: 'id', label: this.$trans('Order'), thAttr: {width: '95%'} },
         { key: 'icons', thAttr: {width: '5%'} },
       ],
       maintenanceContracts: [],
       maintenanceContractFields: [
-        {key: 'contract', label: $trans('Contract')},
+        {key: 'contract', label: this.$trans('Contract')},
       ],
       locations: [],
       locationFieldsCustomer: [
-        {key: 'name', label: $trans('Name')},
-        {key: 'created', label: $trans('Created')},
-        {key: 'modified', label: $trans('Modified')},
+        {key: 'name', label: this.$trans('Name')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons', label: ""}
       ],
       locationFieldsBranch: [
-        {key: 'name', label: $trans('Name')},
-        {key: 'created', label: $trans('Created')},
-        {key: 'modified', label: $trans('Modified')},
+        {key: 'name', label: this.$trans('Name')},
+        {key: 'created', label: this.$trans('Created')},
+        {key: 'modified', label: this.$trans('Modified')},
         {key: 'icons', label: ""}
       ],
       locationFields: [],
 
       equipment: [],
       equipmentFieldsCustomer: [
-        {key: 'name', label: $trans('Equipment')},
-        {key: 'brand', label: $trans('Brand')},
-        {key: 'created', label: $trans('Created')},
+        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'created', label: this.$trans('Created')},
         {key: 'icons', label: ""}
       ],
       equipmentFieldsBranch: [
-        {key: 'name', label: $trans('Equipment')},
-        {key: 'brand', label: $trans('Brand')},
-        {key: 'created', label: $trans('Created')},
+        {key: 'name', label: this.$trans('Equipment')},
+        {key: 'brand', label: this.$trans('Brand')},
+        {key: 'created', label: this.$trans('Created')},
         {key: 'icons', label: ""}
       ],
       equipmentFields: [],
@@ -429,7 +437,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching orders or customer detail', error)
-        errorToast(this.create, $trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -441,7 +449,7 @@ export default {
         this.maintenanceContracts = data.results
       } catch(error) {
         console.log('error fetching maintenance contracts', error)
-        errorToast(this.create, $trans('Error fetching maintenance contracts'))
+        errorToast(this.create, this.$trans('Error fetching maintenance contracts'))
         this.isLoading = false
       }
     },
@@ -453,7 +461,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer orders', error)
-        errorToast(this.create, $trans('Error fetching customer orders'))
+        errorToast(this.create, this.$trans('Error fetching customer orders'))
         this.isLoading = false
       }
     }

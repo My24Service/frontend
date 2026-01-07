@@ -145,7 +145,7 @@ export default {
     },
     async doDelete() {
       try {
-        this.model.delete(this.pk)
+        await this.model.delete(this.pk)
         infoToast(this.create, $trans('Deleted'), $trans('Partner request has been deleted'))
         await this.loadData()
       } catch(error) {

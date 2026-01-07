@@ -100,7 +100,7 @@
                 type="tr"
                 v-bind:title="$trans('Add action')"
                 v-bind:router_name="`${linkAddAction}`"
-                v-bind:router_params="{statuscode_pk: data.item.id}"
+                v-bind:router_params="{pk: data.item.id}"
               />
               <IconLinkDelete
                 v-bind:title="$trans('Delete')"

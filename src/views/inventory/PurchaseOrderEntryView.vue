@@ -72,17 +72,29 @@
 <script>
 import supplierModel from '@/models/inventory/Supplier.js'
 import materialModel from '@/models/inventory/Material.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
       supplier: supplierModel.getFields(),
       materials: [],
       materialFields: [
-        { key: 'name', label: $trans('Name') },
-        { key: 'unit', label: $trans('Unit') },
-        { key: 'modified', label: $trans('Modified') }
+        { key: 'name', label: this.$trans('Name') },
+        { key: 'unit', label: this.$trans('Unit') },
+        { key: 'modified', label: this.$trans('Modified') }
       ],
     }
   },
@@ -105,7 +117,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching supplier/products', error)
-        errorToast(this.create, $trans('Error fetching supplier/products'))
+        errorToast(this.create, this.$trans('Error fetching supplier/products'))
         this.isLoading = false
       }
     }

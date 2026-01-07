@@ -51,7 +51,6 @@ function getUserAuthLevel() {
 
 function hasAccessRouteAuthLevel(authLevelNeeded) {
   const authLevelUser = getUserAuthLevel()
-  console.log({authLevelUser, authLevelNeeded})
 
   // TODO in the future use ONLY arrays?
   // let needed = typeof authLevelNeeded === 'string' ? [ authLevelNeeded ] : authLevelNeeded

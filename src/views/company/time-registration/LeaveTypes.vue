@@ -216,7 +216,7 @@ export default {
       try {
         await this.leaveTypeService.delete(this.leaveTypePk);
         infoToast(this.create, $trans("Deleted"), $trans("Leave type has been deleted"));
-        this.loadData();
+        await this.loadData();
       } catch (error) {
         console.log("error deleting leave type", error);
         errorToast(this.create, $trans("Error deleting leave type"));

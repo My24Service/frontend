@@ -76,10 +76,21 @@ import customerModel from '../../models/customer/Customer.js'
 import engineerModel from '../../models/company/UserEngineer.js'
 import Assign from "../../models/mobile/Assign";
 import engineerEventModel from "../../models/company/EngineerEvent";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
   name: "EngineerEventOrderForm",
+  setup() {
+    const {create} = useToast()
 
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   components: {
     VueMultiselect,
   },
@@ -104,7 +115,7 @@ export default {
     async show(event_id, engineer_user_id) {
       this.event_id = event_id
       this.engineer = await engineerModel.detail(engineer_user_id)
-      this.$refs['attach-order-modal'].show()
+      await this.$refs['attach-order-modal'].show()
     },
     hide() {
       this.$refs['attach-order-modal'].hide()
@@ -131,7 +142,7 @@ export default {
         this.hide()
       } catch(error) {
         console.log('Error creating/assigning order', error)
-        errorToast(this.create, $trans('Error creating/assigning order'))
+        errorToast(this.create, this.$trans('Error creating/assigning order'))
         this.isLoading = false
       }
     },
@@ -168,7 +179,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching customers', error)
-        errorToast(this.create, $trans('Error fetching customers'))
+        errorToast(this.create, this.$trans('Error fetching customers'))
         this.isLoading = false
       }
     },
