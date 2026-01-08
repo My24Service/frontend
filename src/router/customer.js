@@ -138,6 +138,18 @@ export default [
 
     // calendar
     {
+      name: 'maintenance-products-calendar-params',
+      path: '/customers/calendar/:start/:end',
+      components: {
+        'app-content': Calendar,
+        'app-subnav': SubNavCustomers
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
       name: 'maintenance-products-calendar',
       path: '/customers/calendar',
       components: {
@@ -149,6 +161,7 @@ export default [
         'app-subnav': true
       },
     },
+
 
     // equipment
     {
