@@ -1,4 +1,3 @@
-import Vue from "vue"
 import axios from '@/services/api'
 
 let BASE_URL = document.location.host

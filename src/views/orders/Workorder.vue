@@ -1,18 +1,23 @@
 <template>
   <div>
     <WorkorderMaintenance v-if="memberType === 'maintenance'" :uuid="uuid" />
-    <WorkorderTemps v-if="memberType === 'temps'" :uuid="uuid" />
   </div>
 </template>
 <script>
 import WorkorderMaintenance from "./WorkorderMaintenance.vue"
-import WorkorderTemps from "./WorkorderTemps.vue"
+import {useMainStore} from "@/stores/main";
 
 export default {
-  name: "Workorder",
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   components: {
   	WorkorderMaintenance,
-  	WorkorderTemps
   },
 	props: {
 		uuid: {
@@ -25,7 +30,7 @@ export default {
 		}
 	},
 	async created() {
-    this.memberType = await this.$store.dispatch('getMemberType')
+    this.memberType = this.mainStore.getMemberType
 	}
 }
 </script>

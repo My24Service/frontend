@@ -11,28 +11,28 @@
         <b-container>
           <b-row>
             <b-col cols="7">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('State')"
                 label-for="add-state-state"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   id="add-state-state"
                   v-model="state.state"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="5">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Lifespan')"
                 label-for="add-state-replace_months"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   id="add-state-replace_months"
                   v-model="state.replace_months"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -57,11 +57,11 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="tools"></b-icon>
+          <IBiTools></IBiTools>
           {{ $trans("Equipment") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -73,9 +73,9 @@
               v-bind:method="function() { downloadList() }"
               v-bind:title="$trans('Download QR-codes')"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: newLink}" class="btn">{{ $trans("Add Equipment") }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -83,7 +83,7 @@
 
       <b-table
         id="equipment-table"
-        small
+        :small="true"
         :busy='isLoading'
         :fields="equipmentFields"
         :items="equipmentObjects"
@@ -91,9 +91,8 @@
         class="data-table"
         sort-icon-left
         :no-local-sorting="true"
-        @sort-changed="sortingChanged"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
+        @sorted="sortingChanged"
+        :sort-by="sortBy"
       >
         <template #head(icons)="">
           <div class="float-right">
@@ -167,20 +166,26 @@ import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {componentMixin} from "@/utils";
+
 import {EquipmentStateModel, EquipmentStateService} from "@/models/equipment/EquipmentState";
 import {EquipmentService} from '@/models/equipment/equipment'
 import IconLinkPlus from "../../components/IconLinkPlus";
 import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
-import unconfirmedSickLeaveList
-  from "@/views/company/time-registration/UnconfirmedSickLeaveList.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'EquipmentList',
   components: {
     ButtonLinkDownload,
@@ -188,7 +193,6 @@ export default {
     IconLinkEdit,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     IconLinkPlus,
@@ -227,51 +231,50 @@ export default {
       equipmentObjects: [],
       equipmentFields: [],
       equipmentFieldsCustomerPlanning: [
-        {key: 'name', label: this.$trans('Equipment'), sortable: true},
-        {key: 'customer', label: this.$trans('Customer'), sortable: true},
-        {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'location_name', label: this.$trans('Location')},
-        {key: 'latest_state', label: this.$trans('State')},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
-        {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'customer', label: $trans('Customer'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchPlanning: [
-        {key: 'name', label: this.$trans('Equipment'), sortable: true},
-        {key: 'branch', label: this.$trans('Branch'), sortable: true},
-        {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'location_name', label: this.$trans('Location')},
-        {key: 'latest_state', label: this.$trans('State')},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
-        {key: 'brand', label: this.$trans('Brand'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'branch', label: $trans('Branch'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsCustomerNonPlanning: [
-        {key: 'name', label: this.$trans('Equipment'), sortable: true},
-        {key: 'location_name', label: this.$trans('Location')},
-        {key: 'latest_state', label: this.$trans('State')},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchNonPlanning: [
-        {key: 'name', label: this.$trans('Equipment'), sortable: true},
-        {key: 'location_name', label: this.$trans('Location')},
-        {key: 'latest_state', label: this.$trans('State')},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons', label: ''}
       ],
       equipment_pk: null,
       state: new EquipmentStateModel({}),
-      sortBy: 'name',
-      sortDesc: false,
+      sortBy: [{key: 'name', order: 'asc'}],
     }
   },
   async created() {
@@ -279,11 +282,10 @@ export default {
     this.equipmentService.currentPage = this.$route.query.page || 1
     this.equipmentService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      this.sortBy = this.$route.query.sort_field
-      if (this.$route.query.sort_dir) {
-        this.sortDesc = this.$route.query.sort_dir === 'desc'
-      }
-      this.equipmentService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+      const sortBy = this.$route.query.sort_field ?? 'name'
+      const sortDir = this.$route.query.sort_dir ?? 'asc'
+      this.sortBy = [{key: sortBy, order: sortDir}]
+      this.equipmentService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
     }
 
     if (this.hasBranches) {
@@ -310,8 +312,9 @@ export default {
     },
     // sorting
     async sortingChanged(ctx) {
+      this.sortBy = [{key: ctx.key, order: ctx.order}]
       // set sorting and reset current page
-      this.equipmentService.setSorting(ctx.sortBy, ctx.sortDesc, true)
+      this.equipmentService.setSorting(ctx.key, ctx.order, true)
       const query = {
         ...this.$route.query,
         ...this.equipmentService.getQueryArgs()
@@ -329,11 +332,11 @@ export default {
       try {
         await this.equipmentStateService.insert(this.state)
         this.state = new EquipmentStateModel({})
-        this.infoToast(this.$trans('Created'), this.$trans('State added'))
+        infoToast(this.create, $trans('Created'), $trans('State added'))
         await this.loadData()
       } catch(error) {
         console.log('Error adding state', error)
-        this.errorToast(this.$trans('Error adding state'))
+        errorToast(this.create, $trans('Error adding state'))
       }
     },
     // search
@@ -358,11 +361,11 @@ export default {
     async doDelete() {
       try {
         await this.equipmentService.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Equipment has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Equipment has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting equipment', error)
-        this.errorToast(this.$trans('Error deleting equipment'))
+        errorToast(this.create, $trans('Error deleting equipment'))
       }
     },
     // rest
@@ -375,7 +378,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching equipment', error)
-        this.errorToast(this.$trans('Error loading equipment'))
+        errorToast(this.create, $trans('Error loading equipment'))
         this.isLoading = false
       }
     }

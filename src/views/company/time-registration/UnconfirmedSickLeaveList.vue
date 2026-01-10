@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Unconfirmed sick leave") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Unconfirmed sick leave") }}</h3>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -20,8 +20,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="
                     function() {
@@ -37,14 +37,14 @@
                     }
                   "
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(full_name)="data">
-          <b-link :to="{ name: 'leave-edit', params: { pk: data.item.id } }">{{
+          <BLink :to="{ name: 'leave-edit', params: { pk: data.item.id } }">{{
             data.item.full_name
-          }}</b-link>
+          }}</BLink>
         </template>
         <template #cell(date)="data">
           <span v-if="!data.item.end_date">
@@ -56,12 +56,12 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <b-link
+            <BLink
               :title="$trans('Confirm')"
               @click="() => showConfirmModal(data.item.id)"
             >
-              <b-icon-check-lg class="edit-icon"></b-icon-check-lg>
-            </b-link>
+              <IBiCheckLg class="edit-icon"></IBiCheckLg>
+            </BLink>
           </div>
         </template>
       </b-table>
@@ -82,22 +82,28 @@
 <script>
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
-import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import SubNav from "./SubNav.vue";
 import { SickLeavesService } from "@/models/company/SickLeave.js";
-import IconLinkEdit from "../../../components/IconLinkEdit.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     SubNav,
-    IconLinkEdit
   },
   data() {
     return {
@@ -107,11 +113,11 @@ export default {
       isLoading: false,
       leaves: [],
       fields: [
-        { key: "user_full_name", label: this.$trans("User"), thAttr: { width: "15%" } },
-        { key: "date", label: this.$trans("Date") },
-        { key: "created_by_fullname", label: this.$trans("Created by") },
-        { key: "created", label: this.$trans("Created") },
-        { key: "last_status_full", label: this.$trans("Status") },
+        { key: "user_full_name", label: $trans("User"), thAttr: { width: "15%" } },
+        { key: "date", label: $trans("Date") },
+        { key: "created_by_fullname", label: $trans("Created by") },
+        { key: "created", label: $trans("Created") },
+        { key: "last_status_full", label: $trans("Status") },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -137,12 +143,12 @@ export default {
        this.isLoading = true;
       try {
         await this.sickLeavesService.setAsConfirmed(this.leavePk);
-        this.infoToast(this.$trans("Accepted"), this.$trans("Leave as been marked as confirmed"));
+        infoToast(this.create, $trans("Accepted"), $trans("Leave as been marked as confirmed"));
         await this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error confirming leave", error);
-        this.errorToast(this.$trans("Error confirming sick leave"));
+        errorToast(this.create, $trans("Error confirming sick leave"));
       }
     },
     async loadData() {
@@ -154,7 +160,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching unconfirmed sick leave request", error);
-        this.errorToast(this.$trans("Error loading unconfirmed sick leave request"));
+        errorToast(this.create, $trans("Error loading unconfirmed sick leave request"));
         this.isLoading = false;
       }
     }

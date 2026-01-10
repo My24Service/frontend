@@ -3,9 +3,9 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-lock"></b-icon>{{ $trans("Reservations") }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <h3><IBiFileEarmarkLock></IBiFileEarmarkLock>{{ $trans("Reservations") }}</h3>
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -13,11 +13,11 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'supplier-reservation-add'}" class="btn primary">
             {{ $trans("Add reservation") }}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -122,17 +122,25 @@ import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -144,15 +152,15 @@ export default {
       isLoading: false,
       reservations: [],
       fields: [
-        {key: 'id', label: this.$trans('Reservation'), sortable: true},
-        {key: 'materials', label: this.$trans('Materials')},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'id', label: $trans('Reservation'), sortable: true},
+        {key: 'materials', label: $trans('Materials')},
+        {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'icons', label: ''},
       ],
       material_fields: [
-        {key: 'material_view.name', label: this.$trans('Product')},
-        {key: 'remarks', label: this.$trans('Remarks')},
-        {key: 'amount', label: this.$trans('Amount')},
+        {key: 'material_view.name', label: $trans('Product')},
+        {key: 'remarks', label: $trans('Remarks')},
+        {key: 'amount', label: $trans('Amount')},
       ],
     }
   },
@@ -178,11 +186,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.supplierReservationPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Entry Reservation been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Entry Reservation been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting reservation', error)
-        this.errorToast(this.$trans('Error deleting reservation'))
+        errorToast(this.create, $trans('Error deleting reservation'))
       }
     },
     // rest
@@ -195,7 +203,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching reservations', error)
-        this.errorToast(this.$trans('Error loading reservations'))
+        errorToast(this.create, $trans('Error loading reservations'))
         this.isLoading = false
       }
     }

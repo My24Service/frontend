@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-bar-graph-fill"></b-icon>{{ $trans("Order stats") }}</h3>
+        <h3><IBiFileEarmarkBarGraphFill></IBiFileEarmarkBarGraphFill>{{ $trans("Order stats") }}</h3>
         <div class="flex-columns">
           <a>{{ $trans("view") }}</a>
           <router-link class="btn button" to="./year-stats" disabled>{{ $trans("year") }}</router-link>
@@ -14,9 +14,9 @@
     <div class="panel">
       <b-row align-v="center">
         <b-col cols="2">
-          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
+          </BLink>
         </b-col>
         <b-col cols="8" class="text-center">
           <h4>{{ $trans('Total orders in ' + year ) }}</h4>
@@ -28,7 +28,7 @@
             </b-col>
             <b-col cols="4">
               <OrderTypesSelect
-                :order-type.sync="orderType"
+                :order-type="orderType"
                 :include-all="true"
               />
             </b-col>
@@ -38,9 +38,9 @@
         </b-col>
         <b-col cols="2">
           <div class="float-right">
-            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
+            </BLink>
           </div>
         </b-col>
       </b-row>
@@ -96,12 +96,19 @@ import BarChart from "../../components/BarChart.vue"
 import PieChart from "../../components/PieChart.vue"
 import OrderStatusColorSpan from '../../components/OrderStatusColorSpan.vue'
 import OrderTypesSelect from '../../components/OrderTypesSelect.vue'
-import { readonly } from '@vue/composition-api'
-
+import {useMainStore} from "@/stores/main";
 
 let d = new Date();
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       isLoading: false,
@@ -252,13 +259,13 @@ export default {
     }
   },
   async mounted () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     // get statuscodes and load orders
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
-    this.loadData()
+    this.statuscodes = await this.mainStore.getStatuscodes
+    await this.loadData()
   }
 }
 </script>

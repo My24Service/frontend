@@ -3,10 +3,10 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="bookshelf"></b-icon>{{ $trans("Stock Locations") }}
+          <IBiBookshelf></IBiBookshelf>{{ $trans("Stock Locations") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
@@ -14,9 +14,9 @@
             <ButtonLinkSearch
             v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'stock-location-add'}" class="btn">{{ $trans('Add stock location') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -59,7 +59,7 @@
         </template>
         <template #cell(show_in_stats)="data">
           <span v-if="data.item.show_in_stats">
-            <b-icon-check-square-fill></b-icon-check-square-fill>
+            <IBiCheckSquareFill></IBiCheckSquareFill>
           </span>
         </template>
         <template #cell(icons)="data">
@@ -85,16 +85,24 @@ import stockLocationModel from '@/models/inventory/StockLocation.js'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -106,12 +114,12 @@ export default {
       isLoading: false,
       stockLocations: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'identifier', label: this.$trans('Identifier'), sortable: true},
-        {key: 'inventory', label: this.$trans('Inventory'), sortable: true},
-        {key: 'show_in_stats', label: this.$trans('In stats?'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'identifier', label: $trans('Identifier'), sortable: true},
+        {key: 'inventory', label: $trans('Inventory'), sortable: true},
+        {key: 'show_in_stats', label: $trans('In stats?'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -138,11 +146,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.stockLocationPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Stock location has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Stock location has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting stock location', error)
-        this.errorToast(this.$trans('Error deleting stock location'))
+        errorToast(this.create, $trans('Error deleting stock location'))
       }
     },
     // rest
@@ -155,7 +163,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching stock locations', error)
-        this.errorToast(this.$trans('Error loading stock locations'))
+        errorToast(this.create, $trans('Error loading stock locations'))
         this.isLoading = false
       }
     }

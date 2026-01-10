@@ -1,10 +1,10 @@
 <template>
   <span>
-    <b-link v-if="method" v-bind:title="title" v-on:click.native="method()">
-      <b-icon-pencil class="edit-icon"></b-icon-pencil>
-    </b-link>
+    <BLink v-if="method" v-bind:title="title" v-on:click="method()">
+      <IBiPencil class="edit-icon"></IBiPencil>
+    </BLink>
     <router-link v-if="router_name" :to="{name: router_name, params: router_params}" v-bind:title="title">
-      <b-icon-pencil class="edit-icon"></b-icon-pencil>
+      <IBiPencil class="edit-icon"></IBiPencil>
     </router-link>
   </span>
 </template>

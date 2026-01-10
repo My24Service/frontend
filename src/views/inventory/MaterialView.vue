@@ -3,13 +3,13 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="box"></b-icon>
+          <IBiBox></IBiBox>
           <span class="backlink" @click="goBack">{{ $trans("Materials") }}</span> / {{  this.material.name }}
         </h3>
         <div class="flex-columns">
-          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
+          <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
             {{ $trans('Back') }}
-          </b-button>
+          </BButton>
           <router-link :to="{name: 'material-edit', params:{pk: this.pk}}" class="btn">{{ $trans('Edit material') }}</router-link>
         </div>
       </div>
@@ -71,9 +71,21 @@ img[src*="no-img.png"] {
 <script>
 import materialService from '../../models/inventory/Material.js'
 import inventoryModel from '../../models/inventory/Inventory.js'
-import {NO_IMAGE_URL} from "../../constants";
+import {NO_IMAGE_URL} from "@/constants";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
@@ -105,7 +117,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching inventory', error)
-        this.errorToast(this.$trans('Error fetching inventory'))
+        errorToast(this.create, this.$trans('Error fetching inventory'))
         this.isLoading = false
       }
     }

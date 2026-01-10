@@ -1,7 +1,7 @@
 <template>
-  <b-button size="sm" v-bind:title="title" @click="method()">
-    <b-icon-arrow-repeat aria-hidden="true"></b-icon-arrow-repeat>
-  </b-button>
+  <BButton size="sm" v-bind:title="title" @click="method()">
+    <IBiArrowRepeat aria-hidden="true"></IBiArrowRepeat>
+  </BButton>
 </template>
 
 <script>

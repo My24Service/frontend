@@ -3,7 +3,7 @@
     <b-modal
       ref="pdf-error-modal"
       :title="$trans('Error creating PDF')"
-      ok-only
+      :ok-only="true"
     >
       <div
         class="d-block text-center"
@@ -36,18 +36,18 @@
       size="xl"
       v-b-modal.modal-scrollable
       :title="viewerTitle"
-      ok-only
+      :ok-only="true"
     >
       <template #modal-footer="{ ok }">
-        <b-button
+        <BButton
           class="btn button btn-danger"
           @click="showMakeDefinitiveModal"
           v-if="invoice.preliminary"
           variant="danger"
         >
           {{ $trans('Make definitive') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           v-if="!isCustomer && !isBranchEmployee && !invoice.preliminary"
           id="recreateInvoicePdf"
           @click="recreateInvoicePdf"
@@ -58,8 +58,8 @@
         >
           <b-spinner small v-if="isLoading"></b-spinner>
           {{ $trans('Recreate PDF') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           v-if="!isCustomer && !isBranchEmployee && !invoice.preliminary && invoice.invoice_pdf_from_docx_filename"
           @click="downloadPdf"
           :disabled="isLoading"
@@ -67,13 +67,13 @@
           variant="primary"
         >
           <b-spinner small v-if="isLoading"></b-spinner>
-          <b-icon icon="file-earmark-pdf"></b-icon>
+          <IBiFileEarmarkPdf></IBiFileEarmarkPdf>
           {{ $trans('Download PDF') }}
-        </b-button>
+        </BButton>
         <!-- Emulate built in modal footer ok and cancel button actions -->
-        <b-button @click="ok()" variant="primary">
+        <BButton @click="ok()" variant="primary">
           {{ $trans("close") }}
-        </b-button>
+        </BButton>
       </template>
 
       <b-overlay :show="isLoading" rounded="sm">
@@ -90,11 +90,10 @@
 
 <script>
 import my24 from "@/services/my24";
-import {componentMixin} from "@/utils";
-
 import {InvoiceModel, InvoiceService} from "@/models/invoices/Invoice";
-
 import invoiceMixin from "./invoice_form/mixin";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 class PdfBlobError {
   template_error
@@ -109,8 +108,16 @@ class PdfBlobError {
 }
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "invoicePDFViewer",
-  mixins: [invoiceMixin, componentMixin],
+  mixins: [invoiceMixin],
   props: {
     invoiceIn: {
       type: InvoiceModel
@@ -123,7 +130,7 @@ export default {
   computed: {
     viewerTitle() {
       if (this.invoice) {
-        return this.invoice.preliminary ? this.$trans("PDF preview") : this.$trans("Definitive PDF")
+        return this.invoice.preliminary ? $trans("PDF preview") : $trans("Definitive PDF")
       } else {
         return ''
       }
@@ -150,12 +157,12 @@ export default {
         if (!result_ok) {
           this.$refs['pdf-error-modal'].show()
         } else {
-          this.infoToast(this.$trans('Success'), this.$trans('Invoice PDF created'));
+          infoToast(this.create, $trans('Success'), $trans('Invoice PDF created'));
         }
       }
       catch (err) {
         console.log('Error recreating invoice pdf', err);
-        this.errorToast(this.$trans('Error recreating invoice PDF'));
+        errorToast(this.create, $trans('Error recreating invoice PDF'));
         this.isLoading = false;
       }
     },
@@ -164,17 +171,17 @@ export default {
 
       try {
         await this.invoiceService.makeDefinitive(this.invoice.id)
-        this.infoToast(this.$trans('Success'), this.$trans('Invoice is now definitive'))
+        infoToast(this.create, $trans('Success'), $trans('Invoice is now definitive'))
         this.isLoading = false
         await this.$router.push({ name: 'invoice-view', params: {uuid: this.invoice.uuid }})
       } catch(error) {
-        this.errorToast(this.$trans('Error making invoice definitive'))
+        errorToast(this.create, $trans('Error making invoice definitive'))
         this.isLoading = false
         if (error.response?.data?.template_error) {
-          this.errorToast(error.response.data.template_error)
+          errorToast(this.create, error.response.data.template_error)
           return
         }
-        this.errorToast(this.$trans('Error generating PDF'))
+        errorToast(this.create, $trans('Error generating PDF'))
       }
     },
     async downloadPdf() {
@@ -260,7 +267,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoice', error)
-        this.errorToast(this.$trans('Error fetching invoice'))
+        errorToast(this.create, $trans('Error fetching invoice'))
         this.isLoading = false
       }
     },

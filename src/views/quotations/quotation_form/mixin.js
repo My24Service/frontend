@@ -1,5 +1,7 @@
 import {OPTION_NONE, OPTION_ONLY_TOTAL, OPTION_USER_TOTALS} from "./constants";
 import {QuotationLineModel} from "@/models/quotations/QuotationLine";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 let quotationMixin = {
   emits: [
@@ -8,9 +10,9 @@ let quotationMixin = {
   data() {
     return {
       useOnQuotationOptions: [
-        { text: this.$trans('Items'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('Total'), value: OPTION_ONLY_TOTAL },
-        { text: this.$trans('None'), value: OPTION_NONE },
+        { text: $trans('Items'), value: OPTION_USER_TOTALS },
+        { text: $trans('Total'), value: OPTION_ONLY_TOTAL },
+        { text: $trans('None'), value: OPTION_NONE },
       ],
       useOnQuotationSelected: null,
     }
@@ -61,7 +63,7 @@ let quotationMixin = {
         await this.loadData()
       } catch (e) {
         console.log(e)
-        this.errorToast(this.$trans('Error removing costs'))
+        errorToast(this.create, $trans('Error removing costs'))
       }
       this.isLoading = false
     },
@@ -70,10 +72,10 @@ let quotationMixin = {
       try {
         await this.costService.updateCollection()
         await this.loadData()
-        this.infoToast(this.$trans('Saved'), this.$trans('Costs saved'))
+        infoToast(this.create, $trans('Saved'), $trans('Costs saved'))
       } catch (e) {
         console.log(e)
-        this.errorToast(this.$trans('Error saving costs'))
+        errorToast(this.create, $trans('Error saving costs'))
       }
       this.isLoading = false
     },

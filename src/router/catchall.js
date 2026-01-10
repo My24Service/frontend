@@ -5,7 +5,7 @@ import NoAccess from "../views/account/NoAccess";
 
 
 export default [{
-  path: '*',
+  path: '/:pathMatch(.*)*',
   component: TheAppLayout,
   props: {
     hasSubNav: false,
@@ -22,7 +22,7 @@ export default [{
     {
       meta: { needsAuth: false },
       name: 'not-found',
-      path: '*',
+      path: '/:pathMatch(.*)*',
       components: {
         'app-content': NotFound,
       },

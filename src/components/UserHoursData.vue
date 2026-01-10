@@ -2,18 +2,18 @@
   <div class="app-grid">
     <b-row>
       <b-col cols="2">
-        <b-link @click.prevent="backWeek" v-bind:title="$trans('Week back')">
-          <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-        </b-link>
+        <BLink @click.prevent="backWeek" v-bind:title="$trans('Week back')">
+          <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
+        </BLink>
       </b-col>
       <b-col cols="8">
         {{ hoursTitle }} - {{ week }}/{{ today.format('Y') }}
       </b-col>
       <b-col cols="2">
         <div class="float-right">
-          <b-link @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
-            <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-          </b-link>
+          <BLink @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
+            <IBiArrowRight font-scale="1.8"></IBiArrowRight>
+          </BLink>
         </div>
       </b-col>
     </b-row>
@@ -25,8 +25,7 @@
       :items="data"
       responsive="md"
       class="data-table"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
+      :sort-by="sortBy"
     >
       <template #table-busy>
         <div class="text-center text-danger my-2">
@@ -48,9 +47,18 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
-import {componentMixin} from "../utils";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
+
 
 export default {
+  setup() {
+    const store = useMainStore()
+
+    return {
+      store
+    }
+  },
   mixins: [componentMixin],
   name: "UserHoursData",
   props: {
@@ -65,15 +73,13 @@ export default {
       startDate: null,
       data: [],
       fields: [],
-      sortBy: "full_name",
-      sortDesc: false,
+      sortBy: [{key: "full_name", order: 'asc'}],
       day_fields: [],
       day_field_types: []
     }
   },
   computed: {
     hoursTitle() {
-
       let result = []
       if (this.day_fields) {
         for(let i=0; i<this.day_fields.length; i++) {
@@ -84,13 +90,16 @@ export default {
     }
   },
   created() {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.store.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
     this.today = this.$route.query.date ? this.$moment(this.$route.query.date) : this.$moment().weekday(monday)
     this.startDate = this.today.format('YYYY-MM-DD')
     this.week = this.today.format('[week] W')
+    const sortBy = this.$route.query.sort_field ?? 'full_name'
+    const sortDir = this.$route.query.sort_dir ?? 'asc'
+    this.sortBy = [{key: sortBy, order: sortDir}]
   },
   methods: {
     nextWeek() {
@@ -131,7 +140,7 @@ export default {
 
       header_columns.push({
         key: 'full_name',
-        label: this.$trans('User'),
+        label: $trans('User'),
         sortable: true
       })
 
@@ -146,7 +155,7 @@ export default {
 
       header_columns.push({
         key: 'total',
-        label: this.$trans('Total'),
+        label: $trans('Total'),
         sortable: true
       })
 

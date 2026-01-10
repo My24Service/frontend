@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: 'quotations-sent' }">
             {{ $trans("Send quotation") }}
           </router-link>
@@ -15,11 +15,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -32,7 +32,7 @@
               <strong><i>{{ $trans("Quotations can't be changed after having been sent") }}</i></strong>
             </p>
             <h6>{{ $trans("Email") }}</h6>
-            <b-form-group
+            <BFormGroup
               :label="$trans('Email recipients')"
               label-for="tags-validation"
               :state="isSubmitClicked ? !recipientInvalid : null"
@@ -51,40 +51,40 @@
               <template #invalid-feedback>
                 {{ $trans("You must provide at least 1 email recipient") }}
               </template>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               v-bind:label="$trans('Subject')"
               label-for="offer_subject"
               label-cols="3">
-              <b-form-input
+              <BFormInput
                 autofocus
                 id="offer_subject"
                 size="sm"
                 v-model="offer.subject"
                 :state="isSubmitClicked ? !v$.offer.subject.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.offer.subject.$error : null">
                 {{ $trans("Please enter the email subject") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Body')"
               label-for="offer_body"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="offer_body"
                 v-model="offer.body"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
             <h6>{{ $trans("Attachments") }}</h6>
             <p v-if="!documents.length">
               {{ $trans("No attached documents to this quotation") }}
             </p>
             <p v-for="document in documents" :key="document.id">
               {{ document.name }}
-              <b-button
+              <BButton
                 class="btn button btn-danger quotation-pdf-button"
                 @click="downloadPdf"
                 v-if="document.is_pdf"
@@ -92,7 +92,7 @@
               >
                 <b-spinner small v-if="loadingPdf"></b-spinner>
                 {{ $trans('Preview quotation PDF') }}
-              </b-button>
+              </BButton>
             </p>
           </div>
         </div>
@@ -105,13 +105,19 @@ import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 
 import my24 from '@/services/my24.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 import {OfferModel, OfferService} from "@/models/quotations/Offer.js";
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   computed: {
     isCreate() {
@@ -161,7 +167,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching unsent offer", error);
-        this.errorToast(this.$trans("Error fetching unsent offer"));
+        errorToast(this.create, $trans("Error fetching unsent offer"));
         this.isLoading = false;
       }
     },
@@ -200,7 +206,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        this.errorToast(this.$trans('Error fetching quotation'))
+        errorToast(this.create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     },
@@ -218,7 +224,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("Error fetching documents", error);
-        this.errorToast(this.$trans("Error fetching documents"));
+        errorToast(this.create, $trans("Error fetching documents"));
         this.isLoading = false;
       }
     },
@@ -240,9 +246,9 @@ export default {
 
       this.offer.recipients = validatedEmails
       this.isLoading = true;
-      const sentTitle = this.$trans("Sent")
-      const sentBody = this.$trans("Quotation has been sent")
-      const errorBody = this.$trans("Error sending quotation")
+      const sentTitle = $trans("Sent")
+      const sentBody = $trans("Quotation has been sent")
+      const errorBody = $trans("Error sending quotation")
 
       if (this.isCreate) {
         this.offer.quotation = this.$route.query.quotationId
@@ -251,14 +257,14 @@ export default {
           this.isLoading = false;
 
           if (!this.offer.is_sent) {
-            this.errorToast(errorBody);
+            errorToast(this.create, errorBody);
             return;
           }
-          this.infoToast(sentTitle, sentBody);
+          infoToast(this.create, sentTitle, sentBody);
           await this.$router.push({name: 'quotations-sent'});
         } catch (error) {
           console.log("Error sending quotation", error);
-          this.errorToast(errorBody);
+          errorToast(this.create, errorBody);
           this.isLoading = false;
         }
         return
@@ -271,14 +277,14 @@ export default {
 
         this.isLoading = false
         if (!this.offer.is_sent) {
-          this.errorToast(errorBody);
+          errorToast(this.create, errorBody);
           return;
         }
-        this.infoToast(sentTitle, sentBody);
+        infoToast(this.create, sentTitle, sentBody);
         await this.$router.push({name: 'quotations-sent'});
       } catch(error) {
         console.log("Error sending quotation", error);
-        this.errorToast(this.$trans(errorBody));
+        errorToast(this.create, $trans(errorBody));
         this.isLoading = false;
       }
     },

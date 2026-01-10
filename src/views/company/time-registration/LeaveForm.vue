@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: 'leave-list' }">{{ $trans("Leave") }}</router-link>
           /
           <span class="dimmed">
@@ -12,11 +12,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -25,14 +25,14 @@
       <div class="page-detail flex-columns">
         <div class="panel">
           <h6>{{ $trans("Request leave") }}</h6>
-          <b-form-group
+          <BFormGroup
             v-if="isCreate"
             label-size="sm"
             label-class="p-sm-0"
             v-bind:label="$trans('Search existing user')"
             label-for="user-search"
           >
-            <multiselect
+            <VueMultiselect
               id="user-search"
               track-by="id"
               :placeholder="$trans('Type to search')"
@@ -50,51 +50,51 @@
               :custom-label="userLabel"
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-            </multiselect>
-          </b-form-group>
-          <b-form-group
+            </VueMultiselect>
+          </BFormGroup>
+          <BFormGroup
             v-if="isCreate"
             label-class=""
             :label="$trans('User')"
             label-for="user"
             cols="3"
           >
-            <b-form-input
+            <BFormInput
               id="total_time"
               v-model="userName"
               placeholder="User"
               :readonly="true"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.user.$error : null">
               {{ $trans("Please select a user") }}
             </b-form-invalid-feedback>
-          </b-form-group>
-          <b-form-group v-bind:label="$trans('Leave type')" label-for="leave_type" label-cols="3">
-            <b-form-select
+          </BFormGroup>
+          <BFormGroup v-bind:label="$trans('Leave type')" label-for="leave_type" label-cols="3">
+            <BFormSelect
               v-model="leave.leave_type"
               :options="leaveTypes"
               value-field="id"
               text-field="name"
               :state="isSubmitClicked ? !v$.leave.leave_type.$error : null"
-            ></b-form-select>
+            ></BFormSelect>
             <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.leave_type.$error : null">
               {{ $trans("Please select a leave type") }}
             </b-form-invalid-feedback>
-          </b-form-group>
-          <b-form-group
+          </BFormGroup>
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Description')"
             label-for="leave_description"
           >
-            <b-form-textarea
+            <BFormTextarea
               id="leave_description"
               v-model="leave.description"
               rows="3"
-            ></b-form-textarea>
-          </b-form-group>
+            ></BFormTextarea>
+          </BFormGroup>
           <div class="flex-columns">
-            <b-form-group :label="$trans('Start date')" label-for="start_date" cols="4">
-              <b-form-datepicker
+            <BFormGroup :label="$trans('Start date')" label-for="start_date" cols="4">
+              <VueDatePicker
                 id="start_date"
                 class=""
                 v-model="leave.start_date"
@@ -104,35 +104,35 @@
                 @input="() => loadTotals(leave)"
                 :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
               >
                 {{ $trans("Please enter a start date") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group :label="$trans('Whole day')" cols="4">
-              <b-form-checkbox
+            </BFormGroup>
+            <BFormGroup :label="$trans('Whole day')" cols="4">
+              <BFormCheckbox
                 id="leave_start_date_is_whole_day"
                 v-model="leave.start_date_is_whole_day"
                 name="leave_start_date_is_whole_day"
-              ></b-form-checkbox>
-            </b-form-group>
-            <b-form-group
+              ></BFormCheckbox>
+            </BFormGroup>
+            <BFormGroup
               v-if="!leave.start_date_is_whole_day"
               label-class=""
               :label="$trans('Start time')"
               label-for="start_time"
               cols="4"
             >
-              <b-form-input
+              <BFormInput
                 id="start_time"
                 v-model="leave.start_time"
                 type="text"
                 placeholder="HH:mm"
                 @input="startTimeChanged"
                 :state="isSubmitClicked ? !startTimeInvalid : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-timepicker
                 button-only
                 right
@@ -145,11 +145,11 @@
               <b-form-invalid-feedback :state="isSubmitClicked ? !startTimeInvalid : null">
                 {{ $trans("Please enter a valid start time HH:mm") }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
           <div class="flex-columns">
-            <b-form-group :label="$trans('End date')" label-for="end_date" cols="4">
-              <b-form-datepicker
+            <BFormGroup :label="$trans('End date')" label-for="end_date" cols="4">
+              <VueDatePicker
                 id="end_date"
                 class=""
                 v-model="leave.end_date"
@@ -159,33 +159,33 @@
                 @input="() => loadTotals(leave)"
                 :state="isSubmitClicked ? !v$.leave.end_date.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.end_date.$error : null">
                 {{ $trans("Please enter a end date") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group :label="$trans('Whole day')" cols="4">
-              <b-form-checkbox
+            </BFormGroup>
+            <BFormGroup :label="$trans('Whole day')" cols="4">
+              <BFormCheckbox
                 id="leave_end_date_is_whole_day"
                 v-model="leave.end_date_is_whole_day"
                 name="leave_end_date_is_whole_day"
-              ></b-form-checkbox>
-            </b-form-group>
-            <b-form-group
+              ></BFormCheckbox>
+            </BFormGroup>
+            <BFormGroup
               v-if="!leave.end_date_is_whole_day"
               label-class=""
               :label="$trans('End time')"
               label-for="end_time"
               cols="4"
             >
-              <b-form-input
+              <BFormInput
                 id="end_time"
                 v-model="leave.end_time"
                 type="text"
                 placeholder="HH:mm"
                 @input="endTimeChanged"
                 :state="isSubmitClicked ? !endTimeInvalid : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-timepicker
                 button-only
                 right
@@ -198,23 +198,23 @@
               <b-form-invalid-feedback :state="isSubmitClicked ? !endTimeInvalid : null">
                 {{ $trans("Please enter a valid end time HH:mm") }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
           <b-overlay :show="loadingTotals" rounded="sm">
             <div class="flex-columns">
-              <b-form-group
+              <BFormGroup
                 label-class=""
                 :label="$trans('Total time')"
                 label-for="totla_time"
                 cols="4"
               >
-                <b-form-input
+                <BFormInput
                   id="total_time"
                   v-model="leave.total_time"
                   placeholder="Total time"
                   :readonly="true"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </div>
           </b-overlay>
         </div>
@@ -229,9 +229,11 @@ import { required } from "@vuelidate/validators";
 import { UserLeaveHoursService } from "@/models/company/UserLeaveHours.js";
 import { LeaveTypeService } from "@/models/company/LeaveType.js";
 import { UserListService } from "@/models/company/UserList.js";
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 const isCorrectTime = value => {
   return /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(value);
@@ -239,10 +241,17 @@ const isCorrectTime = value => {
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {
@@ -304,7 +313,7 @@ export default {
     }
   },
   created() {
-    const lang = this.$store.getters.getCurrentLanguage;
+    const lang = this.mainStore.getCurrentLanguage;
     this.$moment = moment;
     this.$moment.locale(lang);
 
@@ -332,7 +341,7 @@ export default {
         this.compLoading = false
       } catch(error) {
         console.log('Error fetching users', error)
-        this.errorToast(this.$trans('Error fetching users'))
+        errorToast(this.create, $trans('Error fetching users'))
         this.compLoading = false
       }
     },
@@ -361,12 +370,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.leaveHoursService.insert(this.leave);
-          this.infoToast(this.$trans("Created"), this.$trans("Leave has been created"));
+          infoToast(this.create, $trans("Created"), $trans("Leave has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating leave", error);
-          this.errorToast(this.$trans("Error creating leave"));
+          errorToast(this.create, $trans("Error creating leave"));
           this.isLoading = false;
         }
 
@@ -375,12 +384,12 @@ export default {
 
       try {
         await this.leaveHoursService.update(this.pk, this.leave);
-        this.infoToast(this.$trans("Updated"), this.$trans("Leave has been updated"));
+        infoToast(this.create, $trans("Updated"), $trans("Leave has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("Error updating leave", error);
-        this.errorToast(this.$trans("Error updating leave"));
+        errorToast(this.create, $trans("Error updating leave"));
         this.isLoading = false;
       }
     },
@@ -398,7 +407,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave", error);
-        this.errorToast(this.$trans("Error loading leave"));
+        errorToast(this.create, $trans("Error loading leave"));
         this.isLoading = false;
       }
     },
@@ -411,7 +420,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave types", error);
-        this.errorToast(this.$trans("Error loading leave types"));
+        errorToast(this.create, $trans("Error loading leave types"));
         this.isLoading = false;
       }
     },

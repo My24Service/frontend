@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: statusCodeListLink }">{{ $trans("Statuscodes") }}</router-link>
           /
           <strong>{{ statuscode.statuscode }}</strong>
@@ -13,11 +13,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -26,61 +26,61 @@
       <div class="page-detail flex-columns">
         <div class="panel">
           <h6>{{ $trans("Settings") }}</h6>
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Statuscode')"
             label-for="statuscode_statuscode"
             label-cols="3"
           >
-            <b-form-input
+            <BFormInput
               autofocus
               id="statuscode_statuscode"
               size="sm"
               v-model="statuscode.statuscode"
               :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null"
             >
               {{ $trans("Please enter a statuscode") }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('New status template')"
             label-for="statuscode_new_status_template"
             :description="$trans('For statuses that are not set by the application.')"
           >
-            <b-form-input
+            <BFormInput
               id="statuscode_new_status_template"
               size="sm"
               v-model="statuscode.new_status_template"
             >
-            </b-form-input>
-          </b-form-group>
+            </BFormInput>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Description')"
             label-for="statuscode_description"
           >
-            <b-form-textarea
+            <BFormTextarea
               id="statuscode_description"
               v-model="statuscode.description"
               rows="3"
-            ></b-form-textarea>
-          </b-form-group>
+            ></BFormTextarea>
+          </BFormGroup>
 
           <h6>{{ $trans("Label") }}</h6>
-          <b-form-group label-cols="3" label="Label preview">
+          <BFormGroup label-cols="3" label="Label preview">
             <small
               class="statuscode-preview"
               :style="`--bg-color: ${statuscode.color}; --text-color: ${statuscode.text_color}`"
             >
               {{ statuscode.statuscode || "statuscode text" }}
             </small>
-          </b-form-group>
-          <b-form-group
+          </BFormGroup>
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Label color')"
             label-for="statuscode_color"
@@ -93,9 +93,9 @@
               class="color-picker-placeholder"
               v-model="statuscode.color"
             ></color-picker>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Text color')"
             label-for="statuscode_text_color"
@@ -106,7 +106,7 @@
               class="color-picker-placeholder"
               v-model="statuscode.text_color"
             ></color-picker>
-          </b-form-group>
+          </BFormGroup>
           <ExpiryConditionForm
             :statuscode="statuscode"
             @expiry-condition-changed="updateStatuscode"
@@ -127,7 +127,6 @@ input[type="color"] {
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 
-import statuscodeOrderModel from "@/models/orders/Statuscode.js";
 import {
   QuotationStatuscodeService,
   QuotationStatuscodeModel
@@ -137,23 +136,30 @@ import {
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE,
   STATUSCODE_TYPE_WORK_HOURS
-} from "../../../models/company/AbstractStatuscode";
+} from "@/models/company/AbstractStatuscode";
 import {
   LeaveStatuscodeModel,
   LeaveStatuscodeService
-} from "../../../models/company/LeaveStatuscode";
+} from "@/models/company/LeaveStatuscode";
 import {
   SickLeaveStatuscodeModel,
   SickLeaveStatuscodeService
-} from "../../../models/company/SickLeaveStatuscode";
+} from "@/models/company/SickLeaveStatuscode";
 import {
   WorkHoursStatuscodeModel,
   WorkHoursStatuscodeService
 } from "@/models/company/WorkHoursStatuscode";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
   },
   components: {
     ExpiryConditionForm
@@ -253,12 +259,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.statuscodeService.insert(this.statuscode);
-          this.infoToast(this.$trans("Created"), this.$trans("Statuscode has been created"));
+          infoToast(this.create, $trans("Created"), $trans("Statuscode has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating statuscode", error);
-          this.errorToast(this.$trans("Error creating statuscode"));
+          errorToast(this.create, $trans("Error creating statuscode"));
           this.isLoading = false;
         }
 
@@ -267,12 +273,12 @@ export default {
 
       try {
         await this.statuscodeService.update(this.pk, this.statuscode);
-        this.infoToast(this.$trans("Updated"), this.$trans("Statuscode has been updated"));
+        infoToast(this.create, $trans("Updated"), $trans("Statuscode has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("Error updating statuscode", error);
-        this.errorToast(this.$trans("Error updating statuscode"));
+        errorToast(this.create, $trans("Error updating statuscode"));
         this.isLoading = false;
       }
     },
@@ -284,7 +290,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscode", error);
-        this.errorToast(this.$trans("Error loading statuscode"));
+        errorToast(this.create, $trans("Error loading statuscode"));
         this.isLoading = false;
       }
     },

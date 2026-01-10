@@ -3,15 +3,15 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="filter-square"></b-icon>
+          <IBiFilterSquare></IBiFilterSquare>
           <span v-if="isCreate">{{ $trans('New filter') }}</span>
           <span v-else>{{ $trans('Edit filter') }}</span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary outline">
-            {{ $trans('Cancel') }}</b-button>
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans('Save') }}</b-button>
+          <BButton @click="cancelForm" type="button" variant="secondary outline">
+            {{ $trans('Cancel') }}</BButton>
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans('Save') }}</BButton>
         </div>
       </div>
     </header>
@@ -19,49 +19,49 @@
     <div class="page-detail">
       <div class='flex-columns'>
         <div class='panel col-1-2'>
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             label-size="sm"
             :label="$trans('Name')"
             label-for="filter_name"
           >
-            <b-form-input
+            <BFormInput
               id="filter_name"
               size="sm"
               v-model="filter.name"
               :state="isSubmitClicked ? !v$.filter.name.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.filter.name.$error : null">
               {{ $trans('Please enter a name') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             label-size="sm"
             :label="$trans('Base filter')"
             label-for="filter_base_filter"
           >
-            <b-form-select
+            <BFormSelect
               id="filter_base_filter"
               v-model="filter.base_filter"
               :options="baseFilterOptions"
-              size="sm"></b-form-select>
-          </b-form-group>
+              size="sm"></BFormSelect>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             label-size="sm"
             :label="$trans('Query mode')"
             label-for="filter_querymode"
           >
-            <b-form-select
+            <BFormSelect
               id="filter_query_mode"
               v-model="filter.querymode"
               :options="queryModes"
-              size="sm"></b-form-select>
-          </b-form-group>
+              size="sm"></BFormSelect>
+          </BFormGroup>
 
           <h6>{{ $trans("Conditions")}}</h6>
           <div
@@ -72,120 +72,120 @@
             <b-container>
               <b-row>
                 <b-col cols="6">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Field')"
                     :label-for="`filter_field_${index}`"
                   >
-                    <b-form-select
+                    <BFormSelect
                       :id="`filter_field_${index}`"
                       v-model="condition.field"
                       :options="allFields"
                       @change="checkCondition(condition)"
-                      size="sm"></b-form-select>
-                  </b-form-group>
+                      size="sm"></BFormSelect>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="6">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Operator')"
                     :label-for="`filter_operator${index}`"
                   >
-                    <b-form-select
+                    <BFormSelect
                       :id="`filter_operator${index}`"
                       v-model="condition.operator"
                       :options="getOperators(condition.field)"
                       size="sm"
                       @change="checkCondition(condition)"
-                    ></b-form-select>
-                  </b-form-group>
+                    ></BFormSelect>
+                  </BFormGroup>
                 </b-col>
               </b-row>
               <b-row>
                 <b-col cols="3">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     :label="$trans('Case sensitive')"
                     :label-for="`filter_is_case_sensitive${index}`"
                   >
-                    <b-form-checkbox
+                    <BFormCheckbox
                       :id="`filter_is_case_sensitive${index}`"
                       :disabled="condition.isCaseDisabled"
                       v-model="condition.is_case_sensitive"
-                    ></b-form-checkbox>
-                  </b-form-group>
+                    ></BFormCheckbox>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="2">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     :label="$trans('Exact')"
                     :label-for="`filter_is_exact${index}`"
                   >
-                    <b-form-checkbox
+                    <BFormCheckbox
                         :id="`filter_is_exact${index}`"
                         :disabled="condition.isExactDisabled"
                         v-model="condition.is_exact"
                       >
-                      </b-form-checkbox>
-                  </b-form-group>
+                      </BFormCheckbox>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="2">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     :label="$trans('Exclude')"
                     :label-for="`filter_is_exclude${index}`"
                   >
-                    <b-form-checkbox
+                    <BFormCheckbox
                       :id="`filter_is_exclude${index}`"
                       :disabled="condition.isExcludeDisabled"
                       v-model="condition.is_exclude"
                     >
-                    </b-form-checkbox>
-                  </b-form-group>
+                    </BFormCheckbox>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="2">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Values')"
                     :label-for="`filter_values_query_mode${index}`"
                   >
-                    <b-form-select
+                    <BFormSelect
                       :disabled="condition.valuesQueryModeDisabled"
                       :id="`filter_values_query_mode${index}`"
                       v-model="condition.values_query_mode"
                       :options="queryModes"
-                      size="sm"></b-form-select>
-                  </b-form-group>
+                      size="sm"></BFormSelect>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="3">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     :label="$trans('Values NOT')"
                     :label-for="`filter_values_not${index}`"
                   >
-                    <b-form-checkbox
+                    <BFormCheckbox
                       :id="`filter_values_not${index}`"
                       :disabled="condition.isValuesNotDisabled"
                       v-model="condition.values_not"
                     >
-                    </b-form-checkbox>
-                  </b-form-group>
+                    </BFormCheckbox>
+                  </BFormGroup>
                 </b-col>
               </b-row>
               <b-row>
                 <b-col cols="12">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Values')"
                     label-for="filter_operator"
                   >
                     <div v-for="(_, index) in condition.values" :key="index" class="flex-columns value-container">
-                      <b-form-input
+                      <BFormInput
                         v-if="condition.fieldInputType === FIELD_TYPE_CHAR && !isStatusField(condition.field)"
                         size="sm"
                         v-model="condition.values[index].char_value"
-                      ></b-form-input>
-                      <multiselect
+                      ></BFormInput>
+                      <VueMultiselect
                         v-if="condition.fieldInputType === FIELD_TYPE_CHAR && isStatusField(condition.field)"
                         :placeholder="$trans('Type to search status..')"
                         open-direction="bottom"
@@ -198,41 +198,41 @@
                         v-model="condition.values[index].char_value"
                         @select="selectStatus"
                       >
-                      </multiselect>
-                      <b-form-checkbox
+                      </VueMultiselect>
+                      <BFormCheckbox
                         v-if="condition.fieldInputType === FIELD_TYPE_BOOL"
                         v-model="condition.values[index].bool_value"
                       >
                         {{ condition.values[index].bool_value ? $trans("yes") : $trans("no") }}
-                      </b-form-checkbox>
-                      <b-link :title="$trans('delete')" @click="removeConditionValue(condition, index)">
-                        <b-icon-trash-fill class="edit-icon"></b-icon-trash-fill>
-                      </b-link>
+                      </BFormCheckbox>
+                      <BLink :title="$trans('delete')" @click="removeConditionValue(condition, index)">
+                        <IBiTrashFill class="edit-icon"></IBiTrashFill>
+                      </BLink>
                       <br/>
                     </div>
                     <div
                       class="float-right add-value"
                       v-if="condition.fieldInputType !== FIELD_TYPE_BOOL"
                     >
-                      <b-link
+                      <BLink
                         :title="$trans('add value')"
                         @click="addConditionValue(condition)"
                       >
                         {{ $trans("add value") }}
-                      </b-link>
+                      </BLink>
                     </div>
-                  </b-form-group>
+                  </BFormGroup>
                 </b-col>
               </b-row>
               <b-row>
                 <b-col cols="12">
                   <div class="h5 left">
-                    <b-link
+                    <BLink
                       :title="$trans('remove condition')"
                       @click="removeCondition(index)"
                     >
                       {{ $trans("remove condition") }}
-                    </b-link>
+                    </BLink>
                   </div>
                 </b-col>
               </b-row>
@@ -243,12 +243,12 @@
               <b-col cols="12">
                 <hr/>
                 <div class="h4 float-right">
-                  <b-link
+                  <BLink
                     :title="$trans('add condition')"
                     @click="addCondition()"
                   >
                     {{ $trans("add condition") }}
-                  </b-link>
+                  </BLink>
                 </div>
               </b-col>
             </b-row>
@@ -264,12 +264,12 @@
               <h6>{{ example.filter.name }}</h6>
               <p>{{ example.description }}</p>
               <p>
-                <b-link
+                <BLink
                   :title="$trans('load example')"
                   @click="loadExample(example)"
                 >
                   {{ $trans("load example") }}
-                </b-link>
+                </BLink>
               </p>
             </li>
           </ul>
@@ -296,15 +296,21 @@ import {
   USER_FILTER_TYPE_ORDER
 } from "@/models/base_user_filter";
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
-import Multiselect from "vue-multiselect";
+import VueMultiselect from "vue-multiselect";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   name: "UserFilterForm",
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   validations() {
     return {
@@ -334,8 +340,8 @@ export default {
       filter: null,
       examples: [],
       queryModes: [
-        {value: QUERY_MODE_AND, text: this.$trans('and')},
-        {value: QUERY_MODE_OR, text: this.$trans('or')},
+        {value: QUERY_MODE_AND, text: $trans('and')},
+        {value: QUERY_MODE_OR, text: $trans('or')},
       ],
       allFields: [],
       statusFields: [],
@@ -509,7 +515,7 @@ export default {
       }
     },
     removeCondition(index) {
-      if (confirm(this.$trans("Remove this condition?"))) {
+      if (confirm($trans("Remove this condition?"))) {
         this.filter.json_conditions.splice(index, 1)
       }
     },
@@ -538,12 +544,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.service.insert(this.filter)
-          this.infoToast(this.$trans('Created'), this.$trans('Filter has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Filter has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating filter', error)
-          this.errorToast(this.$trans('Error creating filter'))
+          errorToast(this.create, $trans('Error creating filter'))
           this.isLoading = false
         }
 
@@ -552,12 +558,12 @@ export default {
 
       try {
         await this.service.update(this.pk, this.filter)
-        this.infoToast(this.$trans('Updated'), this.$trans('Filter has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Filter has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating filter', error)
-        this.errorToast(this.$trans('Error updating filter'))
+        errorToast(this.create, $trans('Error updating filter'))
         this.isLoading = false
       }
     },
@@ -574,7 +580,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching filter', error)
-        this.errorToast(this.$trans('Error loading filter'))
+        errorToast(this.create, $trans('Error loading filter'))
         this.isLoading = false
       }
     },

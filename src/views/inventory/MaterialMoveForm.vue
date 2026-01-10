@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="box-arrow-right"></b-icon>{{ $trans('Move materials') }}</h3>
+        <h3><IBiBoxArrowRight></IBiBoxArrowRight>{{ $trans('Move materials') }}</h3>
         <div class="flex-columns" style="z-index:1000">
           <b-dropdown split :text="$trans('Submit')" class="m-2" variant="primary" @click="submitForm" :disabled="canSubmit">
             <b-dropdown-item-button
@@ -13,12 +13,12 @@
             </b-dropdown-item-button>
           </b-dropdown>
           <!--
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
-            <b-button @click="submitFormBulk" :disabled="buttonDisabled" type="button" variant="success">
+            </BButton>
+            <BButton @click="submitFormBulk" :disabled="buttonDisabled" type="button" variant="success">
               {{ $trans('Bulk') }}
-            </b-button>
+            </BButton>
             -->
         </div>
       </div>
@@ -40,13 +40,13 @@
                 <dd v-if="selectedMaterial.material_identifier">{{ selectedMaterial.material_identifier }}</dd>
               </dl>
               <h6>{{$trans('Amount')}}</h6>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Number of items to move')"
                 label-for="move-material-amount"
               >
-                <b-form-input
+                <BFormInput
                   ref="amount"
                   v-model="amount"
                   id="move-material-amount"
@@ -54,23 +54,23 @@
                   type="number"
                   :max="selectedMaterial.total_amount"
                   min="1"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.amount.$error : null">
                   {{ $trans('Please enter an amount') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </div>
             <div v-else class="dimmed">
               <h3>
-                <span class='h1'><br><b-icon icon="box"></b-icon></span>
+                <span class='h1'><br><IBiBox></IBiBox></span>
                 <br><br>{{ $trans("Material") }}</h3>
             </div>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-for="move-material-purchase-order-material-search"
               >
-              <multiselect
+              <VueMultiselect
               id="move-material-purchase-order-material-search"
               track-by="id"
                   :placeholder="$trans('Select material (type to search)')"
@@ -91,12 +91,12 @@
                   ref="searchMaterial"
                   >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
         </div>
 
         <div class="panel col-1-3">
@@ -104,22 +104,22 @@
 
           <div v-if="selectedFromLocation.location_name">
             <h3>
-              <span class="h1 text-danger"><br><b-icon icon="box-arrow-up-right"></b-icon></span>
+              <span class="h1 text-danger"><br><IBiBoxArrowUpRight></IBiBoxArrowUpRight></span>
               <br/><br/>{{ selectedFromLocation.location_name }}
             </h3>
           </div>
           <div v-else class="dimmed">
             <h3>
-              <span class='h1'><br><b-icon icon="box-arrow-right"></b-icon></span>
+              <span class='h1'><br><IBiBoxArrowUpRight></IBiBoxArrowUpRight></span>
               <br/><br/>{{ $trans('Departure location') }}
             </h3>
           </div>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-for="move-material-from-location-search"
             >
-            <multiselect
+            <VueMultiselect
               id="move-material-from-location-search"
               track-by="id"
               open-direction="bottom"
@@ -137,12 +137,12 @@
               :custom-label="fromLocationLabel"
             >
               <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-            </multiselect>
+            </VueMultiselect>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.selectedFromLocationPk.$error : null">
               {{ $trans('Please select from location') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
         </div>
 
@@ -151,22 +151,22 @@
 
           <div v-if="selectedToLocation.name">
             <h3>
-              <span class="h1 text-success"><br><b-icon icon="box-arrow-in-down-right"></b-icon></span>
+              <span class="h1 text-success"><br><IBiBoxArrowInRight></IBiBoxArrowInRight></span>
               <br/><br/>{{ selectedToLocation.name }}
             </h3>
           </div>
 
           <div v-else class="dimmed">
             <h3>
-              <span class="h1"><br><b-icon icon="box-arrow-in-right"></b-icon></span>
+              <span class="h1"><br><IBiBoxArrowInRight></IBiBoxArrowInRight></span>
               <br/><br/>{{ $trans('Arrival location') }}
             </h3>
           </div>
 
-          <b-form-group
+          <BFormGroup
             label-for="move-material-to-location-search"
             >
-            <multiselect
+            <VueMultiselect
               id="move-material-to-location-search"
               track-by="id"
               :placeholder="$trans('Type to search')"
@@ -185,12 +185,12 @@
               :custom-label="toLocationLabel"
             >
               <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-            </multiselect>
+            </VueMultiselect>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.selectedToLocationPk.$error : null">
               {{ $trans('Please select to location') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
         </div>
       </b-form>
@@ -212,20 +212,26 @@ header {
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import inventoryModel from '@/models/inventory/Inventory.js'
 import materialService from '@/models/inventory/Material.js'
 import stockLocationModel from '@/models/inventory/StockLocation.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   data() {
     return {
@@ -292,11 +298,11 @@ export default {
       } catch(error) {
         console.log('Error fetching materials', error)
         this.isLoading = false
-        this.errorToast(this.$trans('Error fetching materials'))
+        errorToast(this.create, $trans('Error fetching materials'))
       }
     },
     materialLabel(material) {
-      const text = this.$trans('in stock')
+      const text = $trans('in stock')
       return `${material.material_name}, ${text}: ${material.total_amount}`
     },
     fromLocationLabel(location) {
@@ -316,7 +322,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching locations', error)
-        this.errorToast(this.$trans('Error fetching locations'))
+        errorToast(this.create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -333,7 +339,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching locations', error)
-        this.errorToast(this.$trans('Error fetching locations'))
+        errorToast(this.create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -358,7 +364,7 @@ export default {
           this.selectedFromLocationPk,
           this.selectedToLocationPk,
           this.amount)
-        this.infoToast(this.$trans('Moved'), this.$trans('Material moved'))
+        infoToast(this.create, $trans('Moved'), $trans('Material moved'))
         this.buttonDisabled = true
         this.isLoading = false
 
@@ -376,7 +382,7 @@ export default {
         }
       } catch(error) {
         console.log('error moving', error)
-        this.errorToast(this.$trans('Error moving material'))
+        errorToast(this.create, $trans('Error moving material'))
         this.buttonDisabled = false
         this.isLoading = false
       }

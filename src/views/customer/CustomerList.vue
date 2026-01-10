@@ -18,10 +18,10 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="building"></b-icon> {{ $trans("Customers") }}
+          <IBiBuilding></IBiBuilding> {{ $trans("Customers") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -34,41 +34,32 @@
               v-bind:method="function() { downloadList() }"
               v-bind:title="$trans('Download')"
             />
-          </b-button-group>
-          <router-link :to="{name: 'customer-add'}" class="btn"><b-icon icon="building"></b-icon>{{$trans('Add customer')}}</router-link>
-        </b-button-toolbar>
+          </BButton-group>
+          <router-link :to="{name: 'customer-add'}" class="btn">
+            <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
+          </router-link>
+        </BButton-toolbar>
       </div>
     </header>
 
     <div class="app-detail panel overflow-auto">
 
-      <b-table
+      <BTable
         id="customer-table"
-        small
+        :small="true"
+        primary-key="id"
         :busy='isLoading'
         :fields="customerFields"
         :items="customers"
         responsive="md"
         class="data-table"
         :no-local-sorting="true"
-        @sort-changed="sortingChanged"
-        :sort-by.sync="sortBy"
-        :sort-desc.sync="sortDesc"
+        @sorted="sortingChanged"
+        :sort-by="sortBy"
         sort-icon-left
         :tbody-tr-class="rowClass"
       >
-        <template #head(icons)="">
-          <div class="float-right">
-
-          </div>
-        </template>
-        <template #table-busy>
-          <div class="text-center my-2">
-            <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-            <strong>{{ $trans('Loading...') }}</strong>
-          </div>
-        </template>
-        <template #cell(id)="data">
+        <template #cell(name)="data">
           <div v-if="data.item.branch_view" class="listing-item">
             <router-link :to="{name: 'customer-view', params: {pk: data.item.id}}">
               {{ data.item.branch_view.name }}, {{ data.item.branch_view.city }}, {{ data.item.branch_view.country_code }}
@@ -81,7 +72,7 @@
                 <b>{{ $trans('Contact') }}</b>: {{ data.item.branch_view.contact }}<br/>
             </span>
             <span v-if="data.item.branch_view.email">
-              {{ $trans('Email') }}: <b-link class="px-1" v-bind:href="`mailto:${data.item.branch_view.email}`">{{ data.item.branch_view.email }}</b-link><br/>
+              {{ $trans('Email') }}: <BLink class="px-1" v-bind:href="`mailto:${data.item.branch_view.email}`">{{ data.item.branch_view.email }}</BLink><br/>
             </span>
             <span v-if="data.item.branch_view.tel && data.item.branch_view.tel.trim() !== ''">
                 <b>{{ $trans('Tel') }}</b>: {{ data.item.branch_view.tel }}<br/>
@@ -104,7 +95,7 @@
         </template>
         <template #cell(remarks)="data">
           <span v-if="data.item.remarks && data.item.remarks.trim() != ''" :title="data.item.remarks">
-            <b-icon icon="info-square"></b-icon>
+            <IBiInfoSquare></IBiInfoSquare>
             <small> {{ data.item.remarks }}</small>
           </span>
         </template>
@@ -120,7 +111,7 @@
             />
           </div>
         </template>
-      </b-table>
+      </BTable>
     </div>
     <Pagination
       v-if="!isLoading && service"
@@ -131,7 +122,7 @@
 </template>
 
 <script>
-import {CustomerService} from '../../models/customer/Customer.js'
+import {CustomerService} from '@/models/customer/Customer'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -139,8 +130,20 @@ import SearchModal from '../../components/SearchModal.vue'
 import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 import Pagination from "../../components/Pagination.vue"
 import my24 from "../../services/my24";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
+  mixins: [componentMixin],
   name: 'CustomerList',
   components: {
     IconLinkDelete,
@@ -163,16 +166,15 @@ export default {
       isLoading: false,
       customers: [],
       customerFields: [
-        {key: 'id', label: this.$trans('Company'), sortable: true },
+        {key: 'name', label: $trans('Company'), sortable: true },
         {key: 'contract', label: ''},
         {key: 'city', label: ''},
-        {key: 'num_orders', label: this.$trans('Orders'), sortable: true, },
-        {key: 'remarks', label: this.$trans('Remarks'), tdAttr: {style: 'max-width: 20ch; white-space: nowrap'}},
-        {key: 'contact', label: this.$trans('Contact')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true, },
+        {key: 'remarks', label: $trans('Remarks'), tdAttr: {style: 'max-width: 20ch; white-space: nowrap'}},
+        {key: 'contact', label: $trans('Contact')},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
-      sortBy: 'name',
-      sortDesc: false,
+      sortBy: [{key: 'name', order: 'asc'}],
     }
   },
   created() {
@@ -182,11 +184,10 @@ export default {
     this.customerService.currentPage = this.$route.query.page || 1
     this.customerService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      this.sortBy = this.$route.query.sort_field
-      if (this.$route.query.sort_dir) {
-        this.sortDesc = this.$route.query.sort_dir === 'desc'
-      }
-      this.customerService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+      const sortBy = this.$route.query.sort_field ?? 'name'
+      const sortDir = this.$route.query.sort_dir ?? 'asc'
+      this.sortBy = [{key: sortBy, order: sortDir}]
+      this.customerService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
     }
 
     this.loadData()
@@ -194,15 +195,16 @@ export default {
   methods: {
     // download
     downloadList() {
-      if (confirm(this.$trans('Are you sure you want to export all customers?'))) {
+      if (confirm($trans('Are you sure you want to export all customers?'))) {
         const url = this.customerService.getExportUrl()
         my24.downloadItemAuth(url, 'customers.xlsx')
       }
     },
     // sorting
     async sortingChanged(ctx) {
+      this.sortBy = [{key: ctx.key, order: ctx.order}]
       // set sorting and reset current page
-      this.customerService.setSorting(ctx.sortBy, ctx.sortDesc, true)
+      this.customerService.setSorting(ctx.key, ctx.order, true)
       const query = {
         ...this.$route.query,
         ...this.customerService.getQueryArgs()
@@ -233,11 +235,11 @@ export default {
     async doDelete() {
       try {
         await this.customerService.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Customer has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Customer has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting customer', error)
-        this.errorToast(this.$trans('Error deleting customer'))
+        errorToast(this.create, $trans('Error deleting customer'))
       }
     },
     // rest
@@ -255,7 +257,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customers', error)
-        this.errorToast(this.$trans('Error loading customers'))
+        errorToast(this.create, $trans('Error loading customers'))
         this.isLoading = false
       }
     }

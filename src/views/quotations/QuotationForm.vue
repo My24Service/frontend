@@ -11,7 +11,7 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="file-earmark-check-fill"></b-icon>
+            <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
             <router-link
               :to="{name: 'preliminary-quotations' }"
               v-if="quotation.preliminary"
@@ -30,45 +30,45 @@
               <span v-if="isEdit && !quotation.id">{{ $trans('edit')}}</span>
             </span>
             <span v-if="quotation.id">
-              <b-link
+              <BLink
                 class="btn btn-sm btn-primary"
                 @click.prevent="showQuotationDialog"
                 target="_blank"
               >
-                <b-icon icon="file-earmark"></b-icon>
+                <IBiFileEarmark></IBiFileEarmark>
                 {{ $trans('View quotation') }}
-              </b-link>
+              </BLink>
             </span>
-            <b-button
+            <BButton
               v-if="!quotation.preliminary && !isNew"
               @click="sendQuotation"
               type="button"
               variant="primary"
             >
               {{ $trans('Send quotation') }}
-            </b-button>
+            </BButton>
           </h3>
           <div
             class="flex-columns"
             v-if="!isView && (quotation.preliminary || isNew)"
           >
-            <b-button @click="cancelForm" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button
+            <BButton @click="cancelForm" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton
               @click="submitQuotation"
               type="button"
               variant="primary"
             >
               {{ $trans('Save') }}
-            </b-button>
-            <b-button
+            </BButton>
+            <BButton
               @click="submitQuotationAndRecreate"
               type="button"
               variant="primary"
               v-if="isEdit && !quotation.preliminary"
             >
               {{ $trans('Submit and recreate PDF') }}
-            </b-button>
+            </BButton>
           </div>
         </div>
       </header>
@@ -225,6 +225,8 @@ import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {ChapterService} from "@/models/quotations/Chapter";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 import CustomerForm from './quotation_form/CustomerForm.vue'
 import Hours from './quotation_form/Hours.vue'
@@ -243,8 +245,8 @@ import Chapter from "./quotation_form/Chapter.vue";
 import QuotationLine from "./quotation_form/QuotationLine.vue";
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import CustomerView from "./CustomerView.vue";
-import QuotationView from "./QuotationView.vue";
 import QuotationPDFViewer from "./QuotationPDFViewer.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationForm',
@@ -261,10 +263,16 @@ export default {
     Distance,
     CallOutCosts,
     StatusesComponent,
-    QuotationView,
   },
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
   validations() {
     return {
@@ -296,10 +304,10 @@ export default {
       errorMessage: null,
       quotationPK: null,
       quotation: new QuotationModel({}),
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_margin: this.$store.getters.getInvoiceDefaultMargin,
-      invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
+      invoice_default_margin: this.mainStore.getInvoiceDefaultMargin,
+      invoice_default_term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
       customerPk: null,
       customer: null,
       loadChapterModel: null,
@@ -385,7 +393,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        this.errorToast(this.$trans('Error fetching quotation'))
+        errorToast(this.create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     },
@@ -401,11 +409,11 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.updateAndRecreate(this.quotation.id, quotation)
-        this.infoToast(this.$trans('Updated and recreated'), this.$trans('Quotation has been updated and the PDF recreated'))
+        infoToast(this.create, $trans('Updated and recreated'), $trans('Quotation has been updated and the PDF recreated'))
         this.isLoading = false
       } catch(error) {
         console.log('error updating quotation', error)
-        this.errorToast(this.$trans('Error updating quotation'))
+        errorToast(this.create, $trans('Error updating quotation'))
         this.isLoading = false
       }
     },
@@ -423,7 +431,7 @@ export default {
           this.isLoading = false
         } catch(error) {
           console.log('error creating quotation', error)
-          this.errorToast(this.$trans('Error creating quotation'))
+          errorToast(this.create, $trans('Error creating quotation'))
           this.isLoading = false
         }
         return
@@ -432,12 +440,12 @@ export default {
       this.isLoading = true
       try {
         await this.quotationService.update(this.quotation.id, quotation)
-        this.infoToast(this.$trans('Updated'), this.$trans('Quotation has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Quotation has been updated'))
         this.isLoading = false
         this.showQuotationDialog()
       } catch(error) {
         console.log('error updating quotation', error)
-        this.errorToast(this.$trans('Error updating quotation'))
+        errorToast(this.create, $trans('Error updating quotation'))
         this.isLoading = false
       }
     },

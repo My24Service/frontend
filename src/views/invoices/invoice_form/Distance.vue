@@ -2,7 +2,7 @@
   <details>
     <summary class='flex-columns space-between'>
       <h6>{{$trans('Distance')}}</h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
+      <IBiChevronDown></IBiChevronDown>
     </summary>
     <b-overlay :show="isLoading" rounded="sm">
       <div
@@ -70,21 +70,21 @@
             {{ distance.distance_total }}
           </b-col>
           <b-col cols="3">
-            <b-form-radio-group
+            <BFormRadioGroup
               @change="updateTotals"
               v-model="distance.use_price"
             >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
                 {{ $trans('Settings') }}
                 {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
                 {{ $trans('Customer') }}
                 {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
                 <p class="flex">
                   {{ $trans("Other") }}:&nbsp;&nbsp;
                   <PriceInput
@@ -93,8 +93,8 @@
                     @priceChanged="(val) => otherPriceChanged(val, distance)"
                   />
                 </p>
-              </b-form-radio>
-            </b-form-radio-group>
+              </BFormRadio>
+            </BFormRadioGroup>
           </b-col>
           <b-col cols="2">
             <VAT @vatChanged="(val) => changeVatType(distance, val)" />
@@ -144,8 +144,20 @@ import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 import TotalsInputs from "../../../components/TotalsInputs";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "DistanceComponent",
   emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
@@ -202,8 +214,8 @@ export default {
 
       invoice_default_price_per_km_dinero: null,
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
 
       usePriceOptions: {
         USE_PRICE_SETTINGS,
@@ -343,10 +355,10 @@ export default {
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
-      return `${this.$trans("distance")}: ${cost.user_full_name}`
+      return `${$trans("distance")}: ${cost.user_full_name}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Distance")}`
+      return `${$trans("Distance")}`
     },
     getTotalAmountInvoiceLine() {
       // If there is a user override for distance, the non-mutable distance_total contains

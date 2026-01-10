@@ -3,14 +3,14 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="bookshelf"></b-icon>
-          <span class="backlink" @click="goBack">{{ $trans('Stock Locations') }}</span> / 
+          <IBiBookshelf></IBiBookshelf>
+          <span class="backlink" @click="goBack">{{ $trans('Stock Locations') }}</span> /
           {{ stockLocation.name }} <small class="dimmed">({{ stockLocation.identifier }})</small>
         </h3>
         <router-link :to="{name: 'stock-location-edit', params: {pk: this.pk}}" class="btn">{{ `${$trans('Edit')} ${$trans('stock location')}` }}</router-link>
       </div>
     </header>
-    
+
       <div class="page-detail">
         <!--
         <div class="col-1-3">
@@ -49,15 +49,27 @@
           </b-row>
         </div>
       </div>
-    
+
   </div>
 </template>
 
 <script>
 import stockLocationModel from '@/models/inventory/StockLocation.js'
 import inventoryModel from '@/models/inventory/Inventory.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
@@ -88,7 +100,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching stock location/inventory', error)
-        this.errorToast(this.$trans('Error fetching stock location/inventory'))
+        errorToast(this.create, this.$trans('Error fetching stock location/inventory'))
         this.isLoading = false
       }
     }

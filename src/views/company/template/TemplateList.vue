@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Templates") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Templates") }}</h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{ name: 'customer-template-add' }">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add template") }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add template") }}
           </router-link>
         </div>
       </div>
@@ -28,8 +28,8 @@
         </template>
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="
                     function() {
@@ -45,8 +45,8 @@
                     }
                   "
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(name)="data">
@@ -55,7 +55,7 @@
           </router-link>
         </template>
         <template #cell(is_active)="data">
-          <b-icon-check v-if="data.item.is_active"></b-icon-check>
+          <IBiCheck v-if="data.item.is_active"></IBiCheck>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -100,9 +100,19 @@ import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
-import { TemplateService } from "../../../models/company/Template.js";
+import { TemplateService } from "@/models/company/Template";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkEdit,
     IconLinkDelete,
@@ -121,12 +131,12 @@ export default {
       isLoading: false,
       templates: [],
       fields: [
-        { key: "name", label: this.$trans("Name"), thAttr: { width: "15%" } },
-        { key: "template_type", label: this.$trans("Type") },
-        { key: "description", label: this.$trans("Description") },
-        { key: "is_active", label: this.$trans("Is active") },
-        { key: "created", label: this.$trans("Created") },
-        { key: "modified", label: this.$trans("Modified") },
+        { key: "name", label: $trans("Name"), thAttr: { width: "15%" } },
+        { key: "template_type", label: $trans("Type") },
+        { key: "description", label: $trans("Description") },
+        { key: "is_active", label: $trans("Is active") },
+        { key: "created", label: $trans("Created") },
+        { key: "modified", label: $trans("Modified") },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -153,11 +163,11 @@ export default {
     async doDelete() {
       try {
         await this.templateService.delete(this.templatePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Template has been deleted"));
+        infoToast(this.create, $trans("Deleted"), $trans("Template has been deleted"));
         await this.loadData();
       } catch (error) {
         console.log("error deleting templates", error);
-        this.errorToast(this.$trans("Error deleting template"));
+        errorToast(this.create, $trans("Error deleting template"));
       }
     },
     // rest
@@ -170,7 +180,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching templates", error);
-        this.errorToast(this.$trans("Error loading templates"));
+        errorToast(this.create, $trans("Error loading templates"));
         this.isLoading = false;
       }
     },
@@ -183,7 +193,7 @@ export default {
         await this.loadData()
       } catch (error) {
         console.log("error setting template as active", error);
-        this.errorToast(this.$trans("Error setting template as active"));
+        errorToast(this.create, $trans("Error setting template as active"));
         this.isLoading = false;
       }
     }

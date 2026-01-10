@@ -6,34 +6,34 @@
         <h2 v-if="!isCreate">{{ $trans('Edit module') }}</h2>
         <b-row>
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-for="module_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="module.name"
                 id="module_name"
                 size="sm"
                 autofocus
                 :state="isSubmitClicked ? !v$.module.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.module.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>
@@ -46,11 +46,20 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import moduleModel from '@/models/member/Module.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
+  mixins: [componentMixin],
   props: {
     pk: {
       type: [String, Number],
@@ -111,13 +120,13 @@ export default {
         this.isLoading = true
         try {
           await moduleModel.insert(this.module)
-          this.infoToast(this.$trans('Created'), this.$trans('Module has been created'))
+          infoToast(this.create, this.$trans('Created'), this.$trans('Module has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating module', error)
-          this.errorToast(this.$trans('Error creating module'))
+          errorToast(this.create, this.$trans('Error creating module'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -129,13 +138,13 @@ export default {
         this.isLoading = true
 
         await moduleModel.update(this.pk, this.module)
-        this.infoToast(this.$trans('Updated'), this.$trans('Module has been updated'))
+        infoToast(this.create, this.$trans('Updated'), this.$trans('Module has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating module', error)
-        this.errorToast(this.$trans('Error updating module'))
+        errorToast(this.create, this.$trans('Error updating module'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -147,7 +156,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching module', error)
-        this.errorToast(this.$trans('Error fetching module'))
+        errorToast(this.create, this.$trans('Error fetching module'))
         this.isLoading = false
       }
     },

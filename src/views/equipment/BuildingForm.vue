@@ -6,13 +6,13 @@
         <h2 v-if="!isCreate">{{ $trans('Edit building') }}</h2>
         <b-row v-if="!hasBranches && !isCustomer">
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Search customer')"
               label-for="building_customer_search"
             >
-              <multiselect
+              <VueMultiselect
                 v-if="!isLoading"
                 id="building_customer_search"
                 track-by="id"
@@ -34,23 +34,23 @@
                 :custom-label="customerLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.building.customer.$error : null">
                 {{ $trans('Please select a customer') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row v-if="hasBranches && !isEmployee">
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Search branches')"
               label-for="building_branch_search"
             >
-              <multiselect
+              <VueMultiselect
                 v-if="!isLoading"
                 id="building_branch_search"
                 track-by="id"
@@ -72,160 +72,160 @@
                 :custom-label="branchLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.building.branch.$error : null">
                 {{ $trans('Please select a branch') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row v-if="customer && !hasBranches">
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Customer')"
               label-for="building_customer_name"
             >
-              <b-form-input
+              <BFormInput
                 id="building_customer_name"
                 size="sm"
                 v-model="customer.name"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Address')"
               label-for="building_customer_address"
             >
-              <b-form-input
+              <BFormInput
                 id="building_customer_address"
                 size="sm"
                 v-model="customer.address"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('City')"
               label-for="building_customer_city"
             >
-              <b-form-input
+              <BFormInput
                 id="building_customer_city"
                 size="sm"
                 v-model="customer.city"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Country')"
               label-for="building_customer_country_code"
             >
-              <b-form-input
+              <BFormInput
                 id="building_customer_country_code"
                 size="sm"
                 v-model="customer.country_code"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row v-if="branch && hasBranches">
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Branch')"
               label-for="building_branch_name"
             >
-              <b-form-input
+              <BFormInput
                 id="building_branch_name"
                 size="sm"
                 v-model="branch.name"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="4" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Address')"
               label-for="building_branch_address"
             >
-              <b-form-input
+              <BFormInput
                 id="building_branch_address"
                 size="sm"
                 v-model="branch.address"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('City')"
               label-for="building_branch_city"
             >
-              <b-form-input
+              <BFormInput
                 id="building_branch_city"
                 size="sm"
                 v-model="branch.city"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Country')"
               label-for="building_branch_country_code"
             >
-              <b-form-input
+              <BFormInput
                 id="building_branch_country_code"
                 size="sm"
                 v-model="branch.country_code"
                 readonly
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-for="building-name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="building.name"
                 id="building-name"
                 size="sm"
                 ref="name"
                 :state="isSubmitClicked ? !v$.building.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.building.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
-            <b-button
+            </BButton>
+            <BButton
               @click="submitFormBulk"
               :disabled="buttonDisabled"
               type="button"
@@ -233,7 +233,7 @@
               v-if="isCreate"
             >
               {{ $trans('Bulk') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>
@@ -244,21 +244,25 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import { BuildingService, BuildingModel } from '../../models/equipment/building.js'
-import {componentMixin} from "../../utils";
-import { CustomerService } from "../../models/customer/Customer";
-import { BranchService } from "../../models/company/Branch";
+import { BuildingService, BuildingModel } from '@/models/equipment/building'
+import { CustomerService } from "@/models/customer/Customer";
+import { BranchService } from "@/models/company/Branch";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     pk: {
@@ -346,7 +350,7 @@ export default {
         this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
       }
     },
     customerLabel({ name, city}) {
@@ -363,7 +367,7 @@ export default {
         this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
-        this.errorToast(this.$trans('Error fetching branches'))
+        errorToast(this.create, $trans('Error fetching branches'))
       }
     },
     branchLabel({ name, city}) {
@@ -395,7 +399,7 @@ export default {
       if (this.isCreate) {
         try {
           await this.buildingService.insert(this.building)
-          this.infoToast(this.$trans('Created'), this.$trans('building has been created'))
+          infoToast(this.create, $trans('Created'), $trans('building has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
@@ -411,7 +415,7 @@ export default {
           }
         } catch(error) {
           console.log('Error creating building', error)
-          this.errorToast(this.$trans('Error creating building'))
+          errorToast(this.create, $trans('Error creating building'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -421,13 +425,13 @@ export default {
 
       try {
         await this.buildingService.update(this.pk, this.building)
-        this.infoToast(this.$trans('Updated'), this.$trans('building has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('building has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating building', error)
-        this.errorToast(this.$trans('Error updating building'))
+        errorToast(this.create, $trans('Error updating building'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -446,7 +450,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching building', error)
-        this.errorToast(this.$trans('Error fetching building'))
+        errorToast(this.create, $trans('Error fetching building'))
         this.isLoading = false
       }
     },

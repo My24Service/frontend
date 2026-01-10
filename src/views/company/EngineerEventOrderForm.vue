@@ -12,13 +12,13 @@
         <b-form>
           <b-row>
             <b-col cols="8" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-class="p-sm-0"
                 v-bind:label="$trans('Search existing address')"
                 label-for="order-customer-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="order-customer-search"
                   track-by="id"
                   :placeholder="$trans('Type to search')"
@@ -36,23 +36,23 @@
                   :custom-label="customerLabel"
                 >
                   <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-                </multiselect>
-              </b-form-group>
+                </VueMultiselect>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-class="p-sm-0"
                 v-bind:label="$trans('Licence plate')"
                 label-for="order_reference"
               >
-                <b-form-input
+                <BFormInput
                   id="order_reference"
                   size="sm"
                   class="p-sm-0"
                   v-model="order.order_reference"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-form>
@@ -67,8 +67,8 @@
 </template>
 
 <script>
-import {componentMixin} from "../../utils";
-import Multiselect from "vue-multiselect";
+
+import VueMultiselect from  "vue-multiselect";
 import moment from "moment";
 import orderModel from "../../models/orders/Order";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
@@ -76,12 +76,23 @@ import customerModel from '../../models/customer/Customer.js'
 import engineerModel from '../../models/company/UserEngineer.js'
 import Assign from "../../models/mobile/Assign";
 import engineerEventModel from "../../models/company/EngineerEvent";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
   name: "EngineerEventOrderForm",
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
   mixins: [componentMixin],
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   data() {
     return {
@@ -104,7 +115,7 @@ export default {
     async show(event_id, engineer_user_id) {
       this.event_id = event_id
       this.engineer = await engineerModel.detail(engineer_user_id)
-      this.$refs['attach-order-modal'].show()
+      await this.$refs['attach-order-modal'].show()
     },
     hide() {
       this.$refs['attach-order-modal'].hide()
@@ -131,7 +142,7 @@ export default {
         this.hide()
       } catch(error) {
         console.log('Error creating/assigning order', error)
-        this.errorToast(this.$trans('Error creating/assigning order'))
+        errorToast(this.create, this.$trans('Error creating/assigning order'))
         this.isLoading = false
       }
     },
@@ -168,7 +179,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(this.create, this.$trans('Error fetching customers'))
         this.isLoading = false
       }
     },

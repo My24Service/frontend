@@ -10,27 +10,27 @@
             <h3>{{ $trans('Start') }}</h3>
             <b-row>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Date/time from first job?')"
                   label-for="start_datetime_from_first_order"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="start_datetime_from_first_order"
                     v-model="trip.start_datetime_from_first_order"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.start_datetime_from_first_order"
                   label-size="sm"
                   label-class="p-sm-0"
                   v-bind:label="$trans('Start date')"
                   label-for="trip_start_date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="trip_start_date"
                     size="sm"
                     class="p-sm-0"
@@ -40,15 +40,15 @@
                     locale="nl"
                     :state="isSubmitClicked ? !v$.trip.start_date.$error && !trip.start_datetime_from_first_order : null"
                     :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.start_date.$error : null">
                     {{ $trans('Please enter a start date') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.start_datetime_from_first_order"
                   label-size="sm"
                   label-class="p-sm-0"
@@ -62,110 +62,110 @@
                     placeholder="Choose a time"
                     :hour12=false
                   ></b-form-timepicker>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Location from first job?')"
                   label-for="start_location_from_first_order"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="start_location_from_first_order"
                     v-model="trip.start_location_from_first_order"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
               <b-col cols="3" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.start_location_from_first_order"
                   label-size="sm"
                   v-bind:label="$trans('Location')"
                   label-for="trip_start_name"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="trip.start_name"
                     id="trip_start_name"
                     size="sm"
                     :state="isSubmitClicked ? !v$.trip.start_name.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.start_name.$error : null">
                     {{ $trans('Please enter a location') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="5" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.start_location_from_first_order"
                   label-size="sm"
                   v-bind:label="$trans('City')"
                   label-for="trip_start_city"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="trip.start_city"
                     id="trip_start_city"
                     size="sm"
                     :state="isSubmitClicked ? !v$.trip.start_city.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.start_city.$error : null">
                     {{ $trans('Please enter a city') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="7" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.start_location_from_first_order"
                   label-size="sm"
                   v-bind:label="$trans('Address')"
                   label-for="trip_start_address"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="trip.start_address"
                     id="trip_start_address"
                     size="sm"
                     :state="isSubmitClicked ? !v$.trip.start_address.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.start_address.$error : null">
                     {{ $trans('Please enter an address') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="3" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.start_location_from_first_order"
                   label-size="sm"
                   v-bind:label="$trans('Postal')"
                   label-for="trip_start_postal"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="trip.start_postal"
                     id="trip_start_postal"
                     size="sm"
                     :state="isSubmitClicked ? !v$.trip.start_postal.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.start_postal.$error : null">
                     {{ $trans('Please enter a postal') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.start_location_from_first_order"
                   label-size="sm"
                   v-bind:label="$trans('Country')"
                   label-for="start_country_code"
                 >
-                  <b-form-select v-model="trip.start_country_code" :options="countries" size="sm"></b-form-select>
-                </b-form-group>
+                  <BFormSelect v-model="trip.start_country_code" :options="countries" size="sm"></BFormSelect>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-col>
@@ -174,27 +174,27 @@
             <h3>{{ $trans('End') }}</h3>
             <b-row>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Date/time from last job?')"
                   label-for="end_datetime_from_last_order"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="end_datetime_from_last_order"
                     v-model="trip.end_datetime_from_last_order"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.end_datetime_from_last_order"
                   label-size="sm"
                   label-class="p-sm-0"
                   v-bind:label="$trans('End date')"
                   label-for="trip_end_date"
                 >
-                  <b-form-datepicker
+                  <VueDatePicker
                     id="trip_end_date"
                     size="sm"
                     v-model="trip.end_date"
@@ -203,15 +203,15 @@
                     locale="nl"
                     :state="isSubmitClicked ? !v$.trip.end_date.$error : null"
                     :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                  ></b-form-datepicker>
+                  ></VueDatePicker>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.end_date.$error : null">
                     {{ $trans('Please enter an end date') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.end_datetime_from_last_order"
                   label-size="sm"
                   v-bind:label="$trans('End time')"
@@ -226,110 +226,110 @@
                     v-bind:placeholder="$trans('Choose a time')"
                     :hour12=false
                   ></b-form-timepicker>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Location from last job?')"
                   label-for="end_location_from_last_order"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="end_location_from_last_order"
                     v-model="trip.end_location_from_last_order"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
               <b-col cols="3" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.end_location_from_last_order"
                   label-size="sm"
                   v-bind:label="$trans('Location')"
                   label-for="trip_end_name"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="trip.end_name"
                     id="trip_end_name"
                     size="sm"
                     :state="isSubmitClicked ? !v$.trip.end_name.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.end_name.$error : null">
                     {{ $trans('Please enter a location') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="5" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.end_location_from_last_order"
                   label-size="sm"
                   v-bind:label="$trans('City')"
                   label-for="trip_end_city"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="trip.end_city"
                     id="trip_end_city"
                     size="sm"
                     :state="isSubmitClicked ? !v$.trip.end_city.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.end_city.$error : null">
                     {{ $trans('Please enter a city') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="7" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.end_location_from_last_order"
                   label-size="sm"
                   v-bind:label="$trans('Address')"
                   label-for="trip_end_address"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="trip.end_address"
                     id="trip_end_address"
                     size="sm"
                     :state="isSubmitClicked ? !v$.trip.end_address.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.end_address.$error : null">
                     {{ $trans('Please enter an address') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="3" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.end_location_from_last_order"
                   label-size="sm"
                   v-bind:label="$trans('Postal')"
                   label-for="trip_end_postal"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="trip.end_postal"
                     id="trip_end_postal"
                     size="sm"
                     :state="isSubmitClicked ? !v$.trip.end_postal.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.end_postal.$error : null">
                     {{ $trans('Please enter a postal') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="!trip.end_location_from_last_order"
                   label-size="sm"
                   v-bind:label="$trans('Country')"
                   label-for="end_country_code"
                 >
-                  <b-form-select v-model="trip.end_country_code" :options="countries" size="sm"></b-form-select>
-                </b-form-group>
+                  <BFormSelect v-model="trip.end_country_code" :options="countries" size="sm"></BFormSelect>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-col>
@@ -337,36 +337,36 @@
 
         <b-row>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Required users')"
               label-for="required_users"
             >
-              <b-form-input
+              <BFormInput
                 id="required_users"
                 size="sm"
                 v-model="trip.required_users"
                 :state="isSubmitClicked ? !v$.trip.required_users.$error: null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.trip.required_users.$error : null">
                 {{ $trans('Please enter required users') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="10" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Description')"
               label-for="trip_description"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="trip_description"
                 v-model="trip.description"
                 rows="2"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
           </b-col>
         </b-row>
 
@@ -376,9 +376,9 @@
             <b-table v-if="trip.trip_orders.length > 0" small :fields="tripOrderFields" :items="trip.trip_orders" responsive="md">
               <template #cell(icons)="data">
                 <div class="float-right">
-                  <b-link class="h5 mx-2" @click.prevent="deleteOrder(data.index)">
-                    <b-icon-trash></b-icon-trash>
-                  </b-link>
+                  <BLink class="h5 mx-2" @click.prevent="deleteOrder(data.index)">
+                    <IBiTrash></IBiTrash>
+                  </BLink>
                 </div>
               </template>
             </b-table>
@@ -387,12 +387,12 @@
 
         <b-row>
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Search orders')"
               label-for="trip-order-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="trip-order-search"
                 track-by="id"
                 :placeholder="$trans('Type to search')"
@@ -413,8 +413,8 @@
                 :custom-label="orderLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
+              </VueMultiselect>
+            </BFormGroup>
           </b-col>
         </b-row>
 
@@ -426,19 +426,19 @@
         </b-row>
 
         <footer class="modal-footer">
-          <b-button @click="addOrder" class="btn btn-primary" size="sm" type="button" variant="primary">
+          <BButton @click="addOrder" class="btn btn-primary" size="sm" type="button" variant="primary">
             {{ $trans('Add order') }}
-          </b-button>
+          </BButton>
         </footer>
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>
@@ -451,17 +451,27 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import tripModel from '@/models/mobile/Trip.js'
 import orderModel from '@/models/orders/Order.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
   components: {
-    Multiselect
+    VueMultiselect
   },
   props: {
     pk: {
@@ -474,10 +484,10 @@ export default {
       isLoading: false,
       buttonDisabled: false,
       tripOrderFields: [
-        { key: 'name', label: this.$trans('Customer') },
-        { key: 'address', label: this.$trans('Address') },
-        { key: 'city', label: this.$trans('City') },
-        { key: 'date', label: this.$trans('Date') },
+        { key: 'name', label: $trans('Customer') },
+        { key: 'address', label: $trans('Address') },
+        { key: 'city', label: $trans('City') },
+        { key: 'date', label: $trans('Date') },
         { key: 'icons', label: '' }
       ],
       submitClicked: false,
@@ -487,6 +497,7 @@ export default {
       ordersSearch: '',
       selectedOrder: {},
       countries: [],
+      getOrdersDebounced: null,
     }
   },
   validations() {
@@ -571,20 +582,18 @@ export default {
       return this.submitClicked
     }
   },
-  created() {
-    const lang = this.$store.getters.getCurrentLanguage
+  async created() {
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     this.getOrdersDebounced = AwesomeDebouncePromise(this.getOrders, 500)
-    this.$store.dispatch('getCountries').then((countries) => {
-      this.countries = countries
-      if (this.isCreate) {
-        this.trip = tripModel.getFields()
-      } else {
-        this.loadData()
-      }
-    })
+    this.countries = this.mainStore.getCountries
+    if (this.isCreate) {
+      this.trip = tripModel.getFields()
+    } else {
+      this.loadData()
+    }
   },
   methods: {
     // orders
@@ -631,13 +640,13 @@ export default {
       if (this.isCreate) {
         try {
           const trip = await tripModel.insert(this.trip)
-          this.infoToast(this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
+          infoToast(this.create, $trans('Trip created'), $trans(`Trip ${trip.id} has been created`))
           this.isLoading = false
           this.buttonDisabled = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating trip', error)
-          this.errorToast(this.$trans('Error creating trip'))
+          errorToast(this.create, $trans('Error creating trip'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -647,13 +656,13 @@ export default {
 
       try {
         await tripModel.update(this.pk, this.trip)
-        this.infoToast(this.$trans('Trip updated'), this.$trans('Trip has been updated'))
+        infoToast(this.create, $trans('Trip updated'), $trans('Trip has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating trip', error)
-        this.errorToast(this.$trans('Error updating trip'))
+        errorToast(this.create, $trans('Error updating trip'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -667,7 +676,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        errorToast(this.create, $trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -691,7 +700,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        this.errorToast(this.$trans('Error fetching trip'))
+        errorToast(this.create, $trans('Error fetching trip'))
         this.isLoading = false
       }
     },

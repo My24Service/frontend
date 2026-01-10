@@ -3,17 +3,17 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="people"></b-icon>
+          <IBiPeople></IBiPeople>
           <span class="backlink"  @click="cancelForm">{{ $trans("People") }}</span> /
           <strong> {{ apiuser.username }}</strong>
           <span class="dimmed" v-if="isCreate && !apiuser.username">{{ $trans('new') }}</span>
           <span class="dimmed" v-if="!isCreate && !apiuser.username">{{ $trans('edit') }}</span>
         </h3>
         <div class='flex-columns'>
-          <b-button @click="cancelForm" type="button" variant="secondary" class="outline">
-            {{ $trans('Cancel') }}</b-button>
-          <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-            {{ $trans('Submit') }}</b-button>
+          <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
+            {{ $trans('Cancel') }}</BButton>
+          <BButton @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+            {{ $trans('Submit') }}</BButton>
         </div>
       </div>
     </header>
@@ -22,18 +22,18 @@
         <div class="panel col-1-3">
           <h6>{{ $trans('User info')}}</h6>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Username')"
             label-for="apiuser_username"
           >
-            <b-form-input
+            <BFormInput
               id="apiuser_username"
               size="sm"
               v-model="apiuser.username"
               :state="isSubmitClicked ? !v$.apiuser.username.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               v-if="apiuser.username === ''"
               :state="isSubmitClicked ? v$.apiuser.username.required : null">
@@ -44,76 +44,76 @@
               :state="isSubmitClicked ? !v$.apiuser.username.isUnique.$invalid : null">
               {{ $trans('Username is already in use') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Password')"
             label-for="apiuser_password"
           >
-            <b-form-input
+            <BFormInput
               id="apiuser_password"
               size="sm"
               type="password"
               v-model="apiuser.password1"
               @blur="v$.apiuser.password1.$touch()"
               :state="isSubmitClicked && v$.apiuser.password1 ? !v$.apiuser.password1.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               :state="isSubmitClicked && v$.apiuser.password1 ? !v$.apiuser.password1.$error : null">
               {{ $trans('Please enter a password') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Password again')"
             label-for="apiuser_password_again"
           >
-            <b-form-input
+            <BFormInput
               id="apiuser_password_again"
               size="sm"
               type="password"
               v-model="apiuser.password2"
               @blur="v$.apiuser.password2.$touch()"
               :state="isSubmitClicked ? !v$.apiuser.password2.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               v-if="apiuser.password2 !== '' && apiuser.password2"
               :state="isSubmitClicked ? !v$.apiuser.password2.sameAs.$invalid : null">
               {{ $trans('Passwords do not match') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
         </div>
 
         <div class="panel col-1-3">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Name')"
               label-for="apiuser_name"
             >
-              <b-form-input
+              <BFormInput
                 id="apiuser_name"
                 size="sm"
                 v-model="apiuser.api_user.name"
                 :state="isSubmitClicked ? !v$.apiuser.api_user.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? v$.apiuser.api_user.name.required : null">
                 {{ $trans('Name is required') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               :label="$trans('Valid from')"
               label-for="expire_start_dt"
             >
-              <b-form-datepicker
+              <VueDatePicker
                 id="expire_start_dt"
                 size="sm"
                 class="p-sm-0"
@@ -123,29 +123,29 @@
                 locale="nl"
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_start_dt.$error : null"
                 :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_start_dt.$error : null">
                 {{ $trans('Please enter date') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Expire in days')"
               label-for="apiuser_expire_in_days"
             >
-              <b-form-input
+              <BFormInput
                 id="apiuser_expire_in_days"
                 v-model="apiuser.api_user.expire_in_days"
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_in_days.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? v$.apiuser.api_user.expire_in_days.required : null">
                 {{ $trans('Name is required') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
         </div>
       </div>
     </form>
@@ -160,10 +160,20 @@ import {email, helpers, required, sameAs} from '@vuelidate/validators'
 
 import {ApiUserService, ApiUserUserModel} from '@/models/company/UserApi'
 import {usernameExists} from "@/models/helpers";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
   components: {
   },
@@ -256,7 +266,7 @@ export default {
     }
   },
   async created() {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
@@ -289,11 +299,11 @@ export default {
         try {
           this.apiuser.password = this.apiuser.password1
           await this.apiUserService.insert(this.apiuser)
-          this.infoToast(this.$trans('Created'), this.$trans('API user has been created'))
+          infoToast(this.create, $trans('Created'), $trans('API user has been created'))
           this.isLoading = false
           await this.$router.push({name: 'users-apiusers'})
         } catch(error) {
-          this.errorToast(this.$trans('Error creating API user'))
+          errorToast(this.create, $trans('Error creating API user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -303,12 +313,12 @@ export default {
 
       try {
         await this.apiUserService.update(this.pk, this.apiuser)
-        this.infoToast(this.$trans('Updated'), this.$trans('API user has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('API user has been updated'))
         this.isLoading = false
         await this.$router.push({name: 'users-apiusers'})
       } catch(error) {
         console.log(error)
-        this.errorToast(this.$trans('Error updating API user'))
+        errorToast(this.create, $trans('Error updating API user'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -322,7 +332,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching apiuser', error)
-        this.errorToast(this.$trans('Error loading API user'))
+        errorToast(this.create, $trans('Error loading API user'))
         this.isLoading = false
       }
     },

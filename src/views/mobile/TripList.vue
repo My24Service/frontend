@@ -34,8 +34,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="mobile-trips-add"
                   v-bind:title="$trans('New trip')"
@@ -47,8 +47,8 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>
@@ -84,8 +84,18 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'TripList',
   components: {
     IconLinkEdit,
@@ -104,11 +114,11 @@ export default {
       trips: [],
       tripPk: null,
       fields: [
-        {key: 'trip_date', label: this.$trans('Date'), sortable: true},
-        {key: 'last_status', label: this.$trans('Status'), sortable: true},
-        {key: 'description', label: this.$trans('Description'), sortable: true},
-        {key: 'required_users', label: this.$trans('Required users'), sortable: true},
-        {key: 'num_orders', label: this.$trans('# orders'), sortable: true},
+        {key: 'trip_date', label: $trans('Date'), sortable: true},
+        {key: 'last_status', label: $trans('Status'), sortable: true},
+        {key: 'description', label: $trans('Description'), sortable: true},
+        {key: 'required_users', label: $trans('Required users'), sortable: true},
+        {key: 'num_orders', label: $trans('# orders'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -135,11 +145,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.tripPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Trip has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Trip has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting trip', error)
-        this.errorToast(this.$trans('Error deleting trip'))
+        errorToast(this.create, $trans('Error deleting trip'))
       }
     },
     // rest
@@ -152,7 +162,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching trips', error)
-        this.errorToast(this.$trans('Error loading trips'))
+        errorToast(this.create, $trans('Error loading trips'))
         this.isLoading = false
       }
     }

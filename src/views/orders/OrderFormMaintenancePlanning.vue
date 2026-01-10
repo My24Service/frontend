@@ -8,19 +8,19 @@
       @cancel="cancelCreateEquipment"
     >
       <form ref="maintenance_equipment_new_equipment-form" @submit.stop.prevent="submitCreateEquipment">
-        <b-container fluid>
+        <b-container fluid="md">
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Equipment name')"
                 label-for="maintenance_equipment_new_equipment"
               >
-                <b-form-input
+                <BFormInput
                   id="maintenance_equipment_new_equipment"
 
                   v-model="newEquipmentName"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -38,16 +38,16 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Location name')"
                 label-for="new_location"
               >
-                <b-form-input
+                <BFormInput
                   id="new_location"
 
                   v-model="newLocationName"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -57,25 +57,25 @@
     <header>
       <div class="page-title">
         <h3 v-if="!pk">
-          <b-icon icon="file-earmark-plus"></b-icon>
+          <IBiFileEarmarkPlus></IBiFileEarmarkPlus>
           <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
           <strong>{{ $trans("new") }}</strong>
         </h3>
         <h3 v-if="pk">
-          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <router-link :to="{name:'order-list'}">{{ $trans("Orders") }}</router-link> /
           <router-link :to="{name: 'order-view', pk:pk}">#<strong>{{ pk }}</strong></router-link>
         / {{ $trans("edit") }}
         </h3>
 
         <div class="flex-columns">
-            <b-button
+            <BButton
               v-if="!isCreate && !hasBranches && (unaccepted || !order.customer_order_accepted)"
               @click="reject"
               class="btn btn-danger"
               type="button"
-              variant="danger">{{ $trans('Reject') }}</b-button>
-            <b-button
+              variant="danger">{{ $trans('Reject') }}</BButton>
+            <BButton
               v-if="!isCreate && !hasBranches && (unaccepted || !order.customer_order_accepted)"
               @click="editAndAccept"
               :disabled="buttonDisabled"
@@ -84,9 +84,9 @@
               name="order-done-next"
               value="dispatch"
               variant="primary">{{ $trans('Save &amp; accept') }}
-            </b-button>
+            </BButton>
 
-            <b-button
+            <BButton
               v-if="!unaccepted || hasBranches"
               @click="cancelForm"
               class="btn btn-secondary"
@@ -94,7 +94,7 @@
               variant="secondary"
               >
               {{ $trans('Cancel') }}
-            </b-button>
+            </BButton>
 
             <b-dropdown
               v-if="!unaccepted || hasBranches"
@@ -127,13 +127,13 @@
         <div class="panel col-1-3">
           <h6>{{ $trans('Contact') }}</h6>
 
-          <b-form-group
+          <BFormGroup
             v-if="!hasBranches"
             label-cols="3"
             v-bind:label="$trans('Customer')"
             label-for="order-customer-search"
           >
-            <multiselect
+            <VueMultiselect
               id="order-customer-search"
               track-by="id"
               :placeholder="$trans('Type to search name, address..')"
@@ -151,17 +151,17 @@
               :custom-label="customerLabel"
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-            </multiselect>
-          </b-form-group>
+            </VueMultiselect>
+          </BFormGroup>
 
 
-          <b-form-group
+          <BFormGroup
             v-if="hasBranches && !from_quotation"
             label-cols="3"
             v-bind:label="$trans('Branch')"
             label-for="order-branch-search"
           >
-            <multiselect
+            <VueMultiselect
               id="order-branch-search"
               track-by="id"
               :placeholder="$trans('Type to search name, address..')"
@@ -179,38 +179,38 @@
               :custom-label="branchLabel"
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-            </multiselect>
-          </b-form-group>
+            </VueMultiselect>
+          </BFormGroup>
 
-          <b-form-group :label="!hasBranches ? $trans('Customer') : $trans('Branch')"
+          <BFormGroup :label="!hasBranches ? $trans('Customer') : $trans('Branch')"
             label-for="order_name"
             label-cols="3"
             >
             <b-input-group>
-              <b-form-input
+              <BFormInput
                 v-if="!hasBranches"
                 v-model="order.order_name"
                 id="order_name"
 
                 :state="isSubmitClicked ? !v$.order.customer_relation.$error : null"
-              ></b-form-input>
-              <b-form-input
+              ></BFormInput>
+              <BFormInput
                 v-else
                 v-model="order.order_name"
                 id="order_name"
 
                 :state="isSubmitClicked ? !v$.order.branch.$error : null"
-              ></b-form-input>
-              <b-input-group-append v-if="!hasBranches">
-                <b-form-input
+              ></BFormInput>
+              <template #append v-if="!hasBranches">
+                <BFormInput
                   v-model="order.customer_id"
-                  readonly
+                  :readonly="true"
                   :title="$trans('Customer ID')"
                   id="customer_id"
                   style="max-width: 9ch"
                   :state="isSubmitClicked ? !v$.order.customer_id.$error : null">
-                </b-form-input>
-              </b-input-group-append>
+                </BFormInput>
+              </template>
             </b-input-group>
 
             <b-form-invalid-feedback
@@ -224,133 +224,132 @@
               :state="isSubmitClicked ? !v$.order.branch.$error : null">
               {{ $trans('Please select a branch') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
           <details v-if="order.customer_id" open>
             <summary class="flex-columns space-between">
               <h6>{{ $trans('Customer details') }}</h6>
-              <b-icon-chevron-down></b-icon-chevron-down>
+              <IBiChevron-down></IBiChevron-down>
             </summary>
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Address')"
               label-for="order_address"
               label-cols="3"
             >
-              <b-form-input
+              <BFormInput
                 id="order_address"
                 v-model="order.order_address"
                 :state="isSubmitClicked ? !v$.order.order_address.$error: null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_address.$error : null">
                 {{ $trans('Please enter the address') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Postal')"
               label-for="order_postal"
               label-cols="3"
             >
-              <b-form-input
+              <BFormInput
                 id="order_postal"
                 v-model="order.order_postal"
                 :state="isSubmitClicked ? !v$.order.order_postal.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_postal.$error : null">
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Country')"
               label-for="order_country_code"
               label-cols="3"
             >
-              <b-form-select v-model="order.order_country_code" :options="countries" ></b-form-select>
-            </b-form-group>
+              <BFormSelect v-model="order.order_country_code" :options="countries" ></BFormSelect>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('City')"
               label-for="order_city"
               label-cols="3"
             >
-              <b-form-input
+              <BFormInput
                 id="order_city"
-
                 v-model="order.order_city"
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null">
                 {{ $trans('Please enter the city') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Contacts')"
               label-for="order_contact"
               label-cols="3">
-              <b-form-input
+              <BFormInput
                 id="order_contact"
                 v-model="order.order_contact">
-              </b-form-input>
-            </b-form-group>
+              </BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Email')"
               label-for="order_email"
               label-cols="3"
               >
-              <b-form-input
+              <BFormInput
                 id="order_email"
 
                 v-model="order.order_email"
                 placeholder="email address">
-              </b-form-input>
-            </b-form-group>
+              </BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Mobile')"
               label-for="order_mobile"
               label-cols="3"
             >
-              <b-form-input
+              <BFormInput
                 id="order_mobile"
 
                 v-model="order.order_mobile"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Phone')"
               label-for="order_tel"
               label-cols="3"
             >
-              <b-form-input
+              <BFormInput
                 id="order_tel"
 
                 v-model="order.order_tel"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Customer remarks')"
               label-for="customer_remarks"
               label-cols="3"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="customer_remarks"
                 v-model="order.customer_remarks"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
           </details>
         </div>
         <div class="panel col-1-3">
           <h6>{{ $trans("Order details") }}</h6>
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Order type')"
             label-for="order_type"
             label-cols="3"
@@ -358,159 +357,168 @@
             <OrderTypesSelect
               v-if="(!isCreate && !isLoading) || isCreate"
               :orderTypeIn="order.order_type"
-              :order-type.sync="order.order_type"
+              :order-type="order.order_type"
               :include-all="false"
             />
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Reference')"
             label-for="order_reference"
             label-cols="3">
-              <b-form-input
+              <BFormInput
               id="order_reference"
 
               v-model="order.order_reference"
               >
-              </b-form-input>
-          </b-form-group>
+              </BFormInput>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Customer reference')"
             label-for="customer_reference"
             label-cols="3">
-            <b-form-input
+            <BFormInput
               id="customer_reference"
 
               v-model="order.customer_reference"
             >
-            </b-form-input>
-          </b-form-group>
+            </BFormInput>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Remarks')"
             label-for="remarks"
             label-cols="3"
             >
-            <b-form-textarea
+            <BFormTextarea
             id="remarks"
               v-model="order.remarks"
               rows="3"
-            ></b-form-textarea>
-          </b-form-group>
+            ></BFormTextarea>
+          </BFormGroup>
 
           <!-- order start/end times -->
           <h6>{{ $trans('Planning') }}</h6>
           <b-container>
             <b-row>
-              <b-form-group
+              <BFormGroup
                 :label="$trans('Start date')"
                 label-for="start_date"
-                cols="2"
+                label-cols="3"
+                :state="isSubmitClicked ? !v$.order.start_date.$error : null"
               >
-                <b-form-datepicker
+                <VueDatePicker
                   id="start_date"
                   v-model="order.start_date"
                   :placeholder="$trans('Select date')"
-                  value="order.start_date"
-                  locale="nl"
+                  :locale="nl"
+                  auto-apply
+                  arrow-navigation
                   :state="isSubmitClicked ? !v$.order.start_date.$error : null"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                ></b-form-datepicker>
+                  :formats="{ input: 'dd/MM/yyyy' }"
+                ></VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.start_date.$error : null">
                   {{ $trans('Please enter a start date') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
               <b-col cols="2"></b-col>
 
-              <b-form-group
+              <BFormGroup
                 :label="$trans('Start time')"
                 label-for="start_time"
-                cols="2"
+                label-cols="3"
               >
-                <b-form-input
+                <BFormInput
                   id="start_time"
                   v-model="order.start_time"
                   type="text"
                   placeholder="HH:mm"
                   class="time-input"
-                ></b-form-input>
-                <span style="float:left !important;"></span>
-                <b-form-timepicker
-                  v-model="order.start_time"
-                  button-only
-                  right
-                  locale="en"
+                ></BFormInput>
+                <VueDatePicker
+                  v-model="start_time_date"
                   id="start_time"
                   :placeholder="$trans('Set time')"
-                  :hour12=false
-                ></b-form-timepicker>
-
+                  time-picker
+                  arrow-navigation
+                  :formats="{ input: 'HH:mm' }"
+                >
+                  <template #trigger>
+                    <p class="clock-icon">
+                      <IBiClock></IBiClock>
+                    </p>
+                  </template>
+                </VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.start_time.$error : null">
                   {{ $trans('Please enter a valid start time HH:mm') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-row>
           </b-container>
 
           <b-container>
             <b-row>
-              <b-form-group
+              <BFormGroup
                 label-class=""
                 v-bind:label="$trans('End date')"
                 label-for="end_date"
-                cols="2"
+                label-cols="3"
               >
-                <b-form-datepicker
+                <VueDatePicker
                   id="end_date"
-
                   v-model="order.end_date"
-                  class="mb-2"
                   :placeholder="$trans('Select date')"
-                  locale="nl"
+                  :locale="nl"
+                  auto-apply
+                  arrow-navigation
                   :state="isSubmitClicked ? !v$.order.end_date.$error : null"
-                  :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-                ></b-form-datepicker>
+                  :formats="{ input: 'dd/MM/yyyy' }"
+                ></VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.end_date.$error : null">
                   {{ $trans('Please enter an end date') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
               <b-col cols="2"></b-col>
 
-              <b-form-group
+              <BFormGroup
                 :label="$trans('End time')"
                 label-class=""
                 label-for="end_time"
-                cols="2"
+                label-cols="3"
               >
-                <b-form-input
+                <BFormInput
                   id="end_time"
                   v-model="order.end_time"
                   type="text"
                   class="time-input"
                   placeholder="HH:mm"
-                ></b-form-input>
-                <span style="float:left !important;"></span>
-                <b-form-timepicker
-                  v-model="order.end_time"
-                  button-only
-                  right
-                  locale="en"
+                ></BFormInput>
+                <VueDatePicker
+                  v-model="end_time_date"
                   id="end_time"
                   class="mb-2"
                   :placeholder="$trans('Set time')"
-                  :hour12=false
-                ></b-form-timepicker>
+                  time-picker
+                  arrow-navigation
+                  :formats="{ input: 'HH:mm' }"
+                >
+                  <template #trigger>
+                    <p class="clock-icon">
+                      <IBiClock></IBiClock>
+                    </p>
+                  </template>
+                </VueDatePicker>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.order.end_time.$error : null">
                   {{ $trans('Please enter a valid end time HH:mm') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-row>
           </b-container>
 
@@ -525,13 +533,13 @@
                 <strong>{{ index + 1 }}</strong> {{ userData.full_name }}
               </span>
             </div>
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('Assign to')"
               label-for="order-assign"
               label-cols="3"
               v-if="assignResult.length === 0"
             >
-              <multiselect
+              <VueMultiselect
                 v-model="selectedEngineers"
                 id="order-assign"
                 track-by="id"
@@ -545,8 +553,8 @@
                 @search-change="getEngineersDebounced"
                 >
                 <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-              </multiselect>
-            </b-form-group>
+              </VueMultiselect>
+            </BFormGroup>
             <div v-if="assignResult.length > 0">
               <h4>{{ $trans("Assign result") }}</h4>
               <ul>
@@ -558,16 +566,16 @@
                 >
                   {{ engineer.full_name }}
                   <span v-if="engineer.hasOwnProperty('apiOk') && engineer.apiOk">
-                    <b-icon icon="check-circle" />
+                    <IBiCheckCircle></IBiCheckCircle>
                   </span>
                   <span v-else>
-                    <b-icon icon="exclamation-circle" />
+                    <IBiExclamationCircle></IBiExclamationCircle>
                   </span>
                 </li>
               </ul>
             </div>
           </div>
-          <b-form-group
+          <BFormGroup
             v-bind:label="$trans('Assignee(s)')"
             label-for="order-assigned-to"
             label-cols="3">
@@ -577,26 +585,28 @@
             <div v-if="order.assigned_user_info && order.assigned_user_info.length>0">
               <div class="col-form-label order-assignee" v-for="(engineer, index) in order.assigned_user_info" :key="index">
                 <span>{{ engineer.full_name }}</span>
-                <b-link v-if="engineer.booked===0" @click="unassignEngineer(engineer, $event)" class="float-right h5 mx-2"><b-icon-trash-fill></b-icon-trash-fill></b-link>
+                <BLink v-if="engineer.booked===0" @click="unassignEngineer(engineer, $event)" class="float-right h5 mx-2">
+                  <IBiTrashFill></IBiTrashFill>
+                </BLink>
               </div>
             </div>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-for="order-orderline-remarks"
             v-bind:label="$trans('Planning remarks')"
           >
-            <b-form-textarea
+            <BFormTextarea
               id="order-orderline-remarks"
               v-model="order.planning_remarks"
               rows="1"
-            ></b-form-textarea>
-          </b-form-group>
-          <b-form-group
+            ></BFormTextarea>
+          </BFormGroup>
+          <BFormGroup
             v-bind:label="$trans('Order email extra')"
             label-for="order-assign"
           >
-            <multiselect
+            <VueMultiselect
               v-model="selectedSalesUsers"
               id="order-assign"
               track-by="id"
@@ -613,8 +623,8 @@
               <span slot="noResult">
                 {{ $trans('Oops! No elements found. Consider changing the search query.') }}
               </span>
-            </multiselect>
-          </b-form-group>
+            </VueMultiselect>
+          </BFormGroup>
         </div>
 
         <div class="panel col-1-3">
@@ -650,12 +660,12 @@
                 </b-col>
                 <b-col cols="3">
                   <div class="float-right">
-                    <b-link class="h5 mx-2" @click="editOrderLine(orderline, index)">
-                      <b-icon-pencil></b-icon-pencil>
-                    </b-link>
-                    <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(index)">
-                      <b-icon-trash></b-icon-trash>
-                    </b-link>
+                    <BLink class="h5 mx-2" @click="editOrderLine(orderline, index)">
+                      <IBiPencil></IBiPencil>
+                    </BLink>
+                    <BLink class="h5 mx-2" @click.prevent="deleteOrderLine(index)">
+                      <IBiTrash></IBiTrash>
+                    </BLink>
                   </div>
                 </b-col>
                 <b-col v-if="orderline.hasOwnProperty('apiOk')" cols="12">
@@ -673,10 +683,10 @@
               <!-- equipment -->
               <h5 v-if="isEditOrderLine">{{ $trans("Edit") }}</h5>
               <h5 v-else>{{ $trans("New") }}</h5>
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Equipment')"
                 cols="12">
-                  <multiselect
+                  <VueMultiselect
                     id="maintenance-contract-equipment-name"
                     ref="multiselect_equipment"
                     track-by="id"
@@ -701,7 +711,7 @@
                     <span slot="noResult">
                       <h5>{{ $trans('No equipment found') }}</h5>
                       <p v-if="canQuickCreateEquipment">
-                        <b-button
+                        <BButton
                           @click="showAddEquipmentModal"
                           class="btn btn-primary"
 
@@ -709,24 +719,24 @@
                           variant="primary"
                         >
                           {{ $trans("Add new equipment") }}
-                        </b-button>
+                        </BButton>
                       </p>
                     </span>
-                  </multiselect>
+                  </VueMultiselect>
 
                   <span>
                     <strong>{{ product }}</strong>
-                    <b-icon-check v-if="equipment"></b-icon-check>
+                    <IBiCheck v-if="equipment"></IBiCheck>
                   </span>
 
-              </b-form-group>
+              </BFormGroup>
 
               <!-- equipment locations -->
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Location')"
                 cols="12"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="location-name"
                     ref="multiselect_location"
                     track-by="id"
@@ -751,7 +761,7 @@
                     <span slot="noResult">
                       <h5>{{ $trans('No locations found') }}</h5>
                       <p v-if="canQuickCreateEquipmentLocation">
-                        <b-button
+                        <BButton
                           @click="showAddLocationModal"
                           class="btn btn-primary"
 
@@ -759,89 +769,89 @@
                           variant="primary"
                         >
                           {{ $trans("Add new location") }}
-                        </b-button>
+                        </BButton>
                       </p>
                     </span>
-                  </multiselect>
+                  </VueMultiselect>
 
                   <span>
                     <strong>{{ location }}</strong>
-                    <b-icon-check v-if="equipment_location"></b-icon-check>
+                    <IBiCheck v-if="equipment_location"></IBiCheck>
                   </span>
-              </b-form-group>
+              </BFormGroup>
 
               <!-- if maintenance: equipment amount -->
-              <b-form-group
+              <BFormGroup
                 v-if="maintenance"
                 v-bind:label="$trans('Amount')"
                 label-for="order-orderline-amount"
                 label-cols="3"
               >
-                <b-form-input
+                <BFormInput
                   id="order-orderline-remarks"
                   type="number"
                   v-model="remarks"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
               <!-- else: equipment remarks -->
-              <b-form-group v-else
+              <BFormGroup v-else
               label-for="order-orderline-remarks"
               v-bind:label="$trans('Remarks')"
               >
-                <b-form-textarea
+                <BFormTextarea
                   id="order-orderline-remarks"
                   v-model="remarks"
                   rows="1"
-                ></b-form-textarea>
-              </b-form-group>
+                ></BFormTextarea>
+              </BFormGroup>
 
             </div>
 
             <!-- normal product -->
             <div v-if="!usesEquipment">
 
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Equipment')"
                 label-for="order-orderline-product"
                 label-cols="3"
               >
-                <b-form-input
+                <BFormInput
                   id="order-orderline-product"
                   v-model="product"
                   placeholder="(item name)"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
               <!-- normal location -->
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Location')"
                 label-for="order-orderline-location"
                 label-cols="3"
               >
-                <b-form-input
+                <BFormInput
                   id="order-orderline-location"
                   placeholder="(location name)"
                   v-model="location"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
 
               <!-- normal remarks -->
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Remarks')"
                 label-for="order-orderline-remarks"
                 label-cols="3"
                 >
-                <b-form-input
+                <BFormInput
                   id="order-orderline-remarks"
                   placeholder="(notes)"
                   v-model="remarks"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </div>
 
-            <b-form-group class="text-right">
-              <b-button
+            <BFormGroup class="text-right">
+              <BButton
                 v-if="isEditOrderLine"
                 @click="doEditOrderLine"
                 class="btn btn-primary"
@@ -850,8 +860,8 @@
                 :disabled="!isOrderLineValid"
               >
                 {{ $trans('Edit orderline') }}
-              </b-button>
-              <b-button
+              </BButton>
+              <BButton
                 v-if="!isEditOrderLine"
                 @click="addOrderLine"
                 class="btn btn-primary"
@@ -861,8 +871,8 @@
                 :disabled="!isOrderLineValid"
               >
                 {{ $trans('Add orderline') }}
-              </b-button>
-            </b-form-group>
+              </BButton>
+            </BFormGroup>
           </div>
 
           <hr/>
@@ -881,12 +891,12 @@
                 </b-col>
                 <b-col cols="3">
                   <div class="float-right">
-                    <b-link class="h5 mx-2" @click="editInfoLine(infoline, index)">
-                      <b-icon-pencil></b-icon-pencil>
-                    </b-link>
-                    <b-link class="h5 mx-2" @click.prevent="deleteInfoLine(index)">
-                      <b-icon-trash></b-icon-trash>
-                    </b-link>
+                    <BLink class="h5 mx-2" @click="editInfoLine(infoline, index)">
+                      <IBiPencil></IBiPencil>
+                    </BLink>
+                    <BLink class="h5 mx-2" @click.prevent="deleteInfoLine(index)">
+                      <IBiTrash></IBiTrash>
+                    </BLink>
                   </div>
                 </b-col>
                 <b-col v-if="infoline.hasOwnProperty('apiOk')" cols="12">
@@ -904,24 +914,24 @@
               <h5 v-if="isEditInfoLine">{{ $trans("Edit") }}</h5>
               <h5 v-else>{{ $trans("New") }}</h5>
 
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Info')"
                 label-for="order-infoline-info"
               >
-                <b-form-textarea
+                <BFormTextarea
                   id="order-infoline-info"
                   v-model="info"
-                ></b-form-textarea>
-              </b-form-group>
+                ></BFormTextarea>
+              </BFormGroup>
 
-              <b-form-group class="text-right">
-                <b-button v-if="isEditInfoLine" @click="doEditInfoLine" class="btn btn-primary"  type="button" variant="warning">
+              <BFormGroup class="text-right">
+                <BButton v-if="isEditInfoLine" @click="doEditInfoLine" class="btn btn-primary"  type="button" variant="warning">
                   {{ $trans('edit') }}
-                </b-button>
-                <b-button v-if="!isEditInfoLine" @click="addInfoLine" class="btn btn-primary"  type="button" variant="primary">
+                </BButton>
+                <BButton v-if="!isEditInfoLine" @click="addInfoLine" class="btn btn-primary"  type="button" variant="primary">
                   {{ $trans('add') }}
-                </b-button>
-              </b-form-group>
+                </BButton>
+              </BFormGroup>
             </div>
 
           </div>
@@ -936,14 +946,16 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, helpers } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {CustomerService} from '@/models/customer/Customer'
 import {AssignService} from '@/models/mobile/Assign'
 import OrderTypesSelect from '@/components/OrderTypesSelect'
-import Collapse from '@/components/Collapse'
-import {componentMixin} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import { nl } from "date-fns/locale"
+
 import {BranchService} from "@/models/company/Branch";
 import {EquipmentService} from "@/models/equipment/equipment";
 import {QuotationService} from '@/models/quotations/Quotation'
@@ -955,6 +967,8 @@ import {EngineerService} from "@/models/company/UserEngineer";
 import DocumentsComponent from "./order_form/DocumentsComponent.vue";
 import ApiResult from "@/components/ApiResult";
 import { UserListService } from "@/models/company/UserList.js";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 const isCorrectTime = (value) => {
   if (!value || value === "") {
@@ -965,16 +979,20 @@ const isCorrectTime = (value) => {
 }
 
 export default {
-  mixins: [componentMixin],
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
+  mixins: [componentMixin],
   components: {
     DocumentsComponent,
-    Multiselect,
+    VueMultiselect,
     OrderTypesSelect,
-    Collapse,
-    CustomerCard,
     ApiResult,
   },
   props: {
@@ -1000,6 +1018,12 @@ export default {
     },
   },
   watch: {
+    start_time_date(val) {
+      this.order.start_time = this.formatTime(val.hours, val.minutes)
+    },
+    end_time_date(val) {
+      this.order.end_time = this.formatTime(val.hours, val.minutes)
+    },
     startDate(val) {
       if (this.endDate && new Date(this.endDate) < new Date(val)) {
         this.order.end_date = val
@@ -1039,15 +1063,15 @@ export default {
       isEditInfoLine: false,
 
       orderLineFields: [
-        { key: 'info', label: this.$trans('Orderline') },
+        { key: 'info', label: $trans('Orderline') },
       ],
       infoLineFields: [
-        { key: 'info', label: this.$trans('Info') },
+        { key: 'info', label: $trans('Info') },
         { key: 'icons', label: '' }
       ],
       recommendedUsers: [],
       recommendedUsersFields: [
-        { key: 'full_name', label: this.$trans('Name') },
+        { key: 'full_name', label: $trans('Name') },
       ],
       submitClicked: false,
       countries: [],
@@ -1070,8 +1094,8 @@ export default {
       orderPk: null,
       nextField: 'orders',
       nextFieldOptions: [
-        { item: 'orders', name: this.$trans('Orders') },
-        { item: 'dispatch', name: this.$trans('Dispatch') },
+        { item: 'orders', name: $trans('Orders') },
+        { item: 'dispatch', name: $trans('Dispatch') },
       ],
 
       getEquipmentDebounced: null,
@@ -1099,7 +1123,10 @@ export default {
       infolineService: new InfolineService(),
       assignService: new AssignService(),
       getSalesUserDebounced: null,
-      searchingSalesUsers: false
+      searchingSalesUsers: false,
+      nl,
+      start_time_date: null,
+      end_time_date: null,
     }
   },
   validations() {
@@ -1174,10 +1201,10 @@ export default {
   },
   computed: {
     canQuickCreateEquipment() {
-      return this.$store.getters.getSettingEquipmentPlanningQuickCreate
+      return this.mainStore.getSettingEquipmentPlanningQuickCreate
     },
     canQuickCreateEquipmentLocation() {
-      return this.$store.getters.getSettingEquipmentLocationPlanningQuickCreate
+      return this.mainStore.getSettingEquipmentLocationPlanningQuickCreate
     },
     equipmentFormSearchOk() {
       if (!this.hasBranches) {
@@ -1187,7 +1214,7 @@ export default {
       }
     },
     usesEquipment() {
-      return this.$store.getters.getMemberUsesEquipment
+      return this.mainStore.getMemberUsesEquipment
     },
     startDate() {
       if (!this.order) {
@@ -1214,7 +1241,7 @@ export default {
     }
   },
   async created () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
@@ -1225,7 +1252,7 @@ export default {
     this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
     this.getEngineersDebounced = AwesomeDebouncePromise(this.getEngineers, 500)
 
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = this.mainStore.getCountries
 
     if (this.isCreate) {
       this.order = new OrderModel()
@@ -1247,7 +1274,7 @@ export default {
 
       if (this.maintenance) {
         this.isLoading = true
-        const data = this.$store.getters.getMaintenanceEquipment
+        const data = this.mainStore.getMaintenanceEquipment
 
         if (data) {
           const {maintenanceEquipment, customer_pk, contract_pk} = data
@@ -1277,6 +1304,11 @@ export default {
     }
   },
   methods: {
+    formatTime(hours, minutes) {
+      const hoursOut = hours < 10 ? `0${hours}` : `${hours}`
+      const minutesOut = minutes < 10 ? `0${minutes}` : `${minutes}`
+      return `${hoursOut}:${minutesOut}`
+    },
     // Search engineers
     async getEngineers(query) {
       this.isLookupLoading.engineers = true
@@ -1285,7 +1317,7 @@ export default {
         // this.engineers = await this.engineerService.search(query)
       } catch(error) {
         console.log('Error searching engineers', error)
-        this.errorToast(this.$trans('Error searching engineers'))
+        errorToast(this.create, $trans('Error searching engineers'))
       }
       this.isLookupLoading.engineers = false
     },
@@ -1310,7 +1342,7 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
             await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
@@ -1324,7 +1356,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding equipment', error)
-        this.errorToast(this.$trans('Error adding equipment'))
+        errorToast(this.create, $trans('Error adding equipment'))
       }
     },
     async getEquipment(query) {
@@ -1337,7 +1369,7 @@ export default {
 
       } catch(error) {
         console.log('Error searching equipment', error)
-        this.errorToast(this.$trans('Error searching equipment'))
+        errorToast(this.create, $trans('Error searching equipment'))
       }
     },
     equipmentLabel({ name }) {
@@ -1369,7 +1401,7 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
             await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
 
@@ -1383,7 +1415,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding location', error)
-        this.errorToast(this.$trans('Error adding location'))
+        errorToast(this.create, $trans('Error adding location'))
       }
     },
     async getSalesUsers(query) {
@@ -1396,7 +1428,7 @@ export default {
         this.searchingSalesUsers = false
       } catch(error) {
         console.log('Error fetching sales users', error)
-        this.errorToast(this.$trans('Error fetching sales users'))
+        errorToast(this.create, $trans('Error fetching sales users'))
         this.searchingSalesUsers = false
       }
     },
@@ -1409,7 +1441,7 @@ export default {
         }
       } catch(error) {
         console.log('Error searching location', error)
-        this.errorToast(this.$trans('Error searching location'))
+        errorToast(this.create, $trans('Error searching location'))
       }
     },
     locationLabel({ name }) {
@@ -1588,6 +1620,9 @@ export default {
         return
       }
 
+      console.log(this.order.order_type)
+      return
+
       // remove null fields
       const null_fields = ['start_time', 'end_time']
       for (let i=0; i<null_fields.length; i++) {
@@ -1631,7 +1666,7 @@ export default {
           this.buttonDisabled = false
           this.isLoading = false
           console.log('Error creating order', error)
-          // this.errorToast(this.$trans('Error creating order'))
+          // errorToast(this.create, $trans('Error creating order'))
           return
         }
       } else {
@@ -1665,17 +1700,17 @@ export default {
       if (!this.isCreate && this.acceptOrder) {
         try {
           await this.orderService.setAccepted(this.pk)
-          this.infoToast(this.$trans('Accepted'), this.$trans('Order has been accepted'))
+          infoToast(this.create, $trans('Accepted'), $trans('Order has been accepted'))
         } catch(error) {
           errors.push(error)
           console.log('Error accepting order', error)
-          this.errorToast(this.$trans('Error accepting order'))
+          errorToast(this.create, $trans('Error accepting order'))
         }
       }
 
       if (errors.length > 0) {
         // TODO do we want this message? the errors in the form are obvious
-        this.errorToast(this.$trans('There were errors'))
+        errorToast(this.create, $trans('There were errors'))
         console.log('There were errors', errors)
         this.buttonDisabled = false
         this.isLoading = false
@@ -1683,9 +1718,9 @@ export default {
       }
 
       if (this.isCreate) {
-        this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Order has been created'))
       } else {
-        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Order has been updated'))
       }
 
       if (this.nextField === 'dispatch') {
@@ -1817,7 +1852,7 @@ export default {
           // future, perhaps a 'reason' for failure could be included, but for
           // now, a zero value indicates failure.
           if (!result.result) {
-            errors.push( `${engineer.full_name} ${this.$trans('has booked hours or materials')}` )
+            errors.push( `${engineer.full_name} ${$trans('has booked hours or materials')}` )
           } else {
             unassigned_total++
           }
@@ -1828,10 +1863,10 @@ export default {
       }
 
       if (errors.length === 0) {
-        this.infoToast(this.$trans('Engineers unassigned'), `${unassigned_total} ${this.$trans('engineer(s) have been unassigned')}`)
+        infoToast(this.create, $trans('Engineers unassigned'), `${unassigned_total} ${$trans('engineer(s) have been unassigned')}`)
       } else {
         console.log('errors un-assigning engineers', errors)
-        this.errorToast(errors.join(', '), this.$trans('There were errors unassigning engineers'))
+        errorToast(this.create, errors.join(', '), $trans('There were errors unassigning engineers'))
       }
 
       // unsure what assignResult does elsewhere?
@@ -1866,10 +1901,10 @@ export default {
       }
 
       if (errors.length === 0) {
-        this.infoToast(this.$trans('Assigned'), this.$trans('Order assigned'))
+        infoToast(this.create, $trans('Assigned'), $trans('Order assigned'))
       } else {
         console.log('errors assigning to users', errors)
-        this.errorToast(this.$trans('There were errors assigning to users'))
+        errorToast(this.create, $trans('There were errors assigning to users'))
       }
 
       this.assignResult = newSelectedEngineers
@@ -1886,7 +1921,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.warn('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
         this.isLoading = false
       }
     },
@@ -1899,7 +1934,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching branches', error)
-        this.errorToast(this.$trans('Error fetching branches'))
+        errorToast(this.create, $trans('Error fetching branches'))
         this.isLoading = false
       }
     },
@@ -1921,7 +1956,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.warn('error fetching order', error)
-        this.errorToast(this.$trans('Error fetching order'))
+        errorToast(this.create, $trans('Error fetching order'))
         this.isLoading = false
       }
     },
@@ -1940,5 +1975,8 @@ export default {
 .time-input {
   width: 100px !important;
   float:left !important;
+}
+.clock-icon {
+  margin: .5em auto auto;
 }
 </style>

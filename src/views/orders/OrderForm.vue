@@ -19,8 +19,17 @@
 <script>
 import OrderFormMaintenance from "./OrderFormMaintenance.vue"
 import OrderFormTemps from "./OrderFormTemps.vue"
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   name: "OrderForm",
   data() {
     return {
@@ -54,7 +63,7 @@ export default {
     OrderFormTemps,
   },
   async created() {
-    this.memberType = await this.$store.dispatch('getMemberType')
+    this.memberType = this.mainStore.getMemberType
   },
 }
 </script>

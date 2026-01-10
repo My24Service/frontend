@@ -2,12 +2,12 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Leave Types") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Leave Types") }}</h3>
         <div class="flex-columns">
-          <b-button @click="addNewLeave" type="button" variant="primary">
-            <b-icon icon="file-earmark-plus"></b-icon>
+          <BButton @click="addNewLeave" type="button" variant="primary">
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>
             {{ $trans("Add leave types") }}
-          </b-button>
+          </BButton>
         </div>
       </div>
     </header>
@@ -30,8 +30,8 @@
         </template>
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="
                     function() {
@@ -48,14 +48,14 @@
                     }
                   "
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <b-icon-pencil class="edit-icon" @click="() => editLeaveType(data.item)">
-            </b-icon-pencil>
+            <IBiPencil class="edit-icon" @click="() => editLeaveType(data.item)">
+            </IBiPencil>
             <IconLinkDelete
               v-bind:title="$trans('Delete')"
               v-bind:method="
@@ -91,24 +91,24 @@
     >
       <b-overlay :show="isLoadingForm" rounded="sm">
         <div class="flex-columns">
-          <b-form-group label-class="" :label="$trans('Name')" label-for="name" cols="4">
-            <b-form-input
+          <BFormGroup label-class="" :label="$trans('Name')" label-for="name" cols="4">
+            <BFormInput
               id="name"
               v-model="leaveTypeForm.name"
               placeholder="Name"
               :state="submitClicked ? !v$.leaveTypeForm.name.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback :state="submitClicked ? !v$.leaveTypeForm.name.$error : null">
               {{ $trans("Please enter a leave type name") }}
             </b-form-invalid-feedback>
-          </b-form-group>
-          <b-form-group :label="$trans('Counts as leave')" cols="4">
-            <b-form-checkbox
+          </BFormGroup>
+          <BFormGroup :label="$trans('Counts as leave')" cols="4">
+            <BFormCheckbox
               id="count_as_leave"
               v-model="leaveTypeForm.counts_as_leave"
               name="count_as_leave"
-            ></b-form-checkbox>
-          </b-form-group>
+            ></BFormCheckbox>
+          </BFormGroup>
         </div>
       </b-overlay>
     </b-modal>
@@ -119,32 +119,34 @@
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
-import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import SubNav from "./SubNav.vue";
 import { LeaveTypeService } from "@/models/company/LeaveType.js";
-import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     SubNav,
-    IconLinkEdit
   },
   computed: {
     leaveTypeFormText() {
-      return this.leaveTypePk ? this.$trans("Update leave type") : this.$trans("Create leave type");
+      return this.leaveTypePk ? $trans("Update leave type") : $trans("Create leave type");
     }
   },
   validations() {
@@ -170,7 +172,7 @@ export default {
         counts_as_leave: true
       },
       fields: [
-        { key: "name", label: this.$trans("Name"), thAttr: { width: "15%" } },
+        { key: "name", label: $trans("Name"), thAttr: { width: "15%" } },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -213,11 +215,11 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveTypeService.delete(this.leaveTypePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Leave type has been deleted"));
-        this.loadData();
+        infoToast(this.create, $trans("Deleted"), $trans("Leave type has been deleted"));
+        await this.loadData();
       } catch (error) {
         console.log("error deleting leave type", error);
-        this.errorToast(this.$trans("Error deleting leave type"));
+        errorToast(this.create, $trans("Error deleting leave type"));
         this.isLoading = false;
       }
     },
@@ -231,7 +233,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave types", error);
-        this.errorToast(this.$trans("Error loading leave types"));
+        errorToast(this.create, $trans("Error loading leave types"));
         this.isLoading = false;
       }
     },
@@ -248,7 +250,7 @@ export default {
       if (!this.leaveTypePk) {
         try {
           await this.leaveTypeService.insert(this.leaveTypeForm);
-          this.infoToast(this.$trans("Created"), this.$trans("Leave type has been created"));
+          infoToast(this.create, $trans("Created"), $trans("Leave type has been created"));
           this.isLoadingForm = false;
           this.$nextTick(() => {
             this.$bvModal.hide("add-edit-leave-type-modal");
@@ -256,7 +258,7 @@ export default {
           });
         } catch (error) {
           console.log("Error creating leave types", error);
-          this.errorToast(this.$trans("Error creating leave types"));
+          errorToast(this.create, $trans("Error creating leave types"));
           this.isLoadingForm = false;
         }
 
@@ -265,7 +267,7 @@ export default {
 
       try {
         await this.leaveTypeService.update(this.leaveTypePk, this.leaveTypeForm);
-        this.infoToast(this.$trans("Updated"), this.$trans("Leave type has been updated"));
+        infoToast(this.create, $trans("Updated"), $trans("Leave type has been updated"));
         this.isLoadingForm = false;
         this.$nextTick(() => {
           this.$bvModal.hide("add-edit-leave-type-modal");
@@ -273,7 +275,7 @@ export default {
         });
       } catch (error) {
         console.log("Error updating leave type", error);
-        this.errorToast(this.$trans("Error updating leave type"));
+        errorToast(this.create, $trans("Error updating leave type"));
         this.isLoadingForm = false;
       }
       this.resetLeaveTypeForm();

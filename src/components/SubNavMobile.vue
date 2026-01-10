@@ -90,11 +90,19 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
+
+
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: "OrdersSubNav",
-  mixins: [componentMixin],
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       isLoaded: false,
@@ -103,10 +111,8 @@ export default {
   },
   created() {
     // get member type
-    this.$store.dispatch('getMemberType').then((memberType) => {
-      this.memberType = memberType
-      this.isLoaded = true
-    })
+    this.memberType = this.mainStore.getMemberType
+    this.isLoaded = true
   },
   methods: {
     isActive(item) {
@@ -117,7 +123,7 @@ export default {
   computed: {
     hasMap() {
       const notHasMap = ['viavandalen']
-      return notHasMap.indexOf(this.$store.getters.getMemberCompanycode) === -1
+      return notHasMap.indexOf(this.mainStore.getMemberCompanycode) === -1
     },
     hasDispatch() {
       return this.hasAccessToModule('mobile', 'dispatch')

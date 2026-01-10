@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="bar-chart-line-fill"></b-icon>{{ $trans('Stats in ' + year ) }}</h3>
+        <h3><IBiBarChartLineFill></IBiBarChartLineFill>{{ $trans('Stats in ' + year ) }}</h3>
       </div>
     </header>
 
@@ -14,16 +14,16 @@
     <div class='app-detail panel'>
       <b-row align-v="center">
         <b-col cols="1">
-          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
+          </BLink>
         </b-col>
-        
+
         <b-col cols="1">
           <div class="float-right">
-            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
+            </BLink>
           </div>
         </b-col>
       </b-row>
@@ -39,8 +39,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
@@ -48,8 +48,8 @@
                   v-bind:method="function() { downloadList() }"
                   v-bind:title="$trans('Download')"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>
@@ -86,6 +86,7 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
 import my24 from "../../services/my24";
+import componentMixin from "@/mixins/common";
 
 let d = new Date();
 
@@ -96,6 +97,7 @@ export default {
     ButtonLinkDownload,
     SearchModal,
   },
+  mixins: [componentMixin],
   data() {
     return {
       model: materialModel,

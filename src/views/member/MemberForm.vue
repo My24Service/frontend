@@ -4,15 +4,15 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="building"></b-icon>
+            <IBiBuilding></IBiBuilding>
             <span v-if="isCreate">{{ $trans('New member') }}</span>
             <span v-else>{{ $trans('Edit member') }}</span>
           </h3>
           <div class="flex-columns">
-            <b-button @click="cancelForm" type="button" variant="secondary outline">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Save') }}</b-button>
+            <BButton @click="cancelForm" type="button" variant="secondary outline">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton @click="submitForm" type="button" variant="primary">
+              {{ $trans('Save') }}</BButton>
           </div>
         </div>
       </header>
@@ -28,37 +28,37 @@
           <b-form v-if="member">
             <b-row>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Name')"
                   label-for="member_name"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="member.name"
                     id="member_name"
                     size="sm"
                     :state="isSubmitClicked ? !v$.member.name.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.name.$error : null">
                     {{ $trans('Please enter a name') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Company code')"
                   label-for="member_companycode"
                   description="[companycode].my24service.com"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_companycode"
                     size="sm"
                     @change="companyCodeChange"
                     v-model="member.companycode"
                     :state="member.companycode ? !v$.member.companycode.$invalid : undefined"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     v-if="member.companycode && member.companycode !== '' && !v$.member.companycode.minLength.$invalid"
                     :state="!v$.member.companycode.isUnique.$invalid">
@@ -74,327 +74,327 @@
                     :state="v$.member.companycode.minLength.$invalid">
                     {{ $trans('Company code must have at least 2 characters') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Contract')"
                   label-for="member_contract"
                 >
-                  <b-form-select v-model="member.contract" :options="contracts" size="sm"></b-form-select>
-                </b-form-group>
+                  <BFormSelect v-model="member.contract" :options="contracts" size="sm"></BFormSelect>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Type')"
                   label-for="member_member_type"
                 >
-                  <b-form-select v-model="member.member_type" :options="memberTypes" size="sm"></b-form-select>
-                </b-form-group>
+                  <BFormSelect v-model="member.member_type" :options="memberTypes" size="sm"></BFormSelect>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group" v-if="showRequestedList">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Requested')"
                   label-for="member_is_requested"
                 >
-                  <b-form-select v-model="member.is_requested" :options="isRequestedOptions" size="sm"></b-form-select>
-                </b-form-group>
+                  <BFormSelect v-model="member.is_requested" :options="isRequestedOptions" size="sm"></BFormSelect>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group" v-if="showDeletedList">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Deleted')"
                   label-for="member_is_deleted"
                 >
-                  <b-form-select v-model="member.is_deleted" :options="isDeletedOptions" size="sm"></b-form-select>
-                </b-form-group>
+                  <BFormSelect v-model="member.is_deleted" :options="isDeletedOptions" size="sm"></BFormSelect>
+                </BFormGroup>
               </b-col>
               <b-col cols="1" role="group" v-if="isRequest || (!showRequestedList && !showDeletedList)">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Branches?')"
                   label-for="member_has_branches"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="member_has_branches"
                     v-model="member.has_branches"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="3" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Address')"
                   label-for="member_address"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_address"
                     size="sm"
                     v-model="member.address"
                     :state="isSubmitClicked ? !v$.member.address.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.address.$error : null">
                     {{ $trans('Please enter an address') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="1" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Postal')"
                   label-for="member_postal"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_postal"
                     size="sm"
                     v-model="member.postal"
                     :state="isSubmitClicked ? !v$.member.postal.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.postal.$error : null">
                     {{ $trans('Please enter a postal') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('City')"
                   label-for="member_city"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_city"
                     size="sm"
                     v-model="member.city"
                     :state="isSubmitClicked ? !v$.member.city.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.city.$error : null">
                     {{ $trans('Please enter a city') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Country')"
                   label-for="member_country"
                 >
-                  <b-form-select v-model="member.country_code" :options="countries" size="sm"></b-form-select>
-                </b-form-group>
+                  <BFormSelect v-model="member.country_code" :options="countries" size="sm"></BFormSelect>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Chamber of commerce')"
                   label-for="member_chamber_of_commerce"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_chamber_of_commerce"
                     size="sm"
                     v-model="member.chamber_of_commerce"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('VAT number')"
                   label-for="member_vat_number"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_vat_number"
                     size="sm"
                     v-model="member.vat_number"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Tel.')"
                   label-for="member_tel"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_tel"
                     size="sm"
                     v-model="member.tel"
                     :state="isSubmitClicked ? !v$.member.tel.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.tel.$error : null">
                     {{ $trans('Please enter a number') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Email')"
                   label-for="member_email"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_email"
                     size="sm"
                     v-model="member.email"
                     :state="isSubmitClicked ? !v$.member.email.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.email.$error : null">
                     {{ $trans('Please enter a valid email') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Website (http://...)')"
                   label-for="member_www"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="member_www"
                     size="sm"
                     v-model="member.www"
                     :state="isSubmitClicked ? !v$.member.www.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.www.$error : null">
                     {{ $trans('Please enter a website') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row v-if="!isRequest">
               <b-col cols="1" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Public?')"
                   label-for="member_is_public"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="member_is_public"
                     v-model="member.is_public"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
               <b-col cols="1" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('API users?')"
                   label-for="member_has_api_users"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="member_has_api_users"
                     v-model="member.has_api_users"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Mobile activity users select?')"
                   label-for="member_has_mobile_activity_user_select"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="member_has_mobile_activity_user_select"
                     v-model="member.has_mobile_activity_user_select"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
               <b-col cols="1" role="group" v-if="showRequestedList || showDeletedList">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Branches?')"
                   label-for="member_has_branches"
                 >
-                  <b-form-checkbox
+                  <BFormCheckbox
                     id="member_has_branches"
                     v-model="member.has_branches"
                   >
-                  </b-form-checkbox>
-                </b-form-group>
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Equipment QR code type')"
                   label-for="member_country"
                 >
-                  <b-form-select v-model="member.equipment_qr_type" :options="equipmentQrTypes" size="sm"></b-form-select>
-                </b-form-group>
+                  <BFormSelect v-model="member.equipment_qr_type" :options="equipmentQrTypes" size="sm"></BFormSelect>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Contacts')"
                   label-for="member_contacts"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="member_contacts"
                     v-model="member.contacts"
                     rows="5"
                     :state="isSubmitClicked ? !v$.member.contacts.$error : null"
-                  ></b-form-textarea>
+                  ></BFormTextarea>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.contacts.$error : null">
                     {{ $trans('Please enter some contacts') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Activities')"
                   label-for="member_activities"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="member_activities"
                     v-model="member.activities"
                     rows="5"
                     :state="isSubmitClicked ? !v$.member.activities.$error : null"
-                  ></b-form-textarea>
+                  ></BFormTextarea>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.activities.$error : null">
                     {{ $trans('Please enter some activities') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Info')"
                   label-for="member_info"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="member_info"
                     v-model="member.info"
                     rows="5"
                     :state="isSubmitClicked ? !v$.member.info.$error : null"
-                  ></b-form-textarea>
+                  ></BFormTextarea>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.member.info.$error : null">
                     {{ $trans('Please enter some info') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="4">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Company logo')"
                   label-for="member_companylogo"
@@ -410,7 +410,7 @@
                     :state="isSubmitClicked && v$.member.companylogo ? !v$.member.companylogo.$error : null">
                     {{ $trans('Please upload a company logo') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4">
                 <h3>{{ $trans('Current image') }}</h3>
@@ -423,7 +423,7 @@
             </b-row>
             <b-row>
               <b-col cols="4">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Optional logo for on the workorder')"
                   label-for="member_companylogo_workorder"
@@ -434,7 +434,7 @@
                     :placeholder="$trans('Choose a file or drop it here...')"
                     @input="imageWorkorderSelected"
                   ></b-form-file>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4">
                 <h3>{{ $trans('Current image') }}</h3>
@@ -448,12 +448,12 @@
 
             <div class="mx-auto">
               <footer class="modal-footer">
-                <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+                <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
                   {{ $trans('Cancel') }}
-                </b-button>
-                <b-button @click="preSubmitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+                </BButton>
+                <BButton @click="preSubmitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
                   {{ $trans('Submit') }}
-                </b-button>
+                </BButton>
               </footer>
             </div>
           </b-form>
@@ -477,14 +477,20 @@ import {
 } from '@/models/member/Member'
 import { ContractService } from '@/models/member/Contract'
 import {NO_IMAGE_URL} from "@/constants";
-import {componentMixin} from "@/utils";
+
 import ApiResult from "@/components/ApiResult.vue";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
   components: {ApiResult},
   mixins: [componentMixin],
   setup() {
-    return { v$: useVuelidate() }
+    const mainStore = useMainStore()
+    return {
+      v$: useVuelidate(),
+      mainStore
+    }
   },
   props: {
     pk: {
@@ -511,12 +517,12 @@ export default {
       member: new MemberModel({}),
       orgCompanycode: null,
       isDeletedOptions: [
-        {value: true, text: this.$trans('Is deleted')},
-        {value: false, text: this.$trans('Not deleted')},
+        {value: true, text: $trans('Is deleted')},
+        {value: false, text: $trans('Not deleted')},
       ],
       isRequestedOptions: [
-        {value: true, text: this.$trans('Is requested')},
-        {value: false, text: this.$trans('Is accepted')},
+        {value: true, text: $trans('Is requested')},
+        {value: false, text: $trans('Is accepted')},
       ],
       suppliers: [],
       current_image: NO_IMAGE_URL,
@@ -624,7 +630,7 @@ export default {
   },
   async created() {
     this.isLoading = true
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = this.mainStore.getCountries
 
     try {
       const data = await this.contractService.list()
@@ -740,16 +746,16 @@ export default {
           await this.memberService.insert(this.member)
           this.member.apiOk = true
           if (this.isRequest) {
-            this.infoToast(this.$trans('Requested'), this.$trans('Request has been created'))
+            infoToast(this.create, $trans('Requested'), $trans('Request has been created'))
           } else {
-            this.infoToast(this.$trans('Created'), this.$trans('Member has been created'))
+            infoToast(this.create, $trans('Created'), $trans('Member has been created'))
           }
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating member', error)
-          this.errorToast(this.$trans('Error creating member'))
+          errorToast(this.create, $trans('Error creating member'))
           this.member.apiOk = false
           this.member.error = error
           this.buttonDisabled = false
@@ -768,13 +774,13 @@ export default {
 
         await this.memberService.update(this.pk, this.member)
         this.member.apiOk = true
-        this.infoToast(this.$trans('Updated'), this.$trans('Member has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Member has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating member', error)
-        this.errorToast(this.$trans('Error updating member'))
+        errorToast(this.create, $trans('Error updating member'))
         this.member.apiOk = false
         this.member.error = error
         this.isLoading = false
@@ -792,7 +798,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching member', error)
-        this.errorToast(this.$trans('Error fetching member'))
+        errorToast(this.create, $trans('Error fetching member'))
         this.isLoading = false
       }
     },

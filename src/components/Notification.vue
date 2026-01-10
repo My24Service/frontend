@@ -1,89 +1,99 @@
 <template>
   <div/>
 </template>
-<script>
-import { componentMixin } from '../utils.js'
+<script setup>
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
-import { NEW_DATA_EVENTS } from '../constants'
+import { NEW_DATA_EVENTS } from '@/constants'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
+import {
+  errorToast,
+  infoToast,
+  $trans,
+  doFetchUnacceptedCountAndUpdateStore,
+  hasAccessToModule
+} from "@/utils";
+import {onMounted, onUnmounted, ref} from "vue";
+import {useAuthStore} from "@/stores/auth";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
-export default {
-  mixins: [componentMixin],
-  data() {
-    return {
-      memberNewDataSocket: new MemberNewDataSocket(),
-      intervalId: null
-    }
-  },
-  methods:{
-    handleMessageUser(data) {
-      if (data.level === 'error') {
-        this.errorToast(data.message, this.$trans('User message'))
-      } else {
-        this.infoToast(this.$trans('User message'), data.message)
-      }
-    },
-    handleMessageMember(data) {
-      if (data.level === 'error') {
-        this.errorToast(data.message, this.$trans('Company message'))
-      } else {
-        this.infoToast(this.$trans('Company message'), data.message)
-      }
-    },
-    async setupPolling() {
-      const doPoll = this.isStaff || this.isSuperuser || (this.isPlanning && this.hasAccessToModule('orders'))
-      if (!doPoll) {
-        console.debug('no polling')
-        return
-      }
+const memberNewDataSocket = new MemberNewDataSocket();
+const intervalId = ref(null)
+const authStore = useAuthStore()
+const mainStore = useMainStore()
+const {create} = useToast()
 
-      setTimeout(async () => {
-        await this.doFetchUnacceptedCountAndUpdateStore()
-      }, 1000)
-
-      console.debug('setting up polling: doFetchUnacceptedCountAndUpdateStore')
-      this.intervalId = setInterval(async () => {
-        await this.doFetchUnacceptedCountAndUpdateStore()
-      }, 5*60*1000)
-    },
-    onNewData(data) {
-      if (data.type === NEW_DATA_EVENTS.UNACCEPTED_ORDER) {
-        this.doFetchUnacceptedCountAndUpdateStore()
-      }
-
-      if (data.type === NEW_DATA_EVENTS.REFRESH_INITIAL) {
-        this.$store.dispatch('getInitialData')
-      }
-    }
-  },
-  async mounted() {
-    await userSocket.init()
-    userSocket.setOnmessageHandler(this.handleMessageUser)
-    userSocket.getSocket()
-
-    await memberSocket.init()
-    memberSocket.setOnmessageHandler(this.handleMessageMember)
-    memberSocket.getSocket()
-
-    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
-    this.memberNewDataSocket.setOnmessageHandler(this.onNewData)
-    this.memberNewDataSocket.getSocket()
-
-    // unaccepted orders polling
-    await this.setupPolling()
-  },
-  async beforeDestroy() {
-    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
-    this.memberNewDataSocket.removeOnmessageHandler()
-    this.memberNewDataSocket.removeSocket()
-
-    if (this.intervalId) {
-      console.debug('clearing polling: doFetchUnacceptedCountAndUpdateStore')
-      clearInterval(this.intervalId)
-    } else {
-      console.debug('not clearing polling, no interval: doFetchUnacceptedCountAndUpdateStore')
-    }
-  },
+function handleMessageUser(data) {
+  if (data.level === 'error') {
+    errorToast(create, data.message, $trans('User message'))
+  } else {
+    infoToast(create, $trans('User message'), data.message)
+  }
 }
+
+function handleMessageMember(data) {
+  if (data.level === 'error') {
+    errorToast(create, data.message, $trans('Company message'))
+  } else {
+    infoToast(create, $trans('Company message'), data.message)
+  }
+}
+
+async function setupPolling() {
+  const doPoll = authStore.isStaff || authStore.isSuperuser || (authStore.isPlanning && hasAccessToModule('orders'))
+  if (!doPoll) {
+    console.debug('no polling')
+    return
+  }
+
+  setTimeout(async () => {
+    await doFetchUnacceptedCountAndUpdateStore()
+  }, 1000)
+
+  console.debug('setting up polling: doFetchUnacceptedCountAndUpdateStore')
+  intervalId.value = setInterval(async () => {
+    await doFetchUnacceptedCountAndUpdateStore()
+  }, 5*60*1000)
+}
+
+function onNewData(data) {
+  if (data.type === NEW_DATA_EVENTS.UNACCEPTED_ORDER) {
+    doFetchUnacceptedCountAndUpdateStore()
+  }
+
+  if (data.type === NEW_DATA_EVENTS.REFRESH_INITIAL) {
+    mainStore.getInitialData()
+  }
+}
+
+onMounted(async () => {
+  await userSocket.init()
+  userSocket.setOnmessageHandler(handleMessageUser)
+  userSocket.getSocket()
+
+  await memberSocket.init()
+  memberSocket.setOnmessageHandler(handleMessageMember)
+  memberSocket.getSocket()
+
+  await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+  memberNewDataSocket.setOnmessageHandler(onNewData)
+  memberNewDataSocket.getSocket()
+
+  // unaccepted orders polling
+  await setupPolling()
+})
+
+onUnmounted(async () => {
+  // await memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
+  memberNewDataSocket.removeOnmessageHandler()
+  memberNewDataSocket.removeSocket()
+
+  if (intervalId.value) {
+    console.debug('clearing polling: doFetchUnacceptedCountAndUpdateStore')
+    clearInterval(intervalId.value)
+  } else {
+    console.debug('not clearing polling, no interval: doFetchUnacceptedCountAndUpdateStore')
+  }
+})
 </script>

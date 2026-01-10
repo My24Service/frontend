@@ -18,10 +18,10 @@
           <b-row role="group">
             <b-col size="12">
               <div>
-                <b-form-group label="Individual radios">
-                  <b-form-radio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</b-form-radio>
-                  <b-form-radio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</b-form-radio>
-                </b-form-group>
+                <BFormGroup label="Individual radios">
+                  <BFormRadio v-model="sortMode" value="default">{{ $trans('Modified (default)') }}</BFormRadio>
+                  <BFormRadio v-model="sortMode" value="-start_date">{{ $trans('Start date') }}</BFormRadio>
+                </BFormGroup>
               </div>
             </b-col>
           </b-row>
@@ -48,31 +48,31 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="4">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('New status')"
                 label-for="change-status-status"
               >
-                <b-form-select
+                <BFormSelect
                   id="change-status-status"
                   v-model="status.statuscode"
                   :options="statuscodes"
                   size="sm"
                   value-field="statuscode"
                   text-field="statuscode"
-                ></b-form-select>
-              </b-form-group>
+                ></BFormSelect>
+              </BFormGroup>
             </b-col>
             <b-col size="8">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Extra text')"
                 label-for="change-status-extra-text"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   id="change-status-extra-text"
                   v-model="status.extra_text"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -84,11 +84,11 @@
         <strong>{{ $trans('Selected orders') }}:</strong>&nbsp;
         <span v-for="(order, index) in selectedOrders" :key="order.id">
           {{ order.order_id }}
-          <b-link class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</b-link>
+          <BLink class="px-1" @click.prevent="removeSelectedOrder(index)">[ x ]</BLink>
         </span>
-        <b-link v-if="dispatch" class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
-          <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
-        </b-link>
+        <BLink v-if="dispatch" class="px-1" @click.prevent="doAssign()" v-bind:title="$trans('Assign these orders')">
+          <IBiArrowBarRight font-scale="1"></IBiArrowBarRight>
+        </BLink>
       </b-col>
     </b-row>
 
@@ -115,8 +115,8 @@
         </template>
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="order-add"
                   v-bind:title="$trans('New order')"
@@ -131,8 +131,8 @@
                 <ButtonLinkSort
                   v-bind:method="function() { showSortModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>
@@ -182,7 +182,7 @@
 </template>
 
 <script>
-import { OrderService } from '../../models/orders/Order.js'
+import { OrderService } from '@/models/orders/Order'
 import statusModel from '../../models/orders/Status.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import my24 from '../../services/my24.js'
@@ -197,8 +197,23 @@ import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
 import Pagination from "../../components/Pagination.vue"
 import SearchModal from '../../components/SearchModal.vue'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
+  mixins: [componentMixin],
   components: {
     OrderTableInfo,
     IconLinkEdit,
@@ -239,7 +254,7 @@ export default {
       isLoading: false,
       orders: [],
       fields: [
-        {thAttr: {width: '80%'}, key: 'id', label: this.$trans('Order')},
+        {thAttr: {width: '80%'}, key: 'id', label: $trans('Order')},
         {thAttr: {width: '20%'}, key: 'icons'}
       ],
     }
@@ -252,7 +267,7 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.statuscodes = await this.mainStore.getStatuscodes
     this.model.currentPage = this.$route.query.page || 1
 
     this.sinceDate = this.$route.query.since || null
@@ -283,7 +298,7 @@ export default {
     },
     // rest
     doAssign() {
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
       this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
     },
     selectOrder(order) {
@@ -294,11 +309,11 @@ export default {
       }
 
       this.selectedOrders.push(order)
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     async changeStatus() {
       const status = {
@@ -308,11 +323,11 @@ export default {
 
       try {
         await statusModel.insert(status)
-        this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        this.errorToast(this.$trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     },
     rowStyle(item, type) {
@@ -336,11 +351,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.orderPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
-        this.errorToast(this.$trans('Error deleting order'))
+        errorToast(this.create, $trans('Error deleting order'))
       }
     },
     async loadData() {
@@ -349,11 +364,11 @@ export default {
       try {
         const data = await this.model.list()
         this.orders = data.results
-        this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
+        this.selectedOrders = await this.mainStore.getAssignOrders || []
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
-        this.errorToast(this.$trans('Error loading orders'))
+        errorToast(this.create, $trans('Error loading orders'))
         this.isLoading = false
       }
     }

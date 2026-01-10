@@ -20,6 +20,7 @@
     <b-row>
       <b-col cols="12">
         <bar-chart
+          v-if="chartdataCountsOrderTypesBar"
           id="bar-chart-order-types-month"
           :chart-data="chartdataCountsOrderTypesBar"
           :options="optionsStacked"
@@ -33,6 +34,7 @@
     <b-row>
       <b-col cols="6">
         <bar-chart
+          v-if="chartdataCountsBar"
           id="bar-chart-order-types"
           :chart-data="chartdataCountsBar"
           :options="options"
@@ -40,6 +42,7 @@
       </b-col>
       <b-col cols="6">
         <pie-chart
+          v-if="chartdataCountsPie"
           id="pie-chart-order-types"
           :chart-data="chartdataCountsPie"
           :options="pieOptions"
@@ -53,6 +56,7 @@
     <b-row>
       <b-col cols="6">
         <bar-chart
+          v-if="chartdataOrderTypesBar"
           id="bar-chart-order-types"
           :chart-data="chartdataOrderTypesBar"
           :options="options"
@@ -60,6 +64,7 @@
       </b-col>
       <b-col cols="6">
         <pie-chart
+          v-if="chartdataOrderTypesPie"
           id="pie-chart-order-types"
           :chart-data="chartdataOrderTypesPie"
           :options="pieOptions"
@@ -71,19 +76,32 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
-import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
+// import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
+import {Chart} from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+Chart.register(ChartDataLabels);
 
 import BarChart from "./BarChart.vue"
 import PieChart from "./PieChart.vue"
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
-Chart.defaults.global.datasets.bar.categoryPercentage = 0.5;
-Chart.defaults.global.datasets.bar.barPercentage = 1
+// Chart.defaults.global.datasets.bar.categoryPercentage = 0.5;
+// Chart.defaults.global.datasets.bar.barPercentage = 1
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
+  mixins: [componentMixin],
   components: {
     BarChart,
     PieChart,
-    ChartJsPluginDataLabels,
+    // ChartJsPluginDataLabels,
   },
   props: {
     dataIn: {
@@ -323,7 +341,7 @@ export default {
       this.chartdataCountsBar = {
         labels,
         datasets: [{
-          // label: this.$trans('Total orders per month'),
+          // label: $trans('Total orders per month'),
           data: monthDataBar,
           backgroundColor: 'blue',
         }]
@@ -366,7 +384,7 @@ export default {
       this.chartdataOrderTypesBar = {
         labels: orderTypesLabels,
         datasets: [{
-          // label: this.$trans('Order types'),
+          // label: $trans('Order types'),
           data: orderTypesDataBar,
           backgroundColor: orderTypesColors,
         }]
@@ -385,10 +403,9 @@ export default {
     }
   },
   async mounted () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
-
   }
 }
 </script>

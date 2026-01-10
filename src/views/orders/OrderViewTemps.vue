@@ -4,13 +4,13 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <router-link :to="{name: 'order-list'}">{{ $trans("Orders") }}</router-link> /
           <span>#<strong>{{ pk }}</strong></span>
         </h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{name:'order-edit', pk: pk}">
-            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit order') }}
+            <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit order') }}
           </router-link>
         </div>
       </div>
@@ -79,9 +79,9 @@
             <b-tr>
               <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
               <b-td>
-                <b-link class="px-1" v-bind:href="`mailto:${order.order_email}`">
+                <BLink class="px-1" v-bind:href="`mailto:${order.order_email}`">
                   {{ order.order_email }}
-                </b-link>
+                </BLink>
               </b-td>
             </b-tr>
           </b-table-simple>
@@ -116,17 +116,17 @@
       <b-row class="my-2">
         <b-col cols="2"><strong>{{ $trans('Workorder online') }}</strong></b-col>
         <b-col cols="9">
-          <b-link class="px-1" :href="order.workorder_url" target="_blank">
+          <BLink class="px-1" :href="order.workorder_url" target="_blank">
             {{ order.order_id }}
-          </b-link>
+          </BLink>
         </b-col>
       </b-row>
       <b-row class="my-2" v-if="order.workorder_pdf_url != ''">
         <b-col cols="2"><strong>{{ $trans('Download PDF') }}</strong></b-col>
         <b-col cols="9">
-          <b-link class="px-1" :href="order.workorder_pdf_url" target="_blank">
+          <BLink class="px-1" :href="order.workorder_pdf_url" target="_blank">
             {{ $trans('Order') }} {{ order.order_id }}
-          </b-link>
+          </BLink>
         </b-col>
       </b-row>
     </div>
@@ -142,9 +142,9 @@ export default {
       isLoading: true,
       order: orderModel.getFields(),
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') }
+        { key: 'product', label: $trans('Product') },
+        { key: 'location', label: $trans('Location') },
+        { key: 'remarks', label: $trans('Remarks') }
       ],
     }
   },
@@ -167,7 +167,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        this.errorToast(this.$trans('Error fetching order'))
+        errorToast(this.create, $trans('Error fetching order'))
         this.isLoading = false
       }
     }

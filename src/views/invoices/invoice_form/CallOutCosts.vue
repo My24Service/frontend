@@ -42,28 +42,28 @@
       </b-row>
       <b-row>
         <b-col cols="2">
-          <b-form-input
+          <BFormInput
             @blur="updateTotals"
             v-model="coc_item.amount_int"
             size="sm"
-          ></b-form-input>
+          ></BFormInput>
         </b-col>
         <b-col cols="5">
-          <b-form-radio-group
+          <BFormRadioGroup
             @change="updateTotals"
             v-model="coc_item.use_price"
           >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
               {{ $trans('Settings') }}
               {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-            </b-form-radio>
+            </BFormRadio>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
               {{ $trans('Customer') }}
               {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-            </b-form-radio><br/>
+            </BFormRadio><br/>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
@@ -72,8 +72,8 @@
                   @priceChanged="(val) => otherPriceChanged(val)"
                 />
               </p>
-            </b-form-radio>
-          </b-form-radio-group>
+            </BFormRadio>
+          </BFormRadioGroup>
         </b-col>
         <b-col cols="2">
           <VAT @vatChanged="(val) => changeVatType(coc_item, val)" />
@@ -108,25 +108,35 @@ import {
   USE_PRICE_SETTINGS
 } from "./constants";
 import PriceInput from "../../../components/PriceInput";
-import Collapse from "../../../components/Collapse";
 import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import invoiceMixin from "./mixin";
 import CostService, {COST_TYPE_CALL_OUT_COSTS} from "../../../models/orders/Cost";
-import {InvoiceLineService} from "../../../models/invoices/InvoiceLine";
+import {InvoiceLineService} from "@/models/invoices/InvoiceLine";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 import TotalsInputs from "../../../components/TotalsInputs";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "CallOutCostsComponent",
   mixins: [invoiceMixin],
   components: {
     PriceInput,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -157,9 +167,9 @@ export default {
   data() {
     return {
       isLoading: false,
-      default_currency: this.$store.getters.getDefaultCurrency,
+      default_currency: this.mainStore.getDefaultCurrency,
       invoice_default_call_out_costs_dinero: null,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
 
       costService: new CostService(),
       coc_item: null,
@@ -299,10 +309,10 @@ export default {
       )
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
-      return `${this.$trans("Call out costs")}`
+      return `${$trans("Call out costs")}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Call out costs")}`
+      return `${$trans("Call out costs")}`
     },
     getTotalAmountInvoiceLine() {
       return this.totalAmount

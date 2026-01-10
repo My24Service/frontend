@@ -1,7 +1,9 @@
 <template>
-  <div ref="index" v-if="!isLoggedIn">
-    <b-container class="d-flex justify-center flex-column">
-      <NavBrand />
+  <div ref="index" v-if="!authStore.isLoggedIn">
+    <b-container class="d-flex justify-center flex-column" v-if="memberInfo">
+      <NavBrand
+        :member-info="memberInfo"
+      />
       <h4>{{  memberInfo.name }}</h4>
     </b-container>
     <b-container class="d-flex">
@@ -18,45 +20,43 @@
       <header>
         <div class='page-title'>
           <h3>
-            <b-icon icon="hourglass-split"></b-icon>
+            <IBiHourglassSplit></IBiHourglassSplit>
           </h3>
         </div>
       </header>
-
     </div>
   </div>
 </template>
 
-<script>
-import { componentMixin } from '@/utils.js'
+<script setup>
 import NavBrand from '@/components/NavBrand.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import Version from "./Version.vue"
+import {computed, onMounted} from "vue";
+import {useAuthStore} from "@/stores/auth";
+import {useMainStore} from "@/stores/main";
+import {useRouter} from "vue-router";
 
-export default {
-  name: 'TheIndex',
-  mixins: [componentMixin],
-  components: {
-    NavBrand,
-    LoginForm,
-    Version
-  },
-  data() {
-    return {
-      slide: 0,
-      memberInfo: this.$store.state.memberInfo,
-    }
-  },
+const authStore = useAuthStore()
+const mainStore = useMainStore()
+const memberInfo = computed(() => mainStore.memberInfo);
+const router = useRouter()
 
-  created() {
+onMounted(async () => {
+  try {
+    await mainStore.checkInitialData()
     setTimeout(() => {
-      if (this.isPlanning) {
-        console.info(`planning, redirecting to 'order-list'`)
-        this.$router.push({ name: 'material-list' });
+      if (authStore.isLoggedIn) {
+        console.debug(`planning, redirecting to 'order-list'`)
+        router.replace({ name: 'order-list' });
       }
     }, 100);
+  } catch(error) {
+    if (error.response && error.response.status === 401) {
+      await authStore.refreshToken()
+    }
   }
-}
+})
 </script>
 
 <style scoped>

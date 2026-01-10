@@ -6,57 +6,57 @@
         <h2 v-if="!isCreate">{{ $trans('Edit module part') }}</h2>
         <b-row>
           <b-col cols="6" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-for="module-part_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="modulePart.name"
                 id="module-part_name"
                 size="sm"
                 autofocus
                 :state="isSubmitClicked ? !v$.modulePart.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.modulePart.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Module')"
               label-for="module-part_module"
             >
-              <b-form-select v-model="modulePart.module" :options="modules" size="sm"></b-form-select>
-            </b-form-group>
+              <BFormSelect v-model="modulePart.module" :options="modules" size="sm"></BFormSelect>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Always selected?')"
               label-for="module-part_is_always_selected"
             >
-              <b-form-checkbox
+              <BFormCheckbox
                 id="module-part_is_always_selected"
                 size="sm"
                 v-model="modulePart.is_always_selected"
               >
-              </b-form-checkbox>
-            </b-form-group>
+              </BFormCheckbox>
+            </BFormGroup>
           </b-col>
         </b-row>
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>
@@ -70,11 +70,20 @@ import { required } from '@vuelidate/validators'
 
 import modulePartModel from '@/models/member/ModulePart.js'
 import moduleModel from '@/models/member/Module.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
+  mixins: [componentMixin],
   props: {
     pk: {
       type: [String, Number],
@@ -146,13 +155,13 @@ export default {
         this.isLoading = true
         try {
           await modulePartModel.insert(this.modulePart)
-          this.infoToast(this.$trans('Created'), this.$trans('Module part has been created'))
+          infoToast(this.create, this.$trans('Created'), this.$trans('Module part has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating module part', error)
-          this.errorToast(this.$trans('Error creating module part'))
+          errorToast(this.create, this.$trans('Error creating module part'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -164,13 +173,13 @@ export default {
         this.isLoading = true
 
         await modulePartModel.update(this.pk, this.modulePart)
-        this.infoToast(this.$trans('Updated'), this.$trans('Module part has been updated'))
+        infoToast(this.create, this.$trans('Updated'), this.$trans('Module part has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating module part', error)
-        this.errorToast(this.$trans('Error updating module part'))
+        errorToast(this.create, this.$trans('Error updating module part'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -181,7 +190,7 @@ export default {
         this.modulePart = await modulePartModel.detail(this.pk)
         this.isLoading = false
       } catch {
-        this.errorToast(this.$trans('Error fetching module part'))
+        errorToast(this.create, this.$trans('Error fetching module part'))
         this.isLoading = false
       }
     },

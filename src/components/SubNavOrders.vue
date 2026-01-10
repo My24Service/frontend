@@ -22,11 +22,19 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils'
+import {$trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   methods: {
+    $trans,
     isActive(item) {
       const parts = this.$route.path.split('/')
       return parts[2] === item
@@ -62,7 +70,7 @@ export default {
       return this.hasAccessToModule('orders', 'month-stats');
     },
     unacceptedCount() {
-      return this.$store.state.unacceptedCount
+      return this.mainStore.unacceptedCount
     }
   },
   watch: {

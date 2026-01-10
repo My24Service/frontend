@@ -3,10 +3,10 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-medical"></b-icon>{{ $trans("Purchase orders") }}
+          <IBiFileEarmarkMedical></IBiFileEarmarkMedical>{{ $trans("Purchase orders") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -14,9 +14,9 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'purchaseorder-add'}" class="btn">{{$trans('Add purchase order')}}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -44,17 +44,17 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="6">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('New status')"
                 label-for="change-status-status"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   autofocus
                   id="change-status-status"
                   v-model="status.status"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -156,24 +156,31 @@
 
 <script>
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import purchaseOrderStatusModel from '@/models/inventory/PurchaseOrderStatus.js'
 import IconLinkPlus from '@/components/IconLinkPlus.vue'
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkPlus,
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -186,12 +193,12 @@ export default {
       purchaseOrders: [],
       fields: [
         'index',
-        {key: 'purchase_order_id', label: this.$trans('Order'), sortable: true },
-        {key: 'supplier_reservation', label: this.$trans('Reservation')},
-        {key: 'last_status', label: this.$trans('Status')},
-        {key: 'expected_entry_date', label: this.$trans('Expected entry date'), sortable: true,thAttr: {width: '15%'}},
-        {key: 'created', label: this.$trans('Created'), sortable: true,thAttr: {width: '15%'}},
-        {key: 'totals', label: this.$trans('# entries / # products'),thAttr: {width: '15%'}},
+        {key: 'purchase_order_id', label: $trans('Order'), sortable: true },
+        {key: 'supplier_reservation', label: $trans('Reservation')},
+        {key: 'last_status', label: $trans('Status')},
+        {key: 'expected_entry_date', label: $trans('Expected entry date'), sortable: true,thAttr: {width: '15%'}},
+        {key: 'created', label: $trans('Created'), sortable: true,thAttr: {width: '15%'}},
+        {key: 'totals', label: $trans('# entries / # products'),thAttr: {width: '15%'}},
         {key: 'icons', thAttr: {width: '15%'}}
       ],
       status: {
@@ -223,11 +230,11 @@ export default {
 
       try {
         await this.model.insert(status)
-        this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        this.errorToast(this.$trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     },
     showChangeStatusModal(id) {
@@ -242,11 +249,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.purchaseOrderPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Purchase order has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Purchase order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting purchase order', error)
-        this.errorToast(this.$trans('Error deleting purchase order'))
+        errorToast(this.create, $trans('Error deleting purchase order'))
       }
     },
     // rest
@@ -259,7 +266,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching purchase orders', error)
-        this.errorToast(this.$trans('Error loading purchase orders'))
+        errorToast(this.create, $trans('Error loading purchase orders'))
         this.isLoading = false
       }
     }

@@ -5,6 +5,7 @@
     </header>
     <div class="panel">
       <OrderStats
+        v-if="statsData"
         :data-in="statsData"
         ref="order-stats"
       />
@@ -13,9 +14,9 @@
     <div class="panel app-grid">
       <b-row align-v="center">
         <b-col cols="1">
-          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
+          </BLink>
         </b-col>
         <b-col cols="10" class="text-center">
           <h4>{{ $trans(`Dashboard for ${year}`) }}</h4>
@@ -28,9 +29,9 @@
         </b-col>
         <b-col cols="1">
           <div class="float-right">
-            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
+            </BLink>
           </div>
         </b-col>
       </b-row>
@@ -39,7 +40,7 @@
         <b-col cols="12">
           <bar-chart
             id="bar-chart-customers"
-            v-if="!isLoading"
+            v-if="!isLoading && chartdataCustomers"
             :chart-data="chartdataCustomers"
             :options="options"
           />
@@ -80,7 +81,7 @@
         <b-col cols="6">
           <pie-chart
             id="pie-chart-order-types-4"
-            v-if="!isLoading"
+            v-if="!isLoading && pieChartdataOrderTypes"
             :chart-data="pieChartdataOrderTypes"
             :options="pieOptions"
           />
@@ -91,7 +92,7 @@
         <b-col cols="6">
           <bar-chart
             id="bar-chart-order-statuses-1"
-            v-if="!isLoading"
+            v-if="!isLoading && barChartdataOrderStatuses"
             :chart-data="barChartdataOrderStatuses"
             :options="options"
           />
@@ -99,7 +100,7 @@
         <b-col cols="6">
           <pie-chart
             id="pie-chart-order-statuses-2"
-            v-if="!isLoading"
+            v-if="!isLoading && pieChartdataOrderStatuses"
             :chart-data="pieChartdataOrderStatuses"
             :options="pieOptions"
           />
@@ -132,7 +133,7 @@
         <b-col cols="6">
           <bar-chart
             id="bar-chart-transactions"
-            v-if="!isLoading"
+            v-if="!isLoading && barChartdataTransactions"
             :chart-data="barChartdataTransactions"
             :options="options"
           />
@@ -140,7 +141,7 @@
         <b-col cols="6">
           <pie-chart
             id="pie-chart-transactions"
-            v-if="!isLoading"
+            v-if="!isLoading && pieChartdataTransactions"
             :chart-data="pieChartdataTransactions"
             :options="pieOptions"
           />
@@ -157,6 +158,7 @@ import PieChart from "../../components/PieChart.vue"
 import OrderStats from "../../components/OrderStats.vue"
 import dashboardModel from '../../models/company/Dashboard.js'
 import {OrderService} from "@/models/orders/Order";
+import componentMixin from "@/mixins/common";
 
 let d = new Date()
 
@@ -166,6 +168,7 @@ export default {
     PieChart,
     OrderStats,
   },
+  mixins: [componentMixin],
   data() {
     return {
       chartdataCustomers: {},
@@ -217,7 +220,11 @@ export default {
     }
   },
   created() {
-    this.loadData()
+    try {
+      this.loadData()
+    } catch (e) {
+      console.error(`error loading data: ${e}`)
+    }
   },
   methods: {
     nextYear() {

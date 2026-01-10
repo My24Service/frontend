@@ -35,8 +35,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="module-part-add"
                   v-bind:title="$trans('New module part')"
@@ -48,8 +48,8 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>
@@ -59,7 +59,7 @@
           </div>
         </template>
         <template #cell(is_always_selected)="data">
-          <b-icon-check-square v-if="data.item.is_always_selected"></b-icon-check-square>
+          <IBiCheckSquare v-if="data.item.is_always_selected"></IBiCheckSquare>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -88,8 +88,20 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   components: {
     IconLinkEdit,
     IconLinkDelete,
@@ -138,11 +150,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.modulePartPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Module part has been deleted'))
-        this.loadData()
+        infoToast(this.create, this.$trans('Deleted'), this.$trans('Module part has been deleted'))
+        await this.loadData()
       } catch(error) {
         console.log('Error deleting module part', error)
-        this.errorToast(this.$trans('Error deleting module part'))
+        errorToast(this.create, this.$trans('Error deleting module part'))
       }
     },
     // rest
@@ -155,7 +167,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching module parts', error)
-        this.errorToast(this.$trans('Error loading module parts'))
+        errorToast(this.create, this.$trans('Error loading module parts'))
         this.isLoading = false
       }
     }

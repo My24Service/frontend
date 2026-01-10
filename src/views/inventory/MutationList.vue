@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="arrow-left-right"></b-icon>{{ $trans("Mutations") }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <h3><IBiArrowLeftRight></IBiArrowLeftRight>{{ $trans("Mutations") }}</h3>
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
@@ -12,9 +12,9 @@
             <ButtonLinkSearch
             v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'mutation-add'}" class="btn">{{ $trans('Add mutation') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -64,18 +64,28 @@
 import mutationModel from '@/models/inventory/Mutation.js'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
     SearchModal,
     Pagination,
-    ButtonLinkAdd,
   },
+  mixins: [componentMixin],
   data() {
     return {
       searchQuery: null,
@@ -115,7 +125,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching mutations', error)
-        this.errorToast(this.$trans('Error loading mutations'))
+        errorToast(this.create, this.$trans('Error loading mutations'))
         this.isLoading = false
       }
     }

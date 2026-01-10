@@ -2,8 +2,7 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="person-square"></b-icon>{{ $trans('Partners') }}</h3>
-        
+        <h3><IBiPersonSquare></IBiPersonSquare>{{ $trans('Partners') }}</h3>
       </div>
     </header>
 
@@ -13,13 +12,13 @@
         <div class='panel col-1-3'>
           <h6>{{ $trans('New partner request') }}</h6>
           <br>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-class="p-sm-0"
                 label-for="partner_request_member_search"
                 :label="$trans('Send partner request to')"
               >
-                <multiselect
+                <VueMultiselect
                   id="partner_request_member_search"
                   track-by="id"
                   :placeholder="`${$trans('Member')} ${$trans('(type to search)')}`"
@@ -40,33 +39,33 @@
                   :custom-label="memberLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
-              </b-form-group>
-            
-              <b-form-group
+                </VueMultiselect>
+              </BFormGroup>
+
+              <BFormGroup
                 v-if="this.member_info"
                 label-size="sm"
                 label-for="partner_request_company_info"
               >
-                <b-form-input
+                <BFormInput
                   id="partner_request_company_info"
                   size="sm"
                   readonly
                   v-model="member_info"
                   :state="isSubmitClicked ? !v$.partnerRequest.to_member.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.partnerRequest.to_member.$error : null">
                   {{ $trans('Please select a member') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
-              <b-button-toolbar class="flex-columns" v-if="this.member_info">
+              </BFormGroup>
+              <BButton-toolbar class="flex-columns" v-if="this.member_info">
                 <div></div>
-                <b-button @click="cancelForm" type="button" variant="secondary">
-                  {{ $trans('Cancel') }}</b-button>
-                <b-button @click="submitForm" type="button" variant="primary">
-                  {{ $trans('Submit') }}</b-button>
-            </b-button-toolbar>
+                <BButton @click="cancelForm" type="button" variant="secondary">
+                  {{ $trans('Cancel') }}</BButton>
+                <BButton @click="submitForm" type="button" variant="primary">
+                  {{ $trans('Submit') }}</BButton>
+            </BButton-toolbar>
         </div>
 
         <div class='col-1-3'></div>
@@ -79,17 +78,23 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import partnerRequestsSentModel from '@/models/company/PartnerRequestsSent.js'
 import memberModel from '@/models/member/Member.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   validations: {
     partnerRequest: {
@@ -125,7 +130,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching members', error)
-        this.errorToast(this.$trans('Error fetching members'))
+        errorToast(this.create, $trans('Error fetching members'))
         this.isLoading = false
       }
     },
@@ -152,12 +157,12 @@ export default {
         delete this.partnerRequest.status
 
         await partnerRequestsSentModel.insert(this.partnerRequest)
-        this.infoToast(this.$trans('Created'), this.$trans('Partner request has been sent'))
+        infoToast(this.create, $trans('Created'), $trans('Partner request has been sent'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error sending partner request', error)
-        this.errorToast(this.$trans('Error sending partner request'))
+        errorToast(this.create, $trans('Error sending partner request'))
         this.isLoading = false
       }
     },

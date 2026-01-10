@@ -2,13 +2,13 @@
   <div>
     <h5>{{ $trans('Customer') }}</h5>
     <b-form>
-      <b-form-group
+      <BFormGroup
         label-size="sm"
         label-class="p-sm-0"
         v-bind:label="$trans('Search existing address')"
         label-for="order-customer-search"
       >
-        <multiselect
+        <VueMultiselect
           id="order-customer-search"
           track-by="id"
           :placeholder="$trans('Type to search')"
@@ -26,141 +26,141 @@
           :custom-label="customerLabel"
         >
           <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-        </multiselect>
-      </b-form-group>
+        </VueMultiselect>
+      </BFormGroup>
 
-      <b-form-group :label="$trans('Customer')"
+      <BFormGroup :label="$trans('Customer')"
           label-for="quotation_name"
           label-cols="3"
       >
         <b-input-group>
-          <b-form-input
+          <BFormInput
             v-model="quotation.quotation_name"
             id="quotation_name"
 
             :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-input-group-append>
-            <b-form-input
+            <BFormInput
               v-model="quotation.customer_id"
               readonly
               :title="$trans('Customer ID')"
               id="customer_id"
               style="max-width: 9ch"
               :state="isSubmitClicked ? !v$.quotation.customer_id.$error : null">
-            </b-form-input>
+            </BFormInput>
           </b-input-group-append>
         </b-input-group>
         <b-form-invalid-feedback
           :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null">
           {{ $trans('Please enter the customer') }}
         </b-form-invalid-feedback>
-      </b-form-group>
+      </BFormGroup>
 
       <div v-if="quotation.customer_id">
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Address')"
           label-for="order_address"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_address"
             v-model="quotation.quotation_address"
             :state="isSubmitClicked ? !v$.quotation.quotation_address.$error: null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.quotation.quotation_address.$error : null">
             {{ $trans('Please enter the address') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Postal')"
           label-for="order_postal"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_postal"
             v-model="quotation.quotation_postal"
             :state="isSubmitClicked ? !v$.quotation.quotation_postal.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.quotation.quotation_postal.$error : null">
             {{ $trans('Please enter the postal') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Country')"
           label-for="order_country_code"
           label-cols="3"
         >
-          <b-form-select v-model="quotation.quotation_country_code" :options="countries" ></b-form-select>
-        </b-form-group>
+          <BFormSelect v-model="quotation.quotation_country_code" :options="countries" ></BFormSelect>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('City')"
           label-for="order_city"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_city"
 
             v-model="quotation.quotation_city"
             :state="isSubmitClicked ? !v$.quotation.quotation_city.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.quotation.quotation_city.$error : null">
             {{ $trans('Please enter the city') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Contacts')"
           label-for="order_contact"
           label-cols="3">
-          <b-form-input
+          <BFormInput
             id="order_contact"
             v-model="quotation.quotation_contact">
-          </b-form-input>
-        </b-form-group>
+          </BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Email')"
           label-for="order_email"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_email"
 
             v-model="quotation.quotation_email"
             placeholder="email address">
-          </b-form-input>
-        </b-form-group>
+          </BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Mobile')"
           label-for="order_mobile"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_mobile"
 
             v-model="quotation.quotation_mobile"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Phone')"
           label-for="order_tel"
           label-cols="3"
         >
-          <b-form-input
+          <BFormInput
             id="order_tel"
 
             v-model="quotation.quotation_tel"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
       </div>
     </b-form>
   </div>
@@ -171,34 +171,28 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
-import Multiselect from 'vue-multiselect'
-
-import {componentMixin} from "@/utils";
-import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
-import Collapse from '@/components/Collapse.vue'
-import CustomerDetail from "@/components/CustomerDetail";
-import TotalsInputs from "@/components/TotalsInputs";
+import VueMultiselect from 'vue-multiselect'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerService} from "@/models/customer/Customer";
-
-import QuotationData from './QuotationData.vue'
-import Chapter from './Chapter.vue'
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: "CustomerForm",
-  mixins: [componentMixin],
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
   components: {
-    Multiselect,
-    OrderTypesSelect,
-    Collapse,
-    QuotationData,
-    CustomerDetail,
-    Chapter,
-    TotalsInputs,
+    VueMultiselect,
   },
   props: {
     pk: {
@@ -270,11 +264,11 @@ export default {
     }
   },
   async created () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = this.mainStore.getCountries
   },
   mounted () {
     if (!this.isCreate) {
@@ -319,13 +313,13 @@ export default {
         try {
           const quotation = await this.quotationService.insert(this.quotation)
 
-          this.infoToast(this.$trans('Created'), this.$trans('Quotation has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Quotation has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           await this.$router.push({ name: 'quotation-edit-preliminary', params: { pk: quotation.id, is_new: true } })
         } catch(error) {
           console.log('Error creating quotation', error)
-          this.errorToast(this.$trans('Error creating quotation'))
+          errorToast(this.create, $trans('Error creating quotation'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -340,7 +334,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
         this.isLoading = false
       }
     },

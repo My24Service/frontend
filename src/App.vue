@@ -1,13 +1,11 @@
 <template>
-  <div id="app">
+  <BApp>
     <router-view/>
-  </div>
+  </BApp>
 </template>
 
-<script>
-export default {
-  name: 'App',
-};
+<script setup>
+import {BApp} from 'bootstrap-vue-next'
 </script>
 
 <style>

@@ -20,9 +20,8 @@
     </b-nav-item>
   </div>
 </template>
-
 <script>
-import { componentMixin } from '@/utils'
+import componentMixin from "@/mixins/common";
 
 export default {
   mixins: [componentMixin],
@@ -31,23 +30,6 @@ export default {
       const parts = this.$route.path.split('/')
       return parts[parts.length - 1] === item
     }
-  },
-  computed: {
-    hasMembers() {
-      return this.isSuperuser || this.isStaff
-    },
-    hasDeletedMembers() {
-      return this.isSuperuser || this.isStaff
-    },
-    hasContracts() {
-      return this.isSuperuser || this.isStaff
-    },
-    hasModules() {
-      return this.isSuperuser
-    },
-    hasModuleParts() {
-      return this.isSuperuser
-    },
   },
 }
 </script>

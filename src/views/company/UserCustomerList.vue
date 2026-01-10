@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
-        <b-button-toolbar>
-          <b-button-group>
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
+        <BButton-toolbar>
+          <BButton-group>
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -12,9 +12,9 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
-          <b-link :to="{name: 'customeruser-add'}" class="btn primary" v-if="isStaff || isSuperuser">{{$trans('Add customer user')}}</b-link>
-        </b-button-toolbar>
+          </BButton-group>
+          <BLink :to="{name: 'customeruser-add'}" class="btn primary" v-if="isStaff || isSuperuser">{{$trans('Add customer user')}}</BLink>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -91,10 +91,18 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '../../utils.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'UserCustomerList',
   components: {
     PillsCompanyUsers,
@@ -113,12 +121,12 @@ export default {
       isLoading: false,
       customerusers: [],
       customeruserFields: [
-        {key: 'full_name', label: this.$trans('Name'), sortable: true},
-        {key: 'username', label: this.$trans('Username'), sortable: true},
-        {key: 'email', label: this.$trans('Email'), sortable: true},
-        {key: 'customer', label: this.$trans('Customer'), sortable: true},
-        {key: 'last_login', label: this.$trans('Last login'), sortable: true},
-        {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
+        {key: 'full_name', label: $trans('Name'), sortable: true},
+        {key: 'username', label: $trans('Username'), sortable: true},
+        {key: 'email', label: $trans('Email'), sortable: true},
+        {key: 'customer', label: $trans('Customer'), sortable: true},
+        {key: 'last_login', label: $trans('Last login'), sortable: true},
+        {key: 'date_joined', label: $trans('Date joined'), sortable: true},
         {key: 'icons', label: ''}
       ],
     }
@@ -145,11 +153,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Customer user has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Customer user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting customer user', error)
-        this.errorToast(this.$trans('Error deleting customer user'))
+        errorToast(this.create, $trans('Error deleting customer user'))
       }
     },
     // rest
@@ -162,7 +170,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customerusers', error)
-        this.errorToast(this.$trans('Error loading customer users'))
+        errorToast(this.create, $trans('Error loading customer users'))
         this.isLoading = false
       }
     }

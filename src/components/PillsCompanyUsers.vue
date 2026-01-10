@@ -45,10 +45,18 @@
   </div>
 </template>
 <script>
-import { componentMixin } from '../utils.js'
+
+
+import {useMainStore} from "@/stores/main";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       isLoaded: false,
@@ -58,10 +66,10 @@ export default {
   },
   async created() {
     // check api users
-    this.hasApiUsers = await this.$store.getters.getMemberHasApiUsers
+    this.hasApiUsers = await this.mainStore.getMemberHasApiUsers
 
     // get member type
-    this.memberType = await this.$store.dispatch('getMemberType')
+    this.memberType = await this.mainStore.getMemberType
 
     this.isLoaded = true
   },

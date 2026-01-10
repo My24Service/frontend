@@ -1,20 +1,20 @@
 <template>
   <div class="use-on-invoice-container">
     <h5>{{ $trans("What to add as quotation lines")}}</h5>
-    <b-form-group>
-      <b-form-radio-group
+    <BFormGroup>
+      <BFormRadioGroup
         v-model="useOnQuotationSelected"
         :options="useOnQuotationOptions"
-      ></b-form-radio-group>
-    </b-form-group>
-    <b-button
+      ></BFormRadioGroup>
+    </BFormGroup>
+    <BButton
       @click="() => { createQuotationLines() }"
       class="btn btn-primary update-button"
       type="button"
       variant="primary"
     >
       {{ $trans("Create quotation lines") }}
-    </b-button>
+    </BButton>
   </div>
 </template>
 

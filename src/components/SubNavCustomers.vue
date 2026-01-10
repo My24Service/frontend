@@ -41,7 +41,8 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils'
+
+import componentMixin from "@/mixins/common";
 
 export default {
   mixins: [componentMixin],
@@ -58,9 +59,6 @@ export default {
     hasEquipmentLocations() {
       return this.hasAccessToModule('customers', 'locations') && !this.isCustomer
     },
-    hasCustomers() {
-      return this.hasAccessToModule('customers', 'customers')
-    },
     hasMaintenanceContracts() {
       return this.hasAccessToModule('customers', 'maintenance-contracts')
     },
@@ -70,9 +68,6 @@ export default {
     showCustomerDashBoard() {
       return !this.hasBranches && this.isCustomer
     },
-    hasUpload() {
-      return this.isStaff || this.isSuperuser
-    }
   },
 }
 </script>

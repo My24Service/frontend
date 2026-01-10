@@ -24,13 +24,13 @@
           <b-container>
             <b-row>
               <b-col cols="12">
-                <b-form-group
+                <BFormGroup
                   label-cols="3"
                   v-bind:label="$trans('Material')"
                   label-for="material-search"
                   v-if="!cost.material"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="material-search"
                     track-by="id"
                     :placeholder="$trans('Type to search')"
@@ -52,49 +52,49 @@
                     ref="searchMaterial"
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                  </multiselect>
-                </b-form-group>
-                <b-form-group
+                  </VueMultiselect>
+                </BFormGroup>
+                <BFormGroup
                   label-for="material-search"
                   v-if="cost.material"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     :value="cost.material_name"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row v-if="cost.material">
               <b-col cols="2">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="`${$trans('Amount')}`"
                   label-for="material-amount"
                 >
-                  <b-form-input
+                  <BFormInput
                     :value="Math.round(cost.amount_decimal)"
                     @change="(amount) => changeAmount(cost, amount)"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="3">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Price')"
                   label-for="material-price"
                 >
-                  <b-form-radio-group
+                  <BFormRadioGroup
                     @change="updateTotals"
                     v-model="cost.use_price"
                   >
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
                       {{ $trans('Pur.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-                    </b-form-radio>
+                    </BFormRadio>
 
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
                       {{ $trans('Sel.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-                    </b-form-radio>
+                    </BFormRadio>
 
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
                       {{ $trans("Other") }}
                       <PriceInput
                         style="margin-left: -24px; margin-top: 2px;"
@@ -103,42 +103,42 @@
                         @priceChanged="(val) => otherPriceChanged(val, cost)"
                         @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
                       />
-                    </b-form-radio>
-                  </b-form-radio-group>
-                </b-form-group>
+                    </BFormRadio>
+                  </BFormRadioGroup>
+                </BFormGroup>
               </b-col>
               <b-col cols="2">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT type')"
                 >
                   <VAT
                     @vatChanged="(val) => changeVatType(cost, val)"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" class="text-right p-0">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT')"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     disabled
                     :value="cost.vat_dinero.toFormat('$0.00')"
                     class="text-right pr-0"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" class="text-right p-0">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Total')"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     disabled
                     :value="cost.total_dinero.toFormat('$0.00')"
                     class="text-right pr-0"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
@@ -146,37 +146,37 @@
           <b-container>
             <b-row>
               <b-col cols="12" class="text-center">
-                <b-button
+                <BButton
                   @click="() => deleteCost(index)"
                   type="button"
                   variant="danger"
                   size="sm"
                 >
                   {{ $trans("Delete cost") }}
-                </b-button>
+                </BButton>
               </b-col>
             </b-row>
             <hr/>
           </b-container>
         </div>
         <div class="text-center">
-          <b-button
+          <BButton
             :disabled="collectionHasEmptyItem"
             @click="addCost"
             class="btn btn-primary"
             type="button"
           >
             {{ $trans("Add material") }}
-          </b-button>
+          </BButton>
           <span style="width: 80px">&nbsp;</span>
-          <b-button
+          <BButton
             :disabled="showSaveButton"
             @click="() => saveCosts()"
             type="button"
             variant="primary"
           >
             {{ $trans("Save changes") }}
-          </b-button>
+          </BButton>
         </div>
         <hr/>
       </div>
@@ -208,13 +208,12 @@
 </template>
 
 <script>
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
-import AmountDecimalInput from "@/components/AmountDecimalInput.vue"
 import PriceInput from "@/components/PriceInput";
-import TotalsInputs from "@/components/TotalsInputs";
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {
@@ -227,28 +226,34 @@ import {ChapterModel} from "@/models/quotations/Chapter";
 
 import quotationMixin from "./mixin.js";
 import {USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING} from "./constants";
-import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
 import SectionHeader from "./SectionHeader.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "MaterialsCreateComponent",
   mixins: [quotationMixin],
   components: {
     CostsTable,
     EmptyQuotationLinesContainer,
     PriceInput,
-    IconLinkDelete,
-    HeaderCell,
     VAT,
     TotalRow,
-    TotalsInputs,
-    Multiselect,
-    AmountDecimalInput,
+    VueMultiselect,
     AddToQuotationLines,
     SectionHeader
   },
@@ -291,8 +296,8 @@ export default {
         USE_PRICE_SELLING,
         USE_PRICE_OTHER,
       },
-      default_currency: this.$store.getters.getDefaultCurrency,
-      default_vat: this.$store.getters.getQuotationDefaultVat,
+      default_currency: this.mainStore.getDefaultCurrency,
+      default_vat: this.mainStore.getQuotationDefaultVat,
       hasStoredData: false,
       getMaterialsDebounced: '',
       parentHasQuotationLines: false,
@@ -358,13 +363,13 @@ export default {
           (cost) => cost.material !== null
         )
         await this.costService.updateCollection()
-        this.infoToast(this.$trans('Updated'), this.$trans('Materials costs have been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Materials costs have been updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error updating material costs', error)
-        this.errorToast(this.$trans('Error updating material costs'))
+        errorToast(this.create, $trans('Error updating material costs'))
         this.isLoading = false
       }
       this.scrollToHeader()
@@ -405,7 +410,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching material', error)
-        this.errorToast(this.$trans('Error fetching material'))
+        errorToast(this.create, $trans('Error fetching material'))
         this.isLoading = false
       }
       this.updateTotals()
@@ -420,7 +425,7 @@ export default {
         this.fetchingMaterials = false
       } catch(error) {
         console.log('Error fetching materials', error)
-        this.errorToast(this.$trans('Error fetching materials'))
+        errorToast(this.create, $trans('Error fetching materials'))
         this.fetchingMaterials = false
       }
     },
@@ -435,7 +440,7 @@ export default {
     },
     getMaterialName(material_id) {
       const material = this.materialModels.find((m) => m.id === material_id)
-      return material ? material.name : this.$trans("unknown")
+      return material ? material.name : $trans("unknown")
     },
     async loadData() {
       this.costService.collection = []
@@ -465,7 +470,7 @@ export default {
         this.hasChanges = false
       } catch(error) {
         console.log('error fetching material cost:', error)
-        this.errorToast(this.$trans('Error fetching material cost'))
+        errorToast(this.create, $trans('Error fetching material cost'))
         this.isLoading = false
         this.isLoaded = true
       }
@@ -557,10 +562,10 @@ export default {
       )
     },
     getDescriptionUserTotalsQuotationLine(cost) {
-      return `${this.$trans("material")}: ${this.getMaterialName(cost.material)}`
+      return `${$trans("material")}: ${this.getMaterialName(cost.material)}`
     },
     getDescriptionOnlyTotalQuotationLine() {
-      return `${this.$trans("Materials")}`
+      return `${$trans("Materials")}`
     },
     getTotalAmountQuotationLine() {
       return this.totalAmount

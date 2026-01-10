@@ -84,11 +84,18 @@
     </b-nav>
   </div>
 </template>
-
 <script>
-import { componentMixin } from '../utils.js'
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   mixins: [componentMixin],
   data() {
     return {
@@ -104,15 +111,13 @@ export default {
   },
   created() {
     // get member type
-    this.$store.dispatch('getMemberType').then((memberType) => {
-      this.memberType = memberType
-      this.isLoaded = true
-    })
+    this.memberType = this.mainStore.getMemberType
+    this.isLoaded = true
   },
   computed: {
     hasStatuscodes() {
       const has = ['demo', 'viavandalen']
-      return has.indexOf(this.$store.getters.getMemberCompanycode) !== -1;
+      return has.indexOf(this.mainStore.getMemberCompanycode) !== -1;
     },
     getToRouteMaintenanceUsers() {
       if (this.hasAccessToModule('company', 'engineer-users') && !this.hasBranches) {
@@ -135,9 +140,6 @@ export default {
       }
 
       return { name: 'users-planningusers' }
-    },
-    hasBranches() {
-      return this.$store.getters.getMemberHasBranches
     },
     hasPartners() {
       return this.hasAccessToModule('company', 'partners')

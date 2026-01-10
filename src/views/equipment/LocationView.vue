@@ -4,7 +4,7 @@
 
       <div class='page-title' v-if="location">
         <h3>
-          <b-icon icon="shop-window"></b-icon>
+          <IBiShopWindow></IBiShopWindow>
           <span @click="goBack" class="backlink">{{ $trans("Locations") }}</span>
           / {{ location.name }}
         </h3>
@@ -26,12 +26,12 @@
           <dt v-if="hasQr" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
           <dd v-if="hasQr">
             <div v-if="location.qr_path" class="qr-container">
-              <b-link
+              <BLink
                 class="btn btn-sm btn-outline" :href="location.qr_path"
                 target="_blank"
                 :title="$trans('Open QR in new tab')">
                 <img alt="QR code" class="qr-code-image" :src="location.qr_path" />
-              </b-link>
+              </BLink>
               <p>
                 <a href="javascript:" @click="download(location)">
                   {{ $trans("Download") }}
@@ -40,9 +40,9 @@
             </div>
             <img v-if="!location.qr_path" :alt="$trans('No QR yet')" class="qr-code-image" :src="NO_IMAGE_URL" />
             <p>
-              <b-button @click="recreate_qr">
+              <BButton @click="recreate_qr">
                 {{ $trans("Recreate")}}
-              </b-button>
+              </BButton>
             </p>
           </dd>
         </dl>
@@ -54,7 +54,7 @@
             <div class='flex-columns space-between align-items-center'>
               <h6>{{ $trans("Past orders") }}</h6>
               <span>
-                <b-button-group>
+                <BButton-group>
                   <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
@@ -62,7 +62,7 @@
                   <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                   />
-                </b-button-group>
+                </BButton-group>
               </span>
             </div>
             <ul class='listing order-list'>
@@ -105,16 +105,28 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "@/utils";
+
 import {NO_IMAGE_URL} from '@/constants'
 
 import { OrderService } from '@/models/orders/Order'
 import { LocationService } from "@/models/equipment/location";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import my24 from "@/services/my24";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
+import {errorToast} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   components: {
     DocumentsComponent,
     ButtonLinkRefresh,
@@ -165,7 +177,7 @@ export default {
   },
   computed: {
     hasQr() {
-      const qrType = this.$store.getters.getEquipmentQrType;
+      const qrType = this.mainStore.getEquipmentQrType;
       return qrType !== 'none'
     },
     editLink() {
@@ -194,7 +206,7 @@ export default {
         // this.isLoading = false
       } catch(error) {
         console.log('error fetching location stats', error)
-        this.errorToast(`${this.$trans('Error fetching location insights:')} ${error}`)
+        errorToast(this.create, `${this.$trans('Error fetching location insights:')} ${error}`)
         // this.isLoading = false
       }
     },
@@ -236,7 +248,7 @@ export default {
         this.location = await this.locationService.detail(this.pk)
       } catch(error) {
         console.log('error fetching location detail data', error)
-        this.errorToast(this.$trans('Error fetching location detail'))
+        errorToast(this.create, this.$trans('Error fetching location detail'))
         this.isLoading = false
       }
     },
@@ -248,7 +260,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     }

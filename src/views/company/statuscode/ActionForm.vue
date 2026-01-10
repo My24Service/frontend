@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="minecart-loaded"></b-icon>
+          <IBiMinecartLoaded></IBiMinecartLoaded>
           <span class="backlink" @click="cancelForm">{{ $trans("Actions") }}</span> /
           <strong>{{ action.name }}</strong>
           <span class="dimmed">
@@ -12,18 +12,18 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            <b-icon icon="x"></b-icon>
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            <IBiX></IBiX>
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button v-if="!isCreate" @click="showDeleteModal" type="button" variant="danger">
-            <b-icon icon="trash"></b-icon>
-            {{ $trans("Delete") }}</b-button
+          <BButton v-if="!isCreate" @click="showDeleteModal" type="button" variant="danger">
+            <IBiTrash></IBiTrash>
+            {{ $trans("Delete") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            <b-icon icon="check"></b-icon>
+          <BButton @click="submitForm" type="button" variant="primary">
+            <IBiCheck></IBiCheck>
             {{ isCreate ? $trans("Create action") : $trans("Save") }}
-          </b-button>
+          </BButton>
         </div>
       </div>
     </header>
@@ -33,42 +33,42 @@
           <b-col>
             <b-row>
               <b-col cols="6" role="group">
-                <b-form-group label-size="sm" v-bind:label="$trans('Name')" label-for="action_name">
-                  <b-form-input
+                <BFormGroup label-size="sm" v-bind:label="$trans('Name')" label-for="action_name">
+                  <BFormInput
                     autofocus
                     id="action_name"
                     size="sm"
                     v-model="action.name"
                     :state="isSubmitClicked ? !v$.action.name.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback :state="isSubmitClicked ? !v$.action.name.$error : null">
                     {{ $trans("Please enter a name") }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="6" role="group">
-                <b-form-group label-size="sm" v-bind:label="$trans('Type')" label-for="action_type">
-                  <b-form-select
+                <BFormGroup label-size="sm" v-bind:label="$trans('Type')" label-for="action_type">
+                  <BFormSelect
                     v-model="action.type"
                     :options="actionTypes"
                     size="sm"
-                  ></b-form-select>
-                </b-form-group>
+                  ></BFormSelect>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Description')"
                   label-for="action_description"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="action_description"
                     v-model="action.description"
                     rows="3"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
@@ -82,9 +82,9 @@
                 >
                   <template #cell(icons)="data">
                     <div class="float-right">
-                      <b-link class="h5 mx-2" @click.prevent="deleteCondition(data.index)">
-                        <b-icon-trash></b-icon-trash>
-                      </b-link>
+                      <BLink class="h5 mx-2" @click.prevent="deleteCondition(data.index)">
+                        <IBiTrash></IBiTrash>
+                      </BLink>
                     </div>
                   </template>
                 </b-table>
@@ -92,47 +92,47 @@
             </b-row>
             <b-row>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('field')"
                   label-for="action-condition-field"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="action-condition-field"
                     size="sm"
                     v-model="condition_field"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('operator')"
                   label-for="action-condition-operator"
                 >
-                  <b-form-select
+                  <BFormSelect
                     v-model="condition_operator"
                     :options="operators"
                     size="sm"
-                  ></b-form-select>
-                </b-form-group>
+                  ></BFormSelect>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('value')"
                   label-for="action-condition-value"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="action-condition-value"
                     size="sm"
                     v-model="condition_value"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="12">
                 <footer class="modal-footer">
-                  <b-button
+                  <BButton
                     @click="addCondition"
                     class="btn btn-primary"
                     size="sm"
@@ -140,22 +140,22 @@
                     variant="warning"
                   >
                     {{ $trans("Add condition") }}
-                  </b-button>
+                  </BButton>
                 </footer>
               </b-col>
             </b-row>
             <b-col cols="12" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Condition handling')"
                 label-for="action_type"
               >
-                <b-form-select
+                <BFormSelect
                   v-model="action.querymode"
                   :options="querymodes"
                   size="sm"
-                ></b-form-select>
-              </b-form-group>
+                ></BFormSelect>
+              </BFormGroup>
             </b-col>
           </b-col>
         </div>
@@ -163,174 +163,174 @@
           <div v-if="action.type === 'status'">
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Override status?')"
                   label-for="action_status_override"
                   :description="$trans('Set a different status in the original order.')"
                 >
-                  <b-form-checkbox id="action_status_override" v-model="action.override_status">
-                  </b-form-checkbox>
-                </b-form-group>
+                  <BFormCheckbox id="action_status_override" v-model="action.override_status">
+                  </BFormCheckbox>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   v-if="action.type === 'status' && action.override_status"
                   label-size="sm"
                   v-bind:label="$trans('Status')"
                   label-for="action_status_override_template"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="action_status_override_template"
                     size="sm"
                     v-model="action.template"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </div>
           <div v-if="action.type === 'copy'">
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Partner')"
                   label-for="action_partner"
                 >
-                  <b-form-select
+                  <BFormSelect
                     v-model="action.company_partner"
                     :options="partners"
                     size="sm"
-                  ></b-form-select>
-                </b-form-group>
+                  ></BFormSelect>
+                </BFormGroup>
               </b-col>
             </b-row>
           </div>
           <div v-if="action.type.indexOf('email') !== -1">
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Address')"
                   label-for="action_email_address"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="action_email_address"
                     size="sm"
                     v-model="action.address"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Subject')"
                   label-for="action_email_subject"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="action_email_subject"
                     size="sm"
                     v-model="action.subject"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Body')"
                   label-for="action_email_body"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="action_email_body"
                     v-model="action.template"
                     rows="10"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
               </b-col>
             </b-row>
           </div>
           <div v-if="action.type === 'send_sms'">
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Address')"
                   label-for="action_sms_address"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="action_sms_address"
                     size="sm"
                     v-model="action.address"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Body')"
                   label-for="action_sms_body"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="action_sms_body"
                     v-model="action.template"
                     rows="10"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
               </b-col>
             </b-row>
           </div>
           <div v-if="action.type === 'send_fcm'">
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('User')"
                   label-for="action_fcm_address"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="action_fcm_address"
                     size="sm"
                     v-model="action.address"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Title')"
                   label-for="action_fcm_title"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="action_fcm_title"
                     size="sm"
                     v-model="action.subject"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row>
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Body')"
                   label-for="action_fcm_body"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="action_fcm_body"
                     v-model="action.template"
                     rows="10"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
               </b-col>
             </b-row>
           </div>
@@ -372,11 +372,17 @@ import {LeaveActionModel} from "@/models/company/LeaveAction";
 import {SickLeaveActionModel} from "@/models/company/SickLeaveAction";
 import {InvoiceActionModel} from "@/models/invoices/InvoiceAction";
 import {WorkHoursActionModel} from "@/models/company/WorkHoursAction";
-
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
   },
   props: {
     list_type: {
@@ -411,9 +417,9 @@ export default {
       condition_operator: "",
       condition_value: "",
       conditionFields: [
-        { key: "field", label: this.$trans("Field") },
-        { key: "operator", label: this.$trans("Operator") },
-        { key: "value", label: this.$trans("Value") },
+        { key: "field", label: $trans("Field") },
+        { key: "operator", label: $trans("Operator") },
+        { key: "value", label: $trans("Value") },
         { key: "icons" }
       ],
 
@@ -422,44 +428,44 @@ export default {
       actionService: new ActionService(),
       operators: ["=", "!=", "<", "<=", ">", ">=", "REGEXP", "NOTREGEXP", "CONTAINS"],
       querymodes: [
-        { value: "and", text: this.$trans("must match all of the conditions") },
-        { value: "or", text: this.$trans("match any of the conditions") }
+        { value: "and", text: $trans("must match all of the conditions") },
+        { value: "or", text: $trans("match any of the conditions") }
       ],
       actionTypes: null,
       actionTypesOrder: [
-        { value: "email", text: this.$trans("send email") },
-        { value: "email_assigned", text: this.$trans("email assigned engineers") },
-        { value: "copy", text: this.$trans("copy order to partner") },
-        { value: "status", text: this.$trans("status change original order") },
-        { value: "email_workorders", text: this.$trans("email workorders") },
-        { value: "send_sms", text: this.$trans("send sms") },
-        { value: "send_fcm", text: this.$trans("send FCM") },
-        { value: "send_to_gripp", text: this.$trans("send to Gripp") },
+        { value: "email", text: $trans("send email") },
+        { value: "email_assigned", text: $trans("email assigned engineers") },
+        { value: "copy", text: $trans("copy order to partner") },
+        { value: "status", text: $trans("status change original order") },
+        { value: "email_workorders", text: $trans("email workorders") },
+        { value: "send_sms", text: $trans("send sms") },
+        { value: "send_fcm", text: $trans("send FCM") },
+        { value: "send_to_gripp", text: $trans("send to Gripp") },
       ],
       actionTypesQuotation: [
-        {value: 'email', text: this.$trans('send email')},
-        {value: 'send_sms', text: this.$trans('send sms')},
-        {value: 'send_fcm', text: this.$trans('send FCM')},
+        {value: 'email', text: $trans('send email')},
+        {value: 'send_sms', text: $trans('send sms')},
+        {value: 'send_fcm', text: $trans('send FCM')},
       ],
       actionTypesLeave: [
-        {value: 'email', text: this.$trans('send email')},
-        {value: 'send_sms', text: this.$trans('send sms')},
-        {value: 'send_fcm', text: this.$trans('send FCM')},
+        {value: 'email', text: $trans('send email')},
+        {value: 'send_sms', text: $trans('send sms')},
+        {value: 'send_fcm', text: $trans('send FCM')},
       ],
       actionTypesSickLeave: [
-        {value: 'email', text: this.$trans('send email')},
-        {value: 'send_sms', text: this.$trans('send sms')},
-        {value: 'send_fcm', text: this.$trans('send FCM')},
+        {value: 'email', text: $trans('send email')},
+        {value: 'send_sms', text: $trans('send sms')},
+        {value: 'send_fcm', text: $trans('send FCM')},
       ],
       actionTypesInvoice: [
-        {value: 'email', text: this.$trans('send email')},
-        {value: 'send_sms', text: this.$trans('send sms')},
-        {value: 'send_fcm', text: this.$trans('send FCM')},
+        {value: 'email', text: $trans('send email')},
+        {value: 'send_sms', text: $trans('send sms')},
+        {value: 'send_fcm', text: $trans('send FCM')},
       ],
       actionTypesWorkHours: [
-        {value: 'email', text: this.$trans('send email')},
-        {value: 'send_sms', text: this.$trans('send sms')},
-        {value: 'send_fcm', text: this.$trans('send FCM')},
+        {value: 'email', text: $trans('send email')},
+        {value: 'send_sms', text: $trans('send sms')},
+        {value: 'send_fcm', text: $trans('send FCM')},
       ],
     };
   },
@@ -510,12 +516,12 @@ export default {
 
       try {
         await this.actionService.delete(this.pk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Action has been deleted"));
+        infoToast(this.create, $trans("Deleted"), $trans("Action has been deleted"));
         this.isLoading = false;
         this.cancelForm();
       } catch (error) {
         console.log("Error deleting action", error);
-        this.errorToast(this.$trans("Error deleting action"));
+        errorToast(this.create, $trans("Error deleting action"));
         this.isLoading = false;
       }
     },
@@ -543,12 +549,12 @@ export default {
         try {
           this.action.statuscode = this.statuscode_pk;
           await this.actionService.insert(this.action);
-          this.infoToast(this.$trans("Created"), this.$trans("Action has been created"));
+          infoToast(this.create, $trans("Created"), $trans("Action has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("error creating action", error);
-          this.errorToast(this.$trans("Error creating action"));
+          errorToast(this.create, $trans("Error creating action"));
           this.isLoading = false;
         }
 
@@ -557,12 +563,12 @@ export default {
 
       try {
         await this.actionService.update(this.pk, this.action);
-        this.infoToast(this.$trans("Updated"), this.$trans("Action has been updated"));
+        infoToast(this.create, $trans("Updated"), $trans("Action has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("error updating action", error);
-        this.errorToast(this.$trans("Error updating action"));
+        errorToast(this.create, $trans("Error updating action"));
         this.isLoading = false;
       }
     },
@@ -574,7 +580,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching action", error);
-        this.errorToast(this.$trans("Error loading action"));
+        errorToast(this.create, $trans("Error loading action"));
         this.isLoading = false;
       }
     },

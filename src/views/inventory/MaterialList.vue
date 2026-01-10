@@ -3,11 +3,11 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="box"></b-icon>
+          <IBiBox></IBiBox>
           {{ $trans("Materials") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
@@ -15,9 +15,9 @@
             <ButtonLinkSearch
             v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'material-add'}" class="btn">{{ $trans('Add material') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -85,16 +85,24 @@ import materialService from '../../models/inventory/Material.js'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -106,13 +114,13 @@ export default {
       isLoading: false,
       materials: [],
       fields: [
-        {key: 'show_name', label: this.$trans('Name'), sortable: true, thAttr: {width: '25%'}},
-        {key: 'identifier', label: this.$trans('Identifier'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'location', label: this.$trans('Location'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'price_purchase', label: this.$trans('Purchase price'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'price_selling', label: this.$trans('Selling price'), sortable: true, thAttr: {width: '10%'}},
-        {key: 'supplier_name', label: this.$trans('Supplier'), sortable: true, thAttr: {width: '15%'}},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'show_name', label: $trans('Name'), sortable: true, thAttr: {width: '25%'}},
+        {key: 'identifier', label: $trans('Identifier'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'location', label: $trans('Location'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'price_purchase', label: $trans('Purchase price'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'price_selling', label: $trans('Selling price'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'supplier_name', label: $trans('Supplier'), sortable: true, thAttr: {width: '15%'}},
+        {key: 'modified', label: $trans('Modified'), sortable: true, thAttr: {width: '10%'}},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
     }
@@ -139,11 +147,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.materialPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
-        this.loadData()
+        infoToast(this.create, $trans('Deleted'), $trans('Material has been deleted'))
+        await this.loadData()
       } catch(error) {
         console.log('error deleting material', error)
-        this.errorToast(this.$trans('Error deleting material'))
+        errorToast(this.create, $trans('Error deleting material'))
       }
     },
     // rest
@@ -156,7 +164,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching materials', error)
-        this.errorToast(this.$trans('Error loading materials'))
+        errorToast(this.create, $trans('Error loading materials'))
         this.isLoading = false
       }
     }

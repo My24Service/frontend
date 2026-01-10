@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Leave") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Leave") }}</h3>
       </div>
     </header>
     <div class="panel overflow-auto">
@@ -18,8 +18,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="
                     function() {
@@ -35,8 +35,8 @@
                     }
                   "
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(date)="data">
@@ -51,18 +51,18 @@
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
-            <b-link
+            <BLink
               :title="$trans('Accept')"
               @click="() => showAcceptModal(data.item.id)"
             >
-              <b-icon-check-lg class="edit-icon"></b-icon-check-lg>
-            </b-link>
-            <b-link
+              <IBiCheckLg class="edit-icon"></IBiCheckLg>
+            </BLink>
+            <BLink
               :title="$trans('Reject')"
               @click="() => showRejectModal(data.item.id)"
             >
-              <b-icon-x-lg class="edit-icon"></b-icon-x-lg>
-            </b-link>
+              <IBiXLg class="edit-icon"></IBiXLg>
+            </BLink>
           </div>
         </template>
       </b-table>
@@ -102,13 +102,22 @@
 <script>
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
-import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import SubNav from "./SubNav.vue";
-import { UserLeaveHoursService, UserLeaveHoursModel } from "@/models/company/UserLeaveHours.js";
+import { UserLeaveHoursService } from "@/models/company/UserLeaveHours.js";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   props: {
     list_type: {
       type: [String],
@@ -118,7 +127,6 @@ export default {
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     SubNav
@@ -132,10 +140,10 @@ export default {
       isLoading: false,
       leaveRequests: [],
       fields: [
-        { key: "full_name", label: this.$trans("User"), thAttr: { width: "15%" } },
-        { key: "date", label: this.$trans("Date/hours") },
-        { key: "leave_type_name", label: this.$trans("Leave type") },
-        { key: "last_status_full", label: this.$trans("Status") },
+        { key: "full_name", label: $trans("User"), thAttr: { width: "15%" } },
+        { key: "date", label: $trans("Date/hours") },
+        { key: "leave_type_name", label: $trans("Leave type") },
+        { key: "last_status_full", label: $trans("Status") },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -162,12 +170,12 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveHoursService.acceptLeave(this.leavePk);
-        this.infoToast(this.$trans("Accepted"), this.$trans("Leave as been accepted"));
-        this.loadData();
+        infoToast(this.create, $trans("Accepted"), $trans("Leave as been accepted"));
+        await this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error accepting leave", error);
-        this.errorToast(this.$trans("Error accepting leave"));
+        errorToast(this.create, $trans("Error accepting leave"));
       }
     },
     showRejectModal(id) {
@@ -178,12 +186,12 @@ export default {
       this.isLoading = true;
       try {
         await this.leaveHoursService.doReject(this.leavePk);
-        this.infoToast(this.$trans("Rejected"), this.$trans("Leave as been rejected"));
+        infoToast(this.create, $trans("Rejected"), $trans("Leave as been rejected"));
         this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error rejecting leave", error);
-        this.errorToast(this.$trans("Error rejecting leave"));
+        errorToast(this.create, $trans("Error rejecting leave"));
       }
     },
     // rest
@@ -196,7 +204,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching leave requests", error);
-        this.errorToast(this.$trans("Error loading leave requests"));
+        errorToast(this.create, $trans("Error loading leave requests"));
         this.isLoading = false;
       }
     }

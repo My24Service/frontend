@@ -19,11 +19,11 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="shop"></b-icon>
+          <IBiShop></IBiShop>
           {{  $trans('Branches') }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group>
+        <BButton-toolbar>
+          <BButton-group>
             <ButtonLinkRefresh
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
@@ -31,12 +31,12 @@
             <ButtonLinkSearch
             v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
-          <router-link 
+          </BButton-group>
+          <router-link
             :to="{name: 'company-branch-add'}"
             class="btn"
             >{{ $trans('New branch') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -54,7 +54,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -74,14 +74,16 @@
         <template #cell(contact)="data">
           <span v-if="data.item.contact && data.item.contact.trim() !== ''">
             <span v-if="data.item.email">
-              <b-link class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.contact }} <b-icon icon="envelope"></b-icon></b-link>
+              <BLink class="px-1" v-bind:href="`mailto:${data.item.email}`">{{ data.item.contact }}
+                <IBiEnvelope></IBiEnvelope>
+              </BLink>
             </span>
             <span v-else>
               {{ data.item.contact }}
             </span>
           </span>
         </template>
-        
+
         <template #cell(tel)="data">
           {{  data.item.tel }}
           <span v-if="data.item.mobile && data.item.mobile.trim() !== ''">
@@ -118,18 +120,26 @@ import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'BranchList',
   components: {
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -141,12 +151,12 @@ export default {
       isLoading: false,
       branches: [],
       branchFields: [
-        {key: 'id', label: this.$trans('Branch'), sortable: true, },
-        {key: 'contact', label: this.$trans('Contact'), sortable: true, },
-        {key: 'tel', label: this.$trans('Phone'), sortable: true, },
-        {key: 'address', label: this.$trans('Address'), sortable: true, },
-        {key: 'country_code', label: this.$trans('Postal'), sortable: true, },
-        {key: 'city', label: this.$trans('City'), sortable: true, },
+        {key: 'id', label: $trans('Branch'), sortable: true, },
+        {key: 'contact', label: $trans('Contact'), sortable: true, },
+        {key: 'tel', label: $trans('Phone'), sortable: true, },
+        {key: 'address', label: $trans('Address'), sortable: true, },
+        {key: 'country_code', label: $trans('Postal'), sortable: true, },
+        {key: 'city', label: $trans('City'), sortable: true, },
         {key: 'icons', }
       ],
     }
@@ -173,11 +183,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Branch has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Branch has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting branch', error)
-        this.errorToast(this.$trans('Error deleting branch'))
+        errorToast(this.create, $trans('Error deleting branch'))
       }
     },
     // rest
@@ -190,7 +200,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching branches', error)
-        this.errorToast(this.$trans('Error loading branches'))
+        errorToast(this.create, $trans('Error loading branches'))
         this.isLoading = false
       }
     }

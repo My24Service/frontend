@@ -11,7 +11,7 @@
       <p class="my-4">{{ $trans('Are you sure you want to delete this order?') }}</p>
     </b-modal>
     <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-id">
-        #{{ order.order_id }}<span v-if="this.$store.getters.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span>
+        #{{ order.order_id }}<span v-if="mainStore.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span>
     </router-link>
     <router-link v-if="isLoaded" :to="{name: 'order-view', params: {pk: order.id}}" class="order-type">
       <strong>{{ order.order_type }}</strong>
@@ -21,7 +21,9 @@
 
     <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
       {{ order.start_date }}
-      <b v-if="order.start_time !== null" :title="order.start_time"><b-icon icon="clock"></b-icon></b>
+      <b v-if="order.start_time !== null" :title="order.start_time">
+        <IBiClock></IBiClock>
+      </b>
     </span>
 
       <!-- fixme -->
@@ -46,14 +48,14 @@
 
       <span class="order-documents">
         <span v-if="order.documents.length" >
-          <b-icon icon="paperclip"></b-icon>
+          <IBipaperclip></IBipaperclip>
           {{ order.documents.length && order.documents.length }} {{ $trans("document") }}{{ order.documents.length === 1 ? '' : 's' }}
         </span>
         <span v-else>&ndash;</span>
       </span>
       <span class="order-status">
-        <b-icon icon="circle-fill" v-bind:style="`color:${orderStatusColorCode}`" :title="order.last_status_full"></b-icon>
-        <b-form-select
+        <IBiCircleFill v-bind:style="`color:${orderStatusColorCode}`" :title="order.last_status_full"></IBiCircleFill>
+        <BFormSelect
           :title="orderStatusCodeComputed.statuscode"
           :id="order.id + '-change-status'"
           v-model="orderStatusCode"
@@ -63,7 +65,7 @@
           text-field="statuscode"
           style="border-color: transparent;"
           @change="handleStatusChange(order.id, $event)"
-        ></b-form-select>
+        ></BFormSelect>
         <IconLinkDelete
           v-if="!isCustomer && !isBranchEmployee && withDelete"
           v-bind:title="$trans('Delete')"
@@ -83,19 +85,31 @@
 
 <script>
 import my24 from '../services/my24.js'
-import { componentMixin } from '@/utils'
+
 import {StatusService} from '@/models/orders/Status.js'
 import IconLinkDelete from './IconLinkDelete.vue'
 import {OrderService} from "@/models/orders/Order";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   components: {
     IconLinkDelete
   },
   async created() {
-    this.memberType = await this.$store.dispatch('getMemberType')
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.memberType = await this.mainStore.getMemberType
+    this.statuscodes = await this.mainStore.getStatuscodes
     this.assignedUsers = this.getAssignedUsersList()
     this.isLoaded = true;
     this.orderStatusCode = this.orderStatusCodeComputed
@@ -129,12 +143,12 @@ export default {
       orderStatusColorCode: '#666',
       statuscodes: [],
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product'), thAttr: {width: '25%'} },
-        { key: 'location', label: this.$trans('Location'), thAttr: {width: '25%'} },
-        { key: 'remarks', label: this.$trans('Remarks'), thAttr: {width: '50%'} }
+        { key: 'product', label: $trans('Product'), thAttr: {width: '25%'} },
+        { key: 'location', label: $trans('Location'), thAttr: {width: '25%'} },
+        { key: 'remarks', label: $trans('Remarks'), thAttr: {width: '50%'} }
       ],
       infoLineFields: [
-        { key: 'info', label: this.$trans('Infolines') }
+        { key: 'info', label: $trans('Infolines') }
       ],
       assignedUsers: []
     }
@@ -173,11 +187,11 @@ export default {
     async doDelete() {
       try {
         await this.orderService.delete(this.order.id)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Order has been deleted'))
         this.$emit('reload-data')
       } catch(error) {
         console.log('Error deleting order', error)
-        this.errorToast(this.$trans('Error deleting order'))
+        errorToast(this.create, $trans('Error deleting order'))
       }
     },
     handleStatusChange(id, value) {
@@ -194,7 +208,7 @@ export default {
         await this.statusService.insert(status)
       } catch(error) {
         console.log('Error creating status', error)
-        this.errorToast(this.$trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     }
   }

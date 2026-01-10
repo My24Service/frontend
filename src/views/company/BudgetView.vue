@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="credit-card2-front"></b-icon>
+          <IBiCreditCard2Front></IBiCreditCard2Front>
           <span class="backlink" @click="goBack">{{ $trans("Budgets") }}</span> /
           <strong>{{ budget.year }}</strong>
         </h3>
@@ -89,15 +89,24 @@
   </div>
 </template>
 <script>
-import {BudgetService} from "../../models/company/Budget";
+import {BudgetService} from "@/models/company/Budget";
 import PieChart from "../../components/PieChart";
-import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
-import {toDinero} from "../../utils";
+// import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
+import {toDinero} from "@/utils";
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
+  mixins: [componentMixin],
+  setup() {
+    const mainStore = useMainStore()
+    return {
+      mainStore
+    }
+  },
   components: {
     PieChart,
-    ChartJsPluginDataLabels,
+    // ChartJsPluginDataLabels,
   },
   props: {
     pk: {
@@ -156,9 +165,9 @@ export default {
       this.budget = new this.service.model(budgetData)
 
       this.costs = await this.service.getCosts(this.pk)
-      this.costs_total_dinero = toDinero(this.costs.total, this.$store.getters.getDefaultCurrency)
+      this.costs_total_dinero = toDinero(this.costs.total, this.mainStore.getDefaultCurrency)
       let rest = this.budget.amount - this.costs.total
-      let rest_dinero = toDinero(rest, this.$store.getters.getDefaultCurrency)
+      let rest_dinero = toDinero(rest, this.mainStore.getDefaultCurrency)
       let labels = [
         `${this.$trans('Costs')} ${this.formatDinero(this.costs_total_dinero)}`,
         `${this.$trans('Remaining')} ${this.formatDinero(rest_dinero)}`,
@@ -193,7 +202,7 @@ export default {
        */
 
       // set up detail chart
-      const purchase_invoices_dinero = toDinero(this.costs.purchase_invoices, this.$store.getters.getDefaultCurrency)
+      const purchase_invoices_dinero = toDinero(this.costs.purchase_invoices, this.mainStore.getDefaultCurrency)
       labels = [
         `${this.$trans('Purchase invoices')} (${this.formatDinero(purchase_invoices_dinero)})`,
       ]
@@ -207,8 +216,8 @@ export default {
       ]
 
       for (const [companycode, amount] of Object.entries(this.costs.invoices_partners)) {
-        const amount_dinero = toDinero(amount, this.$store.getters.getDefaultCurrency)
-        labels.push(`${this.$trans('Invoices partners')} - ${companycode} (${this.formatDinero(amount_dinero)})`)
+        const amount_dinero = toDinero(amount, this.mainStore.getDefaultCurrency)
+        labels.push(`${$trans('Invoices partners')} - ${companycode} (${this.formatDinero(amount_dinero)})`)
         colors.push(this.getRandomColorOrderType('Invoices partners'))
         data.push(((amount / this.costs.total) * 100).toFixed(2))
       }
@@ -222,7 +231,7 @@ export default {
       }
 
       this.expected_costs = await this.service.getExpectedCosts(this.pk)
-      this.expected_costs_total_dinero = toDinero(this.expected_costs.total, this.$store.getters.getDefaultCurrency)
+      this.expected_costs_total_dinero = toDinero(this.expected_costs.total, this.mainStore.getDefaultCurrency)
       /*
       {
           "total": 22490.0,
@@ -236,7 +245,7 @@ export default {
        */
 
       rest = this.budget.amount - this.expected_costs.total
-      rest_dinero = toDinero(rest, this.$store.getters.getDefaultCurrency)
+      rest_dinero = toDinero(rest, this.mainStore.getDefaultCurrency)
 
       labels = [
         `${this.$trans('Expected costs')} (${this.formatDinero(this.expected_costs_total_dinero)})`,
@@ -260,7 +269,7 @@ export default {
 
       // set up detail chart
       const equipment_replacements_dinero = toDinero(
-        this.expected_costs.equipment_replacements, this.$store.getters.getDefaultCurrency)
+        this.expected_costs.equipment_replacements, this.mainStore.getDefaultCurrency)
 
       labels = [
         `${this.$trans('Equipment replacements')} (${this.formatDinero(equipment_replacements_dinero)})`,
@@ -275,14 +284,14 @@ export default {
       ]
 
       for (const [companycode, amount] of Object.entries(this.expected_costs.partner_maintenance_contracts)) {
-        const amount_dinero = toDinero(amount, this.$store.getters.getDefaultCurrency)
+        const amount_dinero = toDinero(amount, this.mainStore.getDefaultCurrency)
         labels.push(`${this.$trans('Maintenance contracts partners')} - ${companycode} (${this.formatDinero(amount_dinero)})`)
         colors.push(this.getRandomColorOrderType('Maintenance contracts partners'))
         data.push(((amount / this.expected_costs.total) * 100).toFixed(2))
       }
 
       for (const [customer_name, amount] of Object.entries(this.expected_costs.own_maintenance_contracts)) {
-        const amount_dinero = toDinero(amount, this.$store.getters.getDefaultCurrency)
+        const amount_dinero = toDinero(amount, this.mainStore.getDefaultCurrency)
         const label = `${this.$trans('Own maintenance contracts')} - ${customer_name} (${this.formatDinero(amount_dinero)})`
         labels.push(label)
         colors.push(this.getRandomColorOrderType('Own maintenance contracts'))

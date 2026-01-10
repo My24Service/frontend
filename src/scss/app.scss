@@ -1,5 +1,5 @@
 // Define variable defaults
-$my24: #ff9933;
+$my24: #ff9933 !default;
 $primary: $my24;
 $secondary: #000;
 $navbar-light-color: $my24;
@@ -8,8 +8,8 @@ $normal-link: #fff;
 $font-size-base: 0.9rem;
 
 // Then import Bootstrap an BootstrapVue SCSS files (order is important)
-@import 'node_modules/bootstrap/scss/bootstrap.scss';
-@import 'node_modules/bootstrap-vue/src/index.scss';
+@import 'bootstrap/scss/bootstrap.scss';
+@import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
 
 html, body {
   height: 100%;

@@ -1,13 +1,13 @@
 <template>
-  <div class="nav-items" ref="nav-items">
+  <div class="nav-items" ref="nav-items" v-if="userInfo.user">
     <!-- Orders -->
     <b-nav-item
       :active="isActive('orders')"
       v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
       to="/orders/orders"
       class="has-children">
-      <b-icon icon="file-earmark-text" v-if="!isActive('orders')"></b-icon>
-      <b-icon icon="file-earmark-text-fill" v-else></b-icon>
+      <IBiFileEarmarkText v-if="!isActive('orders')"></IBiFileEarmarkText>
+      <IBiFileEarmarkTextFill v-else></IBiFileEarmarkTextFill>
       <span style="flex-grow:1">{{ $trans('Orders') }}</span>
       <b-badge
         v-if="unacceptedCount && unacceptedCount > 0"
@@ -19,6 +19,11 @@
     <!-- Orders submenu -->
     <div class="page-subnav" v-if="isActive('orders')">
       <b-nav>
+        <b-nav-item
+          :active="isActive('schedule')"
+          :to="{name: 'orders-schedule'}">
+          {{ $trans('Schedule') }}
+        </b-nav-item>
         <b-nav-item
           v-if="isActive('orders')"
           :active="isActive('orders','statuscodes')"
@@ -45,7 +50,7 @@
       v-if="hasInvoices && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
       class="has-children"
       to="/invoices/invoices">
-      <b-icon icon="receipt-cutoff"></b-icon>
+      <IBiReceiptCutoff></IBiReceiptCutoff>
       {{ $trans('Invoices') }}
     </b-nav-item>
     <SubNav v-if="isActive('invoices') || isActive('invoices', 'invoices')">
@@ -58,8 +63,8 @@
       v-if="showEquipment"
       to="/equipment/equipment"
       class="has-children">
-      <b-icon icon="briefcase" v-if="!isActive('equipment')"></b-icon>
-      <b-icon icon="briefcase-fill" v-if="isActive('equipment')"></b-icon>
+      <IBiBriefcase v-if="!isActive('equipment')"></IBiBriefcase>
+      <IBiBriefcaseFill v-if="isActive('equipment')"></IBiBriefcaseFill>
       {{ $trans('Equipment') }}
     </b-nav-item>
     <SubNav v-if="isActive('equipment')">
@@ -72,7 +77,7 @@
       v-if="showBranchEmployeeDashBoard"
       to="/company/employee-dashboard"
       class="has-children">
-      <b-icon></b-icon> {{ $trans('Dashboard') }}
+      <IBiCalendar2Range></IBiCalendar2Range> {{ $trans('Dashboard') }}
     </b-nav-item>
     <SubNav v-if="showBranchEmployeeDashBoard && isActive('company')">
       <router-view name="app-subnav"></router-view>
@@ -84,7 +89,8 @@
       v-if="showCustomers"
       to="/customers/customers"
       class="has-children">
-      <b-icon icon="building"></b-icon>
+      <IBiBuilding v-if="!isActive('customers')"></IBiBuilding>
+      <IBiBuildingFill v-else></IBiBuildingFill>
       {{ $trans('Customers') }}
     </b-nav-item>
     <SubNav v-if="isActive('customers')">
@@ -97,8 +103,8 @@
       v-if="showInventory"
       to="/inventory/stats-table"
       class="has-children">
-      <b-icon icon="collection" v-if="!isActive('inventory')"></b-icon>
-      <b-icon icon="collection-fill" v-else></b-icon>
+      <IBiCollection v-if="!isActive('inventory')"></IBiCollection>
+      <IBiCollectionFill v-else></IBiCollectionFill>
       {{ $trans('Inventory') }}
     </b-nav-item>
     <SubNav v-if="isActive('inventory')">
@@ -111,8 +117,8 @@
       v-if="showMobile"
       to="/mobile/dispatch"
       class="has-children">
-      <b-icon icon="person-badge" v-if="!isActive('mobile')"></b-icon>
-      <b-icon icon="person-badge-fill" v-else></b-icon>
+      <IBiPersonBadge v-if="!isActive('mobile')"></IBiPersonBadge>
+      <IBiPersonBadgeFill v-else></IBiPersonBadgeFill>
       {{ $trans('Mobile') }}
     </b-nav-item>
     <SubNav v-if="isActive('mobile')">
@@ -124,8 +130,8 @@
       v-if="hasQuotations && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
       class="has-children"
       to="/quotations/quotations">
-      <b-icon icon="briefcase" v-if="!isActive('quotations')"></b-icon>
-      <b-icon icon="briefcase-fill" v-else></b-icon>
+      <IBiBriefcase v-if="!isActive('quotations')"></IBiBriefcase>
+      <IBiBriefcaseFill v-else></IBiBriefcaseFill>
       {{ $trans('Quotations') }}
     </b-nav-item>
 
@@ -134,8 +140,8 @@
       v-if="showCompany"
       to="/company/dashboard"
       class="has-children">
-      <b-icon icon="bookmark-star" v-if="!isActive('company')"></b-icon>
-      <b-icon icon="bookmark-star-fill" v-if="isActive('company')"></b-icon>
+      <IBiBookmarkStar v-if="!isActive('company')"></IBiBookmarkStar>
+      <IBiBookmarkStarFill v-else></IBiBookmarkStarFill>
       {{ $trans('My company') }}
     </b-nav-item>
     <SubNav v-if="isActive('company') || isActive('company', 'budgets')">
@@ -148,7 +154,9 @@
       v-if="showMembers"
       to="/members/members"
       class="has-children">
-      <b-icon icon="people"></b-icon> {{ $trans('Members') }}
+      <IBiPeople v-if="isActive('members')"></IBiPeople>
+      <IBiPeopleFill v-else></IBiPeopleFill>
+      {{ $trans('Members') }}
       <b-badge v-if="requestedCount > 0" variant="light">{{ requestedCount }}</b-badge>
     </b-nav-item>
     <SubNav v-if="isActive('members')">
@@ -176,8 +184,8 @@
       :to="{name: 'bim-frame'}"
       :active="isActive('bim')"
       >
-      <b-icon icon="mouse2" v-if="!isActive('bim')"></b-icon>
-      <b-icon icon="mouse2-fill" v-if="isActive('bim')"></b-icon>
+      <IBiMouse2 v-if="!isActive('bim')"></IBiMouse2>
+      <IBiMouse2Fill v-else></IBiMouse2Fill>
       {{ $trans('3D Module') }}
     </b-nav-item>
     <SubNav v-if="isActive('bim')">
@@ -190,8 +198,8 @@
       to="/webshop"
       :active="isActive('webshop')"
       >
-      <b-icon icon="basket" v-if="!isActive('webshop')"></b-icon>
-      <b-icon icon="basket-fill" v-if="isActive('webshop')"></b-icon>
+      <IBiBasket v-if="!isActive('webshop')"></IBiBasket>
+      <IBiBasketFill v-else></IBiBasketFill>
       {{ $trans('Webshop') }}
     </b-nav-item>
     <SubNav v-if="isActive('webshop')">
@@ -202,14 +210,25 @@
 </template>
 
 <script>
-import { componentMixin } from '../utils.js'
+
 import SubNav from '@/components/SubNav';
-import SubNavCustomers from '@/components/SubNavCustomers';
-import SubNavInventory from '@/components/SubNavInventory';
 import {MemberService} from "@/models/member/Member";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
+import {computed} from "vue";
+import {useAuthStore} from "@/stores/auth";
 
 export default {
   mixins: [componentMixin],
+  setup() {
+    const mainStore = useMainStore()
+    const authStore = useAuthStore()
+    const userInfo = computed(() => authStore.userInfo);
+    return {
+      mainStore,
+      userInfo
+    }
+  },
   data() {
     return {
       memberService: new MemberService(),
@@ -233,26 +252,23 @@ export default {
     }
   },
   computed: {
-    showCustomerDashBoard() {
-      return !this.hasBranches && this.isCustomer
-    },
     showBranchEmployeeDashBoard() {
       return this.hasBranches && this.isBranchEmployee
     },
     showCustomers() {
       return !this.hasBranches && (
         (this.hasCustomers && this.isPlanning) ||
-        this.hasOrders && (this.isPlanning || this.isStaff || this.isSuperuser)
+        this.hasOrders && (this.isPlanning || this.isAdmin)
       );
     },
     showEquipment() {
       return this.hasBranches;
     },
     showInventory() {
-      return this.hasInventory && (this.isPlanning || this.isStaff || this.isSuperuser);
+      return this.hasInventory && (this.isPlanning || this.isAdmin);
     },
     showMobile() {
-      return this.hasMobile && (this.isPlanning || this.isStaff || this.isSuperuser)
+      return this.hasMobile && (this.isPlanning || this.isAdmin)
     },
     showCompany() {
       return !this.isCustomer && !this.isEmployee;
@@ -278,23 +294,20 @@ export default {
     hasInvoices() {
       return this.hasAccessToModule('invoices')
     },
-    hasCompany() {
-      return this.hasAccessToModule('company')
-    },
     hasMembers() {
-      return this.isStaff || this.isSuperuser
+      return this.isAdmin
     },
     unacceptedCount() {
-      return this.$store.state.unacceptedCount
+      return this.mainStore.unacceptedCount
     },
     hasBranches() {
-      return this.$store.getters.getMemberHasBranches
+      return this.mainStore.getMemberHasBranches
     },
     hasBim() {
-      return this.hasAccessToModule('3d') && (this.isPlanning || this.isStaff || this.isSuperuser)
+      return this.hasAccessToModule('3d') && (this.isPlanning || this.isAdmin)
     },
     hasWebshop() {
-      return this.hasAccessToModule('webshop') && (this.isPlanning || this.isStaff || this.isSuperuser)
+      return this.hasAccessToModule('webshop') && (this.isPlanning || this.isAdmin)
     }
   },
   watch: {
@@ -303,8 +316,6 @@ export default {
   },
   components: {
     SubNav,
-    SubNavCustomers,
-    SubNavInventory
   }
 }
 </script>

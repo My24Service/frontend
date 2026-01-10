@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="receipt"></b-icon>{{ $trans('Entries') }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <h3><IBiReceipt></IBiReceipt>{{ $trans('Entries') }}</h3>
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -12,9 +12,9 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link class="btn" :to="{name: 'purchaseorder-entry-add'}">{{ $trans('Add entry') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -46,7 +46,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -56,7 +56,7 @@
           </div>
         </template>
         <template #cell(order_id)="data">
-          <router-link :to="{name: 'purchaseorder-entry-edit', params: {pk: data.item.pk}}">{{data.item.order_id}}</router-link>
+          <router-link :to="{name: 'purchaseorder-entry-edit', params: {pk: data.item.id}}">{{data.item.order_id}}</router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -83,21 +83,27 @@
 
 <script>
 import purchaseorderEntryModel from '@/models/inventory/PurchaseOrderEntry.js'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
-    IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -109,12 +115,12 @@ export default {
       isLoading: false,
       entries: [],
       fields: [
-        {key: 'order_id', label: this.$trans('Order ID'), sortable: true},
-        {key: 'supplier', label: this.$trans('Supplier'), sortable: true},
-        {key: 'material_name', label: this.$trans('Product'), sortable: true},
-        {key: 'amount', label: this.$trans('Amount')},
-        {key: 'entry_date', label: this.$trans('Entry date')},
-        {key: 'stock_location_name', label: this.$trans('Moved to location')},
+        {key: 'order_id', label: $trans('Order ID'), sortable: true},
+        {key: 'supplier', label: $trans('Supplier'), sortable: true},
+        {key: 'material_name', label: $trans('Product'), sortable: true},
+        {key: 'amount', label: $trans('Amount')},
+        {key: 'entry_date', label: $trans('Entry date')},
+        {key: 'stock_location_name', label: $trans('Moved to location')},
         {key: 'icons'}
       ],
     }
@@ -141,11 +147,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.entryPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Entry has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Entry has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting entry', error)
-        this.errorToast(this.$trans('Error deleting entry'))
+        errorToast(this.create, $trans('Error deleting entry'))
       }
     },
     // rest
@@ -158,7 +164,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching entries', error)
-        this.errorToast(this.$trans('Error loading entries'))
+        errorToast(this.create, $trans('Error loading entries'))
         this.isLoading = false
       }
     }

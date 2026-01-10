@@ -7,96 +7,50 @@ import {
   AUTH_LEVELS
 } from "./constants";
 import Dinero from "dinero.js";
+import {useAuthStore} from "@/stores/auth";
+import {useMainStore} from "@/stores/main";
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object
 }
 
-function getIsStaff(store) {
-  return store.state.userInfo.submodel === 'staff' && store.state.userInfo.user.is_staff
-  // return store.state.userInfo.hasOwnProperty('is_staff') && store.state.userInfo.is_staff
-}
-
-function getIsSuperuser(store) {
-  return store.state.userInfo.submodel === 'superuser' && store.state.userInfo.user.is_superuser
-  // return store.state.userInfo.hasOwnProperty('is_superuser') && store.state.userInfo.is_superuser
-}
-
-function getIsPlanning(store) {
-  return store.state.userInfo.submodel === 'planning_user' && store.state.userInfo.user.planning_user
-  // return store.state.userInfo.hasOwnProperty('planning_user') && store.state.userInfo.planning_user
-}
-
-function getIsCustomer(store) {
-  return store.state.userInfo.submodel === 'customer_user' && store.state.userInfo.user.customer_user
-  // return store.state.userInfo.hasOwnProperty('customer_user') && store.state.userInfo.customer_user
-}
-
-function getIsEngineer(store) {
-  return store.state.userInfo.submodel === 'engineer' && store.state.userInfo.user.engineer
-  // return store.state.userInfo.hasOwnProperty('engineer') && store.state.userInfo.engineer
-}
-
-function getIsSales(store) {
-  return store.state.userInfo.submodel === 'sales_user' && store.state.userInfo.user.sales_user
-  // return store.state.userInfo.hasOwnProperty('sales_user') && store.state.userInfo.sales_user
-}
-
-function getIsStudent(store) {
-  return store.state.userInfo.submodel === 'student_user' && store.state.userInfo.user.student_user
-  // return store.state.userInfo.hasOwnProperty('student_user') && store.state.userInfo.student_user
-}
-
-function getIsEmployee(store) {
-  return store.state.userInfo.submodel === 'employee_user' && store.state.userInfo.user.employee_user
-  // return store.state.userInfo.hasOwnProperty() && store.state.userInfo.employee_user
-}
-
-function getIsBranchEmployee(store) {
-  return store.state.userInfo.submodel === 'employee_user' && store.state.userInfo.user.employee_user && store.state.userInfo.user.employee_user.branch
-  // return store.state.userInfo.user.hasOwnProperty('employee_user') && store.state.userInfo.employee_user && store.state.userInfo.employee_user.branch
-}
-
-function getIsLoggedIn(store) {
-  return store.getters.isLoggedIn
-}
-
-function getUserAuthLevel(store) {
-  if (getIsStudent(store)) {
+function getUserAuthLevel() {
+  const store = useAuthStore()
+  if (store.isStudent) {
     return AUTH_LEVELS.STUDENT
   }
 
-  if (getIsSales(store)) {
+  if (store.isSales) {
     return AUTH_LEVELS.SALES
   }
 
-  if (getIsEngineer(store)) {
+  if (store.isEngineer) {
     return AUTH_LEVELS.ENGINEER
   }
 
-  if (getIsCustomer(store)) {
+  if (store.isCustomer) {
     return AUTH_LEVELS.CUSTOMER
   }
 
-  if (getIsPlanning(store)) {
+  if (store.isPlanning) {
     return AUTH_LEVELS.PLANNING
   }
 
-  if (getIsEmployee(store)) {
+  if (store.isEmployee) {
     return AUTH_LEVELS.EMPLOYEE
   }
 
-  if (getIsSuperuser(store)) {
+  if (store.isSuperuser) {
     return AUTH_LEVELS.SUPERUSER
   }
 
-  if (getIsStaff(store)) {
+  if (store.isStaff) {
     return AUTH_LEVELS.STAFF
   }
 }
 
-function hasAccessRouteAuthLevel(authLevelNeeded, store) {
-  const authLevelUser = getUserAuthLevel(store)
+function hasAccessRouteAuthLevel(authLevelNeeded) {
+  const authLevelUser = getUserAuthLevel()
 
   // TODO in the future use ONLY arrays?
   // let needed = typeof authLevelNeeded === 'string' ? [ authLevelNeeded ] : authLevelNeeded
@@ -141,89 +95,51 @@ function hasAccessRouteAuthLevel(authLevelNeeded, store) {
   return false
 }
 
-let componentMixin = {
-  computed: {
-    isStaff() {
-      return getIsStaff(this.$store)
-    },
-    isSuperuser() {
-      return getIsSuperuser(this.$store)
-    },
-    isPlanning() {
-      return getIsPlanning(this.$store)
-    },
-    isCustomer() {
-      return getIsCustomer(this.$store)
-    },
-    isEngineer() {
-      return getIsEngineer(this.$store)
-    },
-    isSales() {
-      return getIsSales(this.$store)
-    },
-    isStudent() {
-      return getIsStudent(this.$store)
-    },
-    isEmployee() {
-      return getIsEmployee(this.$store)
-    },
-    isBranchEmployee() {
-      return getIsBranchEmployee(this.$store)
-    },
-    isLoggedIn() {
-      return getIsLoggedIn(this.$store)
-    },
-    username() {
-      return this.$store.getters.getUserName
-    },
-    hasBranches() {
-      return this.$store.getters.getMemberHasBranches
-    },
-    companyIsDemo() {
-      return this.$store.getters.getMemberCompanycode === 'demo'
-    }
-  },
-  methods: {
-    translateHoursField(field) {
-      const allFields = {
-        'work_total': this.$trans("Work total"),
-        'break_total': this.$trans('Breaks total'),
-        'travel_total': this.$trans('Travel total'),
-        'distance_total': this.$trans('Distance total'),
-        'extra_work': this.$trans('Total extra work'),
-        'actual_work': this.$trans('Total actual work'),
-        'unforeseen_work': this.$trans('Total unforeseen work'),
-        'distance_fixed_rate_amount': this.$trans('Total trips')
-      }
-
-      return allFields[field]
-    },
-    displayDurationFromSeconds(seconds, exclude_seconds) {
-      return this.displayDuration(moment.duration(seconds*1000), exclude_seconds)
-    },
-    displayDuration(duration, exclude_seconds) {
-      const totalMilliseconds = duration.as('milliseconds')
-      const hours = parseInt(moment.duration(totalMilliseconds).asHours())
-      const format = exclude_seconds ? 'mm' : 'mm:ss'
-      return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
-    },
-    async doFetchUnacceptedCountAndUpdateStore() {
-      const service = new OrderService()
-      const countResult = await service.getUnacceptedCount()
-      if (countResult && 'count' in countResult) {
-        await this.$store.dispatch('setUnacceptedCount', countResult.count)
-      }
-    },
-    hasAccessToModule(module, part) {
-      return my24.hasAccessToModule({
-        isStaff: this.isStaff,
-        isSuperuser: this.isSuperuser,
-        contract: this.$store.state.memberContract,
-        module,
-        part,
-      })
-    },
+function translateHoursField(field) {
+  const allFields = {
+    'work_total': $trans("Work total"),
+    'break_total': $trans('Breaks total'),
+    'travel_total': $trans('Travel total'),
+    'distance_total': $trans('Distance total'),
+    'extra_work': $trans('Total extra work'),
+    'actual_work': $trans('Total actual work'),
+    'unforeseen_work': $trans('Total unforeseen work'),
+    'distance_fixed_rate_amount': $trans('Total trips')
   }
+
+  return allFields[field]
+}
+
+function displayDurationFromSeconds(seconds, exclude_seconds) {
+  return this.displayDuration(moment.duration(seconds*1000), exclude_seconds)
+}
+
+function displayDuration(duration, exclude_seconds) {
+  const totalMilliseconds = duration.as('milliseconds')
+  const hours = parseInt(moment.duration(totalMilliseconds).asHours())
+  const format = exclude_seconds ? 'mm' : 'mm:ss'
+  return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
+}
+
+async function doFetchUnacceptedCountAndUpdateStore() {
+  const store = useMainStore()
+  const service = new OrderService()
+  const countResult = await service.getUnacceptedCount()
+  if (countResult && 'count' in countResult) {
+    store.setUnacceptedCount(countResult.count)
+  }
+}
+
+function hasAccessToModule(module, part) {
+  const authStore = useAuthStore()
+  const mainStore = useMainStore()
+  return my24.hasAccessToModule({
+    isStaff: authStore.isStaff,
+    isSuperuser: authStore.isSuperuser,
+    contract: mainStore.memberContract,
+    module,
+    part,
+  })
 }
 
 function toDinero(priceDecimal, currency) {
@@ -246,19 +162,38 @@ function uuidv4() {
   );
 }
 
+function $trans(text) {
+  if (!window.django) {
+    return text
+  }
+
+  if (window.member_type_text && text in window.member_type_text) {
+    return django.gettext(window.member_type_text[text])
+  }
+
+  return django.gettext(text)
+}
+
+function infoToast(create, title, body) {
+  create({title, body, variant: 'success'})
+}
+
+function errorToast(create, body, title=$trans('Error')) {
+  create({title, body, variant: 'danger'})
+}
+
 export {
   isEmpty,
-  getIsStaff,
-  getIsSuperuser,
-  getIsPlanning,
-  getIsEngineer,
-  getIsSales,
-  getIsStudent,
-  getIsCustomer,
-  getIsLoggedIn,
+  translateHoursField,
+  displayDurationFromSeconds,
+  displayDuration,
+  doFetchUnacceptedCountAndUpdateStore,
+  hasAccessToModule,
   hasAccessRouteAuthLevel,
   getUserAuthLevel,
-  componentMixin,
   toDinero,
-  uuidv4
+  uuidv4,
+  $trans,
+  infoToast,
+  errorToast
 }

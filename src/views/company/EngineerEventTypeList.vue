@@ -41,8 +41,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="engineer-event-type-add"
                   v-bind:title="$trans('New event type')"
@@ -54,8 +54,8 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(icons)="data">
@@ -87,8 +87,21 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import PillsEngineer from "./PillsEngineer";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   components: {
     IconLinkEdit,
     IconLinkDelete,
@@ -109,11 +122,11 @@ export default {
       isLoading: false,
       eventTypes: [],
       fields: [
-        {key: 'event_type', label: this.$trans('Event type'), sortable: true},
-        {key: 'measure_last_event_type', label: this.$trans('Measure last event type'), sortable: true},
-        {key: 'statuscode_view.statuscode', label: this.$trans('Status'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'event_type', label: $trans('Event type'), sortable: true},
+        {key: 'measure_last_event_type', label: $trans('Measure last event type'), sortable: true},
+        {key: 'statuscode_view.statuscode', label: $trans('Status'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -140,17 +153,17 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.engineerEventTypeModelPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Event type has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Event type has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting event type', error)
-        this.errorToast(this.$trans('Error deleting event type'))
+        errorToast(this.create, $trans('Error deleting event type'))
       }
     },
     // rest
     async loadData() {
       // get companycode
-      this.companycode = await this.$store.getters.getMemberCompanycode
+      this.companycode = await this.mainStore.getMemberCompanycode
 
       this.isLoading = true;
 
@@ -160,7 +173,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching event types', error)
-        this.errorToast(this.$trans('Error loading event types'))
+        errorToast(this.create, $trans('Error loading event types'))
         this.isLoading = false
       }
     }

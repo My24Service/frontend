@@ -1,7 +1,7 @@
 <template>
   <b-container>
     <h6>
-      <b-icon icon="building"></b-icon> {{ $trans('Customer') }}
+      <IBiBuilding></IBiBuilding> {{ $trans('Customer') }}
     </h6>
     <b-row>
       <b-col cols="4">

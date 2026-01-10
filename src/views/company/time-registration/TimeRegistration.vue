@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Time registration") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Time registration") }}</h3>
       </div>
     </header>
     <div class='panel'>
@@ -19,11 +19,25 @@
 <script>
 import moment from 'moment/min/moment-with-locales'
 
-import { TimeRegistrationService } from "../../../models/company/TimeRegistration";
+import { TimeRegistrationService } from "@/models/company/TimeRegistration";
 import TimeRegistrationData from "../../../components/TimeRegistrationData.vue";
 import SubNav from "./SubNav";
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+    const {create} = useToast()
+
+    return {
+      mainStore,
+      create
+    }
+  },
+  mixins: [componentMixin],
   name: "TimeRegistration",
   props: {
     user_id: {
@@ -45,7 +59,7 @@ export default {
     SubNav
   },
   async created() {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
@@ -87,7 +101,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching time data', error)
-        this.errorToast(this.$trans('Error loading time data'))
+        errorToast(this.create, this.$trans('Error loading time data'))
         this.isLoading = false
       }
     }

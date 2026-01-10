@@ -7,12 +7,11 @@
       </div>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
           <span>{{ $trans("Orders") }}</span>
         </h3>
 
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -20,11 +19,11 @@
             <ButtonLinkSort
               v-bind:method="function() { showSortModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link class="btn button" :to="{name:'order-add'}">
-            <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add order') }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add order') }}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
 
     </header>
@@ -43,13 +42,18 @@
             <b-row role="group">
               <b-col size="12">
                 <div>
-                  <b-form-group :label="$trans('Sort')">
-                    <b-form-radio v-model="sortMode" value="default">{{ $trans('Start date (default)') }}</b-form-radio>
-                    <b-form-radio v-model="sortMode" value="last_update">{{ $trans('Last update') }}</b-form-radio>
-                  </b-form-group>
-                  <b-form-group :label="$trans('Display only orders since')">
-                    <b-form-datepicker v-model="sinceDate" id="sort-filter-since" value="" locale="nl" :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }" />
-                  </b-form-group>
+                  <BFormGroup :label="$trans('Sort')">
+                    <BFormRadio v-model="sortMode" value="default">{{ $trans('Start date (default)') }}</BFormRadio>
+                    <BFormRadio v-model="sortMode" value="last_update">{{ $trans('Last update') }}</BFormRadio>
+                  </BFormGroup>
+                  <BFormGroup :label="$trans('Display only orders since')">
+                    <VueDatePicker
+                      v-model="sinceDate"
+                      id="sort-filter-since"
+                      value="" locale="nl"
+                      :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    />
+                  </BFormGroup>
                 </div>
               </b-col>
             </b-row>
@@ -80,31 +84,31 @@
           <b-container fluid>
             <b-row role="group">
               <b-col size="4">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('New status')"
                   label-for="change-status-status"
                 >
-                  <b-form-select
+                  <BFormSelect
                     id="change-status-status"
                     v-model="status.statuscode"
                     :options="statuscodes"
                     size="sm"
                     value-field="statuscode"
                     text-field="statuscode"
-                  ></b-form-select>
-                </b-form-group>
+                  ></BFormSelect>
+                </BFormGroup>
               </b-col>
               <b-col size="8">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Extra text')"
                   label-for="change-status-extra-text"
                 >
-                  <b-form-input
+                  <BFormInput
                     size="sm"
                     id="change-status-extra-text"
                     v-model="status.extra_text"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
@@ -162,14 +166,14 @@
 
           <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
               {{ order.order_id }}
-              <b-icon icon="x-circle" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
-              <b-icon icon="x-circle-fill" class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></b-icon>
+              <IBiXCircle class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircle>
+              <IBiXCircleFill class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircleFill>
             </span>
 
-          <b-button variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
-            <b-icon-person-lines-fill></b-icon-person-lines-fill>
+          <BButton variant="primary" v-if="dispatch && selectedOrders.length > 0" @click.prevent="doAssign()">
+            <IBiPersonLinesFill></IBiPersonLinesFill>
             {{ $trans('Assign these orders') }}
-          </b-button>
+          </BButton>
 
         </div>
 
@@ -234,43 +238,41 @@ import { OrderService } from '@/models/orders/Order'
 import {StatusService} from '@/models/orders/Status'
 import my24 from '../../services/my24.js'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
-import IconLinkPlus from '../../components/IconLinkPlus.vue'
-import IconLinkDocuments from '../../components/IconLinkDocuments.vue'
 import IconLinkAssign from '../../components/IconLinkAssign.vue'
-import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkSort from '../../components/ButtonLinkSort.vue'
-import SearchModal from '../../components/SearchModal.vue'
 import SearchForm from '../../components/SearchForm.vue'
-import SubNavOrders from '../../components/SubNavOrders.vue'
 import UserFilters from "../../components/UserFilters.vue"
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '@/utils'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans, doFetchUnacceptedCountAndUpdateStore} from "@/utils";
+
 import {NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES} from "@/constants";
 import MemberNewDataSocket from "../../services/websocket/MemberNewDataSocket";
 import {OrderFilterService} from "@/models/orders/OrderFilter";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   mixins: [componentMixin],
   components: {
     OrderTableInfo,
-    IconLinkEdit,
-    IconLinkPlus,
-    IconLinkDocuments,
     IconLinkAssign,
-    IconLinkDelete,
     ButtonLinkRefresh,
-    ButtonLinkSearch,
-    ButtonLinkAdd,
     ButtonLinkSort,
-    SearchModal,
     UserFilters,
     Pagination,
     SearchForm,
-    SubNavOrders
   },
   props: {
     dispatch: {
@@ -303,16 +305,16 @@ export default {
       isLoading: false,
       orders: [],
       fields: [
-        {thAttr: {width: '80%'}, key: 'id', label: this.$trans('Order')},
+        {thAttr: {width: '80%'}, key: 'id', label: $trans('Order')},
         {thAttr: {width: '20%'}, key: 'icons'}
       ],
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') }
+        { key: 'product', label: $trans('Product') },
+        { key: 'location', label: $trans('Location') },
+        { key: 'remarks', label: $trans('Remarks') }
       ],
       infoLineFields: [
-        { key: 'info', label: this.$trans('Infolines') }
+        { key: 'info', label: $trans('Infolines') }
       ],
       filterService: new OrderFilterService(),
     }
@@ -325,7 +327,7 @@ export default {
     this.searchQuery = null
 
     // get statuscodes and load orders
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.statuscodes = await this.mainStore.getStatuscodes
     this.model.currentPage = this.$route.query.page || 1
 
     this.sinceDate = this.$route.query.since || null
@@ -349,7 +351,7 @@ export default {
       this.loadData()
     },
     doAssign() {
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
       this.$router.push({name: 'mobile-dispatch', params: {assignModeProp: true}})
     },
     selectOrder(order) {
@@ -360,11 +362,11 @@ export default {
       }
 
       this.selectedOrders.push(order)
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     removeSelectedOrder(index) {
       this.selectedOrders.splice(index, 1)
-      this.$store.dispatch('setAssignOrders', this.selectedOrders)
+      this.mainStore.setAssignOrders(this.selectedOrders)
     },
     async changeStatus() {
       const status = {
@@ -374,11 +376,11 @@ export default {
 
       try {
         await this.statusService.insert(status)
-        this.infoToast(this.$trans('Created'), this.$trans('Status has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Status has been created'))
         await this.loadData()
       } catch(error) {
         console.log('Error creating status', error)
-        this.errorToast(this.$trans('Error creating status'))
+        errorToast(this.create, $trans('Error creating status'))
       }
     },
     rowStyle(item, type) {
@@ -402,11 +404,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.orderPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Order has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Order has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting order', error)
-        this.errorToast(this.$trans('Error deleting order'))
+        errorToast(this.create, $trans('Error deleting order'))
       }
     },
     async loadData() {
@@ -415,8 +417,8 @@ export default {
       // get filters
       this.userFilters = await this.filterService.getSimpleList()
 
-      await this.doFetchUnacceptedCountAndUpdateStore()
-      this.selectedOrders = await this.$store.dispatch('getAssignOrders') || []
+      await doFetchUnacceptedCountAndUpdateStore()
+      this.selectedOrders = await this.mainStore.getAssignOrders || []
 
       this.model.setUserFilter(this.$route.query.user_filter)
 
@@ -426,7 +428,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching orders', error)
-        this.errorToast(this.$trans('Error loading orders'))
+        errorToast(this.create, $trans('Error loading orders'))
         this.isLoading = false
       }
     },

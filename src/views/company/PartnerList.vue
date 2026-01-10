@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="person-square"></b-icon>{{ $trans('Partners') }}</h3>
-        <b-button-toolbar>
-          <b-button-group>
+        <h3><IBiPersonSquare></IBiPersonSquare>{{ $trans('Partners') }}</h3>
+        <BButton-toolbar>
+          <BButton-group>
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -12,9 +12,9 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'partner-request-add'}" class="btn">{{$trans('New partner request')}}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -35,9 +35,9 @@
     </b-modal>
 
     <div class="panel overflow-auto">
-      
+
       <PillsCompanyPartners />
-      <br />      
+      <br />
       <b-table
         id="partner-table"
         small
@@ -50,7 +50,7 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            
+
           </div>
         </template>
         <template #table-busy>
@@ -68,9 +68,9 @@
           </div>
         </template>
         <template #cell(has_branches)="data">
-          <b-icon-check-square-fill
+          <IBiCheckSquareFill
             v-if="data.item.partner_view.has_branches"
-          ></b-icon-check-square-fill>
+          ></IBiCheckSquareFill>
         </template>
       </b-table>
       <Pagination
@@ -90,8 +90,18 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'PartnerList',
   components: {
     PillsCompanyPartners,
@@ -109,12 +119,12 @@ export default {
       isLoading: false,
       partners: [],
       partnerFields: [
-        {key: 'partner_view.name', label: this.$trans('Name'), sortable: true},
-        {key: 'partner_view.companycode', label: this.$trans('Company code'), sortable: true},
-        {key: 'partner_view.city', label: this.$trans('City'), sortable: true},
-        {key: 'partner_view.email', label: this.$trans('Email'), sortable: true},
-        {key: 'has_branches', label: this.$trans('Branches?'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'partner_view.name', label: $trans('Name'), sortable: true},
+        {key: 'partner_view.companycode', label: $trans('Company code'), sortable: true},
+        {key: 'partner_view.city', label: $trans('City'), sortable: true},
+        {key: 'partner_view.email', label: $trans('Email'), sortable: true},
+        {key: 'has_branches', label: $trans('Branches?'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -141,11 +151,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('partner has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('partner has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting partner', error)
-        this.errorToast(this.$trans('Error deleting partner'))
+        errorToast(this.create, $trans('Error deleting partner'))
       }
     },
     // rest
@@ -158,7 +168,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching partners', error);
-        this.errorToast(this.$trans('Error loading partners'))
+        errorToast(this.create, $trans('Error loading partners'))
         this.isLoading = false
       }
     }

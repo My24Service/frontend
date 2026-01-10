@@ -1,20 +1,20 @@
 <template>
   <span>
     <span v-if="type === 'th'">
-      <b-link v-if="method" class="icon-th" v-bind:title="title" v-on:click.native="method()">
-        <b-icon-plus variant="info"></b-icon-plus>
-      </b-link>
+      <BLink v-if="method" class="icon-th" v-bind:title="title" v-on:click="method()">
+        <IBiPlus variant="info"></IBiPlus>
+      </BLink>
       <router-link v-if="router_name" class="icon-th" v-bind:title="title" :to="{name: router_name, params: router_params}">
-        <b-icon-plus variant="info"></b-icon-plus>
+        <IBiPlus variant="info"></IBiPlus>
       </router-link>
     </span>
 
     <span v-if="type === 'tr'">
-      <b-link v-if="method" v-bind:title="title" v-on:click.native="method()">
-        <b-icon-plus class="edit-icon"></b-icon-plus>
-      </b-link>
+      <BLink v-if="method" v-bind:title="title" v-on:click="method()">
+        <IBiPlus class="edit-icon"></IBiPlus>
+      </BLink>
       <router-link v-if="router_name" v-bind:title="title" :to="{name: router_name, params: router_params}">
-        <b-icon-plus class="edit-icon"></b-icon-plus>
+        <IBiPlus class="edit-icon"></IBiPlus>
       </router-link>
     </span>
   </span>

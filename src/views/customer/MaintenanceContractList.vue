@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-lock"></b-icon> {{ $trans('Maintenance contracts') }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <h3><IBiFileEarmarkLock></IBiFileEarmarkLock> {{ $trans('Maintenance contracts') }}</h3>
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -12,11 +12,11 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'maintenance-contract-add'}" class="btn primary">
             {{ $trans('Add contract') }}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -109,22 +109,33 @@
 </template>
 
 <script>
-import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
+import { MaintenanceContractService } from '@/models/customer/MaintenanceContract'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: 'MaintenanceContractList',
   components: {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     IconLinkEdit
@@ -142,11 +153,11 @@ export default {
       isLoading: true,
       maintenanceContracts: [],
       maintenanceContractFields: [
-        {key: 'name', label: this.$trans('Contract name'), sortable: true},
-        {key: 'customer_view_name', label: this.$trans('Customer'), sortable: true},
-        {key: 'sum_tariffs', label: this.$trans('Contract value'), sortable: true},
-        {key: 'remarks', label: this.$trans('Remarks'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
+        {key: 'name', label: $trans('Contract name'), sortable: true},
+        {key: 'customer_view_name', label: $trans('Customer'), sortable: true},
+        {key: 'sum_tariffs', label: $trans('Contract value'), sortable: true},
+        {key: 'remarks', label: $trans('Remarks'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'icons'}
       ],
       maintenanceContractService: new MaintenanceContractService(),
@@ -174,11 +185,11 @@ export default {
     async doDelete() {
       try {
         await this.maintenanceContractService.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Maintenance contract has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Maintenance contract has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting maintenance contract', error)
-        this.errorToast(this.$trans('Error deleting maintenance contract'))
+        errorToast(this.create, $trans('Error deleting maintenance contract'))
       }
     },
     // rest
@@ -189,12 +200,12 @@ export default {
         const data = await this.maintenanceContractService.list()
         this.maintenanceContracts = data.results.map(
           (m) => new this.maintenanceContractService.model(
-            {...m, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
+            {...m, sum_tariffs_currency: this.mainStore.getDefaultCurrency}
           ))
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)
-        this.errorToast(this.$trans('Error loading maintenance contracts'))
+        errorToast(this.create, $trans('Error loading maintenance contracts'))
         this.isLoading = false
       }
     }

@@ -1,17 +1,29 @@
 import { defineConfig } from 'vite'
-import visualizer from 'rollup-plugin-visualizer'
-import themePreprocessorPlugin from "@zougt/vite-plugin-theme-preprocessor"
-import vue from '@vitejs/plugin-vue2'
+import {
+  themePreprocessorPlugin,
+  themePreprocessorHmrPlugin
+} from "@zougt/vite-plugin-theme-preprocessor";
+import vue from '@vitejs/plugin-vue'
+import Components from 'unplugin-vue-components/vite'
+import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
+import IconsResolve from 'unplugin-icons/resolver'
+import Icons from 'unplugin-icons/vite'
+import * as path from "node:path";
+import {ExternalPackageIconLoader} from "unplugin-icons/loaders";
 
-const path = require("path");
 export default defineConfig({
   base: '',
   // build: {
   //   sourcemap: true
   // },
   server: {
-    host: 'demo.my24service.com',
+    host: '0.0.0.0',
     port: 3000,
+    allowedHosts: [
+      'stormy.my24service-dev.com',
+      'riedel.my24service-dev.com',
+      '*.my24service.com',
+    ],
     hmr: {
       host: "localhost",
       port: 3000
@@ -19,7 +31,20 @@ export default defineConfig({
   },
   plugins: [
     vue(),
-    visualizer(),
+    Components({
+      resolvers: [
+        BootstrapVueNextResolver(),
+        IconsResolve()
+      ],
+      dts: true,
+    }),
+    Icons({
+      compiler: 'vue3',
+      autoInstall: true,
+      customCollections: {
+        ...ExternalPackageIconLoader('bootstrap-icons'),
+      }
+    }),
     themePreprocessorPlugin({
       scss: {
         // close arbitraryMode
@@ -53,13 +78,26 @@ export default defineConfig({
         // custom css file name.
         customThemeCssFileName: (scopeName) => scopeName,
       }
-    })
+    }),
+    themePreprocessorHmrPlugin(),
   ],
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve("./src")
     },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: [
+          'mixed-decls',
+          'color-functions',
+          'global-builtin',
+          'import'
+        ]
+      },
+    }
   },
   test: {
     environment: 'happy-dom',

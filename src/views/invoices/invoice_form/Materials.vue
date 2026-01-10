@@ -53,19 +53,19 @@
           <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material,$event)" />
         </b-col>
         <b-col cols="4">
-          <b-form-radio-group
+          <BFormRadioGroup
             @change="updateTotals"
             v-model="material.use_price"
           >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
               {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-            </b-form-radio>
+            </BFormRadio>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
               {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-            </b-form-radio>
+            </BFormRadio>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
@@ -74,8 +74,8 @@
                   @priceChanged="(val) => otherPriceChanged(val, material)"
                 />
               </p>
-            </b-form-radio>
-          </b-form-radio-group>
+            </BFormRadio>
+          </BFormRadioGroup>
         </b-col>
         <b-col cols="2">
           <VAT @vatChanged="(val) => changeVatType(material, val)" />
@@ -103,7 +103,6 @@
 
 <script>
 import {toDinero} from "@/utils";
-import Collapse from "@/components/Collapse";
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
 
@@ -125,15 +124,26 @@ import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "MaterialsComponent",
   emits: ['invoiceLinesCreated', 'emptyCollectionClicked'],
   mixins: [invoiceMixin],
   components: {
     PriceInput,
     TotalsInputs,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -196,8 +206,8 @@ export default {
         USE_PRICE_OTHER,
       },
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
 
       hasStoredData: false,
       costType: COST_TYPE_USED_MATERIALS,
@@ -258,7 +268,7 @@ export default {
     },
     getMaterialName(material_id) {
       const material = this.materialModels.find((m) => m.id === material_id)
-      return material ? material.name : this.$trans("unknown")
+      return material ? material.name : $trans("unknown")
     },
     async loadData() {
       // create material models
@@ -355,10 +365,10 @@ export default {
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
-      return `${this.$trans("material")}: ${this.getMaterialName(cost.material)}`
+      return `${$trans("material")}: ${this.getMaterialName(cost.material)}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Used materials")}`
+      return `${$trans("Used materials")}`
     },
     getTotalAmountInvoiceLine() {
       return this.totalAmount

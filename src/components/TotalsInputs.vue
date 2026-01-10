@@ -6,14 +6,14 @@
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("Total") }}</span>
         <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("Total") }}</span>
       </div>
-      
-      <b-form-input
+
+      <BFormInput
         readonly
         disabled
         :value="total.toFormat('$0.00')"
         size="sm"
         :class="totalClass"
-      ></b-form-input>
+      ></BFormInput>
 
     </div>
 
@@ -21,13 +21,13 @@
         <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
         <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("VAT") }}</span>
 
-        <b-form-input
+        <BFormInput
           readonly
           disabled
           :value="vat.toFormat('$0.00')"
           size="sm"
           :class="vatClass"
-        ></b-form-input>
+        ></BFormInput>
 
     </div>
   </div>

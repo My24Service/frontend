@@ -2,7 +2,7 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-bar-graph-fill"></b-icon>{{ $trans("Order stats") }}</h3>
+        <h3><IBiFileEarmarkBarGraphFill></IBiFileEarmarkBarGraphFill>{{ $trans("Order stats") }}</h3>
         <div class="flex-columns">
           {{ $trans("view") }}
           <router-link class="btn button" to="./year-stats">{{ $trans("year") }}</router-link>
@@ -13,9 +13,9 @@
     <div class="panel">
       <b-row align-v="center">
         <b-col cols="2">
-          <b-link @click.prevent="backMonth" v-bind:title="$trans('Month back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          <BLink @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
+          </BLink>
         </b-col>
         <b-col cols="8" class="text-center">
           <h4>{{ $trans('Total orders in ') }} {{ monthTxt }} {{ year }}</h4>
@@ -27,7 +27,7 @@
             </b-col>
             <b-col cols="4">
               <OrderTypesSelect
-                :order-type.sync="orderType"
+                :order-type="orderType"
                 :include-all="true"
               />
             </b-col>
@@ -37,9 +37,9 @@
         </b-col>
         <b-col cols="2">
           <div class="float-right">
-            <b-link @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            <BLink @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
+            </BLink>
           </div>
         </b-col>
       </b-row>
@@ -119,8 +119,17 @@ import PieChart from "@/components/PieChart.vue"
 import OrderStatusColorSpan from '@/components/OrderStatusColorSpan.vue'
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import ChartJsPluginDataLabels from 'chartjs-plugin-datalabels'
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       isLoading: false,
@@ -224,7 +233,7 @@ export default {
         // fill bar graph data and set labels/fields
         let monthDataBar = [], monthDataPie = [], labels = [], colors = []
         for (const week of weeks) {
-          const weekText =  `${this.$trans("week")} ${week}`
+          const weekText =  `${$trans("week")} ${week}`
           labels.push(weekText)
           colors.push(this.getRandomColor(weekText))
           if (week in monthData.items) {
@@ -329,7 +338,7 @@ export default {
     }
   },
   async mounted () {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
@@ -340,7 +349,7 @@ export default {
     this.year = this.today.year()
 
     // get statuscodes and load orders
-    this.statuscodes = await this.$store.dispatch('getStatuscodes')
+    this.statuscodes = await this.mainStore.getStatuscodes
     await this.loadData()
   }
 }

@@ -3,19 +3,19 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="shop-window"></b-icon>
+          <IBiShopWindow></IBiShopWindow>
           <span class="backlink" @click="cancelForm">{{ $trans('Locations') }}</span> /
           <span v-if="isCreate">{{ $trans('New location') }}</span>
           <span v-if="!isCreate">{{ location.name }} <span class="dimmed">{{ $trans('edit') }} </span></span>
         </h3>
         <div class='flex-columns'>
-          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+          <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          </BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-          </b-button>
-          <b-button
+          </BButton>
+          <BButton
             @click="submitFormBulk"
             :disabled="buttonDisabled"
             type="button"
@@ -23,7 +23,7 @@
             v-if="isCreate"
           >
             {{ $trans('Bulk') }}
-          </b-button>
+          </BButton>
         </div>
       </div>
     </header>
@@ -35,12 +35,12 @@
             <h6>{{ $trans('Customer') }} / {{ $trans('Branch') }}</h6>
             <b-row v-if="!hasBranches && !isCustomer">
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Search customer')"
                   label-for="location_customer_search"
                 >
-                  <multiselect
+                  <VueMultiselect
                     v-if="!isLoading"
                     id="location_customer_search"
                     track-by="id"
@@ -62,23 +62,23 @@
                     :custom-label="customerLabel"
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                  </multiselect>
+                  </VueMultiselect>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.location.customer.$error : null">
                     {{ $trans('Please select a customer') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row v-if="hasBranches && !isEmployee">
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-class="p-sm-0"
                   v-bind:label="$trans('Search branches')"
                   label-for="location_branch_search"
                 >
-                  <multiselect
+                  <VueMultiselect
                     v-if="!isLoading"
                     id="location_branch_search"
                     track-by="id"
@@ -100,128 +100,128 @@
                     :custom-label="branchLabel"
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                  </multiselect>
+                  </VueMultiselect>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.location.branch.$error : null">
                     {{ $trans('Please select a branch') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row v-if="customer && !hasBranches">
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Customer')"
                   label-for="location_customer_name"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="location_customer_name"
                     size="sm"
                     v-model="customer.name"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Address')"
                   label-for="location_customer_address"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="location_customer_address"
                     size="sm"
                     v-model="customer.address"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('City')"
                   label-for="location_customer_city"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="location_customer_city"
                     size="sm"
                     v-model="customer.city"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Country')"
                   label-for="location_customer_country_code"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="location_customer_country_code"
                     size="sm"
                     v-model="customer.country_code"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
             <b-row v-if="branch && hasBranches">
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Branch')"
                   label-for="location_branch_name"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="location_branch_name"
                     size="sm"
                     v-model="branch.name"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Address')"
                   label-for="location_branch_address"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="location_branch_address"
                     size="sm"
                     v-model="branch.address"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('City')"
                   label-for="location_branch_city"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="location_branch_city"
                     size="sm"
                     v-model="branch.city"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Country')"
                   label-for="location_branch_country_code"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="location_branch_country_code"
                     size="sm"
                     v-model="branch.country_code"
                     readonly
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </div>
@@ -229,39 +229,39 @@
             <h6>{{ $trans('Location') }}</h6>
             <b-row>
               <b-col cols="8" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Location name')"
                   label-for="location-name"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="location.name"
                     id="location-name"
                     size="sm"
                     ref="name"
                     :state="isSubmitClicked ? !v$.location.name.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.location.name.$error : null">
                     {{ $trans('Please enter a name') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col size="4">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Building')"
                   label-size="sm"
                   label-for="location_building"
                 >
-                  <b-form-select
+                  <BFormSelect
                     id="location_building"
                     v-model="location.building"
                     :options="buildings"
                     size="sm"
                     value-field="id"
                     text-field="name"
-                  ></b-form-select>
-                </b-form-group>
+                  ></BFormSelect>
+                </BFormGroup>
               </b-col>
             </b-row>
 
@@ -283,24 +283,28 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import { LocationService, LocationModel } from '../../models/equipment/location.js'
-import {componentMixin} from "../../utils";
-import { CustomerService } from "../../models/customer/Customer";
-import { BranchService } from "../../models/company/Branch";
-import { BuildingService } from "../../models/equipment/building";
+import { LocationService, LocationModel } from '@/models/equipment/location'
+import { CustomerService } from "@/models/customer/Customer";
+import { BranchService } from "@/models/company/Branch";
+import { BuildingService } from "@/models/equipment/building";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
   components: {
     DocumentsComponent,
-    Multiselect,
+    VueMultiselect,
   },
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     pk: {
@@ -390,7 +394,7 @@ export default {
         this.customersSearch = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
       }
     },
     customerLabel({ name, city}) {
@@ -408,7 +412,7 @@ export default {
         this.branchesSearch = await this.branchService.search(query)
       } catch(error) {
         console.log('Error fetching branches', error)
-        this.errorToast(this.$trans('Error fetching branches'))
+        errorToast(this.create, $trans('Error fetching branches'))
       }
     },
     branchLabel({ name, city}) {
@@ -441,7 +445,7 @@ export default {
       if (this.isCreate) {
         try {
           await this.locationService.insert(this.location)
-          this.infoToast(this.$trans('Created'), this.$trans('Location has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Location has been created'))
           this.buttonDisabled = false
           this.isLoading = false
 
@@ -457,7 +461,7 @@ export default {
           }
         } catch(error) {
           console.log('Error creating location', error)
-          this.errorToast(this.$trans('Error creating location'))
+          errorToast(this.create, $trans('Error creating location'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -467,13 +471,13 @@ export default {
 
       try {
         await this.locationService.update(this.pk, this.location)
-        this.infoToast(this.$trans('Updated'), this.$trans('Location has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Location has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating location', error)
-        this.errorToast(this.$trans('Error updating location'))
+        errorToast(this.create, $trans('Error updating location'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -494,7 +498,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching location', error)
-        this.errorToast(this.$trans('Error fetching location'))
+        errorToast(this.create, $trans('Error fetching location'))
         this.isLoading = false
       }
     },

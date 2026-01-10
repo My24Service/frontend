@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{name: 'order-statuscode-list'}">{{ $trans('Statuscodes') }}</router-link> /
           <strong>{{ statuscode.statuscode }}</strong>
           <span class="dimmed">
@@ -12,58 +12,58 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans('Cancel') }}</b-button>
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans('Submit') }}</b-button>
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans('Cancel') }}</BButton>
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans('Submit') }}</BButton>
         </div>
       </div>
     </header>
     <div class="page-detail flex-columns">
       <div class="panel">
         <h6>{{ $trans('Settings') }}</h6>
-        <b-form-group
+        <BFormGroup
         v-bind:label="$trans('Statuscode')"
         label-for="statuscode_statuscode"
         label-cols="3"
         >
-            <b-form-input
+            <BFormInput
               autofocus
               id="statuscode_statuscode"
               size="sm"
               v-model="statuscode.statuscode"
               :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.statuscode.statuscode.$error : null">
               {{ $trans('Please enter a statuscode') }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
           label-cols="3"
             v-bind:label="$trans('New status template')"
             label-for="statuscode_new_status_template"
             :description="$trans('For order statuses that are not set by the application.')">
-            <b-form-input
+            <BFormInput
               id="statuscode_new_status_template"
               size="sm"
               v-model="statuscode.new_status_template">
-            </b-form-input>
-          </b-form-group>
+            </BFormInput>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Description')"
             label-for="statuscode_description">
-            <b-form-textarea
+            <BFormTextarea
               id="statuscode_description"
               v-model="statuscode.description"
-              rows="3"></b-form-textarea>
-          </b-form-group>
+              rows="3"></BFormTextarea>
+          </BFormGroup>
 
           <h6>{{ $trans("Label") }}</h6>
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             label="Label preview"
           >
@@ -73,8 +73,8 @@
             {{  statuscode.statuscode || 'statuscode text'}}
           </small>
 
-          </b-form-group>
-          <b-form-group
+          </BFormGroup>
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Label color')"
             label-for="statuscode_color"
@@ -86,9 +86,9 @@
                 class="color-picker-placeholder"
                 v-model="statuscode.color"
               ></color-picker>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-cols="3"
             v-bind:label="$trans('Text color')"
             label-for="statuscode_text_color"
@@ -98,102 +98,102 @@
                 class="color-picker-placeholder"
                 v-model="statuscode.text_color"
               ></color-picker>
-          </b-form-group>
+          </BFormGroup>
 
         </div>
 
         <div class="panel">
           <h6>{{ $trans("Usage") }}</h6>
-          <b-form-group
+          <BFormGroup
             v-if="list_type === 'order'"
             label-cols="3"
             v-bind:label="$trans('Use in dispatch')"
             label-for="statuscode_color_for_assignedorders"
             :description="$trans('Use this color for assigned orders in dispatch.')"
           >
-            <b-form-checkbox
+            <BFormCheckbox
               button
               button-variant="primary"
               id="statuscode_color_for_assignedorders"
               v-model="statuscode.color_for_assignedorders"
             >
-            <b-icon icon="check" v-if="statuscode.color_for_assignedorders"></b-icon>
+            <IBiCheck v-if="statuscode.color_for_assignedorders"></IBiCheck>
             {{ $trans('Use in dispatch') }}
-            </b-form-checkbox>
-          </b-form-group>
+            </BFormCheckbox>
+          </BFormGroup>
 
           <h6>{{ $trans("Workflow") }}</h6>
 
-          <b-form-group
+          <BFormGroup
             v-if="list_type === 'order'"
             label-cols="3"
             v-bind:label="$trans('Start order')"
             label-for="statuscode_start_order"
             :description="$trans('This statuscode marks the start of an order. This is used in the App for the start order button.')"
           >
-            <b-form-checkbox
+            <BFormCheckbox
               button
               button-variant="primary"
               id="statuscode_start_order"
               v-model="statuscode.start_order"
             >
-              <b-icon icon="check" v-if="statuscode.start_order"></b-icon>
+              <IBiCheck v-if="statuscode.start_order"></IBiCheck>
 
               {{ $trans('Start order') }}
-            </b-form-checkbox>
-          </b-form-group>
-          <b-form-group
+            </BFormCheckbox>
+          </BFormGroup>
+          <BFormGroup
             v-if="list_type === 'trip'"
             label-cols="3"
             v-bind:label="$trans('Starts trip')"
             label-for="statuscode_start_trip"
             :description="$trans('This statuscode marks the start of a trip. This is used in the App for the start trip button.')"
           >
-            <b-form-checkbox
+            <BFormCheckbox
               button
               button-variant="primary"
               id="statuscode_start_trip"
               v-model="statuscode.start_trip"
             >
-            <b-icon icon="check" v-if="statuscode.start_trip"></b-icon>
+            <IBiCheck v-if="statuscode.start_trip"></IBiCheck>
 
             {{ $trans('Starts trip') }}
-            </b-form-checkbox>
-          </b-form-group>
+            </BFormCheckbox>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             v-if="list_type === 'order'"
             label-cols="3"
             v-bind:label="$trans('Completes order')"
             label-for="statuscode_end_order"
             :description="$trans('This statuscode marks the end of an order. This is used in the App for the end order button.')"
           >
-            <b-form-checkbox
+            <BFormCheckbox
               button
               button-variant="primary"
               id="statuscode_end_order"
               v-model="statuscode.end_order"
             >
-            <b-icon icon="check" v-if="statuscode.end_order"></b-icon>
+            <IBiCheck v-if="statuscode.end_order"></IBiCheck>
 
             {{ $trans('Completes order') }}
-            </b-form-checkbox>
-          </b-form-group>
-          <b-form-group
+            </BFormCheckbox>
+          </BFormGroup>
+          <BFormGroup
             v-if="list_type === 'trip'"
             label-cols="3"
             v-bind:label="$trans('End trip?')"
             label-for="statuscode_end_trip"
             :description="$trans('This statuscode marks the end of a trip. This is used in the App for the end trip button.')"
           >
-            <b-form-checkbox
+            <BFormCheckbox
               id="statuscode_end_trip"
               v-model="statuscode.end_trip"
             >
-            </b-form-checkbox>
-          </b-form-group>
+            </BFormCheckbox>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             v-if="list_type === 'order'"
             button
             button-variant="primary"
@@ -202,36 +202,36 @@
             label-for="statuscode_after_end_order"
             :description="$trans('These statuscodes will show up as buttons in the App after the order is completed.')"
           >
-            <b-form-checkbox
+            <BFormCheckbox
               button
               button-variant="primary"
               id="statuscode_after_end_order"
               v-model="statuscode.after_end_order"
             >
-            <b-icon icon="check" v-if="statuscode.after_end_order"></b-icon>
+            <IBiCheck v-if="statuscode.after_end_order"></IBiCheck>
 
             {{$trans('After end order') }}
-            </b-form-checkbox>
-          </b-form-group>
+            </BFormCheckbox>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             v-if="list_type === 'order'"
             label-cols="3"
             v-bind:label="$trans('Re-assignable')"
             label-for="statuscode_can_be_reassigned_after_end"
             :description="$trans('When checked, the order can be re-assigned after ending it. For example after no workorder has been reported.')"
           >
-            <b-form-checkbox
+            <BFormCheckbox
               button
               button-variant="primary"
               id="statuscode_can_be_reassigned_after_end"
               v-model="statuscode.can_be_reassigned_after_end"
             >
-            <b-icon icon="check" v-if="statuscode.can_be_reassigned_after_end"></b-icon>
+            <IBiCheck v-if="statuscode.can_be_reassigned_after_end"></IBiCheck>
 
             {{ $trans('Re-assignable') }}
-            </b-form-checkbox>
-          </b-form-group>
+            </BFormCheckbox>
+          </BFormGroup>
         </div>
       </div>
   </div>
@@ -249,10 +249,16 @@ import { required } from '@vuelidate/validators'
 
 import statuscodeOrderModel from '@/models/orders/Statuscode.js'
 import statuscodeTripModel from '@/models/mobile/TripStatuscode.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     list_type: {
@@ -335,12 +341,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.statuscodeModel.insert(this.statuscode)
-          this.infoToast(this.$trans('Created'), this.$trans('Statuscode has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Statuscode has been created'))
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating statuscode', error)
-          this.errorToast(this.$trans('Error creating statuscode'))
+          errorToast(this.create, $trans('Error creating statuscode'))
           this.isLoading = false
         }
 
@@ -349,12 +355,12 @@ export default {
 
       try {
         await this.statuscodeModel.update(this.pk, this.statuscode)
-        this.infoToast(this.$trans('Updated'), this.$trans('Statuscode has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Statuscode has been updated'))
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating statuscode', error)
-        this.errorToast(this.$trans('Error updating statuscode'))
+        errorToast(this.create, $trans('Error updating statuscode'))
         this.isLoading = false
       }
     },
@@ -366,7 +372,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching statuscode', error)
-        this.errorToast(this.$trans('Error loading statuscode'))
+        errorToast(this.create, $trans('Error loading statuscode'))
         this.isLoading = false
       }
     },

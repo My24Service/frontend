@@ -4,17 +4,17 @@
       <header>
         <div class='page-title'>
           <h3>
-          <b-icon icon="people"></b-icon>
+          <IBiPeople></IBiPeople>
           <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
           {{  engineer.username }}
           <span class="dimmed" v-if="isCreate && !engineer.username">{{ $trans('new') }}</span>
           <span class="dimmed" v-if="!isCreate && !engineer.username">{{ $trans('edit') }}</span>
           </h3>
           <div class='flex-columns'>
-            <b-button @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
+            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+              {{ $trans('Submit') }}</BButton>
           </div>
         </div>
       </header>
@@ -23,16 +23,16 @@
         <div class='flex-columns'>
           <div class='panel'>
             <h6>{{ $trans("User info") }}</h6>
-            <b-form-group
+            <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Username')"
                 label-for="engineer_username">
-                <b-form-input
+                <BFormInput
                   id="engineer_username"
                   size="sm"
                   v-model="engineer.username"
-                  :state="isSubmitClicked ? !v$.engineer.username.$error : null"></b-form-input>
+                  :state="isSubmitClicked ? !v$.engineer.username.$error : null"></BFormInput>
                 <b-form-invalid-feedback
                   v-if="engineer.username === ''"
                   :state="isSubmitClicked ? v$.engineer.username.required : null">
@@ -43,36 +43,36 @@
                   :state="isSubmitClicked ? v$.engineer.username.isUnique.$invalid : null">
                   {{ $trans('Username is already in use') }}
                 </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Password')"
               label-for="engineer_password">
-              <b-form-input
+              <BFormInput
                 id="engineer_password"
                 size="sm"
                 type="password"
                 v-model="engineer.password1"
                 @blur="v$.engineer.password1.$touch()"
-                :state="isSubmitClicked && v$.engineer.password1 ? !v$.engineer.password1.$error : null"></b-form-input>
+                :state="isSubmitClicked && v$.engineer.password1 ? !v$.engineer.password1.$error : null"></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked && v$.engineer.password1 ? !v$.engineer.password1.$error : null">
                 {{ $trans('Please enter a password') }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Password again')"
               label-for="engineer_password_again">
-              <b-form-input
+              <BFormInput
                 id="engineer_password_again"
                 size="sm"
                 type="password"
                 v-model="engineer.password2"
                 @blur="v$.engineer.password2.$touch()"
-                :state="isSubmitClicked ? !v$.engineer.password2.$error : null"></b-form-input>
+                :state="isSubmitClicked ? !v$.engineer.password2.$error : null"></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked && v$.engineer.password2 ? !v$.engineer.password2.$error : null">
                 {{ $trans('Please enter a password') }}
@@ -82,172 +82,172 @@
                 :state="isSubmitClicked ? v$.engineer.password2.sameAs.$invalid : null">
                 {{ $trans('Passwords do not match') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
 
           <div class='panel'>
             <h6>{{ $trans("Personal details") }}</h6>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('First name')"
               label-for="engineer_first_name">
-              <b-form-input
+              <BFormInput
                 id="engineer_first_name"
                 size="sm"
                 v-model="engineer.first_name"
-                :state="isSubmitClicked ? !v$.engineer.first_name.$error : null"></b-form-input>
+                :state="isSubmitClicked ? !v$.engineer.first_name.$error : null"></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.engineer.first_name.$error : null">
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Last name')"
               label-for="engineer_last_name">
-              <b-form-input
+              <BFormInput
                 id="engineer_last_name"
                 size="sm"
                 v-model="engineer.last_name"
-                :state="isSubmitClicked ? !v$.engineer.last_name.$error : null"></b-form-input>
+                :state="isSubmitClicked ? !v$.engineer.last_name.$error : null"></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.engineer.last_name.$error : null">
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Email')"
               label-for="engineer_email">
-              <b-form-input
+              <BFormInput
                 id="engineer_email"
                 size="sm"
                 v-model="engineer.email"
-                :state="isSubmitClicked ? !v$.engineer.email.$error : null"></b-form-input>
+                :state="isSubmitClicked ? !v$.engineer.email.$error : null"></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.engineer.email.$error : null">
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Mobile phone')"
               label-for="engineer_mobile">
-              <b-form-input
+              <BFormInput
                 id="engineer_mobile"
                 size="sm"
-                v-model="engineer.engineer.mobile"></b-form-input>
-            </b-form-group>
-            <b-form-group
+                v-model="engineer.engineer.mobile"></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Address')"
               label-for="engineer_address"
             >
-              <b-form-input
+              <BFormInput
                 id="engineer_address"
                 size="sm"
-                v-model="engineer.engineer.address"></b-form-input>
-            </b-form-group>
-            <b-form-group
+                v-model="engineer.engineer.address"></BFormInput>
+            </BFormGroup>
+            <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Postal')"
                 label-for="engineer_postal">
-              <b-form-input
+              <BFormInput
                 id="engineer_postal"
                 size="sm"
-                v-model="engineer.engineer.postal"></b-form-input>
-            </b-form-group>
-            <b-form-group
+                v-model="engineer.engineer.postal"></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('City')"
               label-for="engineer_city">
-              <b-form-input
+              <BFormInput
                 id="engineer_city"
                 size="sm"
-                v-model="engineer.engineer.city"></b-form-input>
-            </b-form-group>
-            <b-form-group
+                v-model="engineer.engineer.city"></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Country')"
               label-for="engineer_country_code">
-              <b-form-select
+              <BFormSelect
                 v-model="engineer.engineer.country_code"
-                :options="countries" size="sm"></b-form-select>
-            </b-form-group>
-            <b-form-group
+                :options="countries" size="sm"></BFormSelect>
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Passport')"
               label-for="engineer_passport">
-              <b-form-input
+              <BFormInput
                 id="engineer_passport"
                 size="sm"
-                v-model="engineer.engineer.passport"></b-form-input>
-            </b-form-group>
+                v-model="engineer.engineer.passport"></BFormInput>
+            </BFormGroup>
           </div>
 
           <div class='panel'>
             <h6>{{ $trans("Work info") }}</h6>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Email tablet')"
               label-for="engineer_email_tablet">
-              <b-form-input
+              <BFormInput
                 id="engineer_email_tablet"
                 size="sm"
-                v-model="engineer.engineer.email_tablet"></b-form-input>
-            </b-form-group>
-            <b-form-group
+                v-model="engineer.engineer.email_tablet"></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('License plate')"
               label-for="engineer_license_plate">
-              <b-form-input
+              <BFormInput
                 id="engineer_license_plate"
                 size="sm"
-                v-model="engineer.engineer.license_plate"></b-form-input>
-            </b-form-group>
-            <b-form-group
+                v-model="engineer.engineer.license_plate"></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Contract hours per week')"
               label-for="engineer_contract_hours_week">
-              <b-form-input
+              <BFormInput
                 id="engineer_contract_hours_week"
                 size="sm"
-                v-model="engineer.engineer.contract_hours_week"></b-form-input>
-            </b-form-group>
-            <b-form-group
+                v-model="engineer.engineer.contract_hours_week"></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('VCA')"
               label-for="engineer_vca">
-              <b-form-input
+              <BFormInput
                 id="engineer_vca"
                 size="sm"
-                v-model="engineer.engineer.vca"></b-form-input>
-            </b-form-group>
-            <b-form-group
+                v-model="engineer.engineer.vca"></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Cost price')"
               label-for="engineer_cost_price">
-              <b-form-input
+              <BFormInput
                 id="engineer_cost_price"
                 size="sm"
-                v-model="engineer.engineer.cost_price"></b-form-input>
-            </b-form-group>
+                v-model="engineer.engineer.cost_price"></BFormInput>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Hourly rate')"
@@ -258,60 +258,60 @@
                 :currency="engineer.engineer.hourly_rate_currency"
                 @priceChanged="(val) => engineer.engineer.setHourlyRate(val)"
               />
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Preferred location')"
               label-for="engineer_preferred_location">
-              <b-form-select
+              <BFormSelect
                 id="engineer_preferred_location"
                 v-model="engineer.engineer.preferred_location"
                 :options="locations"
                 size="sm"
                 value-field="id"
-                text-field="name"></b-form-select>
+                text-field="name"></BFormSelect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.engineer.engineer.preferred_location.$error : null">
                 {{ $trans('Please select a preferred location') }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Or create new location')"
               label-for="engineer_preferred_location_new">
               <div>
-                <b-form-input
+                <BFormInput
                   style="width: 140px !important; float:left !important;"
                   id="engineer_preferred_location_new"
                   size="sm"
-                  v-model="newLocationName"></b-form-input>
+                  v-model="newLocationName"></BFormInput>
                 <span style="float:left !important;">&nbsp;</span>
-                <b-button
+                <BButton
                   style="width: 60px !important;"
                   @click="createLocation"
                   :disabled="buttonCreateLocationDisabled"
                   type="button"
                   size="sm"
                   variant="primary">
-                  {{ $trans('Create') }}</b-button>
+                  {{ $trans('Create') }}</BButton>
               </div>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Hide from dispatch?')"
               label-for="engineer_hide_from_dispatch">
               <div>
-                <b-form-checkbox
+                <BFormCheckbox
                   id="planning_user_uses_time_registration"
                   size="sm"
                   v-model="engineer.engineer.hide_from_dispatch"
                 >
-                </b-form-checkbox>
+                </BFormCheckbox>
               </div>
-            </b-form-group>
+            </BFormGroup>
           </div>
         </div>
       </div>
@@ -324,14 +324,24 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '../../models/helpers.js'
+import { usernameExists } from '@/models/helpers'
 import engineerModel, {EngineerUserModel} from '../../models/company/UserEngineer.js'
 import stockLocationModel from '../../models/inventory/StockLocation.js'
 import PriceInput from "../../components/PriceInput";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
   components: {
     PriceInput,
@@ -436,7 +446,7 @@ export default {
   },
   async created() {
     this.isLoading = true
-    this.countries = await this.$store.dispatch('getCountries')
+    this.countries = this.mainStore.getCountries
 
     await this.getLocations()
 
@@ -458,7 +468,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching locations', error)
-        this.errorToast(this.$trans('Error fetching locations'))
+        errorToast(this.create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -474,7 +484,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error creating new location', error)
-        this.errorToast(this.$trans('Error creating new location'))
+        errorToast(this.create, $trans('Error creating new location'))
         this.isLoading = false
       }
     },
@@ -515,12 +525,12 @@ export default {
         this.engineer.password = this.engineer.password1
         try {
           await engineerModel.insert(this.engineer)
-          this.infoToast(`${this.$trans('Created')} ${this.engineer.username}`, `${this.$trans('Engineer has been added')}: ${this.engineer.first_name} ${this.engineer.last_name}`)
+          infoToast(this.create, `${$trans('Created')} ${this.engineer.username}`, `${$trans('Engineer has been added')}: ${this.engineer.first_name} ${this.engineer.last_name}`)
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating engineer', error)
-          this.errorToast(`${this.$trans('Error creating engineer')} ${error}`);
+          errorToast(this.create, `${$trans('Error creating engineer')} ${error}`);
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -538,12 +548,12 @@ export default {
         }
 
         await engineerModel.update(this.pk, this.engineer)
-        this.infoToast(`${this.$trans('Updated')} ${this.engineer.username}`, `${this.engineer.first_name} ${this.engineer.last_name}'s ${this.$trans('details updated')}`)
+        infoToast(this.create, `${$trans('Updated')} ${this.engineer.username}`, `${this.engineer.first_name} ${this.engineer.last_name}'s ${$trans('details updated')}`)
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating engineer', error)
-        this.errorToast(`${this.$trans('Error updating engineer details: ')} ${error}`)
+        errorToast(this.create, `${$trans('Error updating engineer details: ')} ${error}`)
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -558,7 +568,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineer', error)
-        this.errorToast(this.$trans('Error loading engineer'))
+        errorToast(this.create, $trans('Error loading engineer'))
         this.isLoading = false
       }
     },

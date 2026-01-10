@@ -1,23 +1,17 @@
 <template>
   <div ref='index-layout'>
-    <TheNav v-if="isLoggedIn"/>
+    <TheNav v-if="store.isLoggedIn"/>
     <TheIndex />
   </div>
 </template>
 
-<script>
+<script setup>
 import TheNav from './TheNav.vue'
 import TheIndex from './TheIndex.vue'
-import { componentMixin } from '@/utils.js'
+import {useAuthStore} from "@/stores/auth";
 
-export default {
-  mixins: [componentMixin],
-  components: {
-    TheNav,
-    TheIndex
-  },
-  name: 'TheIndexLayout',
-}
+const store = useAuthStore()
+
 </script>
 
 <style scoped>

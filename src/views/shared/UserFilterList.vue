@@ -18,10 +18,10 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="building"></b-icon> {{ $trans("Filters") }}
+          <IBiBuilding></IBiBuilding> {{ $trans("Filters") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -30,11 +30,11 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: `${route_name_part}-filter-add`}" class="btn">
             {{$trans('Add filter')}}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -83,22 +83,30 @@
 </template>
 
 <script>
-import {USER_FILTER_TYPE_ORDER} from "../../models/base_user_filter";
-import {OrderFilterModel, OrderFilterService} from "../../models/orders/OrderFilter";
+import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
+import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
 import IconLinkDelete from "../../components/IconLinkDelete";
 import ButtonLinkRefresh from "../../components/ButtonLinkRefresh";
 import ButtonLinkSearch from "../../components/ButtonLinkSearch";
-import ButtonLinkDownload from "../../components/ButtonLinkDownload";
 import SearchModal from "../../components/SearchModal";
 import Pagination from "../../components/Pagination";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "UserFilterList",
   components: {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkDownload,
     SearchModal,
     Pagination,
   },
@@ -119,8 +127,8 @@ export default {
       model: null,
       filters: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), thAttr: {width: '20%'}},
-        {key: 'conditions', label: this.$trans('Conditions'), thAttr: {width: '65%'}},
+        {key: 'name', label: $trans('Name'), thAttr: {width: '20%'}},
+        {key: 'conditions', label: $trans('Conditions'), thAttr: {width: '65%'}},
         {key: 'icons', label: '', thAttr: {width: '15%'}},
       ]
     }
@@ -151,11 +159,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Filter has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Filter has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting filter', error)
-        this.errorToast(this.$trans('Error deleting filter'))
+        errorToast(this.create, $trans('Error deleting filter'))
       }
     },
     async loadData() {
@@ -167,7 +175,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching filters', error)
-        this.errorToast(this.$trans('Error loading filters'))
+        errorToast(this.create, $trans('Error loading filters'))
         this.isLoading = false
       }
     }

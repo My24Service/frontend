@@ -1,7 +1,7 @@
 <template>
-  <b-button size="sm" v-bind:title="$trans('Search')" @click="method()">
-    <b-icon-search aria-hidden="true"></b-icon-search>
-  </b-button>
+  <BButton size="sm" v-bind:title="$trans('Search')" @click="method()">
+    <IBiSearch aria-hidden="true"></IBiSearch>
+  </BButton>
 </template>
 
 <script>

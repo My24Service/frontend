@@ -3,9 +3,9 @@
       <b-breadcrumb class="mt-2" :items="breadcrumb"></b-breadcrumb>
       <b-row>
         <b-col cols="2">
-          <b-link class="px-1" @click.prevent="backWeek" v-bind:title="$trans('Week back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          <BLink class="px-1" @click.prevent="backWeek" v-bind:title="$trans('Week back')">
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
+          </BLink>
         </b-col>
         <b-col cols="8">
           {{ $trans('Totals in') }}
@@ -14,9 +14,9 @@
         </b-col>
         <b-col cols="2">
           <div class="float-right">
-            <b-link class="px-1" @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            <BLink class="px-1" @click.prevent="nextWeek" v-bind:title="$trans('Next week') ">
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
+            </BLink>
           </div>
         </b-col>
       </b-row>
@@ -35,11 +35,18 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
-
-import {componentMixin} from "../utils";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: "UserHoursDataDetail",
+  setup() {
+    const store = useMainStore()
+
+    return {
+      store
+    }
+  },
   mixins: [componentMixin],
   data() {
     return {
@@ -79,7 +86,7 @@ export default {
     }
   },
   async created() {
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.store.getCurrentLanguage
     const monday = lang === 'en' ? 1 : 0
     this.$moment = moment
     this.$moment.locale(lang)
@@ -121,7 +128,7 @@ export default {
       this.day_field_types = data.day_field_types
       this.fullName = data.full_name
 
-      let header_columns = [{label: this.$trans('Field'), key: 'field'}]
+      let header_columns = [{label: $trans('Field'), key: 'field'}]
 
       // add days
       for(let i=0; i<data.date_list.length; i++) {
@@ -134,7 +141,7 @@ export default {
 
       header_columns.push({
         key: 'total',
-        label: this.$trans('Total'),
+        label: $trans('Total'),
         sortable: true
       })
 

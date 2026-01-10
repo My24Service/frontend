@@ -3,11 +3,11 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Statuscodes") }}
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Statuscodes") }}
         </h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="'/orders/statuscodes/form'">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add statuscode") }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add statuscode") }}
           </router-link>
         </div>
       </div>
@@ -31,8 +31,8 @@
           </template>
           <template #head(icons)="">
             <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
+              <BButton-toolbar>
+                <BButton-group class="mr-1">
                   <ButtonLinkRefresh
                     v-bind:method="function() { loadData() }"
                     v-bind:title="$trans('Refresh')"
@@ -40,8 +40,8 @@
                   <ButtonLinkSearch
                     v-bind:method="function() { showSearchModal() }"
                   />
-                </b-button-group>
-              </b-button-toolbar>
+                </BButton-group>
+              </BButton-toolbar>
             </div>
           </template>
           <template #cell(statuscode)="data">
@@ -100,7 +100,7 @@
                 type="tr"
                 v-bind:title="$trans('Add action')"
                 v-bind:router_name="`${linkAddAction}`"
-                v-bind:router_params="{statuscode_pk: data.item.id}"
+                v-bind:router_params="{pk: data.item.id}"
               />
               <IconLinkDelete
                 v-bind:title="$trans('Delete')"
@@ -133,7 +133,6 @@
 
   </div>
 </template>
-
 <script>
 import statuscodeOrderModel from '../../models/orders/Statuscode.js'
 import statuscodeTripModel from '../../models/mobile/TripStatuscode.js'
@@ -141,12 +140,21 @@ import IconLinkPlus from '../../components/IconLinkPlus.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {PIXEL_URL} from "../../constants";
+import {PIXEL_URL} from "@/constants";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   props: {
     list_type: {
       type: [String],
@@ -158,7 +166,6 @@ export default {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -181,20 +188,20 @@ export default {
       ],
       fields: [],
       fieldsOrder: [
-        {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '15%'}},
-        {key: 'preview', label: this.$trans('Preview')},
-        {key: 'type', label: this.$trans('Type')},
-        {key: 'description', label: this.$trans('Description')},
-        {key: 'actions', label: this.$trans('Actions'), thAttr: {width: '20%'}},
+        {key: 'statuscode', label: $trans('Statuscode'), thAttr: {width: '15%'}},
+        {key: 'preview', label: $trans('Preview')},
+        {key: 'type', label: $trans('Type')},
+        {key: 'description', label: $trans('Description')},
+        {key: 'actions', label: $trans('Actions'), thAttr: {width: '20%'}},
         {key: 'icons', thAttr: {width: '15%'}},
       ],
       fieldsTrip: [
-        {key: 'statuscode', label: this.$trans('Statuscode'), thAttr: {width: '15%'}},
-        {key: 'preview', label: this.$trans('Preview')},
-        {key: 'start_trip', label: this.$trans('Start trip?'), thAttr: {width: '10%'}},
-        {key: 'end_trip', label: this.$trans('End trip?'), thAttr: {width: '10%'}},
-        {key: 'description', label: this.$trans('Description')},
-        {key: 'actions', label: this.$trans('Actions'), thAttr: {width: '20%'}},
+        {key: 'statuscode', label: $trans('Statuscode'), thAttr: {width: '15%'}},
+        {key: 'preview', label: $trans('Preview')},
+        {key: 'start_trip', label: $trans('Start trip?'), thAttr: {width: '10%'}},
+        {key: 'end_trip', label: $trans('End trip?'), thAttr: {width: '10%'}},
+        {key: 'description', label: $trans('Description')},
+        {key: 'actions', label: $trans('Actions'), thAttr: {width: '20%'}},
         {key: 'icons', thAttr: {width: '15%'}},
       ],
       PIXEL_URL
@@ -208,13 +215,13 @@ export default {
 
     switch(this.list_type) {
       case 'order':
-        this.titleAdd = this.$trans('New statuscode'),
+        this.titleAdd = $trans('New statuscode'),
 
         this.statuscodeModel = statuscodeOrderModel
         this.fields = this.fieldsOrder
         break
       case 'trip':
-        this.titleAdd = this.$trans('New trip statuscode'),
+        this.titleAdd = $trans('New trip statuscode'),
 
         this.statuscodeModel = statuscodeTripModel
         this.fields = this.fieldsTrip
@@ -244,11 +251,11 @@ export default {
     async doDelete() {
       try {
         await this.statuscodeModel.delete(this.statuscodePk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Statuscode has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Statuscode has been deleted'))
         this.loadData()
       } catch(error) {
         console.log('error deleting statuscodes', error)
-        this.errorToast(this.$trans('Error deleting statuscode'))
+        errorToast(this.create, $trans('Error deleting statuscode'))
       }
     },
     // rest
@@ -261,7 +268,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching statuscodes', error)
-        this.errorToast(this.$trans('Error loading statuscodes'))
+        errorToast(this.create, $trans('Error loading statuscodes'))
         this.isLoading = false
       }
     }

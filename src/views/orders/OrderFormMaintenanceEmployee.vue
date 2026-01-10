@@ -11,16 +11,16 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Equipment name')"
                 label-for="maintenance_equipment_new_equipment"
               >
-                <b-form-input
+                <BFormInput
                   id="maintenance_equipment_new_equipment"
                   size="sm"
                   v-model="newEquipmentName"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -38,16 +38,16 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Location name')"
                 label-for="new_location"
               >
-                <b-form-input
+                <BFormInput
                   id="new_location"
                   size="sm"
                   v-model="newLocationName"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -60,87 +60,121 @@
         <h2 v-if="!isCreate">{{ $trans('Edit order') }}</h2>
         <b-row>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Start date')"
               label-for="start_date"
             >
-              <b-form-datepicker
+              <VueDatePicker
                 id="start_date"
-                size="sm"
-                class="p-sm-0"
                 v-model="order.start_date"
-                v-bind:placeholder="$trans('Choose a date')"
-                value="order.start_date"
-                locale="nl"
+                :placeholder="$trans('Select date')"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+                :formats="{ input: 'dd/MM/yyyy' }"
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null">
                 {{ $trans('Please enter a start date') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               :label="$trans('Start time')"
               label-for="start_time"
             >
-              <b-form-timepicker
+              <BFormInput
                 id="start_time"
-                size="sm"
                 v-model="order.start_time"
-                :placeholder="$trans('Choose a time')"
-                :hour12=false
-              ></b-form-timepicker>
-            </b-form-group>
+                type="text"
+                placeholder="HH:mm"
+                class="time-input"
+              ></BFormInput>
+              <VueDatePicker
+                v-model="start_time_date"
+                id="start_time"
+                :placeholder="$trans('Set time')"
+                time-picker
+                arrow-navigation
+              >
+                <template #trigger>
+                  <p class="clock-icon">
+                    <IBiClock></IBiClock>
+                  </p>
+                </template>
+              </VueDatePicker>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.order.start_time.$error : null">
+                {{ $trans('Please enter a valid start time HH:mm') }}
+              </b-form-invalid-feedback>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               :label="$trans('End date')"
               label-for="end_date"
             >
-              <b-form-datepicker
+              <VueDatePicker
                 id="end_date"
-                size="sm"
                 v-model="order.end_date"
-                class="mb-2"
-                :placeholder="$trans('Choose a date')"
-                locale="nl"
+                :placeholder="$trans('Select date')"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+                :formats="{ input: 'dd/MM/yyyy' }"
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null">
                 {{ $trans('Please enter an end date') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               :label="$trans('End time')"
               label-class="p-sm-0"
               label-for="end_time"
             >
-              <b-form-timepicker
+              <BFormInput
                 id="end_time"
-                size="sm"
                 v-model="order.end_time"
+                type="text"
+                class="time-input"
+                placeholder="HH:mm"
+              ></BFormInput>
+              <VueDatePicker
+                v-model="end_time_date"
+                id="end_time"
                 class="mb-2"
-                :placeholder="$trans('Choose a time')"
-                :hour12=false
-              ></b-form-timepicker>
-            </b-form-group>
+                :placeholder="$trans('Set time')"
+                time-picker
+                arrow-navigation
+                :formats="{ input: 'HH:mm' }"
+              >
+                <template #trigger>
+                  <p class="clock-icon">
+                    <IBiClock></IBiClock>
+                  </p>
+                </template>
+              </VueDatePicker>
+              <b-form-invalid-feedback
+                :state="isSubmitClicked ? !v$.order.end_time.$error : null">
+                {{ $trans('Please enter a valid end time HH:mm') }}
+              </b-form-invalid-feedback>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-class="p-sm-0"
               v-bind:label="$trans('Order type')"
@@ -149,188 +183,188 @@
               <OrderTypesSelect
                 v-if="(!isCreate && !isLoading) || isCreate"
                 :orderTypeIn="order.order_type"
-                :order-type.sync="order.order_type"
+                :order-type="order.order_type"
                 :include-all="false"
               />
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Branch')"
               label-for="order_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="order.order_name"
                 id="order_name"
                 size="sm"
                 :state="isSubmitClicked ? !v$.order.order_name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_name.$error : null">
                 {{ $trans('Please enter the branch') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Address')"
               label-for="order_address"
             >
-              <b-form-input
+              <BFormInput
                 id="order_address"
                 size="sm"
                 v-model="order.order_address"
                 :state="isSubmitClicked ? !v$.order.order_address.$error: null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_address.$error : null">
                 {{ $trans('Please enter the address') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Postal')"
               label-for="order_postal"
             >
-              <b-form-input
+              <BFormInput
                 id="order_postal"
                 size="sm"
                 v-model="order.order_postal"
                 :state="isSubmitClicked ? !v$.order.order_postal.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_postal.$error : null">
                 {{ $trans('Please enter the postal') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('City')"
               label-for="order_city"
             >
-              <b-form-input
+              <BFormInput
                 id="order_city"
                 size="sm"
                 v-model="order.order_city"
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.order_city.$error : null">
                 {{ $trans('Please enter the city') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Country')"
               label-for="order_country_code"
             >
-              <b-form-select v-model="order.order_country_code" :options="countries" size="sm"></b-form-select>
-            </b-form-group>
+              <BFormSelect v-model="order.order_country_code" :options="countries" size="sm"></BFormSelect>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Order number')"
               label-for="service_number"
             >
-              <b-form-input
+              <BFormInput
                 id="service_number"
                 size="sm"
                 v-model="order.service_number"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Reference')"
               label-for="order_reference"
             >
-              <b-form-input
+              <BFormInput
                 id="order_reference"
                 size="sm"
                 v-model="order.order_reference"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="3" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Email')"
               label-for="order_email"
             >
-              <b-form-input
+              <BFormInput
                 id="order_email"
                 size="sm"
                 v-model="order.order_email"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Mobile')"
               label-for="order_mobile"
             >
-              <b-form-input
+              <BFormInput
                 id="order_mobile"
                 size="sm"
                 v-model="order.order_mobile"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
           <b-col cols="2" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Tel.')"
               label-for="order_tel"
             >
-              <b-form-input
+              <BFormInput
                 id="order_tel"
                 size="sm"
                 v-model="order.order_tel"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="6" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Contacts')"
               label-for="order_contact"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="order_contact"
                 v-model="order.order_contact"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
           </b-col>
           <b-col cols="6" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Remarks')"
               label-for="remarks"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="remarks"
                 v-model="order.remarks"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
           </b-col>
         </b-row>
 
@@ -346,12 +380,12 @@
                   </template>
                   <template #cell(icons)="data">
                     <div class="float-right">
-                      <b-link class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
-                        <b-icon-pencil></b-icon-pencil>
-                      </b-link>
-                      <b-link class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
-                        <b-icon-trash></b-icon-trash>
-                      </b-link>
+                      <BLink class="h5 mx-2" @click="editOrderLine(data.item, data.index)">
+                        <IBiPencil></IBiPencil>
+                      </BLink>
+                      <BLink class="h5 mx-2" @click.prevent="deleteOrderLine(data.index)">
+                        <IBiTrash></IBiTrash>
+                      </BLink>
                     </div>
                   </template>
                 </b-table>
@@ -360,12 +394,12 @@
             <b-row>
               <!-- equipment -->
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-class="p-sm-2"
                   v-bind:label="$trans('Search equipment')"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="maintenance-contract-equipment-name"
                     ref="multiselect_equipment"
                     track-by="id"
@@ -389,7 +423,7 @@
                     <span slot="noResult">
                       <h5>{{ $trans('No equipment found') }}</h5>
                       <p v-if="canQuickCreateEquipment">
-                        <b-button
+                        <BButton
                           @click="showAddEquipmentModal"
                           class="btn btn-primary"
                           size="sm"
@@ -397,43 +431,43 @@
                           variant="primary"
                         >
                           {{ $trans("Add new equipment") }}
-                        </b-button>
+                        </BButton>
                       </p>
                     </span>
-                  </multiselect>
-                </b-form-group>
+                  </VueMultiselect>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Equipment')"
                   label-for="order-orderline-product"
                 >
                   <b-input-group class="sm">
-                    <b-form-input
+                    <BFormInput
                       id="order-orderline-product"
                       size="sm"
                       readonly
                       v-model="product"
-                    ></b-form-input>
+                    ></BFormInput>
                     <b-input-group-append>
-                      <b-button variant="outline-success" v-if="equipment" size="sm">
-                        <b-icon-check></b-icon-check>
-                      </b-button>
+                      <BButton variant="outline-success" v-if="equipment" size="sm">
+                        <IBiCheck></IBiCheck>
+                      </BButton>
                     </b-input-group-append>
                   </b-input-group>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <!-- end equipment -->
 
               <!-- equipment locations -->
               <b-col cols="4" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-class="p-sm-2"
                   v-bind:label="$trans('Search location')"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="location-name"
                     ref="multiselect_location"
                     track-by="id"
@@ -458,7 +492,7 @@
                     <span slot="noResult">
                       <h5>{{ $trans('No locations found') }}</h5>
                       <p v-if="canQuickCreateEquipmentLocation">
-                        <b-button
+                        <BButton
                           @click="showAddLocationModal"
                           class="btn btn-primary"
                           size="sm"
@@ -466,56 +500,56 @@
                           variant="primary"
                         >
                           {{ $trans("Add new location") }}
-                        </b-button>
+                        </BButton>
                       </p>
                     </span>
-                  </multiselect>
-                </b-form-group>
+                  </VueMultiselect>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Location')"
                   label-for="order-orderline-equipment-location"
                 >
                   <b-input-group class="sm">
-                    <b-form-input
+                    <BFormInput
                       id="order-orderline-equipment-location"
                       size="sm"
                       readonly
                       v-model="location"
-                    ></b-form-input>
+                    ></BFormInput>
                     <b-input-group-append>
-                      <b-button variant="outline-success" v-if="equipment_location" size="sm">
-                        <b-icon-check></b-icon-check>
-                      </b-button>
+                      <BButton variant="outline-success" v-if="equipment_location" size="sm">
+                        <IBiCheck></IBiCheck>
+                      </BButton>
                     </b-input-group-append>
                   </b-input-group>
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <!-- end equipment locations -->
               <b-col cols="12" role="group">
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
                   label-for="order-orderline-remarks"
                 >
-                  <b-form-textarea
+                  <BFormTextarea
                     id="order-orderline-remarks"
                     v-model="remarks"
                     rows="1"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
               </b-col>
 
             </b-row>
             <footer class="modal-footer">
-              <b-button v-if="isEditOrderLine" @click="doEditOrderLine" class="btn btn-primary" size="sm" type="button" variant="warning">
+              <BButton v-if="isEditOrderLine" @click="doEditOrderLine" class="btn btn-primary" size="sm" type="button" variant="warning">
                 {{ $trans('Edit orderline') }}
-              </b-button>
-              <b-button v-if="!isEditOrderLine" @click="addOrderLine" class="btn btn-primary" size="sm" type="button" variant="primary">
+              </BButton>
+              <BButton v-if="!isEditOrderLine" @click="addOrderLine" class="btn btn-primary" size="sm" type="button" variant="primary">
                 {{ $trans('Add orderline') }}
-              </b-button>
+              </BButton>
             </footer>
           </Collapse>
         </div>
@@ -532,12 +566,12 @@
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>
@@ -550,6 +584,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
+import { nl } from "date-fns/locale"
 
 import {OrderService, OrderModel} from '@/models/orders/Order'
 import {BranchService} from '@/models/company/Branch'
@@ -559,17 +594,28 @@ import Collapse from '@/components/Collapse.vue'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import {EquipmentService} from "@/models/equipment/equipment";
 import {LocationService} from "@/models/equipment/location";
-import Multiselect from "vue-multiselect";
+import VueMultiselect from "vue-multiselect";
 import {OrderlineService} from "@/models/orders/Orderline";
 import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
+  mixins: [componentMixin],
   components: {
     DocumentsComponent,
-    Multiselect,
+    VueMultiselect,
     OrderTypesSelect,
     Collapse
   },
@@ -607,9 +653,9 @@ export default {
 
       info: '',
       orderLineFields: [
-        { key: 'product', label: this.$trans('Product') },
-        { key: 'location', label: this.$trans('Location') },
-        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'product', label: $trans('Product') },
+        { key: 'location', label: $trans('Location') },
+        { key: 'remarks', label: $trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       submitClicked: false,
@@ -637,7 +683,9 @@ export default {
       branchService: new BranchService(),
       locationService: new LocationService(),
       orderlineService: new OrderlineService(),
-
+      nl,
+      start_time_date: null,
+      end_time_date: null,
     }
   },
   validations() {
@@ -666,10 +714,10 @@ export default {
   },
   computed: {
     canQuickCreateEquipment() {
-      return this.$store.getters.getSettingEquipmentQuickCreate
+      return this.mainStore.getSettingEquipmentQuickCreate
     },
     canQuickCreateEquipmentLocation() {
-      return this.$store.getters.getSettingEquipmentLocationQuickCreate
+      return this.mainStore.getSettingEquipmentLocationQuickCreate
     },
     startDate() {
       return this.order.start_date
@@ -699,14 +747,14 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.order.customer_relation) :
             await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
           this.equipment = response.id
           this.product = response.name
         } else {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.equipmentService.quickAddBranchPlanning(this.newEquipmentName, this.order.branch) :
             await this.equipmentService.quickAddBranchNonPlanning(this.newEquipmentName)
 
@@ -715,7 +763,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding equipment', error)
-        this.errorToast(this.$trans('Error adding equipment'))
+        errorToast(this.create, $trans('Error adding equipment'))
       }
     },
     async getEquipment(query) {
@@ -724,7 +772,7 @@ export default {
 
       } catch(error) {
         console.log('Error searching equipment', error)
-        this.errorToast(this.$trans('Error searching equipment'))
+        errorToast(this.create, $trans('Error searching equipment'))
       }
     },
     equipmentLabel({ name }) {
@@ -754,14 +802,14 @@ export default {
 
       try {
         if (!this.hasBranches) {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.locationService.quickAddCustomerPlanning(this.newLocationName, this.order.customer_relation) :
             await this.locationService.quickAddCustomerNonPlanning(this.newLocationName)
 
           this.equipment_location = response.id
           this.location = response.name
         } else {
-          const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+          const response = this.isPlanning || this.isAdmin ?
             await this.locationService.quickAddBranchPlanning(this.newLocationName, this.order.branch) :
             await this.locationService.quickAddBranchNonPlanning(this.newLocationName)
 
@@ -770,7 +818,7 @@ export default {
         }
       }  catch(error) {
         console.log('Error adding location', error)
-        this.errorToast(this.$trans('Error adding location'))
+        errorToast(this.create, $trans('Error adding location'))
       }
     },
     async getLocation(query) {
@@ -778,7 +826,7 @@ export default {
         this.locationSearch = await this.locationService.searchBranchEmployee(query, this.order.branch)
       } catch(error) {
         console.log('Error searching location', error)
-        this.errorToast(this.$trans('Error searching location'))
+        errorToast(this.create, $trans('Error searching location'))
       }
     },
     locationLabel({ name }) {
@@ -884,13 +932,13 @@ export default {
           // insert documents
           this.$refs['documents-component'].orderCreated(newOrder)
 
-          this.infoToast(this.$trans('Created'), this.$trans('Order has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Order has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating order', error)
-          this.errorToast(this.$trans('Error creating order'))
+          errorToast(this.create, $trans('Error creating order'))
           this.isLoading = false
           this.buttonDisabled = false
           return
@@ -908,27 +956,27 @@ export default {
           orderline.order = this.pk
           if (orderline.id) {
             await this.orderlineService.update(orderline.id, orderline)
-            // this.infoToast(this.$trans('Orderline updated'), this.$trans('Orderline has been updated'))
+            // infoToast(this.create, $trans('Orderline updated'), $trans('Orderline has been updated'))
           } else {
             await this.orderlineService.insert(orderline)
-            // this.infoToast(this.$trans('Orderline created'), this.$trans('Orderline has been created'))
+            // infoToast(this.create, $trans('Orderline created'), $trans('Orderline has been created'))
           }
         }
 
         for (const orderline of this.deletedOrderlines) {
           if (orderline.id) {
             await this.orderlineService.delete(orderline.id)
-            // this.infoToast(this.$trans('Orderline removed'), this.$trans('Orderline has been removed'))
+            // infoToast(this.create, $trans('Orderline removed'), $trans('Orderline has been removed'))
           }
         }
 
-        this.infoToast(this.$trans('Updated'), this.$trans('Order has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Order has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating order', error)
-        this.errorToast(this.$trans('Error updating order'))
+        errorToast(this.create, $trans('Error updating order'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -950,12 +998,12 @@ export default {
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.getLocationDebounced = AwesomeDebouncePromise(this.getLocation, 500)
 
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
     try {
-      this.countries = await this.$store.dispatch('getCountries')
+      this.countries = this.mainStore.getCountries
       const branch = await this.branchService.getMyBranch()
 
       if (this.isCreate) {
@@ -979,7 +1027,7 @@ export default {
       this.isLoading = false
     } catch (error) {
       console.log('error loading order', error)
-      this.errorToast(this.$trans('Error fetching order data'))
+      errorToast(this.create, $trans('Error fetching order data'))
       this.isLoading = false
     }
   },
@@ -992,5 +1040,8 @@ div.section {
 }
 div.bottom {
   margin-bottom: 80px;
+}
+.clock-icon {
+  margin: .5em auto auto;
 }
 </style>

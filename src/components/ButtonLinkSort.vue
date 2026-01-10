@@ -1,12 +1,19 @@
 <template>
-  <b-button size="sm" v-bind:title="$trans('Sort')" @click="method()">
-    <b-icon-sort-down-alt aria-hidden="true"></b-icon-sort-down-alt>
-  </b-button>
+  <BButton size="sm" v-bind:title="$trans('Sort')" @click="method()">
+    <IBiSortDownAlt aria-hidden="true"></IBiSortDownAlt>
+  </BButton>
 </template>
 
 <script>
+import componentMixin from "@/mixins/common";
+
 export default {
-  name: "IconLinkSort",
+  setup() {
+    return {
+    }
+  },
+  mixins: [componentMixin],
+  name: "ButtonLinkSort",
   props: {
     method: {
       type: Function

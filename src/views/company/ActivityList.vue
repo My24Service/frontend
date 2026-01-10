@@ -3,11 +3,11 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="receipt-cutoff"></b-icon>
+          <IBiReceiptCutoff></IBiReceiptCutoff>
           {{$trans('Activity')}}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -15,8 +15,8 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
-        </b-button-toolbar>
+          </BButton-group>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -26,7 +26,7 @@
     />
 
     <div class="panel overflow-auto">
-      
+
       <b-table
         id="activity-table"
         small
@@ -37,7 +37,7 @@
         class="data-table"
         sort-icon-left
       >
-        
+
         <template #table-busy>
           <div class="text-center my-2">
             <br>
@@ -65,8 +65,20 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   name: 'ActivityList',
   components: {
     ButtonLinkRefresh,
@@ -112,7 +124,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching activity', error);
-        this.errorToast(this.$trans('Error loading activity'))
+        errorToast(this.create, this.$trans('Error loading activity'))
 
         this.isLoading = false
       }
