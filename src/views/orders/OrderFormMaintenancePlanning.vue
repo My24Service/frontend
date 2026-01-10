@@ -1620,6 +1620,9 @@ export default {
         return
       }
 
+      console.log(this.order.order_type)
+      return
+
       // remove null fields
       const null_fields = ['start_time', 'end_time']
       for (let i=0; i<null_fields.length; i++) {

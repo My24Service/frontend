@@ -4,14 +4,15 @@
   ></div>
 </template>
 <script>
+import { Calendar } from '@fullcalendar/core'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
+import bootstrap5Plugin from '@fullcalendar/bootstrap5';
 import {uuidv4} from "@/utils";
 import BASE_URL from '@/services/base-url'
 import client from "@/services/api";
-
-import { Calendar } from '@fullcalendar/core'
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 export default {
   setup() {
@@ -34,7 +35,8 @@ export default {
       plugins: [
         dayGridPlugin,
         timeGridPlugin,
-        interactionPlugin // needed for dateClick
+        interactionPlugin, // needed for dateClick
+        bootstrap5Plugin,
       ],
       headerToolbar: {
         left: 'prev,next today',
@@ -50,11 +52,13 @@ export default {
       weekends: true,
       select: this.handleDateSelect,
       eventClick: this.handleEventClick,
+      defaultAllDay: true,
+      themeSystem: 'bootstrap5'
     });
     this.calendar = calendar
     calendar.render()
   },
-  name: "CustomerCalendar",
+  name: "OrdersSchedule",
   methods: {
     async sourceChanged(fetchInfo, successCallback, failureCallback) {
       const start = fetchInfo.start
@@ -62,8 +66,14 @@ export default {
       const eventUrl = `${BASE_URL}/api/order/order/month_events/?start=${start.getFullYear()}-${start.getMonth()+1}-${start.getDate()}&end=${end.getFullYear()}-${end.getMonth()+1}-${end.getDate()}`
       try {
         const eventsResponse = await client.get(eventUrl)
-        const events = eventsResponse.data.events
-        successCallback(events)
+        const events = eventsResponse.data
+        successCallback(events.map((event) => {
+          return {
+            ...event,
+            // className: 'btn btn-primary'
+            className: 'my24-event'
+          };
+        }))
       } catch (e) {
         failureCallback(e)
       }
@@ -94,4 +104,8 @@ export default {
 </script>
 
 <style scoped>
+a.my24-event {
+  overflow-wrap: break-word;
+  white-space: wrap;
+}
 </style>

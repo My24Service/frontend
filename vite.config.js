@@ -9,6 +9,7 @@ import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import * as path from "node:path";
+import {ExternalPackageIconLoader} from "unplugin-icons/loaders";
 
 export default defineConfig({
   base: '',
@@ -40,6 +41,9 @@ export default defineConfig({
     Icons({
       compiler: 'vue3',
       autoInstall: true,
+      customCollections: {
+        ...ExternalPackageIconLoader('bootstrap-icons'),
+      }
     }),
     themePreprocessorPlugin({
       scss: {

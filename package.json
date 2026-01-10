@@ -12,6 +12,7 @@
     "ci:build": "export NODE_OPTIONS=--openssl-legacy-provider; vite build"
   },
   "dependencies": {
+    "@fullcalendar/bootstrap5": "^6.1.20",
     "@fullcalendar/core": "^6.1.20",
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
@@ -23,6 +24,7 @@
     "awesome-debounce-promise": "^2.1.0",
     "axios": "1.12.0",
     "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
     "bootstrap-vue-next": "^0.42.0",
     "chart.js": "3",
     "chartjs-plugin-datalabels": "^2.2.0",

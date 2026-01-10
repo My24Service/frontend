@@ -15,7 +15,6 @@ import EquipmentForm from '../views/equipment/EquipmentForm.vue'
 import LocationList from '../views/equipment/LocationList.vue'
 import LocationForm from '../views/equipment/LocationForm.vue'
 
-import Calendar from '../views/customer/Calendar.vue'
 import {AUTH_LEVELS} from "@/constants";
 import EquipmentView from "../views/equipment/EquipmentView";
 import LocationView from "../views/equipment/LocationView";
@@ -135,33 +134,6 @@ export default [
         'app-subnav': true
       },
     },
-
-    // calendar
-    {
-      name: 'maintenance-products-calendar-params',
-      path: '/customers/calendar/:start/:end',
-      components: {
-        'app-content': Calendar,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'maintenance-products-calendar',
-      path: '/customers/calendar',
-      components: {
-        'app-content': Calendar,
-        'app-subnav': SubNavCustomers
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-
 
     // equipment
     {
