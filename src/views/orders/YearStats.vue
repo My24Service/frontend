@@ -28,7 +28,7 @@
             </b-col>
             <b-col cols="4">
               <OrderTypesSelect
-                :order-type="orderType"
+                v-model="orderType"
                 :include-all="true"
               />
             </b-col>

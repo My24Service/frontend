@@ -46,7 +46,9 @@ export default {
   props: ['currency', 'value', 'allow-empty' ],
   emits: ['priceChanged', 'receivedFocus'],
   setup() {
-    return { v$: useVuelidate() }
+    return {
+      v$: useVuelidate()
+    }
   },
   validations() {
     if (this.allowEmpty) {
