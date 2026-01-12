@@ -76,10 +76,11 @@
                 class=""
                 v-model="leave.start_date"
                 :placeholder="$trans('Select date')"
-                value="leave.start_date"
-                locale="nl"
                 :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
+                :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
@@ -95,6 +96,7 @@
 </template>
 <script>
 import moment from "moment";
+import { nl } from "date-fns/locale"
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
@@ -104,6 +106,7 @@ import VueMultiselect from 'vue-multiselect'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -116,6 +119,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     VueMultiselect,
   },
@@ -154,7 +158,8 @@ export default {
       },
       leaveTypes: [],
       endTimeInvalid: true,
-      startTimeInvalid: true
+      startTimeInvalid: true,
+      nl
     };
   },
   computed: {

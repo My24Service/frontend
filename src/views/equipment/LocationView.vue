@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page" v-show="location">
+  <div class="app-page" v-if="location">
     <header>
 
       <div class='page-title' v-if="location">

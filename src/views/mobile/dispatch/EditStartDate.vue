@@ -18,10 +18,13 @@
             <VueDatePicker
               id="start_date"
               v-model="start_date"
+              class="mb-2"
               :placeholder="$trans('Select date')"
-              v-bind:locale="lang"
-              value-as-date=true
-              :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+              :state="this.error == null"
+              :locale="nl"
+              auto-apply
+              arrow-navigation
+              :formats="{ input: 'dd/MM/yyyy' }"
               @input="check_date_start()"
             ></VueDatePicker>
           </BFormGroup>
@@ -36,10 +39,11 @@
                 v-model="end_date"
                 class="mb-2"
                 :placeholder="$trans('Select date')"
-                v-bind:locale="lang"
-                value-as-date=true
                 :state="this.error == null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
+                :formats="{ input: 'dd/MM/yyyy' }"
                 @input="check_date_end()"
               ></VueDatePicker>
             </BFormGroup>
@@ -51,6 +55,8 @@
 <script>
 // import {OrderService} from "@/models/orders/Order";
 import moment from "moment/moment";
+import { nl } from "date-fns/locale"
+import componentMixin from "@/mixins/common";
 
 export default {
   async created () {
@@ -65,8 +71,10 @@ export default {
       end_date: null,
       order_id: null,
       error: null,
+      nl,
     }
   },
+  mixins: [componentMixin],
   methods: {
     setFromOrder(order) {
       this.order_id = order.id;
@@ -81,7 +89,7 @@ export default {
     },
     check_date_end() {
       if (this.end_date < this.start_date) {
-        this.error = $trans('The end date cannot lie before start date')
+        this.error = this.$trans('The end date cannot lie before start date')
       } else {
         this.error = null;
       }

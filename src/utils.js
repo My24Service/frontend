@@ -144,9 +144,8 @@ function hasAccessToModule(module, part) {
 
 function toDinero(priceDecimal, currency) {
   if (currency === 'EUR' || currency === 'USD' || currency === 'GBP') {
-    let amount = priceDecimal * 100
+    let amount = priceDecimal ? priceDecimal * 100 : 0
     amount = parseInt(amount.toFixed(0))
-    // console.log({ priceDecimal, amount, currency })
     if (isNaN(amount)) {
       throw `toDinero - invalid input for amount: ${priceDecimal}`
     }

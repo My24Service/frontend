@@ -84,7 +84,7 @@
             <color-picker
                 id="statuscode_color"
                 class="color-picker-placeholder"
-                v-model="statuscode.color"
+                v-model:pureColor="statuscode.color"
               ></color-picker>
           </BFormGroup>
 
@@ -96,10 +96,9 @@
             <color-picker
                 id="statuscode_color"
                 class="color-picker-placeholder"
-                v-model="statuscode.text_color"
+                v-model:pureColor="statuscode.text_color"
               ></color-picker>
           </BFormGroup>
-
         </div>
 
         <div class="panel">
@@ -246,11 +245,15 @@ input[type="color"] {
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import { ColorPicker } from "vue3-colorpicker";
+import "vue3-colorpicker/style.css";
+import tinycolor from "tinycolor2";
 
 import statuscodeOrderModel from '@/models/orders/Statuscode.js'
 import statuscodeTripModel from '@/models/mobile/TripStatuscode.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -260,6 +263,8 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
+  components: { ColorPicker },
   props: {
     list_type: {
       type: [String],
@@ -327,6 +332,11 @@ export default {
         console.log('invalid?', this.v$.$invalid)
         return
       }
+
+      const color = tinycolor(this.statuscode.color)
+      this.statuscode.color = color.toHexString()
+      const text_color = tinycolor(this.statuscode.text_color)
+      this.statuscode.text_color = text_color.toHexString()
 
       // remove null fields
       const null_fields = ['new_status_template', 'description']

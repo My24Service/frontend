@@ -284,7 +284,6 @@
                     :locale="nl"
                     auto-apply
                     arrow-navigation
-                    :state="isSubmitClicked ? !v$.assignedOrder.alt_start_date.$error : null"
                     :formats="{ input: 'dd/MM/yyyy' }"
                   ></VueDatePicker>
                 </BFormGroup>

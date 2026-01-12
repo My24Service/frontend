@@ -198,11 +198,11 @@ export default {
   },
   props: {
     location: {
-      type: LocationModel,
+      type: Object,
       default: null
     },
     equipment: {
-      type: EquipmentModel,
+      type: Object,
       default: null
     },
     isView: {
