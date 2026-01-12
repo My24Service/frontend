@@ -29,10 +29,12 @@ import { required, numeric } from '@vuelidate/validators'
 
 export default {
   name: "DurationInput",
-  props: ['value'],
-  emits: ['durationChanged'],
+  props: ['modelValue'],
+  emits: ['durationChanged', 'update:modelValue'],
   setup() {
-    return { v$: useVuelidate() }
+    return {
+      v$: useVuelidate()
+    }
   },
   validations() {
     return {
@@ -53,14 +55,17 @@ export default {
     }
   },
   computed: {
-    isInValid() {
-      return this.v$.$invalid
-    }
+    duration() {
+      return `${this.hours}:${this.minutes}`
+    },
   },
   watch: {
-    value(val) {
-      this.setAmount(val)
-    }
+    hours(_val) {
+      this.$emit('update:modelValue', this.duration)
+    },
+    minutes(_val) {
+      this.$emit('update:modelValue', this.duration)
+    },
   },
   methods: {
     setAmount(duration) {
@@ -80,11 +85,11 @@ export default {
         throw `invalid input: ${this.hours}:${this.minutes}`
       }
 
-      this.$emit('durationChanged', `${this.hours}:${this.minutes}:00`)
+      this.$emit('durationChanged', this.duration)
     }
   },
   created() {
-    this.setAmount(this.value)
+    this.setAmount(this.modelValue)
   }
 }
 </script>

@@ -84,12 +84,10 @@ export default {
     }
   },
   watch: {
-    number(val) {
-      console.log('number changed', val)
+    number(_val) {
       this.$emit('update:modelValue', this.amount)
     },
-    decimal(val) {
-      console.log('decimal changed', val)
+    decimal(_val) {
       this.$emit('update:modelValue', this.amount)
     }
   },
