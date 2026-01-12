@@ -91,7 +91,7 @@
             <color-picker
               id="statuscode_color"
               class="color-picker-placeholder"
-              v-model="statuscode.color"
+              v-model:pureColor="statuscode.color"
             ></color-picker>
           </BFormGroup>
 
@@ -124,7 +124,7 @@ input[type="color"] {
 </style>
 
 <script>
-import { useVuelidate } from "@vuelidate/core";
+import { ColorPicker } from "vue3-colorpicker";
 import { required } from "@vuelidate/validators";
 
 import {
@@ -151,6 +151,7 @@ import {
 } from "@/models/company/WorkHoursStatuscode";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -161,8 +162,10 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   components: {
-    ExpiryConditionForm
+    ExpiryConditionForm,
+    ColorPicker
   },
   props: {
     list_type: {
