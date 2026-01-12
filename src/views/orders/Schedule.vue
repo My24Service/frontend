@@ -13,6 +13,7 @@ import {uuidv4} from "@/utils";
 import BASE_URL from '@/services/base-url'
 import client from "@/services/api";
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import locale from '@fullcalendar/core/locales/nl';
 
 export default {
   setup() {
@@ -53,7 +54,8 @@ export default {
       select: this.handleDateSelect,
       eventClick: this.handleEventClick,
       defaultAllDay: true,
-      themeSystem: 'bootstrap5'
+      themeSystem: 'bootstrap5',
+      locale,
     });
     this.calendar = calendar
     calendar.render()
@@ -68,9 +70,13 @@ export default {
         const eventsResponse = await client.get(eventUrl)
         const events = eventsResponse.data
         successCallback(events.map((event) => {
+          const start = new Date(event.start)
+          const end = new Date(event.end)
+          const allDay = start.getHours() === 0 && end.getHours() === 0
           return {
             ...event,
             // className: 'btn btn-primary'
+            allDay,
             className: 'my24-event'
           };
         }))
