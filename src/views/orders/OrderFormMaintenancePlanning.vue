@@ -356,9 +356,7 @@
           >
             <OrderTypesSelect
               v-if="(!isCreate && !isLoading) || isCreate"
-              :orderTypeIn="order.order_type"
-              :order-type="order.order_type"
-              :include-all="false"
+              v-model="order.order_type"
             />
           </BFormGroup>
 
@@ -1619,9 +1617,6 @@ export default {
         console.log('invalid?', this.v$.$invalid)
         return
       }
-
-      console.log(this.order.order_type)
-      return
 
       // remove null fields
       const null_fields = ['start_time', 'end_time']

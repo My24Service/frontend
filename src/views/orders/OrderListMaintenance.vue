@@ -50,8 +50,10 @@
                     <VueDatePicker
                       v-model="sinceDate"
                       id="sort-filter-since"
-                      value="" locale="nl"
-                      :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                      :locale="nl"
+                      auto-apply
+                      arrow-navigation
+                      :formats="{ input: 'dd/MM/yyyy' }"
                     />
                   </BFormGroup>
                 </div>
@@ -234,6 +236,7 @@
 
 </style>
 <script>
+import { nl } from "date-fns/locale"
 import { OrderService } from '@/models/orders/Order'
 import {StatusService} from '@/models/orders/Status'
 import my24 from '../../services/my24.js'
@@ -317,6 +320,7 @@ export default {
         { key: 'info', label: $trans('Infolines') }
       ],
       filterService: new OrderFilterService(),
+      nl,
     }
   },
   async created() {

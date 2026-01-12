@@ -27,7 +27,7 @@
             </b-col>
             <b-col cols="4">
               <OrderTypesSelect
-                :order-type="orderType"
+                v-model="orderType"
                 :include-all="true"
               />
             </b-col>
@@ -181,9 +181,8 @@ export default {
   components: {
     BarChart,
     PieChart,
-    OrderStatusColorSpan,
     OrderTypesSelect,
-    ChartJsPluginDataLabels,
+    // ChartJsPluginDataLabels,
   },
   watch: {
     orderType: function(val) {

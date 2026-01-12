@@ -182,9 +182,7 @@
             >
               <OrderTypesSelect
                 v-if="(!isCreate && !isLoading) || isCreate"
-                :orderTypeIn="order.order_type"
-                :order-type="order.order_type"
-                :include-all="false"
+                v-model="order.order_type"
               />
             </BFormGroup>
           </b-col>

@@ -35,11 +35,12 @@
                     size="sm"
                     class="p-sm-0"
                     v-model="trip.start_date"
-                    v-bind:placeholder="$trans('Choose a date')"
-                    value="trip.start_date"
-                    locale="nl"
+                    :placeholder="$trans('Choose a date')"
                     :state="isSubmitClicked ? !v$.trip.start_date.$error && !trip.start_datetime_from_first_order : null"
-                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    :locale="nl"
+                    auto-apply
+                    arrow-navigation
+                    :formats="{ input: 'dd/MM/yyyy' }"
                   ></VueDatePicker>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.start_date.$error : null">
@@ -199,10 +200,12 @@
                     size="sm"
                     v-model="trip.end_date"
                     class="mb-2"
-                    v-bind:placeholder="$trans('Choose a date')"
-                    locale="nl"
+                    :placeholder="$trans('Choose a date')"
                     :state="isSubmitClicked ? !v$.trip.end_date.$error : null"
-                    :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                    :locale="nl"
+                    auto-apply
+                    arrow-navigation
+                    :formats="{ input: 'dd/MM/yyyy' }"
                   ></VueDatePicker>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.trip.end_date.$error : null">
@@ -450,14 +453,16 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
+import { nl } from "date-fns/locale"
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import VueMultiselect from 'vue-multiselect'
 
 import tripModel from '@/models/mobile/Trip.js'
 import orderModel from '@/models/orders/Order.js'
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
+import {errorToast, infoToast} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -470,6 +475,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     VueMultiselect
   },
@@ -498,6 +504,7 @@ export default {
       selectedOrder: {},
       countries: [],
       getOrdersDebounced: null,
+      nl,
     }
   },
   validations() {
@@ -640,13 +647,13 @@ export default {
       if (this.isCreate) {
         try {
           const trip = await tripModel.insert(this.trip)
-          infoToast(this.create, $trans('Trip created'), $trans(`Trip ${trip.id} has been created`))
+          infoToast(this.create, this.$trans('Trip created'), this.$trans(`Trip ${trip.id} has been created`))
           this.isLoading = false
           this.buttonDisabled = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating trip', error)
-          errorToast(this.create, $trans('Error creating trip'))
+          errorToast(this.create, this.$trans('Error creating trip'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -656,13 +663,13 @@ export default {
 
       try {
         await tripModel.update(this.pk, this.trip)
-        infoToast(this.create, $trans('Trip updated'), $trans('Trip has been updated'))
+        infoToast(this.create, this.$trans('Trip updated'), this.$trans('Trip has been updated'))
         this.isLoading = false
         this.buttonDisabled = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating trip', error)
-        errorToast(this.create, $trans('Error updating trip'))
+        errorToast(this.create, this.$trans('Error updating trip'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -676,7 +683,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching orders', error)
-        errorToast(this.create, $trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -700,7 +707,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching order', error)
-        errorToast(this.create, $trans('Error fetching trip'))
+        errorToast(this.create, this.$trans('Error fetching trip'))
         this.isLoading = false
       }
     },

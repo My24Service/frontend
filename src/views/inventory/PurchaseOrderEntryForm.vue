@@ -262,11 +262,12 @@
                       size="sm"
                       class="p-sm-0"
                       v-model="entry.entry_date"
-                      v-bind:placeholder="$trans('Choose a date')"
-                      value="purchaseorderEntry.entry_date"
-                      locale="nl"
+                      :placeholder="$trans('Choose a date')"
                       :state="isSubmitClicked ? !v$.entry.entry_date.$error : null"
-                      :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                      :locale="nl"
+                      auto-apply
+                      arrow-navigation
+                      :formats="{ input: 'dd/MM/yyyy' }"
                     ></VueDatePicker>
                     <b-form-invalid-feedback
                       :state="isSubmitClicked ? !v$.entry.entry_date.$error : null">
@@ -343,6 +344,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
 import moment from 'moment'
+import { nl } from "date-fns/locale"
 
 import purchaseorderEntryModel from '../../models/inventory/PurchaseOrderEntry.js'
 import purchaseOrderModel from '../../models/inventory/PurchaseOrder.js'
@@ -350,6 +352,7 @@ import stockLocationModel from '../../models/inventory/StockLocation.js'
 import materialModel from '../../models/inventory/Material.js'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
@@ -364,6 +367,7 @@ export default {
   components: {
     VueMultiselect,
   },
+  mixins: [componentMixin],
   props: {
     pk: {
       type: [String, Number],
@@ -403,6 +407,7 @@ export default {
       selectedPurchaseOrderMaterial: {
         material_view: materialModel.getFields()
       },
+      nl,
     }
   },
   watch: {

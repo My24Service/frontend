@@ -115,14 +115,15 @@
             >
               <VueDatePicker
                 id="expire_start_dt"
+                v-model="apiuser.api_user.expire_start_dt"
                 size="sm"
                 class="p-sm-0"
-                v-model="apiuser.api_user.expire_start_dt"
                 :placeholder="$trans('Choose a date')"
-                value="apiuser.api_user.expire_start_dt"
-                locale="nl"
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_start_dt.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
+                :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.apiuser.api_user.expire_start_dt.$error : null">
@@ -154,7 +155,7 @@
 
 <script>
 import moment from 'moment/min/moment-with-locales'
-
+import { nl } from "date-fns/locale"
 import {useVuelidate} from '@vuelidate/core'
 import {email, helpers, required, sameAs} from '@vuelidate/validators'
 
@@ -254,7 +255,8 @@ export default {
       buttonDisabled: false,
       apiuser: new ApiUserUserModel({}),
       orgUsername: null,
-      apiUserService: new ApiUserService()
+      apiUserService: new ApiUserService(),
+      nl
     }
   },
   computed: {

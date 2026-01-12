@@ -239,9 +239,10 @@
                 label-size="sm"
                 label-cols="3"
                 v-bind:label="$trans('Price')"
-                label-for="equipment_serialnumber"
+                label-for="equipment_price"
               >
                 <PriceInput
+                  id="equipment_price"
                   v-model="equipment.price"
                   :currency="equipment.price_currency"
                   @priceChanged="(val) => priceChanged(val)"
@@ -422,13 +423,13 @@
             >
               <VueDatePicker
                 id="equipment_installation_date"
-                size="sm"
-                class="p-sm-0"
                 v-model="equipment.installation_date"
-                v-bind:placeholder="$trans('Choose a date')"
-                value="equipment.installation_date"
-                locale="nl"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :placeholder="$trans('Choose a date')"
+                :state="isSubmitClicked ? !v$.equipment.installation_date.$error : null"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
+                :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
             </BFormGroup>
 
@@ -440,13 +441,13 @@
             >
               <VueDatePicker
                 id="equipment_production_date"
-                size="sm"
-                class="p-sm-0"
                 v-model="equipment.production_date"
-                v-bind:placeholder="$trans('Choose a date')"
-                value="equipment.production_date"
-                locale="nl"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :placeholder="$trans('Choose a date')"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
+                :state="isSubmitClicked ? !v$.equipment.installation_date.$error : null"
+                :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
             </BFormGroup>
 
@@ -502,6 +503,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
+import { nl } from "date-fns/locale"
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import { CustomerService } from '@/models/customer/Customer'
 import {
@@ -596,7 +598,8 @@ export default {
       customerService: new CustomerService(),
       branchService: new BranchService(),
       locationService: new LocationService(),
-      equipmentService: new EquipmentService()
+      equipmentService: new EquipmentService(),
+      nl
     }
   },
   computed: {
@@ -624,6 +627,7 @@ export default {
       })
     },
     priceChanged(priceDinero) {
+      console.log('hoi price changed', priceDinero.toJSON())
       this.equipment.setPriceField('price', priceDinero)
     },
     // customers

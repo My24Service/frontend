@@ -4,8 +4,7 @@
       size="sm"
     >
       <template #prepend>
-        <b-input-group-text
-        >
+        <b-input-group-text>
         {{ currencyCode }}
         </b-input-group-text>
       </template>
@@ -40,13 +39,17 @@ import Dinero from "dinero.js";
 import {toDinero} from "@/utils";
 import { useVuelidate } from '@vuelidate/core'
 import { required, numeric } from '@vuelidate/validators'
+import componentMixin from "@/mixins/common";
 
 export default {
   name: "PriceInput",
-  props: ['currency', 'value', 'allow-empty' ],
-  emits: ['priceChanged', 'receivedFocus'],
+  props: ['currency', 'modelValue', 'allow-empty' ],
+  emits: ['priceChanged', 'receivedFocus', 'update:modelValue'],
+  mixins: [componentMixin],
   setup() {
-    return { v$: useVuelidate() }
+    return {
+      v$: useVuelidate(),
+    }
   },
   validations() {
     if (this.allowEmpty) {
@@ -75,14 +78,24 @@ export default {
   data() {
     return {
       dinero: null,
+      prevAmount: null,
       number: null,
       decimal: null,
-      prevAmount: null
+    }
+  },
+  watch: {
+    number(val) {
+      console.log('number changed', val)
+      this.$emit('update:modelValue', this.amount)
+    },
+    decimal(val) {
+      console.log('decimal changed', val)
+      this.$emit('update:modelValue', this.amount)
     }
   },
   computed: {
-    isInValid() {
-      return this.v$.$invalid
+    amount() {
+      return `${this.number}.${this.decimal}`
     },
     currencyCode() {
       if (!this.dinero) {
@@ -99,11 +112,6 @@ export default {
         return '£'
       }
       throw `Unknown currency: ${this.dinero.getCurrency()}`
-    }
-  },
-  watch: {
-    value(val) {
-      this.setPrice(val)
     }
   },
   methods: {
@@ -143,10 +151,11 @@ export default {
 
       this.$emit('priceChanged', dinero)
       this.prevAmount = amount
+      this.setPrice(amount/100)
     }
   },
   created() {
-    this.setPrice(this.value)
+    this.setPrice(this.modelValue)
   }
 }
 </script>
@@ -163,8 +172,8 @@ export default {
   border-bottom-left-radius: 0;
 }
 .flex {
-  display : flex;
+  display: flex;
   margin-top: auto;
-  min-width: 240px;
+  min-width: 180px;
 }
 </style>

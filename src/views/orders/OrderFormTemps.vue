@@ -46,11 +46,12 @@
                 size="sm"
                 class="p-sm-0"
                 v-model="order.start_date"
-                v-bind:placeholder="$trans('Choose a date')"
-                value="order.start_date"
-                locale="nl"
+                :placeholder="$trans('Choose a date')"
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
+                :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.start_date.$error : null">
@@ -87,9 +88,11 @@
                 v-model="order.end_date"
                 class="mb-2"
                 v-bind:placeholder="$trans('Choose a date')"
-                locale="nl"
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
+                :locale="nl"
+                auto-apply
+                arrow-navigation
+                :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.order.end_date.$error : null">
@@ -222,9 +225,7 @@
             >
               <OrderTypesSelect
                 v-if="(!isCreate && !isLoading) || isCreate"
-                :orderTypeIn="order.order_type"
-                :order-type="order.order_type"
-                :include-all="false"
+                v-model="order.order_type"
               />
             </BFormGroup>
           </b-col>
@@ -447,10 +448,10 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import moment from 'moment'
 import VueMultiselect from 'vue-multiselect'
+import { nl } from "date-fns/locale"
 
-import {OrderService} from '@/models/orders/Order.js'
+import {OrderModel, OrderService} from '@/models/orders/Order.js'
 import customerModel from '@/models/customer/Customer.js'
-
 import OrderTypesSelect from '@/components/OrderTypesSelect.vue'
 import orderlineModel from "../../models/orders/Orderline";
 import {useToast} from "bootstrap-vue-next";
@@ -521,6 +522,7 @@ export default {
       selectedCustomer: null,
       deletedOrderlines: [],
       acceptOrder: false,
+      nl,
     }
   },
   validations() {
