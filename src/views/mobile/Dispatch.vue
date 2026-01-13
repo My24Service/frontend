@@ -414,8 +414,6 @@
               </b-col>
             </b-row>
           </b-container>
-
-
         </template>
       </b-modal>
     </div>
@@ -702,7 +700,6 @@ export default {
       })
     },
     async openActionsModal(userId, order_pk, assignedorder, is_partner) {
-      console.log('hai?')
       this.selectedAssignedOrder = assignedorder
       this.selectedOrderUserId = userId
       this.selectedOrderIsPartner = is_partner
@@ -711,7 +708,7 @@ export default {
         this.showOverlay = true
         this.selectedOrder = await this.orderService.detail(order_pk)
         this.showOverlay = false
-        this.$refs['dispatch-order-actions-modal'].show();
+        await this.$refs['dispatch-order-actions-modal'].show();
       } catch (error) {
         console.log('error fetching order', error)
         errorToast(this.create, $trans('Error fetching order'))
