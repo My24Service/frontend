@@ -20,6 +20,7 @@
     <div class="page-subnav" v-if="isActive('orders')">
       <b-nav>
         <b-nav-item
+          v-if="hasBranches"
           :active="isActive('schedule')"
           :to="{name: 'orders-schedule'}">
           {{ $trans('Schedule') }}
