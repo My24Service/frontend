@@ -47,8 +47,11 @@ onMounted(async () => {
     await mainStore.checkInitialData()
     setTimeout(() => {
       if (authStore.isLoggedIn) {
-        console.debug(`planning, redirecting to 'order-list'`)
-        router.replace({ name: 'order-list' });
+        if (mainStore.getMemberHasBranches) {
+          router.replace({ name: 'orders-schedule' });
+        } else {
+          router.replace({ name: 'order-list' });
+        }
       }
     }, 100);
   } catch(error) {

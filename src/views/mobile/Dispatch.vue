@@ -378,7 +378,7 @@
           {{ selectedAssignedOrder.order.order_postal }} {{ selectedAssignedOrder.order.order_city }}<br/>
           {{ $trans('Order date') }}: {{ selectedAssignedOrder.order.order_date }}<br/>
           {{ $trans("Assigned order date") }}: {{ selectedAssignedOrder.date_formatted }}<br/>
-          <span v-if="selectedAssignedOrder.order.order_reference != ''">
+          <span v-if="selectedAssignedOrder.order.order_reference !== ''">
               {{ $trans('Reference') }}: {{ selectedAssignedOrder.order.order_reference }}<br/>
           </span>
         </template>
