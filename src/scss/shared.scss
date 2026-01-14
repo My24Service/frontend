@@ -114,6 +114,9 @@ tr:focus-within .edit-icon {
     .nav-items {
       overflow: auto;
       padding: 0 1rem;
+      .has-children {
+        padding: .2em;
+      }
     }
 
     .b-nav-dropdown {
@@ -128,17 +131,17 @@ tr:focus-within .edit-icon {
 
     .page-subnav ul.nav {
       &:not(:empty) {
-        margin-block: 1ex;
+        //margin-block: 1ex;
       }
       a {
         border-left: 1px solid #232c2f30;
         border-radius: 0;
         transition: all .2s, padding-inline-start .3s .2s;
-        &:hover,&:focus,&:active,&.router-link-active {
+        &:hover,&:focus,&:active,&.router-link-active,&.active {
           border-color: currentColor;
         }
         &.router-link-active {
-          padding-inline-start: 3ex;
+          padding-inline-start: 2ex;
         }
       }
     }
@@ -166,6 +169,11 @@ tr:focus-within .edit-icon {
         color: #232c2fd9;
       }
 
+      &.active {
+        font-weight: bold;
+        color: #232c2fd9;
+      }
+
     }
     &.has-children a::after {
         content: '›';
@@ -175,7 +183,7 @@ tr:focus-within .edit-icon {
   }
 
   .page-subnav {
-    padding-inline-start: 1.6rem;
+    padding-inline-start: 1.2rem;
     transform: translateY(0);
     opacity: .5;
     animation: fade .5s .05s cubic-bezier(0.075, 0.82, 0.165, 1) both;
@@ -188,7 +196,9 @@ tr:focus-within .edit-icon {
   }
 
   .nav-items > li > a.active {
-    background: #f6f9fc;
+    background: $navbar-light-color;
+    color: white;
+    padding: 4px;
   }
 }
 

@@ -133,7 +133,7 @@
           <small>{{ data.item.modified }}</small>
         </template>
         <template #cell(icons)="data">
-          <div class="h2 float-right">
+          <div class="h2 float-right icons">
             <IconLinkPlus
               type="tr"
               v-bind:title="$trans('Add state')"
@@ -385,3 +385,9 @@ export default {
   }
 }
 </script>
+<style scoped>
+.icons {
+  display: inline-block;
+  min-width: 140px;
+}
+</style>

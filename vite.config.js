@@ -22,7 +22,7 @@ export default defineConfig({
     allowedHosts: [
       'stormy.my24service-dev.com',
       'riedel.my24service-dev.com',
-      '*.my24service.com',
+      'amex.my24service-dev.com',
     ],
     hmr: {
       host: "localhost",

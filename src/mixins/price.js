@@ -8,7 +8,7 @@ let priceMixin = {
       const currency = obj['default_currency'] ? obj['default_currency'] : obj[currency_field]
 
       if (obj[field] && currency) {
-        console.log(obj[field], currency)
+        // console.log(obj[field], currency)
         const dinero = toDinero(obj[field], currency)
         this.setPriceField(field, dinero)
       } else {

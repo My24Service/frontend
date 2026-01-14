@@ -98,13 +98,12 @@
             <div class="h2 float-right">
               <IconLinkPlus
                 type="tr"
-                v-bind:title="$trans('Add action')"
-                v-bind:router_name="`${linkAddAction}`"
-                v-bind:router_params="{pk: data.item.id}"
+                :title="$trans('Add action')"
+                :router_name="`${linkAddAction}`"
               />
               <IconLinkDelete
-                v-bind:title="$trans('Delete')"
-                v-bind:method="function() { showDeleteModal(data.item.id) }"
+                :title="$trans('Delete')"
+                :method="() => showDeleteModal(data.item.id)"
               />
             </div>
           </template>
@@ -145,6 +144,7 @@ import Pagination from "../../components/Pagination.vue"
 import {PIXEL_URL} from "@/constants";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -155,6 +155,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   props: {
     list_type: {
       type: [String],
@@ -215,14 +216,12 @@ export default {
 
     switch(this.list_type) {
       case 'order':
-        this.titleAdd = $trans('New statuscode'),
-
+        this.titleAdd = $trans('New statuscode')
         this.statuscodeModel = statuscodeOrderModel
         this.fields = this.fieldsOrder
         break
       case 'trip':
-        this.titleAdd = $trans('New trip statuscode'),
-
+        this.titleAdd = $trans('New trip statuscode')
         this.statuscodeModel = statuscodeTripModel
         this.fields = this.fieldsTrip
         break

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <nav>
     <b-nav-item
       :active="isActive('dashboard')"
       v-if="showCustomerDashBoard"
@@ -37,7 +37,7 @@
 <!--        {{ $trans('Calendar') }}-->
 <!--      </b-nav-item>-->
 
-  </div>
+  </nav>
 </template>
 
 <script>

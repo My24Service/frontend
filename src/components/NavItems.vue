@@ -6,8 +6,8 @@
       v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
       to="/orders/orders"
       class="has-children">
-      <IBiFileEarmarkText v-if="!isActive('orders')"></IBiFileEarmarkText>
-      <IBiFileEarmarkTextFill v-else></IBiFileEarmarkTextFill>
+      <IBiFileEarmarkTextFill v-if="!isActive('orders')"></IBiFileEarmarkTextFill>
+      <IBiFileEarmarkText v-else></IBiFileEarmarkText>
       <span style="flex-grow:1">{{ $trans('Orders') }}</span>
       <b-badge
         v-if="unacceptedCount && unacceptedCount > 0"
@@ -15,36 +15,9 @@
         :title="`${unacceptedCount} ${$trans('Unaccepted orders')}`">{{ unacceptedCount }}</b-badge>
         &nbsp;
     </b-nav-item>
-
-    <!-- Orders submenu -->
-    <div class="page-subnav" v-if="isActive('orders')">
-      <b-nav>
-        <b-nav-item
-          v-if="hasBranches"
-          :active="isActive('schedule')"
-          :to="{name: 'orders-schedule'}">
-          {{ $trans('Schedule') }}
-        </b-nav-item>
-        <b-nav-item
-          v-if="isActive('orders')"
-          :active="isActive('orders','statuscodes')"
-          to="/orders/statuscodes">
-          {{ $trans('Statuscodes') }}
-        </b-nav-item>
-        <b-nav-item
-          v-if="isActive('orders')"
-          :active="isActive('orders','year-stats') || isActive('orders','month-stats')"
-          to="/orders/year-stats">
-          {{ $trans('Stats') }}
-        </b-nav-item>
-        <b-nav-item
-          :active="isActive('orders', 'filter')"
-          v-if="isStaff || isSuperuser || isPlanning"
-          :to="{ name: 'order-filter-list' }">
-          {{ $trans('Filters') }}
-        </b-nav-item>
-      </b-nav>
-    </div>
+    <SubNav v-if="isActive('orders') || isActive('orders', 'orders')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
 
     <b-nav-item
       :active="isActive('invoices')"
