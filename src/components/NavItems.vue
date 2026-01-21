@@ -245,7 +245,7 @@ export default {
       return this.hasMobile && (this.isPlanning || this.isAdmin)
     },
     showCompany() {
-      return !this.isCustomer && !this.isEmployee;
+      return !this.isCustomer;
     },
     showMembers() {
       return this.hasMembers;

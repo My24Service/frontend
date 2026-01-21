@@ -207,6 +207,7 @@ export default [
     {
       name: 'company-settings',
       path: '/company/company/settings',
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
         'app-content': Settings,
         'app-subnav': SubNavCompany
@@ -458,6 +459,7 @@ export default [
     {
       name: 'users-employees',
       path: '/company/employee-users',
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
         'app-content': UserEmployeeList,
         'app-subnav': SubNavCompany
@@ -470,6 +472,7 @@ export default [
     {
       name: 'employee-edit',
       path: '/company/employee-users/form/:pk',
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -482,6 +485,7 @@ export default [
     {
       name: 'employee-add',
       path: '/company/employee-users/form',
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
         'app-content': UserEmployeeForm,
         'app-subnav': SubNavCompany

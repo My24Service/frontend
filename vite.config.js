@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import {
   themePreprocessorPlugin,
   themePreprocessorHmrPlugin
-} from "@zougt/vite-plugin-theme-preprocessor";
+} from "vite-plugin-theme-preprocessor/dist";
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
 import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
@@ -53,7 +53,7 @@ export default defineConfig({
         multipleScopeVars: [
           {
             scopeName: "theme-default",
-            // path or varscontent must be selected
+            // path or varsContent must be selected
             path: path.resolve("./src/scss/app.scss"),
             // varsContent same as content in path
             // varsContent:`@primary-color:${defaultPrimaryColor};`
@@ -91,10 +91,11 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         silenceDeprecations: [
-          'mixed-decls',
+          'import',
           'color-functions',
           'global-builtin',
-          'import'
+          'legacy-js-api',
+          'if-function'
         ]
       },
     }

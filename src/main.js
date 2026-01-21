@@ -22,36 +22,13 @@ import {router} from './router'
 import componentMixin from "@/mixins/common";
 import { VueDatePicker } from '@vuepic/vue-datepicker';
 import {LoadingPlugin} from 'vue-loading-overlay';
-import '@vuepic/vue-datepicker/dist/main.css'
-import { toggleTheme } from "@zougt/vite-plugin-theme-preprocessor/dist/browser-utils";
+import { toggleTheme } from "vite-plugin-theme-preprocessor/dist/browser-utils";
 import {createPinia} from "pinia";
-
-function createOurApp() {
-  const pinia = createPinia()
-  const app = createApp(App)
-      .use(pinia)
-      .use(LoadingPlugin)
-      .use(router)
-      .mixin(componentMixin)
-      .component('VueDatePicker', VueDatePicker);
-
-  // app.use(VueSpinners)
-  // app.use(Loading)
-  // app.use(ColorPanel)
-  // app.use(ColorPicker)
-
-  app.config.productionTip = false
-
-  // tired of those "v$ already defined" warnings -_-
-  app.config.silent = true
-
-  return app
-}
 
 // style & themes
 import './scss/app.scss'
 import 'vue-loading-overlay/dist/css/index.css';
-import "./scss/shared.scss";
+import '@vuepic/vue-datepicker/dist/main.css'
 
 const defaultTheme = 'theme-default'
 const themes = {
@@ -72,9 +49,6 @@ const theme = companycode in themes ? themes[companycode] : defaultTheme
 toggleTheme({
   scopeName: theme,
 });
-
-// const app = createOurApp()
-// app.mount('#app')
 
 const pinia = createPinia()
 const app = createApp(App)
