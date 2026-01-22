@@ -146,6 +146,8 @@ export default [
 
     // calendar/schedule
     {
+      meta: { authLevelNeeded: [
+        AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE, AUTH_LEVELS.CUSTOMER] },
       name: 'orders-schedule-params',
       path: '/orders/schedule/:start/:end',
       components: {
@@ -158,6 +160,8 @@ export default [
       },
     },
     {
+      meta: { authLevelNeeded: [
+          AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE, AUTH_LEVELS.CUSTOMER] },
       name: 'orders-schedule',
       path: '/orders/schedule',
       components: {

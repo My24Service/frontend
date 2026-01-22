@@ -108,14 +108,14 @@
     </div>
     <Pagination
         v-if="!isLoading"
-        :model="this.model"
+        :model="branchService"
         :model_name="$trans('Branch')"
       />
   </div>
 </template>
 
 <script>
-import branchModel from '../../models/company/Branch.js'
+import {BranchService} from '@/models/company/Branch'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
@@ -124,6 +124,7 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -134,6 +135,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   name: 'BranchList',
   components: {
     IconLinkEdit,
@@ -147,7 +149,6 @@ export default {
     return {
       pk: null,
       searchQuery: null,
-      model: branchModel,
       isLoading: false,
       branches: [],
       branchFields: [
@@ -159,17 +160,18 @@ export default {
         {key: 'city', label: $trans('City'), sortable: true, },
         {key: 'icons', }
       ],
+      branchService: new BranchService()
     }
   },
   created() {
-    this.model.currentPage = this.$route.query.page || 1
+    this.branchService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.branchService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -182,7 +184,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.pk)
+        await this.branchService.delete(this.pk)
         infoToast(this.create, $trans('Deleted'), $trans('Branch has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -195,7 +197,7 @@ export default {
       this.isLoading = true;
 
       try {
-        const data = await this.model.list()
+        const data = await this.branchService.list()
         this.branches = data.results
         this.isLoading = false
       } catch(error) {

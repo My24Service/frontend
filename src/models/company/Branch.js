@@ -35,9 +35,10 @@ class BranchService extends BaseModel {
   getMyBranch() {
     return this.axios.get('/company/branch-my/').then((response) => response.data)
   }
+  updateMyBranch(branch) {
+    return this.axios.patch('/company/branch-my/', this.preUpdate(branch))
+      .then((response) => response.data)
+  }
 }
 
-let branchService = new BranchService()
-
-export default branchService
 export { BranchService, BranchModel }

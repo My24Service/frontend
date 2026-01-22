@@ -2,6 +2,18 @@
   <div v-if="isLoaded">
     <b-nav>
       <b-nav-item
+        v-if="!isBranchEmployee"
+        :active="isActive('dashboard')"
+        :to="{ name: 'company-dashboard' }">
+        {{ $trans('Dashboard') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="isBranchEmployee"
+        :active="isActive('employee-dashboard')"
+        :to="{ name: 'employee-dashboard' }">
+        {{ $trans('Dashboard') }}
+      </b-nav-item>
+      <b-nav-item
         v-if="!hasBranches"
         :active="isActive('time-registration')"
         :to="{ name: 'company-time-registration' }">
@@ -21,39 +33,54 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('partners')"
-        v-if="hasPartners"
+        v-if="hasPartners && (isPlanning || isAdmin)"
         :to="{ name: 'company-partners-active' }">
         {{ $trans('Partners') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('branches')"
-        v-if="hasBranches"
+        v-if="hasBranches && (isPlanning || isAdmin)"
         :to="{ name: 'company-branches' }">
         {{ $trans('Branches') }}
       </b-nav-item>
       <b-nav-item
-        v-if="memberType === 'maintenance'"
+        :active="isActive('my-branch')"
+        v-if="hasBranches && (isPlanning || isAdmin)"
+        :to="{ name: 'company-my-branch-view' }">
+        {{ $trans('My branch') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="memberType === 'maintenance' && (isPlanning || isAdmin)"
         :active="isActive('settings')"
         :to="{ name: 'company-settings' }">
         {{ $trans('Settings') }}
       </b-nav-item>
       <b-nav-item
+        v-if="isPlanning || isAdmin"
         :active="isActive('company')"
         :to="{ name: 'company-info' }">
         {{ $trans('Info') }}
       </b-nav-item>
       <b-nav-item
+        v-if="hasBranches && isBranchEmployee"
+        :active="isActive('branch')"
+        :to="{ name: 'company-my-branch' }">
+        {{ $trans('My branch') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="isPlanning || isAdmin"
         :active="isActive('pictures')"
         :to="{ name: 'company-pictures' }">
         {{ $trans('Pictures') }}
       </b-nav-item>
       <b-nav-item
-        v-if="hasStatuscodes"
+        v-if="hasStatuscodes && (isPlanning || isAdmin)"
         :active="isActive('statuscodes')"
         :to="{ name: 'company-statuscodes' }">
         {{ $trans('Statuscodes') }}
       </b-nav-item>
       <b-nav-item
+        v-if="isPlanning || isAdmin"
         :active="isActive('templates')"
         :to="{ name: 'company-templates' }">
         {{ $trans('Templates') }}
@@ -66,11 +93,18 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('budgets')"
-        v-if="hasBranches"
+        v-if="hasBranches && !isBranchEmployee"
         :to="{ name: 'company-budgets' }">
         {{ $trans('Budgets') }}
       </b-nav-item>
       <b-nav-item
+        :active="isActive('budgets')"
+        v-if="hasBranches && isBranchEmployee"
+        :to="{ name: 'company-my-budgets' }">
+        {{ $trans('My budgets') }}
+      </b-nav-item>
+      <b-nav-item
+        v-if="isPlanning || isAdmin"
         :active="isActive('activity')"
         :to="{ name: 'company-activity' }">
         {{ $trans('Activity') }}
@@ -130,6 +164,10 @@ export default {
 
       if (this.hasAccessToModule('company', 'customer-users') && !this.hasBranches) {
         return { name: 'users-customerusers' }
+      }
+
+      if (this.hasBranches && this.isBranchEmployee) {
+        return { name: 'users-employees' }
       }
 
       return { name: 'users-planningusers' }

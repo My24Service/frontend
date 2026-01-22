@@ -1,6 +1,6 @@
 <template>
   <div v-if="branch">
-    <h3>{{ branch.name }}</h3>
+    <h4 class="text-center">{{ branch.name }}</h4>
     <dl>
       <dt>{{  $trans('Address') }}</dt>
       <dd>
@@ -24,16 +24,17 @@
 </template>
 
 <script>
-import {BranchModel} from "@/models/company/Branch";
+import componentMixin from "@/mixins/common";
 
 export default {
   name: "BranchCard",
   props: {
     branch: {
-      type: BranchModel,
+      type: Object,
       default: null
     },
-  }
+  },
+  mixins: [componentMixin],
 }
 </script>
 

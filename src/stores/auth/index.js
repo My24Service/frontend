@@ -106,6 +106,13 @@ export const useAuthStore = defineStore('auth', {
       return state.userInfo.submodel === 'employee_user' && state.userInfo.user.employee_user && state.userInfo.user.employee_user.branch
       // return state.userInfo.user.hasOwnProperty('employee_user') && state.userInfo.employee_user && state.userInfo.employee_user.branch
     },
+    branchEmployeeBranch: (state) => {
+      if (!state.userInfo || !state.userInfo.user) {
+        return false;
+      }
+      return state.userInfo.user.employee_user.branch
+      // return state.userInfo.user.hasOwnProperty('employee_user') && state.userInfo.employee_user && state.userInfo.employee_user.branch
+    },
     getUserUUID: (state) => {
       return state.userInfo.user.uuid
     },

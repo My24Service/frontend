@@ -77,11 +77,11 @@ import {
   STATUSCODE_TYPE_INVOICE,
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE, STATUSCODE_TYPE_WORK_HOURS
-} from "../models/company/AbstractStatuscode";
+} from "@/models/company/AbstractStatuscode";
 import ImportList from "../views/company/ImportList";
-
 import ImportForm from "../views/company/ImportForm";
 import ImportPreview from "../views/company/ImportPreview";
+import ComingSoon from "@/views/shared/ComingSoon.vue";
 
 const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
 
@@ -173,7 +173,7 @@ export default [
       path: '/company/employee-dashboard',
       components: {
         'app-content': BranchView,
-        // 'app-subnav': {}
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': {},
@@ -704,6 +704,7 @@ export default [
     },
     // branches
     {
+
       name: 'company-branches',
       path: '/company/branches',
       components: {
@@ -751,6 +752,19 @@ export default [
         'app-subnav': {}
       },
     },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
+      name: 'company-my-branch',
+      path: '/company/branches/form/my',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': BranchForm,
+        'app-subnav': SubNavCompany
+      },
+    },
     // budgets
     {
       name: 'company-budgets',
@@ -774,6 +788,15 @@ export default [
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
+      },
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
+      path: '/company/budgets/my',
+      name: 'company-my-budgets',
+      components: {
+        'app-content': ComingSoon,
+        'app-subnav': SubNavCompany
       },
     },
     // statuscodes

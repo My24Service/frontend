@@ -45,8 +45,6 @@
   </div>
 </template>
 <script>
-
-
 import {useMainStore} from "@/stores/main";
 
 export default {

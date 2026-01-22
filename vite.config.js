@@ -25,7 +25,7 @@ export default defineConfig({
       'amex.my24service-dev.com',
     ],
     hmr: {
-      host: "localhost",
+      host: "amex.my24service-dev.com",
       port: 3000
     }
   },

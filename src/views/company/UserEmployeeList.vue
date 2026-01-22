@@ -38,7 +38,9 @@
 
 
     <div class="page-details panel">
-      <PillsCompanyUsers />
+      <PillsCompanyUsers
+        v-if="!isBranchEmployee"
+      />
       <br>
       <b-table
         id="employee-table"
@@ -74,7 +76,7 @@
     </div>
     <Pagination
         v-if="!isLoading"
-        :model="this.model"
+        :model="employeeService"
         :model_name="$trans('Employee')"
       />
   </div>
@@ -82,7 +84,7 @@
 
 <script>
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
-import employeeModel from '../../models/company/UserEmployee.js'
+import {EmployeeService} from '@/models/company/UserEmployee'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
@@ -90,6 +92,7 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -100,6 +103,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   name: 'UserEmployeeList',
   components: {
     PillsCompanyUsers,
@@ -113,7 +117,7 @@ export default {
     return {
       pk: null,
       searchQuery: null,
-      model: employeeModel,
+      model: null,
       isLoading: false,
       employees: [],
       employeeFields: [
@@ -124,17 +128,18 @@ export default {
         {key: 'date_joined', label: $trans('Date joined'), sortable: true},
         {key: 'icons', label: ''}
       ],
+      employeeService: new EmployeeService()
     }
   },
   created() {
-    this.model.currentPage = this.$route.query.page || 1
+    this.employeeService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.employeeService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -147,7 +152,7 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.pk)
+        await this.employeeService.delete(this.pk)
         infoToast(this.create, $trans('Deleted'), $trans('Employee has been deleted'))
         await this.loadData()
       } catch(error) {
@@ -160,7 +165,7 @@ export default {
       this.isLoading = true;
 ``
       try {
-        const data = await this.model.list()
+        const data = await this.employeeService.list()
         this.employees = data.results
         this.isLoading = false
       } catch(error) {

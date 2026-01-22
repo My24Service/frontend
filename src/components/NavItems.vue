@@ -45,18 +45,6 @@
       <router-view name="app-subnav"></router-view>
     </SubNav>
 
-    <!-- dashboard for branch employees -->
-    <b-nav-item
-      :active="isActive('company')"
-      v-if="showBranchEmployeeDashBoard"
-      to="/company/employee-dashboard"
-      class="has-children">
-      <IBiCalendar2Range></IBiCalendar2Range> {{ $trans('Dashboard') }}
-    </b-nav-item>
-    <SubNav v-if="showBranchEmployeeDashBoard && isActive('company')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
     <!-- customers -->
     <b-nav-item
       :active="isActive('customers')"
@@ -112,7 +100,7 @@
     <b-nav-item
       :active="isActive('company')"
       v-if="showCompany"
-      to="/company/dashboard"
+      :to="{name: getCompanyRouteTo }"
       class="has-children">
       <IBiBookmarkStar v-if="!isActive('company')"></IBiBookmarkStar>
       <IBiBookmarkStarFill v-else></IBiBookmarkStarFill>
@@ -226,6 +214,13 @@ export default {
     }
   },
   computed: {
+    getCompanyRouteTo() {
+      if (this.isBranchEmployee) {
+        return 'employee-dashboard'
+      }
+
+      return 'company-dashboard'
+    },
     showBranchEmployeeDashBoard() {
       return this.hasBranches && this.isBranchEmployee
     },

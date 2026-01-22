@@ -60,6 +60,10 @@ let componentMixin = {
     companyIsDemo() {
       const store = useMainStore()
       return store.getMemberCompanycode === 'demo'
+    },
+    branchEmployeeBranch() {
+      const store = useAuthStore()
+      return store.branchEmployeeBranch
     }
   },
   methods: {

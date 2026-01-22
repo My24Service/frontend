@@ -29,7 +29,7 @@
 
       <div class="page-detail flex-columns">
         <div class="panel col-1-3">
-          <h6>{{ $trans('Equipment') }} {{ $trans('Customer')}}</h6>
+          <h6>{{ $trans('Equipment') }} {{ hasBranches ? $trans('Branch') : $trans('Customer')}}</h6>
 
           <b-row v-if="!hasBranches && !isCustomer">
             <b-col cols="12" role="group">
@@ -164,9 +164,9 @@
                 readonly
               ></BFormInput>
             </BFormGroup>
-
           </div>
-          <div v-if="branch && hasBranches">
+
+          <div v-if="branch && hasBranches && !isBranchEmployee">
             <b-col cols="4" role="group">
               <BFormGroup
                 label-size="sm"
@@ -248,8 +248,11 @@
                   @priceChanged="(val) => priceChanged(val)"
                 />
               </BFormGroup>
-
-
+          </div>
+          <div v-if="branch && hasBranches && isBranchEmployee">
+            <BranchCard
+              :branch="branch"
+            />
           </div>
         </div>
 
@@ -338,10 +341,10 @@
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Brand')"
-              label-for="equipment_name"
+              label-for="equipment_brand"
             >
               <BFormInput
-                id="equipment_name"
+                id="equipment_brand"
                 size="sm"
                 v-model="equipment.brand"
               ></BFormInput>
@@ -414,7 +417,6 @@
         </div>
         <div class="panel col-1-3">
           <h6>{{ $trans("Usage") }}</h6>
-
             <BFormGroup
               label-size="sm"
               label-cols="4"
@@ -425,7 +427,6 @@
                 id="equipment_installation_date"
                 v-model="equipment.installation_date"
                 :placeholder="$trans('Choose a date')"
-                :state="isSubmitClicked ? !v$.equipment.installation_date.$error : null"
                 :locale="nl"
                 auto-apply
                 arrow-navigation
@@ -446,7 +447,6 @@
                 :locale="nl"
                 auto-apply
                 arrow-navigation
-                :state="isSubmitClicked ? !v$.equipment.installation_date.$error : null"
                 :formats="{ input: 'dd/MM/yyyy' }"
               ></VueDatePicker>
             </BFormGroup>
@@ -517,6 +517,7 @@ import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsCompon
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -529,6 +530,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     VueMultiselect,
     PriceInput,
@@ -726,10 +728,14 @@ export default {
         const equipmentData = await this.equipmentService.detail(this.pk)
         this.equipment = new EquipmentModel(equipmentData)
 
-        if (this.hasBranches && !this.isEmployee) {
-          if (this.equipment.branch) {
+        if (this.hasBranches && this.equipment.branch) {
+          if (!this.isEmployee) {
             this.branch = await this.branchService.detail(this.equipment.branch)
             this.locations = await this.locationService.listForSelectBranch(this.branch.id)
+          } else {
+            this.branch = await this.branchService.getMyBranch()
+            this.locations = await this.locationService.listForSelectBranch()
+
           }
         }
         if (!this.hasBranches && !this.isCustomer) {

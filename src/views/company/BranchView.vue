@@ -9,8 +9,14 @@
               <strong>{{ branch.name }}</strong>
             </h3>
             <router-link
+              v-if="!branchEmployeeBranch"
             :to="{name: 'company-branch-edit', params: {pk: pk}}"
             class="btn"
+            >{{ $trans("Edit branch") }}</router-link>
+            <router-link
+              v-if="branchEmployeeBranch"
+              :to="{name: 'company-my-branch'}"
+              class="btn"
             >{{ $trans("Edit branch") }}</router-link>
           </div>
         </header>
@@ -321,10 +327,12 @@ export default {
           return
         }
 
-        const orderTypeStatsData = await this.orderService.getOrderTypesStatsBranch()
-        const monthsStatsData = await this.orderService.getMonthsStatsBranch()
-        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsBranch()
-        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsBranch()
+        this.branch = await this.branchService.getMyBranch()
+
+        const orderTypeStatsData = await this.orderService.getOrderTypesStatsBranch(this.branchEmployeeBranch)
+        const monthsStatsData = await this.orderService.getMonthsStatsBranch(this.branchEmployeeBranch)
+        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsBranch(this.branchEmployeeBranch)
+        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsBranch(this.branchEmployeeBranch)
 
         this.statsData = {
           orderTypeStatsData,
@@ -348,7 +356,10 @@ export default {
 
     async loadHistory() {
       try {
-        this.orderService.setListArgs(`branch=${this.pk}`)
+        if (this.pk) {
+          this.orderService.setListArgs(`branch=${this.pk}`)
+        }
+
         const results = await this.orderService.list()
         this.orders = results.results
         this.isLoading = false

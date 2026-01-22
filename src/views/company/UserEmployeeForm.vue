@@ -1,6 +1,5 @@
 <template>
-
-    <div class="app-page">
+    <div class="app-page" v-if="employee">
       <header>
 
         <div class="page-title">
@@ -59,6 +58,7 @@
                   id="employee_password"
                   size="sm"
                   type="password"
+                  autocomplete="false"
                   v-model="employee.password1"
                   @blur="v$.employee.password1.$touch()"
                   :state="isSubmitClicked && v$.employee.password1 ? !v$.employee.password1.$error : null"
@@ -79,6 +79,7 @@
                   id="employee_password_again"
                   size="sm"
                   type="password"
+                  autocomplete="false"
                   v-model="employee.password2"
                   @blur="v$.employee.password2.$touch()"
                   :state="isSubmitClicked ? !v$.employee.password2.$error : null"
@@ -166,7 +167,7 @@
           </BFormGroup>
 
           <BFormGroup
-            v-if="hasBranches"
+            v-if="hasBranches && !isBranchEmployee"
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Branch')"
@@ -180,6 +181,18 @@
             ></BFormSelect>
           </BFormGroup>
 
+          <BFormGroup
+            v-if="hasBranches && isBranchEmployee && branch"
+            label-size="sm"
+            label-cols="4"
+            v-bind:label="$trans('Branch')"
+            label-for="employee_branch"
+          >
+            <BFormInput
+              :model-value="branch.name"
+              readonly="readonly"
+            />
+          </BFormGroup>
 
         </div>
       </b-form>
@@ -193,8 +206,8 @@ import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
 import { usernameExists } from '@/models/helpers'
-import employeeModel from '../../models/company/UserEmployee.js'
-import branchModel from '../../models/company/Branch.js'
+import {EmployeeService} from '@/models/company/UserEmployee'
+import {BranchService} from '@/models/company/Branch'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import componentMixin from "@/mixins/common";
@@ -235,6 +248,9 @@ export default {
     }
 
     if (this.isCreate) {
+      if (!this.employee) {
+        this.employee = this.employeeService.getFields()
+      }
       const isUniqueCreate = (value) => {
         if (value === '') return true
 
@@ -255,6 +271,9 @@ export default {
         sameAs: sameAs(this.employee.password1)
       }
     } else {
+      if (!this.employee) {
+        this.employee = this.employeeService.getFields()
+      }
       const isUniqueEdit = (value) => {
         if (this.orgUsername === value || value === '' || value.length < 3) {
           return true
@@ -283,10 +302,13 @@ export default {
       isLoading: false,
       submitClicked: false,
       buttonDisabled: false,
-      employee: employeeModel.getFields(),
+      employee: null,
       orgUsername: null,
       branches: [],
+      branch: null,
       branch_info: '',
+      employeeService: new EmployeeService,
+      branchService: new BranchService
     }
   },
   computed: {
@@ -296,31 +318,32 @@ export default {
     isSubmitClicked() {
       return this.submitClicked
     },
-    hasBranches() {
-      return this.hasBranches
-    },
   },
   async created() {
-    const response = await branchModel.list()
+    if (!this.isBranchEmployee) {
+      const response = await this.branchService.list()
 
-    this.branches = [{
-      value: null,
-      text: '-'
-    }]
+      this.branches = [{
+        value: null,
+        text: '-'
+      }]
 
-    for(let i=0;i<response.results.length; i++) {
-      const txt = `${response.results[i].name} - ${response.results[i].city}`
+      for(let i=0;i<response.results.length; i++) {
+        const txt = `${response.results[i].name} - ${response.results[i].city}`
 
-      this.branches.push({
-        value: response.results[i].id,
-        text: txt,
-      })
+        this.branches.push({
+          value: response.results[i].id,
+          text: txt,
+        })
+      }
+    } else {
+      this.branch = await this.branchService.getMyBranch()
     }
 
     if (!this.isCreate) {
       await this.loadData()
     } else {
-      this.employee = employeeModel.getFields()
+      this.employee = this.employeeService.getFields()
     }
     this.isLoading = false
   },
@@ -339,15 +362,19 @@ export default {
 
       setTimeout(() => {
         this.submitForm()
-      }, 1000)
+      }, 500)
     },
     async submitForm() {
       this.isLoading = true
 
+      if (this.isBranchEmployee) {
+        this.employee.employee_user.branch = this.branch.id
+      }
+
       if (this.isCreate) {
         this.employee.password = this.employee.password1
         try {
-          await employeeModel.insert(this.employee)
+          await this.employeeService.insert(this.employee)
           infoToast(this.create, $trans('Created'), $trans('employee has been created'))
           this.isLoading = false
           this.cancelForm()
@@ -371,7 +398,7 @@ export default {
           delete this.employee.password
         }
 
-        await employeeModel.update(this.pk, this.employee)
+        await this.employeeService.update(this.pk, this.employee)
         infoToast(this.create, $trans('Updated'), $trans('employee has been updated'))
         this.isLoading = false
         this.cancelForm()
@@ -386,7 +413,7 @@ export default {
       this.isLoading = true
 
       try {
-        this.employee = await employeeModel.detail(this.pk)
+        this.employee = await this.employeeService.detail(this.pk)
         this.orgUsername = this.employee.username
         this.isLoading = false
       } catch(error) {
