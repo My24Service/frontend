@@ -117,6 +117,11 @@ tr:focus-within .edit-icon {
       .has-children {
         padding: .2em;
       }
+      .badge {
+        color: $navbar-light-color !important;
+        background-color: white !important;
+        margin-right: 4px;
+      }
     }
 
     .b-nav-dropdown {

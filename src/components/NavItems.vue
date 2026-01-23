@@ -11,9 +11,10 @@
       <span style="flex-grow:1">{{ $trans('Orders') }}</span>
       <b-badge
         v-if="unacceptedCount && unacceptedCount > 0"
-        variant="secondary"
-        :title="`${unacceptedCount} ${$trans('Unaccepted orders')}`">{{ unacceptedCount }}</b-badge>
-        &nbsp;
+        variant="light"
+        :title="`${unacceptedCount} ${$trans('Unaccepted orders')}`"
+      >{{ unacceptedCount }}</b-badge>
+      &nbsp;
     </b-nav-item>
     <SubNav v-if="isActive('orders') || isActive('orders', 'orders')">
       <router-view name="app-subnav"></router-view>
@@ -288,7 +289,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .nav-items {
   flex-grow: 1;

@@ -326,16 +326,13 @@ export default {
       this.branches = [{
         value: null,
         text: '-'
-      }]
-
-      for(let i=0;i<response.results.length; i++) {
-        const txt = `${response.results[i].name} - ${response.results[i].city}`
-
-        this.branches.push({
-          value: response.results[i].id,
+      }, ...response.results.map((branch) => {
+        const txt = `${branch.name} - ${branch.city}`
+        return {
+          value: branch.id,
           text: txt,
-        })
-      }
+        }
+      })]
     } else {
       this.branch = await this.branchService.getMyBranch()
     }

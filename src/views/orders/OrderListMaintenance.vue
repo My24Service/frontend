@@ -79,7 +79,7 @@
         v-if="!isCustomer && !isBranchEmployee"
         id="change-status-modal"
         ref="change-status-modal"
-        v-bind:title="$trans('Add status')"
+        :title="$trans('Add status')"
         @ok="changeStatus"
       >
         <form ref="change-status-form">
@@ -199,14 +199,14 @@
             </section>
             <li v-for="order in orders" :key="order.id">
               <OrderTableInfo
-              v-bind:order="order"
+              :order="order"
               :model="model"
               @reload-data="loadData"
               />
               <IconLinkAssign
                 v-if="!isCustomer && !isBranchEmployee && dispatch"
-                v-bind:title="$trans('Assign')"
-                v-bind:method="function() { selectOrder(order) }"
+                :title="$trans('Assign')"
+                :method="function() { selectOrder(order) }"
               />
             </li>
           </ul>

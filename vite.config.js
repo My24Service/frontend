@@ -23,6 +23,7 @@ export default defineConfig({
       'stormy.my24service-dev.com',
       'riedel.my24service-dev.com',
       'amex.my24service-dev.com',
+      'gls.my24service-dev.com'
     ],
     hmr: {
       host: "amex.my24service-dev.com",

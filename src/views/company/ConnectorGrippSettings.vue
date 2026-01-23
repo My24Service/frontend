@@ -216,8 +216,6 @@ export default {
   },
   methods: {
     async submitForm() {
-
-
       this.submitClicked = true
       this.buttonDisabled = true
       this.isLoading = true

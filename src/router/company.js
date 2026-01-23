@@ -147,18 +147,6 @@ function createStatuscodeRoutes(type) {
         'app-subnav': SubNavCompany
       },
     },
-    {
-      name: 'company-connector-gripp',
-      path: '/company/connector-gripp',
-      props: {
-        'app-content': route => ({...route.params, list_type: type}),
-        'app-subnav': true
-      },
-      components: {
-        'app-content': GrippSettings,
-        'app-subnav': SubNavCompany
-      },
-    }
   ]
 }
 
@@ -1012,5 +1000,18 @@ export default [
         'app-subnav': true
       },
     },
+    // Gripp settings
+    {
+      name: 'company-connector-gripp',
+      path: '/company/connector-gripp',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': GrippSettings,
+        'app-subnav': SubNavCompany
+      },
+    }
   ]
 }]

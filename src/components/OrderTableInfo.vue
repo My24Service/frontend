@@ -64,7 +64,7 @@
           value-field="statuscode"
           text-field="statuscode"
           style="border-color: transparent;"
-          @change="handleStatusChange(order.id, $event)"
+          @change="(event) => handleStatusChange(order.id, event.target.value)"
         ></BFormSelect>
         <IconLinkDelete
           v-if="!isCustomer && !isBranchEmployee && withDelete"
@@ -92,6 +92,7 @@ import {OrderService} from "@/models/orders/Order";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -104,6 +105,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     IconLinkDelete
   },
