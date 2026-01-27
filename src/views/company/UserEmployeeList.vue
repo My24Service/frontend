@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
         <div>
-          <b-button-toolbar class="flex-columns">
-            <b-button-group>
+          <BButton-toolbar class="flex-columns">
+            <BButton-group>
               <ButtonLinkRefresh
                 v-bind:method="function() { loadData() }"
                 v-bind:title="$trans('Refresh')"
@@ -13,9 +13,9 @@
               <ButtonLinkSearch
                 v-bind:method="function() { showSearchModal() }"
               />
-            </b-button-group>
-            <b-link :to="{name: 'employee-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add employee") }}</b-link>
-          </b-button-toolbar>
+            </BButton-group>
+            <BLink :to="{name: 'employee-add'}" class="btn primary"><IBiPersonPlus></IBiPersonPlus>{{ $trans("Add employee") }}</BLink>
+          </BButton-toolbar>
         </div>
       </div>
 
@@ -38,7 +38,9 @@
 
 
     <div class="page-details panel">
-      <PillsCompanyUsers />
+      <PillsCompanyUsers
+        v-if="!isBranchEmployee"
+      />
       <br>
       <b-table
         id="employee-table"
@@ -74,7 +76,7 @@
     </div>
     <Pagination
         v-if="!isLoading"
-        :model="this.model"
+        :model="employeeService"
         :model_name="$trans('Employee')"
       />
   </div>
@@ -82,15 +84,25 @@
 
 <script>
 import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
-import employeeModel from '../../models/company/UserEmployee.js'
+import {EmployeeService} from '@/models/company/UserEmployee'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '../../utils.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   mixins: [componentMixin],
   name: 'UserEmployeeList',
   components: {
@@ -105,28 +117,29 @@ export default {
     return {
       pk: null,
       searchQuery: null,
-      model: employeeModel,
+      model: null,
       isLoading: false,
       employees: [],
       employeeFields: [
-        {key: 'full_name', label: this.$trans('Name'), sortable: true},
-        {key: 'username', label: this.$trans('Username'), sortable: true},
-        {key: 'email', label: this.$trans('Email'), sortable: true},
-        {key: 'last_login', label: this.$trans('Last login'), sortable: true},
-        {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
+        {key: 'full_name', label: $trans('Name'), sortable: true},
+        {key: 'username', label: $trans('Username'), sortable: true},
+        {key: 'email', label: $trans('Email'), sortable: true},
+        {key: 'last_login', label: $trans('Last login'), sortable: true},
+        {key: 'date_joined', label: $trans('Date joined'), sortable: true},
         {key: 'icons', label: ''}
       ],
+      employeeService: new EmployeeService()
     }
   },
   created() {
-    this.model.currentPage = this.$route.query.page || 1
+    this.employeeService.currentPage = this.$route.query.page || 1
     this.loadData()
   },
   methods: {
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
-      this.model.setSearchQuery(val)
+      this.employeeService.setSearchQuery(val)
       this.loadData()
     },
     showSearchModal() {
@@ -139,12 +152,12 @@ export default {
     },
     async doDelete() {
       try {
-        await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Employee has been deleted'))
+        await this.employeeService.delete(this.pk)
+        infoToast(this.create, $trans('Deleted'), $trans('Employee has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting employee', error)
-        this.errorToast(this.$trans('Error deleting employee'))
+        errorToast(this.create, $trans('Error deleting employee'))
       }
     },
     // rest
@@ -152,12 +165,12 @@ export default {
       this.isLoading = true;
 ``
       try {
-        const data = await this.model.list()
+        const data = await this.employeeService.list()
         this.employees = data.results
         this.isLoading = false
       } catch(error) {
         console.log('error fetching employees', error)
-        this.errorToast(this.$trans('Error loading employees'))
+        errorToast(this.create, $trans('Error loading employees'))
         this.isLoading = false
       }
     }

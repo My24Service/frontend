@@ -11,30 +11,30 @@
       <header v-if="quotation">
         <div class="page-title">
           <h3>
-            <b-icon icon="file-earmark-check-fill"></b-icon>
+            <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
             <router-link
               :to="{name: 'quotations-sent' }"
             >{{ $trans('Quotation') }}</router-link>
             /
             <strong>{{ quotation.quotation_id }} {{ quotation.quotation_name }}</strong>
             <span>
-              <b-link
+              <BLink
                 class="btn btn-sm btn-primary"
                 @click.prevent="showQuotationDialog"
                 target="_blank"
               >
-                <b-icon icon="file-earmark"></b-icon>
+                <IBiFileEarmarkPdf></IBiFileEarmarkPdf>
                 {{ $trans('View PDF') }}
-              </b-link>
+              </BLink>
             </span>
-            <b-button
+            <BButton
               @click="sendQuotation"
               type="button"
               variant="primary"
               class="send-quotation-button"
             >
               {{ $trans('Send quotation') }}
-            </b-button>
+            </BButton>
           </h3>
           <div
             class="flex-columns"
@@ -208,8 +208,17 @@ import {CostService} from "@/models/orders/Cost"
 import {MemberModel} from "@/models/member/Member"
 
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   name: "QuotationView",
   components: {
     QuotationPDFViewer,
@@ -221,7 +230,7 @@ export default {
     return {
       isLoading: false,
       quotation: null,
-      member: new MemberModel(this.$store.getters.getMemberInfo),
+      member: new MemberModel(this.mainStore.getMemberInfo),
       quotationURL: '',
       quotationService: new QuotationService(),
       chapterService: new ChapterService(),
@@ -266,7 +275,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        this.errorToast(this.$trans('Error fetching quotation'))
+        errorToast(this.create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     }

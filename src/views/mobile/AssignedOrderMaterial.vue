@@ -20,12 +20,12 @@
           <h2 v-if="editMode">{{ $trans('Edit material') }}</h2>
           <b-row v-if="!editMode">
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Search assigned orders')"
                 label-for="assignedorder-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="assignedorder-search"
                   track-by="id"
                   :placeholder="$trans('Type to search')"
@@ -45,36 +45,36 @@
                   :custom-label="assignedOrderLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
-              </b-form-group>
+                </VueMultiselect>
+              </BFormGroup>
             </b-col>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Assigned order')"
                 label-for="assignedorder-material-order-info"
               >
-                <b-form-input
+                <BFormInput
                   v-model="selectedAssignedOrderInfo"
                   id="assignedorder-material-order-info"
                   size="sm"
                   readonly
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.selectedAssignedOrderPk.$error : null">
                   {{ $trans('Please select an order') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
           <b-row>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Search location')"
                 label-for="assignedorder-material-location-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="assignedorder-material-location-search"
                   track-by="id"
                   open-direction="bottom"
@@ -90,36 +90,36 @@
                   :custom-label="locationLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
-              </b-form-group>
+                </VueMultiselect>
+              </BFormGroup>
             </b-col>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Location')"
                 label-for="assignedorder-material-location-name"
               >
-                <b-form-input
+                <BFormInput
                   v-model="selectedLocationName"
                   id="assignedorder-material-location-name"
                   size="sm"
                   readonly
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.selectedLocationPk.$error : null">
                   {{ $trans('Please select a location') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
           <b-row>
             <b-col cols="6" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Search material')"
                 label-for="move-material-purchase-order-material-search"
               >
-                <multiselect
+                <VueMultiselect
                   id="move-material-purchase-order-material-search"
                   track-by="id"
                   :placeholder="$trans('Type to search')"
@@ -139,54 +139,54 @@
                   :custom-label="materialLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
-              </b-form-group>
+                </VueMultiselect>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Material')"
                 label-for="move-material-material-name"
               >
-                <b-form-input
+                <BFormInput
                   v-model="selectedMaterialName"
                   id="move-material-material-name"
                   size="sm"
                   readonly
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
                   {{ $trans('Please select a material') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="2" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Amount')"
                 label-for="assignedorder-material-amount"
               >
-                <b-form-input
+                <BFormInput
                   v-model="amount"
                   id="assignedorder-material-amount"
                   size="sm"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.amount.$error : null">
                   {{ $trans('Please enter an amount') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
 
           <div class="mx-auto">
             <footer class="modal-footer">
-              <b-button @click="cancelEdit" v-if="editMode" class="btn btn-primary" type="button" variant="primary">
+              <BButton @click="cancelEdit" v-if="editMode" class="btn btn-primary" type="button" variant="primary">
                 {{ $trans('Cancel') }}
-              </b-button>
-              <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+              </BButton>
+              <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
                 {{ editMode ? $trans('Update') : $trans('Submit') }}
-              </b-button>
+              </BButton>
             </footer>
           </div>
         </b-form>
@@ -227,25 +227,30 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
 import inventoryModel from '@/models/inventory/Inventory.js'
-import materialModel from '@/models/inventory/Material.js'
 import assignedOrderModel from '@/models/mobile/AssignedOrder.js'
 import assignedOrderMaterialModel from '@/models/mobile/AssignedOrderMaterial.js'
 
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
     IconLinkEdit,
     IconLinkDelete,
   },
@@ -262,9 +267,9 @@ export default {
       assignedOrderMaterialPk: null,
       assignedOrderMaterials: [],
       fields: [
-        {key: 'material_name', label: this.$trans('Name'), sortable: true, thAttr: {width: '50%'}},
-        {key: 'location_name', label: this.$trans('Location'), sortable: true, thAttr: {width: '30%'}},
-        {key: 'amount', label: this.$trans('Amount'), sortable: true, thAttr: {width: '10%'}},
+        {key: 'material_name', label: $trans('Name'), sortable: true, thAttr: {width: '50%'}},
+        {key: 'location_name', label: $trans('Location'), sortable: true, thAttr: {width: '30%'}},
+        {key: 'amount', label: $trans('Amount'), sortable: true, thAttr: {width: '10%'}},
         {key: 'icons', thAttr: {width: '10%'}}
       ],
 
@@ -319,11 +324,11 @@ export default {
     async doDelete() {
       try {
         await assignedOrderMaterialModel.delete(this.assignedOrderMaterialPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Material has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Material has been deleted'))
         this.geAassignedOrderMaterials()
       } catch(error) {
         console.log('Error deleting material', error)
-        this.errorToast(this.$trans('Error deleting material'))
+        errorToast(this.create, $trans('Error deleting material'))
       }
     },
     selectAssignedOrder(option) {
@@ -341,7 +346,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching assigned orders', error)
-        this.errorToast(this.$trans('Error fetching assigned orders'))
+        errorToast(this.create, $trans('Error fetching assigned orders'))
         this.isLoading = false
       }
     },
@@ -353,7 +358,7 @@ export default {
         this.materials = await inventoryModel.getMaterialsForLocation(this.selectedLocationPk, query)
       } catch(error) {
         console.log('Error fetching materials', error)
-        this.errorToast(this.$trans('Error fetching materials'))
+        errorToast(this.create, $trans('Error fetching materials'))
       }
     },
     selectMaterial(option) {
@@ -361,7 +366,7 @@ export default {
       this.selectedMaterialPk = option.material_id
     },
     materialLabel(material) {
-      const text = this.$trans('in stock')
+      const text = $trans('in stock')
       return `${material.material_name}, ${text}: ${material.total_amount}`
     },
     async getLocations() {
@@ -372,7 +377,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching locations', error)
-        this.errorToast(this.$trans('Error fetching locations'))
+        errorToast(this.create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -394,7 +399,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('Error fetching assigned order materials', error)
-        this.errorToast(this.$trans('Error fetching assigned order materials'))
+        errorToast(this.create, $trans('Error fetching assigned order materials'))
         this.isLoading = false
       }
     },
@@ -416,7 +421,7 @@ export default {
         this.editMode = true
       } catch(error) {
         console.log('error fetching material', error)
-        this.errorToast(this.$trans('Error fetching material'))
+        errorToast(this.create, $trans('Error fetching material'))
         this.isLoading = false
       }
     },
@@ -450,7 +455,7 @@ export default {
       if (this.editMode) {
         try {
           await assignedOrderMaterialModel.update(this.assignedOrderMaterialPk, this.assignedOrderMaterial)
-          this.errorToast(this.$trans('Material has been updated'))
+          errorToast(this.create, $trans('Material has been updated'))
           this.buttonDisabled = false
           this.isLoading = false
           this.v$.$reset()
@@ -458,7 +463,7 @@ export default {
           this.resetForm()
         } catch(error) {
           console.log('Error updating material', error)
-          this.errorToast(this.$trans('Error updating material'))
+          errorToast(this.create, $trans('Error updating material'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -468,7 +473,7 @@ export default {
 
       try {
         await assignedOrderMaterialModel.insert(this.assignedOrderMaterial)
-        this.infoToast(this.$trans('Created'), this.$trans('Material has been created'))
+        infoToast(this.create, $trans('Created'), $trans('Material has been created'))
         this.buttonDisabled = false
         this.isLoading = false
         this.v$.$reset()
@@ -477,7 +482,7 @@ export default {
         this.resetForm()
       } catch(error) {
         console.log('Error creating material', error)
-        this.errorToast(this.$trans('Error creating material'))
+        errorToast(this.create, $trans('Error creating material'))
         this.buttonDisabled = false
         this.isLoading = false
       }

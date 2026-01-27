@@ -35,11 +35,21 @@
   </div>
 </template>
 <script>
-import { componentMixin } from '@/utils.js'
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
+import {BNav, BNavItem} from "bootstrap-vue-next";
 
 export default {
   name: 'SubNav',
+  components: {BNav, BNavItem},
   mixins: [componentMixin],
+  setup() {
+    const mainStore = useMainStore()
+
+    return {
+      mainStore
+    }
+  },
   data() {
     return {
       memberType: null,
@@ -56,7 +66,7 @@ export default {
   computed: {
     hasNav() {
       const has = ['demo', 'viavandalen']
-      return has.indexOf(this.$store.getters.getMemberCompanycode);
+      return has.indexOf(this.mainStore.getMemberCompanycode);
     },
   }
 }

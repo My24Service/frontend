@@ -2,7 +2,7 @@
   <div class='app-page'>
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="basket"></b-icon>{{ $trans("Webshop") }}</h3>
+        <h3><IBiBasket></IBiBasket>{{ $trans("Webshop") }}</h3>
       </div>
     </header>
     <div class='page-detail'>

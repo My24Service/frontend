@@ -77,13 +77,13 @@ import {
   STATUSCODE_TYPE_INVOICE,
   STATUSCODE_TYPE_LEAVE_HOURS,
   STATUSCODE_TYPE_QUOTATION, STATUSCODE_TYPE_SICK_LEAVE, STATUSCODE_TYPE_WORK_HOURS
-} from "../models/company/AbstractStatuscode";
+} from "@/models/company/AbstractStatuscode";
 import ImportList from "../views/company/ImportList";
-
 import ImportForm from "../views/company/ImportForm";
 import ImportPreview from "../views/company/ImportPreview";
 import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
 import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
+import ComingSoon from "@/views/shared/ComingSoon.vue";
 
 const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
 
@@ -149,42 +149,6 @@ function createStatuscodeRoutes(type) {
         'app-subnav': SubNavCompany
       },
     },
-    {
-      name: 'company-connector-gripp',
-      path: '/company/connector-gripp',
-      props: {
-        'app-content': route => ({...route.params, list_type: type}),
-        'app-subnav': true
-      },
-      components: {
-        'app-content': GrippSettings,
-        'app-subnav': SubNavCompany
-      },
-    },
-    {
-      name: 'company-teamleader-settings',
-      path: '/company/teamleader-settings',
-      props: {
-        'app-content': route => ({...route.params, list_type: type}),
-        'app-subnav': true
-      },
-      components: {
-        'app-content': TeamleaderSettings,
-        'app-subnav': SubNavCompany
-      },
-    },
-    {
-      name: 'company-teamleader-callback',
-      path: '/company/teamleader-callback',
-      props: {
-        'app-content': route => ({...route.params, list_type: type}),
-        'app-subnav': true
-      },
-      components: {
-        'app-content': TeamleaderCallback,
-        'app-subnav': SubNavCompany
-      },
-    }
   ]
 }
 
@@ -199,7 +163,7 @@ export default [
       path: '/company/employee-dashboard',
       components: {
         'app-content': BranchView,
-        // 'app-subnav': {}
+        'app-subnav': SubNavCompany
       },
       props: {
         'app-content': {},
@@ -233,6 +197,7 @@ export default [
     {
       name: 'company-settings',
       path: '/company/company/settings',
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
         'app-content': Settings,
         'app-subnav': SubNavCompany
@@ -484,6 +449,7 @@ export default [
     {
       name: 'users-employees',
       path: '/company/employee-users',
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
         'app-content': UserEmployeeList,
         'app-subnav': SubNavCompany
@@ -496,6 +462,7 @@ export default [
     {
       name: 'employee-edit',
       path: '/company/employee-users/form/:pk',
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
@@ -508,6 +475,7 @@ export default [
     {
       name: 'employee-add',
       path: '/company/employee-users/form',
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
         'app-content': UserEmployeeForm,
         'app-subnav': SubNavCompany
@@ -726,6 +694,7 @@ export default [
     },
     // branches
     {
+
       name: 'company-branches',
       path: '/company/branches',
       components: {
@@ -773,6 +742,19 @@ export default [
         'app-subnav': {}
       },
     },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
+      name: 'company-my-branch',
+      path: '/company/branches/form/my',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': {}
+      },
+      components: {
+        'app-content': BranchForm,
+        'app-subnav': SubNavCompany
+      },
+    },
     // budgets
     {
       name: 'company-budgets',
@@ -796,6 +778,15 @@ export default [
       props: {
         'app-content': route => ({...route.params}),
         'app-subnav': {}
+      },
+    },
+    {
+      meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
+      path: '/company/budgets/my',
+      name: 'company-my-budgets',
+      components: {
+        'app-content': ComingSoon,
+        'app-subnav': SubNavCompany
       },
     },
     // statuscodes
@@ -1011,5 +1002,18 @@ export default [
         'app-subnav': true
       },
     },
+    // Gripp settings
+    {
+      name: 'company-connector-gripp',
+      path: '/company/connector-gripp',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': GrippSettings,
+        'app-subnav': SubNavCompany
+      },
+    }
   ]
 }]

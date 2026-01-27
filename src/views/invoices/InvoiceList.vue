@@ -6,18 +6,18 @@
       </div>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <span>{{ pageTitle }}</span>
         </h3>
 
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
             />
-          </b-button-group>
-        </b-button-toolbar>
+          </BButton-group>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -84,10 +84,10 @@
               :to="{name: 'invoice-send',
                 query: {invoiceId: data.item.id}}"
             >
-              <b-icon-mailbox
+              <IBiMailbox
                 aria-hidden="true"
                 class="edit-icon"
-              ></b-icon-mailbox>
+              ></IBiMailbox>
             </router-link>
             <IconLinkDelete
               v-if="data.item.preliminary"
@@ -98,10 +98,10 @@
               class="icon-link"
               :title="$trans('Order')"
               :to="{name:'order-view', params: {pk: data.item.order}}">
-              <b-icon-arrow-up-right-circle
+              <IBiArrowUpRightCircle
                 aria-hidden="true"
                 class="edit-icon"
-              ></b-icon-arrow-up-right-circle>
+              ></IBiArrowUpRightCircle>
             </router-link>
           </div>
         </template>
@@ -115,32 +115,33 @@
   </div>
 </template>
 <script>
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
-import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '@/components/TableStatusInfo.vue'
 
 import {InvoiceService} from '@/models/invoices/Invoice.js'
 import {InvoiceStatuscodeService} from '@/models/invoices/InvoiceStatuscode.js'
 import { InvoiceStatusService } from '@/models/invoices/InvoiceStatus.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'InvoiceList',
   components: {
-    SearchForm, ButtonLinkSort,
-    IconLinkEdit,
+    SearchForm,
     IconLinkDelete,
-    IconLinkDocuments,
     ButtonLinkRefresh,
-    ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     TableStatusInfo
@@ -157,12 +158,12 @@ export default {
       order: null,
       statuscodes: [],
       fields: [
-        {key: 'invoice_id', label: this.$trans('ID')},
-        {key: 'created_by_fullname', label: this.$trans('Created by')},
-        {key: 'term_of_payment_days', label: this.$trans('Term of payment')},
-        {key: 'total', label: this.$trans('Total')},
-        {key: 'vat', label: this.$trans('Vat')},
-        {key: 'status', label: this.$trans('Status')},
+        {key: 'invoice_id', label: $trans('ID')},
+        {key: 'created_by_fullname', label: $trans('Created by')},
+        {key: 'term_of_payment_days', label: $trans('Term of payment')},
+        {key: 'total', label: $trans('Total')},
+        {key: 'vat', label: $trans('Vat')},
+        {key: 'status', label: $trans('Status')},
         {key: 'icons', label: ''},
       ]
     }
@@ -171,11 +172,11 @@ export default {
     pageTitle() {
       switch (this.$route.name) {
         case 'invoices-sent':
-          return this.$trans("Sent invoices")
+          return $trans("Sent invoices")
         case 'preliminary-invoices':
-          return this.$trans("Preliminary invoices")
+          return $trans("Preliminary invoices")
         default:
-          return this.$trans("Definitive invoices")
+          return $trans("Definitive invoices")
       }
     },
   },
@@ -204,13 +205,13 @@ export default {
 
       try {
         await this.invoiceService.delete(this.invoicePk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Invoice has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Invoice has been deleted'))
         this.isLoading = false
         await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting invoice', error)
-        this.errorToast(this.$trans('Error deleting invoice'))
+        errorToast(this.create, $trans('Error deleting invoice'))
       }
     },
     async loadStatusCodes () {
@@ -227,7 +228,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscodes", error);
-        this.errorToast(this.$trans("Error loading statuscodes"));
+        errorToast(this.create, $trans("Error loading statuscodes"));
         this.isLoading = false;
       }
     },
@@ -241,7 +242,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoices', error)
-        this.errorToast(this.$trans('Error loading invoices'))
+        errorToast(this.create, $trans('Error loading invoices'))
         this.isLoading = false
       }
     }

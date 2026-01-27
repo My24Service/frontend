@@ -1,7 +1,7 @@
 <template>
   <div class='app-page'>
-    <h1><b-icon-lock></b-icon-lock></h1>
-    
+    <h1><IBiLock></IBiLock></h1>
+
       <div class="panel no-access">
         <div class="text-center" v-if="isLoggedIn">
           <h3>{{ $trans('No access') }}</h3>
@@ -20,17 +20,14 @@
 
 <script>
 import LoginForm from "@/components/LoginForm";
+import componentMixin from "@/mixins/common";
 
 export default {
   name: 'NoAccess',
   components: {
     LoginForm
   },
-  computed: {
-    isLoggedIn() {
-      return this.$store.getters.isLoggedIn
-    },
-  },
+  mixins: [componentMixin]
 }
 </script>
 

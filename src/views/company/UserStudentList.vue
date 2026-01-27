@@ -39,8 +39,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="studentuser-add"
                   v-bind:title="$trans('New student user')"
@@ -56,8 +56,8 @@
                   v-bind:method="function() { downloadList() }"
                   v-bind:title="$trans('Download')"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>
@@ -67,21 +67,21 @@
           </div>
         </template>
         <template #cell(full_name)="data">
-          <b-link :to="{name: 'studentuser-detail', params: {pk: data.item.id}}">{{ data.item.full_name }}</b-link>
+          <BLink :to="{name: 'studentuser-detail', params: {pk: data.item.id}}">{{ data.item.full_name }}</BLink>
         </template>
         <template #cell(active)="data">
-          <b-link
+          <BLink
             v-if="!data.item.is_active"
             @click="function() { setActive(data.item.id, data.item.email) }"
           >
-            <b-icon-check-square></b-icon-check-square>
-          </b-link>
-          <b-link
+            <IBiCheckSquare></IBiCheckSquare>
+          </BLink>
+          <BLink
             v-if="data.item.is_active"
             @click="function() { setInActive(data.item.id, data.item.email) }"
           >
-            <b-icon-check-square-fill></b-icon-check-square-fill>
-          </b-link>
+            <IBiCheckSquareFill></IBiCheckSquareFill>
+          </BLink>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -113,8 +113,18 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'UserstudentuserList',
   components: {
     PillsCompanyUsers,
@@ -135,13 +145,13 @@ export default {
       isLoading: false,
       studentusers: [],
       studentuserFields: [
-        {key: 'full_name', label: this.$trans('Name'), sortable: true},
-        {key: 'username', label: this.$trans('Username'), sortable: true},
-        {key: 'student_user.mobile', label: this.$trans('Mobile'), sortable: true},
-        {key: 'email', label: this.$trans('Email'), sortable: true},
-        {key: 'last_login', label: this.$trans('Last login'), sortable: true},
-        {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
-        {key: 'active', label: this.$trans('Active?')},
+        {key: 'full_name', label: $trans('Name'), sortable: true},
+        {key: 'username', label: $trans('Username'), sortable: true},
+        {key: 'student_user.mobile', label: $trans('Mobile'), sortable: true},
+        {key: 'email', label: $trans('Email'), sortable: true},
+        {key: 'last_login', label: $trans('Last login'), sortable: true},
+        {key: 'date_joined', label: $trans('Date joined'), sortable: true},
+        {key: 'active', label: $trans('Active?')},
         {key: 'icons'}
       ],
     }
@@ -153,7 +163,7 @@ export default {
   methods: {
     // download
     downloadList() {
-      if (confirm(this.$trans('Are you sure you want to export all students?'))) {
+      if (confirm($trans('Are you sure you want to export all students?'))) {
         my24.downloadItem('/company/student-export-xls/', 'students.xlsx')
       }
     },
@@ -173,7 +183,7 @@ export default {
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user active', error)
-        this.errorToast(this.$trans('Error setting student user active'))
+        errorToast(this.create, $trans('Error setting student user active'))
       }
     },
     async setInActive(pk, email) {
@@ -182,7 +192,7 @@ export default {
         await this.loadData()
       } catch(error) {
         console.log('Error setting student user inactive', error)
-        this.errorToast(this.$trans('Error setting student user inactive'))
+        errorToast(this.create, $trans('Error setting student user inactive'))
       }
     },
     // delete
@@ -193,11 +203,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('studentuser has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('studentuser has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting studentuser', error)
-        this.errorToast(this.$trans('Error deleting studentuser'))
+        errorToast(this.create, $trans('Error deleting studentuser'))
       }
     },
     // rest
@@ -210,7 +220,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching studentusers', error)
-        this.errorToast(this.$trans('Error loading student users'))
+        errorToast(this.create, $trans('Error loading student users'))
         this.isLoading = false
       }
     }

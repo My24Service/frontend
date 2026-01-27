@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
-        <b-button-toolbar class="flex-columns">
-          <b-button-group class="mr-1">
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
+        <BButton-toolbar class="flex-columns">
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -14,10 +14,14 @@
               v-bind:method="function() { showSearchModal() }"
             />
 
-          </b-button-group>
-          <b-button @click="()=>{ downloadList()}" class="btn primary mr-1"><b-icon icon="save"></b-icon> {{$trans('Download')}}</b-button>
-          <b-link :to="{name: 'engineer-add'}" class="btn primary"><b-icon icon="person-plus"></b-icon>{{ $trans("Add engineer") }}</b-link>
-        </b-button-toolbar>
+          </BButton-group>
+          <BButton @click="()=>{ downloadList()}" class="btn primary mr-1">
+            <IBiSave></IBiSave> {{$trans('Download')}}
+          </BButton>
+          <BLink :to="{name: 'engineer-add'}" class="btn primary">
+            <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add engineer") }}
+          </BLink>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -92,24 +96,33 @@ import PillsCompanyUsers from '../../components/PillsCompanyUsers.vue'
 import engineerModel from '../../models/company/UserEngineer.js'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkDownload from '../../components/ButtonLinkDownload.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import PillsEngineer from "./PillsEngineer";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: 'UserEngineerList',
   components: {
     PillsCompanyUsers,
     IconLinkEdit,
     IconLinkDelete,
-    ButtonLinkAdd,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkDownload,
     SearchModal,
     Pagination,
     PillsEngineer,
@@ -123,12 +136,12 @@ export default {
       isLoading: false,
       engineers: [],
       engineerFields: [
-        {key: 'full_name', label: this.$trans('Name'), sortable: true},
-        {key: 'username', label: this.$trans('Username'), sortable: true},
-        {key: 'engineer.mobile', label: this.$trans('Mobile'), sortable: true},
-        {key: 'email', label: this.$trans('Email'), sortable: true},
-        {key: 'last_login', label: this.$trans('Last login'), sortable: true},
-        {key: 'date_joined', label: this.$trans('Date joined'), sortable: true},
+        {key: 'full_name', label: $trans('Name'), sortable: true},
+        {key: 'username', label: $trans('Username'), sortable: true},
+        {key: 'engineer.mobile', label: $trans('Mobile'), sortable: true},
+        {key: 'email', label: $trans('Email'), sortable: true},
+        {key: 'last_login', label: $trans('Last login'), sortable: true},
+        {key: 'date_joined', label: $trans('Date joined'), sortable: true},
         {key: 'icons', label: ''}
       ]
     }
@@ -145,7 +158,7 @@ export default {
   methods: {
     // download
     downloadList() {
-      if (confirm(this.$trans('Are you sure you want to export all engineers?'))) {
+      if (confirm($trans('Are you sure you want to export all engineers?'))) {
         my24.downloadItem('/company/engineer-export-xls/', 'engineers.xlsx')
       }
     },
@@ -166,16 +179,16 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.pk)
-        this.infoToast(this.$trans('Removed engineer'), `${this.$trans('Engineer has been removed')}`)
+        infoToast(this.create, $trans('Removed engineer'), `${$trans('Engineer has been removed')}`)
         await this.loadData()
       } catch(error) {
-        this.errorToast(`${this.$trans('Error deleting engineer:')} ${error}`);
+        errorToast(this.create, `${$trans('Error deleting engineer:')} ${error}`);
       }
     },
     // rest
     async loadData() {
       // get companycode
-      this.companycode = await this.$store.getters.getMemberCompanycode
+      this.companycode = await this.mainStore.getMemberCompanycode
 
       this.isLoading = true;
 
@@ -185,7 +198,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching engineers', error)
-        this.errorToast(this.$trans('Error loading engineers'))
+        errorToast(this.create, $trans('Error loading engineers'))
         this.isLoading = false
       }
     }

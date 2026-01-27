@@ -56,8 +56,8 @@
         >
           <template #head(icons)="">
             <div class="float-right">
-              <b-button-toolbar>
-                <b-button-group class="mr-1">
+              <BButton-toolbar>
+                <BButton-group class="mr-1">
                   <ButtonLinkRefresh
                     v-bind:method="function() { loadData() }"
                     v-bind:title="$trans('Refresh')"
@@ -65,8 +65,8 @@
                   <ButtonLinkSearch
                     v-bind:method="function() { showSearchModal() }"
                   />
-                </b-button-group>
-              </b-button-toolbar>
+                </BButton-group>
+              </BButton-toolbar>
             </div>
           </template>
           <template #table-busy>
@@ -84,8 +84,8 @@
       </div>
 
       <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
+        <BButton @click="goBack" class="btn btn-info" type="button" variant="primary">
+          {{ $trans('Back') }}</BButton>
       </footer>
     </div>
   </b-overlay>
@@ -97,12 +97,23 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "@/utils";
+
 
 import { OrderService } from '@/models/orders/Order'
 import { BuildingService } from "@/models/equipment/building";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
   mixins: [componentMixin],
   components: {
     ButtonLinkRefresh,
@@ -193,7 +204,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching building detail data', error)
-        this.errorToast(this.$trans('Error fetching building detail'))
+        errorToast(this.create, this.$trans('Error fetching building detail'))
         this.isLoading = false
       }
     },
@@ -206,7 +217,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     }

@@ -16,6 +16,8 @@ import YearStats from '../views/orders/YearStats.vue'
 import MonthStats from '../views/orders/MonthStats.vue'
 import {AUTH_LEVELS} from "@/constants";
 
+import OrdersSchedule from "../views/orders/Schedule.vue";
+
 import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";
 
@@ -141,6 +143,38 @@ export default [
         'app-subnav': true
       }
     },
+
+    // calendar/schedule
+    {
+      meta: { authLevelNeeded: [
+        AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE, AUTH_LEVELS.CUSTOMER] },
+      name: 'orders-schedule-params',
+      path: '/orders/schedule/:start/:end',
+      components: {
+        'app-content': OrdersSchedule,
+        'app-subnav': SubNavOrders
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+    {
+      meta: { authLevelNeeded: [
+          AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE, AUTH_LEVELS.CUSTOMER] },
+      name: 'orders-schedule',
+      path: '/orders/schedule',
+      components: {
+        'app-content': OrdersSchedule,
+        'app-subnav': SubNavOrders
+      },
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+    },
+
+
     // statuscodes
     {
       name: 'order-statuscode-list',

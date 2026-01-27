@@ -12,16 +12,16 @@
       v-bind:title="$trans('Delete?')"
       @ok="doDelete"
     >
-      <p class="my-4">{{ $trans('Are you sure you want to delete this member?') }}</p>
+      <p class="my-4">{{ this.$trans('Are you sure you want to delete this member?') }}</p>
     </b-modal>
 
     <header>
       <div class="page-title">
         <h3>
-          {{ $trans("Members") }}
+          {{ this.$trans("Members") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -30,7 +30,7 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link
             v-if="isSuperuser && !requested && !deleted"
             :to="{name: 'member-add'}"
@@ -45,7 +45,7 @@
           >
             {{$trans('Request new member')}}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -63,19 +63,19 @@
           sort-icon-left
         >
           <template #cell(member_logo)="data">
-            <img :src="data.item.companylogo_url" width="100" alt=""/>
+            <img :src="data.item.companylogo" width="100" alt=""/>
           </template>
           <template #cell(member_info)="data">
             <router-link :to="{name: 'member-edit', params: {pk: data.item.id}}">
-              {{ $trans('Companycode') }}: {{ data.item.companycode }} <span v-if="!data.item.is_public">({{ $trans('private') }})</span> <br/>
-              {{ $trans('Name') }}: {{ data.item.name }}<br/>
+              {{ this.$trans('Companycode') }}: {{ data.item.companycode }} <span v-if="!data.item.is_public">({{ this.$trans('private') }})</span> <br/>
+              {{ this.$trans('Name') }}: {{ data.item.name }}<br/>
               {{ data.item.country_code }}-{{ data.item.postal }} {{ data.item.city }}<br/>
               {{ data.item.email }}<br/>
               <p v-if="data.item.has_api_users">
-                <strong>{{ $trans('Has API users') }}</strong>
+                <strong>{{ this.$trans('Has API users') }}</strong>
               </p>
               <p v-if="data.item.has_branches">
-                <strong>{{ $trans('Has branches') }}</strong>
+                <strong>{{ this.$trans('Has branches') }}</strong>
               </p>
             </router-link>
           </template>
@@ -100,23 +100,29 @@
 
 <script>
 import {MemberService} from '@/models/member/Member'
-import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import { componentMixin } from '@/utils'
+
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
+import componentMixin from "../../mixins/common";
+import {errorToast, infoToast} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    return {
+      create
+    }
+  },
   mixins: [componentMixin],
   components: {
     IconLinkDelete,
-    IconLinkEdit,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -148,13 +154,6 @@ export default {
     }
   },
   computed: {
-    showDelete() {
-      if ((this.isStaff || this.isSuperuser) && this.requested) {
-        return true
-      }
-
-      return !!(this.isSuperuser && !this.requested && !this.deleted);
-    },
     modelName() {
       if (this.requested) {
         return this.$trans('Requested member')
@@ -180,11 +179,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.memberPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Member has been deleted'))
+        infoToast(this.create, this.$trans('Deleted'), this.$trans('Member has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting member', error)
-        this.errorToast(this.$trans('Error deleting member'))
+        errorToast(this.create, this.$trans('Error deleting member'))
       }
     },
     // search
@@ -217,7 +216,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching members', error)
-        this.errorToast(this.$trans('Error loading members'))
+        errorToast(this.create, this.$trans('Error loading members'))
         this.isLoading = false
       }
     }

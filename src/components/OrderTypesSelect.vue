@@ -1,36 +1,48 @@
 <template>
-  <b-form-select
+  <BFormSelect
     v-if="this.orderTypes.length > 0"
-    :input="$emit('update:orderType', orderType)"
     v-model="orderType"
     :options="orderTypes"
-  ></b-form-select>
+  ></BFormSelect>
 </template>
 
 <script>
+import {useMainStore} from "@/stores/main";
+import {computed} from "vue";
+
 export default {
+  name: "OrderTypesSelect",
+  setup(props, { emit }) {
+    const orderType = computed({
+      get: () => props.modelValue,
+      set: (value) => emit('update:modelValue', value)
+    })
+    const mainStore = useMainStore()
+
+    return {
+      mainStore,
+      orderType
+    }
+  },
+  emits: ['update:modelValue'],
   props: {
     includeAll: {
       type: [Boolean],
       default: false
     },
-    orderTypeIn: {
-      type: [String],
-      default: null
+    modelValue: {
+      type: String
     },
   },
   data() {
     return {
-      orderType: null,
       orderTypes: []
     }
   },
   mounted() {
-    this.$store.dispatch('getOrderTypes')
-      .then((order_types) => {
-        this.orderTypes = this.includeAll ? ['all', ...order_types] : order_types
-        this.orderType = this.orderTypeIn !== null ? this.orderTypeIn : this.orderTypes[0]
-      })
+    const order_types = this.mainStore.getOrderTypes
+    this.orderTypes = this.includeAll ? ['all', ...order_types] : order_types
+    this.orderType = this.modelValue !== null ? this.modelValue : this.orderTypes[0]
   }
 }
 </script>

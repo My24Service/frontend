@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: 'sick-leave-list' }">{{ $trans("Sick leave") }}</router-link>
           /
           <span class="dimmed">
@@ -12,11 +12,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -25,14 +25,14 @@
       <div class="page-detail flex-columns">
         <div class="panel">
           <h6>{{ $trans("Sick leave") }}</h6>
-          <b-form-group
+          <BFormGroup
             v-if="isCreate"
             label-size="sm"
             label-class="p-sm-0"
             v-bind:label="$trans('Search existing user')"
             label-for="user-search"
           >
-            <multiselect
+            <VueMultiselect
               id="user-search"
               track-by="id"
               :placeholder="$trans('Type to search')"
@@ -50,43 +50,44 @@
               :custom-label="userLabel"
             >
               <span slot="noResult">{{ $trans('Nothing found.') }}</span>
-            </multiselect>
-          </b-form-group>
-          <b-form-group
+            </VueMultiselect>
+          </BFormGroup>
+          <BFormGroup
             v-if="isCreate"
             label-class=""
             :label="$trans('User')"
             label-for="user"
             cols="4"
           >
-            <b-form-input
+            <BFormInput
               id="total_time"
               v-model="userName"
               placeholder="User"
               :readonly="true"
-            ></b-form-input>
+            ></BFormInput>
             <b-form-invalid-feedback :state="isSubmitClicked ? !v$.leave.user.$error : null">
               {{ $trans("Please select a user") }}
             </b-form-invalid-feedback>
-          </b-form-group>
+          </BFormGroup>
           <div class="flex-columns">
-            <b-form-group :label="$trans('Start date')" label-for="start_date" cols="4">
-              <b-form-datepicker
+            <BFormGroup :label="$trans('Start date')" label-for="start_date" cols="4">
+              <VueDatePicker
                 id="start_date"
                 class=""
                 v-model="leave.start_date"
                 :placeholder="$trans('Select date')"
-                value="leave.start_date"
-                locale="nl"
                 :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
-                :date-format-options="{ year: 'numeric', month: '2-digit', day: '2-digit' }"
-              ></b-form-datepicker>
+                :locale="nl"
+                auto-apply
+                arrow-navigation
+                :formats="{ input: 'dd/MM/yyyy' }"
+              ></VueDatePicker>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.leave.start_date.$error : null"
               >
                 {{ $trans("Please enter a start date") }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
         </div>
       </div>
@@ -95,20 +96,32 @@
 </template>
 <script>
 import moment from "moment";
+import { nl } from "date-fns/locale"
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import { useVuelidate } from "@vuelidate/core";
 import { required } from "@vuelidate/validators";
 import { UserListService } from "@/models/company/UserList.js";
 import { SickLeavesService } from "@/models/company/SickLeave.js";
-import Multiselect from 'vue-multiselect'
-
+import VueMultiselect from 'vue-multiselect'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
+  mixins: [componentMixin],
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {
@@ -145,7 +158,8 @@ export default {
       },
       leaveTypes: [],
       endTimeInvalid: true,
-      startTimeInvalid: true
+      startTimeInvalid: true,
+      nl
     };
   },
   computed: {
@@ -157,7 +171,7 @@ export default {
     }
   },
   created() {
-    const lang = this.$store.getters.getCurrentLanguage;
+    const lang = this.mainStore.getCurrentLanguage;
     this.$moment = moment;
     this.$moment.locale(lang);
 
@@ -180,12 +194,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.sickLeavesService.insert(this.leave);
-          this.infoToast(this.$trans("Created"), this.$trans("Leave has been created"));
+          infoToast(this.create, $trans("Created"), $trans("Leave has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating leave", error);
-          this.errorToast(this.$trans("Error creating leave"));
+          errorToast(this.create, $trans("Error creating leave"));
           this.isLoading = false;
         }
 
@@ -194,12 +208,12 @@ export default {
 
       try {
         await this.sickLeavesService.update(this.pk, this.leave);
-        this.infoToast(this.$trans("Updated"), this.$trans("Leave has been updated"));
+        infoToast(this.create, $trans("Updated"), $trans("Leave has been updated"));
         this.isLoading = false;
         this.$router.go(-1);
       } catch (error) {
         console.log("Error updating leave", error);
-        this.errorToast(this.$trans("Error updating leave"));
+        errorToast(this.create, $trans("Error updating leave"));
         this.isLoading = false;
       }
     },
@@ -219,7 +233,7 @@ export default {
         this.compLoading = false
       } catch(error) {
         console.log('Error fetching users', error)
-        this.errorToast(this.$trans('Error fetching users'))
+        errorToast(this.create, $trans('Error fetching users'))
         this.compLoading = false
       }
     },
@@ -235,7 +249,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching sick leave", error);
-        this.errorToast(this.$trans("Error loading sick leave"));
+        errorToast(this.create, $trans("Error loading sick leave"));
         this.isLoading = false;
       }
     },

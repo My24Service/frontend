@@ -2,15 +2,15 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="arrow-left-right"></b-icon>{{ $trans("Mutations") }}</h3>
-        <b-button-toolbar>
-          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+        <h3><IBiArrowLeftRight></IBiArrowLeftRight>{{ $trans("Mutations") }}</h3>
+        <BButton-toolbar>
+          <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          </BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-          </b-button>
-        </b-button-toolbar>
+          </BButton>
+        </BButton-toolbar>
       </div>
     </header>
     <div class="page-detail">
@@ -19,12 +19,12 @@
           <div class="panel col-1-3">
             <h6>{{ $trans('Add mutation') }}</h6>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="12"
               label-for="add-mutation-material-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="add-mutation-material-search"
                 track-by="id"
                 :placeholder="`${$trans('Select product')} ${$trans('(type to search)')}`"
@@ -44,11 +44,11 @@
                 :custom-label="materialLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
+              </VueMultiselect>
+            </BFormGroup>
 
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="12"
               label-for="add-mutation-material-name"
@@ -58,44 +58,44 @@
                 :state="isSubmitClicked ? !v$.mutation.material.$error : null">
                 {{ $trans('Please select a material') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
             <div class="flex-columns">
-              <b-form-group
+              <BFormGroup
                 label-cols="3"
                 v-bind:label="$trans('Amount')"
                 label-for="add-mutation-amount"
               >
-                <b-form-input
+                <BFormInput
                   v-model="mutation.amount"
                   id="add-mutation-amount"
                   type="number"
                   ref="amount"
                   style="width: 6rem"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.mutation.amount.$error : null">
                   {{ $trans('Please enter an amount') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-cols="3"
                 label-align="right"
                 v-bind:label="$trans('Type')"
                 label-for="add-mutation-mutation_type"
               >
-                <b-form-select v-model="mutation.mutation_type" :options="mutationTypes"></b-form-select>
-              </b-form-group>
+                <BFormSelect v-model="mutation.mutation_type" :options="mutationTypes"></BFormSelect>
+              </BFormGroup>
             </div>
 
             <h6>{{ $trans(locationText)}}</h6>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="12"
               label-for="add-mutation-location-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="add-mutation-location-search"
                 track-by="id"
                 open-direction="bottom"
@@ -111,22 +111,22 @@
                 :custom-label="locationLabel"
               >
                 <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-              </multiselect>
-            </b-form-group>
+              </VueMultiselect>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-for="add-mutation-location-name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="mutation.location_name"
                 id="add-mutation-location-name"
                 readonly
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.mutation.location.$error : null">
                 {{ $trans('Please select a location') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </div>
         </b-form>
       </b-overlay>
@@ -137,19 +137,25 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import inventoryModel from '../../models/inventory/Inventory.js'
 import mutationModel from "../../models/inventory/Mutation";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   data() {
     return {
@@ -157,16 +163,16 @@ export default {
       buttonDisabled: false,
       submitClicked: false,
 
-      fromLocationText: this.$trans('From location'),
-      toLocationText: this.$trans('To location'),
+      fromLocationText: $trans('From location'),
+      toLocationText: $trans('To location'),
 
       mutation: mutationModel.getFields(),
       mutationTypes: [{
         value: 'correction-in',
-        text: this.$trans('Correction in')
+        text: $trans('Correction in')
       }, {
         value: 'correction-out',
-        text: this.$trans('Correction out')
+        text: $trans('Correction out')
       }],
 
       materials: [],
@@ -220,11 +226,11 @@ export default {
       } catch(error) {
         console.log('Error fetching materials', error)
         this.isLoading = false
-        this.errorToast(this.$trans('Error fetching materials'))
+        errorToast(this.create, $trans('Error fetching materials'))
       }
     },
     materialLabel(material) {
-      const text = this.$trans('in stock')
+      const text = $trans('in stock')
       return `${material.material_name}, ${text}: ${material.total_amount}`
     },
     // locations
@@ -235,7 +241,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching locations', error)
-        this.errorToast(this.$trans('Error fetching locations'))
+        errorToast(this.create, $trans('Error fetching locations'))
         this.isLoading = false
       }
     },
@@ -261,13 +267,13 @@ export default {
 
       try {
         await mutationModel.insert(this.mutation)
-        this.infoToast(this.$trans('Created'), this.$trans('Mutation created'))
+        infoToast(this.create, $trans('Created'), $trans('Mutation created'))
         this.buttonDisabled = false
         this.isLoading = false
         await this.$router.push({name: 'mutation-list'})
       } catch(error) {
         console.log('error creating mutation', error)
-        this.errorToast(this.$trans('Error creating mutation'))
+        errorToast(this.create, $trans('Error creating mutation'))
         this.buttonDisabled = false
         this.isLoading = false
       }

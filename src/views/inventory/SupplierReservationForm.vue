@@ -3,18 +3,18 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-lock"></b-icon>
+          <IBiFileLock></IBiFileLock>
           <span class="backlink" @click="cancelForm">{{ $trans('Reservations') }}</span> /
           <span v-if="isCreate">{{ $trans('New reservation') }}</span>
           {{ this.pk }} <span v-if="!isCreate" class="dimmed">{{ $trans('edit') }}</span>
         </h3>
         <div class='flex-columns'>
-          <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+          <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+          </BButton>
+          <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-          </b-button>
+          </BButton>
         </div>
       </div>
     </header>
@@ -25,14 +25,14 @@
             <div class='panel col-1-3'>
               <h6>{{  $trans('Supplier') }}</h6>
               <fieldset>
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-cols="12"
                   label-cols-md="3"
                   v-bind:label="$trans('Search supplier')"
                   label-for="supplier-reservation-supplier-search"
                 >
-                  <multiselect
+                  <VueMultiselect
                     id="supplier-reservation-supplier-search"
                     track-by="id"
                     :placeholder="$trans('Type to search')"
@@ -52,99 +52,99 @@
                     :custom-label="supplierLabel"
                   >
                     <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                  </multiselect>
-                </b-form-group>
+                  </VueMultiselect>
+                </BFormGroup>
 
-                <b-form-group
+                <BFormGroup
                 label-cols="12"
                   label-cols-md="3"
                   label-size="sm"
                   v-bind:label="$trans('Supplier')"
                   label-for="supplier-reservation-supplier-name"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedSupplier.name"
                     id="supplier-reservation-supplier-name"
                     readonly
                     size="sm"
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="!v$.supplierReservation.supplier.$error">
                     {{ $trans('Please select a supplier') }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
 
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-cols="12"
                   label-cols-md="3"
                   v-bind:label="$trans('Address')"
                   label-for="supplier-reservation-supplier-address"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedSupplier.address"
                     id="supplier-reservation-supplier-address"
                     readonly
                     size="sm"
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
 
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-cols="12"
                   label-cols-md="3"
                   v-bind:label="$trans('City')"
                   label-for="supplier-reservation-supplier-city"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedSupplier.city"
                     id="supplier-reservation-supplier-city"
                     size="sm"
                     readonly
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
 
-                <b-form-group
+                <BFormGroup
                   label-size="sm"
                   label-cols="12"
                   label-cols-md="3"
                   v-bind:label="$trans('Email')"
                   label-for="supplier-reservation-supplier-email"
                 >
-                  <b-form-input
+                  <BFormInput
                     v-model="selectedSupplier.email"
                     id="supplier-reservation-supplier-email"
                     size="sm"
                     readonly
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null"
-                  ></b-form-input>
+                  ></BFormInput>
                   <b-form-invalid-feedback
                     :state="isSubmitClicked ? !v$.supplierReservation.supplier.$error : null">
                     {{ chooseErrorText }}
                   </b-form-invalid-feedback>
-                </b-form-group>
+                </BFormGroup>
               </fieldset>
             </div>
             <div class='panel col-1-3'>
               <div class="reservation-materials">
                 <h6>{{$trans('Add product(s)')}}</h6>
 
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Search product')"
                   >
-                    <multiselect
+                    <VueMultiselect
                       id="reservation-material-name"
                       track-by="id"
                       label="name"
@@ -165,62 +165,62 @@
                       @select="selectMaterial"
                     >
                       <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                    </multiselect>
+                    </VueMultiselect>
                     <b-form-invalid-feedback
                       :state="!v$.material.material.$error">
                       {{ $trans('Please select a product') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
 
 
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Name')"
                     label-for="reservation-material-name"
                     >
-                  <b-form-input
+                  <BFormInput
                     id="reservation-material-name"
                     size="sm"
                     v-model="material.material_view.name"
                     readonly
                     :state="!v$.material.material.$error"
-                    ></b-form-input>
+                    ></BFormInput>
 
-                  </b-form-group>
+                  </BFormGroup>
 
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     label-cols="3"
                     v-bind:label="$trans('Amount')"
                     label-for="reservation-material-amount"
                   >
-                  <b-form-input
+                  <BFormInput
                     id="reservation-material-amount"
                     size="sm"
                     v-model="material.amount"
                     :state="!v$.material.amount.$error"
                     ref="amount"
-                      ></b-form-input>
+                      ></BFormInput>
                       <b-form-invalid-feedback
                       :state="!v$.material.amount.$error">
                       {{ $trans('Please enter an amount') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
 
-                  <b-form-group
+                  <BFormGroup
                   label-size="sm"
                   v-bind:label="$trans('Remarks')"
                   label-for="reservation-material-remarks"
                   >
-                  <b-form-textarea
+                  <BFormTextarea
                   id="reservation-material-remarks"
                   v-model="material.remarks"
                   rows="1"
-                  ></b-form-textarea>
-                </b-form-group>
+                  ></BFormTextarea>
+                </BFormGroup>
 
                 <footer class="modal-footer">
-                  <b-button
+                  <BButton
                     @click="cancelEditMaterial"
                     class="btn btn-primary"
                     size="sm"
@@ -228,9 +228,9 @@
                     variant="secondary"
                   >
                     {{ $trans('Cancel') }}
-                  </b-button>
+                  </BButton>
                   &nbsp;
-                  <b-button
+                  <BButton
                     v-if="isEditMaterial"
                     @click="doEditMaterial"
                     class="btn btn-primary"
@@ -238,8 +238,8 @@
                     type="button"
                     variant="warning">
                     {{ $trans('Edit product') }}
-                  </b-button>
-                  <b-button
+                  </BButton>
+                  <BButton
                     v-if="!isEditMaterial"
                     @click="addMaterial"
                     class="btn btn-primary"
@@ -249,7 +249,7 @@
                     :disabled="!isMaterialValid"
                   >
                     {{ $trans('Add product') }}
-                  </b-button>
+                  </BButton>
                 </footer>
 
               </div>
@@ -265,12 +265,12 @@
               >
                 <template #cell(icons)="data">
                   <div class="float-right">
-                    <b-link class="h5 mx-2" @click="editMaterial(data.item, data.index)">
-                      <b-icon-pencil></b-icon-pencil>
-                    </b-link>
-                    <b-link class="h5 mx-2" @click.prevent="deleteMaterial(data.index)">
-                      <b-icon-trash></b-icon-trash>
-                    </b-link>
+                    <BLink class="h5 mx-2" @click="editMaterial(data.item, data.index)">
+                      <IBiPencil></IBiPencil>
+                    </BLink>
+                    <BLink class="h5 mx-2" @click.prevent="deleteMaterial(data.index)">
+                      <IBiTrash></IBiTrash>
+                    </BLink>
                   </div>
                 </template>
               </b-table>
@@ -285,21 +285,27 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 import supplierReservationMaterialModel from '@/models/inventory/SupplierReservationMaterial.js'
 import supplierModel from '@/models/inventory/Supplier.js'
 import materialModel from '@/models/inventory/Material.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {
@@ -309,7 +315,7 @@ export default {
   },
   data() {
     return {
-      chooseErrorText: this.$trans('Please select a supplier'),
+      chooseErrorText: $trans('Please select a supplier'),
       isLoading: true,
       buttonDisabled: false,
       submitClicked: false,
@@ -326,9 +332,9 @@ export default {
       isEditMaterial: false,
 
       materialFields: [
-        { key: 'material_view.name', label: this.$trans('Name') },
-        { key: 'amount', label: this.$trans('Amount') },
-        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'material_view.name', label: $trans('Name') },
+        { key: 'amount', label: $trans('Amount') },
+        { key: 'remarks', label: $trans('Remarks') },
         { key: 'icons', label: '' }
       ],
 
@@ -444,7 +450,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching suppliers', error)
-        this.errorToast(this.$trans('Error fetching suppliers'))
+        errorToast(this.create, $trans('Error fetching suppliers'))
         this.isLoading = false
       }
     },
@@ -465,7 +471,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching products', error)
-        this.errorToast(this.$trans('Error fetching products'))
+        errorToast(this.create, $trans('Error fetching products'))
         this.isLoading = false
       }
     },
@@ -488,13 +494,13 @@ export default {
             await supplierReservationMaterialModel.insert(material)
           }
 
-          this.infoToast(this.$trans('Created'), this.$trans('Reservation has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Reservation has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating reservation', error)
-          this.errorToast(this.$trans('Error creating reservation'))
+          errorToast(this.create, $trans('Error creating reservation'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -504,23 +510,23 @@ export default {
 
       try {
         await supplierReservationModel.update(this.pk, this.supplierReservation)
-        this.infoToast(this.$trans('Updated'), this.$trans('Reservation has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Reservation has been updated'))
 
         for (let material of this.supplierReservation.materials) {
           material.reservation = this.pk
           if (material.id) {
             await supplierReservationMaterialModel.update(material.id, material)
-            this.infoToast(this.$trans('Product updated'), this.$trans('Reservation product has been updated'))
+            infoToast(this.create, $trans('Product updated'), $trans('Reservation product has been updated'))
           } else {
             await supplierReservationMaterialModel.insert(material)
-            this.infoToast(this.$trans('Product created'), this.$trans('Reservation product has been created'))
+            infoToast(this.create, $trans('Product created'), $trans('Reservation product has been created'))
           }
         }
 
         for (const material of this.deletedMaterials) {
           if (material.id) {
             await supplierReservationMaterialModel.delete(material.id)
-            this.infoToast(this.$trans('Product removed'), this.$trans('Reservation product has been removed'))
+            infoToast(this.create, $trans('Product removed'), $trans('Reservation product has been removed'))
           }
         }
 
@@ -529,7 +535,7 @@ export default {
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating reservation', error)
-        this.errorToast(this.$trans('Error updating reservation'))
+        errorToast(this.create, $trans('Error updating reservation'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -542,7 +548,7 @@ export default {
         await this.getMaterials('')
       } catch(error) {
           console.log('error fetching reservation', error)
-          this.errorToast(this.$trans('Error fetching reservation'))
+          errorToast(this.create, $trans('Error fetching reservation'))
       }
     },
     cancelForm() {

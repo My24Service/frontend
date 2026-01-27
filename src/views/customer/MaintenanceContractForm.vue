@@ -12,16 +12,16 @@
           <b-container fluid>
             <b-row role="group">
               <b-col size="12">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Equipment name')"
                   label-for="maintenance_equipment_new_equipment"
                 >
-                  <b-form-input
+                  <BFormInput
                     id="maintenance_equipment_new_equipment"
                     size="sm"
                     v-model="newEquipmentName"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
@@ -30,16 +30,16 @@
       <header>
         <div class='page-title'>
           <h3>
-            <b-icon icon="file-earmark-lock"></b-icon><router-link :to="{name: 'maintenance-contracts'}">{{ $trans("Maintenance contracts") }}</router-link> /
+            <IBiFileEarmarkLock></IBiFileEarmarkLock><router-link :to="{name: 'maintenance-contracts'}">{{ $trans("Maintenance contracts") }}</router-link> /
             <span class="dimmed" v-if="isCreate && !maintenanceContractService.editItem.name">{{ $trans('new') }}</span>
             <span class="dimmed" v-if="!isCreate && !maintenanceContractService.editItem.name">{{ $trans('edit') }}</span>
             <span v-else>{{ maintenanceContractService.editItem.name }}</span>
           </h3>
           <div class='flex-columns'>
-            <b-button @click="cancelForm" type="button" variant="secondary outline">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
+            <BButton @click="cancelForm" type="button" variant="secondary outline">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton @click="submitForm" type="button" variant="primary">
+              {{ $trans('Submit') }}</BButton>
           </div>
         </div>
       </header>
@@ -47,29 +47,29 @@
         <b-form class="flex-columns">
           <div class='panel col-1-3'>
             <h6>{{ $trans('Contract info') }}</h6>
-            <b-form-group v-bind:label="$trans('Contract name')"
+            <BFormGroup v-bind:label="$trans('Contract name')"
               label-cols="4"
               label-size="sm"
               label-for="maintenance_contract_name">
-              <b-form-input
+              <BFormInput
                 ref="contractName"
                 id="maintenance_contract_name"
                 size="sm"
                 v-model="maintenanceContractService.editItem.name"
                 :placeholder="$trans('The name of this contract')"
                 required
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="!v$.maintenanceContractService.editItem.name.$error">
                 {{ $trans('Please enter a contract name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group v-bind:label="$trans('Customer')"
+            </BFormGroup>
+            <BFormGroup v-bind:label="$trans('Customer')"
               label-cols="4"
               label-size="sm"
               label-for="maintenance_contract_customer_search"
             >
-              <multiselect
+              <VueMultiselect
                 v-if="!isLoading"
                 id="maintenance_contract_customer_search"
                 track-by="id"
@@ -92,37 +92,37 @@
                 required
               >
                 <span slot="noResult">{{ $trans('No customers found. Consider changing the search query.') }}</span>
-              </multiselect>
+              </VueMultiselect>
               <b-form-invalid-feedback
                 :state="!v$.maintenanceContractService.editItem.customer.$error">
                 {{ $trans('Please select a customer') }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group v-bind:label="$trans('Remarks')"
+            </BFormGroup>
+            <BFormGroup v-bind:label="$trans('Remarks')"
               label-size="sm"
               label-cols="4"
               label-for="maintenance_contract_remarks"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="maintenance_contract_remarks"
                 v-model="maintenanceContractService.editItem.remarks"
                 rows="1"
                 :placeholder="$trans('A note about this contract')"
-              ></b-form-textarea>
-            </b-form-group>
-            <b-form-group v-bind:label="$trans('Contract value')"
+              ></BFormTextarea>
+            </BFormGroup>
+            <BFormGroup v-bind:label="$trans('Contract value')"
               label-cols="4"
               label-size="sm"
               label-for="maintenance_contract_contract_value">
-              <b-form-input
+              <BFormInput
                 ref="contract_value"
                 id="maintenance_contract_contract_value"
                 size="sm"
                 readonly
                 :value="total_dinero.toFormat('$0.00')"
               >
-              </b-form-input>
-            </b-form-group>
+              </BFormInput>
+            </BFormGroup>
 
             <h6 v-if="customer.id">{{ $trans("Customer") }}</h6>
             <CustomerCard
@@ -137,7 +137,7 @@
             <hr />
 
             <h3 v-if="!customer.id" class="text-center">
-              <b-icon icon="info-square" variant="primary"></b-icon> &nbsp;
+              <IBiInfoSquare variant="primary"></IBiInfoSquare> &nbsp;
               <span class="dimmed">{{ $trans('Select a customer to add equipment to this contract.') }}</span>
             </h3>
 
@@ -155,12 +155,12 @@
                     </template>
                     <template #cell(icons)="data">
                       <div class="float-right">
-                        <b-link class="h5 mx-2" @click="editEquipment(data.item, data.index)">
-                          <b-icon-pencil></b-icon-pencil>
-                        </b-link>
-                        <b-link class="h5 mx-2" @click.prevent="deleteEquipment(data.index)">
-                          <b-icon-trash></b-icon-trash>
-                        </b-link>
+                        <BLink class="h5 mx-2" @click="editEquipment(data.item, data.index)">
+                          <IBiPencil></IBiPencil>
+                        </BLink>
+                        <BLink class="h5 mx-2" @click.prevent="deleteEquipment(data.index)">
+                          <IBiTrash></IBiTrash>
+                        </BLink>
                       </div>
                     </template>
                   </b-table>
@@ -168,11 +168,11 @@
               </b-row>
               <b-row>
                 <b-col cols="12" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Add equipment')"
                   >
-                    <multiselect
+                    <VueMultiselect
                       id="maintenance-contract-equipment-name"
                       ref="multiselect_equipment"
                       :key="customer.id"
@@ -196,11 +196,11 @@
                     >
                       <span slot="noResult">
                         <p>
-                          <b-icon icon="info-square" variant="primary"></b-icon>
+                          <IBiInfoSquare variant="primary"></IBiInfoSquare>
                           {{ $trans('No equipment found. Consider changing the search query, or add a new equipment:')}}
                         </p>
                         <p>
-                          <b-button
+                          <BButton
                             @click="showAddEquipmentModal"
                             class="btn btn-primary"
                             size="sm"
@@ -208,53 +208,53 @@
                             variant="primary"
                           >
                             {{ $trans("Add equipment") }}
-                          </b-button>
+                          </BButton>
                         </p>
                       </span>
-                    </multiselect>
-                  </b-form-group>
+                    </VueMultiselect>
+                  </BFormGroup>
                 </b-col>
               </b-row>
               <b-row>
                 <b-col cols="3" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Name')"
                     label-for="maintenance-contract-equipment-name"
                   >
-                    <b-form-input
+                    <BFormInput
                       readonly
                       id="maintenance-contract-equipment-name"
                       size="sm"
                       v-model="maintenanceEquipmentService.editItem.equipment_name"
-                    ></b-form-input>
+                    ></BFormInput>
                     <b-form-invalid-feedback
                       :state="!v$.maintenanceEquipmentService.editItem.equipment_name.$error">
                       {{ $trans('Please select an equipment') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="2" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Frequency')"
                     :placeholder="$trans('times per year')"
                     label-for="maintenance-contract-equipment-times_per_year"
                   >
-                    <b-form-input
+                    <BFormInput
                       id="maintenance-contract-equipment-times_per_year"
                       size="sm"
                       ref="times_per_year"
                       v-model="maintenanceEquipmentService.editItem.times_per_year"
-                    ></b-form-input>
+                    ></BFormInput>
                     <b-form-invalid-feedback
                       :state="!v$.maintenanceEquipmentService.editItem.times_per_year.$error">
                       {{ $trans('Please enter a number') }}
                     </b-form-invalid-feedback>
-                  </b-form-group>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="3" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Tariff')"
                     label-for="maintenance-contract-equipment-tariff"
@@ -264,24 +264,24 @@
                       :currency="maintenanceEquipmentService.editItem.tariff_currency"
                       @priceChanged="(val) => tariffChanged(val)"
                     />
-                  </b-form-group>
+                  </BFormGroup>
                 </b-col>
                 <b-col cols="4" role="group">
-                  <b-form-group
+                  <BFormGroup
                     label-size="sm"
                     v-bind:label="$trans('Remarks')"
                     label-for="maintenance-contract-equipment-remarks"
                   >
-                    <b-form-textarea
+                    <BFormTextarea
                       id="maintenance-contract-equipment-remarks"
                       v-model="maintenanceEquipmentService.editItem.remarks"
                       rows="1"
-                    ></b-form-textarea>
-                  </b-form-group>
+                    ></BFormTextarea>
+                  </BFormGroup>
                 </b-col>
               </b-row>
               <footer class="modal-footer">
-                <b-button
+                <BButton
                   @click="cancelEditEquipment"
                   class="btn btn-primary"
                   size="sm"
@@ -289,9 +289,9 @@
                   variant="secondary"
                 >
                   {{ $trans('Cancel') }}
-                </b-button>
+                </BButton>
                 &nbsp;
-                <b-button
+                <BButton
                   v-if="maintenanceEquipmentService.isEdit"
                   @click="doEditEquipment"
                   class="btn btn-primary"
@@ -299,8 +299,8 @@
                   type="button"
                   variant="warning">
                   {{ $trans('Edit equipment') }}
-                </b-button>
-                <b-button
+                </BButton>
+                <BButton
                   v-if="!maintenanceEquipmentService.isEdit"
                   @click="addEquipment"
                   class="btn btn-primary"
@@ -310,7 +310,7 @@
                   :disabled="!isEquipmentValid"
                 >
                   {{ $trans('Add equipment') }}
-                </b-button>
+                </BButton>
               </footer>
 
             </div>
@@ -337,29 +337,38 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 
-import { CustomerService } from '../../models/customer/Customer.js'
-import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
-import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
-import { EquipmentService } from "../../models/equipment/equipment";
-import {componentMixin} from "../../utils";
+import { CustomerService } from '@/models/customer/Customer'
+import { MaintenanceContractService } from '@/models/customer/MaintenanceContract'
+import { MaintenanceEquipmentService } from "@/models/customer/MaintenanceEquipment";
+import { EquipmentService } from "@/models/equipment/equipment"
 import PriceInput from "../../components/PriceInput";
 import CustomerCard from '../../components/CustomerCard.vue'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
+import {useMainStore} from "@/stores/main";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
 export default {
-  mixins: [componentMixin],
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
+  mixins: [componentMixin],
   components: {
-    Multiselect,
+    VueMultiselect,
     PriceInput,
     CustomerCard,
-},
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -410,10 +419,10 @@ export default {
       newEquipmentName: null,
 
       equipmentFields: [
-        { key: 'equipment_name', label: this.$trans('Name') },
-        { key: 'times_per_year', label: this.$trans('Times / year') },
-        { key: 'tariff', label: this.$trans('Tariff') },
-        { key: 'remarks', label: this.$trans('Remarks') },
+        { key: 'equipment_name', label: $trans('Name') },
+        { key: 'times_per_year', label: $trans('Times / year') },
+        { key: 'tariff', label: $trans('Tariff') },
+        { key: 'remarks', label: $trans('Remarks') },
         { key: 'icons', label: '' }
       ],
       equipmentSearch: [],
@@ -439,7 +448,7 @@ export default {
     this.getEquipmentDebounced = AwesomeDebouncePromise(this.getEquipment, 500)
     this.maintenanceEquipmentService.modelDefaults = {
       tariff: '0.00',
-      tariff_currency: this.$store.getters.getDefaultCurrency,
+      tariff_currency: this.mainStore.getDefaultCurrency,
     }
     this.maintenanceEquipmentService.newEditItem()
     this.maintenanceEquipmentService.deletedItems = []
@@ -471,7 +480,7 @@ export default {
         this.customers = await this.customerService.search(query)
       } catch(error) {
         console.log('Error fetching customers', error)
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
       }
     },
     customerLabel({ name, city}) {
@@ -500,14 +509,14 @@ export default {
     async submitCreateEquipment() {
       // assuming we don't manage maintenance contracts from branches
       if (!this.hasBranches) {
-        this.errorToast(this.$trans('Not creating equipment from branch environment'))
+        errorToast(this.create, $trans('Not creating equipment from branch environment'))
         return
       }
 
       this.$refs.multiselect_equipment.deactivate()
 
       try {
-        const response = this.isPlanning || this.isStaff || this.isSuperuser ?
+        const response = this.isPlanning || this.isAdmin ?
           await this.equipmentService.quickAddCustomerPlanning(this.newEquipmentName, this.customer.id) :
           await this.equipmentService.quickAddCustomerNonPlanning(this.newEquipmentName)
 
@@ -517,7 +526,7 @@ export default {
         this.$refs.times_per_year.focus()
       }  catch(error) {
         console.log('Error adding equipment', error)
-        this.errorToast(this.$trans('Error adding equipment'))
+        errorToast(this.create, $trans('Error adding equipment'))
       }
     },
     async getEquipment(query) {
@@ -525,7 +534,7 @@ export default {
         this.equipmentSearch = await this.equipmentService.searchCustomer(query, this.customer.id)
       } catch(error) {
         console.log('Error searching equipment', error)
-        this.errorToast(this.$trans('Error searching equipment'))
+        errorToast(this.create, $trans('Error searching equipment'))
       }
     },
     equipmentLabel({ name, city}) {
@@ -595,12 +604,12 @@ export default {
           )
           await this.maintenanceEquipmentService.updateCollection()
 
-          this.infoToast(this.$trans('Created'), this.$trans('Maintenance contract has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Maintenance contract has been created'))
           this.isLoading = false
           this.goBack()
         } catch(error) {
           console.log('Error creating maintenance_contract', error)
-          this.errorToast(this.$trans('Error creating maintenance contract'))
+          errorToast(this.create, $trans('Error creating maintenance contract'))
           this.isLoading = false
         }
 
@@ -617,13 +626,13 @@ export default {
         )
         await this.maintenanceEquipmentService.updateCollection()
 
-        this.infoToast(this.$trans('Updated'), this.$trans('Maintenance contract has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Maintenance contract has been updated'))
         this.isLoading = false
         this.goBack()
       } catch(error) {
         console.log('Error updating maintenance_contract', error)
         if (error.response.data[0])
-        this.errorToast(this.$trans('Error updating maintenance_contract:', error.response.data[0]))
+        errorToast(this.create, $trans('Error updating maintenance_contract:', error.response.data[0]))
         this.isLoading = false
       }
     },
@@ -633,7 +642,7 @@ export default {
       try {
         const data = await this.maintenanceContractService.detail(this.pk)
         this.maintenanceContractService.editItem = new this.maintenanceContractService.model(
-          {...data, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
+          {...data, sum_tariffs_currency: this.mainStore.getDefaultCurrency}
         )
         this.customer = await this.customerService.detail(this.maintenanceContractService.editItem.customer)
 
@@ -641,14 +650,14 @@ export default {
         const equipmentData = await this.maintenanceEquipmentService.list()
         this.maintenanceEquipmentService.collection = equipmentData.results.map(
           (m) => new this.maintenanceEquipmentService.model({
-            ...m, default_currency: this.$store.getters.getDefaultCurrency
+            ...m, default_currency: this.mainStore.getDefaultCurrency
           })
         )
         this.updateTotals()
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error)
-        this.errorToast(`${this.$trans('Error loading maintenance contract')}, ${error.message}`)
+        errorToast(this.create, `${$trans('Error loading maintenance contract')}, ${error.message}`)
         this.isLoading = false
       }
     },

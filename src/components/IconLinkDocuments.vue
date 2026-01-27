@@ -1,7 +1,7 @@
 <template>
   <span>
     <router-link :to="{name: router_name, params: router_params}" v-bind:title="title">
-      <b-icon-file class="edit-icon"></b-icon-file>
+      <IBiFile class="edit-icon"></IBiFile>
     </router-link>
   </span>
 </template>

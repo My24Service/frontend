@@ -1,8 +1,7 @@
-import VueRouter from 'vue-router'
-
+import {createRouter, createWebHashHistory} from 'vue-router'
+import {useMainStore} from "@/stores/main";
 import TheIndexLayout from '../components/TheIndexLayout.vue'
 
-import store from '../store'
 import orders from './orders'
 import quotations from './quotations'
 import invoices from './invoices'
@@ -18,8 +17,9 @@ import catchall from './catchall'
 import webshop from './webshop'
 import bim from './bim'
 import docks from './docks'
-import {AUTH_LEVELS} from "../constants";
-import {getIsLoggedIn, getUserAuthLevel, hasAccessRouteAuthLevel} from "../utils";
+import {AUTH_LEVELS} from "@/constants";
+import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
+import { useAuthStore } from '@/stores/auth'
 
 const routes = [
   {
@@ -44,18 +44,24 @@ const routes = [
   ...docks,
 ]
 
-const router = new VueRouter({
-  routes
+export const router = createRouter({
+  history: createWebHashHistory(),
+  routes,
 })
 
 router.beforeEach(async (to, from, next) => {
-  const isAllowedMemberPath = await store.dispatch('hasAccessToRoute', to.path)
+  const authStore = useAuthStore()
+  const mainStore = useMainStore()
+
+  await mainStore.checkInitialData()
+
+  const userIsLoggedIn = authStore.isLoggedIn;
+  const isAllowedMemberPath = userIsLoggedIn ? mainStore.hasAccessToRoute(to.path) : false;
   const path = to.path;
   const needsAuth = to.meta.hasOwnProperty('needsAuth') ? to.meta.needsAuth : true
   const authLevelNeeded = to.meta.hasOwnProperty('authLevelNeeded') ? to.meta.authLevelNeeded : AUTH_LEVELS.PLANNING
   const pathAuthLevel = authLevelNeeded;
-  const userIsLoggedIn = getIsLoggedIn(store);
-  const userAuthLevel = getUserAuthLevel(store);
+  const userAuthLevel = userIsLoggedIn ? getUserAuthLevel() : null;
 
   if (!needsAuth) {
     console.debug('route allowed, no auth needed', {path})
@@ -69,14 +75,14 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  if (!getIsLoggedIn(store)) {
+  if (!userIsLoggedIn) {
     console.warn('route not allowed for user (not logged in)',{path, needsAuth, userIsLoggedIn})
     next(`/no-access?next=${to.path}`)
     return
   }
 
   // check user type if needed
-  if (hasAccessRouteAuthLevel(authLevelNeeded, store)) {
+  if (hasAccessRouteAuthLevel(authLevelNeeded)) {
     console.debug('route allowed', {path, pathAuthLevel, userAuthLevel})
     next()
     return
@@ -85,5 +91,3 @@ router.beforeEach(async (to, from, next) => {
   console.warn('route not allowed because of user auth level', {path, pathAuthLevel, userAuthLevel})
   next(`/no-access?next=${to.path}`)
 });
-
-export default router

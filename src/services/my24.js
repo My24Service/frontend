@@ -1,6 +1,6 @@
 import BaseModel from '@/models/base';
 import {normalClient} from "@/services/api";
-import auth from '@/services/auth'
+import setInterceptors from '@/services/auth/clientDriver'
 
 class My24 extends BaseModel {
   getInitialData() {
@@ -14,7 +14,7 @@ class My24 extends BaseModel {
   getParameterByName(name, url) {
     if (!url) url = window.location.href
     name = name.replace(/[\[\]]/g, '\\$&');
-    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
         results = regex.exec(url);
     if (!results) return null;
     if (!results[2]) return '';
@@ -26,7 +26,7 @@ class My24 extends BaseModel {
     let client;
 
     if (requestMethod === 'post') {
-      auth.setInterceptors(normalClient)
+      setInterceptors(normalClient)
       client = normalClient.post(url, {}, headers)
     } else {
       client = normalClient.get(url, headers)
@@ -53,7 +53,7 @@ class My24 extends BaseModel {
   downloadItemAuth(url, name, callback) {
     let headers = { responseType: 'blob' }
 
-    auth.setInterceptors(normalClient)
+    setInterceptors(normalClient)
     const client = normalClient.get(url, headers)
 
     client
@@ -188,7 +188,7 @@ class My24 extends BaseModel {
     const parts_always_allowed = [
       'form', 'view', 'info', 'company', 'activity', 'pictures',
       'planning-users', 'employee-users', 'import', 'statuscodes',
-      'api-users', 'map', 'filter'
+      'api-users', 'map', 'filter', 'schedule'
     ]
     if (parts_always_allowed.indexOf(config.part) !== -1) {
       if (debug) console.debug(`allowed: part "${config.part}" in always allowed (${parts_always_allowed.join('/')})`)

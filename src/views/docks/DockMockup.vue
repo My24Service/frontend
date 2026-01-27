@@ -3,7 +3,7 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="truck"></b-icon>
+          <IBiTruck></IBiTruck>
           {{ $trans("Docks") }}
         </h3>
       </div>

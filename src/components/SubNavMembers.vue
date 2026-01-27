@@ -42,8 +42,9 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils'
+
 import {MemberService} from "@/models/member/Member";
+import componentMixin from "@/mixins/common";
 
 export default {
   mixins: [componentMixin],
@@ -65,16 +66,16 @@ export default {
   },
   computed: {
     hasMembers() {
-      return this.isSuperuser || this.isStaff
+      return this.isAdmin
     },
     hasDeletedMembers() {
-      return this.isSuperuser || this.isStaff
+      return this.isAdmin
     },
     hasRequestedMembers() {
-      return this.isSuperuser || this.isStaff
+      return this.isAdmin
     },
     hasContracts() {
-      return this.isSuperuser || this.isStaff
+      return this.isAdmin
     },
     hasModules() {
       return this.isSuperuser

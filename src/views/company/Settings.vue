@@ -3,13 +3,13 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="terminal"></b-icon>
+          <IBiTerminal></IBiTerminal>
           {{ $trans('Settings') }}
         </h3>
 
-        <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+        <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
             {{ $trans('Submit') }}
-        </b-button>
+        </BButton>
       </div>
 
     </header>
@@ -27,17 +27,17 @@
                   {{ index+1 }}: {{ key.split('_').join(' ') }}
                 </b-td>
                 <b-td class="border px-4 py-2">
-                  <b-form-checkbox
+                  <BFormCheckbox
                     v-if="typeof value === 'boolean'"
                     size="sm"
                     v-model="settings[key]"
                   >
-                  </b-form-checkbox>
-                  <b-form-input
+                  </BFormCheckbox>
+                  <BFormInput
                     v-if="typeof value !== 'boolean'"
                     size="sm"
                     v-model="settings[key]"
-                  ></b-form-input>
+                  ></BFormInput>
                 </b-td>
 
               </b-tr>
@@ -52,8 +52,18 @@
 </template>
 <script>
 import memberModel from '@/models/member/Member.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   data() {
     return {
       isLoading: false,
@@ -62,8 +72,8 @@ export default {
       settings: {},
       dummy: [],
       settingsFields: [
-        { key: 'key', label: this.$trans('Key') },
-        { key: 'value', label: this.$trans('Value') },
+        { key: 'key', label: $trans('Key') },
+        { key: 'value', label: $trans('Value') },
       ],
       member: memberModel.getFields(),
     }
@@ -122,12 +132,12 @@ export default {
 
       try {
         await memberModel.updateSettings(newValues)
-        this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('Error updating settings', error)
-        this.errorToast(this.$trans('Error updating settings'))
+        errorToast(this.create, $trans('Error updating settings'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -141,7 +151,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching settings', error)
-        this.errorToast(this.$trans('Error fetching settings'))
+        errorToast(this.create, $trans('Error fetching settings'))
         this.isLoading = false
       }
     },

@@ -8,9 +8,9 @@
       <h3>{{ $trans('Verify success') }}</h3>
       <p>{{ $trans('Your account is now verified. Next you have to set your password') }}</p>
       <p>
-        <b-button @click="sendResetPasswordLink" type="button" variant="primary">
+        <BButton @click="sendResetPasswordLink" type="button" variant="primary">
           {{ $trans('Send reset password link') }}
-        </b-button>
+        </BButton>
       </p>
     </div>
     <div v-if="passwordLinkSent && sendPasswordResetClicked">
@@ -25,10 +25,20 @@
 </template>
 
 <script>
-import accountModel from '../../models/account/Account.js'
+import {AccountService} from '../../models/account/Account.js'
 import my24 from "../../services/my24";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "UserStudentVerify",
   data () {
     return {
@@ -37,31 +47,32 @@ export default {
       sendPasswordResetError: false,
       sendPasswordResetClicked: false,
       passwordLinkSent: false,
-      params: {}
+      params: {},
+      accountService: new AccountService()
     }
   },
   methods: {
     async sendResetPasswordLink() {
       this.sendPasswordResetClicked = true
       try {
-        await accountModel.sendResetPasswordLink(this.params.user_id, true)
+        await this.accountService.sendResetPasswordLink(this.params.user_id, true)
         this.passwordLinkSent = true
-        this.infoToast(this.$trans('Sent'), this.$trans('Password reset link sent'))
+        infoToast(this.create, $trans('Sent'), $trans('Password reset link sent'))
       } catch (e) {
         console.log('Error sending password reset link', e)
-        this.errorToast(this.$trans('Error sending password reset link'))
+        errorToast(this.create, $trans('Error sending password reset link'))
         this.sendPasswordResetError = true
       }
     },
     async doVerify() {
       try {
-        const result = await accountModel.verify(this.params)
+        await this.accountService.verify(this.params)
         console.log('HOI')
         this.verifySuccess = true
-        this.infoToast(this.$trans('Verified'), this.$trans('Account has been verified'))
+        infoToast(this.create, $trans('Verified'), $trans('Account has been verified'))
       } catch (e) {
         console.log('Error verifying studentuser', e)
-        this.errorToast(this.$trans('Error verifying'))
+        errorToast(this.create, $trans('Error verifying'))
         this.verifyError = true
       }
     }

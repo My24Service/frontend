@@ -5,14 +5,14 @@
         <h3>
           {{ $trans("Engineer locations") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
             />
-          </b-button-group>
-        </b-button-toolbar>
+          </BButton-group>
+        </BButton-toolbar>
       </div>
     </header>
 

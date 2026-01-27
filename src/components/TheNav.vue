@@ -5,8 +5,8 @@
 </template>
 
 <script>
-import { componentMixin } from '@/utils.js'
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
+import componentMixin from "@/mixins/common";
 
 export default {
   name: "TheNav",

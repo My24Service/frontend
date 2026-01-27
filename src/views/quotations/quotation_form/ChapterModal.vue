@@ -10,37 +10,37 @@
         <b-container fluid>
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Name')"
                 label-for="name"
               >
-                <b-form-input
+                <BFormInput
                   id="name"
                   size="sm"
                   autofocus
                   v-model="chapter.name"
                   :state="submitClicked ? !v$.chapter.name.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                 :state="submitClicked ? !v$.chapter.name.$error : null">
                 {{ $trans('Please enter the chapter name') }}
               </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
           <b-row role="group">
             <b-col size="12">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Description')"
                 label-for="description"
               >
-                <b-form-textarea
+                <BFormTextarea
                   id="description"
                   size="sm"
                   v-model="chapter.description"
                   placeholder="Chapter description"
-                ></b-form-textarea>
-              </b-form-group>
+                ></BFormTextarea>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>

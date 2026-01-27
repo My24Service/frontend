@@ -3,53 +3,53 @@
     <h6>{{ $trans("Expiry condition") }}</h6>
     <b-row>
       <b-col cols="4" role="group">
-        <b-form-group
+        <BFormGroup
           label-size="sm"
           v-bind:label="$trans('field')"
           label-for="action-condition-field"
         >
-          <b-form-input
+          <BFormInput
             id="action-condition-field"
             size="sm"
             v-model="form.num_days_model_field"
             @input="handleInputChange"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback id="action-condition-value">
             {{ $trans('Please enter a valid field name') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
       </b-col>
       <b-col cols="4" role="group">
-        <b-form-group
+        <BFormGroup
           label-size="sm"
           v-bind:label="$trans('operator')"
           label-for="action-condition-operator"
         >
-          <b-form-select
+          <BFormSelect
             v-model="form.num_days_operator"
             :options="operators"
             size="sm"
             @input="handleInputChange"
-          ></b-form-select>
-        </b-form-group>
+          ></BFormSelect>
+        </BFormGroup>
       </b-col>
       <b-col cols="4" role="group">
-        <b-form-group
+        <BFormGroup
           label-size="sm"
           v-bind:label="$trans('Number of days')"
           label-for="action-condition-value"
         >
-          <b-form-input
+          <BFormInput
             :type="'number'"
             id="action-condition-value"
             size="sm"
             v-model="form.num_days"
             @input="handleInputChange"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback id="action-condition-value">
             {{ $trans('Please enter a valid integer') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
       </b-col>
     </b-row>
   </div>

@@ -10,27 +10,27 @@
       <b-form class="page-detail panel">
         <b-row>
           <b-col cols="12" role="group">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Name')"
               label-for="picture_name"
             >
-              <b-form-input
+              <BFormInput
                 v-model="picture.name"
                 id="picture_name"
                 size="sm"
                 :state="isSubmitClicked ? !v$.picture.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.picture.name.$error : null">
                 {{ $trans('Please enter a name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
         </b-row>
         <b-row>
           <b-col cols="4">
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               v-bind:label="$trans('Image')"
               label-for="picture-image"
@@ -41,7 +41,7 @@
                 :placeholder="$trans('Choose a file or drop it here...')"
                 @input="imageSelected"
               ></b-form-file>
-            </b-form-group>
+            </BFormGroup>
           </b-col>
           <b-col cols="4">
             <h3>{{ $trans('Current image') }}</h3>
@@ -55,12 +55,12 @@
 
         <div class="mx-auto">
           <footer class="modal-footer">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </b-form>
@@ -73,11 +73,17 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import pictureModel from '../../models/company/Picture.js'
-import {NO_IMAGE_URL} from "../../constants"
+import {NO_IMAGE_URL} from "@/constants"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     pk: {
@@ -145,13 +151,13 @@ export default {
       if (this.isCreate) {
         try {
           await pictureModel.insert(this.picture)
-          this.infoToast(this.$trans('Created'), this.$trans('Picture has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Picture has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating picture', error)
-          this.errorToast(this.$trans('Error creating picture'))
+          errorToast(this.create, $trans('Error creating picture'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -165,13 +171,13 @@ export default {
 
       try {
         await pictureModel.update(this.pk, this.picture)
-        this.infoToast(this.$trans('Updated'), this.$trans('Picture has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Picture has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating picture', error)
-        this.errorToast(this.$trans('Error updating picture'))
+        errorToast(this.create, $trans('Error updating picture'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -185,7 +191,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching picture', error)
-        this.errorToast(this.$trans('Error fetching picture'))
+        errorToast(this.create, $trans('Error fetching picture'))
         this.isLoading = false
       }
     },

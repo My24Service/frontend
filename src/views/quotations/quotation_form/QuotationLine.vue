@@ -1,14 +1,14 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
-    <b-button
+    <BButton
       style="width: 100%"
       :variant="quotationLineService.collectionHasChanges ? 'danger' : 'success'"
       :disabled="quotationLineService.collectionHasChanges"
       @click="backToChapters"
     >
-      <b-icon-arrow-left-circle-fill></b-icon-arrow-left-circle-fill>
+      <IBiArrowLeftCircleFill></IBiArrowLeftCircleFill>
       {{ $trans("Back to quotation and chapters") }}
-    </b-button>
+    </BButton>
 
     <h5 class="pt-2">{{ $trans('Quotation lines chapter') }} <i>{{ chapter.name }}</i></h5>
 
@@ -59,28 +59,28 @@
       </b-table>
 
       <div v-if="showForm">
-        <b-form-group
+        <BFormGroup
           label-cols="0"
           label-for="new-invoice-line-amount"
         >
           <b-container>
             <b-row>
               <b-col cols="3">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Amount')"
                   label-for="new-invoice-line-price"
                 >
-                  <b-form-input
+                  <BFormInput
                     autofocus
                     @blur="quotationLineAmountChanged"
                     id="new-invoice-line-amount"
                     size="sm"
                     v-model="quotationLineService.editItem.amount"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="5">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Price')"
                   label-for="new-invoice-line-price"
                 >
@@ -90,42 +90,42 @@
                     :currency="quotationLineService.editItem.price_currency"
                     @priceChanged="quotationLinePriceChanged"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="4">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT type')"
                   label-for="new-invoice-line-total"
                 >
                   <VAT @vatChanged="changeVatTypeQuotationLine" />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Info')"
           label-for="new-invoice-line-description"
         >
-          <b-form-input
+          <BFormInput
             id="new-invoice-line-description"
             size="sm"
             v-model="quotationLineService.editItem.info"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Extra description')"
           label-for="new-invoice-line-description"
         >
-          <b-form-textarea
+          <BFormTextarea
             id="new-invoice-line-description"
             v-model="quotationLineService.editItem.extra_description"
-          ></b-form-textarea>
-        </b-form-group>
+          ></BFormTextarea>
+        </BFormGroup>
 
         <hr/>
 
@@ -141,7 +141,7 @@
         </b-container>
 
         <footer class="modal-footer">
-          <b-button
+          <BButton
             :disabled="isLoading"
             @click="cancelEditQuotationLine"
             class="btn btn-secondary update-button"
@@ -150,8 +150,8 @@
             variant="secondary"
           >
             {{ $trans('Cancel') }}
-          </b-button>
-          <b-button
+          </BButton>
+          <BButton
             v-if="quotationLineService.isEdit"
             @click="doEditCollectionItem"
             class="btn btn-primary"
@@ -161,8 +161,8 @@
             :disabled="!isQuotationLineValid"
           >
             {{ $trans('Edit quotation line') }}
-          </b-button>
-          <b-button
+          </BButton>
+          <BButton
             v-if="!quotationLineService.isEdit"
             @click="addQuotationLine"
             class="btn btn-primary"
@@ -172,7 +172,7 @@
             :disabled="!isQuotationLineValid"
           >
             {{ $trans('Add quotation line') }}
-          </b-button>
+          </BButton>
         </footer>
       </div>
 
@@ -213,7 +213,7 @@
         <b-row>
           <b-col cols="2"></b-col>
           <b-col cols="10">
-            <b-button
+            <BButton
               @click="loadData"
               class="btn btn-secondary"
               type="button"
@@ -221,9 +221,9 @@
               :disabled="!quotationLineService.collectionHasChanges"
             >
               {{ $trans('Discard changes') }}
-            </b-button>
+            </BButton>
             &nbsp;
-            <b-button
+            <BButton
               @click="submitQuotationLines"
               class="btn btn-danger"
               type="button"
@@ -231,7 +231,7 @@
               :disabled="!quotationLineService.collectionHasChanges"
             >
               {{ $trans('Save changes') }}
-            </b-button>
+            </BButton>
           </b-col>
         </b-row>
       </b-container>
@@ -240,14 +240,14 @@
         class="modal-footer"
         v-if="!showForm && !isView && quotation.preliminary"
       >
-        <b-button
+        <BButton
           @click="newQuotationLine"
           class="btn btn-primary update-button"
           type="button"
           variant="primary"
         >
           {{ $trans('New quotation line') }}
-        </b-button>
+        </BButton>
       </footer>
 
     </div>
@@ -259,9 +259,6 @@ import {useVuelidate} from "@vuelidate/core";
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
-import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
-import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 
 import {QuotationModel} from '@/models/quotations/Quotation.js';
@@ -270,14 +267,14 @@ import {QuotationLineModel, QuotationLineService} from '@/models/quotations/Quot
 
 import VAT from "../quotation_form/VAT";
 import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationLineForm',
   components: {
     IconLinkEdit,
-    ButtonLinkAdd,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
     IconLinkDelete,
     PriceInput,
     VAT,
@@ -291,7 +288,14 @@ export default {
     'quotationLinesLoaded'
   ],
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
   validations() {
     return {
@@ -326,13 +330,13 @@ export default {
       isLoading: false,
       newItem: false,
       fields: [
-        {key: 'info', label: this.$trans('Info'), thAttr: {width: '40%'}},
-        {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
+        {key: 'info', label: $trans('Info'), thAttr: {width: '40%'}},
+        {key: 'total', label: $trans('Total'), thAttr: {width: '40%'}},
         {key: 'icons', label: '', thAttr: {width: '20%'}},
       ],
       fieldsView: [
-        {key: 'info', label: this.$trans('Info'), thAttr: {width: '60%'}},
-        {key: 'total', label: this.$trans('Total'), thAttr: {width: '40%'}},
+        {key: 'info', label: $trans('Info'), thAttr: {width: '60%'}},
+        {key: 'total', label: $trans('Total'), thAttr: {width: '40%'}},
       ],
     }
   },
@@ -356,12 +360,12 @@ export default {
     this.quotationLineService.modelDefaults = {
       amount: '0',
       price: '0.00',
-      price_currency: this.$store.getters.getDefaultCurrency,
+      price_currency: this.mainStore.getDefaultCurrency,
       total: '0.00',
-      total_currency: this.$store.getters.getDefaultCurrency,
+      total_currency: this.mainStore.getDefaultCurrency,
       vat: '0.00',
-      vat_currency: this.$store.getters.getDefaultCurrency,
-      vat_type: this.$store.getters.getInvoiceDefaultVat,
+      vat_currency: this.mainStore.getDefaultCurrency,
+      vat_type: this.mainStore.getInvoiceDefaultVat,
     }
 
     await this.loadData()
@@ -426,9 +430,9 @@ export default {
         ...newQuotationLines
       ]
       this.updateChapterTotals()
-      const addedTxt = this.$trans('Added')
-      const txt = newQuotationLines.length === 1 ? this.$trans('invoice line') : this.$trans('invoice lines')
-      this.infoToast(addedTxt, `${newQuotationLines.length} ${txt} ${addedTxt.toLowerCase()}`)
+      const addedTxt = $trans('Added')
+      const txt = newQuotationLines.length === 1 ? $trans('invoice line') : $trans('invoice lines')
+      infoToast(this.create, addedTxt, `${newQuotationLines.length} ${txt} ${addedTxt.toLowerCase()}`)
       this.quotationLineService.collectionHasChanges = true
     },
     updateChapterTotals() {
@@ -467,13 +471,13 @@ export default {
             quotationLine.chapter = this.chapter.id
           }
           await this.quotationLineService.updateCollection()
-          this.infoToast(this.$trans('Updated'), this.$trans('chapter has been updated'))
+          infoToast(this.create, $trans('Updated'), $trans('chapter has been updated'))
           this.isLoading = false
           this.quotationLineService.collection = []
           await this.loadData()
           this.$emit('quotationLineSubmitted')
         } catch(error) {
-          this.errorToast(this.$trans('Error updating chapter'))
+          errorToast(this.create, $trans('Error updating chapter'))
           this.isLoading = false
       }
     },
@@ -492,7 +496,7 @@ export default {
           this.$emit('quotationLinesLoaded', this.quotationLineService.collection)
         } catch(error) {
           console.log('error fetching quotation lines', error)
-          this.errorToast(this.$trans('Error loading quotation lines'))
+          errorToast(this.create, $trans('Error loading quotation lines'))
           this.isLoading = false
         }
         this.quotationLineService.listArgs = []

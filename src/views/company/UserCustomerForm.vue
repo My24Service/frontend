@@ -3,17 +3,17 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="people"></b-icon>
+            <IBiPeople></IBiPeople>
             <span class="backlink"  @click="cancelForm">{{ $trans("People") }}</span> /
             <strong> {{ customeruser.username }}</strong>
             <span class="dimmed" v-if="isCreate && !customeruser.username">{{ $trans('new') }}</span>
             <span class="dimmed" v-if="!isCreate && !customeruser.username">{{ $trans('edit') }}</span>
           </h3>
           <div class='flex-columns'>
-            <b-button @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</b-button>
+            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+              {{ $trans('Submit') }}</BButton>
           </div>
         </div>
       </header>
@@ -22,18 +22,18 @@
           <div class="panel col-1-3">
             <h6>{{ $trans('User info')}}</h6>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Username')"
                 label-for="customeruser_username"
               >
-                <b-form-input
+                <BFormInput
                   id="customeruser_username"
                   size="sm"
                   v-model="customeruser.username"
                   :state="isSubmitClicked ? !v$.customeruser.username.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   v-if="customeruser.username === ''"
                   :state="isSubmitClicked ? v$.customeruser.username.required : null">
@@ -44,130 +44,130 @@
                   :state="isSubmitClicked ? !v$.customeruser.username.isUnique.$invalid : null">
                   {{ $trans('Username is already in use') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Password')"
                 label-for="customeruser_password"
               >
-                <b-form-input
+                <BFormInput
                   id="customeruser_password"
                   size="sm"
                   type="password"
                   v-model="customeruser.password1"
                   @blur="v$.customeruser.password1.$touch()"
                   :state="isSubmitClicked && v$.customeruser.password1 ? !v$.customeruser.password1.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked && v$.customeruser.password1 ? !v$.customeruser.password1.$error : null">
                   {{ $trans('Please enter a password') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Password again')"
                 label-for="customeruser_password_again"
               >
-                <b-form-input
+                <BFormInput
                   id="customeruser_password_again"
                   size="sm"
                   type="password"
                   v-model="customeruser.password2"
                   @blur="v$.customeruser.password2.$touch()"
                   :state="isSubmitClicked ? !v$.customeruser.password2.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   v-if="customeruser.password2 !== '' && customeruser.password2"
                   :state="isSubmitClicked ? !v$.customeruser.password2.sameAs.$invalid : null">
                   {{ $trans('Passwords do not match') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
           </div>
 
           <div class="panel col-1-3">
             <h6>{{ $trans('Personal details')}}</h6>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('First name')"
               label-for="customeruser_first_name"
             >
-              <b-form-input
+              <BFormInput
                 id="customeruser_first_name"
                 size="sm"
                 v-model="customeruser.first_name"
                 :state="isSubmitClicked ? !v$.customeruser.first_name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.customeruser.first_name.$error : null">
                 {{ $trans('Please enter a first name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Last name')"
               label-for="customeruser_last_name"
             >
-              <b-form-input
+              <BFormInput
                 id="customeruser_last_name"
                 size="sm"
                 v-model="customeruser.last_name"
                 :state="isSubmitClicked ? !v$.customeruser.last_name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.customeruser.last_name.$error : null">
                 {{ $trans('Please enter a last name') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Email')"
               label-for="customeruser_email"
             >
-              <b-form-input
+              <BFormInput
                 id="customeruser_email"
                 size="sm"
                 v-model="customeruser.email"
                 :state="isSubmitClicked ? !v$.customeruser.email.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.customeruser.email.$error : null">
                 {{ $trans('Please enter a valid email') }}
               </b-form-invalid-feedback>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Settings group')"
               label-for="customeruser_settings_group"
             >
-              <b-form-input
+              <BFormInput
                 id="customeruser_settings_group"
                 size="sm"
                 v-model="customeruser.customer_user.settings_group"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
           </div>
           <div class="panel col-1-3">
             <h6>{{  $trans('Customer') }}</h6>
             <div class='flex-columns'>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label=""
                 label-for="customeruser_customer_search"
                 class="inline"
               >
-                <multiselect
+                <VueMultiselect
                   id="customeruser_customer_search"
                   track-by="id"
                   :placeholder="$trans('Type to search customer')"
@@ -188,26 +188,26 @@
                   :custom-label="customerLabel"
                 >
                   <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
-                </multiselect>
-              </b-form-group>
-              <b-button @click="clearCustomer" size="sm" type="button" variant="danger" :title="$trans('Clear customer')">
-                  <b-icon icon="backspace"></b-icon>
-              </b-button>
+                </VueMultiselect>
+              </BFormGroup>
+              <BButton @click="clearCustomer" size="sm" type="button" variant="danger" :title="$trans('Clear customer')">
+                  <IBiBackspace></IBiBackspace>
+              </BButton>
             </div>
 
             <br>
-            <b-form-group
+            <BFormGroup
               label-size="sm"
               label=""
               label-for="customeruser_customer"
             >
-              <b-form-input
+              <BFormInput
                 id="customeruser_customer"
                 size="sm"
                 readonly
                 v-model="customer_info"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
           </div>
         </div>
       </form>
@@ -224,18 +224,24 @@
 import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
-import Multiselect from 'vue-multiselect'
+import VueMultiselect from 'vue-multiselect'
 
-import { usernameExists } from '../../models/helpers.js'
+import { usernameExists } from '@/models/helpers'
 import customerUserModel from '../../models/company/UserCustomer.js'
 import customerModel from '../../models/customer/Customer.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
-    Multiselect,
+    VueMultiselect,
   },
   props: {
     pk: {
@@ -346,7 +352,7 @@ export default {
         this.customers = response
         this.isLoading = false
       }).catch(() => {
-        this.errorToast(this.$trans('Error fetching customers'))
+        errorToast(this.create, $trans('Error fetching customers'))
         this.isLoading = false
       })
     },
@@ -382,11 +388,11 @@ export default {
 
         try {
           await customerUserModel.insert(this.customeruser)
-          this.infoToast(this.$trans('Created'), this.$trans('Customer user has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Customer user has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
-          this.errorToast(this.$trans('Error creating customer user'))
+          errorToast(this.create, $trans('Error creating customer user'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -405,11 +411,11 @@ export default {
         }
 
         await customerUserModel.update(this.pk, this.customeruser)
-        this.infoToast(this.$trans('Updated'), this.$trans('Customer user has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Customer user has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
-        this.errorToast(this.$trans('Error updating customer user'))
+        errorToast(this.create, $trans('Error updating customer user'))
         this.isLoading = false
       }
     },
@@ -425,7 +431,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customeruser', error)
-        this.errorToast(this.$trans('Error loading customer user'))
+        errorToast(this.create, $trans('Error loading customer user'))
         this.isLoading = false
       }
     },
