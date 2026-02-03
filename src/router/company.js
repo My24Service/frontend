@@ -1014,6 +1014,31 @@ export default [
         'app-content': GrippSettings,
         'app-subnav': SubNavCompany
       },
-    }
+    },
+    // Teamleader
+    {
+      name: 'company-teamleader-settings',
+      path: '/company/teamleader/settings',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': TeamleaderSettings,
+        'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'company-teamleader-callback',
+      path: '/company/teamleader/callback',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': TeamleaderCallback,
+        'app-subnav': SubNavCompany
+      },
+    },
   ]
 }]

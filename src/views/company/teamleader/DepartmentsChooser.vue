@@ -24,10 +24,13 @@
 </template>
 <script>
 import {TeamleaderService} from "@/models/company/Teamleader";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   name: "DepartmentChooser",
-  mixins: [],
+  mixins: [componentMixin],
   components: {},
   props: {},
   emits: [
@@ -43,7 +46,12 @@ export default {
       ]
     }
   },
-  created() {
+  setup() {
+    const {create} = useToast()
+
+    return {
+      create,
+    }
   },
   methods: {
     onRowClicked(item, _index, _event) {
@@ -58,12 +66,12 @@ export default {
 
       } catch(error) {
         console.log('error fetching departments', error)
-        this.errorToast(this.$trans('Error fetching departments'))
+        errorToast(this.create, this.$trans('Error fetching departments'))
         this.isLoading = false
       }
     },
     async show() {
-      this.$refs['modal'].show()
+      await this.$refs['modal'].show()
       await this.loadData()
     },
     hide() {

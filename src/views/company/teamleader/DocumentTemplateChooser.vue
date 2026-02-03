@@ -46,10 +46,12 @@
 </template>
 <script>
 import {TeamleaderService} from "@/models/company/Teamleader";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
   name: "DocumentTemplateChooser",
-  mixins: [],
   components: {},
   props: {
     'departmentId': String
@@ -57,6 +59,14 @@ export default {
   emits: [
     'template-chosen'
   ],
+  setup() {
+    const {create} = useToast()
+
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
@@ -87,12 +97,12 @@ export default {
 
       } catch(error) {
         console.log('error fetching documents', error)
-        this.errorToast(this.$trans('Error fetching documents'))
+        errorToast(this.create, this.$trans('Error fetching documents'))
         this.isLoading = false
       }
     },
     async show() {
-      this.$refs['modal'].show()
+      await this.$refs['modal'].show()
       await this.loadData()
     },
     hide() {

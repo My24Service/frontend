@@ -10,6 +10,7 @@
       id="template-chooser-modal"
       ref="template-chooser-modal"
       :department-id="settings.department_uuid"
+      v-if="settings.department_uuid"
       @template-chosen="invoiceTemplateChosen"
     />
 
@@ -25,7 +26,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="tools"></b-icon>
+          <IBiTools></IBiTools>
           {{ $trans("Teamleader API settings") }}
         </h3>
       </div>
@@ -149,7 +150,6 @@
                 <b-table
                   id="tax-rates-table"
                   small
-                  :busy="isLoading"
                   :fields="fields"
                   :items="taxRates"
                   responsive="md"
@@ -181,15 +181,30 @@
 import {TeamleaderService} from '@/models/company/Teamleader'
 import DepartmentChooser from "@/views/company/teamleader/DepartmentsChooser.vue";
 import DocumentTemplateChooser from "@/views/company/teamleader/DocumentTemplateChooser.vue";
+import {errorToast, infoToast} from "@/utils";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {useLoading} from "vue-loading-overlay";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const loading = useLoading({
+      // options
+    });
+
+    return {
+      create,
+      loading
+    }
+  },
+  mixins: [componentMixin],
   components: {
     DocumentTemplateChooser,
     DepartmentChooser,
   },
   data() {
     return {
-      isLoading: false,
       buttonDisabled: false,
       submitClicked: false,
       settings: {},
@@ -244,53 +259,69 @@ export default {
         }, 1000)
       }
       if (result.status === 'ok') {
-        this.infoToast('Status', 'Tokens aanwezig')
+        infoToast(this.create, 'Status', 'Tokens aanwezig')
       }
     },
     async emptyTokens() {
       // button/modal not used at the moment
-      this.$refs['delete-tokens'].show()
+      await this.$refs['delete-tokens'].show()
     },
     async doEmptyTokens() {
       // not used at the moment
+      let loader = this.loading.show();
       await this.service.emptyTokens()
       await this.loadData()
+      loader.hide()
     },
     async updateInvoiceDocumentTemplateSetting(item) {
+      let loader = this.loading.show();
       await this.service.updateInvoiceDocumentTemplateSetting(item.id, item.name)
+      loader.hide()
       await this.loadData()
     },
     async updateDepartmentSetting(item) {
+      let loader = this.loading.show();
       await this.service.updateDepartmentSetting(item.id, item.name)
+      loader.hide()
       await this.loadData()
     },
     async updateEnabled() {
+      let loader = this.loading.show();
       await this.service.updateEnabled(this.settings.api_enabled)
+      loader.hide()
       await this.loadData()
     },
     async resetTaxRates() {
+      let loader = this.loading.show();
       const response = await this.service.resetTaxRates(this.settings.department_uuid)
-      this.infoToast("BTW-tarieven",
+      infoToast(this.create, "BTW-tarieven",
         `${response.delete_result[0]} verwijderd, ${response.created} aangemaakt`)
       await this.fetchTaxRates()
+      loader.hide()
     },
     async fetchTaxRates() {
       this.taxRates = []
-      const response = await this.service.fetchTaxRates()
-      this.taxRates = response.results
+      if (this.settings.has_tokens) {
+        let loader = this.loading.show();
+        const response = await this.service.fetchTaxRates()
+        this.taxRates = response.results
+        loader.hide()
+      }
     },
     async loadData() {
-      this.isLoading = true
+      let loader = this.loading.show();
       try {
         this.settings = await this.service.configDetail()
-        const businessTypes = await this.service.fetchBusinessTypes()
-        console.log(businessTypes)
-        await this.fetchTaxRates()
-        this.isLoading = false
+        if (this.settings.has_tokens) {
+          const businessTypes = await this.service.fetchBusinessTypes()
+          console.log(businessTypes)
+          await this.fetchTaxRates()
+        }
+        loader.hide()
       } catch(error) {
         console.log('error fetching data', error)
-        this.errorToast(this.$trans('Error fetching data'))
-        this.isLoading = false
+        errorToast(this.create, this.$trans('Error fetching data'))
+        loader.hide()
       }
     },
   }
