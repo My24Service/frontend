@@ -1,4 +1,5 @@
 import {OPTION_NONE, OPTION_ONLY_TOTAL, OPTION_USER_TOTALS} from "./constants";
+import {$trans, errorToast} from "@/utils";
 
 let invoiceMixin = {
   data() {

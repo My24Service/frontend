@@ -3,7 +3,7 @@
     <b-nav pills>
       <b-nav-item
         :active="filter.id === getCurrentFilter()"
-        @click="changeFilter(filter)"
+        @click.prevent="changeFilter(filter)"
         v-for="filter in filters"
         :key="filter.id"
       >
@@ -41,20 +41,19 @@ export default {
           user_filter: filter.id,
           page: 1
         }
-        this.$router.push({name: this.route_name, query }).catch(e => {})
+        this.$router.push({name: this.route_name, query })
       } else {
         const query = {
           ...this.$route.query,
           page: 1
         }
         delete query.user_filter
-        this.$router.push({ name:this.route_name, query }).catch(e => {})
+        this.$router.push({ name:this.route_name, query })
       }
     }
   }
 }
 </script>
-
 <style scoped>
 
 </style>

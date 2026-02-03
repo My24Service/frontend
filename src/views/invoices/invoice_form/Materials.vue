@@ -162,6 +162,10 @@ export default {
     },
   },
   props: {
+    hasTeamleader: {
+      type: [Boolean],
+      default: false
+    },
     order_pk: {
       type: [Number],
       default: null
