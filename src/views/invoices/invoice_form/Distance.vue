@@ -289,7 +289,7 @@ export default {
         ))
         this.hasStoredData = true
       } else {
-        console.log(this.user_totals)
+        // console.log(this.user_totals)
         // map input to Cost model collection
         this.costService.collection = this.user_totals.map((activity) => (
           this.costService.newModelFromDistance(
