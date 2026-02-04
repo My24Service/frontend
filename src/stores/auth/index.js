@@ -7,17 +7,7 @@ const initialState = { token: null, userInfo: null, };
 
 function getToken() {
   const token = localStorage.getItem('accessToken')
-  if (token) {
-    // token could not yet be JSON.stringified
-    try {
-      return JSON.parse(token)
-    } catch (e) {
-      localStorage.setItem('accessToken', JSON.stringify(token))
-      return token
-    }
-  }
-
-  return null
+  return token ?? null
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -134,7 +124,7 @@ export const useAuthStore = defineStore('auth', {
       this.userInfo = userInfo
     },
     authenticate(accessToken) {
-      localStorage.setItem('accessToken', JSON.stringify(accessToken))
+      localStorage.setItem('accessToken', accessToken)
       this.setToken(accessToken)
     },
     logout() {
@@ -166,12 +156,9 @@ export const useAuthStore = defineStore('auth', {
         const url = '/jwt-token/refresh/'
         const postData = { token }
         const result = await client.post(url, postData)
-        console.debug('token refresh result', result)
         this.authenticate(result.data.token)
-        console.debug('token refreshed, reload window')
         window.location.reload()
       } else {
-        console.log('no token, logout and reload')
         this.logout()
       }
     }
