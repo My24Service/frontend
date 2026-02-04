@@ -616,9 +616,7 @@ export default {
     this.getCustomersDebounced = AwesomeDebouncePromise(this.getCustomers, 500)
     this.getBranchesDebounced = AwesomeDebouncePromise(this.getBranches, 500)
 
-    if (!this.isCreate) {
-      await this.loadData()
-    }
+    await this.loadData()
   },
   methods: {
     newModel() {
@@ -725,23 +723,33 @@ export default {
       this.isLoading = true
 
       try {
-        const equipmentData = await this.equipmentService.detail(this.pk)
-        this.equipment = new EquipmentModel(equipmentData)
+        if (this.pk) {
+          const equipmentData = await this.equipmentService.detail(this.pk)
+          this.equipment = new EquipmentModel(equipmentData)
+        } else {
+          this.equipment = new EquipmentModel({})
+        }
 
-        if (this.hasBranches && this.equipment.branch) {
+        if (this.hasBranches) {
           if (!this.isEmployee) {
-            this.branch = await this.branchService.detail(this.equipment.branch)
-            this.locations = await this.locationService.listForSelectBranch(this.branch.id)
+            if (this.equipment.branch) {
+              this.branch = await this.branchService.detail(this.equipment.branch)
+              this.locations = await this.locationService.listForSelectBranch(this.branch.id)
+            }
           } else {
             this.branch = await this.branchService.getMyBranch()
             this.locations = await this.locationService.listForSelectBranch()
-
+            console.log('fetched locations for employee', this.locations.length)
           }
-        }
-        if (!this.hasBranches && !this.isCustomer) {
-          if (this.equipment.customer) {
-            this.customer = await this.customerService.detail(this.equipment.customer)
-            this.locations = await this.locationService.listForSelectCustomer(this.customer.id)
+        } else {
+          if (!this.isCustomer) {
+            if (this.equipment.customer) {
+              this.customer = await this.customerService.detail(this.equipment.customer)
+              this.locations = await this.locationService.listForSelectCustomer(this.customer.id)
+            }
+          } else {
+            this.customer = await this.customerService.getMyCustomer(this.equipment.customer)
+            this.locations = await this.locationService.listForSelectCustomer()
           }
         }
 
