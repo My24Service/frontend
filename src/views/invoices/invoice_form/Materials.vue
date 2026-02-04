@@ -86,6 +86,9 @@
             :vat="material.vat_dinero"
           />
         </b-col>
+        <b-col cols="12">
+          teamleader
+        </b-col>
       </b-row>
       <TotalRow
         :items_total="totalAmount"
@@ -132,7 +135,6 @@ export default {
     const {create} = useToast()
     const mainStore = useMainStore()
 
-    // expose to template and other options API hooks
     return {
       create,
       mainStore
@@ -155,7 +157,6 @@ export default {
   watch: {
     material_models: {
       handler(_newValue) {
-        console.log(_newValue)
         this.loadData()
       },
       deep: true
