@@ -3,7 +3,7 @@ import {useAuthStore} from "@/stores/auth";
 
 async function errorHandler(error) {
   console.error(`got error: ${error}`)
-  if (error.response.status === 401) {
+  if (error.response && error.response.status === 401) {
     console.log('doing logout')
     const authStore = useAuthStore()
     authStore.logout();

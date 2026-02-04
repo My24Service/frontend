@@ -40,7 +40,7 @@ export default {
     return {
       isLoading: false,
       service: new TeamleaderService(),
-      departments: [],
+      products: [],
       fields: [
         {key: 'name', label: this.$trans('Name')},
       ]
