@@ -8,7 +8,13 @@ const initialState = { token: null, userInfo: null, };
 function getToken() {
   const token = localStorage.getItem('accessToken')
   if (token) {
-    return JSON.parse(token)
+    // token could not yet be JSON.stringified
+    try {
+      return JSON.parse(token)
+    } catch (e) {
+      localStorage.setItem('accessToken', JSON.stringify(token))
+      return token
+    }
   }
 
   return null

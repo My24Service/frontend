@@ -139,8 +139,8 @@
             <UserFilters
               route_name="order-list"
               :filters="userFilters"
+              v-if="userFilters"
             />
-
           </div>
         </div>
 
@@ -159,6 +159,7 @@
             <UserFilters
               route_name="mobile-orders"
               :filters="userFilters"
+              v-if="userFilters"
             />
           </div>
         </div>

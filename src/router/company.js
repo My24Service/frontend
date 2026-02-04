@@ -81,6 +81,8 @@ import {
 import ImportList from "../views/company/ImportList";
 import ImportForm from "../views/company/ImportForm";
 import ImportPreview from "../views/company/ImportPreview";
+import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
+import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
 import ComingSoon from "@/views/shared/ComingSoon.vue";
 
 const DEFAULT_STATUSCODE_TYPE = STATUSCODE_TYPE_LEAVE_HOURS
@@ -1012,6 +1014,31 @@ export default [
         'app-content': GrippSettings,
         'app-subnav': SubNavCompany
       },
-    }
+    },
+    // Teamleader
+    {
+      name: 'company-teamleader-settings',
+      path: '/company/teamleader/settings',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': TeamleaderSettings,
+        'app-subnav': SubNavCompany
+      },
+    },
+    {
+      name: 'company-teamleader-callback',
+      path: '/company/teamleader/callback',
+      props: {
+        'app-content': route => ({...route.params}),
+        'app-subnav': true
+      },
+      components: {
+        'app-content': TeamleaderCallback,
+        'app-subnav': SubNavCompany
+      },
+    },
   ]
 }]

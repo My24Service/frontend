@@ -164,6 +164,7 @@ import {usernameExists} from "@/models/helpers";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -176,6 +177,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
   },
   props: {

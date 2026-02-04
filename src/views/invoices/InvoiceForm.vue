@@ -354,6 +354,7 @@
               @invoiceLinesCreated="invoiceLinesCreated"
               @emptyCollectionClicked="emptyCollectionClicked"
               :invoiceLinesParent="invoiceLines"
+              :has-teamleader="hasTeamleader"
             />
           </details>
 
@@ -480,10 +481,11 @@ import {
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   name: 'InvoiceForm',
-  mixins: [invoiceMixin],
+  mixins: [invoiceMixin, componentMixin],
   components: {
     InvoicePDFViewer,
     PriceInput,
@@ -513,6 +515,9 @@ export default {
   computed: {
     isEdit () {
       return !!this.pk
+    },
+    hasTeamleader() {
+      return this.hasAccessToModule('company','teamleader');
     },
   },
   props: {
