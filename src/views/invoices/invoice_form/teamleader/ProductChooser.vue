@@ -2,17 +2,26 @@
   <b-modal
     id="modal"
     ref="modal"
-    :title="$trans('Choose department')"
+    :title="$trans('Choose product')"
     ok-only
     @ok="hide"
   >
     <b-overlay :show="isLoading" rounded="sm">
+      <div>
+        <b-input
+          v-model="query"
+        />
+        <BButton
+          @click="doSearch"
+        />
+      </div>
+
       <b-table
-        id="departments-table"
+        id="products-table"
         small
         :busy="isLoading"
         :fields="fields"
-        :items="departments"
+        :items="products"
         :hover="true"
         responsive="md"
         tbody-tr-class="table-row"
@@ -25,48 +34,55 @@
 <script>
 import componentMixin from "@/mixins/common";
 import {TeamleaderService} from "@/models/company/Teamleader";
-import {useToast} from "bootstrap-vue-next";
+import {BInput, useToast} from "bootstrap-vue-next";
 import {errorToast} from "@/utils";
 
 export default {
-  name: "DepartmentChooser",
+  name: "ProductChooser",
   mixins: [componentMixin],
-  components: {},
-  props: {},
+  components: {BInput},
+  props: {
+    'name_in': String
+  },
   emits: [
-    'department-chosen'
+    'product-chosen'
   ],
   data() {
     return {
       isLoading: false,
       service: new TeamleaderService(),
-      departments: [],
+      products: [],
       fields: [
         {key: 'name', label: this.$trans('Name')},
-      ]
+      ],
+      query: null
     }
   },
   setup() {
     const {create} = useToast()
+    this.query = this.name_in
 
     return {
       create,
     }
   },
   methods: {
+    async doSearch() {
+      await this.loadData()
+    },
     onRowClicked(item, _index, _event) {
-      this.$emit('department-chosen', item)
+      this.$emit('product-chosen', item)
     },
     async loadData() {
       this.isLoading = true
       try {
-        const response = await this.service.departmentList()
-        this.departments = response.data
+        const response = await this.service.productList(this.query)
+        this.products = response.data
         this.isLoading = false
 
       } catch(error) {
-        console.log('error fetching departments', error)
-        errorToast(this.create, this.$trans('Error fetching departments'))
+        console.log('error fetching products', error)
+        errorToast(this.create, this.$trans('Error fetching products'))
         this.isLoading = false
       }
     },

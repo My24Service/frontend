@@ -1,7 +1,7 @@
 <template>
   <b-table
     small
-    id="document-table"
+    id="costs-table"
     :fields="tableFields"
     :items="collection"
     responsive="md"
@@ -29,6 +29,7 @@ import {
   COST_TYPE_USED_MATERIALS,
   COST_TYPE_WORK_HOURS
 } from "@/models/orders/Cost";
+import {$trans} from "@/utils";
 
 export default {
   name: "CostsTable",
@@ -65,7 +66,6 @@ export default {
         {key: 'vat', label: $trans('VAT')},
         {key: 'total', label: $trans('Total')},
       ],
-
       tableFieldsCallOutCosts: [
         {key: 'amount_int', label: $trans('Amount')},
         {key: 'price', label: $trans('Price')},

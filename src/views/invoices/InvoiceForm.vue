@@ -233,7 +233,6 @@
                   />
                 </b-col>
                 <b-col cols="2">
-
                     <BButton
                       @click="() => { updateEngineer(user.id) }"
                       class="btn update-button"
@@ -243,7 +242,6 @@
                     >
                       {{ $trans("Update") }}
                     </BButton>
-
                 </b-col>
               </b-row>
             </b-container>
