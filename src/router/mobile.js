@@ -83,18 +83,6 @@ export default [
         },
       },
       {
-        name: 'mobile-orders-unassigned',
-        path: '/mobile/orders-unassigned',
-        components: {
-          'app-content': OrderList,
-          'app-subnav': SubNavMobile
-        },
-        props: {
-          'app-content': {dispatch: true, queryMode: 'unassigned'},
-          'app-subnav': {}
-        },
-      },
-      {
         name: 'mobile-assigned-finished',
         path: '/mobile/assigned-finished',
         components: {

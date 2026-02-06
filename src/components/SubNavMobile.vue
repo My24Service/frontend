@@ -37,13 +37,6 @@
     </b-nav-item>
 
     <b-nav-item
-      :active="isActive('orders-unassigned')"
-      v-if="hasOrdersUnassigned"
-      :to="{name: 'mobile-orders-unassigned'}">
-      {{ $trans('Unassigned') }}
-    </b-nav-item>
-
-    <b-nav-item
       :active="isActive('assigned-finished')"
       v-if="hasAssignedFinished"
       :to="{name: 'mobile-assigned-finished'}">
@@ -136,9 +129,6 @@ export default {
     },
     hasOrdersFinished() {
       return this.hasAccessToModule('mobile', 'orders-finished')
-    },
-    hasOrdersUnassigned() {
-      return this.hasAccessToModule('mobile', 'orders-unassigned')
     },
     hasAssignedFinished() {
       return this.hasAccessToModule('mobile', 'assigned-finished')
