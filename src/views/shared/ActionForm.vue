@@ -150,7 +150,7 @@
               <b-col cols="12" role="group">
                 <BFormGroup
                   label-size="sm"
-                  v-bind:label="$trans('Override status?')"
+                  :label="$trans('Override status?')"
                   label-for="action_status_override"
                   :description="$trans('Set a different status in the original order.')"
                   >
@@ -165,15 +165,49 @@
             <b-row>
               <b-col cols="12" role="group">
                 <BFormGroup
-                  v-if="action.type === 'status' && action.override_status"
+                  v-if="action.override_status"
                   label-size="sm"
-                  v-bind:label="$trans('Status')"
+                  :label="$trans('Status')"
                   label-for="action_status_override_template"
                   >
                   <BFormInput
                   id="action_status_override_template"
                   size="sm"
                   v-model="action.template"
+                  ></BFormInput>
+                </BFormGroup>
+              </b-col>
+            </b-row>
+          </div>
+          <div v-if="action.type === 'status_partner'">
+            <b-row>
+              <b-col cols="12" role="group">
+                <BFormGroup
+                  label-size="sm"
+                  :label="$trans('Override status?')"
+                  label-for="action_status_override"
+                  :description="$trans('Set a different status in the order.')"
+                >
+                  <BFormCheckbox
+                    id="action_status_override"
+                    v-model="action.override_status"
+                  >
+                  </BFormCheckbox>
+                </BFormGroup>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="12" role="group">
+                <BFormGroup
+                  v-if="action.override_status"
+                  label-size="sm"
+                  :label="$trans('Status')"
+                  label-for="action_status_override_template"
+                >
+                  <BFormInput
+                    id="action_status_override_template"
+                    size="sm"
+                    v-model="action.template"
                   ></BFormInput>
                 </BFormGroup>
               </b-col>
@@ -416,6 +450,7 @@ export default {
         {value: 'email_assigned', text: this.$trans('email assigned engineers')},
         {value: 'copy', text: this.$trans('copy order to partner')},
         {value: 'status', text: this.$trans('status change original order')},
+        {value: 'status_partner', text: this.$trans('status change order partners')},
         {value: 'email_workorders', text: this.$trans('email workorders')},
         {value: 'send_sms', text: this.$trans('send sms')},
         {value: 'send_fcm', text: this.$trans('send FCM')},
