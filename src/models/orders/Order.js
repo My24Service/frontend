@@ -147,8 +147,6 @@ class OrderService extends BaseModel {
       base = '/order/order/dispatch_list_inprogress/'
     } else if (this.queryMode === 'finished') {
       base = '/order/order/dispatch_list_finished/'
-    } else if (this.queryMode === 'unassigned') {
-      base = '/order/order/dispatch_list_unassigned/'
     } else if (this.queryMode === 'range') {
       base = '/order/order/get_within_range/'
     } else if (this.queryMode === 'unaccepted') {

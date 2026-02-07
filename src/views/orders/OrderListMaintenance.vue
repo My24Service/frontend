@@ -65,7 +65,7 @@
 
       <!-- delete order modal -->
       <b-modal
-        v-if="!isCustomer && !isBranchEmployee"
+        v-if="!isCustomer"
         id="delete-order-modal"
         ref="delete-order-modal"
         v-bind:title="$trans('Delete?')"
