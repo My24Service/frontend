@@ -120,6 +120,28 @@ class TeamleaderService extends BaseModel{
     return this.axios.get(url, headers).then(response => response.data)
   }
 
+
+  async fetchProducts(query) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    let url = `${this.base_url}/product-list/`
+    if (query) {
+      url = `${url}?query=${query}`
+    }
+
+    return this.axios.get(url, headers).then(response => response.data)
+  }
+
+  async fetchTeamleaderProducts(query) {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    let url = `${this.base_url}/tl-product-list/`
+    if (query) {
+      url = `${url}?query=${query}`
+    }
+
+    return this.axios.get(url, headers).then(response => response.data)
+  }
 }
 
 export {TeamleaderService}
