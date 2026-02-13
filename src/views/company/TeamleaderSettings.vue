@@ -116,9 +116,32 @@
                       v-model="settings.department_name"
                     ></b-form-input>
                     <button
-                      class="btn-sm btn-secondary"
+                      class="btn btn-primary m-1"
                       @click="chooseDepartment()"
                     >Kies</button>
+                  </div>
+                </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Rekening</h5>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="4"
+                  v-bind:label="$trans('Rekening')"
+                  label-for="product_category_uuid">
+                  <div class="d-flex">
+                    <BFormSelect
+                      id="product_category_uuid"
+                      v-model="settings.product_category_uuid"
+                      :options="productCategories"
+                      size="sm"
+                    ></BFormSelect>
+                    <button
+                      class="btn btn-primary m-1"
+                      @click="updateProductCategory()"
+                    >Submit</button>
                   </div>
                 </b-form-group>
               </div>
@@ -141,7 +164,7 @@
                       v-model="settings.invoice_template_name"
                     ></b-form-input>
                     <button
-                      class="btn-sm btn-secondary"
+                      class="btn btn-primary m-1"
                       @click="chooseInvoiceTemplate()"
                     >Kies</button>
                   </div>
@@ -164,7 +187,7 @@
                     class="p-2"
                   >
                     <button
-                      class="btn btn-primary"
+                      class="btn btn-primary m-1"
                       @click="resetTaxRates()"
                     >Ververs</button>
                   </div>
@@ -212,6 +235,7 @@ export default {
       authorizationUrl: null,
       authorizeClicked: false,
       taxRates: [],
+      productCategories: [],
       fields: [
         {key: 'description', label: this.$trans('Description')},
         {key: 'rate', label: this.$trans('Rate')},
@@ -291,6 +315,12 @@ export default {
       loader.hide()
       await this.loadData()
     },
+    async updateProductCategory() {
+      let loader = this.loading.show();
+      await this.service.updateProductCategory(this.settings.product_category_uuid)
+      loader.hide()
+      await this.loadData()
+    },
     async resetTaxRates() {
       let loader = this.loading.show();
       const response = await this.service.resetTaxRates(this.settings.department_uuid)
@@ -313,14 +343,30 @@ export default {
       try {
         this.settings = await this.service.configDetail()
         if (this.settings.has_tokens) {
-          const businessTypes = await this.service.fetchBusinessTypes()
-          console.log(businessTypes)
           await this.fetchTaxRates()
+          await this.fetchCategories()
         }
         loader.hide()
       } catch(error) {
-        console.log('error fetching data', error)
+        console.error('error fetching data', error)
         errorToast(this.create, this.$trans('Error fetching data'))
+        loader.hide()
+      }
+    },
+    async fetchCategories() {
+      let loader = this.loading.show()
+      try {
+        const response = await this.service.fetchProductCategories()
+        this.productCategories = response.data.map((item) => {
+          return {
+            value: item.id,
+            text: item.name
+          }
+        })
+        loader.hide()
+      } catch(error) {
+        console.error('error fetching product categories', error)
+        errorToast(this.create, this.$trans('Error fetching product categories'))
         loader.hide()
       }
     },

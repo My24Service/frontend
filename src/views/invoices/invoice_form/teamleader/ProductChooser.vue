@@ -2,9 +2,11 @@
   <b-modal
     id="modal"
     ref="modal"
-    title="Kies product"
+    title="Koppel product"
     ok-only
     @ok="hide"
+    ok-title="Annuleer"
+    ok-variant="secondary"
   >
     <div v-if="!showForm">
       <b-row>
@@ -72,45 +74,52 @@
             v-model="product.description"
           ></BFormInput>
         </BFormGroup>
-        <BFormGroup
-          label="Inkoopprijs"
-          label-for="purchase_price-input"
-        >
-          <PriceInput
-            id="purchase_price-input"
-            v-model="product.purchase_price"
-            currency="EUR"
-          />
-        </BFormGroup>
-        <BFormGroup
-          label="Verkoopprijs"
-          label-for="selling_price-input"
-        >
-          <PriceInput
-            id="selling_price-input"
-            v-model="product.selling_price"
-            currency="EUR"
-          ></PriceInput>
-        </BFormGroup>
-        <BFormGroup
-          label="Categorie"
-          label-for="categorie"
-          invalid-feedback="Categorie is verplicht"
-          :state="isSubmitClicked ? !v$.product.product_category_id.$error : null"
-        >
-          <BFormSelect
-            v-model="product.product_category_id"
-            :options="productCategories"
-            size="sm"
-            :state="isSubmitClicked ? !v$.product.product_category_id.$error : null"
-          ></BFormSelect>
-        </BFormGroup>
+        <BRow>
+          <BCol cols="4">
+            <BFormGroup
+              label="Inkoopprijs"
+              label-for="purchase_price-input"
+            >
+              <PriceInput
+                id="purchase_price-input"
+                v-model="product.purchase_price"
+                currency="EUR"
+              />
+            </BFormGroup>
+          </BCol>
+          <BCol cols="4">
+            <BFormGroup
+              label="Verkoopprijs"
+              label-for="selling_price-input"
+            >
+              <PriceInput
+                id="selling_price-input"
+                v-model="product.selling_price"
+                currency="EUR"
+              ></PriceInput>
+            </BFormGroup>
+          </BCol>
+          <BCol cols="4">
+            <BFormGroup
+              label="BTW-tarief"
+              label-for="tax_percentage-input"
+            >
+              <BFormSelect
+                id="tax_percentage-input"
+                v-model="product.tax_percentage"
+                :options="taxRates"
+                size="sm"
+              ></BFormSelect>
+            </BFormGroup>
+          </BCol>
+        </BRow>
         <div class='flex-columns align-items-center justify-content-center'>
-          <BButton type="submit">Verstuur</BButton>
+          <BButton
+            variant="primary"
+          >Maak aan</BButton>
         </div>
       </form>
     </div>
-
   </b-modal>
 </template>
 <script>
@@ -141,11 +150,11 @@ export default {
         {key: 'name', label: this.$trans('Name')},
       ],
       query: null,
-      showForm: true,
+      showForm: false,
       product: null,
       isSubmitClicked: false,
-      productCategories: [],
-      settings: {}
+      settings: {},
+      taxRates: []
     }
   },
   setup() {
@@ -164,9 +173,6 @@ export default {
         name: {
           required,
         },
-        product_category_id: {
-          required,
-        },
       }
     }
   },
@@ -177,14 +183,25 @@ export default {
     onRowClicked(item, _index, _event) {
       this.$emit('product-chosen', item)
     },
-    newTeamleaderProduct() {
+    async newTeamleaderProduct() {
+      const response = await this.service.fetchTaxRates()
+      this.taxRates = response.results.map((rate) => {
+        return {
+          value: rate.uuid,
+          text: `${rate.description} (${rate.rate})`
+        }
+      })
       this.product = {
-        department_id: this.settings.department_id
+        name: this.material.name,
+        code: this.material.identifier,
+        description: this.material.description,
+        department_id: this.settings.department_id,
+        tax_percentage: 0.21
       }
       this.showForm = true
     },
     async loadData() {
-      let loader = this.loading.show();
+      const loader = this.loading.show()
       try {
         this.products = await this.service.fetchProducts(this.query)
         this.settings = await this.service.configDetail()
@@ -195,21 +212,14 @@ export default {
         loader.hide()
       }
     },
-    async fetchCategories() {
-      let loader = this.loading.show();
-      try {
-        this.productCategories = await this.service.fetchProductCategories()
-        loader.hide()
-      } catch(error) {
-        console.log('error fetching product categories', error)
-        errorToast(this.create, this.$trans('Error fetching product categories'))
-        loader.hide()
-      }
+    async fetchTaxRates() {
+      this.taxRates = []
+
     },
     async show() {
       await this.$refs['modal'].show()
       this.query = this.material.name.trim()
-      await this.loadData()
+      // await this.loadData()
     },
     hide() {
       this.$refs['modal'].hide()
