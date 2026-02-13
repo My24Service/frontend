@@ -31,8 +31,7 @@
         responsive="md"
         tbody-tr-class="table-row"
         @row-clicked="onRowClicked"
-      >
-      </b-table>
+      ></b-table>
       <div class='flex-columns align-items-center justify-content-center'>
         <BButton
           @click="newTeamleaderProduct"
@@ -102,11 +101,11 @@
           <BCol cols="4">
             <BFormGroup
               label="BTW-tarief"
-              label-for="tax_percentage-input"
+              label-for="tax_rate_uuid-input"
             >
               <BFormSelect
-                id="tax_percentage-input"
-                v-model="product.tax_percentage"
+                id="tax_rate_uuid-input"
+                v-model="product.tax_rate_uuid"
                 :options="taxRates"
                 size="sm"
               ></BFormSelect>
@@ -191,12 +190,13 @@ export default {
           text: `${rate.description} (${rate.rate})`
         }
       })
+      const defaultRate = response.results.find((rate) => rate.rate === '0.21')
       this.product = {
         name: this.material.name,
         code: this.material.identifier,
         description: this.material.description,
         department_id: this.settings.department_id,
-        tax_percentage: 0.21
+        tax_rate_uuid: defaultRate.uuid
       }
       this.showForm = true
     },
@@ -219,7 +219,7 @@ export default {
     async show() {
       await this.$refs['modal'].show()
       this.query = this.material.name.trim()
-      // await this.loadData()
+      this.showForm = false
     },
     hide() {
       this.$refs['modal'].hide()
