@@ -142,6 +142,14 @@ class TeamleaderService extends BaseModel{
 
     return this.axios.get(url, headers).then(response => response.data)
   }
+
+  async fetchProductCategories() {
+    const token = await this.getCsrfToken()
+    const headers = this.getHeaders(token)
+    let url = `${this.base_url}/product-categories/`
+
+    return this.axios.get(url, headers).then(response => response.data)
+  }
 }
 
 export {TeamleaderService}
