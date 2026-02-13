@@ -15,7 +15,7 @@
         :items="departments"
         :hover="true"
         responsive="md"
-        tbody-tr-class="table-row"
+        tbody-tr-class="tr-pointer"
         @row-clicked="onRowClicked"
       >
       </b-table>
@@ -40,7 +40,7 @@ export default {
     return {
       isLoading: false,
       service: new TeamleaderService(),
-      products: [],
+      departments: [],
       fields: [
         {key: 'name', label: this.$trans('Name')},
       ]
@@ -80,8 +80,6 @@ export default {
   }
 }
 </script>
-<style scoped>
-.table-row {
-  cursor: pointer;
-}
+<style>
+
 </style>

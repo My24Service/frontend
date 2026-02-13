@@ -33,7 +33,7 @@
                 :items="documents"
                 :hover="true"
                 responsive="md"
-                tbody-tr-class="table-row"
+                tbody-tr-class="tr-pointer"
                 @row-clicked="onRowClicked"
               >
               </b-table>
