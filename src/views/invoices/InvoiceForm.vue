@@ -462,7 +462,7 @@
 
       </b-form>
 
-      <ProductChooserTeamleader
+      <TeamleaderProductChooserTeamleader
         v-if="chosenMaterial"
         ref="product-chooser-teamleader"
         :material="chosenMaterial"
@@ -505,13 +505,13 @@ import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
-import ProductChooserTeamleader from "@/views/invoices/invoice_form/teamleader/ProductChooser.vue";
+import TeamleaderProductChooserTeamleader from "@/components/TeamleaderProductChooser.vue";
 
 export default {
   name: 'InvoiceForm',
   mixins: [invoiceMixin, componentMixin],
   components: {
-    ProductChooserTeamleader,
+    TeamleaderProductChooserTeamleader,
     InvoicePDFViewer,
     PriceInput,
     HoursComponent,
