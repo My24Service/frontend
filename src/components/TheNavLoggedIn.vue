@@ -1,4 +1,20 @@
 <template>
+<div>
+  <div class="site_header">
+      <div class="container-fluid">
+          <NavBrand
+            v-if="memberInfo"
+            :member-info="memberInfo"
+          />
+          <div class="hamburger-menu"><!--
+                <img src="img/expand.png" class="expand_icon white_img" alt="expand">
+                <img src="img/unexpand.png" class="unexpand_icon white_img" alt="unexpand">
+                <img src="img/menu.png" class="arrow_menu white_img d-none" alt="menu">
+                <img src="img/close.png" class="hide_menu white_img d-none" alt="close">-->
+          </div>
+      </div>
+  </div>
+
   <div class="main-menu logged-in">
     <Notification v-if="isLoggedIn && !isCustomer" />
     <TokenRefresh />
@@ -95,10 +111,11 @@
   </b-modal>
 
     <nav class="app-sidebar">
+      <!--
       <NavBrand
         v-if="memberInfo"
         :member-info="memberInfo"
-      />
+      /> -->
       <NavItems />
       <hr />
       <b-nav-item-dropdown dropup :text="getUsername" right v-if="userInfo.user">
@@ -117,6 +134,7 @@
       </b-nav-item-dropdown>
     </nav>
   </div>
+</div>
 </template>
 
 <script>

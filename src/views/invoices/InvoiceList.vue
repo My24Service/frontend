@@ -1,14 +1,15 @@
 <template>
   <div class="app-page">
     <header>
-      <div class='search-form'>
-        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search invoices')}`"/>
-      </div>
       <div class="page-title">
         <h3>
           <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <span>{{ pageTitle }}</span>
         </h3>
+
+      <div class='search-form'>
+        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search invoices')}`"/>
+      </div>
 
         <BButton-toolbar>
           <BButton-group class="mr-1">

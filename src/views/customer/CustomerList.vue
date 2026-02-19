@@ -22,7 +22,6 @@
         </h3>
         <BButton-toolbar>
           <BButton-group class="mr-1">
-
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"

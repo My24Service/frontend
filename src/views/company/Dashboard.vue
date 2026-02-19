@@ -1,9 +1,57 @@
 <template>
   <div class="app-page">
-    <header>
-      <h3>{{ $trans('Overall statistics')}}</h3>
+    <header><!--
+      <div class="page-title">
+        <h3>
+          <IBiSpeedometer></IBiSpeedometer>
+          <span>{{ $trans('Overall statistics')}}</span>
+        </h3>
+      </div> -->
     </header>
-    <div class="panel">
+
+    <div class="section dashboard_section">
+      <!-- ROW 1 -->
+      <div class="row start_page_row1">
+        <div class="col-lgl-6">
+          <div class="row">
+            <div class="col-lg-3">
+              <DashboardTabbedBlock v-if="!isLoading" :tab-list="companyTabs" :title="member.name" pills />
+            </div>
+            <div class="col-lg-3">
+              <DashboardTabbedBlock v-if="!isLoading" :tab-list="companyInfoTabs" :title="$trans('Gegevens')" pills />
+            </div>
+            <div class="col-lg-6">
+              <DashboardBlock v-if="!isLoading" title="Logboek" iconName="card-list">
+                <b-table
+                    id="activity-table"
+                    small
+                    :busy='isLoading'
+                    :fields="activityFields"
+                    :items="activity"
+                    responsive="md"
+                    class="data-table pt-2 pl-2 pr-2"
+                    sort-icon-left>
+                    <template #table-busy>
+                      <div class="text-center my-2">
+                        <br>
+                        <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+                        <strong>{{ $trans('Loading...') }}</strong>
+                        <br>
+                      </div>
+                    </template>
+                    <template #cell(created)="data">
+                      <small>{{  data.item.created }}</small>
+                    </template>
+                </b-table>
+                <!-- <div v-html="companyLog"></div> -->
+              </DashboardBlock>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section dashboard_section mt-4">
       <OrderStats
         v-if="statsData"
         :data-in="statsData"
@@ -159,6 +207,10 @@ import OrderStats from "../../components/OrderStats.vue"
 import dashboardModel from '../../models/company/Dashboard.js'
 import {OrderService} from "@/models/orders/Order";
 import componentMixin from "@/mixins/common";
+import {$trans} from "../../utils";
+import {NO_IMAGE_URL} from "../../constants";
+import memberModel from "../../models/member/Member";
+import activityModel from '@/models/company/Activity.js'
 
 let d = new Date()
 
@@ -171,6 +223,35 @@ export default {
   mixins: [componentMixin],
   data() {
     return {
+        member: memberModel.getFields(),
+
+        activity: [],
+        activityFields: [
+          {key: 'text', label: this.$trans('Activity'), sortable: true},
+          {key: 'created', label: this.$trans('Date'), sortable: true},
+          {key: 'icons', label: ''},
+        ],
+        companyTabs: [
+        {
+          title: 'Foto',
+          content: '<img class="section-image" src="'+NO_IMAGE_URL+'"/>'
+        },
+        {
+          title: 'Locate',
+          content: '' // <iframe class="mijnKaart" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2439.2961422762787!2d4.810294182413494!3d52.310628559294734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c5e1ac04c45af3%3A0xdf35ceb7e66721a7!2sMYSS!5e0!3m2!1snl!2snl!4v1686299469567!5m2!1snl!2snl" width="100%" height="auto" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
+        }
+      ],
+      companyLog: '',
+      companyInfoTabs: [
+        {
+          title: $trans('Address'),
+          content: '<div class="myss_box"></div>'
+        },
+        {
+          title: $trans('Contacts'),
+          content: ''
+        },
+      ],
       chartdataCustomers: {},
 
       orderTypeDisplayThreshold: 15,
@@ -240,6 +321,42 @@ export default {
 
       dashboardModel.setListArgs(`year=${this.year}`)
       try {
+        //
+        this.member = await memberModel.getMe();
+
+        const activityData = await activityModel.list()
+        this.activity = activityData.results
+        this.companyTabs=[
+          {
+            title: 'Foto',
+            content: '<img class="section-image" src="'+NO_IMAGE_URL+'"/>'
+          },
+          {
+            title: 'Locate',
+            content: '<iframe class="mijnKaart" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2439.2961422762787!2d4.810294182413494!3d52.310628559294734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c5e1ac04c45af3%3A0xdf35ceb7e66721a7!2sMYSS!5e0!3m2!1snl!2snl!4v1686299469567!5m2!1snl!2snl" width="100%" height="auto" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
+          }
+        ];
+
+        // this.companyLog = '<table><tr><td><br/><strong>Data kon niet worden geladen</strong></td></tr></table>';
+        const contactsHtml = this.member.contacts
+          .split(/\r?\n/)
+          .filter(line => line.trim() !== "")
+          .map(line => `<p>${line}</p>`)
+          .join("");
+
+        this.companyInfoTabs = [
+            {
+              title: $trans('Address'),
+              content: '<div class="myss_box">'+
+                (!this.member ? '' : '<img src="'+(this.member.companylogo ?? NO_IMAGE_URL)+'" class="myss-logo" alt="Logo"/><ul><li>Gebouw ELM</li><li>'+this.member.address+'</li><li>'+this.member.postal+' '+this.member.city+'</li></ul>')
+                +' </div>'
+            },
+            {
+              title: $trans('Contacts'),
+              content: contactsHtml,
+            },
+        ];
+
         const data = await dashboardModel.list()
 
         // CUSTOMERS: bar graph top customers
@@ -523,3 +640,103 @@ export default {
   },
 }
 </script>
+
+
+<style>
+.section.dashboard_section {
+  padding: 0 1.5rem
+}
+
+.section_head {
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 0.1rem solid var(--greyC);
+  background: var(--mainC);
+}
+
+.section_head h5 {
+  font-size: 1rem;
+}
+
+.section_block {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 0.65rem 0.8rem 0 rgba(0, 0, 0, 0.2);
+}
+
+.myss_box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.myss_box ul li {
+  padding: 0.35rem 0;
+  border-bottom: 0.1rem solid var(--greyC);
+  /*font-size: 1.45rem;*/
+}
+
+.myss_box ul li:last-child {
+  border-bottom: 0;
+}
+
+.myss_box ul li:first-child {
+  color: var(--hoverC);
+  font-weight: 900;
+  /*font-size: 1.5rem;*/
+}
+
+.myss-logo {
+    height: 5rem;
+    padding: 0;
+    margin: 0 auto;
+    display: block;
+}
+
+.row .section_block .tabs .tab-content.mt-3 {
+  margin-top: 0;
+  /* padding: 8px; */
+  /* justify-content: center; */
+}
+
+.start_page_row1 .row .section_block {
+  height: 20rem;
+}
+
+.start_page_row1 .row .section_block .tabs ul.nav-pills {
+  margin: 4px;
+  justify-content: center;
+}
+
+.start_page_row1 .row .section_block .tab-content iframe {
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  outline: none;
+  border: none;
+}
+
+.start_page_row1 .row .section_block .tabs .nav-item .nav-link {
+  border-radius: 4px;
+  padding: 4px 9px;
+}
+
+div.section.dashboard_section div.row.start_page_row1 div.section_block div.tabs div.tab-content div img.section-image,
+div.section_block div.tabs div.tab-content.mt-3 div.tab-pane div img.section-image {
+  border-radius: 0.5rem;
+  object-fit: cover;
+  max-height: 180px;
+  width: 100%;
+}
+
+div.section.dashboard_section div.row div div.section_block div.tabs div.tab-content.section_block_content {
+  border-top: 0.1rem solid var(--greyC) !important;
+  padding: 0.7rem !important;
+}
+
+div.section.dashboard_section div.row div.section_block div.section_content div.table-responsive-md.data-table {
+  padding: 0.5rem !important;
+}
+
+</style>

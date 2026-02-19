@@ -3,10 +3,10 @@
     <header>
       <div class="page-title">
         <h3><IBiFileEarmarkBarGraphFill></IBiFileEarmarkBarGraphFill>{{ $trans("Order stats") }}</h3>
-        <div class="flex-columns">
+        <div class="flex-columns nav_tabs">
           {{ $trans("view") }}
-          <router-link class="btn button" to="./year-stats">{{ $trans("year") }}</router-link>
-          <router-link class="btn button" to="./month-stats" disabled>{{ $trans("month") }}</router-link>
+          <router-link class="nav-link active" to="./year-stats">{{ $trans("year") }}</router-link>
+          <router-link class="nav-link" to="./month-stats" disabled>{{ $trans("month") }}</router-link>
         </div>
       </div>
     </header>

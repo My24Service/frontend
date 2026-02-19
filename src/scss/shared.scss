@@ -63,9 +63,9 @@ input::placeholder {
 }
 
 .edit-icon {
-  width: 1.2rem;
-  height: 1.2rem;
-  opacity: .2;
+  width: 0.9rem;
+  height: 0.9rem;
+  opacity: 0.8;
 }
 
 li:hover .edit-icon,
@@ -101,7 +101,7 @@ tr:focus-within .edit-icon {
   z-index: 1;
   overflow-y: auto;
   display: flex;
-
+  font-family: var(--inter);
 
   nav {
     position: sticky;
@@ -113,9 +113,9 @@ tr:focus-within .edit-icon {
 
     .nav-items {
       overflow: auto;
-      padding: 0 1rem;
+      padding: 0;
       .has-children {
-        padding: .2em;
+        padding: 0 0;
       }
       .badge {
         color: $navbar-light-color !important;
@@ -139,15 +139,19 @@ tr:focus-within .edit-icon {
         //margin-block: 1ex;
       }
       a {
-        border-left: 1px solid #232c2f30;
-        border-radius: 0;
-        transition: all .2s, padding-inline-start .3s .2s;
+        // border-left: 1px solid #232c2f30;
+        border-radius: 8px;
+        margin: 4px 0 0 0;
+        padding-left: 2ex;
+        // transition: all .2s, padding-inline-start .3s .2s;
         &:hover,&:focus,&:active,&.router-link-active,&.active {
-          border-color: currentColor;
+          // border-color: currentColor;
+          background-color: $my24;
+          color: $normal-link;
         }
-        &.router-link-active {
-          padding-inline-start: 2ex;
-        }
+//        &.router-link-active {
+//          padding-inline-start: 2ex;
+//        }
       }
     }
 
@@ -155,15 +159,18 @@ tr:focus-within .edit-icon {
 
   li {
     list-style: none;
-
+    padding: 0 1rem;
     a {
-      border-radius: .5ex;
-      color: #232c2fa0;
+      border-radius: 0;
+      // color: #232c2fa0;
+      color: #000;
+      font-family: var(--inter);
       display: flex;
       gap: 1ex;
       align-items: center;
       position: relative;
       transition: all .2s;
+      padding: 8px 12px;
 
       &.router-link-active {
         font-weight: bold;
@@ -203,7 +210,7 @@ tr:focus-within .edit-icon {
   .nav-items > li > a.active {
     background: $navbar-light-color;
     color: white;
-    padding: 4px;
+    padding: 8px 12px;
   }
 }
 
@@ -211,14 +218,14 @@ tr:focus-within .edit-icon {
   padding: 0;
   height: 100vh;
   overflow-y: scroll;
-  background-image: linear-gradient(to bottom, $primary 11rem, transparent 11rem);
+  // background-image: linear-gradient(to bottom, $primary 11rem, transparent 11rem);
   > header {
-    margin: 0 0rem 0;
+    margin: 0;
     padding: 1rem 2rem;
     color: white;
     z-index: 2;
     top: 0;
-    min-height: 8rem;
+    min-height: 7rem;
 
     h3:first-child {margin-top: calc(52px + 2ex);}
     .page-title {
@@ -230,20 +237,33 @@ tr:focus-within .edit-icon {
       h3 {
         display: flex;
         align-items: center;
-        font-weight: normal;
+        //font-weight: normal;
+        font-weight: bold;
         gap: .5ex;
         margin: 0;
         a {
           color: white;
         }
+
+        svg, img {
+          margin-right: 0.7vw;
+        }
       }
     }
 
     .search-form {
-      margin-bottom: 2ex;
-      position: absolute;
-
+//      margin-bottom: 2ex;
+//      position: absolute;
+      width: 15vw;
       .form-control {
+          height: 2.6rem;
+          border-radius: 10rem;
+          padding: 0 1rem;
+          font-size: 1.1rem;
+          color: var(--dark);
+          border: 0.1rem solid var(--blackC);
+      }
+      .form-control-old {
         background-color: rgba(255,255,255,.75);
         border-radius: 3rem;
         border-color: transparent;
@@ -252,9 +272,9 @@ tr:focus-within .edit-icon {
         padding: 2ex;
         font-size: .85rem;
       }
-      form {
-        max-width: 20ch;
-      }
+//      form {
+//        max-width: 20ch;
+//      }
     }
 
     .flex-columns {
@@ -365,7 +385,7 @@ tr:focus-within .edit-icon {
           font-size: smaller;
           letter-spacing: .25px;
           line-height: 3.2rem;
-          padding: 0;
+          padding: 8px 12px;
           color: $secondary;
 
           &:hover,
@@ -751,12 +771,11 @@ html {
       gap: 1ex;
       align-items: center;
     }
-
     .btn,
     .btn-primary {
-      background-color: white;
+      background-color: $my24;
       border-color: #fff6;
-      color: $my24;
+      color: $white;
       &:not(:disabled):active {
         border-color: white !important;
       }
@@ -792,8 +811,10 @@ html {
 
     .btn-group .btn-secondary {
       margin-inline: 0;
-      background: white !important;
-      color: $primary;
+      // background: white !important;
+      // color: $primary;
+      background: $my24 !important;
+      color: $white;
     }
     .backlink {
       cursor: pointer;

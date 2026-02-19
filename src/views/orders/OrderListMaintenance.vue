@@ -1,14 +1,15 @@
 <template>
   <div class="app-page">
     <header>
-      <!-- WIP -->
-      <div class='search-form'>
-        <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search orders')}`"/>
-      </div>
       <div class="page-title">
         <h3>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <span>{{ $trans("Orders") }}</span>
         </h3>
+
+        <div class='search-form'>
+          <SearchForm @do-search="handleSearchOk" :placeholderText="`${$trans('Search orders')}`"/>
+        </div>
 
         <BButton-toolbar>
           <BButton-group class="mr-1">
@@ -25,7 +26,6 @@
           </router-link>
         </BButton-toolbar>
       </div>
-
     </header>
 
     <div class="panel app-detail" ref="order-list-maintenance">

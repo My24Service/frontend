@@ -1,5 +1,69 @@
 <template>
-  <div class="app-grid">
+  <!--<div class="app-grid">-->
+  <div class="">
+    <DashboardBlock :title="$trans('Per order type per year')">
+        <bar-chart
+          v-if="chartdataCountsYearOrdertypesBar"
+          id="bar-chart-order-types-year"
+          :chart-data="chartdataCountsYearOrdertypesBar"
+          :options="optionsStacked"
+        />
+    </DashboardBlock>
+
+    <DashboardBlock :title="$trans('Per order type per month')" customClass="mt-4">
+        <bar-chart
+          v-if="chartdataCountsOrderTypesBar"
+          id="bar-chart-order-types-month"
+          :chart-data="chartdataCountsOrderTypesBar"
+          :options="optionsStacked"
+        />
+    </DashboardBlock>
+
+    <DashboardBlock :title="$trans('Orders per month')" customClass="mt-4">
+      <b-row>
+        <b-col cols="6">
+          <bar-chart
+            v-if="chartdataCountsBar"
+            id="bar-chart-order-types"
+            :chart-data="chartdataCountsBar"
+            :options="options"
+          />
+        </b-col>
+        <b-col cols="6">
+          <pie-chart
+            v-if="chartdataCountsPie"
+            id="pie-chart-order-types"
+            :chart-data="chartdataCountsPie"
+            :options="pieOptions"
+          />
+        </b-col>
+      </b-row>
+    </DashboardBlock>
+
+    <b-row>
+      <DashboardBlock :title="$trans('Order types')" customClass="mt-4">
+          <b-col cols="6">
+            <bar-chart
+              v-if="chartdataOrderTypesBar"
+              id="bar-chart-order-types"
+              :chart-data="chartdataOrderTypesBar"
+              :options="options"
+            />
+          </b-col>
+      </DashboardBlock>
+      <DashboardBlock :title="$trans('Totals')" customClass="mt-4">
+          <b-col cols="6">
+            <pie-chart
+              v-if="chartdataOrderTypesPie"
+              id="pie-chart-order-types"
+              :chart-data="chartdataOrderTypesPie"
+              :options="pieOptions"
+            />
+          </b-col>
+      </DashboardBlock>
+    </b-row>
+
+    <!--
     <b-row align-h="center">
       <h3>{{ $trans("Per order type per year")}}</h3>
     </b-row>
@@ -13,7 +77,6 @@
         />
       </b-col>
     </b-row>
-
     <b-row align-h="center">
       <h3>{{ $trans("Per order type per month")}}</h3>
     </b-row>
@@ -71,6 +134,7 @@
         />
       </b-col>
     </b-row>
+  -->
   </div>
 </template>
 
