@@ -54,7 +54,7 @@
                   <div class="p-2">
                     <button
                       class="btn btn-primary m-1"
-                      @click="updateEnabled()"
+                      @click="updateEnabled"
                     >
                       {{ $trans('Submit') }}
                     </button>
@@ -79,7 +79,7 @@
                   >
                     <button
                       class="btn btn-danger m-1"
-                      @click="emptyTokens()"
+                      @click="emptyTokens"
                     >
                       {{ $trans('Verwijder') }}
                     </button>
@@ -90,7 +90,7 @@
                   >
                     <button
                       class="btn btn-primary m-1"
-                      @click="authorize()"
+                      @click="authorize"
                     >
                       {{ $trans('Verleen toegang') }}
                     </button>
@@ -117,7 +117,7 @@
                     ></b-form-input>
                     <button
                       class="btn btn-primary m-1"
-                      @click="chooseDepartment()"
+                      @click="chooseDepartment"
                     >Kies</button>
                   </div>
                 </b-form-group>
@@ -140,8 +140,33 @@
                     ></BFormSelect>
                     <button
                       class="btn btn-primary m-1"
-                      @click="updateProductCategory()"
+                      @click="updateProductCategory"
                     >Submit</button>
+                  </div>
+                </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Product voor uren</h5>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="4"
+                  v-bind:label="$trans('Product')"
+                  label-for="hours_product_uuid"
+                >
+                  <div class="d-flex">
+                    <b-form-input
+                      id="hours_product_uuid"
+                      size="sm"
+                      type="text"
+                      :state="isHoursProductOk"
+                      v-model="settings.hours_product_uuid"
+                    ></b-form-input>
+                    <button
+                      class="btn btn-primary m-1"
+                      @click="openProductChooserModal"
+                    >Kies</button>
                   </div>
                 </b-form-group>
               </div>
@@ -165,7 +190,7 @@
                     ></b-form-input>
                     <button
                       class="btn btn-primary m-1"
-                      @click="chooseInvoiceTemplate()"
+                      @click="chooseInvoiceTemplate"
                     >Kies</button>
                   </div>
                 </b-form-group>
@@ -201,6 +226,11 @@
           </ol>
         </div>
       </b-form>
+      <TeamleaderProductChooserTeamleader
+        ref="product-chooser-teamleader"
+        @product-chosen="productChosenTl"
+        :with-create-button="false"
+      />
     </div>
   </div>
 </template>
@@ -212,6 +242,7 @@ import {errorToast, infoToast} from "@/utils";
 import {useToast} from "bootstrap-vue-next";
 import componentMixin from "@/mixins/common";
 import {useLoading} from "vue-loading-overlay";
+import TeamleaderProductChooserTeamleader from "@/components/TeamleaderProductChooser.vue";
 
 export default {
   setup() {
@@ -227,6 +258,7 @@ export default {
   },
   mixins: [componentMixin],
   components: {
+    TeamleaderProductChooserTeamleader,
     DocumentTemplateChooser,
     DepartmentChooser,
   },
@@ -250,6 +282,9 @@ export default {
     isDepartmentOk() {
       return !this.isEmpty(this.settings.department_uuid)
     },
+    isHoursProductOk() {
+      return !this.isEmpty(this.settings.hours_product_uuid)
+    },
     isInvoiceTemplateOk() {
       return !this.isEmpty(this.settings.invoice_template_uuid)
     },
@@ -260,6 +295,13 @@ export default {
   methods: {
     isEmpty(val) {
       return val === null || val === ""
+    },
+    async openProductChooserModal() {
+      await this.$refs['product-chooser-teamleader'].show();
+    },
+    productChosenTl(obj) {
+      console.log('productChosenTl', obj)
+      this.settings.hours_product_uuid = obj.uuid
     },
     async departmentChosen(item) {
       this.$refs['department-chooser-modal'].hide()

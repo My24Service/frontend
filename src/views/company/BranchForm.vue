@@ -20,145 +20,143 @@
             <b-form class="page-detail panel">
               <b-overlay :show="isLoading" rounded="sm">
                 <b-row>
-              <b-col cols="3" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('Name')"
-                  label-for="branch_name"
-                >
-                  <BFormInput
-                    autofocus
-                    id="branch_name"
-                    size="sm"
-                    v-model="branch.name"
-                    :state="isSubmitClicked ? !v$.branch.name.$error : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !v$.branch.name.$error : null">
-                    {{ $trans('Please enter a name') }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="3" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('Address')"
-                  label-for="branch_address"
-                >
-                  <BFormInput
-                    id="branch_address"
-                    size="sm"
-                    v-model="branch.address"
-                    :state="isSubmitClicked ? !v$.branch.address.$error : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !v$.branch.address.$error : null">
-                    {{ $trans('Please enter an address') }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('Postal')"
-                  label-for="branch_postal"
-                >
-                  <BFormInput
-                    id="branch_postal"
-                    size="sm"
-                    v-model="branch.postal"
-                    :state="isSubmitClicked ? !v$.branch.postal.$error : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !v$.branch.postal.$error : null">
-                    {{ $trans('Please enter a postal') }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('City')"
-                  label-for="branch_city"
-                >
-                  <BFormInput
-                    id="branch_city"
-                    size="sm"
-                    v-model="branch.city"
-                    :state="isSubmitClicked ? !v$.branch.city.$error : null"
-                  ></BFormInput>
-                  <b-form-invalid-feedback
-                    :state="isSubmitClicked ? !v$.branch.city.$error : null">
-                    {{ $trans('Please enter a city') }}
-                  </b-form-invalid-feedback>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('Country')"
-                  label-for="branch_country"
-                >
-                  <BFormSelect v-model="branch.country_code" :options="countries" size="sm"></BFormSelect>
-                </BFormGroup>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('Email')"
-                  label-for="branch_email"
-                >
-                  <BFormInput
-                    id="branch_email"
-                    size="sm"
-                    v-model="branch.email"
-                  ></BFormInput>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('Tel.')"
-                  label-for="branch_tel"
-                >
-                  <BFormInput
-                    id="branch_tel"
-                    size="sm"
-                    v-model="branch.tel"
-                  ></BFormInput>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="2" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('Mobile')"
-                  label-for="branch_mobile"
-                >
-                  <BFormInput
-                    id="branch_mobile"
-                    size="sm"
-                    v-model="branch.mobile"
-                  ></BFormInput>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="4" role="group">
-                <BFormGroup
-                  label-size="sm"
-                  v-bind:label="$trans('Contact')"
-                  label-for="branch_contact"
-                >
-                  <BFormTextarea
-                    id="branch_contact"
-                    v-model="branch.contact"
-                    rows="5"
-                  ></BFormTextarea>
-                </BFormGroup>
-              </b-col>
-            </b-row>
-
-
+                  <b-col cols="3" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Name')"
+                      label-for="branch_name"
+                    >
+                      <BFormInput
+                        autofocus
+                        id="branch_name"
+                        size="sm"
+                        v-model="branch.name"
+                        :state="isSubmitClicked ? !v$.branch.name.$error : null"
+                      ></BFormInput>
+                      <b-form-invalid-feedback
+                        :state="isSubmitClicked ? !v$.branch.name.$error : null">
+                        {{ $trans('Please enter a name') }}
+                      </b-form-invalid-feedback>
+                    </BFormGroup>
+                  </b-col>
+                  <b-col cols="3" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Address')"
+                      label-for="branch_address"
+                    >
+                      <BFormInput
+                        id="branch_address"
+                        size="sm"
+                        v-model="branch.address"
+                        :state="isSubmitClicked ? !v$.branch.address.$error : null"
+                      ></BFormInput>
+                      <b-form-invalid-feedback
+                        :state="isSubmitClicked ? !v$.branch.address.$error : null">
+                        {{ $trans('Please enter an address') }}
+                      </b-form-invalid-feedback>
+                    </BFormGroup>
+                  </b-col>
+                  <b-col cols="2" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Postal')"
+                      label-for="branch_postal"
+                    >
+                      <BFormInput
+                        id="branch_postal"
+                        size="sm"
+                        v-model="branch.postal"
+                        :state="isSubmitClicked ? !v$.branch.postal.$error : null"
+                      ></BFormInput>
+                      <b-form-invalid-feedback
+                        :state="isSubmitClicked ? !v$.branch.postal.$error : null">
+                        {{ $trans('Please enter a postal') }}
+                      </b-form-invalid-feedback>
+                    </BFormGroup>
+                  </b-col>
+                  <b-col cols="2" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('City')"
+                      label-for="branch_city"
+                    >
+                      <BFormInput
+                        id="branch_city"
+                        size="sm"
+                        v-model="branch.city"
+                        :state="isSubmitClicked ? !v$.branch.city.$error : null"
+                      ></BFormInput>
+                      <b-form-invalid-feedback
+                        :state="isSubmitClicked ? !v$.branch.city.$error : null">
+                        {{ $trans('Please enter a city') }}
+                      </b-form-invalid-feedback>
+                    </BFormGroup>
+                  </b-col>
+                  <b-col cols="2" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Country')"
+                      label-for="branch_country"
+                    >
+                      <BFormSelect v-model="branch.country_code" :options="countries" size="sm"></BFormSelect>
+                    </BFormGroup>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col cols="4" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Email')"
+                      label-for="branch_email"
+                    >
+                      <BFormInput
+                        id="branch_email"
+                        size="sm"
+                        v-model="branch.email"
+                      ></BFormInput>
+                    </BFormGroup>
+                  </b-col>
+                  <b-col cols="2" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Tel.')"
+                      label-for="branch_tel"
+                    >
+                      <BFormInput
+                        id="branch_tel"
+                        size="sm"
+                        v-model="branch.tel"
+                      ></BFormInput>
+                    </BFormGroup>
+                  </b-col>
+                  <b-col cols="2" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Mobile')"
+                      label-for="branch_mobile"
+                    >
+                      <BFormInput
+                        id="branch_mobile"
+                        size="sm"
+                        v-model="branch.mobile"
+                      ></BFormInput>
+                    </BFormGroup>
+                  </b-col>
+                  <b-col cols="4" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Contact')"
+                      label-for="branch_contact"
+                    >
+                      <BFormTextarea
+                        id="branch_contact"
+                        v-model="branch.contact"
+                        rows="5"
+                      ></BFormTextarea>
+                    </BFormGroup>
+                  </b-col>
+                </b-row>
           </b-overlay>
         </b-form>
       </div>

@@ -2,7 +2,7 @@
   <b-modal
     id="modal"
     ref="modal"
-    :title="$trans('Choose department')"
+    title="Kies afdeling"
     ok-only
     @ok="hide"
   >
@@ -66,7 +66,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching departments', error)
-        errorToast(this.create, this.$trans('Error fetching departments'))
+        errorToast(this.create,'Fout bij het ophalen van de afdelingen')
         this.isLoading = false
       }
     },
@@ -80,6 +80,6 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 
 </style>

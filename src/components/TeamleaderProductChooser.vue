@@ -32,7 +32,10 @@
         tbody-tr-class="table-row"
         @row-clicked="onRowClicked"
       ></b-table>
-      <div class='flex-columns align-items-center justify-content-center'>
+      <div
+        v-if="withCreateButton"
+        class='flex-columns align-items-center justify-content-center'
+      >
         <BButton
           @click="newTeamleaderProduct"
           variant="primary"
@@ -132,11 +135,15 @@ import {TeamleaderService} from "@/models/company/Teamleader";
 import PriceInput from "@/components/PriceInput.vue";
 
 export default {
-  name: "ProductChooserTeamleader",
+  name: "TeamleaderProductChooser",
   mixins: [componentMixin],
   components: {BInput, PriceInput},
   props: {
-    'material': Object
+    material: Object,
+    withCreateButton: {
+      type: Boolean,
+      default: true
+    }
   },
   emits: [
     'product-chosen'
@@ -158,7 +165,7 @@ export default {
   },
   setup() {
     const {create} = useToast()
-    const loading = useLoading();
+    const loading = useLoading()
 
     return {
       create,
@@ -208,13 +215,9 @@ export default {
         loader.hide()
       } catch(error) {
         console.log('error fetching products', error)
-        errorToast(this.create, this.$trans('Error fetching products'))
+        errorToast(this.create,'Fout bij het ophalen van de producten')
         loader.hide()
       }
-    },
-    async fetchTaxRates() {
-      this.taxRates = []
-
     },
     async show() {
       await this.$refs['modal'].show()
