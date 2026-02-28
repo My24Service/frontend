@@ -34,7 +34,7 @@
     <div class="app-detail panel overflow-auto">
       <b-form class="page-detail flex-columns">
         <div class="panel col-1-1">
-          <ol>
+          <ol class="m-2">
             <li>
               <div class="section rounded-sm revert">
                 <h5>API Actief</h5>
@@ -169,6 +169,10 @@
                     >Kies</button>
                   </div>
                 </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
                 <h5>BTW-tarieven</h5>
                 <b-table
                   id="tax-rates-table"
