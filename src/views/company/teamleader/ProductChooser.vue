@@ -2,11 +2,11 @@
   <b-modal
     id="modal"
     ref="modal"
-    :title="$trans('Choose template')"
+    title="Kies product"
     ok-only
     @ok="hide"
   >
-    <form ref="search-form" @submit.stop.prevent="doSearch">
+    <form ref="search-form" @submit.stop.prevent="loadData">
       <b-container fluid>
         <b-row>
           <b-col cols="12">
@@ -40,62 +40,57 @@
         </b-row>
       </b-container>
     </form>
+
   </b-modal>
 </template>
 <script>
 import {TeamleaderService} from "@/models/company/Teamleader";
 import {useToast} from "bootstrap-vue-next";
-import componentMixin from "@/mixins/common";
 import {errorToast} from "@/utils";
+import componentMixin from "@/mixins/common";
+import {useLoading} from "vue-loading-overlay";
 
 export default {
-  name: "DocumentTemplateChooser",
-  components: {},
-  props: {
-    'departmentId': String
-  },
-  emits: [
-    'template-chosen'
-  ],
-  setup() {
-    const {create} = useToast()
-
-    return {
-      create,
-    }
-  },
+  name: "ProductChooser",
   mixins: [componentMixin],
+  components: {},
+  props: {},
+  emits: [
+    'product-chosen'
+  ],
   data() {
     return {
       isLoading: false,
       service: new TeamleaderService(),
-      query: null,
-      documents: [],
+      products: [],
       fields: [
         {key: 'name', label: 'Naam'},
-      ]
+      ],
+      query: null
     }
   },
-  created() {
-    this.loadData()
+  setup() {
+    const {create} = useToast()
+    const loading = useLoading()
+
+    return {
+      create,
+      loading
+    }
   },
   methods: {
     onRowClicked(item, _index, _event) {
-      this.$emit('template-chosen', item)
-    },
-    async doSearch() {
+      this.$emit('product-chosen', item)
     },
     async loadData() {
-      this.isLoading = true
+      const loader = this.loading.show()
       try {
-        const response = await this.service.invoiceDocumentTemplateList(this.departmentId)
-        this.documents = response.data
-        this.isLoading = false
-
+        this.products = await this.service.fetchProducts(this.query)
+        loader.hide()
       } catch(error) {
-        console.log('error fetching documents', error)
-        errorToast(this.create,'Fout bij het ophalen van de templates')
-        this.isLoading = false
+        console.error('error fetching products', error)
+        errorToast(this.create,'Fout bij het ophalen van de producten')
+        loader.hide()
       }
     },
     async show() {

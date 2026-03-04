@@ -270,6 +270,10 @@ tr:focus-within .edit-icon {
 
 }
 
+.modal-content .tr-pointer >* {
+  cursor: pointer !important;
+}
+
 .navbar-brand {
   padding: 0;
   margin: 1rem auto !important;

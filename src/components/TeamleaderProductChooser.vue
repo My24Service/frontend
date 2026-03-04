@@ -1,0 +1,237 @@
+<template>
+  <b-modal
+    id="modal"
+    ref="modal"
+    title="Koppel product"
+    ok-only
+    @ok="hide"
+    ok-title="Annuleer"
+    ok-variant="secondary"
+  >
+    <div v-if="!showForm">
+      <b-row>
+        <b-col cols="10">
+          <b-input
+            v-model="query"
+          />
+        </b-col>
+        <b-col cols="2">
+          <BButton
+            @click="doSearch"
+          >Zoeken</BButton>
+        </b-col>
+      </b-row>
+
+      <b-table
+        id="products-table"
+        small
+        :fields="fields"
+        :items="products"
+        :hover="true"
+        responsive="md"
+        tbody-tr-class="table-row"
+        @row-clicked="onRowClicked"
+      ></b-table>
+      <div
+        v-if="withCreateButton"
+        class='flex-columns align-items-center justify-content-center'
+      >
+        <BButton
+          @click="newTeamleaderProduct"
+          variant="primary"
+          >Voeg nieuw teamleader product toe</BButton>
+      </div>
+    </div>
+    <div v-else>
+      <h3>Nieuw teamleader product</h3>
+      <form v-if="product">
+        <BFormGroup
+          label="Naam"
+          label-for="name-input"
+          invalid-feedback="Naam is vereist"
+          :state="isSubmitClicked ? !v$.product.name.$error : null"
+        >
+          <BFormInput
+            id="name-input"
+            :autofocus="true"
+            v-model="product.name"
+            :state="isSubmitClicked ? !v$.product.name.$error : null"
+          ></BFormInput>
+        </BFormGroup>
+        <BFormGroup
+          label="Code"
+          label-for="code-input"
+        >
+          <BFormInput
+            id="code-input"
+            v-model="product.code"
+          ></BFormInput>
+        </BFormGroup>
+        <BFormGroup
+          label="Omschrijving"
+          label-for="description-input"
+        >
+          <BFormInput
+            id="description-input"
+            v-model="product.description"
+          ></BFormInput>
+        </BFormGroup>
+        <BRow>
+          <BCol cols="4">
+            <BFormGroup
+              label="Inkoopprijs"
+              label-for="purchase_price-input"
+            >
+              <PriceInput
+                id="purchase_price-input"
+                v-model="product.purchase_price"
+                currency="EUR"
+              />
+            </BFormGroup>
+          </BCol>
+          <BCol cols="4">
+            <BFormGroup
+              label="Verkoopprijs"
+              label-for="selling_price-input"
+            >
+              <PriceInput
+                id="selling_price-input"
+                v-model="product.selling_price"
+                currency="EUR"
+              ></PriceInput>
+            </BFormGroup>
+          </BCol>
+          <BCol cols="4">
+            <BFormGroup
+              label="BTW-tarief"
+              label-for="tax_rate_uuid-input"
+            >
+              <BFormSelect
+                id="tax_rate_uuid-input"
+                v-model="product.tax_rate_uuid"
+                :options="taxRates"
+                size="sm"
+              ></BFormSelect>
+            </BFormGroup>
+          </BCol>
+        </BRow>
+        <div class='flex-columns align-items-center justify-content-center'>
+          <BButton
+            variant="primary"
+          >Maak aan</BButton>
+        </div>
+      </form>
+    </div>
+  </b-modal>
+</template>
+<script>
+import {BInput, useToast} from "bootstrap-vue-next";
+import {errorToast} from "@/utils";
+import {useLoading} from "vue-loading-overlay";
+import {useVuelidate} from "@vuelidate/core";
+import {required} from "@vuelidate/validators";
+import componentMixin from "@/mixins/common";
+import {TeamleaderService} from "@/models/company/Teamleader";
+import PriceInput from "@/components/PriceInput.vue";
+
+export default {
+  name: "TeamleaderProductChooser",
+  mixins: [componentMixin],
+  components: {BInput, PriceInput},
+  props: {
+    material: Object,
+    withCreateButton: {
+      type: Boolean,
+      default: true
+    }
+  },
+  emits: [
+    'product-chosen'
+  ],
+  data() {
+    return {
+      service: new TeamleaderService(),
+      products: [],
+      fields: [
+        {key: 'name', label: this.$trans('Name')},
+      ],
+      query: null,
+      showForm: false,
+      product: null,
+      isSubmitClicked: false,
+      settings: {},
+      taxRates: []
+    }
+  },
+  setup() {
+    const {create} = useToast()
+    const loading = useLoading()
+
+    return {
+      create,
+      loading,
+      v$: useVuelidate(),
+    }
+  },
+  validations() {
+    return {
+      product: {
+        name: {
+          required,
+        },
+      }
+    }
+  },
+  methods: {
+    async doSearch() {
+      await this.loadData()
+    },
+    onRowClicked(item, _index, _event) {
+      this.$emit('product-chosen', item)
+    },
+    async newTeamleaderProduct() {
+      const response = await this.service.fetchTaxRates()
+      this.taxRates = response.results.map((rate) => {
+        return {
+          value: rate.uuid,
+          text: `${rate.description} (${rate.rate})`
+        }
+      })
+      const defaultRate = response.results.find((rate) => rate.rate === '0.21')
+      this.product = {
+        name: this.material.name,
+        code: this.material.identifier,
+        description: this.material.description,
+        department_id: this.settings.department_id,
+        tax_rate_uuid: defaultRate.uuid
+      }
+      this.showForm = true
+    },
+    async loadData() {
+      const loader = this.loading.show()
+      try {
+        this.products = await this.service.fetchProducts(this.query)
+        this.settings = await this.service.configDetail()
+        loader.hide()
+      } catch(error) {
+        console.log('error fetching products', error)
+        errorToast(this.create,'Fout bij het ophalen van de producten')
+        loader.hide()
+      }
+    },
+    async show() {
+      await this.$refs['modal'].show()
+      this.query = this.material.name.trim()
+      this.showForm = false
+    },
+    hide() {
+      this.$refs['modal'].hide()
+    }
+  },
+  created() {
+  }
+}
+</script>
+<style scoped>
+
+</style>

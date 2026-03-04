@@ -192,16 +192,30 @@
                 <b-col cols="1">
                   <p class="flex">
                     <BButton
+                      v-if="!hasTeamleader"
                       :disabled="materialUpdating"
-                      @click="() => { updateMaterial(material.id) }"
+                      @click="() => updateMaterial(material.id)"
                       class="btn update-button"
                       size="sm"
                       type="button"
-                      variant=""
+                      variant="primary"
                       :title="$trans('This will update the API')"
                     >
                       <b-spinner small v-if="materialUpdating"></b-spinner>
                       {{ $trans("Update") }}
+                    </BButton>
+                    <BButton
+                      v-if="hasTeamleader"
+                      :disabled="materialUpdating"
+                      @click="() => openProductChooserTlModal(material)"
+                      class="btn update-button"
+                      size="sm"
+                      type="button"
+                      variant="primary"
+                      :title="$trans('Koppel materiaal aan product')"
+                    >
+                      <b-spinner small v-if="materialUpdating"></b-spinner>
+                      {{ $trans("Teamleader") }}
                     </BButton>
                   </p>
                 </b-col>
@@ -213,16 +227,16 @@
             <b-container fluid>
               <h5>{{ $trans("Engineers") }}</h5>
               <b-row>
-                <b-col cols="6" class="header">
+                <b-col cols="7" class="header">
                   {{ $trans("Name") }}
                 </b-col>
                 <b-col cols="4" class="header ml-3">
                   {{ $trans("Hourly price") }}
                 </b-col>
-                <b-col cols="2" />
+                <b-col cols="1" />
               </b-row>
               <b-row v-for="user in engineer_models" :key="user.id">
-                <b-col cols="6">
+                <b-col cols="7">
                   {{ user.full_name }}
                 </b-col>
                 <b-col cols="4">
@@ -232,12 +246,13 @@
                     @priceChanged="(val) => user.engineer.setHourlyRate(val)"
                   />
                 </b-col>
-                <b-col cols="2">
+                <b-col cols="1">
                     <BButton
                       @click="() => { updateEngineer(user.id) }"
                       class="btn update-button"
                       size="sm"
                       type="button"
+                      variant="primary"
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
@@ -248,7 +263,7 @@
 
             <hr/>
 
-            <b-container fluid v-if="customer">
+            <b-container fluid v-if="customer && !hasTeamleader">
               <h5>{{ $trans("Prices for customer") }}</h5>
               <b-row>
                 <b-col cols="7" class="header">
@@ -277,6 +292,7 @@
                       class="btn update-button"
                       size="sm"
                       type="button"
+                      variant="primary"
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
@@ -302,6 +318,7 @@
                       class="btn update-button"
                       size="sm"
                       type="button"
+                      variant="primary"
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
@@ -326,6 +343,7 @@
                       @click="() => { updateCustomer() }"
                       class="btn update-button"
                       size="sm"
+                      variant="primary"
                       type="button"
                       :title="$trans('This will update the API')"
                     >
@@ -444,6 +462,13 @@
 
       </b-form>
 
+      <TeamleaderProductChooserTeamleader
+        v-if="chosenMaterial"
+        ref="product-chooser-teamleader"
+        :material="chosenMaterial"
+        @product-chosen="productChosenTl"
+      />
+
     </div>
   </b-overlay>
 </template>
@@ -480,11 +505,13 @@ import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
+import TeamleaderProductChooserTeamleader from "@/components/TeamleaderProductChooser.vue";
 
 export default {
   name: 'InvoiceForm',
   mixins: [invoiceMixin, componentMixin],
   components: {
+    TeamleaderProductChooserTeamleader,
     InvoicePDFViewer,
     PriceInput,
     HoursComponent,
@@ -587,6 +614,7 @@ export default {
       customerService: new CustomerService(),
       deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
+      chosenMaterial: null
     }
   },
   async created() {
@@ -651,6 +679,15 @@ export default {
       infoToast(this.create, $trans('Updated'), $trans('Hourly rate engineer has been updated'))
     },
     // materials
+    async openProductChooserTlModal(material) {
+      this.chosenMaterial = material
+      await this.$nextTick()
+      await this.$refs['product-chooser-teamleader'].show();
+    },
+    productChosenTl(obj) {
+      console.log('productChosenTl', obj)
+      // TODO update material in our API
+    },
     async updateMaterial(material_id) {
       this.materialUpdating = true
       let material = this.material_models.find((m) => m.id === material_id)

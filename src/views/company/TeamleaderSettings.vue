@@ -34,7 +34,7 @@
     <div class="app-detail panel overflow-auto">
       <b-form class="page-detail flex-columns">
         <div class="panel col-1-1">
-          <ol>
+          <ol class="m-2">
             <li>
               <div class="section rounded-sm revert">
                 <h5>API Actief</h5>
@@ -54,7 +54,7 @@
                   <div class="p-2">
                     <button
                       class="btn btn-primary m-1"
-                      @click="updateEnabled()"
+                      @click="updateEnabled"
                     >
                       {{ $trans('Submit') }}
                     </button>
@@ -79,7 +79,7 @@
                   >
                     <button
                       class="btn btn-danger m-1"
-                      @click="emptyTokens()"
+                      @click="emptyTokens"
                     >
                       {{ $trans('Verwijder') }}
                     </button>
@@ -90,7 +90,7 @@
                   >
                     <button
                       class="btn btn-primary m-1"
-                      @click="authorize()"
+                      @click="authorize"
                     >
                       {{ $trans('Verleen toegang') }}
                     </button>
@@ -116,8 +116,56 @@
                       v-model="settings.department_name"
                     ></b-form-input>
                     <button
-                      class="btn-sm btn-secondary"
-                      @click="chooseDepartment()"
+                      class="btn btn-primary m-1"
+                      @click="chooseDepartment"
+                    >Kies</button>
+                  </div>
+                </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Rekening</h5>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="4"
+                  v-bind:label="$trans('Rekening')"
+                  label-for="product_category_uuid">
+                  <div class="d-flex">
+                    <BFormSelect
+                      id="product_category_uuid"
+                      v-model="settings.product_category_uuid"
+                      :options="productCategories"
+                      size="sm"
+                    ></BFormSelect>
+                    <button
+                      class="btn btn-primary m-1"
+                      @click="updateProductCategory"
+                    >Submit</button>
+                  </div>
+                </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Product voor uren</h5>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="4"
+                  v-bind:label="$trans('Product')"
+                  label-for="hours_product_uuid"
+                >
+                  <div class="d-flex">
+                    <b-form-input
+                      id="hours_product_uuid"
+                      size="sm"
+                      type="text"
+                      :state="isHoursProductOk"
+                      v-model="settings.hours_product_uuid"
+                    ></b-form-input>
+                    <button
+                      class="btn btn-primary m-1"
+                      @click="openProductChooserModal"
                     >Kies</button>
                   </div>
                 </b-form-group>
@@ -141,11 +189,15 @@
                       v-model="settings.invoice_template_name"
                     ></b-form-input>
                     <button
-                      class="btn-sm btn-secondary"
-                      @click="chooseInvoiceTemplate()"
+                      class="btn btn-primary m-1"
+                      @click="chooseInvoiceTemplate"
                     >Kies</button>
                   </div>
                 </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
                 <h5>BTW-tarieven</h5>
                 <b-table
                   id="tax-rates-table"
@@ -164,7 +216,7 @@
                     class="p-2"
                   >
                     <button
-                      class="btn btn-primary"
+                      class="btn btn-primary m-1"
                       @click="resetTaxRates()"
                     >Ververs</button>
                   </div>
@@ -174,6 +226,11 @@
           </ol>
         </div>
       </b-form>
+      <TeamleaderProductChooserTeamleader
+        ref="product-chooser-teamleader"
+        @product-chosen="productChosenTl"
+        :with-create-button="false"
+      />
     </div>
   </div>
 </template>
@@ -185,6 +242,7 @@ import {errorToast, infoToast} from "@/utils";
 import {useToast} from "bootstrap-vue-next";
 import componentMixin from "@/mixins/common";
 import {useLoading} from "vue-loading-overlay";
+import TeamleaderProductChooserTeamleader from "@/components/TeamleaderProductChooser.vue";
 
 export default {
   setup() {
@@ -200,6 +258,7 @@ export default {
   },
   mixins: [componentMixin],
   components: {
+    TeamleaderProductChooserTeamleader,
     DocumentTemplateChooser,
     DepartmentChooser,
   },
@@ -212,6 +271,7 @@ export default {
       authorizationUrl: null,
       authorizeClicked: false,
       taxRates: [],
+      productCategories: [],
       fields: [
         {key: 'description', label: this.$trans('Description')},
         {key: 'rate', label: this.$trans('Rate')},
@@ -221,6 +281,9 @@ export default {
   computed: {
     isDepartmentOk() {
       return !this.isEmpty(this.settings.department_uuid)
+    },
+    isHoursProductOk() {
+      return !this.isEmpty(this.settings.hours_product_uuid)
     },
     isInvoiceTemplateOk() {
       return !this.isEmpty(this.settings.invoice_template_uuid)
@@ -232,6 +295,13 @@ export default {
   methods: {
     isEmpty(val) {
       return val === null || val === ""
+    },
+    async openProductChooserModal() {
+      await this.$refs['product-chooser-teamleader'].show();
+    },
+    productChosenTl(obj) {
+      console.log('productChosenTl', obj)
+      this.settings.hours_product_uuid = obj.uuid
     },
     async departmentChosen(item) {
       this.$refs['department-chooser-modal'].hide()
@@ -291,6 +361,12 @@ export default {
       loader.hide()
       await this.loadData()
     },
+    async updateProductCategory() {
+      let loader = this.loading.show();
+      await this.service.updateProductCategory(this.settings.product_category_uuid)
+      loader.hide()
+      await this.loadData()
+    },
     async resetTaxRates() {
       let loader = this.loading.show();
       const response = await this.service.resetTaxRates(this.settings.department_uuid)
@@ -313,14 +389,30 @@ export default {
       try {
         this.settings = await this.service.configDetail()
         if (this.settings.has_tokens) {
-          const businessTypes = await this.service.fetchBusinessTypes()
-          console.log(businessTypes)
           await this.fetchTaxRates()
+          await this.fetchCategories()
         }
         loader.hide()
       } catch(error) {
-        console.log('error fetching data', error)
+        console.error('error fetching data', error)
         errorToast(this.create, this.$trans('Error fetching data'))
+        loader.hide()
+      }
+    },
+    async fetchCategories() {
+      let loader = this.loading.show()
+      try {
+        const response = await this.service.fetchProductCategories()
+        this.productCategories = response.data.map((item) => {
+          return {
+            value: item.id,
+            text: item.name
+          }
+        })
+        loader.hide()
+      } catch(error) {
+        console.error('error fetching product categories', error)
+        errorToast(this.create, this.$trans('Error fetching product categories'))
         loader.hide()
       }
     },

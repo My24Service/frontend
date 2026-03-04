@@ -2,7 +2,7 @@
   <b-modal
     id="modal"
     ref="modal"
-    :title="$trans('Choose department')"
+    title="Kies afdeling"
     ok-only
     @ok="hide"
   >
@@ -15,7 +15,7 @@
         :items="departments"
         :hover="true"
         responsive="md"
-        tbody-tr-class="table-row"
+        tbody-tr-class="tr-pointer"
         @row-clicked="onRowClicked"
       >
       </b-table>
@@ -40,7 +40,7 @@ export default {
     return {
       isLoading: false,
       service: new TeamleaderService(),
-      products: [],
+      departments: [],
       fields: [
         {key: 'name', label: this.$trans('Name')},
       ]
@@ -66,7 +66,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching departments', error)
-        errorToast(this.create, this.$trans('Error fetching departments'))
+        errorToast(this.create,'Fout bij het ophalen van de afdelingen')
         this.isLoading = false
       }
     },
@@ -81,7 +81,5 @@ export default {
 }
 </script>
 <style scoped>
-.table-row {
-  cursor: pointer;
-}
+
 </style>
