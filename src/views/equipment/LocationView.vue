@@ -46,35 +46,6 @@
             </p>
           </dd>
         </dl>
-        <hr/>
-        <dt class="align-top-verdomme">{{ $trans('Equipment') }}</dt>
-        <dd>
-          <b-table
-            id="equipment-table"
-            :small="true"
-            :busy='isLoading'
-            :fields="equipmentFields"
-            :items="equipmentObjects"
-            responsive="md"
-            class="data-table"
-          >
-            <template #cell(name)="data">
-              <router-link :to="{name: viewMaterialLink, params: {pk: data.item.id}}">
-                {{ data.item.name }}
-              </router-link><br/>
-            </template>
-            <template #cell(customer)="data">
-              <span v-if="data.item.customer_branch_view">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </span>
-            </template>
-            <template #cell(branch)="data">
-              <span v-if="data.item.customer_branch_view">
-                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
-              </span>
-            </template>
-          </b-table>
-        </dd>
       </div>
 
       <div class='panel col-2-3'>
@@ -121,6 +92,33 @@
               :location="location"
               :is-view="true"
             />
+          </b-tab>
+          <b-tab key="docs" :title="$trans('Equipment')">
+            <b-table
+              id="equipment-table"
+              :small="true"
+              :busy='isLoading'
+              :fields="equipmentFields"
+              :items="equipmentObjects"
+              responsive="md"
+              class="data-table"
+            >
+              <template #cell(name)="data">
+                <router-link :to="{name: viewMaterialLink, params: {pk: data.item.id}}">
+                  {{ data.item.name }}
+                </router-link><br/>
+              </template>
+              <template #cell(customer)="data">
+              <span v-if="data.item.customer_branch_view">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </span>
+              </template>
+              <template #cell(branch)="data">
+              <span v-if="data.item.customer_branch_view">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </span>
+              </template>
+            </b-table>
           </b-tab>
         </b-tabs>
       </div>
