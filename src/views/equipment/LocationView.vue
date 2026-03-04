@@ -46,6 +46,7 @@
             </p>
           </dd>
         </dl>
+        <hr/>
         <dt class="align-top-verdomme">{{ $trans('Equipment') }}</dt>
         <dd>
           <b-table
@@ -61,6 +62,16 @@
               <router-link :to="{name: viewMaterialLink, params: {pk: data.item.id}}">
                 {{ data.item.name }}
               </router-link><br/>
+            </template>
+            <template #cell(customer)="data">
+              <span v-if="data.item.customer_branch_view">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </span>
+            </template>
+            <template #cell(branch)="data">
+              <span v-if="data.item.customer_branch_view">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </span>
             </template>
           </b-table>
         </dd>
@@ -184,21 +195,21 @@ export default {
       equipmentFields: [],
       equipmentObjects: [],
       equipmentFieldsCustomerPlanning: [
-        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
         {key: 'customer', label: $trans('Customer'), sortable: true},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
       ],
       equipmentFieldsBranchPlanning: [
-        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
         {key: 'branch', label: $trans('Branch'), sortable: true},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
       ],
       equipmentFieldsCustomerNonPlanning: [
-        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
       ],
       equipmentFieldsBranchNonPlanning: [
-        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
       ],
     }
