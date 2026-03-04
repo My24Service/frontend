@@ -186,44 +186,20 @@ export default {
       equipmentFieldsCustomerPlanning: [
         {key: 'name', label: $trans('Equipment'), sortable: true},
         {key: 'customer', label: $trans('Customer'), sortable: true},
-        {key: 'brand', label: $trans('Brand'), sortable: true},
-        {key: 'location_name', label: $trans('Location')},
-        {key: 'latest_state', label: $trans('State')},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
-        {key: 'brand', label: $trans('Brand'), sortable: true},
-        {key: 'created', label: $trans('Created'), sortable: true},
-        {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchPlanning: [
         {key: 'name', label: $trans('Equipment'), sortable: true},
         {key: 'branch', label: $trans('Branch'), sortable: true},
-        {key: 'brand', label: $trans('Brand'), sortable: true},
-        {key: 'location_name', label: $trans('Location')},
-        {key: 'latest_state', label: $trans('State')},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
-        {key: 'brand', label: $trans('Brand'), sortable: true},
-        {key: 'created', label: $trans('Created'), sortable: true},
-        {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons', label: ''}
       ],
       equipmentFieldsCustomerNonPlanning: [
         {key: 'name', label: $trans('Equipment'), sortable: true},
-        {key: 'location_name', label: $trans('Location')},
-        {key: 'latest_state', label: $trans('State')},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
-        {key: 'created', label: $trans('Created'), sortable: true},
-        {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons', label: ''}
       ],
       equipmentFieldsBranchNonPlanning: [
         {key: 'name', label: $trans('Equipment'), sortable: true},
-        {key: 'location_name', label: $trans('Location')},
-        {key: 'latest_state', label: $trans('State')},
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
-        {key: 'created', label: $trans('Created'), sortable: true},
-        {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons', label: ''}
       ],
     }
   },
@@ -320,7 +296,9 @@ export default {
         this.location = await this.locationService.detail(this.pk)
         this.equipmentService.addListArg(`location=${this.pk}`)
         this.equipmentService.addListArg('page_size=1000')
-        this.equipmentObjects = await this.equipmentService.list()
+        const response = await this.equipmentService.list()
+        this.equipmentObjects = response.results
+        console.log(this.equipmentObjects)
       } catch(error) {
         console.log('error fetching location detail data', error)
         errorToast(this.create, this.$trans('Error fetching location detail'))
