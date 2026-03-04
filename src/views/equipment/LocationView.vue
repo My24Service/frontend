@@ -46,6 +46,24 @@
             </p>
           </dd>
         </dl>
+        <dt class="align-top-verdomme">{{ $trans('Equipment') }}</dt>
+        <dd>
+          <b-table
+            id="equipment-table"
+            :small="true"
+            :busy='isLoading'
+            :fields="equipmentFields"
+            :items="equipmentObjects"
+            responsive="md"
+            class="data-table"
+          >
+            <template #cell(name)="data">
+              <router-link :to="{name: viewMaterialLink, params: {pk: data.item.id}}">
+                {{ data.item.name }}
+              </router-link><br/>
+            </template>
+          </b-table>
+        </dd>
       </div>
 
       <div class='panel col-2-3'>
@@ -114,7 +132,8 @@ import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsCompon
 import my24 from "@/services/my24";
 import {useToast} from "bootstrap-vue-next";
 import {useMainStore} from "@/stores/main";
-import {errorToast} from "@/utils";
+import {$trans, errorToast} from "@/utils";
+import {EquipmentService} from "@/models/equipment/equipment";
 
 export default {
   setup() {
@@ -160,7 +179,52 @@ export default {
       ],
       locationService: new LocationService(),
       orderService: new OrderService(),
-      statsData: null
+      equipmentService: new EquipmentService(),
+      statsData: null,
+      equipmentFields: [],
+      equipmentObjects: [],
+      equipmentFieldsCustomerPlanning: [
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'customer', label: $trans('Customer'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
+        {key: 'icons', label: ''}
+      ],
+      equipmentFieldsBranchPlanning: [
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'branch', label: $trans('Branch'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'brand', label: $trans('Brand'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
+        {key: 'icons', label: ''}
+      ],
+      equipmentFieldsCustomerNonPlanning: [
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
+        {key: 'icons', label: ''}
+      ],
+      equipmentFieldsBranchNonPlanning: [
+        {key: 'name', label: $trans('Equipment'), sortable: true},
+        {key: 'location_name', label: $trans('Location')},
+        {key: 'latest_state', label: $trans('State')},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
+        {key: 'icons', label: ''}
+      ],
     }
   },
   props: {
@@ -187,8 +251,16 @@ export default {
         return 'customers-location-edit'
       }
     },
+    viewMaterialLink() {
+      if (this.hasBranches) {
+        return 'equipment-equipment-view'
+      } else {
+        return 'customers-equipment-view'
+      }
+    },
   },
   methods: {
+    $trans,
     async renderStats() {
       try {
         // this.isLoading = true
@@ -246,6 +318,9 @@ export default {
       try {
         await this.loadHistory()
         this.location = await this.locationService.detail(this.pk)
+        this.equipmentService.addListArg(`location=${this.pk}`)
+        this.equipmentService.addListArg('page_size=1000')
+        this.equipmentObjects = await this.equipmentService.list()
       } catch(error) {
         console.log('error fetching location detail data', error)
         errorToast(this.create, this.$trans('Error fetching location detail'))
@@ -265,8 +340,22 @@ export default {
       }
     }
   },
-  created() {
-    this.loadData()
+  async created() {
+    if (this.hasBranches) {
+      if (this.isEmployee) {
+        this.equipmentFields = this.equipmentFieldsBranchNonPlanning
+      } else {
+        this.equipmentFields = this.equipmentFieldsBranchPlanning
+      }
+    } else {
+      if (this.isCustomer) {
+        this.equipmentFields = this.equipmentFieldsCustomerNonPlanning
+      } else {
+        this.equipmentFields = this.equipmentFieldsCustomerPlanning
+      }
+    }
+
+    await this.loadData()
   },
   async mounted () {
   }
