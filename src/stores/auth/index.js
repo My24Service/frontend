@@ -103,7 +103,7 @@ export const useAuthStore = defineStore('auth', {
       // return state.userInfo.user.hasOwnProperty('employee_user') && state.userInfo.employee_user && state.userInfo.employee_user.branch
     },
     branchEmployeeBranch: (state) => {
-      if (!state.userInfo || !state.userInfo.user) {
+      if (!state.userInfo || !state.userInfo.user || !state.userInfo.user.employee_user) {
         return false;
       }
       return state.userInfo.user.employee_user.branch

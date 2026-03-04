@@ -44,7 +44,6 @@
                   id="company-import-file"
                   v-model="file"
                   v-bind:placeholder="$trans('Choose a file or drop it here...')"
-                  @input="fileSelected"
                 ></b-form-file>
                 {{ current_file }}
               </BFormGroup>
@@ -136,6 +135,11 @@ export default {
     } else {
       this.importModel = await this.service.detail(this.pk)
       this.isLoading = false
+    }
+  },
+  watch: {
+    file(value) {
+      this.fileSelected(value)
     }
   },
   methods: {

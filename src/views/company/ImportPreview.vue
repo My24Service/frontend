@@ -10,7 +10,7 @@
         </div>
       </header>
 
-      <div class="page-detail import-preview">
+      <div class="page-detail import-preview" v-if="!isLoading">
         <div class="app-detail">
           <b-card no-body>
             <b-tabs
@@ -74,7 +74,6 @@ export default {
   setup() {
     const {create} = useToast()
 
-    // expose to template and other options API hooks
     return {
       create
     }
@@ -171,19 +170,25 @@ export default {
     const lookupFields = await this.service.fetchLookupFields()
 
     this.importData = await this.service.previewImport(this.pk)
+    let activePill = null
     for (const key of Object.keys(this.availablePills)) {
       if (this.importData.hasOwnProperty(key)) {
         this.pills.push({
           title: this.availablePills[key],
           key
         })
+        if (activePill === null) {
+          activePill = key
+        }
         this.lookupFields[key] = lookupFields[key]
       }
     }
+    this.activePill = activePill
 
     this.isLoading = false
   },
   methods: {
+    $trans,
     async importAll() {
       if (confirm($trans("Import these records?"))) {
         try {
