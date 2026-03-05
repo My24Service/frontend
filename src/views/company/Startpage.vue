@@ -52,6 +52,14 @@
     </div>
 
     <div class="section dashboard_section mt-4">
+      <DashboardBlock v-if="!isLoading" title="Schedule" iconName="calendar">
+        <div class="p-1">
+        <OrdersSchedule />
+        </div>
+      </DashboardBlock>
+    </div>
+
+    <div class="section dashboard_section mt-4">
       <OrderStats
         v-if="statsData"
         :data-in="statsData"
@@ -211,11 +219,13 @@ import {$trans} from "../../utils";
 import {NO_IMAGE_URL} from "../../constants";
 import memberModel from "../../models/member/Member";
 import activityModel from '@/models/company/Activity.js'
+import OrdersSchedule from "../orders/Schedule.vue";
 
 let d = new Date()
 
 export default {
   components: {
+    OrdersSchedule,
     BarChart,
     PieChart,
     OrderStats,
