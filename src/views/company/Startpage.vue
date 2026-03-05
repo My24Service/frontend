@@ -51,6 +51,169 @@
       </div>
     </div>
 
+    <div class="section dashboard_section row dashboard_row start_page_row2 pb-2 align-items-stretch pt-4">
+
+        <div class="col-lg-3 col-md-6 pb-3">
+            <div class="card d-flex flex-column h-100" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div class="d-flex flex-row card-left">
+                            <div class="align-self-center">
+                              <i class="bi bi-building-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-primary mt-2 fw-bold">Kantoor&shy;oppervlak vvo</h6>
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <h6 class="mb-0 fw-bold text-secondary">1400 m²</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 pb-3">
+            <div class="card d-flex flex-column h-100" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div class="d-flex flex-row card-left">
+                            <div class="align-self-center">
+                                <i class="bi bi-building-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-primary mt-2 fw-bold">Bedrijfs&shy;ruimte oppervlak</h6>
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <h6 class="mb-0 fw-bold text-secondary ">2000 m²</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 pb-3">
+            <div class="card d-flex flex-column h-100" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div class="d-flex flex-row card-left">
+                            <div class="align-self-center">
+                                <i class="bi bi-p-square-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-primary mt-2 fw-bold">Parkeerplaatsen</h6>
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <h6 class="mb-0 fw-bold text-secondary ">48</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 pb-3">
+            <div class="card d-flex flex-column h-100" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div class="d-flex flex-row card-left">
+                            <div class="align-self-center">
+                                <i class="bi bi-pc-display-horizontal"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-primary mt-2 fw-bold">m² vvo per werkplek</h6>
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <h6 class="mb-0 fw-bold text-secondary">18 m²</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 pb-3">
+            <div class="card d-flex flex-column h-100" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div class="d-flex flex-row card-left">
+                            <div class="align-self-center">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-primary mt-2 fw-bold">Werkplek per medewerker</h6>
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <h6 class="mb-0 fw-bold text-secondary">1</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 pb-3">
+            <div class="card d-flex flex-column h-100" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div class="d-flex flex-row card-left">
+                            <div class="align-self-center">
+                                <i class="bi bi-pc-display-horizontal"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-primary mt-2 fw-bold">Werkplek per FTE</h6>
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <h6 class="mb-0 fw-bold text-secondary">1</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 pb-3">
+            <div class="card d-flex flex-column h-100" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div class="d-flex flex-row card-left">
+                            <div class="align-self-center">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-primary mt-2 fw-bold">m² vvo per mede&shy;werker</h6>
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <h6 class="mb-0 fw-bold text-secondary">12 m²</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 pb-3">
+            <div class="card d-flex flex-column h-100" style="cursor: pointer">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between p-md-1">
+                        <div class="d-flex flex-row card-left">
+                            <div class="align-self-center">
+                                <i class="bi bi-square-fill"></i>
+                            </div>
+                            <div>
+                                <h6 class="text-primary mt-2 fw-bold">m² vvo per FTE</h6>
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <h6 class="mb-0 fw-bold text-secondary">10 m²</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="section dashboard_section mt-4">
       <DashboardBlock v-if="!isLoading" title="Schedule" iconName="calendar">
         <div class="p-1">
@@ -760,4 +923,49 @@ table#activity-table tr {
   background-color:#ff0000 !important;
 }
 
+.section.dashboard_section .card {
+  margin-top: 0.2em;
+}
+
+.section.dashboard_section .card .card-body {
+  padding: 0.2em;
+}
+
+.card-left > div.align-self-center {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  border-radius: 10rem;
+  border: 0.1rem solid var(--greyC);
+  flex: 0 0 auto;
+  justify-content: center;
+  background: var(--blackC);
+  margin-top: 0.4rem;
+}
+
+.card-left {
+  align-items: center;
+  gap: 1rem;
+}
+
+.card-left i.bi {
+  color: white;
+  font-size: 1.5em;
+}
+
+.section.dashboard_section .card {
+  box-shadow: 0 0.65rem 0.8rem 0 rgba(0, 0, 0, 0.2);
+}
+.section.dashboard_section .card .card-body .card-left h6.text-primary {
+  color: #000000 !important;
+}
+
+.card-body h6.text-secondary {
+  text-align: right;
+  font-size: 0.9rem;
+  margin-left: 2rem;
+  white-space: nowrap;
+  color: #828282 !important;
+}
 </style>
