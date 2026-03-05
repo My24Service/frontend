@@ -17,6 +17,8 @@ import catchall from './catchall'
 import webshop from './webshop'
 import bim from './bim'
 import docks from './docks'
+import startpage from './startpage'
+
 import {AUTH_LEVELS} from "@/constants";
 import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
 import { useAuthStore } from '@/stores/auth'
@@ -42,6 +44,7 @@ const routes = [
   ...budget,
   ...catchall,
   ...docks,
+  ...startpage
 ]
 
 export const router = createRouter({

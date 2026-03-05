@@ -1,5 +1,11 @@
 <template>
   <div class="nav-items" ref="nav-items" v-if="userInfo.user">
+    <!-- Dashboard -->
+    <b-nav-item to="/startpage/" v-if="hasBranches">
+      <IBiFileEarmarkBarGraphFill></IBiFileEarmarkBarGraphFill>
+      {{ $trans('Startpage') }}
+    </b-nav-item>
+
     <!-- Orders -->
     <b-nav-item
       :active="isActive('orders')"

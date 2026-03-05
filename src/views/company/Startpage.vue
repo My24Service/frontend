@@ -1,5 +1,56 @@
 <template>
   <div class="app-page">
+    <header><!--
+      <div class="page-title">
+        <h3>
+          <IBiSpeedometer></IBiSpeedometer>
+          <span>{{ $trans('Overall statistics')}}</span>
+        </h3>
+      </div> -->
+    </header>
+
+    <div class="section dashboard_section">
+      <!-- ROW 1 -->
+      <div class="row dashboard_row">
+        <div class="col-lgl-6">
+          <div class="row">
+            <div class="col-lg-3">
+              <DashboardTabbedBlock v-if="!isLoading" :tab-list="companyTabs" :title="member.name" pills />
+            </div>
+            <div class="col-lg-3">
+              <DashboardTabbedBlock v-if="!isLoading" :tab-list="companyInfoTabs" :title="$trans('Gegevens')" pills />
+            </div>
+            <div class="col-lg-6">
+              <DashboardBlock v-if="!isLoading" title="Logboek" iconName="card-list">
+                <b-table
+                    id="activity-table"
+                    small
+                    :busy='isLoading'
+                    :fields="activityFields"
+                    :items="activity"
+                    responsive="md"
+                    class="data-table pt-2 pl-2 pr-2"
+                    sort-icon-left>
+                    <template #table-busy>
+                      <div class="text-center my-2">
+                        <br>
+                        <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+                        <strong>{{ $trans('Loading...') }}</strong>
+                        <br>
+                      </div>
+                    </template>
+                    <template #cell(created)="data">
+                      <small>{{  data.item.created }}</small>
+                    </template>
+                </b-table>
+                <!-- <div v-html="companyLog"></div> -->
+              </DashboardBlock>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="section dashboard_section mt-4">
       <OrderStats
         v-if="statsData"
@@ -613,6 +664,90 @@ export default {
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 0.65rem 0.8rem 0 rgba(0, 0, 0, 0.2);
+}
+
+.myss_box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.myss_box ul li {
+  padding: 0.35rem 0;
+  border-bottom: 0.1rem solid var(--greyC);
+}
+
+.myss_box ul li:last-child {
+  border-bottom: 0;
+}
+
+.myss_box ul li:first-child {
+  color: var(--hoverC);
+  font-weight: 900;
+}
+
+.myss-logo {
+    height: 5rem;
+    padding: 0;
+    margin: 0 auto;
+    display: block;
+}
+
+.row .section_block .tabs .tab-content.mt-3 {
+  margin-top: 0;
+  /* padding: 8px; */
+  /* justify-content: center; */
+}
+
+.dashboard_row .row .section_block {
+  height: 20rem;
+}
+
+.dashboard_row_expand .row .section_block {
+  height: min-content !important;
+}
+
+.dashboard_row .row .section_block .tabs ul.nav-pills {
+  margin: 4px;
+  justify-content: center;
+}
+
+.dashboard_row .row .section_block .tab-content iframe {
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  outline: none;
+  border: none;
+}
+
+.dashboard_row .row .section_block .tabs .nav-item .nav-link {
+  border-radius: 4px;
+  padding: 4px 9px;
+}
+
+div.section.dashboard_section div.row.dashboard_row div.section_block div.tabs div.tab-content div img.section-image,
+div.section_block div.tabs div.tab-content.mt-3 div.tab-pane div img.section-image {
+  border-radius: 0.5rem;
+  object-fit: cover;
+  max-height: 180px;
+  width: 100%;
+}
+
+div.section.dashboard_section div.row div div.section_block div.tabs div.tab-content.section_block_content {
+  border-top: 0.1rem solid var(--greyC) !important;
+  padding: 0.7rem !important;
+}
+
+div.section.dashboard_section div.row div.section_block div.section_content div.table-responsive-md.data-table {
+  padding: 0.5rem !important;
+}
+
+table#activity-table thead {
+  position: sticky;
+  top: 0;
+}
+
+table#activity-table tr {
+  background-color:#ff0000 !important;
 }
 
 </style>

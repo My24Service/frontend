@@ -1,7 +1,7 @@
 <template>
 <div>
   <div class="site_header">
-      <div class="container-fluid">
+      <div class="container-fluid ps-2">
           <NavBrand
             v-if="memberInfo"
             :member-info="memberInfo"

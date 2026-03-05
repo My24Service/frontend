@@ -17,8 +17,7 @@ $secondary: $my24;
 $navbar-light-color: $secondary;
 $active-link: $secondary;
 $normal-link: $secondary;
-// $font-size-base: 0.9rem;
-$font-size-base: 4.0rem;
+$font-size-base: 0.9rem;
 
 @import 'bootstrap/scss/bootstrap.scss';
 @import "bootstrap-vue-next/dist/bootstrap-vue-next.css";

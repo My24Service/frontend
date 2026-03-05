@@ -14,7 +14,8 @@ const props = defineProps(['memberInfo'])
 <style scoped>
 .memberLogo {
   max-width: 200px;
-  max-height: 100px
+  max-height: 55px;
+  margin: 0;
 }
 </style>
 

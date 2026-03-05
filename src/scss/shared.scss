@@ -159,7 +159,8 @@ tr:focus-within .edit-icon {
 
   li {
     list-style: none;
-    padding: 0 1rem;
+    /*padding: 0 1rem;*/
+    padding: 0;
     a {
       border-radius: 0;
       // color: #232c2fa0;
@@ -1125,3 +1126,160 @@ html {
 //    flex-direction: column;
 //  }
 //}
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@200;300;400;500;600;700;800&display=swap");
+
+:root {
+  scroll-behavior: unset;
+  --blackC: #30bfbf;
+  --mainC: #f2f2f2;
+  --titleC: #1a1a1a;
+  --dark: #000000;
+  --bodyC: #3d3d3d;
+  --btnC: #30bfbf;
+  --greyC: #e6e6e6;
+  --white: #ffffff;
+  --white3C: #ffffff30;
+  --hoverC: #159b9b;
+  --white_img: brightness(0) saturate(100%) invert(100%) sepia(100%)
+    saturate(0%) hue-rotate(74deg) brightness(104%) contrast(104%);
+  --black_img: brightness(0) saturate(100%) invert(0%) sepia(1%) saturate(7500%)
+    hue-rotate(358deg) brightness(100%) contrast(100%);
+  --m_rope: "Manrope", sans-serif;
+  --inter: "Inter", sans-serif;
+  --b_sdw: 0 0.5rem 1.5rem 0.1rem rgba(0, 0, 0, 0.2);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--m_rope), sans-serif;
+  font-weight: 700;
+  color: var(--titleC);
+}
+
+.site_header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: var(--mainC);
+  width: 100%;
+  //height: 10rem;
+  height: 80px;
+  z-index: 1000; /* below dialogs */
+  display: flex;
+  box-shadow: 0 0 1.5rem 0 rgba(0, 0, 0, 0.3);
+}
+
+.main-menu nav.app-sidebar {
+  background: rgb(242, 242, 242);
+  padding-top: 110px;
+  --bs-nav-link-font-size: 1rem;
+}
+
+.app-page {
+  top: 10px;
+  position: fixed;
+  background: #ffffff;
+  right: 0;
+  left: 240px;
+  bottom: 0;
+}
+
+.app-page header {
+  position: sticky;
+}
+
+.page-title,
+.section_top {
+  padding: 1rem 2rem;
+  background: var(--mainC);
+  box-shadow: 0 0.6rem 0.8rem 0 rgba(0, 0, 0, 0.15);
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  color: var(--dark);
+}
+
+.page-title .btn {
+    color: var(--white);
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 5rem;
+    padding: 0 3rem;
+    border-radius: 10rem;
+    background: $my24;
+}
+
+.listing-item .btn.btn-md,
+.page-title .btn.btn-sm {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 5rem;
+    border: 0.1rem solid $my24;
+    transition: 0.25s ease;
+    color: $white;
+    background: $my24;
+}
+
+.listing-item .btn.btn-md {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 4rem;
+    padding: 3px 0;
+}
+
+.listing-item .btn.btn-md.btn-light {
+  background-color: transparent;
+  border: 0.1rem solid transparent;
+  color: #ccc;
+  &:hover {
+    background-color: $my24;
+  }
+}
+
+
+html {
+    .app-page header div.page-title {
+      .button, .btn {
+        color: $white;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        height: 40px;
+        padding: 0 10px;
+        border-radius: 10rem;
+        background: $my24;
+      }
+
+      .btn-group .btn {
+        border-radius: 10em;
+      }
+    }
+
+   .app-page header div.page-title .btn.btn-secondary, html .app-page header div.page-title .btn-primary.btn-secondary {
+	  background-color: $my24;
+	  color: white;
+    }
+}
+
+.theme-default .nav-pills .nav-link,
+.nav-pills .nav-link {
+  border-radius: 100px;
+}
+
+
+.theme-shltr .main-menu nav .page-subnav ul.nav a:hover,
+.theme-shltr .main-menu nav .page-subnav ul.nav a:focus,
+.theme-shltr .main-menu nav .page-subnav ul.nav a:active,
+.theme-shltr .main-menu nav .page-subnav ul.nav a.router-link-active,
+.theme-shltr .main-menu nav .page-subnav ul.nav a.active {
+  background-color: $my24;
+  color: white;
+}

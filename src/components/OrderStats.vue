@@ -19,49 +19,60 @@
         />
     </DashboardBlock>
 
-    <DashboardBlock :title="$trans('Orders per month')" customClass="mt-4">
-      <b-row>
-        <b-col cols="6">
-          <bar-chart
-            v-if="chartdataCountsBar"
-            id="bar-chart-order-types"
-            :chart-data="chartdataCountsBar"
-            :options="options"
-          />
-        </b-col>
-        <b-col cols="6">
-          <pie-chart
-            v-if="chartdataCountsPie"
-            id="pie-chart-order-types"
-            :chart-data="chartdataCountsPie"
-            :options="pieOptions"
-          />
-        </b-col>
-      </b-row>
-    </DashboardBlock>
 
-    <b-row>
-      <DashboardBlock :title="$trans('Order types')" customClass="mt-4">
-          <b-col cols="6">
-            <bar-chart
-              v-if="chartdataOrderTypesBar"
-              id="bar-chart-order-types"
-              :chart-data="chartdataOrderTypesBar"
-              :options="options"
-            />
-          </b-col>
-      </DashboardBlock>
-      <DashboardBlock :title="$trans('Totals')" customClass="mt-4">
-          <b-col cols="6">
-            <pie-chart
-              v-if="chartdataOrderTypesPie"
-              id="pie-chart-order-types"
-              :chart-data="chartdataOrderTypesPie"
-              :options="pieOptions"
-            />
-          </b-col>
-      </DashboardBlock>
-    </b-row>
+    <div class="row dashboard_row_expand mt-4">
+        <div class="col-lgl-6">
+          <div class="row">
+            <div class="col-lg-8">
+              <DashboardBlock :title="$trans('Orders per month')" customClass="mt-4">
+                  <bar-chart
+                    v-if="chartdataCountsBar"
+                    id="bar-chart-order-types"
+                    :chart-data="chartdataCountsBar"
+                    :options="options"
+                  />
+              </DashboardBlock>
+            </div>
+            <div class="col-lg-4">
+              <DashboardBlock :title="$trans('Totals')" customClass="mt-4">
+                  <pie-chart
+                    v-if="chartdataCountsPie"
+                    id="pie-chart-order-types"
+                    :chart-data="chartdataCountsPie"
+                    :options="pieOptions"
+                  />
+              </DashboardBlock>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="row dashboard_row_expand mt-4">
+        <div class="col-lgl-6">
+          <div class="row">
+            <div class="col-lg-8">
+              <DashboardBlock :title="$trans('Order types')" customClass="mt-4">
+                  <bar-chart
+                    v-if="chartdataOrderTypesBar"
+                    id="bar-chart-order-types"
+                    :chart-data="chartdataOrderTypesBar"
+                    :options="options"
+                  />
+              </DashboardBlock>
+            </div>
+            <div class="col-lg-4">
+              <DashboardBlock :title="$trans('Totals')" customClass="mt-4">
+                  <pie-chart
+                    v-if="chartdataOrderTypesPie"
+                    id="pie-chart-order-types"
+                    :chart-data="chartdataOrderTypesPie"
+                    :options="pieOptions"
+                  />
+              </DashboardBlock>
+            </div>
+          </div>
+        </div>
+    </div>
 
     <!--
     <b-row align-h="center">
