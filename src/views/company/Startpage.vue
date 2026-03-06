@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page">
+  <div class="app-page start-page">
     <header><!--
       <div class="page-title">
         <h3>
@@ -859,10 +859,10 @@ export default {
 }
 
 .myss-logo {
-    height: 5rem;
-    padding: 0;
-    margin: 0 auto;
-    display: block;
+  height: 5rem;
+  padding: 0;
+  margin: 0 auto;
+  display: block;
 }
 
 .row .section_block .tabs .tab-content.mt-3 {
@@ -920,7 +920,7 @@ table#activity-table thead {
 }
 
 table#activity-table tr {
-  background-color:#ff0000 !important;
+  background-color: #ff0000 !important;
 }
 
 .section.dashboard_section .card {
@@ -940,7 +940,7 @@ table#activity-table tr {
   border: 0.1rem solid var(--greyC);
   flex: 0 0 auto;
   justify-content: center;
-  background: var(--blackC);
+  background: var(--bs-secondary);
   margin-top: 0.4rem;
 }
 
@@ -957,6 +957,7 @@ table#activity-table tr {
 .section.dashboard_section .card {
   box-shadow: 0 0.65rem 0.8rem 0 rgba(0, 0, 0, 0.2);
 }
+
 .section.dashboard_section .card .card-body .card-left h6.text-primary {
   color: #000000 !important;
 }
