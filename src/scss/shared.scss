@@ -1128,10 +1128,20 @@ html {
 //    flex-direction: column;
 //  }
 //}
-
-
 :root {
   scroll-behavior: unset;
+  --blackC: $my24;
+  --mainC: #f2f2f2;
+  --titleC: #1a1a1a;
+  --dark: #000000;
+  --bodyC: #3d3d3d;
+  --btnC: #30bfbf;
+  --greyC: #e6e6e6;
+  --white: #ffffff;
+  --white3C: #ffffff30;
+  --hoverC: #159b9b;
+  --white_img: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(0%) hue-rotate(74deg) brightness(104%) contrast(104%);
+  --black_img: brightness(0) saturate(100%) invert(0%) sepia(1%) saturate(7500%)  hue-rotate(358deg) brightness(100%) contrast(100%);
   --m_rope: "Manrope", sans-serif;
   --inter: "Inter", sans-serif;
   --b_sdw: 0 0.5rem 1.5rem 0.1rem rgba(0, 0, 0, 0.2);
