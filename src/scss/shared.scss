@@ -221,7 +221,7 @@ tr:focus-within .edit-icon {
   padding: 0;
   height: 100vh;
   overflow-y: scroll;
-  // background-image: linear-gradient(to bottom, $primary 11rem, transparent 11rem);
+  background-image: none; /*linear-gradient(to bottom, $primary 11rem, transparent 11rem);*/
   > header {
     margin: 0;
     padding: 1rem 2rem;
@@ -1265,17 +1265,16 @@ html {
     }
 }
 
-.theme-default .nav-pills .nav-link,
+.nav-pills .nav-link,
 .nav-pills .nav-link {
   border-radius: 100px;
 }
 
-
-.theme-shltr .main-menu nav .page-subnav ul.nav a:hover,
-.theme-shltr .main-menu nav .page-subnav ul.nav a:focus,
-.theme-shltr .main-menu nav .page-subnav ul.nav a:active,
-.theme-shltr .main-menu nav .page-subnav ul.nav a.router-link-active,
-.theme-shltr .main-menu nav .page-subnav ul.nav a.active {
+.main-menu nav .page-subnav ul.nav a:hover,
+.main-menu nav .page-subnav ul.nav a:focus,
+.main-menu nav .page-subnav ul.nav a:active,
+.main-menu nav .page-subnav ul.nav a.router-link-active,
+.main-menu nav .page-subnav ul.nav a.active {
   background-color: $my24;
   color: white;
 }
