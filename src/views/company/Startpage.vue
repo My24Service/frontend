@@ -214,6 +214,102 @@
         </div>
     </div>
 
+    <div class="section dashboard_section mt-2">
+      <div class="row dashboard_row">
+        <div class="col-lgl-6">
+          <div class="row">
+            <div class="col-lg-6">
+              <DashboardBlock v-if="!isLoading" title="Nieuwe documenten - Techniek" iconName="wrench-adjustable">
+                <div class="table_scroll table-responsive-md data-table pt-2 pl-2 pr-2">
+                  <table class="table b-table table-sm table-docs">
+                    <thead>
+                    <tr>
+                      <th>Document</th>
+                      <th>Van</th>
+                      <th>Datum</th>
+                      <th>Bestand</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <tr>
+                      <td class="align-middle"><span class="badge">Nieuw</span> Servicecontract liften</td>
+                      <td class="align-middle">Otis B.V. </td>
+                      <td class="align-middle">10-05-23 </td>
+                      <td class="align-middle">
+                        <i class="bi bi-filetype-pdf fs-3"></i>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="align-middle"><span class="badge">Nieuw</span> Contract WTW onderhoud </td>
+                      <td class="align-middle">Feenstra B.V. </td>
+                      <td class="align-middle">07-04-23 </td>
+                      <td class="align-middle">
+                        <i class="bi bi-filetype-pdf fs-3"></i>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="align-middle"><span class="badge">Nieuw</span> Service Zonnepanelen</td>
+                      <td class="align-middle">Solar GMBH </td>
+                      <td class="align-middle">05-07-23 </td>
+                      <td class="align-middle">
+                        <i class="bi bi-filetype-pdf fs-3"></i>
+                      </td>
+                    </tr>
+
+                    </tbody>
+                  </table>
+                </div>
+              </DashboardBlock>
+            </div>
+            <div class="col-lg-6">
+              <DashboardBlock v-if="!isLoading" title="Nieuwe documenten - Facilitair" iconName="hand-index">
+                <div class="table_scroll table-responsive-md data-table pt-2 pl-2 pr-2">
+                  <table class="table b-table table-sm table-docs">
+                    <thead>
+                    <tr>
+                      <th>Document</th>
+                      <th>Van</th>
+                      <th>Datum</th>
+                      <th>Bestand</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <tr>
+                      <td class="align-middle"><span class="badge">Nieuw</span> Contract Schoonmaak</td>
+                      <td class="align-middle">Feenstra B.V.</td>
+                      <td class="align-middle">10-05-23</td>
+                      <td class="align-middle">
+                        <i class="bi bi-filetype-pdf fs-3"></i>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="align-middle"><span class="badge">Nieuw</span> Beveiliging (meldkamer)</td>
+                      <td class="align-middle">Secure B.V.</td>
+                      <td class="align-middle">07-04-23</td>
+                      <td class="align-middle">
+                        <i class="bi bi-filetype-pdf fs-3"></i>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="align-middle"><span class="badge">Nieuw</span> Contract Groenvoorziening</td>
+                      <td class="align-middle">Green Blue B.V.</td>
+                      <td class="align-middle">05-07-23</td>
+                      <td class="align-middle">
+                        <i class="bi bi-filetype-pdf fs-3"></i>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </DashboardBlock>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="section dashboard_section mt-4">
       <DashboardBlock v-if="!isLoading" title="Schedule" iconName="calendar">
         <div class="p-1">
@@ -368,6 +464,7 @@
       </b-row>
 
     </div>
+
   </div>
 </template>
 
@@ -502,7 +599,7 @@ export default {
         this.companyTabs=[
           {
             title: 'Foto',
-            content: '<img class="section-image" src="'+NO_IMAGE_URL+'"/>'
+            content: '<img src="'+(this.member.companylogo ?? NO_IMAGE_URL)+'" alt="logo"/>'
           },
           {
             title: 'Locate',
@@ -968,5 +1065,13 @@ table#activity-table tr {
   margin-left: 2rem;
   white-space: nowrap;
   color: #828282 !important;
+}
+
+span.badge {
+  background-color: var(--bs-secondary);
+}
+
+table.table-docs tr td {
+  height: 2em;
 }
 </style>
