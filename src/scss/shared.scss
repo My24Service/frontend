@@ -221,7 +221,8 @@ tr:focus-within .edit-icon {
   padding: 0;
   height: 100vh;
   overflow-y: scroll;
-  background-image: none; /*linear-gradient(to bottom, $primary 11rem, transparent 11rem);*/
+  background-image: none !important; /*linear-gradient(to bottom, $primary 11rem, transparent 11rem);*/
+
   > header {
     margin: 0;
     padding: 1rem 2rem;
