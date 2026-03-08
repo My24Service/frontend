@@ -411,8 +411,8 @@ tr:focus-within .edit-icon {
   }
   button.primary,
   .btn-primary {
-    color: $my24;
-    //color: $normal-link!important;
+    background-color: $my24;
+    color: $white;
   }
   h6 {
     text-transform: uppercase;
@@ -1275,10 +1275,9 @@ html {
 .main-menu nav .page-subnav ul.nav a:active,
 .main-menu nav .page-subnav ul.nav a.router-link-active,
 .main-menu nav .page-subnav ul.nav a.active {
-  background-color: $my24;
-  color: white;
+  background-color: $my24 !important;
+  color: white !important;
 }
-
 
 .main-menu nav .page-subnav ul.nav a:hover,.main-menu nav .page-subnav ul.nav a:focus,.main-menu nav .page-subnav ul.nav a:active,.main-menu nav .page-subnav ul.nav a.router-link-active,.main-menu nav .page-subnav ul.nav a.active {
   background-color: $my24 !important;
@@ -1297,4 +1296,5 @@ html {
 
 .dummy-hvg-where-does-this-end-up {
   font-size: 1em;
+  background-color: #f00;
 }
