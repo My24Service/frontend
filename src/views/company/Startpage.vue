@@ -943,7 +943,7 @@ export default {
 
 .myss_box ul li {
   padding: 0.35rem 0;
-  border-bottom: 0.1rem solid var(--greyC);
+  border-bottom: 0.1rem solid #eee;
 }
 
 .myss_box ul li:last-child {
@@ -1003,7 +1003,7 @@ div.section_block div.tabs div.tab-content.mt-3 div.tab-pane div img.section-ima
 }
 
 div.section.dashboard_section div.row div div.section_block div.tabs div.tab-content.section_block_content {
-  border-top: 0.1rem solid var(--greyC) !important;
+  border-top: 0.1rem solid #eee !important;
   padding: 0.7rem !important;
 }
 
@@ -1034,7 +1034,7 @@ table#activity-table tr {
   display: flex;
   align-items: center;
   border-radius: 10rem;
-  border: 0.1rem solid var(--greyC);
+  border: 0.1rem solid #eee;
   flex: 0 0 auto;
   justify-content: center;
   background: var(--bs-secondary);
