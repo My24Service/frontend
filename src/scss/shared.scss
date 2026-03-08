@@ -816,7 +816,7 @@ html {
       margin-inline: 0;
       // background: white !important;
       // color: $primary;
-      background: $my24 !important;
+      background: $my24 ;
       color: $white;
     }
     .backlink {
@@ -1275,23 +1275,23 @@ html {
 .main-menu nav .page-subnav ul.nav a:active,
 .main-menu nav .page-subnav ul.nav a.router-link-active,
 .main-menu nav .page-subnav ul.nav a.active {
-  background-color: $my24 !important;
-  color: white !important;
+  background-color: $my24 ;
+  color: white ;
 }
 
 .main-menu nav .page-subnav ul.nav a:hover,.main-menu nav .page-subnav ul.nav a:focus,.main-menu nav .page-subnav ul.nav a:active,.main-menu nav .page-subnav ul.nav a.router-link-active,.main-menu nav .page-subnav ul.nav a.active {
-  background-color: $my24 !important;
-  color: $white !important;
+  background-color: $my24 ;
+  color: $white ;
 }
 
 .app-page header div.page-title .button, html .app-page header div.page-title .btn {
-  color: $white !important;
-  background-color: $my24 !important;
+  color: $white ;
+  background-color: $my24 ;
 }
 
 .nav-pills .nav-link.active,.nav-pills .show>.nav-link {
-  color: #ffffff !important;
-  background-color: $my24 !important;
+  color: #ffffff ;
+  background-color: $my24 ;
 }
 
 .dummy-hvg-where-does-this-end-up {
