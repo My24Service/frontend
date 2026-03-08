@@ -1088,7 +1088,7 @@ table.table-docs tr td {
 
 .dashboard_row .row .section_block .nav-pills .nav-link.active,.nav-pills .show>.nav-link {
   color: #ffffff !important;
-  background-color: $my24 !important;
+  background-color: var(--bs-secondary) !important;
 }
 
 
