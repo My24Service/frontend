@@ -22,3 +22,17 @@ $font-size-base: 0.9rem;
 @import 'bootstrap/scss/bootstrap.scss';
 @import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
 @import "./shared.scss";
+
+html.theme-shltr .main-menu nav .page-subnav ul.nav a:hover,.main-menu nav .page-subnav ul.nav a:focus,.main-menu nav .page-subnav ul.nav a:active,.main-menu nav .page-subnav ul.nav a.router-link-active,.main-menu nav .page-subnav ul.nav a.active {
+  background-color: $my24 !important;
+  color: $white !important;
+}
+html.theme-shltr .app-page header div.page-title .button, html .app-page header div.page-title .btn {
+  color: $white !important;
+  background-color: $my24 !important;
+}
+
+html.theme-shltr .nav-pills .nav-link.active,.nav-pills .show>.nav-link {
+  color: #ffffff !important;
+  background-color: $my24 !important;
+}
