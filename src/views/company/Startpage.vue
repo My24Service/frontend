@@ -1086,7 +1086,7 @@ table.table-docs tr td {
 }
 
 
-.nav-pills .nav-link.active,.nav-pills .show>.nav-link {
+.dashboard_row .row .section_block .nav-pills .nav-link.active,.nav-pills .show>.nav-link {
   color: #ffffff !important;
   background-color: $my24 !important;
 }
