@@ -1085,24 +1085,6 @@ table.table-docs tr td {
   min-height: 3rem !important;
 }
 
-.main-menu nav .page-subnav ul.nav a:hover,
-.main-menu nav .page-subnav ul.nav a:focus,
-.main-menu nav .page-subnav ul.nav a:active,
-.main-menu nav .page-subnav ul.nav a.router-link-active,
-.main-menu nav .page-subnav ul.nav a.active {
-  background-color: $my24 !important;
-  color: white !important;
-}
-
-.main-menu nav .page-subnav ul.nav a:hover,.main-menu nav .page-subnav ul.nav a:focus,.main-menu nav .page-subnav ul.nav a:active,.main-menu nav .page-subnav ul.nav a.router-link-active,.main-menu nav .page-subnav ul.nav a.active {
-  background-color: $my24 !important;
-  color: $white !important;
-}
-
-.app-page header div.page-title .button, html .app-page header div.page-title .btn {
-  color: $white !important;
-  background-color: $my24 !important;
-}
 
 .nav-pills .nav-link.active,.nav-pills .show>.nav-link {
   color: #ffffff !important;
