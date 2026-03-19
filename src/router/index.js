@@ -20,6 +20,7 @@ import docks from './docks'
 import {AUTH_LEVELS} from "@/constants";
 import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
 import { useAuthStore } from '@/stores/auth'
+import startpage from "@/router/startpage";
 
 const routes = [
   {
@@ -42,6 +43,7 @@ const routes = [
   ...budget,
   ...catchall,
   ...docks,
+  ...startpage
 ]
 
 export const router = createRouter({

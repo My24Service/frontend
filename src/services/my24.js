@@ -175,6 +175,10 @@ class My24 extends BaseModel {
       return true;
     }
 
+    if (config.module === 'startpage') {
+      return true;
+    }
+
     if (!(config.module in config.contract)) {
       if (debug) console.debug(`not allowed: module not in contract (module=${config.module})`)
       return false;
