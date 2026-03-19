@@ -912,7 +912,7 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 .section.dashboard_section {
   padding: 0 1.5rem
 }
@@ -1084,7 +1084,6 @@ table.table-docs tr td {
   padding: 0;
   min-height: 3rem !important;
 }
-
 
 .dashboard_row .row .section_block .nav-pills .nav-link.active,.nav-pills .show>.nav-link {
   color: #ffffff !important;
