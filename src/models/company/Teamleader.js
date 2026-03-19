@@ -24,8 +24,8 @@ class TeamleaderService extends BaseModel{
     return this.axios.get(url).then(response => response.data)
   }
 
-  async invoiceDocumentTemplateList(id) {
-    const url = `${this.base_url}/invoice-document-template/?department_id=${id}`
+  async invoiceDocumentTemplateList() {
+    const url = `${this.base_url}/invoice-document-template/`
 
     return this.axios.get(url).then(response => response.data)
   }
@@ -40,6 +40,13 @@ class TeamleaderService extends BaseModel{
   async emptyTokens() {
     const data = {}
     const url = `${this.base_url}/empty-tokens/`
+
+    return this.axios.post(url, data).then(response => response.data)
+  }
+
+  async checkTokens() {
+    const data = {}
+    const url = `${this.base_url}/check-tokens/`
 
     return this.axios.post(url, data).then(response => response.data)
   }
@@ -60,6 +67,16 @@ class TeamleaderService extends BaseModel{
       department_name: name,
     }
     const url = `${this.base_url}/update-department/`
+
+    return this.axios.patch(url, data).then(response => response.data)
+  }
+
+  async updateHoursProduct(id, name) {
+    const data = {
+      hours_product_uuid: id,
+      hours_product_name: name
+    }
+    const url = `${this.base_url}/hours-product/`
 
     return this.axios.patch(url, data).then(response => response.data)
   }
@@ -90,8 +107,20 @@ class TeamleaderService extends BaseModel{
     return this.axios.get(url).then(response => response.data)
   }
 
-  async resetTaxRates(department_id) {
-    const url = `${this.base_url}/tax-rate-reset/?department_id=${department_id}`
+  async resetTaxRates() {
+    const url = `${this.base_url}/tax-rate-reset/`
+
+    return this.axios.post(url, {}).then(response => response.data)
+  }
+
+  async fetchProductCategories() {
+    const url = `${this.base_url}/product-category/`
+
+    return this.axios.get(url).then(response => response.data)
+  }
+
+  async resetProductCategories() {
+    const url = `${this.base_url}/product-category-reset/`
 
     return this.axios.post(url, {}).then(response => response.data)
   }
@@ -112,17 +141,17 @@ class TeamleaderService extends BaseModel{
     return this.axios.get(url).then(response => response.data)
   }
 
+  async fetchProductDetail(id) {
+    let url = `${this.base_url}/product-detail/?id=${id}`
+
+    return this.axios.get(url).then(response => response.data)
+  }
+
   async fetchTeamleaderProducts(query) {
     let url = `${this.base_url}/tl-product-list/`
     if (query) {
       url = `${url}?query=${query}`
     }
-
-    return this.axios.get(url).then(response => response.data)
-  }
-
-  async fetchProductCategories() {
-    let url = `${this.base_url}/product-categories/`
 
     return this.axios.get(url).then(response => response.data)
   }

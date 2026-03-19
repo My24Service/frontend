@@ -88,7 +88,7 @@ export default {
     async loadData() {
       this.isLoading = true
       try {
-        const response = await this.service.invoiceDocumentTemplateList(this.departmentId)
+        const response = await this.service.invoiceDocumentTemplateList()
         this.documents = response.data
         this.isLoading = false
 

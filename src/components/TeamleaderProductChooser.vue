@@ -8,41 +8,32 @@
     ok-title="Annuleer"
     ok-variant="secondary"
   >
-    <div v-if="!showForm">
-      <b-row>
-        <b-col cols="10">
-          <b-input
-            v-model="query"
-          />
-        </b-col>
-        <b-col cols="2">
-          <BButton
-            @click="doSearch"
-          >Zoeken</BButton>
-        </b-col>
-      </b-row>
-
-      <b-table
-        id="products-table"
-        small
-        :fields="fields"
-        :items="products"
-        :hover="true"
-        responsive="md"
-        tbody-tr-class="table-row"
-        @row-clicked="onRowClicked"
-      ></b-table>
-      <div
-        v-if="withCreateButton"
-        class='flex-columns align-items-center justify-content-center'
-      >
-        <BButton
-          @click="newTeamleaderProduct"
-          variant="primary"
-          >Voeg nieuw teamleader product toe</BButton>
+    <div v-if="showDetails && product">
+      <div>
+        <h3>{{ product.name }} details</h3>
+        <dl>
+          <dt>Naam</dt>
+          <dd>{{ product.name }}</dd>
+          <dt>Code</dt>
+          <dd>{{ product.code }}</dd>
+          <dt>Omschrijving</dt>
+          <dd>{{ product.description }}</dd>
+          <dt>Rekening</dt>
+          <dd>{{ product.product_category_detail.name }}</dd>
+          <dt>Inkoopprijs</dt>
+          <dd>{{ product.purchase_price ? product.purchase_price.currency : '-' }} {{ product.purchase_price? product.purchase_price.amount : '-' }}</dd>
+          <dt>Verkoopprijs</dt>
+          <dd>{{ product.selling_price? product.selling_price.currency : '-' }} {{ product.selling_price ? product.selling_price.amount : '-' }}</dd>
+          <dt>BTW-tarief</dt>
+          <dd>{{ product.tax_detail.rate }}</dd>
+          <dt>Aangemaakt</dt>
+          <dd>{{ product.added_at }}</dd>
+          <dt>Gewijzigd</dt>
+          <dd>{{ product.updated_at }}</dd>
+        </dl>
       </div>
     </div>
-    <div v-else>
+    <div v-else-if="showForm">
       <h3>Nieuw teamleader product</h3>
       <form v-if="product">
         <BFormGroup
@@ -122,6 +113,53 @@
         </div>
       </form>
     </div>
+    <div v-else>
+      <BForm @submit.stop.prevent="doSearch">
+        <b-row>
+          <b-col cols="8">
+            <b-input
+              autofocus
+              size="sm"
+              v-model="query"
+            />
+          </b-col>
+          <b-col cols="2">
+            <BButton
+              @click="doSearch"
+              type="submit"
+            >Zoeken</BButton>
+          </b-col>
+        </b-row>
+      </BForm>
+
+      <b-table
+        id="products-table"
+        small
+        :fields="fields"
+        :items="products"
+        :hover="true"
+        responsive="md"
+        tbody-tr-class="tr-pointer"
+        @row-clicked="onRowClicked"
+      >
+        <template #cell(id)="data">
+          <BButton
+            @click="() => showDetail(data.item.id)"
+          >
+            Details
+          </BButton>
+        </template>
+      </b-table>
+      <div
+        v-if="withCreateButton"
+        class='flex-columns align-items-center justify-content-center'
+      >
+        <BButton
+          @click="newTeamleaderProduct"
+          variant="primary"
+        >Voeg nieuw teamleader product toe</BButton>
+      </div>
+    </div>
   </b-modal>
 </template>
 <script>
@@ -133,6 +171,7 @@ import {required} from "@vuelidate/validators";
 import componentMixin from "@/mixins/common";
 import {TeamleaderService} from "@/models/company/Teamleader";
 import PriceInput from "@/components/PriceInput.vue";
+import {constrainPoint} from "@fullcalendar/core/internal";
 
 export default {
   name: "TeamleaderProductChooser",
@@ -143,7 +182,7 @@ export default {
     withCreateButton: {
       type: Boolean,
       default: true
-    }
+    },
   },
   emits: [
     'product-chosen'
@@ -154,13 +193,18 @@ export default {
       products: [],
       fields: [
         {key: 'name', label: this.$trans('Name')},
+        {key: 'description', label: this.$trans('Description')},
+        {key: 'code', label: this.$trans('Code')},
+        {key: 'id', label: ''},
       ],
       query: null,
       showForm: false,
+      showDetails: false,
+      showSearch: true,
       product: null,
       isSubmitClicked: false,
       settings: {},
-      taxRates: []
+      taxRates: [],
     }
   },
   setup() {
@@ -183,6 +227,33 @@ export default {
     }
   },
   methods: {
+    showFormMode() {
+      this.showForm = true
+      this.showSearch = false
+      this.showDetails = false
+    },
+    showDetailMode() {
+      this.showForm = false
+      this.showSearch = false
+      this.showDetails = true
+    },
+    showSearchMode() {
+      this.showForm = false
+      this.showSearch = true
+      this.showDetails = false
+    },
+    async showDetail(id) {
+      const loader = this.loading.show()
+      try {
+        this.product = await this.service.fetchProductDetail(id)
+        console.log('product', this.product)
+        this.showDetailMode()
+        loader.hide()
+      } catch (e) {
+        console.error('error fetching product details', e)
+        loader.hide()
+      }
+    },
     async doSearch() {
       await this.loadData()
     },
@@ -190,6 +261,7 @@ export default {
       this.$emit('product-chosen', item)
     },
     async newTeamleaderProduct() {
+      this.settings = await this.service.configDetail()
       const response = await this.service.fetchTaxRates()
       this.taxRates = response.results.map((rate) => {
         return {
@@ -202,16 +274,17 @@ export default {
         name: this.material.name,
         code: this.material.identifier,
         description: this.material.description,
-        department_id: this.settings.department_id,
+        department_id: this.settings.json_data_department_uuid,
         tax_rate_uuid: defaultRate.uuid
       }
-      this.showForm = true
+      this.showFormMode()
     },
     async loadData() {
       const loader = this.loading.show()
       try {
         this.products = await this.service.fetchProducts(this.query)
-        this.settings = await this.service.configDetail()
+        const productCategories = await this.service.fetchProductCategories()
+        console.log({productCategories})
         loader.hide()
       } catch(error) {
         console.log('error fetching products', error)
@@ -221,7 +294,9 @@ export default {
     },
     async show() {
       await this.$refs['modal'].show()
-      this.query = this.material.name.trim()
+      if (this.material && this.material.name) {
+        this.query = this.material.name.trim()
+      }
       this.showForm = false
     },
     hide() {

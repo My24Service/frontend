@@ -40,7 +40,7 @@
             </span>
           </h3>
           <BButton-toolbar>
-            <BButton @click="cancelForm" type="button" variant="outline">
+            <BButton @click="cancelForm" type="button" variant="secondary">
               {{ $trans('Cancel') }}</BButton>
             <BButton @click="submitForm" type="button" variant="primary">
               {{ $trans('Save') }}</BButton>
@@ -222,9 +222,9 @@
               </b-row>
             </b-container>
 
-            <hr/>
+            <hr v-if="!hasTeamleader" />
 
-            <b-container fluid>
+            <b-container fluid v-if="!hasTeamleader">
               <h5>{{ $trans("Engineers") }}</h5>
               <b-row>
                 <b-col cols="7" class="header">
@@ -353,7 +353,7 @@
                 </b-col>
               </b-row>
             </b-container>
-          </details>
+          </details> <!-- end manage prices -->
 
           <details v-if="used_materials.length > 0">
             <summary class="flex-columns space-between">
@@ -462,7 +462,7 @@
 
       </b-form>
 
-      <TeamleaderProductChooserTeamleader
+      <TeamleaderProductChooser
         v-if="chosenMaterial"
         ref="product-chooser-teamleader"
         :material="chosenMaterial"
@@ -505,13 +505,13 @@ import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
-import TeamleaderProductChooserTeamleader from "@/components/TeamleaderProductChooser.vue";
+import TeamleaderProductChooser from "@/components/TeamleaderProductChooser.vue";
 
 export default {
   name: 'InvoiceForm',
   mixins: [invoiceMixin, componentMixin],
   components: {
-    TeamleaderProductChooserTeamleader,
+    TeamleaderProductChooser,
     InvoicePDFViewer,
     PriceInput,
     HoursComponent,

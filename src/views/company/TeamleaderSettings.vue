@@ -9,8 +9,8 @@
     <DocumentTemplateChooser
       id="template-chooser-modal"
       ref="template-chooser-modal"
-      :department-id="settings.department_uuid"
-      v-if="settings.department_uuid"
+      :department-id="settings.json_data.department_uuid"
+      v-if="settings.json_data && settings.json_data.department_uuid"
       @template-chosen="invoiceTemplateChosen"
     />
 
@@ -32,7 +32,7 @@
       </div>
     </header>
     <div class="app-detail panel overflow-auto">
-      <b-form class="page-detail flex-columns">
+      <b-form class="page-detail flex-columns" v-if="settings && settings.json_data">
         <div class="panel col-1-1">
           <ol class="m-2">
             <li>
@@ -75,7 +75,7 @@
                 <div class="btn-group d-flex justify-content-end">
                   <div
                     class="p-2"
-                    v-if="settings.has_tokens && false"
+                    v-if="false"
                   >
                     <button
                       class="btn btn-danger m-1"
@@ -113,7 +113,7 @@
                       size="sm"
                       type="text"
                       :state="isDepartmentOk"
-                      v-model="settings.department_name"
+                      v-model="settings.json_data.department_name"
                     ></b-form-input>
                     <button
                       class="btn btn-primary m-1"
@@ -121,6 +121,25 @@
                     >Kies</button>
                   </div>
                 </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Grootboekrekeningen</h5>
+                <div>
+                  {{ productCategories.length }} rekeningen aanwezig
+                </div>
+                <div class="btn-group d-flex justify-content-end">
+                  <div
+                    class="p-2"
+                  >
+                    <button
+                      :disabled="!isDepartmentOk"
+                      class="btn btn-primary m-1"
+                      @click="resetProductCategories()"
+                    >Ververs</button>
+                  </div>
+                </div>
               </div>
             </li>
             <li>
@@ -134,13 +153,15 @@
                   <div class="d-flex">
                     <BFormSelect
                       id="product_category_uuid"
-                      v-model="settings.product_category_uuid"
+                      v-model="settings.json_data.product_category_uuid"
                       :options="productCategories"
+                      :disabled="!isDepartmentOk || !isProductCategoriesOk"
                       size="sm"
                     ></BFormSelect>
                     <button
                       class="btn btn-primary m-1"
                       @click="updateProductCategory"
+                      :disabled="!isDepartmentOk || !isProductCategoriesOk"
                     >Submit</button>
                   </div>
                 </b-form-group>
@@ -160,12 +181,14 @@
                       id="hours_product_uuid"
                       size="sm"
                       type="text"
+                      readonly="readonly"
                       :state="isHoursProductOk"
-                      v-model="settings.hours_product_uuid"
+                      v-model="settings.json_data.hours_product_name"
                     ></b-form-input>
                     <button
                       class="btn btn-primary m-1"
                       @click="openProductChooserModal"
+                      :disabled="!isDepartmentOk"
                     >Kies</button>
                   </div>
                 </b-form-group>
@@ -185,10 +208,12 @@
                       id="invoice_template_name"
                       size="sm"
                       type="text"
+                      readonly="readonly"
                       :state="isInvoiceTemplateOk"
-                      v-model="settings.invoice_template_name"
+                      v-model="settings.json_data.invoice_template_name"
                     ></b-form-input>
                     <button
+                      :disabled="!isDepartmentOk"
                       class="btn btn-primary m-1"
                       @click="chooseInvoiceTemplate"
                     >Kies</button>
@@ -216,6 +241,7 @@
                     class="p-2"
                   >
                     <button
+                      :disabled="!isDepartmentOk"
                       class="btn btn-primary m-1"
                       @click="resetTaxRates()"
                     >Ververs</button>
@@ -226,7 +252,7 @@
           </ol>
         </div>
       </b-form>
-      <TeamleaderProductChooserTeamleader
+      <TeamleaderProductChooser
         ref="product-chooser-teamleader"
         @product-chosen="productChosenTl"
         :with-create-button="false"
@@ -242,7 +268,7 @@ import {errorToast, infoToast} from "@/utils";
 import {useToast} from "bootstrap-vue-next";
 import componentMixin from "@/mixins/common";
 import {useLoading} from "vue-loading-overlay";
-import TeamleaderProductChooserTeamleader from "@/components/TeamleaderProductChooser.vue";
+import TeamleaderProductChooser from "@/components/TeamleaderProductChooser.vue";
 
 export default {
   setup() {
@@ -258,7 +284,7 @@ export default {
   },
   mixins: [componentMixin],
   components: {
-    TeamleaderProductChooserTeamleader,
+    TeamleaderProductChooser,
     DocumentTemplateChooser,
     DepartmentChooser,
   },
@@ -280,35 +306,48 @@ export default {
   },
   computed: {
     isDepartmentOk() {
-      return !this.isEmpty(this.settings.department_uuid)
+      if (this.settings.json_data) {
+        return !this.isEmpty(this.settings.json_data.department_uuid)
+      }
+      return false
     },
     isHoursProductOk() {
-      return !this.isEmpty(this.settings.hours_product_uuid)
+      if (this.settings.json_data) {
+        return !this.isEmpty(this.settings.json_data.hours_product_uuid)
+      }
+      return false
     },
     isInvoiceTemplateOk() {
-      return !this.isEmpty(this.settings.invoice_template_uuid)
+      if (this.settings.json_data) {
+        return !this.isEmpty(this.settings.json_data.invoice_template_uuid)
+      }
+      return false
     },
+    isProductCategoriesOk() {
+      return this.productCategories.length > 0
+    }
   },
   created() {
     this.loadData()
   },
   methods: {
     isEmpty(val) {
-      return val === null || val === ""
+      return val === undefined || val === null || val === ""
     },
     async openProductChooserModal() {
+      this.$refs['product-chooser-teamleader'].showSearchMode()
       await this.$refs['product-chooser-teamleader'].show();
     },
-    productChosenTl(obj) {
-      console.log('productChosenTl', obj)
-      this.settings.hours_product_uuid = obj.uuid
+    async productChosenTl(obj) {
+      await this.updateHoursProduct(obj)
+      this.$refs['product-chooser-teamleader'].hide();
+    },
+    chooseDepartment() {
+      this.$refs['department-chooser-modal'].show()
     },
     async departmentChosen(item) {
       this.$refs['department-chooser-modal'].hide()
       await this.updateDepartmentSetting(item)
-    },
-    chooseDepartment() {
-      this.$refs['department-chooser-modal'].show()
     },
     async invoiceTemplateChosen(item) {
       this.$refs['template-chooser-modal'].hide()
@@ -353,6 +392,11 @@ export default {
       let loader = this.loading.show();
       await this.service.updateDepartmentSetting(item.id, item.name)
       loader.hide()
+    },
+    async updateHoursProduct(item) {
+      let loader = this.loading.show();
+      await this.service.updateHoursProduct(item.id, item.name)
+      loader.hide()
       await this.loadData()
     },
     async updateEnabled() {
@@ -384,35 +428,38 @@ export default {
         loader.hide()
       }
     },
+    async resetProductCategories() {
+      let loader = this.loading.show();
+      const response = await this.service.resetProductCategories(this.settings.department_uuid)
+      infoToast(this.create, "Rekeningen",
+        `${response.delete_result[0]} verwijderd, ${response.created} aangemaakt`)
+      await this.fetchProductCategories()
+      loader.hide()
+    },
+    async fetchProductCategories() {
+      this.productCategories = []
+      if (this.settings.has_tokens) {
+        let loader = this.loading.show();
+        const response = await this.service.fetchProductCategories()
+        this.productCategories = response.results
+        loader.hide()
+      }
+    },
     async loadData() {
       let loader = this.loading.show();
       try {
         this.settings = await this.service.configDetail()
         if (this.settings.has_tokens) {
-          await this.fetchTaxRates()
-          await this.fetchCategories()
+          const result = await this.service.checkTokens()
+          if (this.settings.json_data.department_uuid && result.result_ok) {
+            await this.fetchTaxRates()
+            await this.fetchProductCategories()
+          }
         }
         loader.hide()
       } catch(error) {
         console.error('error fetching data', error)
         errorToast(this.create, this.$trans('Error fetching data'))
-        loader.hide()
-      }
-    },
-    async fetchCategories() {
-      let loader = this.loading.show()
-      try {
-        const response = await this.service.fetchProductCategories()
-        this.productCategories = response.data.map((item) => {
-          return {
-            value: item.id,
-            text: item.name
-          }
-        })
-        loader.hide()
-      } catch(error) {
-        console.error('error fetching product categories', error)
-        errorToast(this.create, this.$trans('Error fetching product categories'))
         loader.hide()
       }
     },
