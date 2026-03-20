@@ -169,25 +169,52 @@
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Product voor uren</h5>
+                <h5>Product voor werkuren</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
                   v-bind:label="$trans('Product')"
-                  label-for="hours_product_uuid"
+                  label-for="work_hours_product_uuid"
                 >
                   <div class="d-flex">
                     <b-form-input
-                      id="hours_product_uuid"
+                      id="work_hours_product_uuid"
                       size="sm"
                       type="text"
                       readonly="readonly"
                       :state="isHoursProductOk"
-                      v-model="settings.json_data.hours_product_name"
+                      v-model="settings.json_data.workhours_product_name"
                     ></b-form-input>
                     <button
                       class="btn btn-primary m-1"
-                      @click="openProductChooserModal"
+                      @click="openWorkHoursProductChooserModal"
+                      :disabled="!isDepartmentOk"
+                    >Kies</button>
+                  </div>
+                </b-form-group>
+              </div>
+            </li>
+            <li>
+              <div class="section rounded-sm revert">
+                <h5>Product voor reisuren</h5>
+                <b-form-group
+                  label-size="sm"
+                  label-cols="4"
+                  v-bind:label="$trans('Product')"
+                  label-for="travel_hours_product_uuid"
+                >
+                  <div class="d-flex">
+                    <b-form-input
+                      id="travel_hours_product_uuid"
+                      size="sm"
+                      type="text"
+                      readonly="readonly"
+                      :state="isHoursProductOk"
+                      v-model="settings.json_data.travel_hours_product_name"
+                    ></b-form-input>
+                    <button
+                      class="btn btn-primary m-1"
+                      @click="openTravelHoursProductChooserModal"
                       :disabled="!isDepartmentOk"
                     >Kies</button>
                   </div>
@@ -301,7 +328,8 @@ export default {
       fields: [
         {key: 'description', label: this.$trans('Description')},
         {key: 'rate', label: this.$trans('Rate')},
-      ]
+      ],
+      hoursProductTypeIsWork: false
     }
   },
   computed: {
@@ -334,6 +362,14 @@ export default {
     isEmpty(val) {
       return val === undefined || val === null || val === ""
     },
+    async openTravelHoursProductChooserModal() {
+      this.hoursProductTypeIsWork = false
+      await this.openProductChooserModal()
+    },
+    async openWorkHoursProductChooserModal() {
+      this.hoursProductTypeIsWork = true
+      await this.openProductChooserModal()
+    },
     async openProductChooserModal() {
       this.$refs['product-chooser-teamleader'].showSearchMode()
       await this.$refs['product-chooser-teamleader'].show();
@@ -356,6 +392,11 @@ export default {
     chooseInvoiceTemplate() {
       this.$refs['template-chooser-modal'].show()
     },
+    async emptyTokens() {
+      // button/modal not used at the moment
+      await this.$refs['delete-tokens'].show()
+    },
+    // API
     async authorize() {
       const result = await this.service.authorize()
       if (result.status === 'auth') {
@@ -371,10 +412,6 @@ export default {
         infoToast(this.create, 'Status', 'Tokens aanwezig')
       }
     },
-    async emptyTokens() {
-      // button/modal not used at the moment
-      await this.$refs['delete-tokens'].show()
-    },
     async doEmptyTokens() {
       // not used at the moment
       let loader = this.loading.show();
@@ -384,29 +421,51 @@ export default {
     },
     async updateInvoiceDocumentTemplateSetting(item) {
       let loader = this.loading.show();
+      // TODO use response and lose the loadData()
       await this.service.updateInvoiceDocumentTemplateSetting(item.id, item.name)
       loader.hide()
       await this.loadData()
     },
     async updateDepartmentSetting(item) {
       let loader = this.loading.show();
+      // TODO use response and lose the loadData()
       await this.service.updateDepartmentSetting(item.id, item.name)
       loader.hide()
     },
     async updateHoursProduct(item) {
       let loader = this.loading.show();
-      await this.service.updateHoursProduct(item.id, item.name)
-      loader.hide()
-      await this.loadData()
+      try {
+        if (this.hoursProductTypeIsWork) {
+          const workHoursSettings = await this.service.updateWorkHoursProduct(
+            item.id, item.name, item.purchase_price, item.selling_price)
+          this.settings.json_data = {
+            ...this.settings.json_data,
+            ...workHoursSettings
+          }
+        } else {
+          const travelHoursSettings = await this.service.updateTravelHoursProduct(
+            item.id, item.name, item.purchase_price, item.selling_price)
+          this.settings.json_data = {
+            ...this.settings.json_data,
+            ...travelHoursSettings
+          }
+        }
+        loader.hide()
+      } catch (e) {
+        console.error('update hours error', e)
+        loader.hide()
+      }
     },
     async updateEnabled() {
       let loader = this.loading.show();
+      // TODO use response to update settings and lose the loadData()
       await this.service.updateEnabled(this.settings.api_enabled)
       loader.hide()
       await this.loadData()
     },
     async updateProductCategory() {
       let loader = this.loading.show()
+      // TODO use response and lose the loadData()
       await this.service.updateProductCategory(this.settings.json_data.product_category_uuid)
       loader.hide()
       await this.loadData()

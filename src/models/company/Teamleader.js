@@ -71,12 +71,48 @@ class TeamleaderService extends BaseModel{
     return this.axios.patch(url, data).then(response => response.data)
   }
 
-  async updateHoursProduct(id, name) {
-    const data = {
-      hours_product_uuid: id,
-      hours_product_name: name
+  _getPriceJsonObj(priceObj) {
+    if (priceObj) {
+      return {
+        price: priceObj.amount,
+        currency: priceObj.currency,
+      }
     }
-    const url = `${this.base_url}/hours-product/`
+
+    return {
+      price: null,
+      currency: null,
+    }
+  }
+
+  async updateWorkHoursProduct(id, name, purchasePriceObj, sellingPriceObj) {
+    const jsonPricePurchase = this._getPriceJsonObj(purchasePriceObj)
+    const jsonPriceSelling = this._getPriceJsonObj(sellingPriceObj)
+    const data = {
+      workhours_product_uuid: id,
+      workhours_product_name: name,
+      workhours_product_purchase_price: jsonPricePurchase.amount,
+      workhours_product_purchase_price_currency: jsonPricePurchase.currency,
+      workhours_product_selling_price: jsonPriceSelling.amount,
+      workhours_product_selling_price_currency: jsonPriceSelling.currency
+    }
+    const url = `${this.base_url}/work-hours-product/`
+
+    return this.axios.patch(url, data).then(response => response.data)
+  }
+
+  async updateTravelHoursProduct(id, name, purchasePriceObj, sellingPriceObj) {
+    const jsonPricePurchase = this._getPriceJsonObj(purchasePriceObj)
+    const jsonPriceSelling = this._getPriceJsonObj(sellingPriceObj)
+    const data = {
+      travel_hours_product_uuid: id,
+      travel_hours_product_name: name,
+      travel_hours_product_purchase_price: jsonPricePurchase.amount,
+      travel_hours_product_purchase_price_currency: jsonPricePurchase.currency,
+      travel_hours_product_selling_price: jsonPriceSelling.amount,
+      travel_hours_product_selling_price_currency: jsonPriceSelling.currency
+    }
+    const url = `${this.base_url}/travel-hours-product/`
 
     return this.axios.patch(url, data).then(response => response.data)
   }
