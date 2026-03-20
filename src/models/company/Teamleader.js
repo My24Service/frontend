@@ -91,16 +91,6 @@ class TeamleaderService extends BaseModel{
     return this.axios.patch(url, data).then(response => response.data)
   }
 
-  async updateProductCategory(product_category_uuid) {
-    const data = {
-      'product_category_uuid': product_category_uuid
-    }
-
-    const url = `${this.base_url}/update-product-category/`
-
-    return this.axios.patch(url, data).then(response => response.data)
-  }
-
   async fetchTaxRates() {
     const url = `${this.base_url}/tax-rate/`
 
@@ -123,6 +113,17 @@ class TeamleaderService extends BaseModel{
     const url = `${this.base_url}/product-category-reset/`
 
     return this.axios.post(url, {}).then(response => response.data)
+  }
+
+  async updateProductCategory(product_category_uuid) {
+    const data = {
+      product_category_uuid
+    }
+    console.log({data})
+
+    const url = `${this.base_url}/update-product-category/`
+
+    return this.axios.patch(url, data).then(response => response.data)
   }
 
   async fetchBusinessTypes() {

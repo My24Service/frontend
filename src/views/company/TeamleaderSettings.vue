@@ -33,7 +33,7 @@
     </header>
     <div class="app-detail panel overflow-auto">
       <b-form class="page-detail flex-columns" v-if="settings && settings.json_data">
-        <div class="panel col-1-1">
+        <div class="panel">
           <ol class="m-2">
             <li>
               <div class="section rounded-sm revert">
@@ -154,7 +154,7 @@
                     <BFormSelect
                       id="product_category_uuid"
                       v-model="settings.json_data.product_category_uuid"
-                      :options="productCategories"
+                      :options="productCategories.map((category) => { return {'value': category.uuid, 'text': category.name}})"
                       :disabled="!isDepartmentOk || !isProductCategoriesOk"
                       size="sm"
                     ></BFormSelect>
@@ -406,8 +406,8 @@ export default {
       await this.loadData()
     },
     async updateProductCategory() {
-      let loader = this.loading.show();
-      await this.service.updateProductCategory(this.settings.product_category_uuid)
+      let loader = this.loading.show()
+      await this.service.updateProductCategory(this.settings.json_data.product_category_uuid)
       loader.hide()
       await this.loadData()
     },
@@ -479,6 +479,7 @@ input[type="number"] {
 ol {
   font-size: 2.6em;
   list-style-type: upper-roman;
+  padding: 2em;
 }
 .revert {
   font-size: 0.9rem;
