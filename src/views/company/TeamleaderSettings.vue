@@ -436,15 +436,13 @@ export default {
       let loader = this.loading.show();
       try {
         if (this.hoursProductTypeIsWork) {
-          const workHoursSettings = await this.service.updateWorkHoursProduct(
-            item.id, item.name, item.purchase_price, item.selling_price)
+          const workHoursSettings = await this.service.updateWorkHoursProduct(item.id, item.name)
           this.settings.json_data = {
             ...this.settings.json_data,
             ...workHoursSettings
           }
         } else {
-          const travelHoursSettings = await this.service.updateTravelHoursProduct(
-            item.id, item.name, item.purchase_price, item.selling_price)
+          const travelHoursSettings = await this.service.updateTravelHoursProduct(item.id, item.name)
           this.settings.json_data = {
             ...this.settings.json_data,
             ...travelHoursSettings
