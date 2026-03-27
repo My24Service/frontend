@@ -147,6 +147,7 @@ function toDinero(priceDecimal, currency) {
     let amount = priceDecimal ? priceDecimal * 100 : 0
     amount = parseInt(amount.toFixed(0))
     if (isNaN(amount)) {
+      console.error('toDinero - invalid input for amount', priceDecimal)
       throw `toDinero - invalid input for amount: ${priceDecimal}`
     }
     return Dinero({ amount, currency })

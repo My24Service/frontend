@@ -1,41 +1,27 @@
 <template>
   <div>
-    <div class="flex-columns">
-
-      <div>
-        <span v-if="!isFinalTotal" class="value-container">{{ $trans("Total") }}</span>
-        <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("Total") }}</span>
-      </div>
-
-      <BFormInput
-        readonly
-        disabled
-        :value="total.toFormat('$0.00')"
-        size="sm"
-        :class="totalClass"
-      ></BFormInput>
-
+    <div class="d-flex justify-content-between">
+      <span v-if="!isFinalTotal" class="value-container">{{ $trans("Total") }}</span>
+      <span v-else class="value-container-bold">{{ $trans("Total") }}</span>
+      <div class="d-flex align-items-end">{{ total.toFormat('$0.00') }}</div>
     </div>
 
-    <div class="flex-columns">
-        <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
-        <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("VAT") }}</span>
-
-        <BFormInput
-          readonly
-          disabled
-          :value="vat.toFormat('$0.00')"
-          size="sm"
-          :class="vatClass"
-        ></BFormInput>
-
+    <div class="d-flex justify-content-between">
+      <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
+      <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("VAT") }}</span>
+      <div class="d-flex align-items-end">
+        {{ vat.toFormat('$0.00') }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import {$trans} from "../utils";
+
 export default {
   name: "TotalsInputs",
+  methods: {$trans},
   props: {
     vat: {
       type: [Object],
@@ -50,26 +36,18 @@ export default {
       default: false
     }
   },
-  computed: {
-    totalClass() {
-      let base = 'input-total-used'
-      return this.isFinalTotal ? `${base} total-input-final` : `${base} total-input`
-    },
-    vatClass() {
-      let base = 'input-total-used'
-      return this.isFinalTotal ? `${base} vat-input-final` : `${base} vat-input`
-    },
-  }
 }
 </script>
 
 <style scoped>
 .value-container {
+  width: 120px;
   padding-top: 4px;
   padding-right: 4px;
   padding-left: 4px;
 }
 .value-container-bold {
+  width: 120px;
   padding-top: 4px;
   padding-right: 4px;
   padding-left: 4px;

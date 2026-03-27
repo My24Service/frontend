@@ -386,6 +386,7 @@
               @invoiceLinesCreated="invoiceLinesCreated"
               @emptyCollectionClicked="emptyCollectionClicked"
               :invoiceLinesParent="invoiceLines"
+              :teamleader-hours="teamleaderService.getPriceWorkHours()"
             />
 
             <HoursComponent
@@ -399,6 +400,7 @@
               @invoiceLinesCreated="invoiceLinesCreated"
               @emptyCollectionClicked="emptyCollectionClicked"
               :invoiceLinesParent="invoiceLines"
+              :teamleader-hours="teamleaderService.getPriceTravelHours()"
             />
 
             <DistanceComponent
@@ -506,6 +508,7 @@ import InvoicePDFViewer from "./InvoicePDFViewer.vue";
 import {useMainStore} from "@/stores/main";
 import componentMixin from "@/mixins/common";
 import TeamleaderProductChooser from "@/components/TeamleaderProductChooser.vue";
+import {TeamleaderService} from "@/models/company/Teamleader";
 
 export default {
   name: 'InvoiceForm',
@@ -614,7 +617,9 @@ export default {
       customerService: new CustomerService(),
       deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
-      chosenMaterial: null
+      chosenMaterial: null,
+      teamLeaderSettings: null,
+      teamleaderService: new TeamleaderService()
     }
   },
   async created() {
@@ -686,6 +691,7 @@ export default {
     },
     productChosenTl(obj) {
       console.log('productChosenTl', obj)
+
       // TODO update material in our API
     },
     async updateMaterial(material_id) {
@@ -741,6 +747,11 @@ export default {
         ...m,
         engineer: {...m.engineer, default_currency: this.default_currency}
       }))
+
+      // load teamleader settings
+      if (this.hasTeamleader) {
+        this.teamLeaderSettings = await this.teamleaderService.configDetail()
+      }
     },
     async submitForm() {
       this.isLoading = true

@@ -1,10 +1,7 @@
 <template>
   <b-row>
-    <b-col cols="6">
-      <span class="total-text">{{ $trans('Total') }}</span>
-    </b-col>
-    <b-col cols="3">
-      <span class="total-text items-total">{{ items_total }}</span>
+    <b-col cols="9">
+      {{ $trans('Total') }}: <span class="total-text">{{ items_total }}</span>
     </b-col>
     <b-col cols="3">
       <TotalsInputs

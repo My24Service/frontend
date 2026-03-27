@@ -66,6 +66,7 @@
             <BFormRadioGroup
               @change="updateTotals"
               v-model="activity.use_price"
+              v-if="!teamleaderHours"
             >
               <BFormRadio :value="usePriceOptions.USE_PRICE_USER" v-if="!activity.is_partner">
                 {{ $trans('Engineer') }}
@@ -92,6 +93,20 @@
                   />
                 </p>
               </BFormRadio>
+            </BFormRadioGroup>
+            <BFormRadioGroup
+              @change="updateTotals"
+              v-model="activity.use_price"
+              v-if="teamleaderHours"
+            >
+              <p class="flex">
+                Teamleader:&nbsp;
+                <PriceInput
+                  v-model="activity.price"
+                  :currency="activity.price_currency"
+                  @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
+                />
+              </p>
             </BFormRadioGroup>
           </b-col>
           <b-col cols="2">
@@ -120,7 +135,6 @@
 </template>
 
 <script>
-import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import invoiceLineService from "../../../models/invoices/InvoiceLine";
 import {
@@ -228,6 +242,10 @@ export default {
       type: [Array],
       default: null
     },
+    teamleaderHours: {
+      type: Object,
+      default: null
+    },
   },
   data () {
     return {
@@ -288,10 +306,12 @@ export default {
     this.costService.addListArg(`cost_type=${this.type}`)
 
     await this.loadData()
+    console.log(this.teamleaderHours)
 
     this.isLoading = false
   },
   methods: {
+    $trans,
     activityDurationChange(activity, event) {
 //       console.log( activity );
       const durationParts = activity.amount_duration_read.split( ':', 2 );
@@ -366,6 +386,7 @@ export default {
                 this.default_currency,
                 this.getDefaultProps()
               )))
+
             break
           case COST_TYPE_TRAVEL_HOURS:
             user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
@@ -437,11 +458,16 @@ export default {
       )
 
       this.total_dinero = this.costService.getItemsTotal()
+      console.log('total', this.total_dinero.toFormat("$0.00"))
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
 
       return true
     },
     getPrice(activity) {
+      if (this.teamleaderHours) {
+        // return this.teamleaderHours.selling_price
+        return parseFloat(this.teamleaderHours.selling_price)
+      }
       const user_id = activity.user ? activity.user : activity.user_id
       const user = this.engineer_models.find((m) => m.id === user_id)
       if (user) {

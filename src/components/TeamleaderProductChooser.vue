@@ -108,6 +108,7 @@
         </BRow>
         <div class='flex-columns align-items-center justify-content-center'>
           <BButton
+            @click="createLinkProduct"
             variant="primary"
           >Maak aan</BButton>
         </div>
@@ -274,10 +275,20 @@ export default {
         name: this.material.name,
         code: this.material.identifier,
         description: this.material.description,
-        department_id: this.settings.json_data_department_uuid,
         tax_rate_uuid: defaultRate.uuid
       }
       this.showFormMode()
+    },
+    async createLinkProduct() {
+      const createData = {
+        ...this.product,
+        purchase_price_currency: 'EUR',
+        selling_price_currency: 'EUR',
+      }
+      const response = await this.service.createLinkProduct(createData)
+
+      // TODO finish this!
+      console.log({response})
     },
     async loadData() {
       const loader = this.loading.show()

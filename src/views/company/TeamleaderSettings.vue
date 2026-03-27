@@ -1,5 +1,5 @@
 <template>
-  <div class="app-page">
+  <div class="app-page" v-if="settings">
     <DepartmentChooser
       id="department-chooser-modal"
       ref="department-chooser-modal"

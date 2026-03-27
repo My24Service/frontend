@@ -4,6 +4,7 @@ import BaseModel from "@/models/base";
 class TeamleaderService extends BaseModel{
   axios = client
   base_url = 'teamleader'
+  config = {}
 
   async oauthPost(code, state) {
     const data = { code, state }
@@ -15,7 +16,36 @@ class TeamleaderService extends BaseModel{
   async configDetail() {
     const url = `${this.base_url}/config/`
 
-    return this.axios.get(url).then(response => response.data)
+    const result = await this.axios.get(url)
+    this.config = result.data
+
+    return result.data
+  }
+
+  getPriceWorkHours() {
+    if (!this.config) {
+      return {}
+    }
+
+    return {
+      'purchase_price': this.config.json_data.workhours_product_purchase_price,
+      'purchase_currency': this.config.json_data.workhours_product_purchase_price_currency,
+      'selling_price': this.config.json_data.workhours_product_selling_price,
+      'selling_currency': this.config.json_data.workhours_product_selling_price_currency,
+    }
+  }
+
+  getPriceTravelHours() {
+    if (!this.config) {
+      return {}
+    }
+
+    return {
+      'purchase_price': this.config.json_data.travel_hours_product_purchase_price,
+      'purchase_currency': this.config.json_data.travel_hours_product_purchase_price_currency,
+      'selling_price': this.config.json_data.travel_hours_product_selling_price,
+      'selling_currency': this.config.json_data.travel_hours_product_selling_price_currency,
+    }
   }
 
   async departmentList() {
@@ -69,20 +99,6 @@ class TeamleaderService extends BaseModel{
     const url = `${this.base_url}/update-department/`
 
     return this.axios.patch(url, data).then(response => response.data)
-  }
-
-  _getPriceJsonObj(priceObj) {
-    if (priceObj) {
-      return {
-        price: priceObj.amount,
-        currency: priceObj.currency,
-      }
-    }
-
-    return {
-      price: null,
-      currency: null,
-    }
   }
 
   async updateWorkHoursProduct(id, name) {
@@ -179,6 +195,12 @@ class TeamleaderService extends BaseModel{
     }
 
     return this.axios.get(url).then(response => response.data)
+  }
+
+  async createLinkProduct(data) {
+    const url = `${this.base_url}/tl-product-create-link/`
+
+    return this.axios.post(url, data).then(response => response.data)
   }
 }
 
