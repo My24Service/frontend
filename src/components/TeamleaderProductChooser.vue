@@ -99,7 +99,7 @@
             >
               <BFormSelect
                 id="tax_rate_uuid-input"
-                v-model="product.tax_rate_uuid"
+                v-model="product.tax_rate_id"
                 :options="taxRates"
                 size="sm"
               ></BFormSelect>
@@ -186,7 +186,8 @@ export default {
     },
   },
   emits: [
-    'product-chosen'
+    'product-chosen',
+    'product-created-linked',
   ],
   data() {
     return {
@@ -275,7 +276,10 @@ export default {
         name: this.material.name,
         code: this.material.identifier,
         description: this.material.description,
-        tax_rate_uuid: defaultRate.uuid
+        tax_rate_id: defaultRate.uuid,
+        purchase_price: this.material.price_purchase_ex,
+        selling_price: this.material.price_selling_ex,
+        material: this.material.id,
       }
       this.showFormMode()
     },
@@ -285,17 +289,27 @@ export default {
         purchase_price_currency: 'EUR',
         selling_price_currency: 'EUR',
       }
-      const response = await this.service.createLinkProduct(createData)
 
-      // TODO finish this!
-      console.log({response})
+      try {
+        const response = await this.service.createLinkProduct(createData)
+        console.log({response})
+        if (!response['is_ok']) {
+          errorToast(this.create,'Fout aanmaken van het product in Teamleader')
+          return
+        }
+
+        const materialId = response['material']
+        this.$emit('product-created-linked', materialId)
+      } catch (error) {
+        console.error('error in create/link', error)
+      }
     },
     async loadData() {
       const loader = this.loading.show()
       try {
         this.products = await this.service.fetchProducts(this.query)
-        const productCategories = await this.service.fetchProductCategories()
-        console.log({productCategories})
+        // const productCategories = await this.service.fetchProductCategories()
+        // console.log({productCategories})
         loader.hide()
       } catch(error) {
         console.log('error fetching products', error)
@@ -304,6 +318,7 @@ export default {
       }
     },
     async show() {
+      console.log(this.material)
       await this.$refs['modal'].show()
       if (this.material && this.material.name) {
         this.query = this.material.name.trim()

@@ -215,10 +215,18 @@
                       :title="$trans('Koppel materiaal aan product')"
                     >
                       <b-spinner small v-if="materialUpdating"></b-spinner>
-                      {{ $trans("Teamleader") }}
+                      Koppel TL
                     </BButton>
                   </p>
                 </b-col>
+                <BCol cols="12" class="m-0 p-0">
+                  <div v-if="getTlProduct(material)" class="bg-success text-white p-1 w-100 rounded-2 m-2">
+                    Materiaal gekoppeld <span><a href="#">Ververs gegevens</a></span>
+                  </div>
+                  <div v-else class="bg-danger text-white p-1 w-100 rounded-2 m-2">
+                    Materiaal nog niet gekoppeld
+                  </div>
+                </BCol>
               </b-row>
             </b-container>
 
@@ -469,6 +477,7 @@
         ref="product-chooser-teamleader"
         :material="chosenMaterial"
         @product-chosen="productChosenTl"
+        @product-created-linked="tlProductCreatedLinked"
       />
 
     </div>
@@ -478,15 +487,15 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
-import {toDinero} from "@/utils";
+import {$trans, errorToast, infoToast, toDinero} from "@/utils";
 import TotalsInputs from "@/components/TotalsInputs";
 import PriceInput from "@/components/PriceInput";
 import CustomerCard from "@/components/CustomerCard";
 
-import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
-import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
+import {InvoiceModel, InvoiceService} from '@/models/invoices/Invoice'
+import {InvoiceLineService} from '@/models/invoices/InvoiceLine'
 import {MaterialModel, MaterialService} from "@/models/inventory/Material";
-import {EngineerUserModel, EngineerService} from "@/models/company/UserEngineer";
+import {EngineerService, EngineerUserModel} from "@/models/company/UserEngineer";
 import {CustomerModel, CustomerPriceModel, CustomerService} from "@/models/customer/Customer";
 
 import invoiceMixin from "./invoice_form/mixin";
@@ -496,7 +505,6 @@ import MaterialsComponent from "./invoice_form/Materials";
 import CallOutCostsComponent from "./invoice_form/CallOutCosts";
 import InvoiceLine from "./invoice_form/InvoiceLine";
 import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/utils";
 import {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
@@ -619,7 +627,8 @@ export default {
       INVOICE_LINE_TYPE_MANUAL,
       chosenMaterial: null,
       teamLeaderSettings: null,
-      teamleaderService: new TeamleaderService()
+      teamleaderService: new TeamleaderService(),
+      tlProducts: []
     }
   },
   async created() {
@@ -684,15 +693,52 @@ export default {
       infoToast(this.create, $trans('Updated'), $trans('Hourly rate engineer has been updated'))
     },
     // materials
+    getTlProduct(material) {
+      return this.tlProducts.find((product) => product.material.id === material.id)
+    },
     async openProductChooserTlModal(material) {
       this.chosenMaterial = material
       await this.$nextTick()
       await this.$refs['product-chooser-teamleader'].show();
     },
-    productChosenTl(obj) {
-      console.log('productChosenTl', obj)
+    async productChosenTl(obj) {
+      const detailProduct = this.teamleaderService.fetchProductDetail(obj.id)
 
-      // TODO update material in our API
+      const response = await this.service.fetchTaxRates()
+      const taxObj = response.results.find((tax) => tax.uuid === detailProduct.tax.id)
+      const purchasePriceObj = this.teamleaderService.priceObjToAmountCurrency(
+        detailProduct.price_purchase)
+      const sellingPriceObj = this.teamleaderService.priceObjToAmountCurrency(
+        detailProduct.price_selling)
+      const data = {
+        'material': this.chosenMaterial,
+        'uuid': obj.id,
+        'purchase_price': purchasePriceObj['amount'],
+        'purchase_price_currency': purchasePriceObj['currency'],
+        'selling_price': sellingPriceObj['amount'],
+        'selling_price_currency': sellingPriceObj['currency'],
+        'tax_percentage': taxObj.rate
+      }
+
+      try {
+        this.isLoading = true
+        await this.teamleaderService.linkProduct(data)
+        await this.tlFetchProducts()
+        this.isLoading = false
+        await this.$refs['product-chooser-teamleader'].hide();
+      } catch (e) {
+        this.isLoading = false
+        console.error('error linking product/fetch products', e)
+        errorToast(this.create, $trans('Error creating invoice'))
+      }
+    },
+    async tlProductCreatedLinked(_materialId) {
+      await this.$refs['product-chooser-teamleader'].hide();
+      await this.tlFetchProducts()
+    },
+    async tlFetchProducts() {
+      const ids = this.material_models.map((material) => material.id)
+      this.tlProducts = await this.teamleaderService.fetchTeamleaderProducts(ids)
     },
     async updateMaterial(material_id) {
       this.materialUpdating = true
@@ -751,6 +797,7 @@ export default {
       // load teamleader settings
       if (this.hasTeamleader) {
         this.teamLeaderSettings = await this.teamleaderService.configDetail()
+        await this.tlFetchProducts()
       }
     },
     async submitForm() {

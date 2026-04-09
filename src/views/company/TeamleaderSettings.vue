@@ -182,7 +182,7 @@
                       size="sm"
                       type="text"
                       readonly="readonly"
-                      :state="isHoursProductOk"
+                      :state="isWorkHoursProductOk"
                       v-model="settings.json_data.workhours_product_name"
                     ></b-form-input>
                     <button
@@ -209,7 +209,7 @@
                       size="sm"
                       type="text"
                       readonly="readonly"
-                      :state="isHoursProductOk"
+                      :state="isTravelHoursProductOk"
                       v-model="settings.json_data.travel_hours_product_name"
                     ></b-form-input>
                     <button
@@ -339,9 +339,15 @@ export default {
       }
       return false
     },
-    isHoursProductOk() {
+    isWorkHoursProductOk() {
       if (this.settings.json_data) {
-        return !this.isEmpty(this.settings.json_data.hours_product_uuid)
+        return !this.isEmpty(this.settings.json_data.workhours_product_uuid)
+      }
+      return false
+    },
+    isTravelHoursProductOk() {
+      if (this.settings.json_data) {
+        return !this.isEmpty(this.settings.json_data.travel_hours_product_uuid)
       }
       return false
     },

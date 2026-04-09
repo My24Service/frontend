@@ -188,20 +188,34 @@ class TeamleaderService extends BaseModel{
     return this.axios.get(url).then(response => response.data)
   }
 
-  async fetchTeamleaderProducts(query) {
-    let url = `${this.base_url}/tl-product-list/`
-    if (query) {
-      url = `${url}?query=${query}`
-    }
-
-    return this.axios.get(url).then(response => response.data)
-  }
-
   async createLinkProduct(data) {
     const url = `${this.base_url}/tl-product-create-link/`
 
     return this.axios.post(url, data).then(response => response.data)
   }
+
+  async linkProduct(data) {
+    const url = `${this.base_url}/tl-product-create/`
+
+    return this.axios.post(url, data).then(response => response.data)
+  }
+
+  async fetchTeamleaderProducts(ids) {
+    let url = `${this.base_url}/tl-product-list/?ids=${ids.join(',')}`
+
+    return this.axios.get(url).then(response => response.data)
+  }
+
+  priceObjToAmountCurrency(priceObj) {
+    if (!priceObj) {
+      return {
+        'amount': null,
+        'currency': null
+      }
+    }
+    return priceObj
+  }
+
 }
 
 export {TeamleaderService}
