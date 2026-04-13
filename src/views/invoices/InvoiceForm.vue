@@ -195,7 +195,7 @@
                       v-if="!hasTeamleader"
                       :disabled="materialUpdating"
                       @click="() => updateMaterial(material.id)"
-                      class="btn update-button"
+                      class="btn"
                       size="sm"
                       type="button"
                       variant="primary"
@@ -208,25 +208,17 @@
                       v-if="hasTeamleader"
                       :disabled="materialUpdating"
                       @click="() => openProductChooserTlModal(material)"
-                      class="btn update-button"
                       size="sm"
                       type="button"
-                      variant="primary"
+                      :variant="getTlProduct(material) ? 'success' : 'danger'"
                       :title="$trans('Koppel materiaal aan product')"
                     >
                       <b-spinner small v-if="materialUpdating"></b-spinner>
-                      Koppel TL
+                      <span v-if="getTlProduct(material)">Bekijk</span>
+                      <span v-else>Nog niet gekoppeld</span>
                     </BButton>
                   </p>
                 </b-col>
-                <BCol cols="12" class="m-0 p-0">
-                  <div v-if="getTlProduct(material)" class="bg-success text-white p-1 w-100 rounded-2 m-2">
-                    Materiaal gekoppeld <span><a href="#">Ververs gegevens</a></span>
-                  </div>
-                  <div v-else class="bg-danger text-white p-1 w-100 rounded-2 m-2">
-                    Materiaal nog niet gekoppeld
-                  </div>
-                </BCol>
               </b-row>
             </b-container>
 
@@ -377,8 +369,8 @@
               :used_materials="used_materials"
               @invoiceLinesCreated="invoiceLinesCreated"
               @emptyCollectionClicked="emptyCollectionClicked"
-              :invoiceLinesParent="invoiceLines"
-              :has-teamleader="hasTeamleader"
+              :invoice-lines-parent="invoiceLines"
+              :teamleader-products="tlProducts"
             />
           </details>
 
@@ -863,9 +855,6 @@ export default {
 .flex {
   display : flex;
   margin-top: auto;
-}
-.update-button {
-  margin-bottom: 8px;
 }
 .header {
   font-size: 14px;

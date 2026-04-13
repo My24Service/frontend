@@ -306,7 +306,6 @@ export default {
     this.costService.addListArg(`cost_type=${this.type}`)
 
     await this.loadData()
-    console.log(this.teamleaderHours)
 
     this.isLoading = false
   },

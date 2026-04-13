@@ -399,29 +399,9 @@ export default {
 }
 </script>
 <style scoped>
-.flex {
-  display : flex;
-  margin-top: auto;
-}
 .vat {
   white-space: nowrap;
 }
-.value-container {
-  padding-top: 4px;
-  padding-right: 4px;
-  padding-left: 4px;
-}
-.update-button {
-  margin-bottom: 8px;
-}
-.header {
-  font-size: 14px;
-  font-weight: bold;
-}
-.total-text {
-  font-weight: bold;
-}
-
 .listing { display: table; }
 .listing li:not(.text-right) { display: table-row;}
 .listing li:not(.text-right) span  {  display: table-cell;}

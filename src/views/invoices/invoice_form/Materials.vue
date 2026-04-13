@@ -56,6 +56,7 @@
           <BFormRadioGroup
             @change="updateTotals"
             v-model="material.use_price"
+            v-if="!teamleaderProducts"
           >
             <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
               {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
@@ -75,6 +76,26 @@
                 />
               </p>
             </BFormRadio>
+          </BFormRadioGroup>
+          <BFormRadioGroup
+            @change="updateTotals"
+            v-model="material.use_price"
+            v-else
+          >
+            <div :class="getTlProduct(material.material_id) ? 'w-100 bg-success mb-2' : 'w-100 bg-danger mb-2'">
+              <img :src="PIXEL_URL" alt="pixel">
+            </div>
+            <p class="flex">
+              <span v-if="getTlProduct(material.material_id)">
+                Teamleader:&nbsp;
+              </span>
+              <span v-else>niet gekoppeld</span>
+              <PriceInput
+                v-model="material.price"
+                :currency="material.price_currency"
+                @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, material)"
+              />
+            </p>
           </BFormRadioGroup>
         </b-col>
         <b-col cols="2">
@@ -105,9 +126,10 @@
 </template>
 
 <script>
-import {toDinero} from "@/utils";
+import {$trans, toDinero} from "@/utils";
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
+import {PIXEL_URL} from "@/constants";
 
 import {InvoiceLineService} from "@/models/invoices/InvoiceLine";
 import {CostService, COST_TYPE_USED_MATERIALS} from "@/models/orders/Cost";
@@ -163,10 +185,6 @@ export default {
     },
   },
   props: {
-    hasTeamleader: {
-      type: [Boolean],
-      default: false
-    },
     order_pk: {
       type: [Number],
       default: null
@@ -188,6 +206,10 @@ export default {
       default: null
     },
     invoiceLinesParent: {
+      type: [Array],
+      default: null
+    },
+    teamleaderProducts: {
       type: [Array],
       default: null
     },
@@ -218,6 +240,7 @@ export default {
       costType: COST_TYPE_USED_MATERIALS,
       parentHasInvoiceLines: false,
       invoiceLineType: INVOICE_LINE_TYPE_USED_MATERIALS,
+      PIXEL_URL
     }
   },
   async created() {
@@ -243,6 +266,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    $trans,
     // Triggered when the 'amount' field changes value.
     materialAmountChange(material, event) {
       // console.log( material )
@@ -314,6 +338,9 @@ export default {
         order: this.order_pk,
       }
     },
+    getTlProduct(material_id) {
+      return this.teamleaderProducts.find((product) => product.material.id === material_id)
+    },
     otherPriceChanged(priceDinero, material) {
       material.setPriceField('price_other', priceDinero)
       this.updateTotals()
@@ -325,6 +352,14 @@ export default {
       return this.getPrice(cost.material, cost.name, cost.use_price, cost.price_other)
     },
     getPrice(material_id, material_name, use_price, price_other) {
+      if (this.teamleaderProducts) {
+        const model = this.getTlProduct(material_id)
+        if (!model) {
+          console.debug('MODEL NOT FOUND', this.teamleaderProducts)
+        } else {
+          return parseFloat(model.selling_price)
+        }
+      }
       let model
       switch (use_price) {
         case this.usePriceOptions.USE_PRICE_PURCHASE:
