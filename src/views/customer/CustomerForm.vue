@@ -8,7 +8,7 @@
           <span v-else>{{ $trans('Edit customer') }}</span>
         </h3>
         <div class="flex-columns">
-          <BButton @click="cancelForm" type="button" variant="secondary outline">
+          <BButton @click="cancelForm" type="button" variant="secondary">
             {{ $trans('Cancel') }}</BButton>
           <BButton @click="submitForm" type="button" variant="primary">
             {{ $trans('Save') }}</BButton>
@@ -228,9 +228,6 @@
               rows="5"
             ></BFormTextarea>
           </BFormGroup>
-
-
-
           <BFormGroup
             label-cols="6"
             label-size="sm"
@@ -446,7 +443,19 @@ export default {
       customerId: null,
       minutes: ['00', '15', '30', '45'],
       submitClicked: false,
-      customer: new CustomerModel({}),
+      customer: new CustomerModel({
+        default_currency: this.mainStore.getDefaultCurrency,
+        price_per_km: "0.00",
+        price_per_km_currency: this.mainStore.getDefaultCurrency,
+        call_out_costs: "0.00",
+        call_out_costs_currency: this.mainStore.getDefaultCurrency,
+        hourly_rate: "0.00",
+        hourly_rate_currency: this.mainStore.getDefaultCurrency,
+        hourly_rate_engineer: "0.00",
+        hourly_rate_engineer_currency: this.mainStore.getDefaultCurrency,
+        hourly_rate_partner_engineer: "0.00",
+        hourly_rate_partner_engineer_currency: this.mainStore.getDefaultCurrency,
+      }),
       customerService: new CustomerService(),
       errorMessage: null,
       branchPartners: [],
@@ -516,14 +525,15 @@ export default {
     }
   },
   methods: {
+    $trans,
     async syncOrders() {
       this.syncingOrders = true
       try {
-        const syncResult = await partnerModel.copy_customer_orders(this.pk, this.customer.branch_partner)
+        await partnerModel.copy_customer_orders(this.pk, this.customer.branch_partner)
         await this.getBranchesForPartner()
         infoToast(this.create, $trans('Synced'), $trans('Orders synced'))
       } catch (error) {
-        console.log('Error syncing orders', error)
+        console.error('Error syncing orders', error)
         errorToast(this.create, $trans('Error syncing orders'))
       }
       this.syncingOrders = false
@@ -549,7 +559,7 @@ export default {
       this.submitClicked = true
       this.v$.$touch()
       if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
+        console.debug('invalid?', this.v$.$invalid)
         return
       }
 
@@ -570,7 +580,7 @@ export default {
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
-          console.log('Error creating customer', error)
+          console.error('Error creating customer', error)
           errorToast(this.create, $trans('Error creating customer'))
           this.isLoading = false
         }
@@ -587,7 +597,7 @@ export default {
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
-        console.log('Error updating customer', error)
+        console.error('Error updating customer', error)
         errorToast(this.create, $trans('Error updating customer'))
         this.isLoading = false
       }
@@ -597,11 +607,14 @@ export default {
 
       try {
         const customerData = await this.customerService.detail(this.pk)
-        this.customer = new CustomerModel(customerData)
+        this.customer = {
+          ...this.customer,
+          ...new CustomerModel(customerData)
+        }
 
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching customer', error)
+        console.error('error fetching customer', error)
         errorToast(this.create, $trans('Error loading customer'))
         this.isLoading = false
       }

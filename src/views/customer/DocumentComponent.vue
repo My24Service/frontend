@@ -202,7 +202,7 @@ export default {
   },
   props: {
     customer: {
-      type: CustomerModel,
+      type: Object,
       default: null
     },
     isView: {

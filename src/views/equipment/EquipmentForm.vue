@@ -583,7 +583,7 @@ export default {
     return {
       isLoading: false,
       submitClicked: false,
-      equipment: this.newModel(),
+      equipment: null,
       errorMessage: null,
       equipmentObjects: [],
 
@@ -727,7 +727,10 @@ export default {
           const equipmentData = await this.equipmentService.detail(this.pk)
           this.equipment = new EquipmentModel(equipmentData)
         } else {
-          this.equipment = new EquipmentModel({})
+          this.equipment = new EquipmentModel({
+            price: "0.00",
+            price_currency: this.mainStore.getDefaultCurrency,
+          })
         }
 
         if (this.hasBranches) {
