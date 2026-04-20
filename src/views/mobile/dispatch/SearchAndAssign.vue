@@ -1,106 +1,105 @@
 <template>
-  <div>
-    <b-modal
-      id="search-modal-wide"
-      ref="search-modal-wide"
-      v-bind:title="$trans('Search')"
-      :cancel-disabled="true"
-      @ok="searchAndAssignDone"
-      :ok-title="$trans('Close')"
-    >
-
-
-      <form ref="search-form">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-                <BFormInput size="sm" autofocus v-model="query"
-                              v-bind:placeholder="$trans('Type to search orders')"
-                              @keydown.enter="search"
-                              @change="searchDebounced"
-                              @update="searchDebounced"></BFormInput>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-
-      <div class="overflow-auto">
-        <ul class="listing order-list full-size">
-          <li><!-- FIXME -->
-
-            <div class="headings">
-              <span class="order-id">{{ this.$trans("order id") }}</span>
-              <span class="order-type">{{ this.$trans("type") }}</span>
-              <span class="order-company-name">{{ this.$trans("company") }}</span>
-              <span class="order-start-date">{{ this.$trans("start date") }}</span>
-              <span class="order-status">{{ this.$trans("status") }}</span>
-              <span class="order-actions">&nbsp;</span>
-            </div>
-          </li>
-          <li v-if="isLoading" class="text-center my-2 list-loading">
-            <div>
-              <b-spinner class="align-middle"></b-spinner><br>
-              <span>{{ this.$trans('loading orders') }}</span>
-            </div>
-          </li>
-          <li v-if="orders.length === 0" class="list-empty">
-            <div>
-              <span>{{ this.$trans('No results') }}</span>
-            </div>
-          </li>
-          <li v-if="!isLoading" v-for="order in orders" :key="order.id" style="">
-            <div class="listing-item" style="">
-              <span class="order-id">#{{ order.order_id }}<span v-if="mainStore.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span></span>
-              <span class="order-type">{{ order.order_type }}</span>
-              <span class="order-company-name">{{ order.order_name }}</span>
-              <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
-                {{ order.start_date }}
-                <BLink v-bind:title="$trans('Edit start and end dates')" v-on:click="editStartDate(order)">
-                  <IBiPencil class="edit-icon"></IBiPencil>
-                </BLink>
-              </span>
-              <span class="order-status" :title="order.last_status_full">
-                <IBiCircleFill v-bind:style="`color:${orderStatusColorCode}`"></IBiCircleFill>
-                {{ order.last_status_full }}
-              </span>
-
-            <!-- <OrderTableInfo
-              v-bind:order="order"
-              :model="model"
-              @reload-data="loadData"
-            /> -->
-              <div class="order-actions" style="">
-                <IconLinkAssign
-                  v-bind:title="$trans('Assign')"
-                  v-bind:method="function() { selectOrder(order) }"
-                />
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
-      <div slot="modal-footer" class="w-100">
-        <b-row v-if="selectedOrders.length > 0" class="selected-orders float-left">
-          <span class="dimmed">{{ this.$trans('Selected') }} ({{ selectedOrders.length }}):</span>
-          <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
-              {{ order.order_id }}
-              <IBiXCircle class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircle>
-              <IBiXCircleFill class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircleFill>
-        </span>
-          <!--
-          <BButton variant="primary" v-if="selectedOrders.length > 0" @click.prevent="searchAndAssignDone()">
-            <b-icon-person-lines-fill></b-icon-person-lines-fill>
-            {{ this.$trans('Assign these orders') }}
-          </BButton>
-          -->
+  <BModal
+    id="search-modal-wide"
+    ref="search-modal-wide"
+    :title="$trans('Search')"
+    :cancel-disabled="true"
+    @ok="searchAndAssignDone"
+    size="lg"
+    :ok-title="$trans('Close')"
+  >
+    <form ref="search-form">
+      <b-container fluid>
+        <b-row role="group">
+          <b-col size="12">
+              <BFormInput
+                size="sm"
+                autofocus
+                v-model="query"
+                v-bind:placeholder="$trans('Type to search orders')"
+                @keydown.enter="search"
+                @change="searchDebounced"
+                @update="searchDebounced"
+              />
+          </b-col>
         </b-row>
-        <BButton class="float-right" variant="primary" @click="searchAndAssignDone()" :data-non-zero="hasSelectedOrders()?'1':'0'">
-          <IBiPersonLinesFill class="assign-icon"></IBiPersonLinesFill>&nbsp;<span>{{ buttonLabel }}</span>
-        </BButton>
-      </div>
-      <EditStartDate id="edit-start-date" ref="edit-start-date" @edit-start-date-done="editStartDateDone"></EditStartDate>
-    </b-modal>
-  </div>
+      </b-container>
+    </form>
+    <div class="overflow-auto">
+      <ul class="listing order-list full-size">
+        <li>
+          <div class="headings">
+            <span class="order-id">{{ this.$trans("order id") }}</span>
+            <span class="order-type">{{ this.$trans("type") }}</span>
+            <span class="order-company-name">{{ this.$trans("company") }}</span>
+            <span class="order-start-date">{{ this.$trans("start date") }}</span>
+            <span class="order-status">{{ this.$trans("status") }}</span>
+            <span class="order-actions">&nbsp;</span>
+          </div>
+        </li>
+        <li v-if="isLoading" class="text-center my-2 list-loading">
+          <div>
+            <b-spinner class="align-middle"></b-spinner><br>
+            <span>{{ this.$trans('loading orders') }}</span>
+          </div>
+        </li>
+        <li v-if="orders.length === 0" class="list-empty">
+          <div>
+            <span>{{ this.$trans('No results') }}</span>
+          </div>
+        </li>
+        <li v-if="!isLoading" v-for="order in orders" :key="order.id" style="">
+          <div class="listing-item">
+            <span class="order-id">#{{ order.order_id }}<span v-if="mainStore.getOrderListMustIncludeReference && order.order_reference && order.order_reference.length > 0"> / {{ order.order_reference }}</span></span>
+            <span class="order-type">{{ order.order_type }}</span>
+            <span class="order-company-name">{{ order.order_name }}</span>
+            <span class="order-start-date" :title="`${order.start_date} ${order.start_time ? ' ' + order.start_time :'' }`">
+              {{ order.start_date }}
+              <BLink v-bind:title="$trans('Edit start and end dates')" v-on:click.prevent="editStartDate(order)">
+                <IBiPencil class="edit-icon" />
+              </BLink>
+            </span>
+            <span class="order-status" :title="order.last_status_full">
+              <IBiCircleFill
+                :style="`color:${orderStatusColorCode}`"
+              />
+              {{ order.last_status_full }}
+            </span>
+            <div class="order-actions" style="">
+              <IconLinkAssign
+                :title="$trans('Assign')"
+                :method="function() { selectOrder(order) }"
+              />
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <template #footer="{}">
+      <b-row v-if="selectedOrders.length > 0" class="selected-orders float-left">
+        <span class="dimmed">{{ this.$trans('Selected') }} ({{ selectedOrders.length }}):</span>
+        <span v-for="(order, index) in selectedOrders" :key="order.id" class="selected-order">
+            {{ order.order_id }}
+            <IBiXCircle class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircle>
+            <IBiXCircleFill class="icon" variant="primary" @click.prevent="removeSelectedOrder(index)"></IBiXCircleFill>
+        </span>
+      </b-row>
+      <BButton
+        class="float-right"
+        variant="primary"
+        @click="searchAndAssignDone()"
+        :data-non-zero="hasSelectedOrders()?'1':'0'"
+      >
+        <IBiPersonLinesFill class="assign-icon"></IBiPersonLinesFill>&nbsp;<span>{{ buttonLabel }}</span>
+      </BButton>
+      <EditStartDate
+        id="edit-start-date"
+        ref="edit-start-date"
+        @edit-start-date-done="editStartDateDone"
+      />
+    </template>
+  </BModal>
 </template>
 
 <script>
@@ -145,7 +144,15 @@ export default {
       orderStatusColorCode: '#666',
       orders: [],
       selectedOrders: [],
-      buttonLabel: this.$trans('Close')
+      buttonLabel: this.$trans('Close'),
+      fields: [
+        { key: 'order_id', 'label': this.$trans("order id") },
+        { key: 'order_type', 'label': this.$trans("type") },
+        { key: 'order_name', 'label': this.$trans("company") },
+        { key: 'start_date', 'label': this.$trans("start date") },
+        { key: 'status', 'label': this.$trans("status") },
+        'actions'
+      ]
     }
   },
   methods: {
@@ -158,9 +165,6 @@ export default {
       } else {
         this.buttonLabel = this.$trans('Close')
       }
-    },
-    handleOk(bvModalEvent) {
-      bvModalEvent.preventDefault()
     },
     async editStartDateDone(order_id, start_date, end_date) {
       // console.log("editStartDateDone "+order_id+", from "+start_date+" to "+end_date);
@@ -191,15 +195,8 @@ export default {
           break;
         }
       }
-
-      // debugger
-      // console.log('done')
-
     },
     editStartDate(order) {
-      // console.log(order);
-      // debugger;
-
       this.$refs['edit-start-date'].setFromOrder(order);
       this.$refs['edit-start-date'].show();
     },
@@ -271,12 +268,7 @@ export default {
 }
 </script>
 
-<style>
-#search-modal-wide .modal-dialog.modal-md {
-  width: 75vw;
-  max-width: 855px;
-}
-
+<style scoped>
 #search-modal-wide input.form-control.form-control-sm {
   max-width: 200px;
   margin: 0 auto 2em auto;
@@ -341,7 +333,7 @@ export default {
 #search-modal-wide .order-status,
 #search-modal-wide .order-id { color: #a9adae }
 
-#search-modal-wide .order-id { text-align: end; width: 10rem; }
+#search-modal-wide .order-id { text-align: end; }
 
 #search-modal-wide .list-empty div { margin: auto; padding: 5px 10px; }
 

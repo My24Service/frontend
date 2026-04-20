@@ -100,6 +100,7 @@
                 type="tr"
                 :title="$trans('Add action')"
                 :router_name="`${linkAddAction}`"
+                :router_params="{statuscode_pk: data.item.id}"
               />
               <IconLinkDelete
                 :title="$trans('Delete')"

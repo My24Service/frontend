@@ -345,7 +345,7 @@
             </b-row>
           </b-container>
         </form>
-        <footer class="modal-footer">
+        <template #footer="{}">
           <BButton
             @click="cancelSplitOrder"
             class="btn btn-secondary"
@@ -361,7 +361,7 @@
             variant="primary"
           >
             {{ $trans('Submit') }}</BButton>
-        </footer>
+        </template>
 
       </b-modal>
 
@@ -382,7 +382,7 @@
               {{ $trans('Reference') }}: {{ selectedAssignedOrder.order.order_reference }}<br/>
           </span>
         </template>
-        <template #modal-footer="{ cancel }">
+        <template #footer="{cancel}">
           <b-container>
             <b-row v-if="selectedOrderIsPartner">
               <b-col cols="1" class="mx-2">
@@ -687,17 +687,13 @@ export default {
       // this.dispatch.loadToday()
       this.startDate = new Date();
     },
-    viewOrder() {
-      this.$refs['dispatch-order-actions-modal'].hide();
-      this.$root.$once('bv::modal::hidden', (bvEvent, modalId) => {
-        this.$router.push({name: 'order-view', params: {pk: this.selectedOrder.id}})
-      })
+    async viewOrder() {
+      await this.$refs['dispatch-order-actions-modal'].hide();
+      this.$router.push({name: 'order-view', params: {pk: this.selectedOrder.id}})
     },
-    editOrder() {
-      this.$refs['dispatch-order-actions-modal'].hide();
-      this.$root.$once('bv::modal::hidden', (bvEvent, modalId) => {
-        this.$router.push({name: 'order-edit', params: {pk: this.selectedOrder.id}})
-      })
+    async editOrder() {
+      await this.$refs['dispatch-order-actions-modal'].hide();
+      this.$router.push({name: 'order-edit', params: {pk: this.selectedOrder.id}})
     },
     async openActionsModal(userId, order_pk, assignedorder, is_partner) {
       this.selectedAssignedOrder = assignedorder
@@ -754,22 +750,20 @@ export default {
         this.buttonDisabled = false
       }
     },
-    postUnassign() {
+    async postUnassign() {
       this.showOverlay = true
 
-      this.$refs['dispatch-order-actions-modal'].hide();
-      this.$root.$once('bv::modal::hidden', async (bvEvent, modalId) => {
-        try {
-          await this.assignService.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
-          infoToast(this.create, $trans('Success'), $trans('Order removed from planning'))
-          this.refreshData()
-          this.showOverlay = false
-        } catch (error) {
-          console.log('error un-assigning', error)
-          errorToast(this.create, $trans('Error un-assigning order'))
-          this.showOverlay = false
-        }
-      })
+      await this.$refs['dispatch-order-actions-modal'].hide();
+      try {
+        await this.assignService.unAssign(this.selectedOrderUserId, this.selectedOrder.id)
+        infoToast(this.create, $trans('Success'), $trans('Order removed from planning'))
+        this.refreshData()
+        this.showOverlay = false
+      } catch (error) {
+        console.error('error un-assigning', error)
+        errorToast(this.create, $trans('Error un-assigning order'))
+        this.showOverlay = false
+      }
     },
     cancelAssign() {
       this.selectedUsers = []

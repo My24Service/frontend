@@ -58,7 +58,6 @@ export default {
   },
   created() {
     this.time = this.cleanTime(this.timeIn)
-    console.log(this.time, this.timeIn)
   }
 }
 </script>

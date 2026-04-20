@@ -471,6 +471,7 @@ export default {
     }
   },
   async created() {
+    console.log(this.statuscode_pk)
     switch(this.list_type) {
       case 'order':
         this.actionTypes = this.actionTypesOrder.slice()

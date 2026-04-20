@@ -166,7 +166,7 @@ export const useMainStore = defineStore('main', {
       this.unacceptedCount = count
     },
     setAssignOrders(orders) {
-      state.assignOrders = orders
+      this.assignOrders = orders
     },
     setMaintenanceEquipment(maintenanceEquipment) {
       this.maintenanceEquipment = maintenanceEquipment

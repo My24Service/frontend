@@ -106,11 +106,9 @@ export default {
       }
     },
     show() {
-      console.log('EditStartDate SHOW');
       this.$refs['edit-start-date-modal-wide'].show()
     },
     hide() {
-      console.log('EditStartDate HIDE');
       this.$refs['edit-start-date-modal-wide'].hide()
     }
 

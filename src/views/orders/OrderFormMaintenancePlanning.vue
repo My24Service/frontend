@@ -658,7 +658,7 @@
                 </b-col>
                 <b-col cols="3">
                   <div class="float-right">
-                    <BLink class="h5 mx-2" @click="editOrderLine(orderline, index)">
+                    <BLink class="h5 mx-2" @click.prevent="editOrderLine(orderline, index)">
                       <IBiPencil></IBiPencil>
                     </BLink>
                     <BLink class="h5 mx-2" @click.prevent="deleteOrderLine(index)">

@@ -557,7 +557,7 @@ dl {
       .order-id {
         color: lighten(#757a7c, 20%);
         text-align: end;
-        width: 5rem;
+        max-width: 5rem;
       }
       .order-type {
         max-width: 10rem;

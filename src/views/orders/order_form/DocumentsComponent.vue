@@ -61,7 +61,6 @@
             v-model="files"
             multiple
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
-            @input="filesSelected"
           ></b-form-file>
         </BFormGroup>
       </b-form>
@@ -75,7 +74,6 @@
           <b-form-file
             v-model="documentService.editItem.file"
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
-            @input="filesSelected"
           ></b-form-file>
         </BFormGroup>
 
@@ -127,7 +125,6 @@
           {{ $trans('Edit document') }}
         </BButton>
       </footer>
-
     </div>
 
     <footer
@@ -146,14 +143,16 @@
 
     <b-container
       v-if="showChangesBlock"
+      class="pt-4"
     >
       <b-row>
-        <b-col cols="2"></b-col>
-        <b-col cols="10">
+        <b-col cols="12">
           <BButton
             @click="loadData"
             class="btn btn-secondary"
             type="button"
+            size="sm"
+            variant="secondary"
           >
             {{ $trans('Discard changes') }}
           </BButton>
@@ -162,6 +161,8 @@
             @click="submitDocuments"
             class="btn btn-primary"
             type="button"
+            size="sm"
+            variant="primary"
           >
             {{ $trans('Save changes') }}
           </BButton>
@@ -207,6 +208,11 @@ export default {
       default: false
     }
   },
+  watch: {
+    files: function(files) {
+      this.filesSelected(files)
+    }
+  },
   // watch: {
   //   order: async function(newVal) {
   //     await this.loadData()
@@ -247,6 +253,7 @@ export default {
     await this.loadData()
   },
   methods: {
+    $trans,
     async orderCreated(orderPk) {
       for (const document of this.documentService.collection) {
         document.order = orderPk

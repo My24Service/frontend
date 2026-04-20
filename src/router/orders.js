@@ -227,7 +227,7 @@ export default [
     },
     {
       name: 'order-statuscode-action-add',
-      path: '/orders/statuscodes/action/form',
+      path: '/orders/statuscodes/action/form-new/:statuscode_pk',
       components: {
         'app-content': ActionForm,
         'app-subnav': SubNavOrders
