@@ -154,7 +154,6 @@
             </VueMultiselect>
           </BFormGroup>
 
-
           <BFormGroup
             v-if="hasBranches && !from_quotation"
             label-cols="3"
@@ -1678,19 +1677,13 @@ export default {
 
       // this document handling here is only needed when creating an order
       if (this.isCreate) {
-        // TODO why is this if here? shouldn't be needed
-        // if (this.order.id) {
           const documentErrors = await this.$refs['documents-component'].orderCreated(this.order.id)
           errors = [...errors, ...documentErrors]
-        // }
       }
 
-      // TODO why is this if here? shouldn't be needed
-      // if (this.order.id) {
       const assignErrors = await this.assignEngineers(this.order.order_id)
       const removeErrors = await this.unassignEngineers(this.order.id)
       errors = [...errors, ...assignErrors, ...removeErrors]
-      // }
 
       if (!this.isCreate && this.acceptOrder) {
         try {
@@ -1704,9 +1697,8 @@ export default {
       }
 
       if (errors.length > 0) {
-        // TODO do we want this message? the errors in the form are obvious
         errorToast(this.create, $trans('There were errors'))
-        console.log('There were errors', errors)
+        console.error('There were errors', errors)
         this.buttonDisabled = false
         this.isLoading = false
         return
