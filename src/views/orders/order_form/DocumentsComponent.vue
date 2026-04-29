@@ -106,7 +106,6 @@
         <BButton
           :disabled="isLoading"
           @click="cancelEditDocument"
-          class="btn btn-primary"
           type="button"
           size="sm"
           variant="secondary"
@@ -177,7 +176,6 @@
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
 import {DocumentModel, DocumentService} from "@/models/orders/Document";
-import {OrderModel} from "@/models/orders/Order"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 

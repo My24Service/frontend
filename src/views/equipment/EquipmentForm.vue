@@ -1,8 +1,8 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
+  <b-overlay :show="isLoading" rounded="sm"  v-if="equipment">
     <div class="app-page">
       <header>
-        <div class="page-title">
+        <div class="page-title" v-if="equipment">
             <h3>
               <IBiTools></IBiTools>
               <span class="backlink" @click=cancelForm>{{ $trans("Equipment") }}</span> /
@@ -259,64 +259,64 @@
         <div class="panel col-1-3">
           <h6>{{  $trans('Equipment details') }}</h6>
 
-        <b-row v-if="branch && hasBranches">
-          <b-col cols="4" role="group">
-            <BFormGroup
-              label-size="sm"
-              v-bind:label="$trans('Branch')"
-              label-for="equipment_branch_name"
-            >
-              <BFormInput
-                id="equipment_branch_name"
-                size="sm"
-                v-model="branch.name"
-                readonly
-              ></BFormInput>
-            </BFormGroup>
-          </b-col>
-          <b-col cols="4" role="group">
-            <BFormGroup
-              label-size="sm"
-              v-bind:label="$trans('Address')"
-              label-for="equipment_branch_address"
-            >
-              <BFormInput
-                id="equipment_branch_address"
-                size="sm"
-                v-model="branch.address"
-                readonly
-              ></BFormInput>
-            </BFormGroup>
-          </b-col>
-          <b-col cols="2" role="group">
-            <BFormGroup
-              label-size="sm"
-              v-bind:label="$trans('City')"
-              label-for="equipment_branch_city"
-            >
-              <BFormInput
-                id="equipment_branch_city"
-                size="sm"
-                v-model="branch.city"
-                readonly
-              ></BFormInput>
-            </BFormGroup>
-          </b-col>
-          <b-col cols="2" role="group">
-            <BFormGroup
-              label-size="sm"
-              v-bind:label="$trans('Country')"
-              label-for="equipment_branch_country_code"
-            >
-              <BFormInput
-                id="equipment_branch_country_code"
-                size="sm"
-                v-model="branch.country_code"
-                readonly
-              ></BFormInput>
-            </BFormGroup>
-          </b-col>
-        </b-row>
+            <b-row v-if="branch && hasBranches">
+              <b-col cols="4" role="group">
+                <BFormGroup
+                  label-size="sm"
+                  v-bind:label="$trans('Branch')"
+                  label-for="equipment_branch_name"
+                >
+                  <BFormInput
+                    id="equipment_branch_name"
+                    size="sm"
+                    v-model="branch.name"
+                    readonly
+                  ></BFormInput>
+                </BFormGroup>
+              </b-col>
+              <b-col cols="4" role="group">
+                <BFormGroup
+                  label-size="sm"
+                  v-bind:label="$trans('Address')"
+                  label-for="equipment_branch_address"
+                >
+                  <BFormInput
+                    id="equipment_branch_address"
+                    size="sm"
+                    v-model="branch.address"
+                    readonly
+                  ></BFormInput>
+                </BFormGroup>
+              </b-col>
+              <b-col cols="2" role="group">
+                <BFormGroup
+                  label-size="sm"
+                  v-bind:label="$trans('City')"
+                  label-for="equipment_branch_city"
+                >
+                  <BFormInput
+                    id="equipment_branch_city"
+                    size="sm"
+                    v-model="branch.city"
+                    readonly
+                  ></BFormInput>
+                </BFormGroup>
+              </b-col>
+              <b-col cols="2" role="group">
+                <BFormGroup
+                  label-size="sm"
+                  v-bind:label="$trans('Country')"
+                  label-for="equipment_branch_country_code"
+                >
+                  <BFormInput
+                    id="equipment_branch_country_code"
+                    size="sm"
+                    v-model="branch.country_code"
+                    readonly
+                  ></BFormInput>
+                </BFormGroup>
+              </b-col>
+            </b-row>
 
             <BFormGroup
               label-size="sm"
@@ -483,6 +483,7 @@
           <div class="documents section">
             <DocumentsComponent
               :equipment="equipment"
+              ref="documents-component"
               :is-view="false"
             />
           </div>
@@ -491,14 +492,6 @@
     </div>
   </b-overlay>
 </template>
-
-<style scoped>
-.wide {
-  min-width: 66%;
-  max-width: unset !important;
-}
-</style>
-
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
@@ -685,7 +678,12 @@ export default {
 
       if (this.isCreate) {
         try {
-          await this.equipmentService.insert(this.equipment)
+          const newEquipment = await this.equipmentService.insert(this.equipment)
+
+          // document handling here is only needed when creating equipment
+          console.log('calling documents submit with id=', newEquipment.id)
+          await this.$refs['documents-component'].parentCreated(newEquipment.id)
+
           infoToast(this.create, $trans('Created'), $trans('Equipment has been created'))
           this.isLoading = false
 
@@ -769,3 +767,5 @@ export default {
   }
 }
 </script>
+<style scoped>
+</style>

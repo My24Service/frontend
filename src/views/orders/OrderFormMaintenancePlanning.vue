@@ -1675,7 +1675,7 @@ export default {
       this.order.infolines = processedInfolines
       errors = [...errors, ...infolineErrors]
 
-      // this document handling here is only needed when creating an order
+      // document handling here is only needed when creating an order
       if (this.isCreate) {
           const documentErrors = await this.$refs['documents-component'].orderCreated(this.order.id)
           errors = [...errors, ...documentErrors]

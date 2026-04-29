@@ -343,8 +343,12 @@ export default {
     async handleSearchOk(val) {
       this.$refs['search-modal'].hide()
       this.equipmentService.setSearchQuery(val)
+      const params = {
+        ...this.$route.query
+      }
+      delete params['q']
       const query = {
-        ...this.$route.query,
+        ...params,
         ...this.equipmentService.getQueryArgs()
       }
 

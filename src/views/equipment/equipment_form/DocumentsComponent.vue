@@ -58,7 +58,6 @@
             v-model="files"
             multiple
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
-            @input="filesSelected"
           ></b-form-file>
         </BFormGroup>
       </b-form>
@@ -70,9 +69,8 @@
           v-bind:label="$trans('Choose files')"
         >
           <b-form-file
-            v-model="documentService.editItem.file"
+            v-model="files"
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
-            @input="filesSelected"
           ></b-form-file>
         </BFormGroup>
 
@@ -133,7 +131,7 @@
     >
       <BButton
         @click="newDocument"
-        class="btn btn-primary update-button"
+        class="btn btn-primary"
         type="button"
         variant="primary"
       >
@@ -143,6 +141,7 @@
 
     <b-container
       v-if="showChangesBlock"
+      class="pt-4"
     >
       <b-row>
         <b-col cols="2"></b-col>
@@ -151,15 +150,18 @@
             @click="loadData"
             class="btn btn-secondary"
             type="button"
+            size="sm"
+            variant="secondary"
           >
             {{ $trans('Discard changes') }}
           </BButton>
           &nbsp;
           <BButton
             @click="submitDocuments"
-            class="btn btn-danger"
+            class="btn btn-primary"
             type="button"
-            variant="danger"
+            size="sm"
+            variant="primary"
           >
             {{ $trans('Save changes') }}
           </BButton>
@@ -170,22 +172,18 @@
 </template>
 
 <script>
+import {useToast} from "bootstrap-vue-next";
 
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
-import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
-import {EquipmentModel} from "@/models/equipment/equipment"
-
 import ApiResult from "@/components/ApiResult.vue";
-import {LocationModel} from "@/models/equipment/location";
-import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
 
 export default {
   setup() {
     const {create} = useToast()
 
-    // expose to template and other options API hooks
     return {
       create
     }
@@ -221,7 +219,6 @@ export default {
       fieldsView: [
         {key: 'name', label: $trans('Name')},
       ],
-      // documentService: new DocumentService(),
       documentService: this.location != null ? new LocationDocumentService() : new DocumentService(),
       isLocation: this.location != null,
       isEquipment: this.equipment != null,
@@ -253,9 +250,25 @@ export default {
       handler() {
         this.loadData()
       },
+    },
+    files(value) {
+      this.filesSelected(value)
     }
   },
   methods: {
+    $trans,
+    async parentCreated(pk) {
+      for (const document of this.documentService.collection) {
+        if (this.isLocation) {
+          document.location = pk
+        } else if (this.isEquipment) {
+          document.equipment = pk
+        } else {
+          throw new Error('no location or equipment set')
+        }
+      }
+      return await this.submitDocuments()
+    },
     getParentId() {
       if (this.isEquipment) return this.equipment.id
       else if (this.isLocation) return this.location.id
@@ -276,33 +289,19 @@ export default {
       this.newItem = true
     },
     deleteDocument(index) {
-      this.documentService.deleteCollectionItem(index)
       if (this.getParentId()) {
+        this.documentService.deleteCollectionItem(index)
         infoToast(this.create, $trans('Marked for delete'), $trans("Document marked for delete"))
       }
     },
     async loadData() {
-
-      if (this.equipment != null) {
-        if (this.equipment.documents) {
-          this.documentService.collection = this.equipment.documents;
-          return;
-        }
-      }
-      else if (this.location != null) {
-        if (this.location.documents) {
-          this.documentService.collection = this.location.documents;
-          return;
-        }
-      }
-
       if (!this.getParentId()) {
-        return;
+        console.warn('no parent id')
+        return
       }
 
       this.isLoading = true
-      this.documentService.setParentId( this.getParentId() );
-      //this.documentService.setListArgs(`equipment=${this.equipment.id}`)
+      this.documentService.setParentId( this.getParentId() )
 
       try {
         await this.documentService.loadCollection()
@@ -311,7 +310,7 @@ export default {
         }
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching documents', error)
+        console.error('error fetching documents', error)
         errorToast(this.create, $trans('Error loading documents'))
         this.isLoading = false
       }
@@ -363,16 +362,20 @@ export default {
         }
 
         if (this.isLocation) {
-          if (!this.location.id) {
-            documentErrors.push(`no location to update document: ${document.name}`)
-          } else {
-            document.location = this.location.id
+          if (!document.location) {
+            if (!this.location.id) {
+              documentErrors.push(`no location to create/update document: ${document.name}`)
+            } else {
+              document.location = this.location.id
+            }
           }
         } else if (this.isEquipment) {
-          if (!this.equipment.id) {
-            documentErrors.push(`no equipment to update document: ${document.name}`)
-          } else {
-            document.equipment = this.equipment.id
+          if (!document.equipment) {
+            if (!this.equipment.id) {
+              documentErrors.push(`no equipment to create/update document: ${document.name}`)
+            } else {
+              document.equipment = this.equipment.id
+            }
           }
         }
         else {
@@ -381,7 +384,7 @@ export default {
       }
 
       if (documentErrors.length > 0) {
-        console.log('no equipment/locations to update documents', documentErrors)
+        console.error('no equipment/locations to update documents', documentErrors)
         errorToast(this.create, $trans('Error updating documents (no equipment or location)'))
         return documentErrors
       }
@@ -407,7 +410,6 @@ export default {
       this.isLoading = false
       return errors
     },
-
   }
 }
 </script>
