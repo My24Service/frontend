@@ -264,16 +264,14 @@
                 </BFormGroup>
               </b-col>
             </b-row>
-
-            <div class="documents section" style="margin-top:2em">
+            <div class="documents section mt-2">
               <DocumentsComponent
+                ref="documents-component"
                 :location="location"
                 :is-view="false"
               />
             </div>
           </div>
-
-
         </b-form>
       </b-overlay>
     </div>
@@ -293,6 +291,7 @@ import { BuildingService } from "@/models/equipment/building";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   components: {
@@ -312,6 +311,7 @@ export default {
       default: null
     },
   },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
@@ -388,6 +388,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     // customers
     async getCustomers(query) {
       try {
@@ -444,7 +445,11 @@ export default {
 
       if (this.isCreate) {
         try {
-          await this.locationService.insert(this.location)
+          const newLocation = await this.locationService.insert(this.location)
+
+          // document handling here is only needed when creating equipment
+          await this.$refs['documents-component'].parentCreated(newLocation.id)
+
           infoToast(this.create, $trans('Created'), $trans('Location has been created'))
           this.buttonDisabled = false
           this.isLoading = false

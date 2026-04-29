@@ -3,9 +3,7 @@
    <h6>{{ $trans('Documents') }}</h6>
 
     <!-- list -->
-    <div
-      v-if="true"
-    >
+    <div v-if="!newItem">
       <p v-if="!documentService.collection.length">
         <i>{{ $trans("No documents") }}</i>
       </p>
@@ -43,7 +41,6 @@
           </b-col>
         </b-row>
       </b-container>
-
     </div>
 
     <!-- form -->
@@ -101,9 +98,8 @@
 
       <footer class="modal-footer">
         <BButton
-          :disabled="isLoading"
           @click="cancelEditDocument"
-          class="btn btn-secondary update-button"
+          class="m-2"
           type="button"
           size="sm"
           variant="secondary"
@@ -113,10 +109,9 @@
         <BButton
           v-if="documentService.isEdit"
           @click="doEditCollectionItem"
-          class="btn btn-primary"
           size="sm"
           type="button"
-          variant="warning"
+          variant="primary"
           :disabled="!isDocumentValid"
         >
           {{ $trans('Edit document') }}
@@ -124,20 +119,6 @@
       </footer>
 
     </div>
-
-    <footer
-      class="modal-footer"
-      v-if="!showForm && !isView"
-    >
-      <BButton
-        @click="newDocument"
-        class="btn btn-primary"
-        type="button"
-        variant="primary"
-      >
-        {{ $trans('Add document(s)') }}
-      </BButton>
-    </footer>
 
     <b-container
       v-if="showChangesBlock"
@@ -239,6 +220,10 @@ export default {
   },
   async created () {
     await this.loadData()
+    if (!this.isView && this.documentService.collection.length === 0) {
+      this.newDocument()
+      this.newItem = true
+    }
   },
   watch: {
     location: {

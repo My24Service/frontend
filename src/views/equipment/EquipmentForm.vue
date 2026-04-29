@@ -681,7 +681,6 @@ export default {
           const newEquipment = await this.equipmentService.insert(this.equipment)
 
           // document handling here is only needed when creating equipment
-          console.log('calling documents submit with id=', newEquipment.id)
           await this.$refs['documents-component'].parentCreated(newEquipment.id)
 
           infoToast(this.create, $trans('Created'), $trans('Equipment has been created'))
