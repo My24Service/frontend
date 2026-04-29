@@ -49,7 +49,9 @@
                     @select="selectPurchaseOrder"
                     :custom-label="purchaseOrderLabel"
                   >
-                    <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                    <template #noResult>
+                      {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                      </template>
                   </VueMultiselect>
                 </BFormGroup>
               </b-col>
@@ -180,7 +182,9 @@
                       @select="selectPurchaseOrderMaterial"
                       :custom-label="purchaseOrderMaterialLabel"
                     >
-                      <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                      <template #noResult>
+                        {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                        </template>
                     </VueMultiselect>
                     <b-form-invalid-feedback
                       :state="isSubmitClicked ? !v$.purchaseorderEntry.purchase_order_material.$error : null">

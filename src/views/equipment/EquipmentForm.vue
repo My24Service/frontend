@@ -58,7 +58,9 @@
                   @select="selectCustomer"
                   :custom-label="customerLabel"
                 >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  <template #noResult>
+                    {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                    </template>
                 </VueMultiselect>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.equipment.customer.$error : null">
@@ -96,7 +98,9 @@
                   @select="selectBranch"
                   :custom-label="branchLabel"
                 >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  <template #noResult>
+                    {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                    </template>
                 </VueMultiselect>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.equipment.branch.$error : null">

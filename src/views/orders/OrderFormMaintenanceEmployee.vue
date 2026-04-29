@@ -356,7 +356,7 @@
                   @select="selectEquipment"
                   :disabled="!equipmentFormSearchOk"
                 >
-                    <span slot="noResult">
+                    <template #noResult>
                       <h5>{{ $trans('No equipment found') }}</h5>
                       <p v-if="canQuickCreateEquipment">
                         <BButton
@@ -369,7 +369,7 @@
                           {{ $trans("Add new equipment") }}
                         </BButton>
                       </p>
-                    </span>
+                    </template>
                 </VueMultiselect>
 
                 <span>
@@ -406,7 +406,7 @@
                   @select="selectLocation"
                   :disabled="!equipmentFormSearchOk || locationSearchDisabled"
                 >
-                    <span slot="noResult">
+                    <template #noResult>
                       <h5>{{ $trans('No locations found') }}</h5>
                       <p v-if="canQuickCreateEquipmentLocation">
                         <BButton
@@ -419,7 +419,7 @@
                           {{ $trans("Add new location") }}
                         </BButton>
                       </p>
-                    </span>
+                    </template>
                 </VueMultiselect>
 
                 <span>

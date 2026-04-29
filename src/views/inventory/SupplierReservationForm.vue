@@ -51,7 +51,7 @@
                     @select="selectSupplier"
                     :custom-label="supplierLabel"
                   >
-                    <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                    <template #noResult>{{ $trans('Oops! No elements found. Consider changing the search query.') }}</template>
                   </VueMultiselect>
                 </BFormGroup>
 
@@ -164,7 +164,7 @@
                       @search-change="getMaterials"
                       @select="selectMaterial"
                     >
-                      <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                      <template #noResult>{{ $trans('Oops! No elements found. Consider changing the search query.') }}</template>
                     </VueMultiselect>
                     <b-form-invalid-feedback
                       :state="!v$.material.material.$error">

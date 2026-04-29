@@ -106,7 +106,9 @@
                   @select="selectSupplier"
                   label="name"
                 >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  <template #noResult>
+                    {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                    </template>
                 </VueMultiselect>
               </BFormGroup>
 
@@ -331,6 +333,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     imageSelected(file) {
       const reader = new FileReader()
       reader.onload = (f) => {

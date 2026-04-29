@@ -261,9 +261,9 @@
                     :loading="searchingEngineers"
                     @search-change="getEngineersDebounced"
                   >
-                    <span slot="noResult">
+                    <template #noResult>
                       {{ $trans('Oops! No elements found. Consider changing the search query.') }}
-                    </span>
+                    </template>
                   </VueMultiselect>
 
                 </BFormGroup>

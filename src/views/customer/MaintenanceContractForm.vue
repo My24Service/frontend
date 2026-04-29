@@ -91,7 +91,9 @@
                 :custom-label="customerLabel"
                 required
               >
-                <span slot="noResult">{{ $trans('No customers found. Consider changing the search query.') }}</span>
+                <template #noResult>
+                  {{ $trans('No customers found. Consider changing the search query.') }}
+                </template>
               </VueMultiselect>
               <b-form-invalid-feedback
                 :state="!v$.maintenanceContractService.editItem.customer.$error">
@@ -194,7 +196,7 @@
                       @search-change="getEquipmentDebounced"
                       @select="selectEquipment"
                     >
-                      <span slot="noResult">
+                      <template #noResult>
                         <p>
                           <IBiInfoSquare variant="primary"></IBiInfoSquare>
                           {{ $trans('No equipment found. Consider changing the search query, or add a new equipment:')}}
@@ -210,7 +212,7 @@
                             {{ $trans("Add equipment") }}
                           </BButton>
                         </p>
-                      </span>
+                      </template>
                     </VueMultiselect>
                   </BFormGroup>
                 </b-col>

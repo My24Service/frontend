@@ -35,7 +35,7 @@
                   @select="selectCustomer"
                   :custom-label="customerLabel"
                 >
-                  <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+                  <template #noResult>{{ $trans('Nothing found.') }}</template>
                 </VueMultiselect>
               </BFormGroup>
             </b-col>

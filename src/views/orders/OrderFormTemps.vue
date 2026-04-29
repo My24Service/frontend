@@ -30,7 +30,7 @@
                 @select="selectCustomer"
                 :custom-label="customerLabel"
               >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                <template #noResult>{{ $trans('Oops! No elements found. Consider changing the search query.') }}</template>
               </VueMultiselect>
             </BFormGroup>
           </b-col>
@@ -582,6 +582,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     // order lines
     deleteOrderLine(index) {
       this.deletedOrderlines.push(this.order.orderlines[index])

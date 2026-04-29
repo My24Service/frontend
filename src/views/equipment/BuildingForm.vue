@@ -33,7 +33,9 @@
                 @select="selectCustomer"
                 :custom-label="customerLabel"
               >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                <template #noResult>
+                  {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                  </template>
               </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.building.customer.$error : null">
@@ -71,7 +73,9 @@
                 @select="selectBranch"
                 :custom-label="branchLabel"
               >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                <template #noResult>
+                  {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                  </template>
               </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.building.branch.$error : null">
@@ -344,6 +348,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     // customers
     async getCustomers(query) {
       try {

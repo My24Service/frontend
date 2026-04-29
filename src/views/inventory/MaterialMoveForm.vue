@@ -90,7 +90,9 @@
                   :custom-label="materialLabel"
                   ref="searchMaterial"
                   >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                <template #noResult>
+                  {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                  </template>
               </VueMultiselect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.selectedMaterialPk.$error : null">
@@ -136,7 +138,9 @@
               @select="selectFromLocation"
               :custom-label="fromLocationLabel"
             >
-              <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+              <template #noResult>
+                {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                </template>
             </VueMultiselect>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.selectedFromLocationPk.$error : null">
@@ -184,7 +188,9 @@
               @select="selectToLocation"
               :custom-label="toLocationLabel"
             >
-              <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+              <template #noResult>
+                {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                </template>
             </VueMultiselect>
             <b-form-invalid-feedback
               :state="isSubmitClicked ? !v$.selectedToLocationPk.$error : null">
@@ -281,6 +287,7 @@ export default {
     this.getMaterials('')
   },
   methods: {
+    $trans,
     selectMaterial(option) {
       this.selectedMaterial = option
       this.selectedMaterialPk = option.material_id

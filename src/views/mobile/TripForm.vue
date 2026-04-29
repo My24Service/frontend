@@ -415,7 +415,7 @@
                 @select="selectOrder"
                 :custom-label="orderLabel"
               >
-                <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                <template #noResult>{{ $trans('Oops! No elements found. Consider changing the search query.') }}</template>
               </VueMultiselect>
             </BFormGroup>
           </b-col>

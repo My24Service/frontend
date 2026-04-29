@@ -1,59 +1,59 @@
 <template>
+  <b-modal
+    id="new-equipment-modal"
+    ref="new-equipment-modal"
+    v-bind:title="$trans('New equipment')"
+    @ok="submitCreateEquipment"
+    @cancel="cancelCreateEquipment"
+  >
+    <form ref="maintenance_equipment_new_equipment-form" @submit.stop.prevent="submitCreateEquipment">
+      <b-container fluid="md">
+        <b-row role="group">
+          <b-col size="12">
+            <BFormGroup
+              v-bind:label="$trans('Equipment name')"
+              label-for="maintenance_equipment_new_equipment"
+            >
+              <BFormInput
+                id="maintenance_equipment_new_equipment"
+
+                v-model="newEquipmentName"
+              ></BFormInput>
+            </BFormGroup>
+          </b-col>
+        </b-row>
+      </b-container>
+    </form>
+  </b-modal>
+
+  <b-modal
+    id="new-location-modal"
+    ref="new-location-modal"
+    v-bind:title="$trans('New location')"
+    @ok="submitCreateLocation"
+    @cancel="cancelCreateLocation"
+  >
+    <form ref="new_location-form" @submit.stop.prevent="submitCreateLocation">
+      <b-container fluid>
+        <b-row role="group">
+          <b-col size="12">
+            <BFormGroup
+              v-bind:label="$trans('Location name')"
+              label-for="new_location"
+            >
+              <BFormInput
+                id="new_location"
+
+                v-model="newLocationName"
+              ></BFormInput>
+            </BFormGroup>
+          </b-col>
+        </b-row>
+      </b-container>
+    </form>
+  </b-modal>
+
   <div class="app-page" v-if="order">
-    <b-modal
-      id="new-equipment-modal"
-      ref="new-equipment-modal"
-      v-bind:title="$trans('New equipment')"
-      @ok="submitCreateEquipment"
-      @cancel="cancelCreateEquipment"
-    >
-      <form ref="maintenance_equipment_new_equipment-form" @submit.stop.prevent="submitCreateEquipment">
-        <b-container fluid="md">
-          <b-row role="group">
-            <b-col size="12">
-              <BFormGroup
-                v-bind:label="$trans('Equipment name')"
-                label-for="maintenance_equipment_new_equipment"
-              >
-                <BFormInput
-                  id="maintenance_equipment_new_equipment"
-
-                  v-model="newEquipmentName"
-                ></BFormInput>
-              </BFormGroup>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
-
-    <b-modal
-      id="new-location-modal"
-      ref="new-location-modal"
-      v-bind:title="$trans('New location')"
-      @ok="submitCreateLocation"
-      @cancel="cancelCreateLocation"
-    >
-      <form ref="new_location-form" @submit.stop.prevent="submitCreateLocation">
-        <b-container fluid>
-          <b-row role="group">
-            <b-col size="12">
-              <BFormGroup
-                v-bind:label="$trans('Location name')"
-                label-for="new_location"
-              >
-                <BFormInput
-                  id="new_location"
-
-                  v-model="newLocationName"
-                ></BFormInput>
-              </BFormGroup>
-            </b-col>
-          </b-row>
-        </b-container>
-      </form>
-    </b-modal>
-
     <header>
       <div class="page-title">
         <h3 v-if="!pk">
@@ -150,7 +150,7 @@
               @select="selectCustomer"
               :custom-label="customerLabel"
             >
-              <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+              <template #noResult>{{ $trans('Nothing found.') }}</template>
             </VueMultiselect>
           </BFormGroup>
 
@@ -177,7 +177,7 @@
               @select="selectBranch"
               :custom-label="branchLabel"
             >
-              <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+              <template #noResult>{{ $trans('Nothing found.') }}</template>
             </VueMultiselect>
           </BFormGroup>
 
@@ -549,7 +549,7 @@
                 :custom-label="engineerLabel"
                 @search-change="getEngineersDebounced"
                 >
-                <span slot="noResult">{{ $trans('Nothing found.') }}</span>
+                <template #noResult>{{ $trans('Nothing found.') }}</template>
               </VueMultiselect>
             </BFormGroup>
             <div v-if="assignResult.length > 0">
@@ -617,9 +617,9 @@
               :loading="searchingSalesUsers"
               @search-change="getSalesUserDebounced"
             >
-              <span slot="noResult">
+              <template #noResult>
                 {{ $trans('Oops! No elements found. Consider changing the search query.') }}
-              </span>
+              </template>
             </VueMultiselect>
           </BFormGroup>
         </div>
@@ -705,7 +705,7 @@
                     @select="selectEquipment"
                     :disabled="!equipmentFormSearchOk"
                   >
-                    <span slot="noResult">
+                    <template #noResult>
                       <h5>{{ $trans('No equipment found') }}</h5>
                       <p v-if="canQuickCreateEquipment">
                         <BButton
@@ -718,7 +718,7 @@
                           {{ $trans("Add new equipment") }}
                         </BButton>
                       </p>
-                    </span>
+                    </template>
                   </VueMultiselect>
 
                   <span>
@@ -755,7 +755,7 @@
                     @select="selectLocation"
                     :disabled="!equipmentFormSearchOk || locationSearchDisabled"
                   >
-                    <span slot="noResult">
+                    <template #noResult>
                       <h5>{{ $trans('No locations found') }}</h5>
                       <p v-if="canQuickCreateEquipmentLocation">
                         <BButton
@@ -768,7 +768,7 @@
                           {{ $trans("Add new location") }}
                         </BButton>
                       </p>
-                    </span>
+                    </template>
                   </VueMultiselect>
 
                   <span>
@@ -959,7 +959,6 @@ import {QuotationService} from '@/models/quotations/Quotation'
 import {LocationService} from "@/models/equipment/location";
 import {OrderlineService} from "@/models/orders/Orderline";
 import {InfolineService} from "@/models/orders/Infoline";
-import CustomerCard from '@/components/CustomerCard'
 import {EngineerService} from "@/models/company/UserEngineer";
 import DocumentsComponent from "./order_form/DocumentsComponent.vue";
 import ApiResult from "@/components/ApiResult";
@@ -1198,9 +1197,11 @@ export default {
   },
   computed: {
     canQuickCreateEquipment() {
+      console.log('hoi', this.mainStore.getSettingEquipmentPlanningQuickCreate)
       return this.mainStore.getSettingEquipmentPlanningQuickCreate
     },
     canQuickCreateEquipmentLocation() {
+      console.log('hoi', this.mainStore.getSettingEquipmentLocationPlanningQuickCreate)
       return this.mainStore.getSettingEquipmentLocationPlanningQuickCreate
     },
     equipmentFormSearchOk() {

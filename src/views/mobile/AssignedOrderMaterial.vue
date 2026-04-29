@@ -44,7 +44,7 @@
                   @select="selectAssignedOrder"
                   :custom-label="assignedOrderLabel"
                 >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  <template #noResult>{{ $trans('Oops! No elements found. Consider changing the search query.') }}</template>
                 </VueMultiselect>
               </BFormGroup>
             </b-col>
@@ -89,7 +89,7 @@
                   @select="selectLocation"
                   :custom-label="locationLabel"
                 >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  <template #noResult>{{ $trans('Oops! No elements found. Consider changing the search query.') }}</template>
                 </VueMultiselect>
               </BFormGroup>
             </b-col>
@@ -138,7 +138,7 @@
                   @select="selectMaterial"
                   :custom-label="materialLabel"
                 >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  <template #noResult>{{ $trans('Oops! No elements found. Consider changing the search query.') }}</template>
                 </VueMultiselect>
               </BFormGroup>
             </b-col>

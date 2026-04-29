@@ -38,7 +38,9 @@
                   @select="selectMember"
                   :custom-label="memberLabel"
                 >
-                  <span slot="noResult">{{ $trans('Oops! No elements found. Consider changing the search query.') }}</span>
+                  <template #noResult>
+                    {{ $trans('Oops! No elements found. Consider changing the search query.') }}
+                  </template>
                 </VueMultiselect>
               </BFormGroup>
 
