@@ -472,8 +472,8 @@ export default {
   },
   props: {
     assignModeProp: {
-      type: [Boolean],
-      default: false
+      type: [String],
+      default: "false"
     },
   },
   data() {
@@ -819,7 +819,7 @@ export default {
     this.startDate = this.$moment().weekday(monday).toDate()
     this.startWeek = this.$moment(this.startDate).format('w')
 
-    this.assignMode = this.assignModeProp
+    this.assignMode = JSON.parse(this.assignModeProp)
 
     if (this.assignMode) {
       this.alreadyAssignedUsers = []

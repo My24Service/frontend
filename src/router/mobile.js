@@ -24,7 +24,7 @@ export default [
   children: [
       {
         name: 'mobile-dispatch',
-        path: '/mobile/dispatch',
+        path: '/mobile/dispatch/:assignModeProp?',
         components: {
           'app-content': Dispatch,
           'app-subnav': SubNavMobile

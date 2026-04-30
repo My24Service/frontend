@@ -1,4 +1,115 @@
 <template>
+
+  <b-modal
+    v-if="purchaseInvoice && hasBranches"
+    id="delete-purchase-invoice-modal"
+    ref="delete-purchase-invoice-modal"
+    v-bind:title="$trans('Delete?')"
+    @ok="doDeletePurchaseInvoice"
+  >
+    <p class="my-4">{{ $trans('Are you sure you want to delete this purchase invoice?') }}</p>
+  </b-modal>
+
+  <b-modal
+    v-if="purchaseInvoice && hasBranches"
+    id="add-purchase-invoice-modal"
+    ref="add-purchase-invoice-modal"
+    v-bind:title="$trans('Add purchase invoice')"
+    @ok="doAddPurchaseInvoice"
+  >
+    <form ref="add-purchase-invoice-form">
+      <b-container>
+        <b-row>
+          <b-col cols="6">
+            <BFormGroup
+              v-bind:label="$trans('VAT')"
+              label-for="add-purchase-invoice-vat"
+            >
+              <PriceInput
+                id="add-purchase-invoice-vat"
+                v-model="purchaseInvoice.vat"
+                :currency="purchaseInvoice.vat_currency"
+                @priceChanged="(val) => vatChanged(val)"
+              />
+            </BFormGroup>
+          </b-col>
+          <b-col cols="6">
+            <BFormGroup
+              v-bind:label="$trans('Total')"
+              label-for="add-purchase-invoice-total"
+            >
+              <PriceInput
+                id="add-purchase-invoice-total"
+                v-model="purchaseInvoice.total"
+                :currency="purchaseInvoice.total_currency"
+                @priceChanged="(val) => totalChanged(val)"
+              />
+            </BFormGroup>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col cols="4">
+            <BFormGroup
+              v-bind:label="$trans('Reference')"
+              label-for="add-purchase-invoice-reference"
+            >
+              <BFormInput
+                size="sm"
+                id="add-purchase-invoice-reference"
+                v-model="purchaseInvoice.reference"
+              ></BFormInput>
+            </BFormGroup>
+          </b-col>
+          <b-col cols="8">
+            <BFormGroup
+              v-bind:label="$trans('Description')"
+              label-for="add-purchase-invoice-description"
+            >
+              <BFormTextarea
+                id="add-purchase-invoice-description"
+                v-model="purchaseInvoice.description"
+                rows="1"
+              ></BFormTextarea>
+            </BFormGroup>
+          </b-col>
+        </b-row>
+      </b-container>
+    </form>
+  </b-modal>
+
+  <b-modal ref="workorder-viewer" size="xl" v-b-modal.modal-scrollable>
+    <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
+      <b-spinner medium></b-spinner>
+    </div>
+    <iframe :src="this.workorderURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
+
+    <template #modal-footer="{ ok }">
+      <BButton class="btn button btn-secondary" @click="openWorkorder()" target="_blank">
+        {{ $trans('Open in a new tab') }}
+      </BButton>
+      <BButton
+        v-if="!past && !isCustomer && !isBranchEmployee"
+        id="recreateWorkorderPdfButtonGotenberg"
+        @click="recreateWorkorderPdfGotenberg"
+        :disabled="buttonDisabled"
+        class="btn btn-secondary"
+        type="button"
+        variant="secondary"
+      >
+        <b-spinner small v-if="isGeneratingPDF"></b-spinner>
+        {{ $trans('re-generate PDF') }}
+
+      </BButton>
+      <BLink class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+        <IBiFileEarmarkPdf></IBiFileEarmarkPdf>{{ $trans('Download PDF') }}
+      </BLink>
+      <!-- Emulate built in modal footer ok and cancel button actions -->
+      <BButton @click="ok()" variant="primary">
+        {{ $trans("close") }}
+      </BButton>
+    </template>
+  </b-modal>
+
   <div class="app-page" v-if="order">
     <header>
       <div class="page-title">
@@ -335,115 +446,6 @@
         </div>
       </div>
 
-      <b-modal
-        v-if="purchaseInvoice && hasBranches"
-        id="delete-purchase-invoice-modal"
-        ref="delete-purchase-invoice-modal"
-        v-bind:title="$trans('Delete?')"
-        @ok="doDeletePurchaseInvoice"
-        >
-        <p class="my-4">{{ $trans('Are you sure you want to delete this purchase invoice?') }}</p>
-      </b-modal>
-
-      <b-modal
-        v-if="purchaseInvoice && hasBranches"
-        id="add-purchase-invoice-modal"
-        ref="add-purchase-invoice-modal"
-        v-bind:title="$trans('Add purchase invoice')"
-        @ok="doAddPurchaseInvoice"
-      >
-        <form ref="add-purchase-invoice-form">
-          <b-container>
-            <b-row>
-              <b-col cols="6">
-                <BFormGroup
-                  v-bind:label="$trans('VAT')"
-                  label-for="add-purchase-invoice-vat"
-                >
-                  <PriceInput
-                    id="add-purchase-invoice-vat"
-                    v-model="purchaseInvoice.vat"
-                    :currency="purchaseInvoice.vat_currency"
-                    @priceChanged="(val) => vatChanged(val)"
-                  />
-                </BFormGroup>
-              </b-col>
-              <b-col cols="6">
-                <BFormGroup
-                  v-bind:label="$trans('Total')"
-                  label-for="add-purchase-invoice-total"
-                >
-                  <PriceInput
-                    id="add-purchase-invoice-total"
-                    v-model="purchaseInvoice.total"
-                    :currency="purchaseInvoice.total_currency"
-                    @priceChanged="(val) => totalChanged(val)"
-                  />
-                </BFormGroup>
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="4">
-                <BFormGroup
-                  v-bind:label="$trans('Reference')"
-                  label-for="add-purchase-invoice-reference"
-                >
-                  <BFormInput
-                    size="sm"
-                    id="add-purchase-invoice-reference"
-                    v-model="purchaseInvoice.reference"
-                  ></BFormInput>
-                </BFormGroup>
-              </b-col>
-              <b-col cols="8">
-                <BFormGroup
-                  v-bind:label="$trans('Description')"
-                  label-for="add-purchase-invoice-description"
-                >
-                  <BFormTextarea
-                    id="add-purchase-invoice-description"
-                    v-model="purchaseInvoice.description"
-                    rows="1"
-                  ></BFormTextarea>
-                </BFormGroup>
-              </b-col>
-            </b-row>
-          </b-container>
-        </form>
-      </b-modal>
-
-      <b-modal ref="workorder-viewer" size="xl" v-b-modal.modal-scrollable>
-        <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
-          <b-spinner medium></b-spinner>
-        </div>
-        <iframe :src="this.workorderURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
-
-        <template #modal-footer="{ ok }">
-          <BButton class="btn button btn-secondary" @click="openWorkorder()" target="_blank">
-              {{ $trans('Open in a new tab') }}
-          </BButton>
-          <BButton
-            v-if="!past && !isCustomer && !isBranchEmployee"
-            id="recreateWorkorderPdfButtonGotenberg"
-            @click="recreateWorkorderPdfGotenberg"
-            :disabled="buttonDisabled"
-            class="btn btn-secondary"
-            type="button"
-            variant="secondary"
-          >
-          <b-spinner small v-if="isGeneratingPDF"></b-spinner>
-          {{ $trans('re-generate PDF') }}
-
-          </BButton>
-          <BLink class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
-            <IBiFileEarmarkPdf></IBiFileEarmarkPdf>{{ $trans('Download PDF') }}
-          </BLink>
-          <!-- Emulate built in modal footer ok and cancel button actions -->
-          <BButton @click="ok()" variant="primary">
-            {{ $trans("close") }}
-          </BButton>
-        </template>
-      </b-modal>
     </div>
   </div>
 </template>
@@ -530,6 +532,7 @@ export default {
     },
   },
   methods: {
+    $trans,
     iframeLoaded() {
         this.iframeLoading = false;
     },

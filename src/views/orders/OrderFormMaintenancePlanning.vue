@@ -888,7 +888,7 @@
                 </b-col>
                 <b-col cols="3">
                   <div class="float-right">
-                    <BLink class="h5 mx-2" @click="editInfoLine(infoline, index)">
+                    <BLink class="h5 mx-2" @click.prevent="editInfoLine(infoline, index)">
                       <IBiPencil></IBiPencil>
                     </BLink>
                     <BLink class="h5 mx-2" @click.prevent="deleteInfoLine(index)">
