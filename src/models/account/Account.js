@@ -1,8 +1,6 @@
 import BaseModel from '@/models/base'
-import my24 from '@/services/my24'
 
-
-class Account extends BaseModel {
+class AccountService extends BaseModel {
   fields = {
   }
 
@@ -13,35 +11,6 @@ class Account extends BaseModel {
     bodyFormData.append('language', language)
 
     return this.axios.post('/set-language/', bodyFormData, {withCredentials:true})
-  }
-
-  async login(username, password) {
-    const token = await this.getCsrfToken()
-    const headers = this.getHeaders(token)
-    const url = '/jwt-token/'
-
-    const postData = {
-      username: username,
-      password: password,
-      app: 'web'
-    }
-
-    return this.axios.post(url, postData, headers).then((response) => response.data)
-  }
-
-  refreshToken(token) {
-    const headers = this.getHeaders()
-    const url = '/jwt-token/refresh/'
-
-    const postData = {
-      token,
-    }
-
-    return this.axios.post(url, postData, headers).then((response) => response.data)
-  }
-
-  getUserDetails() {
-    return this.axios.get('/company/user-info-me/').then(response => response.data)
   }
 
   async sendResetPasswordLink(idField, isRegistration=false) {
@@ -88,12 +57,6 @@ class Account extends BaseModel {
 
     return this.axios.post('/change-password/', data, headers).then((response) => response.data)
   }
-
-  getUserInfo(pk) {
-    return this.axios.get(`/company/user-info/${pk}/`).then(response => response.data)
-  }
 }
 
-let accountModel = new Account()
-
-export default accountModel
+export {AccountService}

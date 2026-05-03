@@ -11,53 +11,56 @@
       @ok="handleOk"
     >
       <form ref="password-change-form" @submit.stop.prevent="doPasswordChange">
-        <b-form-group
+        <BFormGroup
           v-bind:label="$trans('Old password')"
           label-for="old-password-input"
         >
-          <b-form-input
-            autofocus
+          <BFormInput
+            :autofocus="true"
             id="old-password-input"
             v-model="old_password"
             type="password"
+            autocomplete="false"
             :state="isSubmitClicked ? !v$.old_password.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.old_password.$error : null">
             {{ $trans('Please enter your old password') }}
           </b-form-invalid-feedback>
-        </b-form-group>
-        <b-form-group
+        </BFormGroup>
+        <BFormGroup
           v-bind:label="$trans('New password')"
           label-for="new-password1-input"
         >
-          <b-form-input
+          <BFormInput
             id="new-password1-input"
             type="password"
+            autocomplete="false"
             v-model="new_password1"
             :state="isSubmitClicked ? !v$.new_password1.$error : null"
-          ></b-form-input>
-          <password v-model="new_password1" :strength-meter-only="true"/>
+          ></BFormInput>
+          <password-meter :password="new_password1" />
           <b-form-invalid-feedback
             :state="isSubmitClicked ? !v$.new_password1.$error : null">
             {{ $trans('Please enter a new password') }}
           </b-form-invalid-feedback>
-        </b-form-group>
-        <b-form-group
+        </BFormGroup>
+        <BFormGroup
           v-bind:label="$trans('Password again')"
           label-for="new-password2-input"
         >
-          <b-form-input
+          <BFormInput
             id="new-password2-input"
             type="password"
+            autocomplete="false"
             v-model="new_password2"
             :state="isSubmitClicked ? !v$.new_password2.$error : null"
-          ></b-form-input>
+          ></BFormInput>
           <b-form-invalid-feedback
             :state="isSubmitClicked ? v$.new_password2.sameAs.$invalid : null">
             {{ $trans('Passwords do not match') }}
           </b-form-invalid-feedback>
-        </b-form-group>
+        </BFormGroup>
       </form>
       {{ v$.new_password2.sameAs }}
     </b-modal>
@@ -76,29 +79,32 @@
     id="lang-modal"
     ref="lang-modal"
     v-bind:title="$trans('Change language')"
-    ok-disabled
+    :ok-disabled="true"
     >
       <template #modal-footer>
-        <b-button
+        <BButton
           variant="secondary"
           size="sm"
           class="float-right"
           @click="$bvModal.hide('lang-modal')"
         >
           {{ $trans('Close') }}
-        </b-button>
+        </BButton>
       </template>
       <TheLanguageChooser />
   </b-modal>
 
     <nav class="app-sidebar">
-      <NavBrand />
+      <NavBrand
+        v-if="memberInfo"
+        :member-info="memberInfo"
+      />
       <NavItems />
       <hr />
-      <b-nav-item-dropdown dropup v-bind:text="username" right>
+      <b-nav-item-dropdown dropup :text="getUsername" right v-if="userInfo.user">
         <template slot="button-content">
-          <b-icon icon="person-circle"></b-icon>
-          <span>{{ username }}</span>
+          <IBiPersonCircle></IBiPersonCircle>
+          <span>{{ getUsername }}</span>
         </template>
         <li style="text-align: center;">
           {{ memberInfo.name }}
@@ -116,14 +122,13 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs } from '@vuelidate/validators'
-import Password from 'vue-password-strength-meter'
 
-import accountModel from '../models/account/Account.js'
-import { componentMixin } from '../utils.js'
+import {AccountService} from '@/models/account/Account'
+
 import userSocket from '../services/websocket/UserSocket.js'
 import memberSocket from '../services/websocket/MemberSocket.js'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket.js'
-import {NEW_DATA_EVENTS} from "../constants";
+import {NEW_DATA_EVENTS} from "@/constants";
 
 import TheLanguageChooser from "../components/TheLanguageChooser.vue"
 import Version from "../components/Version.vue"
@@ -131,17 +136,34 @@ import NavItems from "../components/NavItems.vue"
 import NavBrand from "../components/NavBrand.vue"
 import Notification from '../components/Notification'
 import TokenRefresh from '../components/TokenRefresh'
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
+import {useMainStore} from "@/stores/main";
+import {useAuthStore} from "@/stores/auth";
+import {computed} from "vue";
+import PasswordMeter from "vue-simple-password-meter";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const mainStore = useMainStore()
+    const authStore = useAuthStore()
+    const memberInfo = computed(() => mainStore.memberInfo);
+    const userInfo = computed(() => authStore.userInfo);
+
+    return {
+      v$: useVuelidate(),
+      mainStore,
+      authStore,
+      memberInfo,
+      userInfo
+    }
   },
   mixins: [componentMixin],
   components: {
+    PasswordMeter,
     TheLanguageChooser,
     NavItems,
     NavBrand,
-    Password,
     Version,
     Notification,
     TokenRefresh,
@@ -163,17 +185,20 @@ export default {
   computed: {
     isSubmitClicked() {
       return this.submitClicked
+    },
+    getUsername() {
+      return this.authStore.getUserName
     }
   },
   data() {
     return {
-      memberInfo: this.$store.state.memberInfo,
       memberNewDataSocket: new MemberNewDataSocket(),
       old_password: null,
       new_password1: null,
       new_password2: null,
       buttonDisabled: false,
       submitClicked: false,
+      accountService: new AccountService()
     }
   },
   methods: {
@@ -202,24 +227,23 @@ export default {
       this.isLoading = true
 
       try {
-        await accountModel.changePassword(this.old_password, this.new_password1)
-        this.infoToast(this.$trans('Password changed'), this.$trans('Your password is changed'))
-        this.$refs['password-change-modal'].hide()
+        await this.accountService.changePassword(this.old_password, this.new_password1)
+        infoToast(this.create, this.$trans('Password changed'), this.$trans('Your password is changed'))
+        await this.$refs['password-change-modal'].hide()
       } catch(error) {
         console.log(error)
-        this.errorToast(this.$trans('Error changing your password'))
+        errorToast(this.create, this.$trans('Error changing your password'))
       }
     },
     logout() {
       this.$refs['logout-modal'].show()
     },
     async doLogout() {
-      // do logout
       let loader = this.$loading.show()
 
       try {
-        this.$auth.logout(false)
-        await this.$store.dispatch('getInitialData')
+        this.authStore.logout();
+        await this.mainStore.getInitialData()
 
         loader.hide()
 
@@ -245,16 +269,17 @@ export default {
       } catch (error) {
         console.log(error)
         loader.hide()
-        this.errorToast(this.$trans('Error logging you out'))
+        errorToast(this.create, this.$trans('Error logging you out'))
       }
     },
     onContractChange(data) {
       if (data.type === NEW_DATA_EVENTS.CONTRACT) {
-        this.$store.dispatch('getInitialData')
+        this.mainStore.getInitialData()
       }
     },
   },
   async created() {
+    await this.mainStore.checkInitialData()
     await this.memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
     this.memberNewDataSocket.setOnmessageHandler(this.onContractChange)
     this.memberNewDataSocket.getSocket()

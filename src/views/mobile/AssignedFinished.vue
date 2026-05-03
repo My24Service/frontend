@@ -10,22 +10,22 @@
     <div class="panel overflow-auto">
       <b-row>
         <b-col cols="2">
-          <b-link class="px-1" @click.prevent="backMonth" v-bind:title="$trans('Month back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          <BLink class="px-1" @click.prevent="backMonth" v-bind:title="$trans('Month back')">
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
+          </BLink>
         </b-col>
         <b-col cols="8">
           {{ $trans('Assigned finished') }} {{ monthText}} {{ year }}
         </b-col>
         <b-col cols="2">
           <div class="float-right">
-            <b-link class="px-1" @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            <BLink class="px-1" @click.prevent="nextMonth" v-bind:title="$trans('Next month') ">
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
+            </BLink>
           </div>
         </b-col>
       </b-row>
-      
+
       <b-table
         id="assigned-finished-table"
         small
@@ -37,8 +37,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
@@ -46,8 +46,8 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>
@@ -84,8 +84,23 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
+  mixins: [componentMixin],
   name: "AssignedFinished",
   components: {
     ButtonLinkRefresh,
@@ -126,7 +141,7 @@ export default {
   },
   created() {
     // moment
-    const lang = this.$store.getters.getCurrentLanguage
+    const lang = this.mainStore.getCurrentLanguage
     this.$moment = moment
     this.$moment.locale(lang)
 
@@ -188,7 +203,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching assigned orders', error)
-        this.errorToast(this.$trans('Error loading orders'))
+        errorToast(this.create, this.$trans('Error loading orders'))
         this.isLoading = false
       }
     }

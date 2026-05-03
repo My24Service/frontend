@@ -12,7 +12,7 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon-receipt-cutoff></b-icon-receipt-cutoff>
+            <IBiReceiptCutoff></IBiReceiptCutoff>
               <router-link
               :to="{name: 'invoice-list' }"
             >{{ $trans('Invoices') }}</router-link>
@@ -20,32 +20,31 @@
             <span v-if="!isEdit">{{ $trans('New invoice') }} / {{ $trans('order') }} {{ order_id }}</span>
             <span v-if="isEdit">{{ $trans('Update invoice') }} / {{ $trans('order') }} {{ order_id }}</span>
             <span v-if="isEdit">
-              <b-link
+              <BLink
                 class="btn btn-sm btn-primary"
                 @click.prevent="showInvoiceDialog"
                 target="_blank"
               >
-                <b-icon icon="file-earmark"></b-icon>
+                <IBiFileEarmark></IBiFileEarmark>
                 {{ $trans('View Invoice') }}
-              </b-link>
+              </BLink>
             </span>
             <span>
               <router-link
                 v-if="order_pk"
                 class="btn btn-sm btn-primary"
                 :to="{name:'order-view', params: {pk: order_pk}}">
-                <b-icon-arrow-up-right-circle
-                ></b-icon-arrow-up-right-circle>
+                <IBiArrowUpRightCircle></IBiArrowUpRightCircle>
                 {{ $trans('Order') }}
               </router-link>
             </span>
           </h3>
-          <b-button-toolbar>
-            <b-button @click="cancelForm" type="button" variant="outline">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button @click="submitForm" type="button" variant="primary">
-              {{ $trans('Save') }}</b-button>
-          </b-button-toolbar>
+          <BButton-toolbar>
+            <BButton @click="cancelForm" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton @click="submitForm" type="button" variant="primary">
+              {{ $trans('Save') }}</BButton>
+          </BButton-toolbar>
         </div>
       </header>
 
@@ -62,32 +61,32 @@
             <hr />
 
             <h6>{{ $trans('Invoice data')}}</h6>
-            <b-form-group
+            <BFormGroup
               v-bind:label="$trans('ID')"
               label-for="invoice_id"
               label-cols="5"
             >
-              <b-form-input
+              <BFormInput
                 disabled
                 v-model="invoice.invoice_id"
                 id="invoice_id"
                 size="sm"
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
+              ></BFormInput>
+            </BFormGroup>
+            <BFormGroup
               label-cols="5"
               v-bind:label="$trans('Reference')"
               label-for="invoice_reference"
             >
-              <b-form-input
+              <BFormInput
                 v-model="invoice.reference"
                 id="invoice_reference"
                 size="sm"
-              ></b-form-input>
-            </b-form-group>
+              ></BFormInput>
+            </BFormGroup>
 
 
-            <b-form-group
+            <BFormGroup
 
               label-cols="5"
               v-bind:label="$trans('Term of payment')"
@@ -95,13 +94,13 @@
             >
               <b-input-group>
 
-                <b-form-input
+                <BFormInput
                 id="invoice_term_of_payment_days"
 
                 v-model="invoice.term_of_payment_days"
                 type="number"
                 >
-                </b-form-input>
+                </BFormInput>
                 <template #append>
                   <b-input-group-text
                   >
@@ -109,19 +108,19 @@
                   </b-input-group-text>
                 </template>
               </b-input-group>
-            </b-form-group>
+            </BFormGroup>
 
-            <b-form-group
+            <BFormGroup
               label-cols="5"
               v-bind:label="$trans('Description')"
               label-for="invoice_description"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="invoice_description"
                 v-model="invoice.description"
                 rows="1"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
 
             <hr />
 
@@ -149,7 +148,7 @@
           <details>
             <summary class="flex-columns space-between">
               <h6>{{ $trans('Manage prices') }}</h6>
-              <b-icon-chevron-down></b-icon-chevron-down>
+              <IBiChevronDown></IBiChevronDown>
             </summary>
             <b-container fluid>
               <h5>{{ $trans("Materials") }}</h5>
@@ -192,38 +191,52 @@
                 </b-col>
                 <b-col cols="1">
                   <p class="flex">
-                    <b-button
+                    <BButton
+                      v-if="!hasTeamleader"
                       :disabled="materialUpdating"
-                      @click="() => { updateMaterial(material.id) }"
-                      class="btn update-button"
+                      @click="() => updateMaterial(material.id)"
+                      class="btn"
                       size="sm"
                       type="button"
-                      variant=""
+                      variant="primary"
                       :title="$trans('This will update the API')"
                     >
                       <b-spinner small v-if="materialUpdating"></b-spinner>
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
+                    <BButton
+                      v-if="hasTeamleader"
+                      :disabled="materialUpdating"
+                      @click="() => openProductChooserTlModal(material)"
+                      size="sm"
+                      type="button"
+                      :variant="getTlProduct(material) ? 'success' : 'danger'"
+                      :title="$trans('Koppel materiaal aan product')"
+                    >
+                      <b-spinner small v-if="materialUpdating"></b-spinner>
+                      <span v-if="getTlProduct(material)">Bekijk</span>
+                      <span v-else>Nog niet gekoppeld</span>
+                    </BButton>
                   </p>
                 </b-col>
               </b-row>
             </b-container>
 
-            <hr/>
+            <hr v-if="!hasTeamleader" />
 
-            <b-container fluid>
+            <b-container fluid v-if="!hasTeamleader">
               <h5>{{ $trans("Engineers") }}</h5>
               <b-row>
-                <b-col cols="6" class="header">
+                <b-col cols="7" class="header">
                   {{ $trans("Name") }}
                 </b-col>
                 <b-col cols="4" class="header ml-3">
                   {{ $trans("Hourly price") }}
                 </b-col>
-                <b-col cols="2" />
+                <b-col cols="1" />
               </b-row>
               <b-row v-for="user in engineer_models" :key="user.id">
-                <b-col cols="6">
+                <b-col cols="7">
                   {{ user.full_name }}
                 </b-col>
                 <b-col cols="4">
@@ -233,25 +246,24 @@
                     @priceChanged="(val) => user.engineer.setHourlyRate(val)"
                   />
                 </b-col>
-                <b-col cols="2">
-
-                    <b-button
+                <b-col cols="1">
+                    <BButton
                       @click="() => { updateEngineer(user.id) }"
                       class="btn update-button"
                       size="sm"
                       type="button"
+                      variant="primary"
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
-                    </b-button>
-
+                    </BButton>
                 </b-col>
               </b-row>
             </b-container>
 
             <hr/>
 
-            <b-container fluid v-if="customer">
+            <b-container fluid v-if="customer && !hasTeamleader">
               <h5>{{ $trans("Prices for customer") }}</h5>
               <b-row>
                 <b-col cols="7" class="header">
@@ -275,15 +287,16 @@
                 </b-col>
                 <b-col cols="1">
                   <p class="flex">
-                    <b-button
+                    <BButton
                       @click="() => { updateCustomer() }"
                       class="btn update-button"
                       size="sm"
                       type="button"
+                      variant="primary"
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
                   </p>
                 </b-col>
               </b-row>
@@ -300,15 +313,16 @@
                 </b-col>
                 <b-col cols="1">
                   <p class="flex">
-                    <b-button
+                    <BButton
                       @click="() => { updateCustomer() }"
                       class="btn update-button"
                       size="sm"
                       type="button"
+                      variant="primary"
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
                   </p>
                 </b-col>
               </b-row>
@@ -325,25 +339,26 @@
                 </b-col>
                 <b-col cols="1">
                   <p class="flex">
-                    <b-button
+                    <BButton
                       @click="() => { updateCustomer() }"
                       class="btn update-button"
                       size="sm"
+                      variant="primary"
                       type="button"
                       :title="$trans('This will update the API')"
                     >
                       {{ $trans("Update") }}
-                    </b-button>
+                    </BButton>
                   </p>
                 </b-col>
               </b-row>
             </b-container>
-          </details>
+          </details> <!-- end manage prices -->
 
           <details v-if="used_materials.length > 0">
             <summary class="flex-columns space-between">
               <h6>{{ $trans("Used materials") }}</h6>
-              <b-icon-chevron-down></b-icon-chevron-down>
+              <IBiChevronDown></IBiChevronDown>
             </summary>
             <MaterialsComponent
               v-if="material_models"
@@ -354,7 +369,8 @@
               :used_materials="used_materials"
               @invoiceLinesCreated="invoiceLinesCreated"
               @emptyCollectionClicked="emptyCollectionClicked"
-              :invoiceLinesParent="invoiceLines"
+              :invoice-lines-parent="invoiceLines"
+              :teamleader-products="tlProducts"
             />
           </details>
 
@@ -370,6 +386,7 @@
               @invoiceLinesCreated="invoiceLinesCreated"
               @emptyCollectionClicked="emptyCollectionClicked"
               :invoiceLinesParent="invoiceLines"
+              :teamleader-hours="teamleaderService.getPriceWorkHours()"
             />
 
             <HoursComponent
@@ -383,6 +400,7 @@
               @invoiceLinesCreated="invoiceLinesCreated"
               @emptyCollectionClicked="emptyCollectionClicked"
               :invoiceLinesParent="invoiceLines"
+              :teamleader-hours="teamleaderService.getPriceTravelHours()"
             />
 
             <DistanceComponent
@@ -428,7 +446,7 @@
           <details v-if="order_pk">
             <summary class="flex-columns space-between">
               <h6>{{ $trans('Call out costs') }}</h6>
-              <b-icon-chevron-down></b-icon-chevron-down>
+              <IBiChevronDown></IBiChevronDown>
             </summary>
             <CallOutCostsComponent
               v-if="!isLoading"
@@ -446,6 +464,14 @@
 
       </b-form>
 
+      <TeamleaderProductChooser
+        v-if="chosenMaterial"
+        ref="product-chooser-teamleader"
+        :material="chosenMaterial"
+        @product-chosen="productChosenTl"
+        @product-created-linked="tlProductCreatedLinked"
+      />
+
     </div>
   </b-overlay>
 </template>
@@ -453,16 +479,15 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
-import {toDinero} from "@/utils";
+import {$trans, errorToast, infoToast, toDinero} from "@/utils";
 import TotalsInputs from "@/components/TotalsInputs";
 import PriceInput from "@/components/PriceInput";
-import Collapse from "@/components/Collapse";
 import CustomerCard from "@/components/CustomerCard";
 
-import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
-import { InvoiceLineService } from '@/models/invoices/InvoiceLine'
+import {InvoiceModel, InvoiceService} from '@/models/invoices/Invoice'
+import {InvoiceLineService} from '@/models/invoices/InvoiceLine'
 import {MaterialModel, MaterialService} from "@/models/inventory/Material";
-import {EngineerUserModel, EngineerService} from "@/models/company/UserEngineer";
+import {EngineerService, EngineerUserModel} from "@/models/company/UserEngineer";
 import {CustomerModel, CustomerPriceModel, CustomerService} from "@/models/customer/Customer";
 
 import invoiceMixin from "./invoice_form/mixin";
@@ -471,7 +496,7 @@ import DistanceComponent from "./invoice_form/Distance";
 import MaterialsComponent from "./invoice_form/Materials";
 import CallOutCostsComponent from "./invoice_form/CallOutCosts";
 import InvoiceLine from "./invoice_form/InvoiceLine";
-import VAT from "./invoice_form/VAT";
+import {useToast} from "bootstrap-vue-next";
 import {
   COST_TYPE_ACTUAL_WORK,
   COST_TYPE_EXTRA_WORK,
@@ -480,25 +505,35 @@ import {
 } from "@/models/orders/Cost";
 import {INVOICE_LINE_TYPE_MANUAL} from "./invoice_form/constants";
 import InvoicePDFViewer from "./InvoicePDFViewer.vue";
+import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
+import TeamleaderProductChooser from "@/components/TeamleaderProductChooser.vue";
+import {TeamleaderService} from "@/models/company/Teamleader";
 
 export default {
   name: 'InvoiceForm',
-  mixins: [invoiceMixin],
+  mixins: [invoiceMixin, componentMixin],
   components: {
+    TeamleaderProductChooser,
     InvoicePDFViewer,
     PriceInput,
-    Collapse,
     HoursComponent,
     MaterialsComponent,
     DistanceComponent,
     CallOutCostsComponent,
-    VAT,
     CustomerCard,
     TotalsInputs,
     InvoiceLine,
   },
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      v$: useVuelidate(),
+      create,
+      mainStore
+    }
   },
   validations() {
     return {
@@ -508,6 +543,9 @@ export default {
   computed: {
     isEdit () {
       return !!this.pk
+    },
+    hasTeamleader() {
+      return this.hasAccessToModule('company','teamleader');
     },
   },
   props: {
@@ -537,10 +575,10 @@ export default {
       submitClicked: false,
       invoice: new InvoiceModel({
         total: "0.00",
-        total_currency: this.$store.getters.getDefaultCurrency,
+        total_currency: this.mainStore.getDefaultCurrency,
         vat: "0.00",
-        vat_currency: this.$store.getters.getDefaultCurrency,
-        term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+        vat_currency: this.mainStore.getDefaultCurrency,
+        term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
       }),
       errorMessage: null,
 
@@ -549,9 +587,9 @@ export default {
       order_id: null,
       order_reference: null,
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      invoice_default_term_of_payment_days: this.$store.getters.getInvoiceDefaultTermOfPaymentDays,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
+      invoice_default_term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
 
       invoice_default_partner_hourly_rate: null,
       invoice_default_partner_hourly_rate_dinero: null,
@@ -579,6 +617,10 @@ export default {
       customerService: new CustomerService(),
       deletedInvoiceLines: [],
       INVOICE_LINE_TYPE_MANUAL,
+      chosenMaterial: null,
+      teamLeaderSettings: null,
+      teamleaderService: new TeamleaderService(),
+      tlProducts: []
     }
   },
   async created() {
@@ -628,7 +670,7 @@ export default {
 
       const customerData = await this.customerService.update(this.customerPk, minimalModel)
       this.customer = new CustomerModel(customerData)
-      this.infoToast(this.$trans('Updated'), this.$trans('Customer data has been updated'))
+      infoToast(this.create, $trans('Updated'), $trans('Customer data has been updated'))
     },
     // activity
     async updateEngineer(user_id) {
@@ -640,9 +682,56 @@ export default {
       let updatedEngineerUserJson = await this.engineerService.update(user_id, minimalModel)
       engineer_user.engineer.setPriceFields(updatedEngineerUserJson.engineer)
 
-      this.infoToast(this.$trans('Updated'), this.$trans('Hourly rate engineer has been updated'))
+      infoToast(this.create, $trans('Updated'), $trans('Hourly rate engineer has been updated'))
     },
     // materials
+    getTlProduct(material) {
+      return this.tlProducts.find((product) => product.material.id === material.id)
+    },
+    async openProductChooserTlModal(material) {
+      this.chosenMaterial = material
+      await this.$nextTick()
+      await this.$refs['product-chooser-teamleader'].show();
+    },
+    async productChosenTl(obj) {
+      const detailProduct = this.teamleaderService.fetchProductDetail(obj.id)
+
+      const response = await this.service.fetchTaxRates()
+      const taxObj = response.results.find((tax) => tax.uuid === detailProduct.tax.id)
+      const purchasePriceObj = this.teamleaderService.priceObjToAmountCurrency(
+        detailProduct.price_purchase)
+      const sellingPriceObj = this.teamleaderService.priceObjToAmountCurrency(
+        detailProduct.price_selling)
+      const data = {
+        'material': this.chosenMaterial,
+        'uuid': obj.id,
+        'purchase_price': purchasePriceObj['amount'],
+        'purchase_price_currency': purchasePriceObj['currency'],
+        'selling_price': sellingPriceObj['amount'],
+        'selling_price_currency': sellingPriceObj['currency'],
+        'tax_percentage': taxObj.rate
+      }
+
+      try {
+        this.isLoading = true
+        await this.teamleaderService.linkProduct(data)
+        await this.tlFetchProducts()
+        this.isLoading = false
+        await this.$refs['product-chooser-teamleader'].hide();
+      } catch (e) {
+        this.isLoading = false
+        console.error('error linking product/fetch products', e)
+        errorToast(this.create, $trans('Error creating invoice'))
+      }
+    },
+    async tlProductCreatedLinked(_materialId) {
+      await this.$refs['product-chooser-teamleader'].hide();
+      await this.tlFetchProducts()
+    },
+    async tlFetchProducts() {
+      const ids = this.material_models.map((material) => material.id)
+      this.tlProducts = await this.teamleaderService.fetchTeamleaderProducts(ids)
+    },
     async updateMaterial(material_id) {
       this.materialUpdating = true
       let material = this.material_models.find((m) => m.id === material_id)
@@ -650,7 +739,7 @@ export default {
       const updatedMaterialJson = await this.materialService.update(material_id, material)
       material.setPriceFields(updatedMaterialJson)
 
-      this.infoToast(this.$trans('Updated'), this.$trans('Material prices have been updated'))
+      infoToast(this.create, $trans('Updated'), $trans('Material prices have been updated'))
       this.materialUpdating = false
     },
     async loadData() {
@@ -696,6 +785,12 @@ export default {
         ...m,
         engineer: {...m.engineer, default_currency: this.default_currency}
       }))
+
+      // load teamleader settings
+      if (this.hasTeamleader) {
+        this.teamLeaderSettings = await this.teamleaderService.configDetail()
+        await this.tlFetchProducts()
+      }
     },
     async submitForm() {
       this.isLoading = true
@@ -710,14 +805,14 @@ export default {
             await this.invoiceLineService.insert(invoiceLine)
           }
 
-          this.infoToast(this.$trans('Created'), this.$trans('Invoice has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Invoice has been created'))
           this.isLoading = false
           await this.$router.push({
             name: 'invoice-edit',
             params: {pk: invoice.id, uuid: this.uuid}
           })
         } catch(error) {
-          this.errorToast(this.$trans('Error creating invoice'))
+          errorToast(this.create, $trans('Error creating invoice'))
           this.isLoading = false
         }
 
@@ -730,10 +825,10 @@ export default {
         await invoiceLineService.updateCollection(this.invoice.id)
         await this.loadData()
         this.isLoading = false
-        this.infoToast(this.$trans('Updated'), this.$trans('Invoice has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Invoice has been updated'))
       } catch(error) {
         console.log(error)
-        this.errorToast(this.$trans('Error updated invoice'))
+        errorToast(this.create, $trans('Error updated invoice'))
         this.isLoading = false
       }
     },
@@ -746,7 +841,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching invoice', error)
-        this.errorToast(this.$trans('Error loading invoice'))
+        errorToast(this.create, $trans('Error loading invoice'))
         this.isLoading = false
       }
     },
@@ -760,9 +855,6 @@ export default {
 .flex {
   display : flex;
   margin-top: auto;
-}
-.update-button {
-  margin-bottom: 8px;
 }
 .header {
   font-size: 14px;

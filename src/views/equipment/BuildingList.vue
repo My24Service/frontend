@@ -3,8 +3,8 @@
     <header>
       <div class='page-title'>
         <h3>{{ $trans("Buildings") }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
@@ -12,12 +12,12 @@
             <ButtonLinkSearch
             v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link
             :to="newLink"
             class="btn"
             >{{ $trans('New building') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -39,13 +39,16 @@
 
       <b-table
         id="building-table"
-        small
+        :small="true"
         :busy='isLoading'
         :fields="fields"
         :items="buildings"
         responsive="md"
         class="data-table"
+        :no-local-sorting="true"
         sort-icon-left
+        :sort-by="sortBy"
+        @sorted="sortingChanged"
       >
         <template #head(icons)="">
           <div class="float-right">
@@ -97,24 +100,30 @@
 </template>
 
 <script>
-import { BuildingService } from '../../models/equipment/building.js'
+import { BuildingService } from '@/models/equipment/building'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {componentMixin} from "../../utils";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -151,32 +160,33 @@ export default {
       isLoading: false,
       buildings: [],
       fieldsCustomerPlanning: [
-        {key: 'customer', label: this.$trans('Customer')},
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'customer', label: $trans('Customer')},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchPlanning: [
-        {key: 'branch', label: this.$trans('Branch')},
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'branch', label: $trans('Branch')},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsCustomerNonPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchNonPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fields: [],
+      sortBy: [{key: 'name', order: 'asc'}],
     }
   },
   created() {
@@ -184,11 +194,10 @@ export default {
     this.buildingService.currentPage = this.$route.query.page || 1
     this.buildingService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      this.sortBy = this.$route.query.sort_field
-      if (this.$route.query.sort_dir) {
-        this.sortDesc = this.$route.query.sort_dir === 'desc'
-      }
-      this.buildingService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+      const sortBy = this.$route.query.sort_field ?? 'name'
+      const sortDir = this.$route.query.sort_dir ?? 'asc'
+      this.sortBy = [{key: sortBy, order: sortDir}]
+      this.buildingService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
     }
 
     if (this.hasBranches) {
@@ -207,6 +216,19 @@ export default {
     this.loadData()
   },
   methods: {
+    // sorting
+    async sortingChanged(ctx) {
+      this.sortBy = [{key: ctx.key, order: ctx.order}]
+      // set sorting and reset current page
+      this.buildingService.setSorting(ctx.key, ctx.order, true)
+      const query = {
+        ...this.$route.query,
+        ...this.buildingService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
+      // await this.loadData()
+    },
     // search
     async handleSearchOk(val) {
       this.$refs['search-modal'].hide()
@@ -229,11 +251,11 @@ export default {
     async doDelete() {
       try {
         await this.buildingService.delete(this.buildingPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('building has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('building has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting building', error)
-        this.errorToast(this.$trans('Error deleting building'))
+        errorToast(this.create, $trans('Error deleting building'))
       }
     },
     // rest
@@ -246,7 +268,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching buildings', error)
-        this.errorToast(this.$trans('Error loading buildings'))
+        errorToast(this.create, $trans('Error loading buildings'))
         this.isLoading = false
       }
     }

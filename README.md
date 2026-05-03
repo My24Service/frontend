@@ -85,3 +85,10 @@ Online development environments are available at *.{user}.my24service-dev.com
 To deploy local changes, run:
 
 `./deploy_dev_developer.sh {user}`
+
+## Packages
+
+`@vitejs/plugin-vue` must be ^5.2.1 or VueMultiselect breaks (https://github.com/shentao/vue-multiselect/issues/1901).
+
+`vite` is kept in the 5.x version range because with newer versions the themes stop working.
+

@@ -20,8 +20,8 @@
         <h3>
           {{ $trans("Contracts") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -30,11 +30,11 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'contract-add'}" class="btn">
             {{$trans('Add contract')}}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -81,17 +81,27 @@ import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   components: {
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -133,11 +143,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.contractPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Contract has been deleted'))
+        infoToast(this.create, this.$trans('Deleted'), this.$trans('Contract has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting contract', error)
-        this.errorToast(this.$trans('Error deleting contract'))
+        errorToast(this.create, this.$trans('Error deleting contract'))
       }
     },
     // rest
@@ -150,7 +160,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching contracts', error)
-        this.errorToast(this.$trans('Error loading contracts'))
+        errorToast(this.create, this.$trans('Error loading contracts'))
         this.isLoading = false
       }
     }

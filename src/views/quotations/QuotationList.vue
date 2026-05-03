@@ -6,24 +6,24 @@
       </div>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-text-fill"></b-icon>
+          <IBiFileEarmarkTextFill></IBiFileEarmarkTextFill>
           <span>{{ pageTitle }}</span>
         </h3>
 
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link
             class="btn button"
             :to="{name:'quotation-add'}"
           >
-            <b-icon icon="file-earmark-plus"></b-icon> {{ $trans('Add quotation') }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add quotation') }}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -98,17 +98,17 @@
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
-            <b-link
+            <BLink
               class="mr-2"
               v-if="!data.item.preliminary"
               :title="$trans('Create order')"
               @click="function() { createOrder(data.item.id) }"
             >
-              <b-icon-arrow-up-right-circle
+              <IBiArrowUpRightCircle
                 aria-hidden="true"
                 class="edit-icon"
-              ></b-icon-arrow-up-right-circle>
-            </b-link>
+              ></IBiArrowUpRightCircle>
+            </BLink>
             <router-link
               class="mr-2"
               v-if="!data.item.preliminary"
@@ -116,10 +116,10 @@
               :to="{name: 'quotation-send',
                 query: {quotationId: data.item.id}}"
             >
-              <b-icon-mailbox
+              <IBiMailbox
                 aria-hidden="true"
                 class="edit-icon"
-              ></b-icon-mailbox>
+              ></IBiMailbox>
             </router-link>
           </div>
         </template>
@@ -136,15 +136,13 @@
 <script>
 import IconLinkEdit from '@/components/IconLinkEdit.vue'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkDocuments from '@/components/IconLinkDocuments.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
-import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
-import ButtonLinkSort from "@/components/ButtonLinkSort.vue";
 import SearchForm from "@/components/SearchForm.vue";
 import TableStatusInfo from '@/components/TableStatusInfo.vue'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 import {QuotationService} from '@/models/quotations/Quotation.js'
 import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
@@ -152,16 +150,21 @@ import { StatusService } from '@/models/quotations/Status.js'
 import PillsQuotationTypes from "@/components/PillsQuotationTypes.vue";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'QuotationList',
   components: {
     PillsQuotationTypes,
-    SearchForm, ButtonLinkSort,
+    SearchForm,
     IconLinkEdit,
     IconLinkDelete,
-    IconLinkDocuments,
     ButtonLinkRefresh,
-    ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     TableStatusInfo
@@ -177,13 +180,13 @@ export default {
       quotations: [],
       statuscodes: [],
       fields: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'quotation_name', label: this.$trans('Customer')},
-        {key: 'quotation_reference', label: this.$trans('Reference')},
-        {key: 'quotation_city', label: this.$trans('City')},
-        {key: 'total', label: this.$trans('Total')},
-        {key: 'vat', label: this.$trans('Vat')},
-        {key: 'status', label: this.$trans('Status')},
+        {key: 'name', label: $trans('Name')},
+        {key: 'quotation_name', label: $trans('Customer')},
+        {key: 'quotation_reference', label: $trans('Reference')},
+        {key: 'quotation_city', label: $trans('City')},
+        {key: 'total', label: $trans('Total')},
+        {key: 'vat', label: $trans('Vat')},
+        {key: 'status', label: $trans('Status')},
         {key: 'icons', label: ''},
       ]
     }
@@ -192,11 +195,11 @@ export default {
     pageTitle() {
       switch (this.$route.name) {
         case 'quotations-sent':
-          return this.$trans("Sent quotations")
+          return $trans("Sent quotations")
         case 'preliminary-quotations':
-          return this.$trans("Preliminary quotations")
+          return $trans("Preliminary quotations")
         default:
-          return this.$trans("Definitive quotations")
+          return $trans("Definitive quotations")
       }
     },
   },
@@ -247,13 +250,13 @@ export default {
 
       try {
         await this.quotationService.delete(this.quotationPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Quotation has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Quotation has been deleted'))
         this.isLoading = false
         await this.loadData()
       } catch(error) {
         this.isLoading = false
         console.log('Error deleting quotation', error)
-        this.errorToast(this.$trans('Error deleting quotation'))
+        errorToast(this.create, $trans('Error deleting quotation'))
       }
     },
     // rest
@@ -266,7 +269,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotations', error)
-        this.errorToast(this.$trans('Error loading quotations'))
+        errorToast(this.create, $trans('Error loading quotations'))
         this.isLoading = false
       }
     },
@@ -284,7 +287,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching statuscodes", error);
-        this.errorToast(this.$trans("Error loading statuscodes"));
+        errorToast(this.create, $trans("Error loading statuscodes"));
         this.isLoading = false;
       }
     }

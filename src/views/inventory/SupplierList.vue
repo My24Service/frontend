@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="shop"></b-icon>{{ $trans("Suppliers") }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <h3><IBiShop></IBiShop>{{ $trans("Suppliers") }}</h3>
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
             v-bind:method="function() { loadData() }"
             v-bind:title="$trans('Refresh')"
@@ -12,9 +12,9 @@
             <ButtonLinkSearch
             v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'supplier-add' }" class="btn primary">{{$trans('Add supplier')}}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
     <SearchModal
@@ -79,16 +79,24 @@ import supplierModel from '@/models/inventory/Supplier.js'
 import IconLinkDelete from '@/components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -100,11 +108,11 @@ export default {
       isLoading: false,
       suppliers: [],
       fields: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'address', label: this.$trans('Address'), sortable: true},
-        {key: 'city', label: this.$trans('City'), sortable: true},
-        {key: 'tel', label: this.$trans('Tel.')},
-        {key: 'mobile', label: this.$trans('Mobile')},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'address', label: $trans('Address'), sortable: true},
+        {key: 'city', label: $trans('City'), sortable: true},
+        {key: 'tel', label: $trans('Tel.')},
+        {key: 'mobile', label: $trans('Mobile')},
         {key: 'icons'}
       ],
     }
@@ -131,11 +139,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.supplierPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Supplier has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Supplier has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting supplier', error)
-        this.errorToast(this.$trans('Error deleting supplier'))
+        errorToast(this.create, $trans('Error deleting supplier'))
       }
     },
     // rest
@@ -148,7 +156,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching suppliers', error)
-        this.errorToast(this.$trans('Error loading suppliers'))
+        errorToast(this.create, $trans('Error loading suppliers'))
         this.isLoading = false
       }
     }

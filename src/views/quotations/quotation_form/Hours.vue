@@ -23,7 +23,7 @@
           <b-container>
             <b-row>
               <b-col cols="2">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Hours')"
                 >
                   <DurationInput
@@ -32,28 +32,28 @@
                     @durationChanged="(duration) => changeDuration(cost, duration)"
                     v-if="!isView"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="3">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Engineer rate')"
                 >
-                  <b-form-radio-group
+                  <BFormRadioGroup
                     @change="updateTotals"
                     v-model="cost.use_price"
                     v-if="!isView"
                   >
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
                       {{ $trans('Settings') }}
                       {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-                    </b-form-radio>
+                    </BFormRadio>
 
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
                       {{ $trans('Customer') }}
                       {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                    </b-form-radio>
+                    </BFormRadio>
 
-                    <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
                         {{ $trans("Other") }}
                         <PriceInput
                           v-model="cost.price_other"
@@ -61,79 +61,79 @@
                           @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, cost)"
                           @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
                         />
-                    </b-form-radio>
-                  </b-form-radio-group>
-                </b-form-group>
+                    </BFormRadio>
+                  </BFormRadioGroup>
+                </BFormGroup>
               </b-col>
               <b-col cols="2">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT type')"
                 >
                   <VAT
                     @vatChanged="(val) => changeVatType(cost, val)"
                   />
-                </b-form-group>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" class="text-right p-0">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('VAT')"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     disabled
                     :value="cost.vat_dinero.toFormat('$0.00')"
                     class="text-right pr-0"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
               <b-col cols="2" class="text-right p-0">
-                <b-form-group
+                <BFormGroup
                   v-bind:label="$trans('Total')"
                 >
-                  <b-form-input
+                  <BFormInput
                     readonly
                     disabled
                     class="text-right pr-0"
                     :value="cost.total_dinero.toFormat('$0.00')"
-                  ></b-form-input>
-                </b-form-group>
+                  ></BFormInput>
+                </BFormGroup>
               </b-col>
             </b-row>
           </b-container>
           <b-container>
             <b-row>
               <b-col cols="12" class="text-center">
-                <b-button
+                <BButton
                   @click="() => deleteCost(index)"
                   type="button"
                   variant="danger"
                   size="sm"
                 >
                   {{ $trans("Delete cost") }}
-                </b-button>
+                </BButton>
               </b-col>
             </b-row>
             <hr/>
           </b-container>
         </div>
         <div class="text-center">
-          <b-button
+          <BButton
             :disabled="collectionHasEmptyItem"
             @click="addCost"
             class="btn btn-primary"
             type="button"
           >
             {{ $trans(`Add ${this.getTitle().toLocaleLowerCase()}`) }}
-          </b-button>
+          </BButton>
           <span style="width: 80px">&nbsp;</span>
-          <b-button
+          <BButton
             :disabled="showSaveButton"
             @click="() => saveCosts()"
             type="button"
             variant="primary"
           >
             {{ $trans("Save changes") }}
-          </b-button>
+          </BButton>
         </div>
         <hr/>
       </div>
@@ -165,13 +165,12 @@
 </template>
 <script>
 import moment from 'moment'
-import Multiselect from 'vue-multiselect'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 import {toDinero} from "@/utils";
 import DurationInput from "@/components/DurationInput.vue"
 import PriceInput from "@/components/PriceInput";
-import TotalsInputs from "@/components/TotalsInputs";
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
 
 import {ChapterModel} from "@/models/quotations/Chapter";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
@@ -187,15 +186,25 @@ import {
   USE_PRICE_OTHER,
   USE_PRICE_SETTINGS
 } from "./constants";
-import HeaderCell from "./Header";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "HoursComponent",
   mixins: [quotationMixin],
   components: {
@@ -203,12 +212,8 @@ export default {
     EmptyQuotationLinesContainer,
     SectionHeader,
     PriceInput,
-    IconLinkDelete,
-    HeaderCell,
     VAT,
     TotalRow,
-    TotalsInputs,
-    Multiselect,
     DurationInput,
     AddToQuotationLines
   },
@@ -261,9 +266,9 @@ export default {
         USE_PRICE_CUSTOMER,
         USE_PRICE_OTHER,
       },
-      default_currency: this.$store.getters.getDefaultCurrency,
-      default_vat: this.$store.getters.getQuotationDefaultVat,
-      default_hourly_rate: this.$store.getters.getQuotationDefaultHourlyRate,
+      default_currency: this.mainStore.getDefaultCurrency,
+      default_vat: this.mainStore.getQuotationDefaultVat,
+      default_hourly_rate: this.mainStore.getQuotationDefaultHourlyRate,
       hasStoredData: false,
       costService: new CostService(),
       quotationLineService: new QuotationLineService(),
@@ -294,9 +299,9 @@ export default {
     getTitle() {
       switch (this.type) {
         case COST_TYPE_WORK_HOURS:
-          return this.$trans("Work hours")
+          return $trans("Work hours")
         case COST_TYPE_TRAVEL_HOURS:
-          return this.$trans("Travel hours")
+          return $trans("Travel hours")
         default:
           throw `getTitle(), unknown type ${this.type}`
       }
@@ -328,13 +333,13 @@ export default {
       try {
         this.isLoading = true
         await this.costService.updateCollection()
-        this.infoToast(this.$trans('Created'), this.$trans('Hours costs have been updated'))
+        infoToast(this.create, $trans('Created'), $trans('Hours costs have been updated'))
         await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
         console.log('Error creating hours costs', error)
-        this.errorToast(this.$trans('Error creating hours costs'))
+        errorToast(this.create, $trans('Error creating hours costs'))
         this.isLoading = false
       }
     },
@@ -373,7 +378,7 @@ export default {
         this.isLoaded = true
       } catch(error) {
         console.log('error fetching hours costs', error)
-        this.errorToast(this.$trans('Error fetching hours cost'))
+        errorToast(this.create, $trans('Error fetching hours cost'))
         this.isLoading = false
         this.isLoaded = true
       }

@@ -3,13 +3,13 @@
     <header>
       <div class='page-title'>
         <h3>
-          <b-icon icon="file-earmark-lock"></b-icon>
-          <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ $trans('Maintenance contracts') }}</router-link> /
+          <IBiFileEarmarkLock></IBiFileEarmarkLock>
+          <router-link :to="{name: 'maintenance-contracts'}" class='backlink'>{{ this.$trans('Maintenance contracts') }}</router-link> /
           <span>{{ maintenanceContract.name }}</span>
         </h3>
-        <b-button-toolbar>
-          <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">{{ $trans("Edit contract") }}</router-link>
-        </b-button-toolbar>
+        <BButton-toolbar>
+          <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">{{ this.$trans("Edit contract") }}</router-link>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -17,14 +17,14 @@
 
       <div class='flex-columns'>
       <div class='panel col-1-3 sidebar'>
-        <h6>{{ $trans('Contract')}}</h6>
+        <h6>{{ this.$trans('Contract')}}</h6>
         <dl>
-          <dt>{{ $trans('Value') }}</dt>
+          <dt>{{ this.$trans('Value') }}</dt>
           <dd>{{ maintenanceContract.sum_tariffs_dinero.toFormat('$0.00') }}</dd>
-          <dt>{{ $trans('Remarks') }}</dt>
+          <dt>{{ this.$trans('Remarks') }}</dt>
           <dd>{{ maintenanceContract.remarks }}</dd>
         </dl>
-        <h6>{{ $trans('Customer') }}</h6>
+        <h6>{{ this.$trans('Customer') }}</h6>
         <CustomerCard :customer="customer"/>
         <dl>
           <dt></dt>
@@ -32,8 +32,8 @@
             <router-link
               class="btn btn-primary"
               :to="{name: 'customer-view', params: {pk: customer.id}}">
-              <b-icon icon="building"></b-icon>
-              {{ $trans('view customer details') }}
+              <IBiBuilding></IBiBuilding>
+              {{ this.$trans('view customer details') }}
             </router-link>
           </dd>
         </dl>
@@ -45,8 +45,8 @@
             <!-- equipment select -->
             <div class="flex-columns" style="justify-content: end;">
               <span>
-                {{ $trans('Create order?') }}&nbsp;
-                <b-button
+                {{ this.$trans('Create order?') }}&nbsp;
+                <BButton
                   @click="selectEquipment"
                   class="btn btn-primary"
                   size="sm"
@@ -54,8 +54,8 @@
                   variant="primary"
                   :disabled="isCreate ? 'disabled' : false"
                 >
-                  {{ $trans("Select equipment") }}
-                </b-button>
+                  {{ this.$trans("Select equipment") }}
+                </BButton>
               </span>
             </div>
             <hr/>
@@ -66,38 +66,38 @@
                 :items="orderLinesData" responsive="md"
               >
                 <template #cell(id)="data">
-                  <b-form-checkbox
+                  <BFormCheckbox
                     :id="`equipment${data.item.equipment_pk}`"
                     v-model="data.item.useAsOrderLine"
                   >
                     {{ data.item.id }}
-                  </b-form-checkbox>
+                  </BFormCheckbox>
                 </template>
                   <template #cell(frequency)="data">
                     <span>
-                      <strong>{{ data.item.times_per_year }}</strong> &times; {{ $trans('yearly') }}
+                      <strong>{{ data.item.times_per_year }}</strong> &times; {{ this.$trans('yearly') }}
                     </span>
-                    <small class="dimmed">({{ data.item.num_order_equipment }} {{ $trans('in orders') }})</small>
+                    <small class="dimmed">({{ data.item.num_order_equipment }} {{ this.$trans('in orders') }})</small>
                 </template>
                 <template #cell(amount)="data">
-                  <b-form-group
+                  <BFormGroup
                   label-cols="4">
-                  <b-form-input
+                  <BFormInput
                     :value="`${data.item.amount}`"
                     v-model="data.item.amount"
                     type="number"
                     min="1"
                   />
-                </b-form-group>
+                </BFormGroup>
                 </template>
               </b-table>
               <footer class="modal-footer">
-                <b-button @click="cancelForm" class="btn btn-secondary" type="reset" variant="secondary">
-                  {{ $trans('Cancel') }}
-                </b-button>
-                <b-button @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary">
-                  {{ $trans('Add equipment') }}
-                </b-button>
+                <BButton @click="cancelForm" class="btn btn-secondary" type="reset" variant="secondary">
+                  {{ this.$trans('Cancel') }}
+                </BButton>
+                <BButton @click="createOrder" :disabled="buttonDisabled" class="btn btn-primary" type="submit" variant="primary">
+                  {{ this.$trans('Add equipment') }}
+                </BButton>
               </footer>
 
             </div>
@@ -111,9 +111,9 @@
               >
                 <template #cell(times_per_year)="data">
                   <span>
-                    <strong>{{ data.item.times_per_year }}</strong> &times; {{ $trans('yearly') }}
+                    <strong>{{ data.item.times_per_year }}</strong> &times; {{ this.$trans('yearly') }}
                   </span>
-                  <small class="dimmed">({{ data.item.num_order_equipment }} {{ $trans('in orders') }})</small>
+                  <small class="dimmed">({{ data.item.num_order_equipment }} {{ this.$trans('in orders') }})</small>
                 </template>
                 <template #cell(tariff)="data">
                   <div style="text-align: end;">{{ data.item.tariff_dinero.toFormat('$0.00')}}</div>
@@ -135,8 +135,8 @@
             />
             <div class="flex-columns" style="justify-content: end;">
               <span>
-                <b-button-toolbar>
-                  <b-button-group class="mr-1">
+                <BButton-toolbar>
+                  <BButton-group class="mr-1">
                     <ButtonLinkRefresh
                       v-bind:method="function() { loadData() }"
                       v-bind:title="$trans('Refresh')"
@@ -144,14 +144,14 @@
                     <ButtonLinkSearch
                       v-bind:method="function() { showSearchModal() }"
                     />
-                  </b-button-group>
-                </b-button-toolbar>
+                  </BButton-group>
+                </BButton-toolbar>
               </span>
             </div>
             <hr/>
             <ul class='listing order-list' v-if="!isLoading">
               <li v-if="!maintenanceOrders.length">
-                <div style="text-align: center;">{{ $trans('No orders for') }} {{ $trans('contract')}}.</div>
+                <div style="text-align: center;">{{ this.$trans('No orders for') }} {{ this.$trans('contract')}}.</div>
               </li>
               <li v-for="item in maintenanceOrders" >
                 <OrderTableInfo v-bind:order="item" />
@@ -177,21 +177,30 @@
 </template>
 
 <script>
-import { MaintenanceContractService } from '../../models/customer/MaintenanceContract.js'
-import { MaintenanceEquipmentService } from "../../models/customer/MaintenanceEquipment";
-import {componentMixin} from "../../utils";
-import CustomerDetail from "../../components/CustomerDetail";
+import { MaintenanceContractService } from '@/models/customer/MaintenanceContract'
+import { MaintenanceEquipmentService } from "@/models/customer/MaintenanceEquipment";
+
 import CustomerCard from "../../components/CustomerCard";
-import {OrdersMaintenanceService} from '../../models/orders/OrdersMaintenance'
+import {OrdersMaintenanceService} from '@/models/orders/OrdersMaintenance'
 import ButtonLinkRefresh from "../../components/ButtonLinkRefresh";
 import ButtonLinkSearch from "../../components/ButtonLinkSearch";
 import OrderTableInfo from "../../components/OrderTableInfo";
 import SearchModal from "../../components/SearchModal";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   components: {
-    CustomerDetail,
     CustomerCard,
     ButtonLinkRefresh,
     ButtonLinkSearch,
@@ -271,7 +280,7 @@ export default {
         customer_pk: this.customer.id,
         contract_pk: this.pk,
       }
-      await this.$store.dispatch('setMaintenanceEquipment', data)
+      this.mainStore.setMaintenanceEquipment(data)
 
       // route to order form in maintenance mode
       await this.$router.push({name: 'order-add-maintenance'})
@@ -297,7 +306,7 @@ export default {
       try {
         const data = await this.maintenanceContractService.detail(this.pk)
         this.maintenanceContract = new this.maintenanceContractService.model(
-          {...data, sum_tariffs_currency: this.$store.getters.getDefaultCurrency}
+          {...data, sum_tariffs_currency: this.mainStore.getDefaultCurrency}
         )
         this.customer = this.maintenanceContract.customer_view
 
@@ -305,7 +314,7 @@ export default {
         const equipmentData = await this.maintenanceEquipmentService.list()
         this.maintenanceEquipmentService.collection = equipmentData.results.map(
           (m) => new this.maintenanceEquipmentService.model({
-            ...m, default_currency: this.$store.getters.getDefaultCurrency
+            ...m, default_currency: this.mainStore.getDefaultCurrency
           })
         )
 
@@ -316,7 +325,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching maintenance contract', error.response)
-        this.errorToast(`${this.$trans('Error loading maintenance contract')}: ${error.response.status} ${error.response.statusText}`)
+        errorToast(this.create, `${$trans('Error loading maintenance contract')}: ${error.response.status} ${error.response.statusText}`)
         this.isLoading = false
       }
     },

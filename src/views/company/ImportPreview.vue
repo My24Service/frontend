@@ -4,13 +4,13 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="file-arrow-down"></b-icon>
+            <IBiFileArrowDown></IBiFileArrowDown>
             <span>{{ $trans('Import preview') }}</span>
           </h3>
         </div>
       </header>
 
-      <div class="page-detail import-preview">
+      <div class="page-detail import-preview" v-if="!isLoading">
         <div class="app-detail">
           <b-card no-body>
             <b-tabs
@@ -49,15 +49,15 @@
             </b-tabs>
           </b-card>
           <footer class="modal-footer">
-            <b-button @click="cancel" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-            <b-button
+            <BButton @click="cancel" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</BButton>
+            <BButton
               @click="importAll"
               type="button"
               variant="primary"
             >
               {{ $trans('Import all') }}
-            </b-button>
+            </BButton>
           </footer>
         </div>
       </div>
@@ -66,11 +66,18 @@
 </template>
 
 <script>
-import {ImportService} from "../../models/company/Import";
-import {componentMixin} from "../../utils";
+import {ImportService} from "@/models/company/Import";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+
+    return {
+      create
+    }
+  },
   props: {
     pk: {
       type: [String, Number],
@@ -86,72 +93,72 @@ export default {
       importData: {},
       pills: [],
       availablePills: {
-        'customers': this.$trans("Customers"),
-        'branches': this.$trans("Branches"),
-        'equipment': this.$trans("Equipment"),
-        'locations': this.$trans("Locations"),
-        'materials': this.$trans("Materials"),
-        'suppliers': this.$trans("Suppliers"),
+        'customers': $trans("Customers"),
+        'branches': $trans("Branches"),
+        'equipment': $trans("Equipment"),
+        'locations': $trans("Locations"),
+        'materials': $trans("Materials"),
+        'suppliers': $trans("Suppliers"),
       },
       activePill: 0,
       branchesFields: [
-        {key: 'name', label: this.$trans('Name') },
-        {key: 'address', label: this.$trans('Address') },
-        {key: 'postal', label: this.$trans('Postal') },
-        {key: 'city', label: this.$trans('City') },
-        {key: 'country_code', label: this.$trans('Country') },
-        {key: 'tel', label: this.$trans('Phone') },
+        {key: 'name', label: $trans('Name') },
+        {key: 'address', label: $trans('Address') },
+        {key: 'postal', label: $trans('Postal') },
+        {key: 'city', label: $trans('City') },
+        {key: 'country_code', label: $trans('Country') },
+        {key: 'tel', label: $trans('Phone') },
         {key: 'mode', label: ''},
       ],
       customersFields: [
-        {key: 'name', label: this.$trans('Name') },
-        {key: 'address', label: this.$trans('Address') },
-        {key: 'postal', label: this.$trans('Postal') },
-        {key: 'city', label: this.$trans('City') },
-        {key: 'country_code', label: this.$trans('Country') },
-        {key: 'tel', label: this.$trans('Phone') },
+        {key: 'name', label: $trans('Name') },
+        {key: 'address', label: $trans('Address') },
+        {key: 'postal', label: $trans('Postal') },
+        {key: 'city', label: $trans('City') },
+        {key: 'country_code', label: $trans('Country') },
+        {key: 'tel', label: $trans('Phone') },
         {key: 'mode', label: ''},
       ],
       equipmentFieldsBranches: [
-        {key: 'customer_branch_view.name', label: this.$trans('Branch') },
-        {key: 'name', label: this.$trans('Equipment') },
-        {key: 'brand', label: this.$trans('Brand') },
-        {key: 'location_name', label: this.$trans('Location')},
+        {key: 'customer_branch_view.name', label: $trans('Branch') },
+        {key: 'name', label: $trans('Equipment') },
+        {key: 'brand', label: $trans('Brand') },
+        {key: 'location_name', label: $trans('Location')},
         {key: 'mode', label: ''},
       ],
       equipmentFieldsCustomers: [
-        {key: 'customer_branch_view.name', label: this.$trans('Customer') },
-        {key: 'name', label: this.$trans('Equipment') },
-        {key: 'brand', label: this.$trans('Brand') },
-        {key: 'location_name', label: this.$trans('Location')},
+        {key: 'customer_branch_view.name', label: $trans('Customer') },
+        {key: 'name', label: $trans('Equipment') },
+        {key: 'brand', label: $trans('Brand') },
+        {key: 'location_name', label: $trans('Location')},
         {key: 'mode', label: ''},
       ],
       locationFieldsCustomers: [
-        {key: 'name', label: this.$trans('Name') },
-        {key: 'customer_branch_view.name', label: this.$trans('Customer')},
+        {key: 'name', label: $trans('Name') },
+        {key: 'customer_branch_view.name', label: $trans('Customer')},
         {key: 'mode', label: ''},
       ],
       locationFieldsBranches: [
-        {key: 'name', label: this.$trans('Name') },
-        {key: 'customer_branch_view.name', label: this.$trans('Branch')},
+        {key: 'name', label: $trans('Name') },
+        {key: 'customer_branch_view.name', label: $trans('Branch')},
         {key: 'mode', label: ''},
       ],
       materialFields: [
-        {key: 'name', label: this.$trans('Name') },
-        {key: 'show_name', label: this.$trans('Name')},
-        {key: 'identifier', label: this.$trans('Identifier')},
-        {key: 'price_purchase_ex', label: this.$trans('Purchase price ex.')},
-        {key: 'price_selling_ex', label: this.$trans('Selling price ex.')},
-        {key: 'supplier_name', label: this.$trans('Supplier')},
+        {key: 'name', label: $trans('Name') },
+        {key: 'show_name', label: $trans('Name')},
+        {key: 'identifier', label: $trans('Identifier')},
+        {key: 'price_purchase_ex', label: $trans('Purchase price ex.')},
+        {key: 'price_selling_ex', label: $trans('Selling price ex.')},
+        {key: 'supplier_name', label: $trans('Supplier')},
         {key: 'mode', label: ''},
       ],
       suppliersFields: [
-        {key: 'name', label: this.$trans('Name') },
-        {key: 'address', label: this.$trans('Address') },
-        {key: 'postal', label: this.$trans('Postal') },
-        {key: 'city', label: this.$trans('City') },
-        {key: 'country_code', label: this.$trans('Country') },
-        {key: 'tel', label: this.$trans('Phone') },
+        {key: 'name', label: $trans('Name') },
+        {key: 'address', label: $trans('Address') },
+        {key: 'postal', label: $trans('Postal') },
+        {key: 'city', label: $trans('City') },
+        {key: 'country_code', label: $trans('Country') },
+        {key: 'tel', label: $trans('Phone') },
         {key: 'mode', label: ''},
       ],
       lookupFields: {}
@@ -163,28 +170,34 @@ export default {
     const lookupFields = await this.service.fetchLookupFields()
 
     this.importData = await this.service.previewImport(this.pk)
+    let activePill = null
     for (const key of Object.keys(this.availablePills)) {
       if (this.importData.hasOwnProperty(key)) {
         this.pills.push({
           title: this.availablePills[key],
           key
         })
+        if (activePill === null) {
+          activePill = key
+        }
         this.lookupFields[key] = lookupFields[key]
       }
     }
+    this.activePill = activePill
 
     this.isLoading = false
   },
   methods: {
+    $trans,
     async importAll() {
-      if (confirm(this.$trans("Import these records?"))) {
+      if (confirm($trans("Import these records?"))) {
         try {
           await this.service.doImport(this.pk)
-          this.infoToast(this.$trans('Imported'), this.$trans('Data has been imported'))
+          infoToast(this.create, $trans('Imported'), $trans('Data has been imported'))
           await this.$router.push({name: 'company-import-list'})
         } catch (error) {
           console.log('Error importing data', error)
-          this.errorToast(this.$trans('Error importing data'))
+          errorToast(this.create, $trans('Error importing data'))
         }
       }
     },

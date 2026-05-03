@@ -78,12 +78,14 @@ class LocationService extends BaseModel {
   }
 
   listForSelectBranch(branch) {
-    return this.axios.get(`${this.url}list_for_select/?branch=${branch}`)
+    const url = branch ? `${this.url}list_for_select/?branch=${branch}` : `${this.url}list_for_select/`
+    return this.axios.get(url)
       .then((response) => response.data)
   }
 
   listForSelectCustomer(customer) {
-    return this.axios.get(`${this.url}list_for_select/?customer=${customer}`)
+    const url = customer ? `${this.url}list_for_select/?customer=${customer}` : `${this.url}list_for_select/`
+    return this.axios.get(url)
       .then((response) => response.data)
   }
 

@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="shop-window"></b-icon>{{ $trans("Locations") }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <h3><IBiShopWindow></IBiShopWindow>{{ $trans("Locations") }}</h3>
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -17,9 +17,9 @@
               v-bind:method="function() { downloadList() }"
               v-bind:title="$trans('Download QR-codes')"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: newLink}" class="btn btn-primary">{{ $trans('Add location') }}</router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -33,6 +33,9 @@
         responsive="md"
         class="data-table"
         sort-icon-left
+        :no-local-sorting="true"
+        @sorted="sortingChanged"
+        :sort-by="sortBy"
       >
         <template #head(icons)="">
           <div class="float-right">
@@ -109,27 +112,33 @@
 </template>
 
 <script>
-import { LocationService } from '../../models/equipment/location.js'
+import { LocationService } from '@/models/equipment/location'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {componentMixin} from "../../utils";
 import ButtonLinkDownload from "@/components/ButtonLinkDownload.vue";
 import my24 from "@/services/my24";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     ButtonLinkDownload,
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -167,32 +176,33 @@ export default {
       isLoading: false,
       locations: [],
       fieldsCustomerPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'customer', label: this.$trans('Customer')},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'customer', label: $trans('Customer')},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'branch', label: this.$trans('Branch')},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'branch', label: $trans('Branch')},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsCustomerNonPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fieldsBranchNonPlanning: [
-        {key: 'name', label: this.$trans('Name'), sortable: true},
-        {key: 'created', label: this.$trans('Created'), sortable: true},
-        {key: 'modified', label: this.$trans('Modified'), sortable: true},
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'created', label: $trans('Created'), sortable: true},
+        {key: 'modified', label: $trans('Modified'), sortable: true},
         {key: 'icons'}
       ],
       fields: [],
+      sortBy: [{key: 'name', order: 'asc'}],
     }
   },
   created() {
@@ -200,11 +210,10 @@ export default {
     this.locationService.currentPage = this.$route.query.page || 1
     this.locationService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {
-      this.sortBy = this.$route.query.sort_field
-      if (this.$route.query.sort_dir) {
-        this.sortDesc = this.$route.query.sort_dir === 'desc'
-      }
-      this.locationService.setSorting(this.sortBy, this.sortDesc, !!!this.$route.query.page)
+      const sortBy = this.$route.query.sort_field ?? 'name'
+      const sortDir = this.$route.query.sort_dir ?? 'asc'
+      this.sortBy = [{key: sortBy, order: sortDir}]
+      this.locationService.setSorting(sortBy, sortDir, !!!this.$route.query.page)
     }
 
     if (this.hasBranches) {
@@ -223,6 +232,19 @@ export default {
     this.loadData()
   },
   methods: {
+    // sorting
+    async sortingChanged(ctx) {
+      this.sortBy = [{key: ctx.key, order: ctx.order}]
+      // set sorting and reset current page
+      this.locationService.setSorting(ctx.key, ctx.order, true)
+      const query = {
+        ...this.$route.query,
+        ...this.locationService.getQueryArgs()
+      }
+
+      this.$router.push({ query }).catch(e => {})
+      // await this.loadData()
+    },
     // download
     downloadList() {
       const url = this.locationService.getExportUrl()
@@ -250,11 +272,11 @@ export default {
     async doDelete() {
       try {
         await this.locationService.delete(this.locationPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Location has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Location has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting location', error)
-        this.errorToast(this.$trans('Error deleting location'))
+        errorToast(this.create, $trans('Error deleting location'))
       }
     },
     // rest
@@ -267,7 +289,7 @@ export default {
         this.isLoading = false
       } catch(error){
         console.log('error fetching locations', error)
-        this.errorToast(this.$trans('Error loading locations'))
+        errorToast(this.create, $trans('Error loading locations'))
         this.isLoading = false
       }
     }

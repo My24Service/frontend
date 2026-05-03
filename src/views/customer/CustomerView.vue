@@ -4,11 +4,11 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="building"></b-icon>
+            <IBiBuilding></IBiBuilding>
             <span class="backlink" @click="goBack">{{ $trans("Customers") }}</span> / {{  customer.name }}
           </h3>
           <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
-            <b-icon icon="pencil" font-scale="0.95"></b-icon> &nbsp; {{ $trans('Edit customer') }}
+            <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit customer') }}
           </router-link>
         </div>
       </header>
@@ -50,7 +50,7 @@
               </b-tab>
               <b-tab :title="$trans('Equipment')">
                 <span class="button-container">
-                  <b-button
+                  <BButton
                     class="btn btn-outline-secondary"
                     :to="{name: 'customers-equipment-add'}"
                     size="sm"
@@ -58,10 +58,10 @@
                     variant="outline-secondary"
                   >
                     {{ $trans('Add equipment') }}
-                  </b-button>
+                  </BButton>
                 </span>
                 <span class="button-container">
-                  <b-button
+                  <BButton
                     class="btn btn-outline-secondary"
                     :to="{name: 'customers-equipment-list'}"
                     size="sm"
@@ -69,7 +69,7 @@
                     variant="outline-secondary"
                   >
                     {{ $trans('Manage equipment') }}
-                  </b-button>
+                  </BButton>
                 </span>
                 <hr/>
                 <b-table
@@ -90,7 +90,7 @@
                   <template #cell(icons)="data">
                     <div class="h2 float-right">
                       <span class="button-container">
-                        <b-button
+                        <BButton
                           :to="{name: 'customers-equipment-edit', params: {pk: data.item.id}}"
                           class="btn btn-outline-secondary"
                           size="sm"
@@ -98,7 +98,7 @@
                           variant="outline-secondary"
                         >
                           {{ $trans('Edit') }}
-                        </b-button>
+                        </BButton>
                       </span>
                     </div>
                   </template>
@@ -144,7 +144,7 @@
                         <b-col cols="3">
                           <div class="float-right">
                             <span class="button-container">
-                              <b-button
+                              <BButton
                                 class="btn btn-outline-primary"
                                 :to="{name: 'order-add-maintenance'}"
                                 size="sm"
@@ -152,11 +152,11 @@
                                 variant="outline-primary"
                               >
                                 {{ $trans('Create order') }}
-                              </b-button>
+                              </BButton>
                             </span>
 
                             <span class="button-container">
-                              <b-button
+                              <BButton
                                 :to="{name: 'maintenance-contract-edit', params: {pk: data.item.id}}"
                                 class="btn btn-outline-secondary"
                                 size="sm"
@@ -164,7 +164,7 @@
                                 variant="outline-secondary"
                               >
                                 {{ $trans('Edit') }}
-                              </b-button>
+                              </BButton>
                             </span>
                           </div>
                         </b-col>
@@ -173,7 +173,7 @@
                 </b-table>
                 <hr/>
                 <span class="button-container">
-                <b-button
+                <BButton
                   class="btn btn-outline-secondary"
                   :to="{name: 'maintenance-contract-add'}"
                   size="sm"
@@ -181,10 +181,10 @@
                   variant="outline-secondary"
                 >
                   {{ $trans('Add contract') }}
-                </b-button>
+                </BButton>
               </span>
               <span class="button-container">
-                <b-button
+                <BButton
                   class="btn btn-outline-secondary"
                   :to="{name: 'maintenance-contracts'}"
                   size="sm"
@@ -192,7 +192,7 @@
                   variant="outline-secondary"
                 >
                   {{ $trans('Manage contracts') }}
-                </b-button>
+                </BButton>
               </span>
               </b-tab>
               <b-tab :title="$trans('Locations')">
@@ -213,7 +213,7 @@
                   <template #cell(icons)="data">
                     <div class="h2 float-right">
                       <span class="button-container">
-                        <b-button
+                        <BButton
                           :to="{name: 'customers-location-edit', params: {pk: data.item.id}}"
                           class="btn btn-outline-secondary"
                           size="sm"
@@ -221,14 +221,14 @@
                           variant="outline-secondary"
                         >
                           {{ $trans('Edit') }}
-                        </b-button>
+                        </BButton>
                       </span>
                     </div>
                   </template>
                 </b-table>
                 <b-row align-h="end">
                   <span class="button-container">
-                    <b-button
+                    <BButton
                       class="btn btn-outline-secondary"
                       :to="{name: 'customers-location-add'}"
                       size="sm"
@@ -236,10 +236,10 @@
                       variant="outline-secondary"
                     >
                       {{ $trans('New') }}
-                    </b-button>
+                    </BButton>
                   </span>
                   <span class="button-container">
-                    <b-button
+                    <BButton
                       class="btn btn-outline-secondary"
                       :to="{name: 'customers-location-list'}"
                       size="sm"
@@ -247,7 +247,7 @@
                       variant="outline-secondary"
                     >
                       {{ $trans('Manage >>') }}
-                    </b-button>
+                    </BButton>
                   </span>
                 </b-row>
               </b-tab>
@@ -271,23 +271,31 @@ import CustomerCard from '../../components/CustomerCard.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "@/utils";
-import CustomerDetail from "../../components/CustomerDetail";
 
 import {MaintenanceContractService} from '@/models/customer/MaintenanceContract'
 import { OrderService } from '@/models/orders/Order'
 import {CustomerModel, CustomerService} from '@/models/customer/Customer'
 import {LocationService} from "@/models/equipment/location";
 import {EquipmentService} from "@/models/equipment/equipment";
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
   mixins: [componentMixin],
   components: {
     CustomerCard,
     OrderTableInfo,
     SearchModal,
     OrderStats,
-    CustomerDetail,
   },
   data() {
     return {
@@ -429,7 +437,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching orders or customer detail', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     },
@@ -441,7 +449,7 @@ export default {
         this.maintenanceContracts = data.results
       } catch(error) {
         console.log('error fetching maintenance contracts', error)
-        this.errorToast(this.$trans('Error fetching maintenance contracts'))
+        errorToast(this.create, this.$trans('Error fetching maintenance contracts'))
         this.isLoading = false
       }
     },
@@ -453,7 +461,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching customer orders', error)
-        this.errorToast(this.$trans('Error fetching customer orders'))
+        errorToast(this.create, this.$trans('Error fetching customer orders'))
         this.isLoading = false
       }
     }

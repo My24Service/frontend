@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: 'invoices-sent' }">
             {{ $trans("Send invoice") }}
           </router-link>
@@ -16,11 +16,11 @@
           </span>
         </h3>
         <div class="flex-columns">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button @click="submitForm" type="button" variant="primary">
-            {{ $trans("Submit") }}</b-button
+          <BButton @click="submitForm" type="button" variant="primary">
+            {{ $trans("Submit") }}</BButton
           >
         </div>
       </div>
@@ -30,7 +30,7 @@
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans("Email") }}</h6>
-            <b-form-group
+            <BFormGroup
               :label="$trans('Email recipients')"
               label-for="tags-validation"
               :state="isSubmitClicked ? !recipientInvalid : null"
@@ -49,40 +49,40 @@
               <template #invalid-feedback>
                 You must provide at least 1 email recipient
               </template>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               v-bind:label="$trans('Subject')"
               label-for="email_subject"
               label-cols="3">
-              <b-form-input
+              <BFormInput
                 autofocus
                 id="email_subject"
                 size="sm"
                 v-model="email.subject"
                 :state="isSubmitClicked ? !v$.email.subject.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.email.subject.$error : null">
                 {{ $trans("Please enter the email subject") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Body')"
               label-for="email_body"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="email_body"
                 v-model="email.body"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
+              ></BFormTextarea>
+            </BFormGroup>
             <h6>{{ $trans("Attachments") }}</h6>
             <p v-if="!documents.length">
               {{ $trans("No attached documents to this invoice") }}
             </p>
             <p v-for="document in documents" :key="document.id">
               {{ document.name }}
-              <b-button
+              <BButton
                 class="btn button btn-danger invoice-pdf-button"
                 @click="downloadPdf"
                 v-if="document.is_pdf"
@@ -90,7 +90,7 @@
               >
                 <b-spinner small v-if="loadingPdf"></b-spinner>
                 {{ $trans('Preview invoice PDF') }}
-              </b-button>
+              </BButton>
             </p>
           </div>
         </div>
@@ -106,12 +106,18 @@ import my24 from '@/services/my24.js'
 
 import { EmailService, EmailModel } from "@/models/invoices/Email.js";
 import { InvoiceService, InvoiceModel } from '@/models/invoices/Invoice'
-import {OrderModel, OrderService} from "@/models/orders/Order";
+import {OrderService} from "@/models/orders/Order";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   computed: {
     isCreate() {
@@ -164,7 +170,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching unsent email", error);
-        this.errorToast(this.$trans("Error fetching unsent email"));
+        errorToast(this.create, $trans("Error fetching unsent email"));
         this.isLoading = false;
       }
     },
@@ -215,7 +221,7 @@ export default {
       } catch(error) {
         this.isLoading = false
         console.log('error fetching invoice', error)
-        this.errorToast(this.$trans('Error fetching invoice'))
+        errorToast(this.create, $trans('Error fetching invoice'))
       }
     },
     async loadDocuments() {
@@ -229,7 +235,7 @@ export default {
       } catch (error) {
         this.isLoading = false;
         console.log("Error fetching documents", error);
-        this.errorToast(this.$trans("Error fetching documents"));
+        errorToast(this.create, $trans("Error fetching documents"));
       }
     },
     async submitForm() {
@@ -250,9 +256,9 @@ export default {
 
       this.email.recipients = validatedEmails
       this.isLoading = true;
-      const sentTitle = this.$trans("Sent")
-      const sentBody = this.$trans("Invoice has been sent")
-      const sendError = this.$trans("Error sending invoice")
+      const sentTitle = $trans("Sent")
+      const sentBody = $trans("Invoice has been sent")
+      const sendError = $trans("Error sending invoice")
 
       if (this.isCreate) {
         this.email.invoice = this.$route.query.invoiceId
@@ -261,15 +267,15 @@ export default {
           this.isLoading = false;
 
           if (!this.email.is_sent) {
-            this.errorToast(sendError);
+            errorToast(this.create, sendError);
             return;
           }
-          this.infoToast(sentTitle, sentBody);
+          infoToast(this.create, sentTitle, sentBody);
           await this.$router.push({name: 'invoices-sent'});
         } catch (error) {
           console.log("Error sending invoice", error);
           this.isLoading = false;
-          this.errorToast(sendError);
+          errorToast(this.create, sendError);
         }
         return
       }
@@ -281,15 +287,15 @@ export default {
 
         this.isLoading = false
         if (!this.email.is_sent) {
-          this.errorToast(sendError);
+          errorToast(this.create, sendError);
           return;
         }
-        this.infoToast(sentTitle, sentBody);
+        infoToast(this.create, sentTitle, sentBody);
         await this.$router.push({name: 'invoices-sent'});
       } catch(error) {
         console.log("Error sending invoice", error);
         this.isLoading = false;
-        this.errorToast(sendError);
+        errorToast(this.create, sendError);
       }
     },
   }

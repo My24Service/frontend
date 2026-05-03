@@ -2,9 +2,9 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="people"></b-icon>{{ $trans("People") }}</h3>
-        <b-button-toolbar>
-          <b-button-group>
+        <h3><IBiPeople></IBiPeople>{{ $trans("People") }}</h3>
+        <BButton-toolbar>
+          <BButton-group>
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
               v-bind:title="$trans('Refresh')"
@@ -12,11 +12,11 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
-          <b-link :to="{name: 'apiuser-add'}" class="btn primary" v-if="isStaff || isSuperuser">
+          </BButton-group>
+          <BLink :to="{name: 'apiuser-add'}" class="btn primary" v-if="isStaff || isSuperuser">
             {{$trans('Add API user')}}
-          </b-link>
-        </b-button-toolbar>
+          </BLink>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -61,8 +61,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="apiuser-add"
                   v-bind:title="$trans('New API user')"
@@ -74,8 +74,8 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(token)="data">
@@ -87,9 +87,9 @@
               size="60"
               :value="data.item.api_user.token"
             />
-            <b-link v-on:click.native="copyToken(data.item.token)">
-              <b-icon-back class="icon-th"></b-icon-back>
-            </b-link>
+            <BLink v-on:click="copyToken(data.item.token)">
+              <IBiBack class="icon-th"></IBiBack>
+            </BLink>
           </p>
           <br/>
 
@@ -101,7 +101,7 @@
             </span>
             <span v-else>
               {{ $trans('Active') }}&nbsp;-
-              <b-link v-on:click.native="function(){ showRevokeModal(data.item.id) }">{{ $trans('Revoke') }}</b-link>
+              <BLink v-on:click="function(){ showRevokeModal(data.item.id) }">{{ $trans('Revoke') }}</BLink>
               <p>
                 {{ $trans("Valid until") }}: {{ getValidUntil(data.item.api_user) }}
               </p>
@@ -141,9 +141,19 @@ import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {ApiUserService} from '../../models/company/UserApi.js'
+import {ApiUserService} from '@/models/company/UserApi'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'UserApiList',
   components: {
     PillsCompanyUsers,
@@ -164,9 +174,9 @@ export default {
       isLoading: false,
       apiusers: [],
       apiuserFields: [
-        {key: 'username', label: this.$trans('Username')},
-        {key: 'api_user.name', label: this.$trans('Name')},
-        {key: 'token', label: this.$trans('Token')},
+        {key: 'username', label: $trans('Username')},
+        {key: 'api_user.name', label: $trans('Name')},
+        {key: 'token', label: $trans('Token')},
         {key: 'icons'}
       ],
     }
@@ -193,11 +203,11 @@ export default {
     async doDelete() {
       try {
         await this.apiUserService.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('API user has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('API user has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting API user', error)
-        this.errorToast(this.$trans('Error deleting API user'))
+        errorToast(this.create, $trans('Error deleting API user'))
       }
     },
     // rest
@@ -208,11 +218,11 @@ export default {
     async doRevoke() {
       try {
         await this.apiUserService.revoke(this.revokeId)
-        this.infoToast(this.$trans('Revoked'), this.$trans('API key has been revoked'))
+        infoToast(this.create, $trans('Revoked'), $trans('API key has been revoked'))
         await this.loadData()
       } catch(error) {
         console.log('Error revoking API key', error)
-        this.errorToast(this.$trans('Error revoking API key'))
+        errorToast(this.create, $trans('Error revoking API key'))
       }
     },
     getValidUntil(api_user) {
@@ -222,7 +232,7 @@ export default {
       this.$refs.clone.focus();
       document.execCommand('copy');
       // navigator.clipboard.writeText(token)
-      this.infoToast(this.$trans('Copy'), this.$trans('Token copied to clipboard'))
+      infoToast(this.create, $trans('Copy'), $trans('Token copied to clipboard'))
     },
     async loadData() {
       this.isLoading = true;
@@ -233,7 +243,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching api users', error)
-        this.errorToast(this.$trans('Error loading API keys'))
+        errorToast(this.create, $trans('Error loading API keys'))
         this.isLoading = false
       }
     }

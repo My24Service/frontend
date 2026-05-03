@@ -1,11 +1,10 @@
 <template>
-
-    <div class="app-page">
+    <div class="app-page" v-if="employee">
       <header>
 
         <div class="page-title">
           <h3>
-            <b-icon icon="people"></b-icon>
+            <IBiPeople></IBiPeople>
             <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
             <strong>{{ employee.username }}</strong>
             <span class="dimmed" v-if="isCreate && !employee.username">{{ $trans('new') }}</span>
@@ -13,30 +12,30 @@
           </h3>
 
 
-          <b-button-toolbar>
-            <b-button @click="cancelForm" type="button" variant="secondary">
-              {{ $trans('Cancel') }}</b-button>
-              <b-button @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
-                {{ $trans('Submit') }}</b-button>
-              </b-button-toolbar>
+          <BButton-toolbar>
+            <BButton @click="cancelForm" type="button" variant="secondary">
+              {{ $trans('Cancel') }}</BButton>
+              <BButton @click="preSubmitForm" :disabled="buttonDisabled" type="button" variant="primary">
+                {{ $trans('Submit') }}</BButton>
+              </BButton-toolbar>
             </div>
           </header>
 
           <b-form class="page-detail flex-columns">
             <div class="panel col-1-3">
               <h6>{{ $trans('user info') }}</h6>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Username')"
                 label-for="employee_username"
               >
-                <b-form-input
+                <BFormInput
                   id="employee_username"
                   size="sm"
                   v-model="employee.username"
                   :state="isSubmitClicked ? !v$.employee.username.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   v-if="employee.username === ''"
                   :state="isSubmitClicked ? v$.employee.username.required : null">
@@ -47,139 +46,153 @@
                   :state="isSubmitClicked ? !v$.employee.username.isUnique.$invalid : null">
                   {{ $trans('Username is already in use') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Password')"
                 label-for="employee_password"
               >
-                <b-form-input
+                <BFormInput
                   id="employee_password"
                   size="sm"
                   type="password"
+                  autocomplete="false"
                   v-model="employee.password1"
                   @blur="v$.employee.password1.$touch()"
                   :state="isSubmitClicked && v$.employee.password1 ? !v$.employee.password1.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked && v$.employee.password1 ? !v$.employee.password1.$error : null">
                   {{ $trans('Please enter a password') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Password again')"
                 label-for="employee_password_again"
               >
-                <b-form-input
+                <BFormInput
                   id="employee_password_again"
                   size="sm"
                   type="password"
+                  autocomplete="false"
                   v-model="employee.password2"
                   @blur="v$.employee.password2.$touch()"
                   :state="isSubmitClicked ? !v$.employee.password2.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   v-if="employee.password2 !== '' && employee.password2"
                   :state="isSubmitClicked ? !v$.employee.password2.sameAs.$invalid : null">
                   {{ $trans('Passwords do not match') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
         </div>
         <div class="panel col-1-3">
 
           <h6>{{ $trans('personal details') }}</h6>
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('First name')"
                 label-for="employee_first_name"
               >
-                <b-form-input
+                <BFormInput
                   id="employee_first_name"
                   size="sm"
                   v-model="employee.first_name"
                   :state="isSubmitClicked ? !v$.employee.first_name.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.employee.first_name.$error : null">
                   {{ $trans('Please enter a first name') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Last name')"
                 label-for="employee_last_name"
               >
-                <b-form-input
+                <BFormInput
                   id="employee_last_name"
                   size="sm"
                   v-model="employee.last_name"
                   :state="isSubmitClicked ? !v$.employee.last_name.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.employee.last_name.$error : null">
                   {{ $trans('Please enter a last name') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-cols="4"
                 v-bind:label="$trans('Email')"
                 label-for="employee_email"
               >
-                <b-form-input
+                <BFormInput
                   id="employee_email"
                   size="sm"
                   v-model="employee.email"
                   :state="isSubmitClicked ? !v$.employee.email.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.employee.email.$error : null">
                   {{ $trans('Please enter a valid email') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
 
 
         </div>
         <div class="panel col-1-3">
           <h6>{{ $trans('contract') }} &amp; {{  $trans('misc.') }}</h6>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Contract hours per week')"
             label-for="employee_contract_hours_week"
           >
-            <b-form-input
+            <BFormInput
               id="employee_contract_hours_week"
               size="sm"
               v-model="employee.employee_user.contract_hours_week"
-            ></b-form-input>
-          </b-form-group>
+            ></BFormInput>
+          </BFormGroup>
 
-          <b-form-group
-            v-if="hasBranches"
+          <BFormGroup
+            v-if="hasBranches && !isBranchEmployee"
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Branch')"
             label-for="employee_branch"
           >
-            <b-form-select
+            <BFormSelect
               id="employee_branch"
               v-model="employee.employee_user.branch"
               :options="branches"
               size="sm"
-            ></b-form-select>
-          </b-form-group>
+            ></BFormSelect>
+          </BFormGroup>
 
+          <BFormGroup
+            v-if="hasBranches && isBranchEmployee && branch"
+            label-size="sm"
+            label-cols="4"
+            v-bind:label="$trans('Branch')"
+            label-for="employee_branch"
+          >
+            <BFormInput
+              :model-value="branch.name"
+              readonly="readonly"
+            />
+          </BFormGroup>
 
         </div>
       </b-form>
@@ -192,13 +205,21 @@ import { useVuelidate } from '@vuelidate/core'
 import { required, sameAs, email } from '@vuelidate/validators'
 import { helpers } from '@vuelidate/validators'
 
-import { usernameExists } from '../../models/helpers.js'
-import employeeModel from '../../models/company/UserEmployee.js'
-import branchModel from '../../models/company/Branch.js'
+import { usernameExists } from '@/models/helpers'
+import {EmployeeService} from '@/models/company/UserEmployee'
+import {BranchService} from '@/models/company/Branch'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
+  mixins: [componentMixin],
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   components: {
   },
@@ -227,6 +248,9 @@ export default {
     }
 
     if (this.isCreate) {
+      if (!this.employee) {
+        this.employee = this.employeeService.getFields()
+      }
       const isUniqueCreate = (value) => {
         if (value === '') return true
 
@@ -247,6 +271,9 @@ export default {
         sameAs: sameAs(this.employee.password1)
       }
     } else {
+      if (!this.employee) {
+        this.employee = this.employeeService.getFields()
+      }
       const isUniqueEdit = (value) => {
         if (this.orgUsername === value || value === '' || value.length < 3) {
           return true
@@ -275,10 +302,13 @@ export default {
       isLoading: false,
       submitClicked: false,
       buttonDisabled: false,
-      employee: employeeModel.getFields(),
+      employee: null,
       orgUsername: null,
       branches: [],
+      branch: null,
       branch_info: '',
+      employeeService: new EmployeeService,
+      branchService: new BranchService
     }
   },
   computed: {
@@ -288,31 +318,29 @@ export default {
     isSubmitClicked() {
       return this.submitClicked
     },
-    hasBranches() {
-      return this.$store.getters.getMemberHasBranches
-    },
   },
   async created() {
-    const response = await branchModel.list()
+    if (!this.isBranchEmployee) {
+      const response = await this.branchService.list()
 
-    this.branches = [{
-      value: null,
-      text: '-'
-    }]
-
-    for(let i=0;i<response.results.length; i++) {
-      const txt = `${response.results[i].name} - ${response.results[i].city}`
-
-      this.branches.push({
-        value: response.results[i].id,
-        text: txt,
-      })
+      this.branches = [{
+        value: null,
+        text: '-'
+      }, ...response.results.map((branch) => {
+        const txt = `${branch.name} - ${branch.city}`
+        return {
+          value: branch.id,
+          text: txt,
+        }
+      })]
+    } else {
+      this.branch = await this.branchService.getMyBranch()
     }
 
     if (!this.isCreate) {
       await this.loadData()
     } else {
-      this.employee = employeeModel.getFields()
+      this.employee = this.employeeService.getFields()
     }
     this.isLoading = false
   },
@@ -331,21 +359,25 @@ export default {
 
       setTimeout(() => {
         this.submitForm()
-      }, 1000)
+      }, 500)
     },
     async submitForm() {
       this.isLoading = true
 
+      if (this.isBranchEmployee) {
+        this.employee.employee_user.branch = this.branch.id
+      }
+
       if (this.isCreate) {
         this.employee.password = this.employee.password1
         try {
-          await employeeModel.insert(this.employee)
-          this.infoToast(this.$trans('Created'), this.$trans('employee has been created'))
+          await this.employeeService.insert(this.employee)
+          infoToast(this.create, $trans('Created'), $trans('employee has been created'))
           this.isLoading = false
           this.cancelForm()
         } catch(error) {
           console.log('Error creating employee', error)
-          this.errorToast(this.$trans('Error creating employee'))
+          errorToast(this.create, $trans('Error creating employee'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -363,13 +395,13 @@ export default {
           delete this.employee.password
         }
 
-        await employeeModel.update(this.pk, this.employee)
-        this.infoToast(this.$trans('Updated'), this.$trans('employee has been updated'))
+        await this.employeeService.update(this.pk, this.employee)
+        infoToast(this.create, $trans('Updated'), $trans('employee has been updated'))
         this.isLoading = false
         this.cancelForm()
       } catch(error) {
         console.log('Error updating employee', error)
-        this.errorToast(this.$trans('Error updating employee'))
+        errorToast(this.create, $trans('Error updating employee'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -378,12 +410,12 @@ export default {
       this.isLoading = true
 
       try {
-        this.employee = await employeeModel.detail(this.pk)
+        this.employee = await this.employeeService.detail(this.pk)
         this.orgUsername = this.employee.username
         this.isLoading = false
       } catch(error) {
         console.log('error fetching employee', error)
-        this.errorToast(this.$trans('Error loading employee'))
+        errorToast(this.create, $trans('Error loading employee'))
         this.isLoading = false
       }
     },

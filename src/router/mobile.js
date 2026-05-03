@@ -24,7 +24,7 @@ export default [
   children: [
       {
         name: 'mobile-dispatch',
-        path: '/mobile/dispatch',
+        path: '/mobile/dispatch/:assignModeProp?',
         components: {
           'app-content': Dispatch,
           'app-subnav': SubNavMobile
@@ -79,18 +79,6 @@ export default [
         },
         props: {
           'app-content': {dispatch: true, queryMode: 'finished'},
-          'app-subnav': {}
-        },
-      },
-      {
-        name: 'mobile-orders-unassigned',
-        path: '/mobile/orders-unassigned',
-        components: {
-          'app-content': OrderList,
-          'app-subnav': SubNavMobile
-        },
-        props: {
-          'app-content': {dispatch: true, queryMode: 'unassigned'},
           'app-subnav': {}
         },
       },

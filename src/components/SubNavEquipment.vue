@@ -24,11 +24,11 @@
 </template>
 
 <script>
-import { componentMixin } from '../utils.js'
+
 
 export default {
   name: 'SubNavEquipment',
-  mixins: [componentMixin],
+
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')

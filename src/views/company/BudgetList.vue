@@ -12,19 +12,19 @@
         >
           <b-row>
             <b-col cols="4">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Year')"
                 label-for="model-year"
               >
-                <b-form-input
+                <BFormInput
                   size="sm"
                   id="model-year"
                   v-model="budget.year"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="8">
-              <b-form-group
+              <BFormGroup
                 v-bind:label="$trans('Amount')"
               >
                 <PriceInput
@@ -32,7 +32,7 @@
                   :currency="budget.amount_currency"
                   @priceChanged="(val) => budget.setAmount(val)"
                 />
-              </b-form-group>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-container>
@@ -55,9 +55,9 @@
 
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="credit-card2-front"></b-icon>{{ $trans("Budgets") }}</h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <h3><IBiCreditCard2Front></IBiCreditCard2Front>{{ $trans("Budgets") }}</h3>
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
             <ButtonLinkRefresh
             :method="function() { loadData() }"
             :title="$trans('Refresh')"
@@ -65,14 +65,14 @@
             <ButtonLinkSearch
             :method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <button
             class="btn primary"
             @click="showAddModal"
             >
-            <b-icon icon="plus"></b-icon>{{ $trans('New budget') }}
+            <IBiPlus></IBiPlus>{{ $trans('New budget') }}
           </button>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -124,27 +124,37 @@
 </template>
 
 <script>
-import { BudgetService } from '../../models/company/Budget.js'
+import { BudgetService } from '@/models/company/Budget'
 
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
-import {componentMixin} from "../../utils";
 import PriceInput from "../../components/PriceInput";
 
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {useMainStore} from "@/stores/main";
+
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: 'BudgetList',
   components: {
     IconLinkDelete,
     IconLinkEdit,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     PriceInput,
@@ -158,8 +168,8 @@ export default {
       isLoading: false,
       isEdit: false,
       fields: [
-        {key: 'year', label: this.$trans('Year')},
-        {key: 'amount', label: this.$trans('Budget size')},
+        {key: 'year', label: $trans('Year')},
+        {key: 'amount', label: $trans('Budget size')},
         {key: 'icons'}
       ],
     }
@@ -183,8 +193,8 @@ export default {
       this.budget = new this.service.model({
         year: d.getFullYear(),
         amount: '0.00',
-        amount_currency: this.$store.getters.getDefaultCurrency,
-        default_currency: this.$store.getters.getDefaultCurrency
+        amount_currency: this.mainStore.getDefaultCurrency,
+        default_currency: this.mainStore.getDefaultCurrency
       })
       this.isEdit = false
       this.$refs['model-modal'].show()
@@ -193,15 +203,15 @@ export default {
       try {
         if (this.isEdit) {
           await this.service.update(this.budget.id, this.budget)
-          this.infoToast(this.$trans('Updated'), this.$trans('Budget modified'))
+          infoToast(this.create, $trans('Updated'), $trans('Budget modified'))
         } else {
           await this.service.insert(this.budget)
-          this.infoToast(this.$trans('Created'), this.$trans('Budget added'))
+          infoToast(this.create, $trans('Created'), $trans('Budget added'))
         }
         await this.loadData()
       } catch(error) {
         console.log('Error handling budget', error)
-        this.errorToast(this.$trans('Error handling budget'))
+        errorToast(this.create, $trans('Error handling budget'))
       }
     },
     // search
@@ -221,11 +231,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.pk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Budget has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Budget has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting budget', error)
-        this.errorToast(this.$trans('Error deleting budget'))
+        errorToast(this.create, $trans('Error deleting budget'))
       }
     },
     // rest
@@ -235,7 +245,7 @@ export default {
         this.budgets = data.results.map((m) => new this.service.model(m))
       } catch(error) {
         console.log('error fetching budgets', error)
-        this.errorToast(this.$trans('Error loading budgets'))
+        errorToast(this.create, $trans('Error loading budgets'))
       }
     }
   }
