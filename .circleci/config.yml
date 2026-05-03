@@ -33,12 +33,13 @@ jobs:
       - checkout
       - run: sudo apt-get update
       - run: sudo apt install virtualenv
+      - run: rm -fr package-lock.json
       - run:
           name: Install packages
-          command: yarn
+          command: npm i
       - run:
           name: Create build
-          command: yarn ci:build
+          command: npm run ci:build
 
       - run:
           name: set environment var TARGET_DIR
@@ -93,12 +94,13 @@ jobs:
       - checkout
       - run: sudo apt-get update
       - run: sudo apt install virtualenv
+      - run: rm -fr package-lock.json
       - run:
           name: Install packages
-          command: yarn
+          command: npm i
       - run:
           name: Create build
-          command: yarn ci:build
+          command: npm run ci:build
       - run:
           name: set environment var TARGET_DIR
           command: |
