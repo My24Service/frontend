@@ -25,7 +25,7 @@ jobs:
   build-upload-main:
     working_directory: ~/circleci-frontend
     docker:
-      - image: cimg/node:18.19.0
+      - image: cimg/node:22.12.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-main-build.tgz
           RELEASE_NAME: /tmp/frontend-release
@@ -86,7 +86,7 @@ jobs:
   build-upload-develop:
     working_directory: ~/circleci-frontend
     docker:
-      - image: cimg/node:18.19.0
+      - image: cimg/node:22.12.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-develop-build.tgz
           RELEASE_NAME: /tmp/frontend-release
