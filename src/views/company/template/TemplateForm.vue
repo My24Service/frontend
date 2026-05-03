@@ -3,7 +3,7 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-earmark-check-fill"></b-icon>
+          <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
           <router-link :to="{ name: 'company-templates' }">{{ $trans("Templates") }}</router-link>
           /
           <strong>{{ template.name }}</strong>
@@ -13,10 +13,10 @@
           </span>
         </h3>
         <div class="flex-columns" v-if="isCreate || isEdit">
-          <b-button @click="cancelForm" type="button" variant="secondary">
-            {{ $trans("Cancel") }}</b-button
+          <BButton @click="cancelForm" type="button" variant="secondary">
+            {{ $trans("Cancel") }}</BButton
           >
-          <b-button
+          <BButton
             @click="submitForm"
             type="button"
             variant="primary"
@@ -24,12 +24,12 @@
           >
             <b-spinner small v-if="isLoading"></b-spinner>
             {{ $trans("Submit") }}
-          </b-button
+          </BButton
           >
         </div>
         <div class="flex-columns" v-if="!isCreate && !isEdit">
-          <b-button @click="isEdit = true" type="button" variant="primary">
-            {{ $trans("Edit template") }}</b-button
+          <BButton @click="isEdit = true" type="button" variant="primary">
+            {{ $trans("Edit template") }}</BButton
           >
         </div>
       </div>
@@ -39,49 +39,49 @@
         <div class="flex-columns">
           <div class="panel" v-if="isCreate || isEdit">
             <h6>{{ $trans("Template") }}</h6>
-            <b-form-group v-bind:label="$trans('Name')" label-for="template_name" label-cols="3">
-              <b-form-input
+            <BFormGroup v-bind:label="$trans('Name')" label-for="template_name" label-cols="3">
+              <BFormInput
                 autofocus
                 id="template_name"
                 size="sm"
                 v-model="template.name"
                 :state="isSubmitClicked ? !v$.template.name.$error : null"
-              ></b-form-input>
+              ></BFormInput>
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.template.name.$error : null">
                 {{ $trans("Please enter a template name") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Description')"
               label-for="template_description"
             >
-              <b-form-textarea
+              <BFormTextarea
                 id="template_description"
                 v-model="template.description"
                 rows="3"
-              ></b-form-textarea>
-            </b-form-group>
-            <b-form-group
+              ></BFormTextarea>
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Type')"
               label-for="template_type"
               v-if="isCreate"
             >
-              <b-form-select
+              <BFormSelect
                 id="template_type"
                 v-model="template.template_type"
                 :options="templateTypes"
                 size="sm"
                 :state="isSubmitClicked ? !v$.template.template_type.$error : null"
-              ></b-form-select>
+              ></BFormSelect>
               <b-form-invalid-feedback
                 :state="isSubmitClicked ? !v$.template.template_type.$error : null"
               >
                 {{ $trans("Please select a template type") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group v-bind:label="$trans('Choose template')" label-cols="3">
+            </BFormGroup>
+            <BFormGroup v-bind:label="$trans('Choose template')" label-cols="3">
               <b-form-file
                 v-model="file"
                 v-bind:placeholder="$trans('Choose a word document or drop it here...')"
@@ -96,20 +96,20 @@
               <b-form-invalid-feedback :state="isSubmitClicked ? !v$.template.file.$error : null">
                 {{ $trans("Please select a file") }}
               </b-form-invalid-feedback>
-            </b-form-group>
-            <b-form-group
+            </BFormGroup>
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Set template as active')"
               class="template_active"
               label-for="template_active"
             >
-              <b-form-checkbox
+              <BFormCheckbox
                 id="template_active"
                 v-model="template.is_active"
                 rows="3"
               >
-              </b-form-checkbox>
-            </b-form-group>
+              </BFormCheckbox>
+            </BFormGroup>
             <div>
               <h4>{{ $trans("Template fields documentation") }}</h4>
               <ul>
@@ -151,12 +151,12 @@
           </div>
           <div class="panel" v-if="!isCreate && !isEdit">
             <h6>{{ $trans("Template preview") }}</h6>
-            <b-form-group
+            <BFormGroup
               label-cols="3"
               v-bind:label="$trans('Template')"
               label-for="template-search"
             >
-              <multiselect
+              <VueMultiselect
                 id="template-search"
                 track-by="id"
                 :placeholder="$trans('Type to search')"
@@ -177,14 +177,14 @@
                 :custom-label="result => result.name"
                 ref="searchTemplate"
               >
-              </multiselect>
-            </b-form-group>
+              </VueMultiselect>
+            </BFormGroup>
             <b-row>
               <b-col cols="3" v-if="result">
                 {{ result.name }}
               </b-col>
               <b-col cols="3" v-if="result">
-                <b-button
+                <BButton
                   @click="previewPdf"
                   type="button"
                   variant="primary"
@@ -192,7 +192,7 @@
                 >
                   <b-spinner small v-if="loadingPdf"></b-spinner>
                   {{ $trans("Preview pdf") }}
-                </b-button>
+                </BButton>
               </b-col>
             </b-row>
           </div>
@@ -211,14 +211,20 @@ import {
 import AwesomeDebouncePromise from "awesome-debounce-promise";
 import { QuotationService } from "@/models/quotations/Quotation";
 import { InvoiceService } from '@/models/invoices/Invoice'
-import Multiselect from "vue-multiselect";
+import VueMultiselect from  "vue-multiselect";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   components: {
-    Multiselect
+    VueMultiselect
   },
   setup() {
-    return { v$: useVuelidate() };
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     pk: {
@@ -264,8 +270,8 @@ export default {
       file: null,
       template: {},
       templateTypes: [
-        { value: "invoice", text: this.$trans("Invoice") },
-        { value: "quotation", text: this.$trans("Quotation") }
+        { value: "invoice", text: $trans("Invoice") },
+        { value: "quotation", text: $trans("Quotation") }
       ],
       results: [],
       fetchingResults: false,
@@ -294,7 +300,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching template", error);
-        this.errorToast(this.$trans("Error loading template"));
+        errorToast(this.create, $trans("Error loading template"));
         this.isLoading = false;
       }
     },
@@ -322,7 +328,7 @@ export default {
         this.fetchingResults = false;
       } catch (error) {
         console.log("Error fetching results", error);
-        this.errorToast(this.$trans("Error fetching results"));
+        errorToast(this.create, $trans("Error fetching results"));
         this.fetchingResults = false;
       }
     },
@@ -338,12 +344,12 @@ export default {
       if (this.isCreate) {
         try {
           await this.templateService.insert(this.template);
-          this.infoToast(this.$trans("Created"), this.$trans("Template has been created"));
+          infoToast(this.create, $trans("Created"), $trans("Template has been created"));
           this.isLoading = false;
           this.$router.go(-1);
         } catch (error) {
           console.log("Error creating template", error);
-          this.errorToast(this.$trans("Error creating template"));
+          errorToast(this.create, $trans("Error creating template"));
           this.isLoading = false;
         }
       }
@@ -356,14 +362,14 @@ export default {
 
         try {
           await this.templateService.update(this.pk, this.template);
-          this.infoToast(this.$trans("Created"), this.$trans("Template has been updated"));
+          infoToast(this.create, $trans("Created"), $trans("Template has been updated"));
           this.isLoading = false;
           this.isEdit = false
           this.template = {}
           await this.loadData()
         } catch (error) {
           console.log("Error creating template", error);
-          this.errorToast(this.$trans("Error creating template"));
+          errorToast(this.create, $trans("Error creating template"));
           this.isLoading = false;
         }
       }
@@ -383,7 +389,7 @@ export default {
         window.open(_url, "_blank");
       } catch (error) {
         console.log("Error downloading template", error);
-        this.errorToast(this.$trans("Error downloading template"));
+        errorToast(this.create, $trans("Error downloading template"));
         this.loadingPdf = false;
       }
     },

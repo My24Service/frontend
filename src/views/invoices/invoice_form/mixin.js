@@ -1,12 +1,13 @@
 import {OPTION_NONE, OPTION_ONLY_TOTAL, OPTION_USER_TOTALS} from "./constants";
+import {$trans, errorToast} from "@/utils";
 
 let invoiceMixin = {
   data() {
     return {
       useOnInvoiceOptions: [
-        { text: this.$trans('Items'), value: OPTION_USER_TOTALS },
-        { text: this.$trans('Total'), value: OPTION_ONLY_TOTAL },
-        { text: this.$trans('None'), value: OPTION_NONE },
+        { text: $trans('Items'), value: OPTION_USER_TOTALS },
+        { text: $trans('Total'), value: OPTION_ONLY_TOTAL },
+        { text: $trans('None'), value: OPTION_NONE },
       ],
       useOnInvoiceSelected: null,
     }
@@ -30,7 +31,7 @@ let invoiceMixin = {
         await this.loadData()
       } catch (e) {
         console.log(e)
-        this.errorToast(this.$trans('Error removing costs'))
+        errorToast(this.create, $trans('Error removing costs'))
       }
       this.isLoading = false
     },
@@ -39,10 +40,10 @@ let invoiceMixin = {
       try {
         await this.costService.updateCollection()
         await this.loadData()
-        this.infoToast(this.$trans('Saved'), this.$trans('Costs saved'))
+        infoToast(this.create, $trans('Saved'), $trans('Costs saved'))
       } catch (e) {
         console.log(e)
-        this.errorToast(this.$trans('Error saving costs'))
+        errorToast(this.create, $trans('Error saving costs'))
       }
       this.isLoading = false
     },

@@ -35,8 +35,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkAdd
                   router_name="module-add"
                   v-bind:title="$trans('New module')"
@@ -48,8 +48,8 @@
                 <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #table-busy>
@@ -85,8 +85,20 @@ import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import ButtonLinkAdd from '@/components/ButtonLinkAdd.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import Pagination from "@/components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast, infoToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   components: {
     IconLinkEdit,
     IconLinkDelete,
@@ -133,11 +145,11 @@ export default {
     async doDelete() {
       try {
         await this.model.delete(this.modulePk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Module has been deleted'))
+        infoToast(this.create, this.$trans('Deleted'), this.$trans('Module has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('Error deleting module', error)
-        this.errorToast(this.$trans('Error deleting module'))
+        errorToast(this.create, this.$trans('Error deleting module'))
       }
     },
     // rest
@@ -150,7 +162,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching modules', error)
-        this.errorToast(this.$trans('Error loading modules'))
+        errorToast(this.create, this.$trans('Error loading modules'))
         this.isLoading = false
       }
     }

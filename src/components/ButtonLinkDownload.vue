@@ -1,7 +1,7 @@
 <template>
-  <b-button size="sm" :title="title" @click="method()">
-    <b-icon-cloud-download aria-hidden="true"></b-icon-cloud-download>
-  </b-button>
+  <BButton size="sm" :title="title" @click="method()">
+    <IBiCloudDownload aria-hidden="true"></IBiCloudDownload>
+  </BButton>
 </template>
 
 <script>

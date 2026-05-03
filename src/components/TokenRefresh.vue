@@ -4,16 +4,27 @@
 </template>
 
 <script>
-import accountModel from "../models/account/Account";
+import {AccountService} from "../models/account/Account";
+import componentMixin from "@/mixins/common";
+import {useAuthStore} from "@/stores/auth";
 
 export default {
+  setup() {
+    const authStore = useAuthStore()
+
+    return {
+      authStore
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       intervalIdToken: null,
       intervalMinutes: 15,
       // 'SLIDING_TOKEN_LIFETIME': timedelta(days=2),
       // 'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=14),
-      expireRefreshThresholdSec: 60*60*12
+      expireRefreshThresholdSec: 60*60*12,
+      accountService: new AccountService()
     }
   },
   methods: {
@@ -27,7 +38,7 @@ export default {
       return JSON.parse(jsonPayload);
     },
     async checkToken() {
-      const token = this.$auth.getAccessToken()
+      const token = localStorage.getItem('accessToken')
       const tokenVars = this.parseJwt(token)
       const expireInSeconds = tokenVars.exp - Math.round(Date.now()/1000)
       const expireInHours = Math.round(expireInSeconds/(60*60))
@@ -37,10 +48,7 @@ export default {
         console.debug(`refreshing token (${debugStr})`)
 
         try {
-          const result = await accountModel.refreshToken(token)
-          console.debug('token refresh result', result)
-          this.$auth.authenticate({ accessToken: result.token })
-          console.debug('token refreshed')
+          await this.authStore.refreshToken(token)
         } catch (e) {
           console.error('error refreshing token', e)
         }

@@ -1,10 +1,10 @@
 <template>
-  <div class="app-page" v-show="location">
+  <div class="app-page" v-if="location">
     <header>
 
       <div class='page-title' v-if="location">
         <h3>
-          <b-icon icon="shop-window"></b-icon>
+          <IBiShopWindow></IBiShopWindow>
           <span @click="goBack" class="backlink">{{ $trans("Locations") }}</span>
           / {{ location.name }}
         </h3>
@@ -26,12 +26,12 @@
           <dt v-if="hasQr" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
           <dd v-if="hasQr">
             <div v-if="location.qr_path" class="qr-container">
-              <b-link
+              <BLink
                 class="btn btn-sm btn-outline" :href="location.qr_path"
                 target="_blank"
                 :title="$trans('Open QR in new tab')">
                 <img alt="QR code" class="qr-code-image" :src="location.qr_path" />
-              </b-link>
+              </BLink>
               <p>
                 <a href="javascript:" @click="download(location)">
                   {{ $trans("Download") }}
@@ -40,9 +40,9 @@
             </div>
             <img v-if="!location.qr_path" :alt="$trans('No QR yet')" class="qr-code-image" :src="NO_IMAGE_URL" />
             <p>
-              <b-button @click="recreate_qr">
+              <BButton @click="recreate_qr">
                 {{ $trans("Recreate")}}
-              </b-button>
+              </BButton>
             </p>
           </dd>
         </dl>
@@ -54,7 +54,7 @@
             <div class='flex-columns space-between align-items-center'>
               <h6>{{ $trans("Past orders") }}</h6>
               <span>
-                <b-button-group>
+                <BButton-group>
                   <ButtonLinkRefresh
                   v-bind:method="function() { loadData() }"
                   v-bind:title="$trans('Refresh')"
@@ -62,7 +62,7 @@
                   <ButtonLinkSearch
                   v-bind:method="function() { showSearchModal() }"
                   />
-                </b-button-group>
+                </BButton-group>
               </span>
             </div>
             <ul class='listing order-list'>
@@ -93,6 +93,33 @@
               :is-view="true"
             />
           </b-tab>
+          <b-tab key="docs" :title="$trans('Equipment')">
+            <b-table
+              id="equipment-table"
+              :small="true"
+              :busy='isLoading'
+              :fields="equipmentFields"
+              :items="equipmentObjects"
+              responsive="md"
+              class="data-table"
+            >
+              <template #cell(name)="data">
+                <router-link :to="{name: viewMaterialLink, params: {pk: data.item.id}}">
+                  {{ data.item.name }}
+                </router-link><br/>
+              </template>
+              <template #cell(customer)="data">
+              <span v-if="data.item.customer_branch_view">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </span>
+              </template>
+              <template #cell(branch)="data">
+              <span v-if="data.item.customer_branch_view">
+                {{ data.item.customer_branch_view.name }} - {{ data.item.customer_branch_view.city }}
+              </span>
+              </template>
+            </b-table>
+          </b-tab>
         </b-tabs>
       </div>
     </div>
@@ -105,16 +132,29 @@ import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
 import OrderTableInfo from '../../components/OrderTableInfo.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import OrderStats from "../../components/OrderStats";
-import {componentMixin} from "@/utils";
+
 import {NO_IMAGE_URL} from '@/constants'
 
 import { OrderService } from '@/models/orders/Order'
 import { LocationService } from "@/models/equipment/location";
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import my24 from "@/services/my24";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
+import {$trans, errorToast} from "@/utils";
+import {EquipmentService} from "@/models/equipment/equipment";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   components: {
     DocumentsComponent,
     ButtonLinkRefresh,
@@ -148,7 +188,28 @@ export default {
       ],
       locationService: new LocationService(),
       orderService: new OrderService(),
-      statsData: null
+      equipmentService: new EquipmentService(),
+      statsData: null,
+      equipmentFields: [],
+      equipmentObjects: [],
+      equipmentFieldsCustomerPlanning: [
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'customer', label: $trans('Customer'), sortable: true},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+      ],
+      equipmentFieldsBranchPlanning: [
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'branch', label: $trans('Branch'), sortable: true},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+      ],
+      equipmentFieldsCustomerNonPlanning: [
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+      ],
+      equipmentFieldsBranchNonPlanning: [
+        {key: 'name', label: $trans('Name'), sortable: true},
+        {key: 'num_orders', label: $trans('Orders'), sortable: true},
+      ],
     }
   },
   props: {
@@ -165,7 +226,7 @@ export default {
   },
   computed: {
     hasQr() {
-      const qrType = this.$store.getters.getEquipmentQrType;
+      const qrType = this.mainStore.getEquipmentQrType;
       return qrType !== 'none'
     },
     editLink() {
@@ -175,8 +236,16 @@ export default {
         return 'customers-location-edit'
       }
     },
+    viewMaterialLink() {
+      if (this.hasBranches) {
+        return 'equipment-equipment-view'
+      } else {
+        return 'customers-equipment-view'
+      }
+    },
   },
   methods: {
+    $trans,
     async renderStats() {
       try {
         // this.isLoading = true
@@ -194,7 +263,7 @@ export default {
         // this.isLoading = false
       } catch(error) {
         console.log('error fetching location stats', error)
-        this.errorToast(`${this.$trans('Error fetching location insights:')} ${error}`)
+        errorToast(this.create, `${this.$trans('Error fetching location insights:')} ${error}`)
         // this.isLoading = false
       }
     },
@@ -234,9 +303,14 @@ export default {
       try {
         await this.loadHistory()
         this.location = await this.locationService.detail(this.pk)
+        this.equipmentService.addListArg(`location=${this.pk}`)
+        this.equipmentService.addListArg('page_size=1000')
+        const response = await this.equipmentService.list()
+        this.equipmentObjects = response.results
+        console.log(this.equipmentObjects)
       } catch(error) {
         console.log('error fetching location detail data', error)
-        this.errorToast(this.$trans('Error fetching location detail'))
+        errorToast(this.create, this.$trans('Error fetching location detail'))
         this.isLoading = false
       }
     },
@@ -248,13 +322,27 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching history orders', error)
-        this.errorToast(this.$trans('Error fetching orders'))
+        errorToast(this.create, this.$trans('Error fetching orders'))
         this.isLoading = false
       }
     }
   },
-  created() {
-    this.loadData()
+  async created() {
+    if (this.hasBranches) {
+      if (this.isEmployee) {
+        this.equipmentFields = this.equipmentFieldsBranchNonPlanning
+      } else {
+        this.equipmentFields = this.equipmentFieldsBranchPlanning
+      }
+    } else {
+      if (this.isCustomer) {
+        this.equipmentFields = this.equipmentFieldsCustomerNonPlanning
+      } else {
+        this.equipmentFields = this.equipmentFieldsCustomerPlanning
+      }
+    }
+
+    await this.loadData()
   },
   async mounted () {
   }

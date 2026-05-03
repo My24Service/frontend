@@ -3,12 +3,12 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="tools"></b-icon>
+          <IBiTools></IBiTools>
           {{ $trans("Gripp API settings") }}
         </h3>
-        <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+        <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
           {{ $trans('Submit') }}
-        </b-button>
+        </BButton>
       </div>
     </header>
     <div class="app-detail panel overflow-auto">
@@ -35,128 +35,128 @@
 
       <b-form id="gripp_settings_form" class="page-detail flex-columns">
         <div class="panel col-1-1">
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Gripp API koppeling')"
             label-for="api_enabled">
-            <b-form-checkbox
+            <BFormCheckbox
               id="api_enabled"
               size="sm"
               v-model="settings.gripp_api_enabled">
               Actief
-            </b-form-checkbox>
-          </b-form-group>
+            </BFormCheckbox>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Gripp API key')"
             label-for="api_key">
-            <b-form-input
+            <BFormInput
               id="api_key"
               size="sm"
               type="text"
-              v-model="settings.gripp_api_key"></b-form-input>
+              v-model="settings.gripp_api_key"></BFormInput>
             <p>De <strong>API key</strong> dat binnen het Gripp platform is aangemaakt dient hieronder ingevuld te worden.</p>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Webhook wachtwoord')"
             label-for="webhook_password">
-            <b-form-input
+            <BFormInput
               id="webhook_password"
               size="sm"
               type="text"
-              v-model="settings.gripp_webhook_password"></b-form-input>
+              v-model="settings.gripp_webhook_password"></BFormInput>
             <p>Het <strong>Webhook wachtwoord</strong> is een willekeurige reeks alfanumerieke tekens dat onderdeel
               wordt van het verzoek dat het Gripp platform stuurt naar My24Service als verificatie dat het verzoek
               daadwerkelijk van Gripp komt.</p>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Order type')"
             label-for="default_order_type">
-            <b-form-input
+            <BFormInput
               id="default_order_type"
               size="sm"
               type="text"
-              v-model="settings.gripp_default_order_type"></b-form-input>
+              v-model="settings.gripp_default_order_type"></BFormInput>
             <p>Dit is het opdracht-type dat aan alle uit Gripp afkomstige opdrachten wordt toegewezen.</p>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Werknemer (numeriek)')"
             label-for="default_employee">
-            <b-form-input
+            <BFormInput
               id="default_employee"
               size="sm"
               type="number"
-              v-model="settings.gripp_default_employee"></b-form-input>
+              v-model="settings.gripp_default_employee"></BFormInput>
             <p>Dit is de standaard werknemer die aan de taken wordt toegewezen</p>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Projectfase voor importeren (numeriek)')"
             label-for="project_phase_match">
-            <b-form-input
+            <BFormInput
               id="project_phase_match"
               size="sm"
               type="number"
-              v-model="settings.gripp_project_phase_match"></b-form-input>
+              v-model="settings.gripp_project_phase_match"></BFormInput>
             <p>Als de Gripp opdracht in deze fase wordt gezet, alleen dan wordt deze opdracht volledig
             binnen My24Service geimporteerd.</p>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Projectfase na exporteren (numeriek)')"
             label-for="project_phase_workorder_signed">
-            <b-form-input
+            <BFormInput
               id="project_phase_workorder_signed"
               size="sm"
               type="number"
-              v-model="settings.gripp_project_phase_workorder_signed"></b-form-input>
+              v-model="settings.gripp_project_phase_workorder_signed"></BFormInput>
             <p>Als de opdracht binnen My24Service in de status "werkbon getekend" wordt gezet, wordt
               de opdracht naar Gripp gesynchroniseerd en krijgt deze binnen Gripp deze projectfase.
             Als deze instelling leeg blijft, zal de fase niet worden aangepast.</p>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Taaktype voor werkuren (numeriek)')"
             label-for="tasktype_hours">
-            <b-form-input
+            <BFormInput
               id="tasktype_hours"
               size="sm"
               type="number"
-              v-model="settings.gripp_tasktype_hours"></b-form-input>
+              v-model="settings.gripp_tasktype_hours"></BFormInput>
             <p>De binnen My24Service geregistreerde uren zullen onder een aparte taak worden gesynchroniseerd
             binnen Gripp. Deze taak heeft een taaktype nodig (dit kan bijvoorbeeld overeenkomen met Montage of Installatie).
             Als deze instelling leeg of 0 is, wordt de taak (en bijbehorende uren) niet geëxporteerd.</p>
-          </b-form-group>
+          </BFormGroup>
 
-          <b-form-group
+          <BFormGroup
             label-size="sm"
             label-cols="4"
             v-bind:label="$trans('Taaktype voor reisuren (numeriek)')"
             label-for="tasktype_travel">
-            <b-form-input
+            <BFormInput
               id="tasktype_travel"
               size="sm"
               type="number"
-              v-model="settings.gripp_tasktype_travel"></b-form-input>
-          </b-form-group>
+              v-model="settings.gripp_tasktype_travel"></BFormInput>
+          </BFormGroup>
           <p>De binnen My24Service geregistreerde uren zullen onder een aparte taak worden gesynchroniseerd
             binnen Gripp. Deze taak heeft een taaktype nodig. Mogelijk dient een apart taaktype "Reizen" aangemaakt
             worden. Als deze instelling leeg of 0 is, wordt de taak (en bijbehorende uren) niet geëxporteerd.</p>
@@ -180,9 +180,19 @@
   </div>
 </template>
 <script>
-import memberModel from '@/models/member/Member.js'
+import memberModel, {MemberService} from '@/models/member/Member.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   data() {
     return {
       isLoading: false,
@@ -191,6 +201,7 @@ export default {
       settings: {}, // the ones from server
       currentSettings: {}, // the ones in the page
       member: memberModel.getFields(),
+      service: new MemberService()
     }
   },
   computed: {
@@ -206,8 +217,6 @@ export default {
   },
   methods: {
     async submitForm() {
-
-
       this.submitClicked = true
       this.buttonDisabled = true
       this.isLoading = true
@@ -215,7 +224,7 @@ export default {
       try {
         // If we don't send all the settings, all the other settings
         // will be reset to defaults, so we /must/ include everything.
-        const allSettings = await memberModel.getSettings()
+        const allSettings = await this.service.getSettings()
         const localKeys = Object.keys(this.settings);
         for (const key in allSettings) {
           if (localKeys.indexOf(key) > -1) {
@@ -223,20 +232,20 @@ export default {
           }
         }
 
-        await memberModel.updateSettings(allSettings);
+        await this.service.updateSettings(allSettings);
         this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('Error updating settings', error)
-        this.errorToast(this.$trans('Error updating settings'))
+        errorToast(this.create, $trans('Error updating settings'))
         this.isLoading = false
         this.buttonDisabled = false
       }
     },
     async loadData() {
       this.isLoading = true
-      this.member = await memberModel.getMe()
+      this.member = await this.service.getMe()
       try {
 
         this.currentSettings = {};
@@ -257,7 +266,7 @@ export default {
 
         // This fetches *all* the settings, we are only interested in a
         // subset to show on this page.
-        const data = await memberModel.getSettings()
+        const data = await this.service.getSettings()
         for (const key in data) {
           if (localKeys.indexOf(key) > -1) {
             this.settings[ key ] = data[ key ];
@@ -272,7 +281,7 @@ export default {
 
       } catch(error) {
         console.log('error fetching settings', error)
-        this.errorToast(this.$trans('Error fetching settings'))
+        errorToast(this.create, $trans('Error fetching settings'))
         this.isLoading = false
       }
     },

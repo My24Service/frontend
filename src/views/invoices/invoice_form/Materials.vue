@@ -53,19 +53,20 @@
           <input type="number" class="form-control form-control-sm" v-model.number="material.amount" style="width:4em;text-align:right" v-on:change="materialAmountChange(material,$event)" />
         </b-col>
         <b-col cols="4">
-          <b-form-radio-group
+          <BFormRadioGroup
             @change="updateTotals"
             v-model="material.use_price"
+            v-if="!teamleaderProducts"
           >
-            <b-form-radio :value="usePriceOptions.USE_PRICE_PURCHASE">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
               {{ $trans('Pur.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-            </b-form-radio>
+            </BFormRadio>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_SELLING">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
               {{ $trans('Sel.') }} {{ getMaterialPriceFor(material, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-            </b-form-radio>
+            </BFormRadio>
 
-            <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+            <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
               <p class="flex">
                 {{ $trans("Other") }}:&nbsp;&nbsp;
                 <PriceInput
@@ -74,8 +75,28 @@
                   @priceChanged="(val) => otherPriceChanged(val, material)"
                 />
               </p>
-            </b-form-radio>
-          </b-form-radio-group>
+            </BFormRadio>
+          </BFormRadioGroup>
+          <BFormRadioGroup
+            @change="updateTotals"
+            v-model="material.use_price"
+            v-else
+          >
+            <div :class="getTlProduct(material.material_id) ? 'w-100 bg-success mb-2' : 'w-100 bg-danger mb-2'">
+              <img :src="PIXEL_URL" alt="pixel">
+            </div>
+            <p class="flex">
+              <span v-if="getTlProduct(material.material_id)">
+                Teamleader:&nbsp;
+              </span>
+              <span v-else>niet gekoppeld</span>
+              <PriceInput
+                v-model="material.price"
+                :currency="material.price_currency"
+                @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, material)"
+              />
+            </p>
+          </BFormRadioGroup>
         </b-col>
         <b-col cols="2">
           <VAT @vatChanged="(val) => changeVatType(material, val)" />
@@ -85,6 +106,9 @@
             :total="material.total_dinero"
             :vat="material.vat_dinero"
           />
+        </b-col>
+        <b-col cols="12">
+          teamleader
         </b-col>
       </b-row>
       <TotalRow
@@ -102,10 +126,10 @@
 </template>
 
 <script>
-import {toDinero} from "@/utils";
-import Collapse from "@/components/Collapse";
+import {$trans, toDinero} from "@/utils";
 import PriceInput from "@/components/PriceInput";
 import TotalsInputs from "@/components/TotalsInputs";
+import {PIXEL_URL} from "@/constants";
 
 import {InvoiceLineService} from "@/models/invoices/InvoiceLine";
 import {CostService, COST_TYPE_USED_MATERIALS} from "@/models/orders/Cost";
@@ -125,15 +149,25 @@ import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "MaterialsComponent",
   emits: ['invoiceLinesCreated', 'emptyCollectionClicked'],
   mixins: [invoiceMixin],
   components: {
     PriceInput,
     TotalsInputs,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -145,7 +179,6 @@ export default {
   watch: {
     material_models: {
       handler(_newValue) {
-        console.log(_newValue)
         this.loadData()
       },
       deep: true
@@ -176,6 +209,10 @@ export default {
       type: [Array],
       default: null
     },
+    teamleaderProducts: {
+      type: [Array],
+      default: null
+    },
   },
   data() {
     return {
@@ -196,13 +233,14 @@ export default {
         USE_PRICE_OTHER,
       },
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
 
       hasStoredData: false,
       costType: COST_TYPE_USED_MATERIALS,
       parentHasInvoiceLines: false,
       invoiceLineType: INVOICE_LINE_TYPE_USED_MATERIALS,
+      PIXEL_URL
     }
   },
   async created() {
@@ -228,6 +266,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    $trans,
     // Triggered when the 'amount' field changes value.
     materialAmountChange(material, event) {
       // console.log( material )
@@ -258,7 +297,7 @@ export default {
     },
     getMaterialName(material_id) {
       const material = this.materialModels.find((m) => m.id === material_id)
-      return material ? material.name : this.$trans("unknown")
+      return material ? material.name : $trans("unknown")
     },
     async loadData() {
       // create material models
@@ -299,6 +338,9 @@ export default {
         order: this.order_pk,
       }
     },
+    getTlProduct(material_id) {
+      return this.teamleaderProducts.find((product) => product.material.id === material_id)
+    },
     otherPriceChanged(priceDinero, material) {
       material.setPriceField('price_other', priceDinero)
       this.updateTotals()
@@ -310,6 +352,14 @@ export default {
       return this.getPrice(cost.material, cost.name, cost.use_price, cost.price_other)
     },
     getPrice(material_id, material_name, use_price, price_other) {
+      if (this.teamleaderProducts) {
+        const model = this.getTlProduct(material_id)
+        if (!model) {
+          console.debug('MODEL NOT FOUND', this.teamleaderProducts)
+        } else {
+          return parseFloat(model.selling_price)
+        }
+      }
       let model
       switch (use_price) {
         case this.usePriceOptions.USE_PRICE_PURCHASE:
@@ -355,10 +405,10 @@ export default {
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
     },
     getDescriptionUserTotalsInvoiceLine(cost) {
-      return `${this.$trans("material")}: ${this.getMaterialName(cost.material)}`
+      return `${$trans("material")}: ${this.getMaterialName(cost.material)}`
     },
     getDescriptionOnlyTotalInvoiceLine() {
-      return `${this.$trans("Used materials")}`
+      return `${$trans("Used materials")}`
     },
     getTotalAmountInvoiceLine() {
       return this.totalAmount

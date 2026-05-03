@@ -1,6 +1,6 @@
 <template>
     <div class="app-page">
-      <h1><b-icon icon="truck"></b-icon></h1>
+      <h1><IBiTruck></IBiTruck></h1>
       <div class="panel coming-soon">
         <h3>{{ $trans('Coming Soon') }}</h3>
         <p align="center">{{ $trans('This section of the app is under construction') }}</p>

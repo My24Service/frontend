@@ -29,8 +29,8 @@
         <b-col cols="6">
           <p><strong>{{ $trans('Assign to') }} {{ selectedUser.full_name }}?</strong></p>
           <p>
-            <b-button type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Assign') }}</b-button>&nbsp;
-            <b-button type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</b-button>
+            <BButton type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Assign') }}</BButton>&nbsp;
+            <BButton type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</BButton>
           </p>
         </b-col>
       </b-row>
@@ -44,9 +44,9 @@
         responsive="sm"
       >
         <template #cell(icons)="data">
-          <b-link class="px-1" @click.prevent="assign(data.item)" v-bind:title="$trans('Assign')">
-            <b-icon-arrow-bar-right font-scale="1"></b-icon-arrow-bar-right>
-          </b-link>
+          <BLink class="px-1" @click.prevent="assign(data.item)" v-bind:title="$trans('Assign')">
+            <IBiArrowBarRight font-scale="1"></IBiArrowBarRight>
+          </BLink>
         </template>
       </b-table>
 
@@ -54,8 +54,8 @@
         <b-col cols="6">
           <p><strong>{{ $trans('Unassign') }} {{ selectedUser.full_name }}?</strong></p>
           <p>
-            <b-button type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Unassign') }}</b-button>&nbsp;
-            <b-button type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</b-button>
+            <BButton type="button" :disabled="buttonDisabled" class="btn btn-danger" @click="proceed">{{ $trans('Unassign') }}</BButton>&nbsp;
+            <BButton type="button" class="btn btn-default" @click="cancel">{{ $trans('Cancel') }}</BButton>
           </p>
         </b-col>
       </b-row>
@@ -69,15 +69,15 @@
         responsive="sm"
       >
         <template #cell(icons)="data">
-          <b-link class="px-1" @click.prevent="unAssign(data.item)" v-bind:title="$trans('Unassign')">
-            <b-icon-trash font-scale="1"></b-icon-trash>
-          </b-link>
+          <BLink class="px-1" @click.prevent="unAssign(data.item)" v-bind:title="$trans('Unassign')">
+            <IBiTrash font-scale="1"></IBiTrash>
+          </BLink>
         </template>
       </b-table>
 
       <footer class="modal-footer">
-        <b-button @click="goBack" class="btn btn-info" type="button" variant="primary">
-          {{ $trans('Back') }}</b-button>
+        <BButton @click="goBack" class="btn btn-info" type="button" variant="primary">
+          {{ $trans('Back') }}</BButton>
       </footer>
     </div>
   </b-overlay>
@@ -85,8 +85,18 @@
 
 <script>
 import tripAvailabilityModel from '@/models/mobile/TripAvailability.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "TripAvailabilityDetail",
   data() {
     return {
@@ -97,9 +107,9 @@ export default {
       unAssignMode: false,
       tripAvailability: {trip: {}},
       fields: [
-        { key: 'full_name', label: this.$trans('Name') },
-        { key: 'address', label: this.$trans('Address') },
-        { key: 'rating_avg', label: this.$trans('Rating') },
+        { key: 'full_name', label: $trans('Name') },
+        { key: 'address', label: $trans('Address') },
+        { key: 'rating_avg', label: $trans('Rating') },
         { key: 'icons', label: ''}
       ],
     }
@@ -128,14 +138,14 @@ export default {
       if(this.assignMode) {
         try {
           await tripAvailabilityModel.assign(this.selectedUser.id, this.tripAvailability.trip.id)
-          this.infoToast(this.$trans('Assigned'), this.$trans('Trip assigned'))
+          infoToast(this.create, $trans('Assigned'), $trans('Trip assigned'))
           this.loadTripAvailability()
           this.cancel()
           this.buttonDisabled = false
           this.isLoading = false
         } catch(error) {
           console.log('error assigning trip', error)
-          this.errorToast(this.$trans('Error assigning trip'))
+          errorToast(this.create, $trans('Error assigning trip'))
           this.isLoading = false
           this.buttonDisabled = false
         }
@@ -145,14 +155,14 @@ export default {
 
       try {
         await tripAvailabilityModel.unAssign(this.selectedUser.id, this.tripAvailability.trip.id)
-        this.infoToast(this.$trans('Unassigned'), this.$trans('Student unassigned'))
+        infoToast(this.create, $trans('Unassigned'), $trans('Student unassigned'))
         this.loadTripAvailability()
         this.cancel()
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
         console.log('error unassigning trip', error)
-        this.errorToast(this.$trans('Error unassigning trip'))
+        errorToast(this.create, $trans('Error unassigning trip'))
         this.isLoading = false
         this.buttonDisabled = false
       }
@@ -173,7 +183,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching tripAvailability', error)
-        this.errorToast(this.$trans('Error fetching trip availability'))
+        errorToast(this.create, $trans('Error fetching trip availability'))
         this.isLoading = false
       }
     }

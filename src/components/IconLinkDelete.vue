@@ -1,8 +1,8 @@
 <template>
   <span>
-    <b-link v-bind:title="title" v-on:click="method()">
-      <b-icon-trash-fill class="edit-icon"></b-icon-trash-fill>
-    </b-link>
+    <BButton variant="light" :title="title" @click="method()">
+      <IBiTrashFill class="edit-icon"></IBiTrashFill>
+    </BButton>
   </span>
 </template>
 

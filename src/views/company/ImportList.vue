@@ -19,10 +19,10 @@
     <header>
       <div class="page-title">
         <h3>
-          <b-icon icon="file-arrow-down"></b-icon> {{ $trans("Imports") }}
+          <IBiFileArrowDown></IBiFileArrowDown> {{ $trans("Imports") }}
         </h3>
-        <b-button-toolbar>
-          <b-button-group class="mr-1">
+        <BButton-toolbar>
+          <BButton-group class="mr-1">
 
             <ButtonLinkRefresh
               v-bind:method="function() { loadData() }"
@@ -31,12 +31,12 @@
             <ButtonLinkSearch
               v-bind:method="function() { showSearchModal() }"
             />
-          </b-button-group>
+          </BButton-group>
           <router-link :to="{name: 'company-import-add'}" class="btn">
-            <b-icon icon="file-arrow-down"></b-icon>
+            <IBiFileArrowDown></IBiFileArrowDown>
             {{$trans('Add import')}}
           </router-link>
-        </b-button-toolbar>
+        </BButton-toolbar>
       </div>
     </header>
 
@@ -73,9 +73,9 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <span v-if="Object.keys(data.item.result_inserts).length > 0">
-              <b-link v-bind:title="$trans('Revert import')" v-on:click="revertImport(data.item.id)">
-                <b-icon-arrow-counterclockwise></b-icon-arrow-counterclockwise>
-              </b-link>
+              <BLink v-bind:title="$trans('Revert import')" v-on:click="revertImport(data.item.id)">
+                <IBiArrowCounterclockwise></IBiArrowCounterclockwise>
+              </BLink>
             </span>
             <IconLinkEdit
               v-if="Object.keys(data.item.result_inserts).length === 0"
@@ -103,23 +103,31 @@
 </template>
 
 <script>
-import {ImportService} from '../../models/company/Import.js'
+import {ImportService} from '@/models/company/Import'
 import IconLinkEdit from '../../components/IconLinkEdit.vue'
 import IconLinkDelete from '../../components/IconLinkDelete.vue'
 import ButtonLinkRefresh from '../../components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '../../components/ButtonLinkSearch.vue'
-import ButtonLinkAdd from '../../components/ButtonLinkAdd.vue'
 import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: 'ImportList',
   components: {
     IconLinkEdit,
     IconLinkDelete,
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
   },
@@ -131,11 +139,11 @@ export default {
       service: new ImportService(),
       imports: [],
       fields: [
-        {key: 'name', label: this.$trans('Name')},
-        {key: 'file', label: this.$trans('File')},
-        {key: 'result_inserts', label: this.$trans('Result')},
-        {key: 'created', label: this.$trans('Created')},
-        {key: 'modified', label: this.$trans('Modified')},
+        {key: 'name', label: $trans('Name')},
+        {key: 'file', label: $trans('File')},
+        {key: 'result_inserts', label: $trans('Result')},
+        {key: 'created', label: $trans('Created')},
+        {key: 'modified', label: $trans('Modified')},
         {key: 'icons', label: ''},
       ]
     }
@@ -162,11 +170,11 @@ export default {
     async doDelete() {
       try {
         await this.service.delete(this.importPk)
-        this.infoToast(this.$trans('Deleted'), this.$trans('Import has been deleted'))
+        infoToast(this.create, $trans('Deleted'), $trans('Import has been deleted'))
         await this.loadData()
       } catch(error) {
         console.log('error deleting import', error)
-        this.errorToast(this.$trans('Error deleting import'))
+        errorToast(this.create, $trans('Error deleting import'))
       }
     },
     async loadData() {
@@ -178,20 +186,20 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching imports', error)
-        this.errorToast(this.$trans('Error loading imports'))
+        errorToast(this.create, $trans('Error loading imports'))
         this.isLoading = false
       }
     },
     async revertImport(id) {
-      if (confirm(this.$trans("Revert this import? All created and related data will be deleted."))) {
+      if (confirm($trans("Revert this import? All created and related data will be deleted."))) {
         try {
           await this.service.revertImport(id)
-          this.infoToast(this.$trans('Reverted'), this.$trans('Import has been reverted'))
+          infoToast(this.create, $trans('Reverted'), $trans('Import has been reverted'))
           // await this.$router.push({name: 'company-import-list'})
           await this.loadData()
         } catch (error) {
           console.log('Error reverting import', error)
-          this.errorToast(this.$trans('Error reverting import'))
+          errorToast(this.create, $trans('Error reverting import'))
         }
       }
     }

@@ -1,7 +1,7 @@
 import BaseModel from '../../models/base'
 
 
-class EmployeeUser extends BaseModel {
+class EmployeeService extends BaseModel {
   fields = {
     'username': '',
     'first_name': '',
@@ -20,6 +20,4 @@ class EmployeeUser extends BaseModel {
   url = '/company/employeeuser/'
 }
 
-let employeeUserModel = new EmployeeUser()
-
-export default employeeUserModel
+export {EmployeeService}

@@ -1,25 +1,51 @@
 import { defineConfig } from 'vite'
-import visualizer from 'rollup-plugin-visualizer'
-import themePreprocessorPlugin from "@zougt/vite-plugin-theme-preprocessor"
-import vue from '@vitejs/plugin-vue2'
+import {
+  themePreprocessorPlugin,
+  themePreprocessorHmrPlugin
+} from "vite-plugin-theme-preprocessor/dist";
+import vue from '@vitejs/plugin-vue'
+import Components from 'unplugin-vue-components/vite'
+import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
+import IconsResolve from 'unplugin-icons/resolver'
+import Icons from 'unplugin-icons/vite'
+import * as path from "node:path";
+import {ExternalPackageIconLoader} from "unplugin-icons/loaders";
 
-const path = require("path");
 export default defineConfig({
   base: '',
   // build: {
   //   sourcemap: true
   // },
   server: {
-    host: 'demo.my24service.com',
+    host: '0.0.0.0',
     port: 3000,
+    allowedHosts: [
+      'stormy.my24service-dev.com',
+      'riedel.my24service-dev.com',
+      'amex.my24service-dev.com',
+      'gls.my24service-dev.com'
+    ],
     hmr: {
-      host: "localhost",
+      host: "amex.my24service-dev.com",
       port: 3000
     }
   },
   plugins: [
     vue(),
-    visualizer(),
+    Components({
+      resolvers: [
+        BootstrapVueNextResolver(),
+        IconsResolve()
+      ],
+      dts: true,
+    }),
+    Icons({
+      compiler: 'vue3',
+      autoInstall: true,
+      customCollections: {
+        ...ExternalPackageIconLoader('bootstrap-icons'),
+      }
+    }),
     themePreprocessorPlugin({
       scss: {
         // close arbitraryMode
@@ -28,7 +54,7 @@ export default defineConfig({
         multipleScopeVars: [
           {
             scopeName: "theme-default",
-            // path or varscontent must be selected
+            // path or varsContent must be selected
             path: path.resolve("./src/scss/app.scss"),
             // varsContent same as content in path
             // varsContent:`@primary-color:${defaultPrimaryColor};`
@@ -53,13 +79,27 @@ export default defineConfig({
         // custom css file name.
         customThemeCssFileName: (scopeName) => scopeName,
       }
-    })
+    }),
+    themePreprocessorHmrPlugin(),
   ],
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve("./src")
     },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        silenceDeprecations: [
+          'import',
+          'color-functions',
+          'global-builtin',
+          'legacy-js-api',
+          'if-function'
+        ]
+      },
+    }
   },
   test: {
     environment: 'happy-dom',

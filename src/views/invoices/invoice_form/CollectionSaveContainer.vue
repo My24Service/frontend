@@ -1,12 +1,12 @@
 <template>
   <div class="save-collection text-right">
-    <b-button
+    <BButton
       @click="() => { buttonClicked() }"
       class="btn update-button"
       type="button"
     >
       {{ $trans("Save costs") }}
-    </b-button>
+    </BButton>
   </div>
 </template>
 

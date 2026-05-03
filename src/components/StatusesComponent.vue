@@ -1,7 +1,7 @@
 <template>
 <div>
   <h6>
-    <b-icon-bar-chart-steps></b-icon-bar-chart-steps>
+    <IBiBarChartSteps></IBiBarChartSteps>
     {{ $trans('Timeline') }}
   </h6>
 

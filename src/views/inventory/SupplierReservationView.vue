@@ -2,12 +2,12 @@
   <div class='app-page'>
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="file-earmark-lock"></b-icon>
+        <h3><IBiFileEarmarkLock></IBiFileEarmarkLock>
           <router-link :to="{name:'supplier-reservation-list'}">{{ $trans("Reservations") }}</router-link> / {{this.pk}}
         </h3>
         <div class="flex-columns">
-          <b-button @click="goBack" class="btn btn-info" type="button" variant="secondary">
-            {{ $trans('Back') }}</b-button>
+          <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
+            {{ $trans('Back') }}</BButton>
           <router-link class="btn primary" :to="{name: 'supplier-reservation-edit', params: {pk:this.pk}}">{{ $trans("Edit") }}</router-link>
         </div>
       </div>
@@ -61,9 +61,9 @@
               <b-tr>
                 <b-td><strong>{{ $trans('Email') }}:</strong></b-td>
                 <b-td>
-                  <b-link class="px-1" v-bind:href="`mailto:${reservation.supplier_view.email}`">
+                  <BLink class="px-1" v-bind:href="`mailto:${reservation.supplier_view.email}`">
                     {{ reservation.supplier_view.email }}
-                  </b-link>
+                  </BLink>
                 </b-td>
               </b-tr>
             </b-table-simple>
@@ -91,8 +91,20 @@
 
 <script>
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
+import {errorToast} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       isLoading: false,
@@ -123,7 +135,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching reservation', error)
-        this.errorToast(this.$trans('Error fetching reservation'))
+        errorToast(this.create, this.$trans('Error fetching reservation'))
         this.isLoading = false
       }
     }

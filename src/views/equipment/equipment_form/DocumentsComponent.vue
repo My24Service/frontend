@@ -3,9 +3,7 @@
    <h6>{{ $trans('Documents') }}</h6>
 
     <!-- list -->
-    <div
-      v-if="true"
-    >
+    <div v-if="!newItem">
       <p v-if="!documentService.collection.length">
         <i>{{ $trans("No documents") }}</i>
       </p>
@@ -17,9 +15,9 @@
           style="padding-bottom: 10px"
         >
           <b-col :cols="isView ? 12 : 9">
-            <b-link v-bind:href="document.url" target="_blank">
-              {{ document.name }} <b-icon-download font-scale=".8"></b-icon-download>
-            </b-link>
+            <BLink v-bind:href="document.url" target="_blank">
+              {{ document.name }} <IBiDownload font-scale=".8"></IBiDownload>
+            </BLink>
           </b-col>
           <b-col cols="3" v-if="!isView">
             <div
@@ -43,14 +41,13 @@
           </b-col>
         </b-row>
       </b-container>
-
     </div>
 
     <!-- form -->
     <div v-if="showForm">
       <b-form v-if="!documentService.isEdit">
         <p>{{ $trans("Add document(s)") }}</p>
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Choose files')"
         >
@@ -58,111 +55,97 @@
             v-model="files"
             multiple
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
-            @input="filesSelected"
           ></b-form-file>
-        </b-form-group>
+        </BFormGroup>
       </b-form>
 
       <b-form v-if="documentService.isEdit">
         <p>{{ $trans("Edit document") }}</p>
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Choose files')"
         >
           <b-form-file
-            v-model="documentService.editItem.file"
+            v-model="files"
             v-bind:placeholder="$trans('Choose a file or drop it here...')"
-            @input="filesSelected"
           ></b-form-file>
-        </b-form-group>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Name')"
           label-for="equipment-document-name"
         >
-          <b-form-input
+          <BFormInput
             id="equipment-document-name"
             size="sm"
             v-model="documentService.editItem.name"
-          ></b-form-input>
-        </b-form-group>
+          ></BFormInput>
+        </BFormGroup>
 
-        <b-form-group
+        <BFormGroup
           label-cols="3"
           v-bind:label="$trans('Description')"
           label-for="equipment-document-description"
         >
-          <b-form-textarea
+          <BFormTextarea
             id="equipment-document-description"
             v-model="documentService.editItem.description"
             rows="1"
-          ></b-form-textarea>
-        </b-form-group>
+          ></BFormTextarea>
+        </BFormGroup>
       </b-form>
 
       <footer class="modal-footer">
-        <b-button
-          :disabled="isLoading"
+        <BButton
           @click="cancelEditDocument"
-          class="btn btn-secondary update-button"
+          class="m-2"
           type="button"
           size="sm"
           variant="secondary"
         >
           {{ $trans('Cancel') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           v-if="documentService.isEdit"
           @click="doEditCollectionItem"
-          class="btn btn-primary"
           size="sm"
           type="button"
-          variant="warning"
+          variant="primary"
           :disabled="!isDocumentValid"
         >
           {{ $trans('Edit document') }}
-        </b-button>
+        </BButton>
       </footer>
 
     </div>
 
-    <footer
-      class="modal-footer"
-      v-if="!showForm && !isView"
-    >
-      <b-button
-        @click="newDocument"
-        class="btn btn-primary update-button"
-        type="button"
-        variant="primary"
-      >
-        {{ $trans('Add document(s)') }}
-      </b-button>
-    </footer>
-
     <b-container
       v-if="showChangesBlock"
+      class="pt-4"
     >
       <b-row>
         <b-col cols="2"></b-col>
         <b-col cols="10">
-          <b-button
+          <BButton
             @click="loadData"
             class="btn btn-secondary"
             type="button"
+            size="sm"
+            variant="secondary"
           >
             {{ $trans('Discard changes') }}
-          </b-button>
+          </BButton>
           &nbsp;
-          <b-button
+          <BButton
             @click="submitDocuments"
-            class="btn btn-danger"
+            class="btn btn-primary"
             type="button"
-            variant="danger"
+            size="sm"
+            variant="primary"
           >
             {{ $trans('Save changes') }}
-          </b-button>
+          </BButton>
         </b-col>
       </b-row>
     </b-container>
@@ -170,36 +153,35 @@
 </template>
 
 <script>
+import {useToast} from "bootstrap-vue-next";
 
 import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import ButtonLinkSearch from "@/components/ButtonLinkSearch.vue";
-import ButtonLinkRefresh from "@/components/ButtonLinkRefresh.vue";
-import ButtonLinkAdd from "@/components/ButtonLinkAdd.vue";
 import IconLinkEdit from "@/components/IconLinkEdit.vue";
-import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
-import {EquipmentModel} from "@/models/equipment/equipment"
-import {componentMixin} from "@/utils";
 import ApiResult from "@/components/ApiResult.vue";
-import {LocationModel} from "@/models/equipment/location";
+import {errorToast, infoToast, $trans} from "@/utils";
+import {DocumentModel, LocationDocumentService, DocumentService} from "@/models/equipment/Document";
 
 export default {
-  mixins: [componentMixin],
+  setup() {
+    const {create} = useToast()
+
+    return {
+      create
+    }
+  },
   name: "DocumentsComponent",
   components: {
     ApiResult,
     IconLinkEdit,
-    ButtonLinkAdd,
-    ButtonLinkRefresh,
-    ButtonLinkSearch,
     IconLinkDelete
   },
   props: {
     location: {
-      type: LocationModel,
+      type: Object,
       default: null
     },
     equipment: {
-      type: EquipmentModel,
+      type: Object,
       default: null
     },
     isView: {
@@ -212,13 +194,12 @@ export default {
       isLoading: false,
       isNewEquipment: true,
       fields: [
-        {key: 'name', label: this.$trans('Name')},
+        {key: 'name', label: $trans('Name')},
         {key: 'icons', label: ""},
       ],
       fieldsView: [
-        {key: 'name', label: this.$trans('Name')},
+        {key: 'name', label: $trans('Name')},
       ],
-      // documentService: new DocumentService(),
       documentService: this.location != null ? new LocationDocumentService() : new DocumentService(),
       isLocation: this.location != null,
       isEquipment: this.equipment != null,
@@ -239,6 +220,10 @@ export default {
   },
   async created () {
     await this.loadData()
+    if (!this.isView && this.documentService.collection.length === 0) {
+      this.newDocument()
+      this.newItem = true
+    }
   },
   watch: {
     location: {
@@ -250,9 +235,25 @@ export default {
       handler() {
         this.loadData()
       },
+    },
+    files(value) {
+      this.filesSelected(value)
     }
   },
   methods: {
+    $trans,
+    async parentCreated(pk) {
+      for (const document of this.documentService.collection) {
+        if (this.isLocation) {
+          document.location = pk
+        } else if (this.isEquipment) {
+          document.equipment = pk
+        } else {
+          throw new Error('no location or equipment set')
+        }
+      }
+      return await this.submitDocuments()
+    },
     getParentId() {
       if (this.isEquipment) return this.equipment.id
       else if (this.isLocation) return this.location.id
@@ -273,33 +274,19 @@ export default {
       this.newItem = true
     },
     deleteDocument(index) {
-      this.documentService.deleteCollectionItem(index)
       if (this.getParentId()) {
-        this.infoToast(this.$trans('Marked for delete'), this.$trans("Document marked for delete"))
+        this.documentService.deleteCollectionItem(index)
+        infoToast(this.create, $trans('Marked for delete'), $trans("Document marked for delete"))
       }
     },
     async loadData() {
-
-      if (this.equipment != null) {
-        if (this.equipment.documents) {
-          this.documentService.collection = this.equipment.documents;
-          return;
-        }
-      }
-      else if (this.location != null) {
-        if (this.location.documents) {
-          this.documentService.collection = this.location.documents;
-          return;
-        }
-      }
-
       if (!this.getParentId()) {
-        return;
+        console.warn('no parent id')
+        return
       }
 
       this.isLoading = true
-      this.documentService.setParentId( this.getParentId() );
-      //this.documentService.setListArgs(`equipment=${this.equipment.id}`)
+      this.documentService.setParentId( this.getParentId() )
 
       try {
         await this.documentService.loadCollection()
@@ -308,8 +295,8 @@ export default {
         }
         this.isLoading = false
       } catch(error) {
-        console.log('error fetching documents', error)
-        this.errorToast(this.$trans('Error loading documents'))
+        console.error('error fetching documents', error)
+        errorToast(this.create, $trans('Error loading documents'))
         this.isLoading = false
       }
     },
@@ -360,16 +347,20 @@ export default {
         }
 
         if (this.isLocation) {
-          if (!this.location.id) {
-            documentErrors.push(`no location to update document: ${document.name}`)
-          } else {
-            document.location = this.location.id
+          if (!document.location) {
+            if (!this.location.id) {
+              documentErrors.push(`no location to create/update document: ${document.name}`)
+            } else {
+              document.location = this.location.id
+            }
           }
         } else if (this.isEquipment) {
-          if (!this.equipment.id) {
-            documentErrors.push(`no equipment to update document: ${document.name}`)
-          } else {
-            document.equipment = this.equipment.id
+          if (!document.equipment) {
+            if (!this.equipment.id) {
+              documentErrors.push(`no equipment to create/update document: ${document.name}`)
+            } else {
+              document.equipment = this.equipment.id
+            }
           }
         }
         else {
@@ -378,8 +369,8 @@ export default {
       }
 
       if (documentErrors.length > 0) {
-        console.log('no equipment/locations to update documents', documentErrors)
-        this.errorToast(this.$trans('Error updating documents (no equipment or location)'))
+        console.error('no equipment/locations to update documents', documentErrors)
+        errorToast(this.create, $trans('Error updating documents (no equipment or location)'))
         return documentErrors
       }
 
@@ -389,22 +380,21 @@ export default {
         errors = this.documentService.collection.filter((d) => d.error)
 
         if (errors.length > 0) {
-          this.errorToast(this.$trans('Error updating documents'))
+          errorToast(this.create, $trans('Error updating documents'))
         } else {
-          this.infoToast(this.$trans('Updated'), this.$trans('Documents have been updated'))
+          infoToast(this.create, $trans('Updated'), $trans('Documents have been updated'))
           this.documentService.collectionHasChanges = false
         }
         // await this.loadData()
       } catch (e) {
         errors.push(e)
         console.log('error updating documents', e)
-        this.errorToast(this.$trans('Error updating documents'))
+        errorToast(this.create, $trans('Error updating documents'))
       }
 
       this.isLoading = false
       return errors
     },
-
   }
 }
 </script>

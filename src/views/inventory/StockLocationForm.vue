@@ -4,17 +4,17 @@
       <header>
         <div class="page-title">
           <h3>
-            <b-icon icon="bookshelf"></b-icon>
+            <IBiBookshelf></IBiBookshelf>
             <span v-if="isCreate">{{ $trans('New stock location') }}</span>
             <span v-if="!isCreate">{{ $trans('Edit stock location') }}</span>
-          </h3>  
+          </h3>
           <div class="flex-columns">
-            <b-button @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
+            <BButton @click="cancelForm" class="btn btn-secondary" type="button" variant="secondary">
               {{ $trans('Cancel') }}
-            </b-button>
-            <b-button @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
+            </BButton>
+            <BButton @click="submitForm" :disabled="buttonDisabled" class="btn btn-primary" type="button" variant="primary">
               {{ $trans('Submit') }}
-            </b-button>
+            </BButton>
           </div>
         </div>
       </header>
@@ -22,44 +22,44 @@
         <b-form>
           <b-row>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Name')"
                 label-for="stock-location-name"
               >
-                <b-form-input
+                <BFormInput
                   v-model="stockLocation.name"
                   id="stock-location-name"
                   size="sm"
                   :state="isSubmitClicked ? !v$.stockLocation.name.$error : null"
-                ></b-form-input>
+                ></BFormInput>
                 <b-form-invalid-feedback
                   :state="isSubmitClicked ? !v$.stockLocation.name.$error : null">
                   {{ $trans('Please enter a name') }}
                 </b-form-invalid-feedback>
-              </b-form-group>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Identifier')"
                 label-for="stock-location-identifier"
               >
-                <b-form-input
+                <BFormInput
                   id="stock-location-identifier"
                   size="sm"
                   v-model="stockLocation.identifier"
-                ></b-form-input>
-              </b-form-group>
+                ></BFormInput>
+              </BFormGroup>
             </b-col>
             <b-col cols="4" role="group">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 label-for="stock-location-show_in_stats"
                 v-bind:label="$trans('Stats')"
               >
-                <b-form-checkbox v-model="stockLocation.show_in_stats">{{ $trans('Show in stats') }}</b-form-checkbox>
-              </b-form-group>
+                <BFormCheckbox v-model="stockLocation.show_in_stats">{{ $trans('Show in stats') }}</BFormCheckbox>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-form>
@@ -73,10 +73,16 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import stockLocationModel from '@/models/inventory/StockLocation.js'
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
   setup() {
-    return { v$: useVuelidate() }
+    const {create} = useToast()
+    return {
+      v$: useVuelidate(),
+      create
+    }
   },
   props: {
     pk: {
@@ -137,13 +143,13 @@ export default {
       if (this.isCreate) {
         try {
           await stockLocationModel.insert(this.stockLocation)
-          this.infoToast(this.$trans('Created'), this.$trans('Stock location has been created'))
+          infoToast(this.create, $trans('Created'), $trans('Stock location has been created'))
           this.buttonDisabled = false
           this.isLoading = false
           this.$router.go(-1)
         } catch(error) {
           console.log('Error creating stock location', error)
-          this.errorToast(this.$trans('Error creating stock location'))
+          errorToast(this.create, $trans('Error creating stock location'))
           this.buttonDisabled = false
           this.isLoading = false
         }
@@ -153,13 +159,13 @@ export default {
 
       try {
         await stockLocationModel.update(this.pk, this.stockLocation)
-        this.infoToast(this.$trans('Updated'), this.$trans('Stock location has been updated'))
+        infoToast(this.create, $trans('Updated'), $trans('Stock location has been updated'))
         this.buttonDisabled = false
         this.isLoading = false
         this.$router.go(-1)
       } catch(error) {
         console.log('Error updating stock location', error)
-        this.errorToast(this.$trans('Error updating stock location'))
+        errorToast(this.create, $trans('Error updating stock location'))
         this.buttonDisabled = false
         this.isLoading = false
       }
@@ -172,7 +178,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching stock location', error)
-        this.errorToast(this.$trans('Error fetching stock location'))
+        errorToast(this.create, $trans('Error fetching stock location'))
         this.isLoading = false
       }
     },

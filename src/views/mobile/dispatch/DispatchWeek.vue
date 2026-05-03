@@ -50,8 +50,17 @@
 import moment from 'moment/min/moment-with-locales';
 import axios from '@/services/api.js'
 import UserData from './UserData.vue';
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      mainStore
+    }
+  },
   name: "DispatchWeek",
   components: {UserData},
   emits: ['addSelectedUser'],
@@ -176,7 +185,7 @@ export default {
     this.loadData();
   },
   async mounted() {
-    this.statuscodes = await this.$store.dispatch('getStatuscodes');
+    this.statuscodes = await this.mainStore.getStatuscodes
   }
 }
 </script>

@@ -1,11 +1,11 @@
-<template>  
+<template>
   <form ref="search-form" @submit.stop.prevent="doSearch">
-      <b-form-input
+      <BFormInput
         size="sm"
         v-model="query"
         :placeholder="placeholderText"
         @keyup="checkInput"
-      ></b-form-input>
+      ></BFormInput>
   </form>
 </template>
 

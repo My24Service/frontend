@@ -2,56 +2,56 @@
   <div class="app-page">
     <header>
       <div class='page-title'>
-        <h3><b-icon icon="bar-chart-line-fill"></b-icon>{{ $trans('Total sales in ' + year ) }}</h3>
+        <h3><IBiBarChartLineFill></IBiBarChartLineFill>{{ $trans('Total sales in ' + year ) }}</h3>
       </div>
     </header>
     <div class="app-detail panel">
       <b-row align-v="center">
         <b-col cols="1">
-          <b-link @click.prevent="backYear" v-bind:title="$trans('Year back')">
-            <b-icon-arrow-left font-scale="1.8"></b-icon-arrow-left>
-          </b-link>
+          <BLink @click.prevent="backYear" v-bind:title="$trans('Year back')">
+            <IBiArrowLeft font-scale="1.8"></IBiArrowLeft>
+          </BLink>
         </b-col>
         <b-col cols="10" class="text-center">
-        
+
           <b-row>
             <b-col cols="6">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Graph type')"
                 label-for="graph-type"
               >
-                <b-form-select
+                <BFormSelect
                   id="graph-type"
                   v-model="currentMode"
                   :options="modes"
                   size="sm"
-                ></b-form-select>
-              </b-form-group>
+                ></BFormSelect>
+              </BFormGroup>
             </b-col>
             <b-col cols="6">
-              <b-form-group
+              <BFormGroup
                 label-size="sm"
                 v-bind:label="$trans('Show')"
                 label-for="graph-field"
               >
-                <b-form-radio-group
+                <BFormRadioGroup
                   id="graph-field"
                   v-model="graphField"
                   :options="graphFieldOptions"
                   class="mb-3"
                   value-field="item"
                   text-field="name"
-                ></b-form-radio-group>
-              </b-form-group>
+                ></BFormRadioGroup>
+              </BFormGroup>
             </b-col>
           </b-row>
         </b-col>
         <b-col cols="1">
           <div class="float-right">
-            <b-link @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
-              <b-icon-arrow-right font-scale="1.8"></b-icon-arrow-right>
-            </b-link>
+            <BLink @click.prevent="nextYear" v-bind:title="$trans('Next year') ">
+              <IBiArrowRight font-scale="1.8"></IBiArrowRight>
+            </BLink>
           </div>
         </b-col>
       </b-row>
@@ -78,11 +78,11 @@
           </div>
         </template>
         <template #cell(sum_amount)="data">
-          {{ data.item.sum_amount }} 
+          {{ data.item.sum_amount }}
           <span>({{ data.item.amount_perc }}%)</span>
         </template>
         <template #cell(sum_price_selling)="data">
-          &euro; {{ data.item.sum_price_selling.toFixed(2) }} 
+          &euro; {{ data.item.sum_price_selling.toFixed(2) }}
           <span>({{ data.item.amount_selling_perc }}%)</span>
         </template>
         <template #cell(sum_price_purchase)="data">
@@ -102,6 +102,8 @@ import totalSalesPerSupplierModel from '@/models/inventory/TotalSalesPerSupplier
 import totalSalesPerCustomerModel from '@/models/inventory/TotalSalesPerCustomer.js'
 import totalSalesPerMaterialSupplierModel from '@/models/inventory/TotalSalesPerMaterialSupplier.js'
 import totalSalesPerMaterialCustomerModel from '@/models/inventory/TotalSalesPerMaterialCustomer.js'
+import {useToast} from "bootstrap-vue-next";
+import componentMixin from "@/mixins/common";
 
 const MODES = {
   TS: 'total-material-sales',
@@ -114,6 +116,15 @@ const MODES = {
 let d = new Date();
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
+  mixins: [componentMixin],
   data() {
     return {
       modes: [

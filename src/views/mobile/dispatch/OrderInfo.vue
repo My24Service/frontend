@@ -14,11 +14,12 @@
     </dl>
     <p v-if="order.orderlines.length"><strong><small>{{ $trans("Orderlines") }}</small></strong></p>
     <dl v-if="order.orderlines.length">
-      <template v-for="orderline in order.orderlines">
-        <dt :key="orderline.id">{{ $trans("Product") }}</dt>
-        <dd :key="orderline.id">{{ orderline.product }}</dd>
-        <dt :key="orderline.id">{{ $trans("Location") }}</dt>
-        <dd :key="orderline.id">{{ orderline.location }}</dd>
+      <!-- eslint-disable-next-line vue/no-v-for-template-key -->
+      <template v-for="orderline in order.orderlines" :key="orderline.id">
+        <dt>{{ $trans("Product") }}</dt>
+        <dd>{{ orderline.product }}</dd>
+        <dt>{{ $trans("Location") }}</dt>
+        <dd>{{ orderline.location }}</dd>
       </template>
     </dl>
   </div>
@@ -30,7 +31,7 @@ export default {
   name: "OrderInfo",
   props: {
     gridSlot: {
-      type: String
+      type: [String, Number]
     },
     order: {
       type: [Object]

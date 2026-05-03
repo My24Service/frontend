@@ -25,7 +25,7 @@ jobs:
   build-upload-main:
     working_directory: ~/circleci-frontend
     docker:
-      - image: cimg/node:18.19.0
+      - image: cimg/node:22.12.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-main-build.tgz
           RELEASE_NAME: /tmp/frontend-release
@@ -33,12 +33,13 @@ jobs:
       - checkout
       - run: sudo apt-get update
       - run: sudo apt install virtualenv
+      - run: rm -fr package-lock.json
       - run:
           name: Install packages
-          command: yarn
+          command: npm i
       - run:
           name: Create build
-          command: yarn ci:build
+          command: npm run ci:build
 
       - run:
           name: set environment var TARGET_DIR
@@ -85,7 +86,7 @@ jobs:
   build-upload-develop:
     working_directory: ~/circleci-frontend
     docker:
-      - image: cimg/node:18.19.0
+      - image: cimg/node:22.12.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-develop-build.tgz
           RELEASE_NAME: /tmp/frontend-release
@@ -93,12 +94,13 @@ jobs:
       - checkout
       - run: sudo apt-get update
       - run: sudo apt install virtualenv
+      - run: rm -fr package-lock.json
       - run:
           name: Install packages
-          command: yarn
+          command: npm i
       - run:
           name: Create build
-          command: yarn ci:build
+          command: npm run ci:build
       - run:
           name: set environment var TARGET_DIR
           command: |

@@ -3,7 +3,7 @@
     <b-modal
       ref="pdf-error-modal"
       :title="$trans('Error creating PDF')"
-      ok-only
+      :ok-only="true"
     >
       <div
         class="d-block text-center"
@@ -34,18 +34,18 @@
       size="xl"
       v-b-modal.modal-scrollable
       :title="viewerTitle"
-      ok-only
+      :ok-only="true"
     >
       <template #modal-footer="{ ok }">
-        <b-button
+        <BButton
           class="btn button btn-danger"
           @click="showMakeDefinitiveModal"
           v-if="quotation.preliminary"
           variant="danger"
         >
           {{ $trans('Make definitive') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           class="btn button btn-danger"
           @click="generatePdf"
           v-if="!quotation.preliminary"
@@ -53,8 +53,8 @@
         >
           <b-spinner small v-if="isLoading"></b-spinner>
           {{ $trans('Recreate PDF') }}
-        </b-button>
-        <b-button
+        </BButton>
+        <BButton
           class="btn button btn-danger"
           @click="downloadPdf"
           v-if="quotation.definitive_pdf_filename"
@@ -62,10 +62,10 @@
         >
           <b-spinner small v-if="isLoading"></b-spinner>
           {{ $trans('Download PDF') }}
-        </b-button>
-        <b-button @click="ok()" variant="primary">
+        </BButton>
+        <BButton @click="ok()" variant="primary">
           {{ $trans("Close") }}
-        </b-button>
+        </BButton>
       </template>
 
       <b-overlay :show="isLoading" rounded="sm">
@@ -83,6 +83,8 @@
 <script>
 import {QuotationModel, QuotationService} from "@/models/quotations/Quotation";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 import my24 from "@/services/my24";
 
@@ -99,6 +101,14 @@ class PdfBlobError {
 }
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   name: "QuotationPDFViewer",
   props: {
     quotationIn: {
@@ -112,7 +122,7 @@ export default {
   computed: {
     viewerTitle() {
       if (this.quotation) {
-        return this.quotation.preliminary ? this.$trans("PDF preview") : this.$trans("Definitive PDF")
+        return this.quotation.preliminary ? $trans("PDF preview") : $trans("Definitive PDF")
       } else {
         return ''
       }
@@ -134,17 +144,17 @@ export default {
 
       try {
         await this.quotationService.makeDefinitive(this.quotation.id)
-        this.infoToast(this.$trans('Success'), this.$trans('Quotation is now definitive'))
+        infoToast(this.create, $trans('Success'), $trans('Quotation is now definitive'))
         this.isLoading = false
         await this.$router.push({ name: 'quotation-view', params: {pk: this.quotation.id }})
       } catch(error) {
-        this.errorToast(this.$trans('Error making quotation definitive'))
+        errorToast(this.create, $trans('Error making quotation definitive'))
         this.isLoading = false
         if (error.response?.data?.template_error) {
-          this.errorToast(error.response.data.template_error)
+          errorToast(this.create, error.response.data.template_error)
           return
         }
-        this.errorToast(this.$trans('Error generating pdf'))
+        errorToast(this.create, $trans('Error generating pdf'))
       }
     },
     async generatePdf() {
@@ -158,12 +168,12 @@ export default {
         if (!result_ok) {
           this.$refs['pdf-error-modal'].show()
         } else {
-          this.infoToast(this.$trans('Success'), this.$trans('PDF created'))
+          infoToast(this.create, $trans('Success'), $trans('PDF created'))
         }
       } catch(error) {
         console.log('error generating pdf', error)
         this.isLoading = false
-        this.errorToast(this.$trans('Error creating PDF'))
+        errorToast(this.create, $trans('Error creating PDF'))
       }
     },
     async downloadPdf() {
@@ -254,7 +264,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)
-        this.errorToast(this.$trans('Error fetching quotation'))
+        errorToast(this.create, $trans('Error fetching quotation'))
         this.isLoading = false
       }
     },

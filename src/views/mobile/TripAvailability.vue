@@ -21,14 +21,14 @@
     >
       <template #head(icons)="">
         <div class="float-right">
-          <b-button-toolbar>
-            <b-button-group class="mr-1">
+          <BButton-toolbar>
+            <BButton-group class="mr-1">
               <ButtonLinkRefresh
                 v-bind:method="function() { loadData() }"
                 v-bind:title="$trans('Refresh')"
               />
-            </b-button-group>
-          </b-button-toolbar>
+            </BButton-group>
+          </BButton-toolbar>
         </div>
       </template>
       <template #cell(trip)="data">
@@ -63,10 +63,10 @@ export default {
       isLoading: false,
       tripAvailability: [],
       fields: [
-        {key: 'trip', label: this.$trans('Trip'), sortable: false},
-        {key: 'required_users', label: this.$trans('Required users'), sortable: true},
-        {key: 'users_trip_set_as_available', label: this.$trans('Available users'), sortable: true},
-        {key: 'assigned_user_count', label: this.$trans('Assigned users'), sortable: true},
+        {key: 'trip', label: $trans('Trip'), sortable: false},
+        {key: 'required_users', label: $trans('Required users'), sortable: true},
+        {key: 'users_trip_set_as_available', label: $trans('Available users'), sortable: true},
+        {key: 'assigned_user_count', label: $trans('Assigned users'), sortable: true},
         {key: 'icons'}
       ],
     }
@@ -91,7 +91,7 @@ export default {
         this.isLoading = false
       } catch(error) {
         console.log('error fetching trips', error);
-        this.errorToast(this.$trans('Error loading trips'))
+        errorToast(this.create, $trans('Error loading trips'))
         this.isLoading = false
       }
     }

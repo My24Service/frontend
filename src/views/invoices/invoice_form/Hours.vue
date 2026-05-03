@@ -2,7 +2,7 @@
   <details>
     <summary class="flex-columns space-between">
       <h6>{{ getTitle() }}</h6>
-      <b-icon-chevron-down></b-icon-chevron-down>
+      <IBiChevronDown></IBiChevronDown>
     </summary>
 
     <b-overlay :show="isLoading" rounded="sm">
@@ -63,26 +63,27 @@
             <!-- {{ activity.amount_duration_read }}-->
           </b-col>
           <b-col cols="3">
-            <b-form-radio-group
+            <BFormRadioGroup
               @change="updateTotals"
               v-model="activity.use_price"
+              v-if="!teamleaderHours"
             >
-              <b-form-radio :value="usePriceOptions.USE_PRICE_USER" v-if="!activity.is_partner">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_USER" v-if="!activity.is_partner">
                 {{ $trans('Engineer') }}
                 {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_USER).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_SETTINGS">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
                 {{ $trans('Settings') }}
                 {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_CUSTOMER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
                 {{ $trans('Customer') }}
                 {{ getEngineerRateFor(activity, usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-              </b-form-radio>
+              </BFormRadio>
 
-              <b-form-radio :value="usePriceOptions.USE_PRICE_OTHER">
+              <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
                 <p class="flex">
                   {{ $trans("Other") }}:&nbsp;&nbsp;
                   <PriceInput
@@ -91,8 +92,22 @@
                     @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
                   />
                 </p>
-              </b-form-radio>
-            </b-form-radio-group>
+              </BFormRadio>
+            </BFormRadioGroup>
+            <BFormRadioGroup
+              @change="updateTotals"
+              v-model="activity.use_price"
+              v-if="teamleaderHours"
+            >
+              <p class="flex">
+                Teamleader:&nbsp;
+                <PriceInput
+                  v-model="activity.price"
+                  :currency="activity.price_currency"
+                  @priceChanged="(dineroVal) => otherPriceChanged(dineroVal, activity)"
+                />
+              </p>
+            </BFormRadioGroup>
           </b-col>
           <b-col cols="2">
             <VAT @vatChanged="(val) => changeVatType(activity, val)" />
@@ -120,7 +135,6 @@
 </template>
 
 <script>
-import Collapse from "../../../components/Collapse";
 import invoiceMixin from "./mixin.js";
 import invoiceLineService from "../../../models/invoices/InvoiceLine";
 import {
@@ -143,20 +157,31 @@ import CostService, {
   COST_TYPE_WORK_HOURS
 } from "../../../models/orders/Cost";
 import PriceInput from "../../../components/PriceInput";
-import {toDinero} from "../../../utils";
+import {$trans, toDinero} from "@/utils";
 import CollectionSaveContainer from "./CollectionSaveContainer";
 import CollectionEmptyContainer from "./CollectionEmptyContainer";
 import CostsTable from "./CostsTable";
 import AddToInvoiceLinesDiv from "./AddToInvoiceLinesDiv";
 import TotalsInputs from "../../../components/TotalsInputs";
+import {useToast} from "bootstrap-vue-next";
+import {useMainStore} from "@/stores/main";
 
 export default {
+  setup() {
+    const {create} = useToast()
+    const mainStore = useMainStore()
+
+    // expose to template and other options API hooks
+    return {
+      create,
+      mainStore
+    }
+  },
   name: "HoursComponent",
   emits: ['invoiceLinesCreated'],
   mixins: [invoiceMixin],
   components: {
     TotalsInputs,
-    Collapse,
     HeaderCell,
     VAT,
     TotalRow,
@@ -217,6 +242,10 @@ export default {
       type: [Array],
       default: null
     },
+    teamleaderHours: {
+      type: Object,
+      default: null
+    },
   },
   data () {
     return {
@@ -230,9 +259,9 @@ export default {
       costService: new CostService(),
       totalHours: null,
 
-      default_currency: this.$store.getters.getDefaultCurrency,
-      invoice_default_vat: this.$store.getters.getInvoiceDefaultVat,
-      default_hourly_rate: this.$store.getters.getInvoiceDefaultHourlyRate,
+      default_currency: this.mainStore.getDefaultCurrency,
+      invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
+      default_hourly_rate: this.mainStore.getInvoiceDefaultHourlyRate,
 
       total_dinero: null,
       totalVAT_dinero: null,
@@ -281,6 +310,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    $trans,
     activityDurationChange(activity, event) {
 //       console.log( activity );
       const durationParts = activity.amount_duration_read.split( ':', 2 );
@@ -355,6 +385,7 @@ export default {
                 this.default_currency,
                 this.getDefaultProps()
               )))
+
             break
           case COST_TYPE_TRAVEL_HOURS:
             user_totals = this.user_totals.filter((m) => m.travel_total_secs !== null)
@@ -403,13 +434,13 @@ export default {
     getTitle() {
       switch (this.type) {
         case COST_TYPE_WORK_HOURS:
-          return this.$trans("Work hours")
+          return $trans("Work hours")
         case COST_TYPE_TRAVEL_HOURS:
-          return this.$trans("Travel hours")
+          return $trans("Travel hours")
         case COST_TYPE_EXTRA_WORK:
-          return this.$trans("Extra work")
+          return $trans("Extra work")
         case COST_TYPE_ACTUAL_WORK:
-          return this.$trans("Actual work")
+          return $trans("Actual work")
         default:
           throw `getTitle(), unknown type ${this.type}`
       }
@@ -426,11 +457,16 @@ export default {
       )
 
       this.total_dinero = this.costService.getItemsTotal()
+      console.log('total', this.total_dinero.toFormat("$0.00"))
       this.totalVAT_dinero = this.costService.getItemsTotalVAT()
 
       return true
     },
     getPrice(activity) {
+      if (this.teamleaderHours) {
+        // return this.teamleaderHours.selling_price
+        return parseFloat(this.teamleaderHours.selling_price)
+      }
       const user_id = activity.user ? activity.user : activity.user_id
       const user = this.engineer_models.find((m) => m.id === user_id)
       if (user) {

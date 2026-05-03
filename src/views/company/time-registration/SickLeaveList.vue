@@ -2,10 +2,10 @@
   <div class="app-page">
     <header>
       <div class="page-title">
-        <h3><b-icon icon="file-earmark-check-fill"></b-icon>{{ $trans("Sick leave") }}</h3>
+        <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Sick leave") }}</h3>
         <div class="flex-columns">
           <router-link class="btn button" :to="{ name: 'sick-leave-list-add' }">
-            <b-icon icon="file-earmark-plus"></b-icon>{{ $trans("Add sick leave") }}
+            <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add sick leave") }}
           </router-link>
         </div>
       </div>
@@ -23,8 +23,8 @@
       >
         <template #head(icons)="">
           <div class="float-right">
-            <b-button-toolbar>
-              <b-button-group class="mr-1">
+            <BButton-toolbar>
+              <BButton-group class="mr-1">
                 <ButtonLinkRefresh
                   v-bind:method="
                     function() {
@@ -40,14 +40,14 @@
                     }
                   "
                 />
-              </b-button-group>
-            </b-button-toolbar>
+              </BButton-group>
+            </BButton-toolbar>
           </div>
         </template>
         <template #cell(full_name)="data">
-          <b-link :to="{ name: 'leave-edit', params: { pk: data.item.id } }">{{
+          <BLink :to="{ name: 'leave-edit', params: { pk: data.item.id } }">{{
             data.item.full_name
-          }}</b-link>
+          }}</BLink>
         </template>
         <template #cell(date)="data">
           <span v-if="!data.item.end_date">
@@ -92,19 +92,27 @@
 <script>
 import ButtonLinkRefresh from "../../../components/ButtonLinkRefresh.vue";
 import ButtonLinkSearch from "../../../components/ButtonLinkSearch.vue";
-import ButtonLinkAdd from "../../../components/ButtonLinkAdd.vue";
 import SearchModal from "../../../components/SearchModal.vue";
 import Pagination from "../../../components/Pagination.vue";
 import PillsLeave from "./SubNav.vue";
 import { SickLeavesService } from "@/models/company/SickLeave.js";
 import IconLinkEdit from "../../../components/IconLinkEdit.vue";
 import IconLinkDelete from "../../../components/IconLinkDelete.vue";
+import {useToast} from "bootstrap-vue-next";
+import {errorToast, infoToast, $trans} from "@/utils";
 
 export default {
+  setup() {
+    const {create} = useToast()
+
+    // expose to template and other options API hooks
+    return {
+      create
+    }
+  },
   components: {
     ButtonLinkRefresh,
     ButtonLinkSearch,
-    ButtonLinkAdd,
     SearchModal,
     Pagination,
     PillsLeave,
@@ -119,11 +127,11 @@ export default {
       isLoading: false,
       leaves: [],
       fields: [
-        { key: "user_full_name", label: this.$trans("User"), thAttr: { width: "15%" } },
-        { key: "date", label: this.$trans("Date") },
-        { key: "created_by_fullname", label: this.$trans("Created by") },
-        { key: "created", label: this.$trans("Created") },
-        { key: "last_status_full", label: this.$trans("Status") },
+        { key: "user_full_name", label: $trans("User"), thAttr: { width: "15%" } },
+        { key: "date", label: $trans("Date") },
+        { key: "created_by_fullname", label: $trans("Created by") },
+        { key: "created", label: $trans("Created") },
+        { key: "last_status_full", label: $trans("Status") },
         { key: "icons", thAttr: { width: "15%" } }
       ]
     };
@@ -149,12 +157,12 @@ export default {
        this.isLoading = true;
       try {
         await this.sickLeavesService.delete(this.leavePk);
-        this.infoToast(this.$trans("Deleted"), this.$trans("Sick leave has been deleted"));
-        this.loadData();
+        infoToast(this.create, $trans("Deleted"), $trans("Sick leave has been deleted"));
+        await this.loadData();
       } catch (error) {
         this.isLoading = false;
         console.log("error deleting sick leave", error);
-        this.errorToast(this.$trans("Error deleting sick leave"));
+        errorToast(this.create, $trans("Error deleting sick leave"));
       }
     },
     async loadData() {
@@ -166,7 +174,7 @@ export default {
         this.isLoading = false;
       } catch (error) {
         console.log("error fetching sick leave request", error);
-        this.errorToast(this.$trans("Error loading sick leave request"));
+        errorToast(this.create, $trans("Error loading sick leave request"));
         this.isLoading = false;
       }
     }

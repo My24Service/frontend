@@ -169,6 +169,9 @@ class CustomerService extends BaseModel {
     return `/api/customer/export/?${listArgs.join('&')}`
   }
 
+  getMyCustomer() {
+    return this.axios.get('/customer/customer-my/').then((response) => response.data)
+  }
 }
 
 export default new CustomerService()

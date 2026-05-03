@@ -35,7 +35,7 @@ export default {
   name: "CustomerCard",
   props: {
     customer: {
-      type: [CustomerModel],
+      type: [CustomerModel, Object],
       default: null
     },
   }

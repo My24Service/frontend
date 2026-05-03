@@ -3,7 +3,8 @@ import BaseModel from '@/models/base'
 
 class DocumentModel {
   id
-  order
+  equipment
+  location
   name
   description
   file
@@ -17,7 +18,8 @@ class DocumentModel {
 
 class DocumentService extends BaseModel {
   fields = {
-    order: null,
+    equipment: null,
+    location: null,
     name: '',
     description: '',
     file: ''
