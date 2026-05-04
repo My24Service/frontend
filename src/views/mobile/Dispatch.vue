@@ -819,7 +819,7 @@ export default {
     this.startDate = this.$moment().weekday(monday).toDate()
     this.startWeek = this.$moment(this.startDate).format('w')
 
-    this.assignMode = JSON.parse(this.assignModeProp)
+    this.assignMode = this.assignModeProp ? JSON.parse(this.assignModeProp) : null
 
     if (this.assignMode) {
       this.alreadyAssignedUsers = []
