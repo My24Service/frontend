@@ -39,7 +39,7 @@ jobs:
           command: npm i
       - run:
           name: Create build
-          command: npm run ci:build
+          command: npm run build
 
       - run:
           name: set environment var TARGET_DIR
@@ -100,7 +100,7 @@ jobs:
           command: npm i
       - run:
           name: Create build
-          command: npm run ci:build
+          command: npm run build
       - run:
           name: set environment var TARGET_DIR
           command: |

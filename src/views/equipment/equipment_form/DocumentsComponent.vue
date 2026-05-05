@@ -117,37 +117,29 @@
           {{ $trans('Edit document') }}
         </BButton>
       </footer>
-
     </div>
 
     <b-container
       v-if="showChangesBlock"
       class="pt-4"
     >
-      <b-row>
-        <b-col cols="2"></b-col>
-        <b-col cols="10">
-          <BButton
-            @click="loadData"
-            class="btn btn-secondary"
-            type="button"
-            size="sm"
-            variant="secondary"
-          >
-            {{ $trans('Discard changes') }}
-          </BButton>
-          &nbsp;
-          <BButton
-            @click="submitDocuments"
-            class="btn btn-primary"
-            type="button"
-            size="sm"
-            variant="primary"
-          >
-            {{ $trans('Save changes') }}
-          </BButton>
-        </b-col>
-      </b-row>
+      <BButton
+        @click="loadData"
+        type="button"
+        size="sm"
+        variant="secondary"
+      >
+        {{ $trans('Discard changes') }}
+      </BButton>
+      &nbsp;
+      <BButton
+        @click="submitDocuments"
+        type="button"
+        size="sm"
+        variant="primary"
+      >
+        {{ $trans('Save changes') }}
+      </BButton>
     </b-container>
   </div>
 </template>
@@ -390,6 +382,11 @@ export default {
         errors.push(e)
         console.log('error updating documents', e)
         errorToast(this.create, $trans('Error updating documents'))
+      }
+
+      if (!this.isView && this.documentService.collection.length === 0) {
+        this.newDocument()
+        this.newItem = true
       }
 
       this.isLoading = false
