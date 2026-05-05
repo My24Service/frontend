@@ -94,7 +94,6 @@ jobs:
       - checkout
       - run: sudo apt-get update
       - run: sudo apt install virtualenv
-      - run: rm -fr package-lock.json
       - run:
           name: Install packages
           command: npm i
