@@ -67,8 +67,8 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkDelete
-              v-bind:title="$trans('Delete')"
-              v-bind:method="function() { showDeleteModal(data.item.id) }"
+              :title="$trans('Delete')"
+              :method="function() { showDeleteModal(data.item.id) }"
             />
           </div>
         </template>
@@ -142,6 +142,7 @@ export default {
     await this.loadData()
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

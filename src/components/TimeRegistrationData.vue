@@ -7,7 +7,7 @@
           v-for="item in dateQueryMode"
           :active="item.value === activeDateQueryMode"
           :key="item.value"
-          @click="activeDateQueryMode = item.value"
+          @click.prevent="activeDateQueryMode = item.value"
         >
           {{ item.label }}
         </b-nav-item>
@@ -202,7 +202,12 @@
             <span v-else>{{ item.distance_to }} / {{ item.distance_back }}</span>
           </template>
           <template v-slot:cell(work_correct)="{ item }">
-            <b-btn v-if="isPlanning" variant="outline" class="highlight-on-hover-row" size="sm" @click="editCorrection(item)">+ / -</b-btn>
+            <BButton
+              v-if="isPlanning"
+              variant="outline-primary"
+              class="highlight-on-hover-row"
+              size="sm" @click="editCorrection(item)"
+            >+ / -</BButton>
           </template>
       </b-table>
     </div>

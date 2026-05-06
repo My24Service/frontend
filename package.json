@@ -8,8 +8,7 @@
     "build": "vite build",
     "dev": "vite",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
-    "test": "vitest run --dom",
-    "ci:build": "export NODE_OPTIONS=--openssl-legacy-provider; vite build"
+    "test": "vitest run --dom"
   },
   "dependencies": {
     "@fullcalendar/bootstrap5": "^6.1.20",

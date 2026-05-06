@@ -3,45 +3,43 @@
    <h6>{{ $trans('Documents') }}</h6>
 
     <!-- list -->
-    <div v-if="!newItem">
-      <p v-if="!documentService.collection.length">
-        <i>{{ $trans("No documents") }}</i>
-      </p>
-      <b-container fluid="sm" v-else>
-        <b-row
-          v-for="(document, index) of documentService.collection"
-          :key="document.name"
-          no-gutters
-          style="padding-bottom: 10px"
-        >
-          <b-col :cols="isView ? 12 : 9">
-            <BLink v-bind:href="document.url" target="_blank">
-              {{ document.name }} <IBiDownload font-scale=".8"></IBiDownload>
-            </BLink>
-          </b-col>
-          <b-col cols="3" v-if="!isView">
-            <div
-              class="h2 float-right"
-            >
-              <IconLinkEdit
-                :method="function() { editDocument(document, index) }"
-                v-bind:title="$trans('Edit')"
-              />
-              <IconLinkDelete
-                v-bind:title="$trans('Delete')"
-                v-bind:method="function() { deleteDocument(index) }"
-              />
-            </div>
-          </b-col>
-          <b-col v-if="document.hasOwnProperty('apiOk')" cols="12">
-            <ApiResult
-              :error="document.error"
-              :success-message='$trans("Document created")'
+    <p v-if="!documentService.collection.length">
+      <i>{{ $trans("No documents") }}</i>
+    </p>
+    <b-container fluid="sm" v-else>
+      <b-row
+        v-for="(document, index) of documentService.collection"
+        :key="document.name"
+        no-gutters
+        style="padding-bottom: 10px"
+      >
+        <b-col :cols="isView ? 12 : 9">
+          <BLink v-bind:href="document.url" target="_blank">
+            {{ document.name }} <IBiDownload font-scale=".8"></IBiDownload>
+          </BLink>
+        </b-col>
+        <b-col cols="3" v-if="!isView">
+          <div
+            class="h2 float-right"
+          >
+            <IconLinkEdit
+              :method="function() { editDocument(document, index) }"
+              v-bind:title="$trans('Edit')"
             />
-          </b-col>
-        </b-row>
-      </b-container>
-    </div>
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { deleteDocument(index) }"
+            />
+          </div>
+        </b-col>
+        <b-col v-if="document.hasOwnProperty('apiOk')" cols="12">
+          <ApiResult
+            :error="document.error"
+            :success-message='$trans("Document created")'
+          />
+        </b-col>
+      </b-row>
+    </b-container>
 
     <!-- form -->
     <div v-if="showForm">
@@ -117,37 +115,29 @@
           {{ $trans('Edit document') }}
         </BButton>
       </footer>
-
     </div>
 
     <b-container
       v-if="showChangesBlock"
       class="pt-4"
     >
-      <b-row>
-        <b-col cols="2"></b-col>
-        <b-col cols="10">
-          <BButton
-            @click="loadData"
-            class="btn btn-secondary"
-            type="button"
-            size="sm"
-            variant="secondary"
-          >
-            {{ $trans('Discard changes') }}
-          </BButton>
-          &nbsp;
-          <BButton
-            @click="submitDocuments"
-            class="btn btn-primary"
-            type="button"
-            size="sm"
-            variant="primary"
-          >
-            {{ $trans('Save changes') }}
-          </BButton>
-        </b-col>
-      </b-row>
+      <BButton
+        @click="loadData"
+        type="button"
+        size="sm"
+        variant="secondary"
+      >
+        {{ $trans('Discard changes') }}
+      </BButton>
+      &nbsp;
+      <BButton
+        @click="submitDocuments"
+        type="button"
+        size="sm"
+        variant="primary"
+      >
+        {{ $trans('Save changes') }}
+      </BButton>
     </b-container>
   </div>
 </template>
@@ -390,6 +380,11 @@ export default {
         errors.push(e)
         console.log('error updating documents', e)
         errorToast(this.create, $trans('Error updating documents'))
+      }
+
+      if (!this.isView && this.documentService.collection.length === 0) {
+        this.newDocument()
+        this.newItem = true
       }
 
       this.isLoading = false

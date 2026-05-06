@@ -77,13 +77,17 @@
     </form>
   </b-modal>
 
-  <b-modal ref="workorder-viewer" size="xl" v-b-modal.modal-scrollable>
+  <b-modal
+    ref="workorder-viewer"
+    size="xl"
+    v-b-modal.modal-scrollable
+  >
     <div class="d-flex flex-row justify-content-center align-items-center iframe-loader" v-if="iframeLoading">
       <b-spinner medium></b-spinner>
     </div>
     <iframe :src="this.workorderURL" style="min-height:720px; width: 100%;" frameborder="0" @load="iframeLoaded" v-show="!iframeLoading"></iframe>
 
-    <template #modal-footer="{ ok }">
+    <template #footer="{ ok }">
       <BButton class="btn button btn-secondary" @click="openWorkorder()" target="_blank">
         {{ $trans('Open in a new tab') }}
       </BButton>
@@ -100,7 +104,13 @@
         {{ $trans('re-generate PDF') }}
 
       </BButton>
-      <BLink class="btn button btn-primary" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+      <BLink
+        class="btn button btn-primary"
+        v-if="order && order.workorder_pdf_url"
+        :href="order.workorder_pdf_url"
+        target="_blank"
+        :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'"
+      >
         <IBiFileEarmarkPdf></IBiFileEarmarkPdf>{{ $trans('Download PDF') }}
       </BLink>
       <!-- Emulate built in modal footer ok and cancel button actions -->
@@ -131,9 +141,7 @@
     </header>
 
     <div class="page-detail">
-
       <div v-if="order" class="flex-columns wrap" >
-
         <div class="panel col-1-3">
           <h3>
             <span><strong>{{ order.order_type }}</strong> <br><small>
@@ -461,6 +469,7 @@ import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -473,6 +482,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     // ApiResult,
     DocumentsComponent,
