@@ -92,7 +92,7 @@ jobs:
           RELEASE_NAME: /tmp/frontend-release
     steps:
       - checkout
-      - run: sudo apt-get update && apt-get upgrade -y
+      - run: sudo apt-get update && sudo apt-get upgrade -y
       - run:
           name: npm info
           command: node --version ; npm --version
