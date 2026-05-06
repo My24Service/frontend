@@ -92,8 +92,10 @@ jobs:
           RELEASE_NAME: /tmp/frontend-release
     steps:
       - checkout
-      - run: sudo apt-get clean
-      - run: sudo apt-get update
+      - run: sudo apt-get update && apt get upgrade -y
+      - run:
+          name: npm info
+          command: node --version ; npm --version
       - run: sudo apt install virtualenv
       - run:
           name: Install packages
