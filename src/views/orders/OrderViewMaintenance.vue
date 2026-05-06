@@ -106,7 +106,7 @@
       </BButton>
       <BLink
         class="btn button btn-primary"
-        v-if="order.workorder_pdf_url"
+        v-if="order && order.workorder_pdf_url"
         :href="order.workorder_pdf_url"
         target="_blank"
         :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'"
@@ -469,6 +469,7 @@ import DocumentsComponent from "@/views/orders/order_form/DocumentsComponent.vue
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 import {useMainStore} from "@/stores/main";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -481,6 +482,7 @@ export default {
       mainStore
     }
   },
+  mixins: [componentMixin],
   components: {
     // ApiResult,
     DocumentsComponent,

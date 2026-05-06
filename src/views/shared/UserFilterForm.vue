@@ -8,7 +8,7 @@
           <span v-else>{{ $trans('Edit filter') }}</span>
         </h3>
         <div class="flex-columns">
-          <BButton @click="cancelForm" type="button" variant="secondary outline">
+          <BButton @click="cancelForm" type="button" variant="outline-secondary">
             {{ $trans('Cancel') }}</BButton>
           <BButton @click="submitForm" type="button" variant="primary">
             {{ $trans('Save') }}</BButton>
@@ -205,35 +205,39 @@
                       >
                         {{ condition.values[index].bool_value ? $trans("yes") : $trans("no") }}
                       </BFormCheckbox>
-                      <BLink :title="$trans('delete')" @click="removeConditionValue(condition, index)">
+                      <BButton
+                        :title="$trans('delete')"
+                        @click="removeConditionValue(condition, index)"
+                        variant="light"
+                      >
                         <IBiTrashFill class="edit-icon"></IBiTrashFill>
-                      </BLink>
+                      </BButton>
                       <br/>
                     </div>
                     <div
                       class="float-right add-value"
                       v-if="condition.fieldInputType !== FIELD_TYPE_BOOL"
                     >
-                      <BLink
+                      <BButton
                         :title="$trans('add value')"
                         @click="addConditionValue(condition)"
+                        variant="primary"
                       >
                         {{ $trans("add value") }}
-                      </BLink>
+                      </BButton>
                     </div>
                   </BFormGroup>
                 </b-col>
               </b-row>
-              <b-row>
+              <b-row class="mt-2">
                 <b-col cols="12">
-                  <div class="h5 left">
-                    <BLink
+                    <BButton
                       :title="$trans('remove condition')"
                       @click="removeCondition(index)"
+                      variant="danger"
                     >
                       {{ $trans("remove condition") }}
-                    </BLink>
-                  </div>
+                    </BButton>
                 </b-col>
               </b-row>
             </b-container>
@@ -243,12 +247,13 @@
               <b-col cols="12">
                 <hr/>
                 <div class="h4 float-right">
-                  <BLink
+                  <BButton
                     :title="$trans('add condition')"
                     @click="addCondition()"
+                    variant="primary"
                   >
                     {{ $trans("add condition") }}
-                  </BLink>
+                  </BButton>
                 </div>
               </b-col>
             </b-row>
@@ -398,6 +403,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    $trans,
     selectStatus(val) {
       console.log(val)
     },
