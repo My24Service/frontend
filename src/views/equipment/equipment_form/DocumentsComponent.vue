@@ -3,45 +3,43 @@
    <h6>{{ $trans('Documents') }}</h6>
 
     <!-- list -->
-    <div v-if="!newItem">
-      <p v-if="!documentService.collection.length">
-        <i>{{ $trans("No documents") }}</i>
-      </p>
-      <b-container fluid="sm" v-else>
-        <b-row
-          v-for="(document, index) of documentService.collection"
-          :key="document.name"
-          no-gutters
-          style="padding-bottom: 10px"
-        >
-          <b-col :cols="isView ? 12 : 9">
-            <BLink v-bind:href="document.url" target="_blank">
-              {{ document.name }} <IBiDownload font-scale=".8"></IBiDownload>
-            </BLink>
-          </b-col>
-          <b-col cols="3" v-if="!isView">
-            <div
-              class="h2 float-right"
-            >
-              <IconLinkEdit
-                :method="function() { editDocument(document, index) }"
-                v-bind:title="$trans('Edit')"
-              />
-              <IconLinkDelete
-                v-bind:title="$trans('Delete')"
-                v-bind:method="function() { deleteDocument(index) }"
-              />
-            </div>
-          </b-col>
-          <b-col v-if="document.hasOwnProperty('apiOk')" cols="12">
-            <ApiResult
-              :error="document.error"
-              :success-message='$trans("Document created")'
+    <p v-if="!documentService.collection.length">
+      <i>{{ $trans("No documents") }}</i>
+    </p>
+    <b-container fluid="sm" v-else>
+      <b-row
+        v-for="(document, index) of documentService.collection"
+        :key="document.name"
+        no-gutters
+        style="padding-bottom: 10px"
+      >
+        <b-col :cols="isView ? 12 : 9">
+          <BLink v-bind:href="document.url" target="_blank">
+            {{ document.name }} <IBiDownload font-scale=".8"></IBiDownload>
+          </BLink>
+        </b-col>
+        <b-col cols="3" v-if="!isView">
+          <div
+            class="h2 float-right"
+          >
+            <IconLinkEdit
+              :method="function() { editDocument(document, index) }"
+              v-bind:title="$trans('Edit')"
             />
-          </b-col>
-        </b-row>
-      </b-container>
-    </div>
+            <IconLinkDelete
+              v-bind:title="$trans('Delete')"
+              v-bind:method="function() { deleteDocument(index) }"
+            />
+          </div>
+        </b-col>
+        <b-col v-if="document.hasOwnProperty('apiOk')" cols="12">
+          <ApiResult
+            :error="document.error"
+            :success-message='$trans("Document created")'
+          />
+        </b-col>
+      </b-row>
+    </b-container>
 
     <!-- form -->
     <div v-if="showForm">

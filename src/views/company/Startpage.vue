@@ -230,89 +230,68 @@
           <div class="row">
             <div class="col-lg-6">
               <DashboardBlock v-if="!isLoading" title="Nieuwe documenten - Techniek" iconName="wrench-adjustable">
-                <div class="table_scroll table-responsive-md data-table pt-2 pl-2 pr-2">
-                  <table class="table b-table table-sm table-docs">
-                    <thead>
-                    <tr>
-                      <th>Document</th>
-                      <th>Van</th>
-                      <th>Datum</th>
-                      <th>Bestand</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    <tr>
-                      <td class="align-middle"><span class="badge">Nieuw</span> Servicecontract liften</td>
-                      <td class="align-middle">Otis B.V. </td>
-                      <td class="align-middle">10-05-23 </td>
-                      <td class="align-middle">
-                        <i class="bi bi-filetype-pdf fs-3"></i>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="align-middle"><span class="badge">Nieuw</span> Contract WTW onderhoud </td>
-                      <td class="align-middle">Feenstra B.V. </td>
-                      <td class="align-middle">07-04-23 </td>
-                      <td class="align-middle">
-                        <i class="bi bi-filetype-pdf fs-3"></i>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="align-middle"><span class="badge">Nieuw</span> Service Zonnepanelen</td>
-                      <td class="align-middle">Solar GMBH </td>
-                      <td class="align-middle">05-07-23 </td>
-                      <td class="align-middle">
-                        <i class="bi bi-filetype-pdf fs-3"></i>
-                      </td>
-                    </tr>
-
-                    </tbody>
-                  </table>
-                </div>
+                <b-table
+                  id="equipment-documents-table"
+                  small
+                  :busy='isLoading'
+                  :fields="documentFields"
+                  :items="equipmentDocuments"
+                  responsive="md"
+                  class="data-table pt-2 pl-2 pr-2"
+                  sort-icon-left>
+                  <template #table-busy>
+                    <div class="text-center my-2">
+                      <br>
+                      <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+                      <strong>{{ $trans('Loading...') }}</strong>
+                      <br>
+                    </div>
+                  </template>
+                  <template #cell(name)="data">
+                    <span class="badge" v-if="data.item.is_new">{{ $trans('New') }}</span> {{ data.item.name }}
+                  </template>
+                  <template #cell(created)="data">
+                    <small>{{  data.item.created }}</small>
+                  </template>
+                  <template #cell(file)="data">
+                    <BLink :href="data.item.url" target="_blank">
+                      <i :class="'fs-3 bi ' + getFileIcon(data.item.url)"></i>
+                    </BLink>
+                  </template>
+                </b-table>
               </DashboardBlock>
             </div>
             <div class="col-lg-6">
               <DashboardBlock v-if="!isLoading" title="Nieuwe documenten - Facilitair" iconName="hand-index">
-                <div class="table_scroll table-responsive-md data-table pt-2 pl-2 pr-2">
-                  <table class="table b-table table-sm table-docs">
-                    <thead>
-                    <tr>
-                      <th>Document</th>
-                      <th>Van</th>
-                      <th>Datum</th>
-                      <th>Bestand</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    <tr>
-                      <td class="align-middle"><span class="badge">Nieuw</span> Contract Schoonmaak</td>
-                      <td class="align-middle">Feenstra B.V.</td>
-                      <td class="align-middle">10-05-23</td>
-                      <td class="align-middle">
-                        <i class="bi bi-filetype-pdf fs-3"></i>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="align-middle"><span class="badge">Nieuw</span> Beveiliging (meldkamer)</td>
-                      <td class="align-middle">Secure B.V.</td>
-                      <td class="align-middle">07-04-23</td>
-                      <td class="align-middle">
-                        <i class="bi bi-filetype-pdf fs-3"></i>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="align-middle"><span class="badge">Nieuw</span> Contract Groenvoorziening</td>
-                      <td class="align-middle">Green Blue B.V.</td>
-                      <td class="align-middle">05-07-23</td>
-                      <td class="align-middle">
-                        <i class="bi bi-filetype-pdf fs-3"></i>
-                      </td>
-                    </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <b-table
+                  id="location-documents-table"
+                  small
+                  :busy='isLoading'
+                  :fields="documentFields"
+                  :items="locationDocuments"
+                  responsive="md"
+                  class="data-table pt-2 pl-2 pr-2"
+                  sort-icon-left>
+                  <template #table-busy>
+                    <div class="text-center my-2">
+                      <br>
+                      <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+                      <strong>{{ $trans('Loading...') }}</strong>
+                      <br>
+                    </div>
+                  </template>
+                  <template #cell(name)="data">
+                    <span class="badge" v-if="data.item.is_new">{{ $trans('New') }}</span> {{ data.item.name }}
+                  </template>
+                  <template #cell(created)="data">
+                    <small>{{  data.item.created }}</small>
+                  </template>
+                  <template #cell(file)="data">
+                    <BLink :href="data.item.url" target="_blank">
+                      <i :class="'fs-3 bi ' + getFileIcon(data.item.url)"></i>
+                    </BLink>
+                  </template>
+                </b-table>
               </DashboardBlock>
             </div>
           </div>
@@ -330,6 +309,7 @@ import {$trans} from "@/utils";
 import {NO_IMAGE_URL} from "@/constants";
 import memberModel from "@/models/member/Member";
 import activityModel from '@/models/company/Activity.js'
+import {DocumentService, LocationDocumentService} from "@/models/equipment/Document";
 
 let d = new Date()
 
@@ -348,6 +328,15 @@ export default {
           {key: 'text', label: this.$trans('Activity'), sortable: true},
           {key: 'created', label: this.$trans('Date'), sortable: true},
           {key: 'icons', label: ''},
+        ],
+        equipmentDocumentService: new DocumentService(),
+        locationDocumentService: new LocationDocumentService(),
+        equipmentDocuments: [],
+        locationDocuments: [],
+        documentFields: [
+          {key: 'name', label: this.$trans('Document'), sortable: true},
+          {key: 'created', label: this.$trans('Date'), sortable: true},
+          {key: 'file', label: this.$trans('File')},
         ],
         companyTabs: [
         {
@@ -382,6 +371,42 @@ export default {
     }
   },
   methods: {
+    getFileIcon(url) {
+      // Default fallback icon if URL is missing or unparseable
+      const fallbackIcon = 'bi-file-earmark';
+      if (!url) return fallbackIcon;
+
+      // Clean the URL by removing query parameters (?) and hashes (#)
+      const cleanUrl = url.split('?')[0].split('#')[0];
+      
+      // Get the last string after the final dot
+      const parts = cleanUrl.split('.');
+      if (parts.length <= 1) return fallbackIcon; // No extension found
+      
+      const ext = parts.pop().toLowerCase();
+      
+      // These are the easiest matches:
+      const extensionList = [
+        'pdf', 'xls', 'xlsx', 'doc', 'docx',
+        'txt', 'csv', 'png', 'jpg', 'jpeg',
+        'gif', 'zip', 'odt', 'eml', 'msg'
+      ];
+
+      if (extensionList.includes(ext)) {
+        return `bi-filetype-${ext}`;
+      }
+
+      // Map extensions to Bootstrap Icon classes
+      const iconMap = {
+        jpeg: 'bi-filetype-jpg', // Map jpeg to jpg icon
+        odt: 'bi-file-earmark-word', // Close approximation for OpenDocument
+        eml: 'bi-envelope-paper',    // Email format
+        msg: 'bi-envelope-paper'     // Email format
+      };
+
+      // Add the 'bi' base class to the returned mapped icon, or use the fallback
+      return iconMap[ext] || fallbackIcon;
+    },
     nextYear() {
       this.year = this.year + 1
       this.loadData()
@@ -399,6 +424,16 @@ export default {
 
         const activityData = await activityModel.list()
         this.activity = activityData.results
+
+        await this.equipmentDocumentService.loadCollection()
+        this.equipmentDocuments = this.equipmentDocumentService.collection
+
+        await this.locationDocumentService.loadCollection()
+        this.locationDocuments = this.locationDocumentService.collection
+
+        console.log("equipment documents:", this.equipmentDocuments)
+        console.log("location documents:", this.locationDocuments)
+
         this.companyTabs=[
           {
             title: 'Foto',
