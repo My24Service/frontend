@@ -364,11 +364,7 @@ export default {
     }
   },
   async created() {
-    try {
-      await this.loadData()
-    } catch (e) {
-      console.error(`error loading data: ${e}`)
-    }
+    await this.loadData()
   },
   methods: {
     getFileIcon(url) {
@@ -378,13 +374,13 @@ export default {
 
       // Clean the URL by removing query parameters (?) and hashes (#)
       const cleanUrl = url.split('?')[0].split('#')[0];
-      
+
       // Get the last string after the final dot
       const parts = cleanUrl.split('.');
       if (parts.length <= 1) return fallbackIcon; // No extension found
-      
+
       const ext = parts.pop().toLowerCase();
-      
+
       // These are the easiest matches:
       const extensionList = [
         'pdf', 'xls', 'xlsx', 'doc', 'docx',
@@ -431,9 +427,6 @@ export default {
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
 
-        console.log("equipment documents:", this.equipmentDocuments)
-        console.log("location documents:", this.locationDocuments)
-
         this.companyTabs=[
           {
             title: 'Foto',
@@ -467,7 +460,7 @@ export default {
 
         this.isLoading = false
       } catch(error) {
-        console.log('error getting dashboard data', error)
+        console.error('error getting dashboard data', error)
         this.isLoading = false
       }
     }
