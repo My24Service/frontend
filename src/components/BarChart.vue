@@ -1,5 +1,5 @@
 <template>
-  <Bar :chart-data="chartDataLocal" :options="options" />
+  <Bar :chart-data="chartDataLocal" :chart-options="options" :height="height" />
 </template>
 <script>
 import { Bar } from 'vue-chartjs'
@@ -17,6 +17,10 @@ export default {
     chartData: {
       type: Object,
       default: null
+    },
+    height: {
+      type: Number,
+      default: undefined
     },
   },
   data() {

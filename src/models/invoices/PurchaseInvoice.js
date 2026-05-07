@@ -30,6 +30,12 @@ class PurchaseInvoiceService extends BaseModel {
   collection = []
 
   url = '/invoice/purchase/'
+
+  async getMonthlyOverview(year) {
+    const url = `${this.url}year/?year=${year}`
+    const response = await this.axios.get(url)
+    return response.data
+  }
 }
 
 const purchaseInvoiceService = new PurchaseInvoiceService()
