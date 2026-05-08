@@ -298,6 +298,19 @@
         </div>
       </div>
     </div>
+    <div class="section dashboard_section mt-2 pb-4">
+      <div class="row dashboard_row">
+        <div class="col-12">
+          <DashboardBlock v-if="!isLoading" :title="$trans('Monthly cost overview')" iconName="bar-chart-fill">
+            <bar-chart
+              :chart-data="chartdataMonthBar"
+              :options="chartOptions"
+              :height="300"
+            />
+          </DashboardBlock>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -310,10 +323,17 @@ import {NO_IMAGE_URL} from "@/constants";
 import memberModel from "@/models/member/Member";
 import activityModel from '@/models/company/Activity.js'
 import {DocumentService, LocationDocumentService} from "@/models/equipment/Document";
+import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
+import moment from 'moment/min/moment-with-locales'
+import {useMainStore} from "@/stores/main";
 
 let d = new Date()
 
 export default {
+  setup() {
+    const mainStore = useMainStore()
+    return { mainStore }
+  },
   components: {
     BarChart,
     PieChart,
@@ -331,8 +351,10 @@ export default {
         ],
         equipmentDocumentService: new DocumentService(),
         locationDocumentService: new LocationDocumentService(),
+        purchaseInvoiceService: new PurchaseInvoiceService(),
         equipmentDocuments: [],
         locationDocuments: [],
+        monthlyCostOverview: [],
         documentFields: [
           {key: 'name', label: this.$trans('Document'), sortable: true},
           {key: 'created', label: this.$trans('Date'), sortable: true},
@@ -361,9 +383,22 @@ export default {
       ],
       isLoading: false,
       year: d.getYear() + 1900,
+      chartdataMonthBar: {
+        labels: [],
+        datasets: []
+      },
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false
+      },
+      gradient: ['#ff9933','#ff9c36','#fea03a','#fea33d','#fea741','#fdaa44','#fdae48','#fdb14b','#fdb54f','#fcb852','#fcbc56','#fcbf59','#fbc35d','#fbc660']
     }
   },
   async created() {
+    const lang = this.mainStore.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+
     await this.loadData()
   },
   methods: {
@@ -426,6 +461,26 @@ export default {
 
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
+
+        this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)
+
+        // Process monthlyCostOverview for the bar chart
+        const labels = this.$moment.monthsShort()
+        const monthDataBar = []
+
+        for (let i = 1; i <= 12; i++) {
+          const monthEntry = this.monthlyCostOverview.find(item => item.month === i)
+          monthDataBar.push(monthEntry ? parseFloat(monthEntry.total) : 0)
+        }
+
+        this.chartdataMonthBar = {
+          labels,
+          datasets: [{
+            label: this.$trans('Monthly cost overview'),
+            data: monthDataBar,
+            backgroundColor: this.gradient
+          }]
+        }
 
         this.companyTabs=[
           {
