@@ -86,17 +86,17 @@ jobs:
   build-upload-develop:
     working_directory: ~/circleci-frontend
     docker:
-      - image: cimg/node:25.6.0
+      - image: cimg/node:26.1.0
         environment:
           TGZ_NAME: /tmp/my24-frontend-develop-build.tgz
           RELEASE_NAME: /tmp/frontend-release
     steps:
       - checkout
       - run: sudo apt-get update && sudo apt-get upgrade -y
+      - run: sudo apt install virtualenv
       - run:
           name: npm info
           command: node --version ; npm --version
-      - run: sudo apt install virtualenv
       - run:
           name: Install packages
           command: npm i
