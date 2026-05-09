@@ -101,6 +101,9 @@ jobs:
           name: Install packages
           command: npm i
       - run:
+          name: ls -l sass
+          command: ls -l node_modules/sass ; head node_modules/sass/sass.dart.js
+      - run:
           name: Create build
           command: npm run build
       - run:
