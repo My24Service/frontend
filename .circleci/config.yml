@@ -98,6 +98,9 @@ jobs:
           name: npm info
           command: node --version ; npm --version
       - run:
+          name: sass installed?
+          command: dpkg -l | grep sass
+      - run:
           name: Install packages
           command: npm i
       - run:
