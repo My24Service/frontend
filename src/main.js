@@ -45,6 +45,7 @@ const themes = {
   'dpworld': 'theme-shltr',
   'trioworld': 'theme-shltr',
   'smurfit': 'theme-shltr',
+  'demo-branches': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 toggleTheme({

@@ -1,160 +1,52 @@
 version: '2.1'
-jobs:
-#  test:
-#    working_directory: ~/circleci-frontend
-#    docker:
-#      - image: cimg/node:18.19.0
-#    steps:
-#      - checkout
-#      - run:
-#          name: Install packages
-#          command: yarn
-#      - run:
-#          name: Install JUnit coverage reporter
-#          command: yarn add --dev jest-junit
-#      - run:
-#          name: Run tests
-#          command: yarn test
-#          no_output_timeout: 20m
-#          environment:
-#            JEST_JUNIT_OUTPUT_DIR: ./reports/junit/
-#      - store_test_results:
-#          path: ./reports/junit/
-#      - store_artifacts:
-#          path: ./reports/junit
-  build-upload-main:
-    working_directory: ~/circleci-frontend
-    docker:
-      - image: cimg/node:25.6.0
-        environment:
-          TGZ_NAME: /tmp/my24-frontend-main-build.tgz
-          RELEASE_NAME: /tmp/frontend-release
-    steps:
-      - checkout
-      - run: sudo apt-get update
-      - run: sudo apt install virtualenv
-      - run: rm -fr package-lock.json
-      - run:
-          name: Install packages
-          command: npm i
-      - run:
-          name: Create build
-          command: npm run build
 
-      - run:
-          name: set environment var TARGET_DIR
-          command: |
-            echo 'export TARGET_DIR="my24-frontend-$(date +"%Y-%m-%d_%H%M")-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
-            source $BASH_ENV
-      - run:
-          name: Create build archive
-          command: |
-            source $BASH_ENV
-            mkdir /tmp/$TARGET_DIR
-            cp -r dist /tmp/$TARGET_DIR
-            echo $(cat src/version.js | sed -r "s/^.*'([^']+)'$/\1/" | xargs echo -n) > /tmp/$TARGET_DIR/VERSION
-            cd /tmp
-            tar -zcf $TGZ_NAME $TARGET_DIR
-            echo "$TARGET_DIR" > $RELEASE_NAME
-      - run:
-           name: Clone build-upload repo
-           command: git clone https://github.com/My24Service/build-upload.git
-      - run:
-           name: Upload to linode
-           command: |
-              cd build-upload
-              virtualenv --python=python3 venv
-              . venv/bin/activate
-              pip install -r requirements.txt
-              cd build_upload
-              python manage.py upload_live_build --file $TGZ_NAME
-              python manage.py upload_live_build --file $RELEASE_NAME
-      - run:
-           name: Create github release
-           command: |
-              curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-              sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-              sudo apt update
-              sudo apt install gh
-             
-              mkdir /tmp/release
-              cp $TGZ_NAME /tmp/release/frontend-release-$(cat /tmp/$TARGET_DIR/VERSION).tgz
-             
-              export GH_HOST=git@github.com:My24Service/frontend.git
-              gh release create $(cat /tmp/$TARGET_DIR/VERSION) /tmp/release/frontend-release-$(cat /tmp/$TARGET_DIR/VERSION).tgz --generate-notes -R git@github.com:My24Service/frontend.git
-  build-upload-develop:
+jobs:
+  build-push-main:
     working_directory: ~/circleci-frontend
     docker:
-      - image: cimg/node:25.6.0
-        environment:
-          TGZ_NAME: /tmp/my24-frontend-develop-build.tgz
-          RELEASE_NAME: /tmp/frontend-release
+      - image: cimg/base:current-24.04
     steps:
       - checkout
-      - run: sudo apt-get update && sudo apt-get upgrade -y
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
-          name: npm info
-          command: node --version ; npm --version
-      - run: sudo apt install virtualenv
+          name: Docker login registry.chapter3-it.io
+          command: docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN registry.chapter3-it.io
       - run:
-          name: Install packages
-          command: npm i
+          name: Build image
+          command: docker build -t registry.chapter3-it.io/my24service/frontend-main:latest .
       - run:
-          name: Create build
-          command: npm run build
+          name: Push image
+          command: docker push registry.chapter3-it.io/my24service/frontend-main:latest
+  build-push-develop:
+    working_directory: ~/circleci-frontend
+    docker:
+      - image: cimg/base:current-24.04
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
-          name: set environment var TARGET_DIR
-          command: |
-            echo 'export TARGET_DIR="my24-frontend-$(date +"%Y-%m-%d_%H%M")-${CIRCLE_BUILD_NUM}"' >> $BASH_ENV
-            source $BASH_ENV
+          name: Docker login registry.chapter3-it.io
+          command: docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN registry.chapter3-it.io
       - run:
-           name: Create build archive
-           command: |
-             source $BASH_ENV
-             mkdir /tmp/$TARGET_DIR
-             cp -r dist /tmp/$TARGET_DIR
-             echo $(cat src/version.js | sed -r "s/^.*'([^']+)'$/\1/" | xargs echo -n) > /tmp/$TARGET_DIR/VERSION
-             cd /tmp
-             tar -zcf $TGZ_NAME $TARGET_DIR
-             echo "$TARGET_DIR" > $RELEASE_NAME
+          name: Build image
+          command: docker build -t registry.chapter3-it.io/my24service/frontend-develop:latest .
       - run:
-           name: Clone build-upload repo
-           command: git clone https://github.com/My24Service/build-upload.git
-      - run:
-           name: Upload to linode
-           command: |
-              source $BASH_ENV
-              cd build-upload
-              virtualenv --python=python3 venv
-              . venv/bin/activate
-              pip install -r requirements.txt
-              cd build_upload
-              python manage.py upload_dev_build --file $TGZ_NAME
-              python manage.py upload_dev_build --file $RELEASE_NAME
+          name: Push image
+          command: docker push registry.chapter3-it.io/my24service/frontend-develop:latest
+
 workflows:
    version: 2
    build-main:
      jobs:
-#       - test:
-#           filters:
-#             branches:
-#               only: main
-       - build-upload-main:
-#           requires:
-#             - test
+       - build-push-main:
            filters:
              branches:
                only: main
    build-develop:
      jobs:
-#       - test:
-#           filters:
-#             branches:
-#               only: develop
-       - build-upload-develop:
-#           requires:
-#             - test
+       - build-push-develop:
            filters:
              branches:
                only: develop

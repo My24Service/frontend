@@ -1,27 +1,22 @@
-FROM node:lts-alpine
+# ---- Base ----
+FROM node:24-slim AS base
 
-RUN apk add --update --no-cache python3 make g++
+RUN apt-get update && apt-get install -y git
 
-RUN ln -sf python3 /usr/bin/python
-
-# install simple http server for serving static content
-RUN npm install -g http-server
-
-# make the 'app' folder the current working directory
 WORKDIR /app
-
-# copy both 'package.json' and 'package-lock.json' (if available)
-COPY package*.json ./
-
-# install project dependencies
+COPY . .
+RUN npm update
 RUN npm install
 
-# copy project files and folders to the current working directory (i.e. 'app' folder)
-COPY . .
+# ---- Build ----
+FROM base AS build
+WORKDIR /app
 
-# build app for production with minification
 RUN npm run build
 
-EXPOSE 3000
-
-CMD [ "http-server", "-p", "3000", "dist" ]
+# ---- Release ----
+FROM nginx:1.21-alpine
+# copy static files to nginx server root
+COPY --from=build /app/dist /usr/share/nginx/html
+# start Nginx in the foreground when the container is run
+CMD ["nginx", "-g", "daemon off;"]
