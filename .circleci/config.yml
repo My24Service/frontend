@@ -86,11 +86,8 @@ jobs:
               gh release create $(cat /tmp/$TARGET_DIR/VERSION) /tmp/release/frontend-release-$(cat /tmp/$TARGET_DIR/VERSION).tgz --generate-notes -R git@github.com:My24Service/frontend.git
   build-push-develop:
     working_directory: ~/circleci-frontend
-    docker:
-      - image: registry.chapter3-it.io/chapter3-it/docker-build-image:latest
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_TOKEN
+    machine:
+      - image: cimg/node:25.6.0
     steps:
       - checkout
       - run:
