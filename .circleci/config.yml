@@ -87,7 +87,7 @@ jobs:
   build-push-develop:
     working_directory: ~/circleci-frontend
     docker:
-      - image: ubuntu-2404
+      - image: cimg/base:current-24.04
     steps:
       - checkout
       - setup_remote_docker:
