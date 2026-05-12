@@ -186,13 +186,13 @@ export default {
         const { statusesData, yearData } = await yearModel.getYearData(this.statuscodes)
 
         // fill bar graph data and set labels/fields
-        let monthDataBar = [], monthDataPie = [], labels = [], colors = []
+        let monthDataBar = [], monthDataPie = [], colors = []
+        const labels = this.$moment.monthsShort()
+
         for (let i=0; i<12; i++) {
-          const monthText =  i < 10 ? `0${i + 1}` : `${i}`
-          const date = this.$moment(`${this.year}-${monthText}-1`, 'D-MM-YYYY')
-          const monthTextLong = date.format('MMM')
-          labels.push(monthTextLong)
+          const monthText = (i + 1).toString().padStart(2, '0')
           colors.push(this.getRandomColor(monthText))
+          
           if (monthText in yearData.items) {
             monthDataBar.push(yearData.items[monthText].count)
             monthDataPie.push(yearData.items[monthText].perc)
