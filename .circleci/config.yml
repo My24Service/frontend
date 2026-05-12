@@ -1,4 +1,5 @@
 version: '2.1'
+
 jobs:
 #  test:
 #    working_directory: ~/circleci-frontend
@@ -86,12 +87,12 @@ jobs:
   build-push-develop:
     working_directory: ~/circleci-frontend
     docker:
-      - image: cimg/node:26.1.0
+      - image: registry.chapter3-it.io/chapter3-it/docker-build-image:latest
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_TOKEN
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 20.10.18
-          docker_layer_caching: true
       - run:
           name: Docker login registry.chapter3-it.io
           command: docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN registry.chapter3-it.io
