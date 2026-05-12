@@ -5,8 +5,8 @@ RUN apt-get update && apt-get install -y git
 
 WORKDIR /app
 COPY . .
-RUN npm update
 RUN npm install
+RUN npm update vite-plugin-theme-preprocessor
 
 # ---- Build ----
 FROM base AS build
