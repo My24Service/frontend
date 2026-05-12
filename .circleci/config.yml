@@ -150,7 +150,7 @@ workflows:
 #           filters:
 #             branches:
 #               only: develop
-       - build-upload-develop:
+       - build-push-develop:
 #           requires:
 #             - test
            filters:
