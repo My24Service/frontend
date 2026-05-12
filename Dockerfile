@@ -1,8 +1,11 @@
 # ---- Base ----
-FROM node:lts AS base
-WORKDIR /app
+FROM node:24-slim AS base
 
+RUN apt-get update && apt-get install -y git
+
+WORKDIR /app
 COPY . .
+RUN npm update
 RUN npm install
 
 # ---- Build ----
