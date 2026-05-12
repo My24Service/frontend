@@ -89,6 +89,9 @@ jobs:
       - image: cimg/node:26.1.0
     steps:
       - checkout
+      - setup_remote_docker:
+          version: 29.4.3
+          docker_layer_caching: true
       - run:
           name: Docker login registry.chapter3-it.io
           command: docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN registry.chapter3-it.io
