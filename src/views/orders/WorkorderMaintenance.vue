@@ -1,5 +1,5 @@
 <template>
-    <div class="pdf-container" v-if="data">
+    <div class="pdf-container w-100" v-if="data">
         <div class="row">
             <div class="col-sm-2 logo">
                 <img class="thumbnail" :src="companyLogo" style="border:0; max-height: 120px; max-width: 120px" :alt="data.member.name" />
@@ -259,34 +259,5 @@ export default {
   },
 }
 </script>
-
-<style lang="less" scoped>
-@import '@/less/my24.less';
-
-.pdf-container {
-  font-size: 12px !important;
-  margin-top: 4px;
-  font-size: 85%;
-
-  .log, .info {
-    padding-top: 12px;
-  }
-
-  .underline {
-    border-bottom: 1px dotted;
-  }
-
-  div.row {
-    padding-top: 6px;
-    padding-bottom: 6px;
-  }
-
-  .panel-body {
-    padding: 10px;
-  }
-
-  .signature {
-    height: 150px;
-  }
-}
+<style scoped>
 </style>
