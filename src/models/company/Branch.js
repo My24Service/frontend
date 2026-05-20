@@ -41,7 +41,7 @@ class BranchService extends BaseModel {
   }
 
   first() {
-    return this.axios.get(`${this.url}first`)
+    return this.axios.get(`${this.url}first/`)
       .then((response) => response.data)
   }
 }
