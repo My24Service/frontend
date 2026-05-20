@@ -1,13 +1,12 @@
 <template>
   <b-overlay :show="isLoading" rounded="sm">
+    <QuotationPDFViewer
+      :quotation-in="quotation"
+      :is-view="isView"
+      v-if="quotation && quotation.id"
+      ref="quotation-viewer"
+    />
     <div class="app-page">
-      <QuotationPDFViewer
-        :quotation-in="quotation"
-        :is-view="isView"
-        v-if="quotation && quotation.id"
-        ref="quotation-viewer"
-      />
-
       <header>
         <div class="page-title">
           <h3>

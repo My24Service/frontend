@@ -171,8 +171,6 @@ import {errorToast, infoToast, $trans} from "@/utils";
 import {toDinero} from "@/utils";
 import DurationInput from "@/components/DurationInput.vue"
 import PriceInput from "@/components/PriceInput";
-
-import {ChapterModel} from "@/models/quotations/Chapter";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 import {
   COST_TYPE_TRAVEL_HOURS,
@@ -223,7 +221,7 @@ export default {
       default: ''
     },
     chapter: {
-      type: ChapterModel,
+      type: Object,
       default: null
     },
     customer:{

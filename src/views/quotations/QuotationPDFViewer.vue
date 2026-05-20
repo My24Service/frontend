@@ -36,7 +36,7 @@
       :title="viewerTitle"
       :ok-only="true"
     >
-      <template #modal-footer="{ ok }">
+      <template #footer="{ ok }">
         <BButton
           class="btn button btn-danger"
           @click="showMakeDefinitiveModal"
@@ -139,6 +139,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     async doMakeDefinitive() {
       this.isLoading = true
 
