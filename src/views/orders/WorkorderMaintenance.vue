@@ -1,5 +1,5 @@
 <template>
-    <div class="pdf-container w-100" v-if="data">
+    <div class="pdf-container" v-if="data">
         <div class="row">
             <div class="col-sm-2 logo">
                 <img class="thumbnail" :src="companyLogo" style="border:0; max-height: 120px; max-width: 120px" :alt="data.member.name" />
