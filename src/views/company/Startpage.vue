@@ -31,7 +31,7 @@
               />
             </div>
             <div class="col-lg-6">
-              <DashboardBlock v-if="!isLoading" title="Logboek" iconName="card-list">
+              <DashboardBlock v-if="!isLoading" :title="$trans('Logboek')" iconName="card-list">
                 <b-table
                     id="activity-table"
                     small
