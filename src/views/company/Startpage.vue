@@ -14,32 +14,17 @@
       <div class="row dashboard_row">
         <div class="col-lgl-6">
           <div class="row">
-            <div class="col-lg-3">
-              <DashboardTabbedBlock
-                v-if="!isLoading"
-                :tab-list="companyTabs"
-                :title="member.name"
-                pills
-              />
-            </div>
-            <div class="col-lg-3">
-              <DashboardTabbedBlock
-                v-if="!isLoading"
-                :tab-list="companyInfoTabs"
-                :title="$trans('Gegevens')"
-                pills
-              />
-            </div>
-            <div class="col-lg-6">
+            <div class="col-lg-9">
               <DashboardBlock v-if="!isLoading" :title="$trans('Logboek')" iconName="card-list">
                 <b-table
                     id="activity-table"
+                    hover
                     small
                     :busy='isLoading'
                     :fields="activityFields"
                     :items="activity"
                     responsive="md"
-                    class="data-table pt-2 pl-2 pr-2"
+                    class="data-table"
                     sort-icon-left>
                     <template #table-busy>
                       <div class="text-center my-2">
@@ -232,12 +217,13 @@
               <DashboardBlock v-if="!isLoading" title="Nieuwe documenten - Techniek" iconName="wrench-adjustable">
                 <b-table
                   id="equipment-documents-table"
+                  hover
                   small
                   :busy='isLoading'
                   :fields="documentFields"
                   :items="equipmentDocuments"
                   responsive="md"
-                  class="data-table pt-2 pl-2 pr-2"
+                  class="data-table"
                   sort-icon-left>
                   <template #table-busy>
                     <div class="text-center my-2">
@@ -265,12 +251,13 @@
               <DashboardBlock v-if="!isLoading" title="Nieuwe documenten - Facilitair" iconName="hand-index">
                 <b-table
                   id="location-documents-table"
+                  hover
                   small
                   :busy='isLoading'
                   :fields="documentFields"
                   :items="locationDocuments"
                   responsive="md"
-                  class="data-table pt-2 pl-2 pr-2"
+                  class="data-table"
                   sort-icon-left>
                   <template #table-busy>
                     <div class="text-center my-2">
@@ -360,27 +347,7 @@ export default {
           {key: 'created', label: this.$trans('Date'), sortable: true},
           {key: 'file', label: this.$trans('File')},
         ],
-        companyTabs: [
-        {
-          title: 'Foto',
-          content: '<img class="section-image" src="'+NO_IMAGE_URL+'"/>'
-        },
-        {
-          title: 'Locate',
-          content: '' // <iframe class="mijnKaart" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2439.2961422762787!2d4.810294182413494!3d52.310628559294734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c5e1ac04c45af3%3A0xdf35ceb7e66721a7!2sMYSS!5e0!3m2!1snl!2snl!4v1686299469567!5m2!1snl!2snl" width="100%" height="auto" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
-        }
-      ],
       companyLog: '',
-      companyInfoTabs: [
-        {
-          title: $trans('Address'),
-          content: '<div class="myss_box"></div>'
-        },
-        {
-          title: $trans('Contacts'),
-          content: ''
-        },
-      ],
       isLoading: false,
       year: d.getYear() + 1900,
       chartdataMonthBar: {
@@ -482,36 +449,12 @@ export default {
           }]
         }
 
-        this.companyTabs=[
-          {
-            title: 'Foto',
-            content: '<img src="'+(this.member.companylogo ?? NO_IMAGE_URL)+'" alt="logo"/>'
-          },
-          {
-            title: 'Locate',
-            content: '<iframe class="mijnKaart" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2439.2961422762787!2d4.810294182413494!3d52.310628559294734!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c5e1ac04c45af3%3A0xdf35ceb7e66721a7!2sMYSS!5e0!3m2!1snl!2snl!4v1686299469567!5m2!1snl!2snl" width="100%" height="auto" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>',
-          }
-        ];
-
         // this.companyLog = '<table><tr><td><br/><strong>Data kon niet worden geladen</strong></td></tr></table>';
         const contactsHtml = this.member.contacts
           .split(/\r?\n/)
           .filter(line => line.trim() !== "")
           .map(line => `<p>${line}</p>`)
           .join("");
-
-        this.companyInfoTabs = [
-            {
-              title: $trans('Address'),
-              content: '<div class="myss_box">'+
-                (!this.member ? '' : '<img src="'+(this.member.companylogo ?? NO_IMAGE_URL)+'" class="myss-logo" alt="Logo"/><ul><li>Gebouw ELM</li><li>'+this.member.address+'</li><li>'+this.member.postal+' '+this.member.city+'</li></ul>')
-                +' </div>'
-            },
-            {
-              title: $trans('Contacts'),
-              content: contactsHtml,
-            },
-        ];
 
         this.isLoading = false
       } catch(error) {
@@ -526,36 +469,111 @@ export default {
 
 <style scoped>
 .section.dashboard_section {
-  padding: 0 1.5rem
+  padding-inline: 1.5rem;
 }
 
-.section_head {
-  height: 3rem;
+/* Modern Premium Card Block style overrides */
+:deep(.section_block) {
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eef2f5;
+  background-color: #fff;
+  margin-bottom: 1.5rem;
+  height: 22rem; /* Fixed height for dashboard layout alignment */
+}
+
+/* Override default height for non-tabbed standard block */
+.dashboard_row_expand .row .section_block {
+  height: auto;
+}
+
+/* Card header - clean, transparent, center-aligned layout */
+:deep(.section_head) {
+  height: 3.5rem;
   display: flex;
   align-items: center;
+  justify-content: flex-start; /* Left-aligned to support vertical line layout */
+  padding-top: 1.25rem;
+  padding-left: 1.25rem;
+}
+
+:deep(.section_head h5) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+  padding-left: 0.5rem;
+  border-left: 3px solid #179da0;
+  line-height: 1.2;
+}
+
+:deep(.section_head .d-flex) {
+  justify-content: flex-start;
+  width: 100%;
+  color: #1b4f72;
+}
+
+:deep(.section_head svg.bi) {
+  width: 18px;
+  height: 18px;
+}
+
+/* Text-only uppercase tabs style with active underline */
+:deep(.tabs) {
+  border-top: none;
+}
+
+:deep(.tabs ul.nav-pills) {
+  margin: 8px 12px;
+  height: auto;
   justify-content: center;
-  border-bottom: 0.1rem solid #eee;
-  background: #eee;
+  border-bottom: 1px solid #eef2f5;
+  padding-bottom: 8px;
 }
 
-.section_head h5 {
-  font-size: 1rem;
+:deep(.tabs ul.nav-pills .nav-item) {
+  margin: 0 10px;
 }
 
-.section_block {
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 0.65rem 0.8rem 0 rgba(0, 0, 0, 0.2);
+:deep(.tabs ul.nav-pills .nav-link) {
+  background: transparent;
+  color: #828282;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  border-radius: 0;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+:deep(.tabs ul.nav-pills .nav-link:hover) {
+  color: #179da0;
+}
+
+:deep(.tabs ul.nav-pills .nav-link.active) {
+  color: #179da0;
+  border-bottom: 2px solid #179da0;
+}
+
+/* Tab content and list layouts */
+:deep(.section_block_content) {
+  border-top: none;
+  padding: 0.75rem;
 }
 
 .myss_box ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .myss_box ul li {
-  padding: 0.35rem 0;
-  border-bottom: 0.1rem solid #eee;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f5f7f8;
+  font-size: 0.85rem;
+  color: #2b2b2b;
+  text-align: center;
 }
 
 .myss_box ul li:last-child {
@@ -563,142 +581,197 @@ export default {
 }
 
 .myss_box ul li:first-child {
-  color: var(--hoverC);
-  font-weight: 900;
+  color: #179da0;
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .myss-logo {
-  height: 5rem;
+  height: 4.5rem;
   padding: 0;
-  margin: 0 auto;
+  margin: 0.5rem auto 1rem auto;
   display: block;
 }
 
-.row .section_block .tabs .tab-content.mt-3 {
-  margin-top: 0;
-  /* padding: 8px; */
-  /* justify-content: center; */
-}
-
-.dashboard_row .row .section_block {
-  height: 20rem;
-}
-
-.dashboard_row_expand .row .section_block {
-  height: min-content !important;
-}
-
-.dashboard_row .row .section_block .tabs ul.nav-pills {
-  margin: 4px;
-  justify-content: center;
-}
-
-.dashboard_row .row .section_block .tab-content iframe {
-  height: 100%;
-  object-fit: cover;
-  border-radius: 0.5rem;
-  outline: none;
-  border: none;
-}
-
-.dashboard_row .row .section_block .tabs .nav-item .nav-link {
+/* Image content inside tabs */
+:deep(img.section-image),
+:deep(.tab-pane img) {
   border-radius: 4px;
-  padding: 4px 9px;
-}
-
-div.section.dashboard_section div.row.dashboard_row div.section_block div.tabs div.tab-content div img.section-image,
-div.section_block div.tabs div.tab-content.mt-3 div.tab-pane div img.section-image {
-  border-radius: 0.5rem;
   object-fit: cover;
-  max-height: 180px;
+  height: 180px;
   width: 100%;
+  border: 1px solid #eef2f5;
 }
 
-div.section.dashboard_section div.row div div.section_block div.tabs div.tab-content.section_block_content {
-  border-top: 0.1rem solid #eee !important;
-  padding: 0.7rem !important;
+:deep(.tab-content iframe.mijnKaart) {
+  height: 180px;
+  width: 100%;
+  border-radius: 4px;
+  outline: none;
+  border: 1px solid #eef2f5;
+  filter: grayscale(1) contrast(105%);
+  transition: filter 0.3s ease;
 }
 
-div.section.dashboard_section div.row div.section_block div.section_content div.table-responsive-md.data-table {
-  padding: 0.5rem !important;
+:deep(.tab-content iframe.mijnKaart:hover) {
+  filter: grayscale(0) contrast(100%);
 }
 
-table#activity-table thead {
-  position: sticky;
-  top: 0;
-}
-
-table#activity-table tr {
-  background-color: #ff0000 !important;
-}
-
+/* Modern Premium Stats Cards */
 .section.dashboard_section .card {
-  margin-top: 0.2em;
+  border-radius: 4px;
+  border: 1px solid #eef2f5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 0.2rem;
+}
+
+.section.dashboard_section .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
 .section.dashboard_section .card .card-body {
-  padding: 0.2em;
-}
-
-.card-left > div.align-self-center {
-  width: 3rem;
-  height: 3rem;
-  display: flex;
-  align-items: center;
-  border-radius: 10rem;
-  border: 0.1rem solid #eee;
-  flex: 0 0 auto;
-  justify-content: center;
-  background: var(--bs-secondary);
-  margin-top: 0.4rem;
+  padding-block: 0.8rem;
 }
 
 .card-left {
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
+}
+
+.card-left > div.align-self-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .card-left i.bi {
-  color: white;
-  font-size: 1.5em;
-}
-
-.section.dashboard_section .card {
-  box-shadow: 0 0.65rem 0.8rem 0 rgba(0, 0, 0, 0.2);
+  color: #1b4f72;
+  font-size: 1.5rem;
 }
 
 .section.dashboard_section .card .card-body .card-left h6.text-primary {
-  color: #000000 !important;
+  color: #1b4f72 !important;
+  font-size: 0.85rem;
+  font-weight: 600 !important;
+  margin-bottom: 0;
+  line-height: 1.3;
 }
 
 .card-body h6.text-secondary {
   text-align: right;
-  font-size: 0.9rem;
-  margin-left: 2rem;
+  font-size: 1.05rem;
+  color: #179da0 !important;
+  margin-left: 1.5rem;
   white-space: nowrap;
-  color: #828282 !important;
 }
 
+/* Premium Tables styling */
+:deep(.data-table table thead tr) {
+  background-color: #f3f3f3;
+  border-top: 1px solid #eef2f5 !important;
+  border-bottom: 1px solid #eef2f5;
+
+  th {
+    background-color: transparent;
+  }
+}
+
+:deep(.data-table table thead th) {
+  color: #2b2b2b;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: none;
+}
+
+:deep(.data-table table tbody td) {
+  padding: 12px 12px;
+  font-size: 0.85rem;
+  /* color: #2b2b2b; */
+  vertical-align: middle !important;
+}
+
+:deep(.data-table table tbody td small) {
+  color: #828282;
+  font-size: 0.75rem;
+}
+
+:deep(.data-table table tbody tr) {
+  border-bottom: 1px solid #f5f7f8;
+}
+
+/* Smooth row hover transition as requested by the user */
+:deep(.data-table .table) {
+  --bs-table-hover-bg: #179DA0;
+  --bs-table-hover-color: #fff;
+}
+
+/* Ensure all child elements inside the hovered row also transition to white smoothly */
+:deep(.data-table > .table-hover > tbody > tr:hover td),
+:deep(.data-table > .table-hover > tbody > tr:hover td small),
+:deep(.data-table > .table-hover > tbody > tr:hover td span),
+:deep(.data-table > .table-hover > tbody > tr:hover td a),
+:deep(.data-table > .table-hover > tbody > tr:hover td i.bi) {
+  color: #ffffff;
+}
+
+/* Hover effect on file badges inside hovered row */
+:deep(.data-table > .table-hover > tbody > tr:hover span.badge) {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Document type icons */
+:deep(.bi-filetype-pdf) {
+  color: #179da0;
+}
+
+:deep(.bi-file-earmark-word),
+:deep(.bi-filetype-doc),
+:deep(.bi-filetype-docx) {
+  color: #2b579a;
+}
+
+:deep(.bi-filetype-xls),
+:deep(.bi-filetype-xlsx) {
+  color: #217346;
+}
+
+/* Ensure document type icons also turn white on hover with correct specificity */
+:deep(.data-table > .table-hover > tbody > tr:hover td i.bi-filetype-pdf),
+:deep(.data-table > .table-hover > tbody > tr:hover td i.bi-file-earmark-word),
+:deep(.data-table > .table-hover > tbody > tr:hover td i.bi-filetype-doc),
+:deep(.data-table > .table-hover > tbody > tr:hover td i.bi-filetype-docx),
+:deep(.data-table > .table-hover > tbody > tr:hover td i.bi-filetype-xls),
+:deep(.data-table > .table-hover > tbody > tr:hover td i.bi-filetype-xlsx) {
+  color: #ffffff;
+}
+
+/* Premium Badge */
 span.badge {
-  background-color: var(--bs-secondary);
-}
-
-table.table-docs tr td {
-  height: 2em;
+  background-color: rgba(23, 157, 160, 0.1);
+  color: #179da0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
 }
 
 .app-page {
   background-image: none !important;
-  background-color: #fff !important;
+  background-color: #fbfbfb;
 }
 
 .app-page > header {
   padding: 0;
-  min-height: 3rem !important;
-}
-
-.dashboard_row .row .section_block .nav-pills .nav-link.active,.nav-pills .show>.nav-link {
-  color: #ffffff !important;
-  background-color: var(--bs-secondary) !important;
+  min-height: 1rem;
 }
 </style>
+
