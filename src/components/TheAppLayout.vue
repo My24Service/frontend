@@ -13,23 +13,5 @@ import TheNavLoggedIn from './TheNavLoggedIn.vue'
 import TheNavLoggedOut from './TheNavLoggedOut.vue'
 import {useAuthStore} from "@/stores/auth";
 
-const props = defineProps({
-  hasSubNav: Boolean
-})
-
 const store = useAuthStore()
-
-// export default {
-//
-//   props: {
-//     hasSubNav: {
-//       type: Boolean,
-//       default: true
-//     }
-//   },
-//   components: {
-//     TheNavLoggedIn,
-//     TheNavLoggedOut,
-//   },
-// }
 </script>

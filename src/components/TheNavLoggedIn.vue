@@ -62,7 +62,6 @@
           </b-form-invalid-feedback>
         </BFormGroup>
       </form>
-      {{ v$.new_password2.sameAs }}
     </b-modal>
 
     <b-modal

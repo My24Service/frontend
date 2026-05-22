@@ -1,183 +1,48 @@
 <template>
   <div class="nav-items" ref="nav-items" v-if="userInfo.user">
-    <!-- Startpage -->
-    <b-nav-item to="/startpage/" v-if="hasBranches">
-      <IBiFileEarmarkBarGraphFill v-if="!isActive('orders')"></IBiFileEarmarkBarGraphFill>
+    <b-nav-item :to="{name: 'startpage'}">
+      <IBiClockFill v-if="isActive('startpage')"></IBiClockFill>
+      <IBiClock v-else></IBiClock>
+      {{ $trans('Start') }}
+    </b-nav-item>
+
+    <b-nav-item :to="{name: 'equipment-equipment-list'}">
+      <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment')"></IBiWrenchAdjustableCircleFill>
+      <IBiWrenchAdjustableCircle v-else></IBiWrenchAdjustableCircle>
+      {{ $trans('Techniek') }}
+    </b-nav-item>
+
+    <b-nav-item :to="{name: 'equipment-location-list'}">
+      <IBiBuildingsFill v-if="!isActive('location')"></IBiBuildingsFill>
+      <IBiBuildings v-else></IBiBuildings>
+      {{ $trans('Facilitair') }}
+    </b-nav-item>
+
+    <b-nav-item :to="{name: 'settings-company'}">
+      <IBiFileEarmarkBarGraphFill v-if="isActive('company')"></IBiFileEarmarkBarGraphFill>
       <IBiFileEarmarkBarGraph v-else></IBiFileEarmarkBarGraph>
-      {{ $trans('Startpage') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('startpage')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <!-- Orders -->
-    <b-nav-item
-      :active="isActive('orders')"
-      v-if="hasOrders && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
-      to="/orders/orders"
-      class="has-children">
-      <IBiFileEarmarkTextFill v-if="!isActive('orders')"></IBiFileEarmarkTextFill>
-      <IBiFileEarmarkText v-else></IBiFileEarmarkText>
-      <span style="flex-grow:1">{{ $trans('Orders') }}</span>
-      <b-badge
-        v-if="unacceptedCount && unacceptedCount > 0"
-        variant="light"
-        :title="`${unacceptedCount} ${$trans('Unaccepted orders')}`"
-      >{{ unacceptedCount }}</b-badge>
-      &nbsp;
-    </b-nav-item>
-    <SubNav v-if="isActive('orders') || isActive('orders', 'orders')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <b-nav-item
-      :active="isActive('invoices')"
-      v-if="hasInvoices && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
-      class="has-children"
-      to="/invoices/invoices">
-      <IBiReceiptCutoff></IBiReceiptCutoff>
-      {{ $trans('Invoices') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('invoices') || isActive('invoices', 'invoices')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <!-- equipment -->
-    <b-nav-item
-      :active="isActive('equipment')"
-      v-if="showEquipment"
-      to="/equipment/equipment"
-      class="has-children">
-      <IBiBriefcase v-if="!isActive('equipment')"></IBiBriefcase>
-      <IBiBriefcaseFill v-if="isActive('equipment')"></IBiBriefcaseFill>
-      {{ $trans('Equipment') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('equipment')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <!-- customers -->
-    <b-nav-item
-      :active="isActive('customers')"
-      v-if="showCustomers"
-      to="/customers/customers"
-      class="has-children">
-      <IBiBuilding v-if="!isActive('customers')"></IBiBuilding>
-      <IBiBuildingFill v-else></IBiBuildingFill>
-      {{ $trans('Customers') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('customers')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <!-- inventory -->
-    <b-nav-item
-      :active="isActive('inventory')"
-      v-if="showInventory"
-      to="/inventory/stats-table"
-      class="has-children">
-      <IBiCollection v-if="!isActive('inventory')"></IBiCollection>
-      <IBiCollectionFill v-else></IBiCollectionFill>
-      {{ $trans('Inventory') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('inventory')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <!-- mobile -->
-    <b-nav-item
-      :active="isActive('mobile')"
-      v-if="showMobile"
-      to="/mobile/dispatch"
-      class="has-children">
-      <IBiPersonBadge v-if="!isActive('mobile')"></IBiPersonBadge>
-      <IBiPersonBadgeFill v-else></IBiPersonBadgeFill>
-      {{ $trans('Mobile') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('mobile')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <b-nav-item
-      :active="isActive('quotations')"
-      v-if="hasQuotations && (isPlanning || isStaff || isSuperuser || isCustomer || isBranchEmployee)"
-      class="has-children"
-      to="/quotations/quotations">
-      <IBiBriefcase v-if="!isActive('quotations')"></IBiBriefcase>
-      <IBiBriefcaseFill v-else></IBiBriefcaseFill>
-      {{ $trans('Quotations') }}
-    </b-nav-item>
-
-    <b-nav-item
-      :active="isActive('company')"
-      v-if="showCompany"
-      :to="{name: getCompanyRouteTo }"
-      class="has-children">
-      <IBiBookmarkStar v-if="!isActive('company')"></IBiBookmarkStar>
-      <IBiBookmarkStarFill v-else></IBiBookmarkStarFill>
-      {{ $trans('My company') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('company') || isActive('company', 'budgets')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <!-- members -->
-    <b-nav-item
-      :active="isActive('members')"
-      v-if="showMembers"
-      to="/members/members"
-      class="has-children">
-      <IBiPeople v-if="isActive('members')"></IBiPeople>
-      <IBiPeopleFill v-else></IBiPeopleFill>
-      {{ $trans('Members') }}
-      <b-badge v-if="requestedCount > 0" variant="light">{{ requestedCount }}</b-badge>
-    </b-nav-item>
-    <SubNav v-if="isActive('members')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <!-- budgets
-    <b-nav-item
-      v-if="isPlanning"
-      to="/budget"
-      :active="isActive('budget')"
+      <BNavItemDropdown
+        :text="$trans('Settings')"
+        right
       >
-      <b-icon icon="credit-card2-front" v-if="!isActive('budget')"></b-icon>
-      <b-icon icon="credit-card2-front-fill" v-if="isActive('budget')"></b-icon>
-      {{ $trans('Budgets') }}
+        <BDropdownItem>
+          <BLink :to="{name: 'settings-users-planningusers'}">
+            {{ $trans('Users') }}
+          </BLink>
+        </BDropdownItem>
+        <BDropdownItem>
+          <BLink :to="{name: 'settings-statuscode-list'}">
+          {{ $trans('Statuses') }}
+          </BLink>
+        </BDropdownItem>
+        <BDropdownItem>
+          <BLink :to="{name: 'settings-order-filter-list'}">
+            {{ $trans('Filters') }}
+          </BLink>
+        </BDropdownItem>
+      </BNavItemDropdown>
     </b-nav-item>
-    <SubNav v-if="isActive('budget')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-    -->
 
-    <!-- BIM / 3D -->
-    <b-nav-item
-      v-if="hasBim"
-      :to="{name: 'bim-frame'}"
-      :active="isActive('bim')"
-      >
-      <IBiMouse2 v-if="!isActive('bim')"></IBiMouse2>
-      <IBiMouse2Fill v-else></IBiMouse2Fill>
-      {{ $trans('3D Module') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('bim')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
-
-    <!-- webshop -->
-    <b-nav-item
-      v-if="hasWebshop"
-      to="/webshop"
-      :active="isActive('webshop')"
-      >
-      <IBiBasket v-if="!isActive('webshop')"></IBiBasket>
-      <IBiBasketFill v-else></IBiBasketFill>
-      {{ $trans('Webshop') }}
-    </b-nav-item>
-    <SubNav v-if="isActive('webshop')">
-      <router-view name="app-subnav"></router-view>
-    </SubNav>
 
   </div>
 </template>
@@ -226,74 +91,17 @@ export default {
     }
   },
   computed: {
-    getCompanyRouteTo() {
-      if (this.isBranchEmployee) {
-        return 'employee-dashboard'
-      }
-
-      return 'company-dashboard'
-    },
-    showBranchEmployeeDashBoard() {
-      return this.hasBranches && this.isBranchEmployee
-    },
-    showCustomers() {
-      return !this.hasBranches && (
-        (this.hasCustomers && this.isPlanning) ||
-        this.hasOrders && (this.isPlanning || this.isAdmin)
-      );
-    },
-    showEquipment() {
-      return this.hasBranches;
-    },
-    showInventory() {
-      return this.hasInventory && (this.isPlanning || this.isAdmin);
-    },
-    showMobile() {
-      return this.hasMobile && (this.isPlanning || this.isAdmin)
-    },
-    showCompany() {
-      return !this.isCustomer;
-    },
     showMembers() {
       return this.hasMembers;
-    },
-    hasOrders() {
-      return this.hasAccessToModule('orders')
-    },
-    hasCustomers() {
-      return this.hasAccessToModule('customers')
-    },
-    hasInventory() {
-      return this.hasAccessToModule('inventory')
-    },
-    hasMobile() {
-      return this.hasAccessToModule('mobile')
-    },
-    hasQuotations() {
-      return this.hasAccessToModule('quotations')
-    },
-    hasInvoices() {
-      return this.hasAccessToModule('invoices')
     },
     hasMembers() {
       return this.isAdmin
     },
     unacceptedCount() {
       return this.mainStore.unacceptedCount
-    },
-    hasBranches() {
-      return this.mainStore.getMemberHasBranches
-    },
-    hasBim() {
-      return this.hasAccessToModule('3d') && (this.isPlanning || this.isAdmin)
-    },
-    hasWebshop() {
-      return this.hasAccessToModule('webshop') && (this.isPlanning || this.isAdmin)
     }
   },
   watch: {
-    unacceptedCount (oldValue, newValue) {
-    }
   },
   components: {
     SubNav,
