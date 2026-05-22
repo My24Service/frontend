@@ -5,14 +5,14 @@
     <b-modal
       id="password-change-modal"
       ref="password-change-modal"
-      v-bind:title="$trans('Change password')"
+      :title="$trans('Change password')"
       @show="resetModal"
       @hidden="resetModal"
       @ok="handleOk"
     >
       <form ref="password-change-form" @submit.stop.prevent="doPasswordChange">
         <BFormGroup
-          v-bind:label="$trans('Old password')"
+          :label="$trans('Old password')"
           label-for="old-password-input"
         >
           <BFormInput
@@ -29,7 +29,7 @@
           </b-form-invalid-feedback>
         </BFormGroup>
         <BFormGroup
-          v-bind:label="$trans('New password')"
+          :label="$trans('New password')"
           label-for="new-password1-input"
         >
           <BFormInput
@@ -46,7 +46,7 @@
           </b-form-invalid-feedback>
         </BFormGroup>
         <BFormGroup
-          v-bind:label="$trans('Password again')"
+          :label="$trans('Password again')"
           label-for="new-password2-input"
         >
           <BFormInput
@@ -68,7 +68,7 @@
     <b-modal
       id="logout-modal"
       ref="logout-modal"
-      v-bind:title="$trans('Log out?')"
+      :title="$trans('Log out?')"
       @ok="doLogout"
       auto-focus-button="ok"
     >
@@ -76,17 +76,17 @@
     </b-modal>
 
     <b-modal
-    id="lang-modal"
-    ref="lang-modal"
-    v-bind:title="$trans('Change language')"
-    :ok-disabled="true"
+      id="lang-modal"
+      ref="lang-modal"
+      :title="$trans('Change language')"
+      :ok-disabled="true"
     >
-      <template #modal-footer>
+      <template #footer="{cancel}">
         <BButton
           variant="secondary"
           size="sm"
           class="float-right"
-          @click="$bvModal.hide('lang-modal')"
+          @click="() => cancel()"
         >
           {{ $trans('Close') }}
         </BButton>
@@ -99,7 +99,8 @@
         v-if="memberInfo"
         :member-info="memberInfo"
       />
-      <NavItems />
+      <NavItems v-if="!hasBranches" />
+      <NavItemsBranch v-else />
       <hr />
       <b-nav-item-dropdown dropup :text="getUsername" right v-if="userInfo.user">
         <template slot="button-content">
@@ -142,6 +143,7 @@ import {useMainStore} from "@/stores/main";
 import {useAuthStore} from "@/stores/auth";
 import {computed} from "vue";
 import PasswordMeter from "vue-simple-password-meter";
+import NavItemsBranch from "@/components/NavItemsBranch.vue";
 
 export default {
   setup() {
@@ -160,6 +162,7 @@ export default {
   },
   mixins: [componentMixin],
   components: {
+    NavItemsBranch,
     PasswordMeter,
     TheLanguageChooser,
     NavItems,
@@ -296,7 +299,4 @@ export default {
 }
 </script>
 <style scoped>
-.navbar {
-  padding: 0 !important;
-}
 </style>

@@ -1,5 +1,15 @@
 <template>
   <div class="nav-items" ref="nav-items" v-if="userInfo.user">
+    <!-- Startpage -->
+    <b-nav-item to="/startpage/" v-if="hasBranches">
+      <IBiFileEarmarkBarGraphFill v-if="!isActive('orders')"></IBiFileEarmarkBarGraphFill>
+      <IBiFileEarmarkBarGraph v-else></IBiFileEarmarkBarGraph>
+      {{ $trans('Startpage') }}
+    </b-nav-item>
+    <SubNav v-if="isActive('startpage')">
+      <router-view name="app-subnav"></router-view>
+    </SubNav>
+
     <!-- Orders -->
     <b-nav-item
       :active="isActive('orders')"
@@ -182,7 +192,7 @@ import {computed} from "vue";
 import {useAuthStore} from "@/stores/auth";
 
 export default {
-  name: "NavItems",
+  name: "NavItemsBranch",
   mixins: [componentMixin],
   setup() {
     const mainStore = useMainStore()
