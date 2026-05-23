@@ -6,6 +6,12 @@
       {{ $trans('Start') }}
     </b-nav-item>
 
+    <b-nav-item :to="{name: 'orders-schedule'}">
+      <IBiBriefcaseFill v-if="isActive('orders')"></IBiBriefcaseFill>
+      <IBiBriefcase v-else></IBiBriefcase>
+      {{ $trans('Planning') }}
+    </b-nav-item>
+
     <b-nav-item :to="{name: 'equipment-equipment-list'}">
       <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment')"></IBiWrenchAdjustableCircleFill>
       <IBiWrenchAdjustableCircle v-else></IBiWrenchAdjustableCircle>
