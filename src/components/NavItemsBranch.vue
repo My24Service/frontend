@@ -1,5 +1,5 @@
 <template>
-  <div class="nav-items" ref="nav-items" v-if="userInfo.user">
+  <div class="nav-items branch" ref="nav-items" v-if="userInfo.user">
     <b-nav-item :to="{name: 'startpage'}">
       <IBiClockFill v-if="isActive('startpage')"></IBiClockFill>
       <IBiClock v-else></IBiClock>
