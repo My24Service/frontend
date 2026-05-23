@@ -10,6 +10,9 @@ import UserPlanningList from "@/views/company/UserPlanningList.vue";
 import UserPlanningForm from "@/views/company/UserPlanningForm.vue";
 import UserEmployeeList from "@/views/company/UserEmployeeList.vue";
 import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
+import BranchList from "@/views/company/BranchList.vue";
+import BranchForm from "@/views/company/BranchForm.vue";
+import BranchView from "@/views/company/BranchView.vue";
 
 export default [
   {
@@ -166,6 +169,55 @@ export default [
         },
         props: {
           'app-content': {},
+          'app-subnav': {}
+        },
+      },
+      // branches
+      {
+        name: 'settings-branches',
+        path: '/settings/branches',
+        components: {
+          'app-content': BranchList,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': {},
+          'app-subnav': {}
+        },
+      },
+      {
+        name: 'settings-branch-edit',
+        path: '/settings/branches/form/:pk',
+        props: {
+          'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+        components: {
+          'app-content': BranchForm,
+          'app-subnav': {}
+        },
+      },
+      {
+        name: 'settings-branch-add',
+        path: '/settings/branches/form',
+        components: {
+          'app-content': BranchForm,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': {},
+          'app-subnav': {}
+        },
+      },
+      {
+        name: 'settings-branch-view',
+        path: '/settings/branches/:pk',
+        components: {
+          'app-content': BranchView,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': route => ({...route.params}),
           'app-subnav': {}
         },
       },

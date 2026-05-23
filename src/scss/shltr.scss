@@ -58,6 +58,14 @@ $font-size-base: 0.9rem;
       }
     }
 
+    div.branch-settings {
+      li {
+        a {
+          padding: .4em;
+        }
+      }
+    }
+
     .nav-items {
       overflow: auto;
       padding: 0;

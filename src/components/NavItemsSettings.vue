@@ -1,27 +1,23 @@
 <template>
-  <div class="nav-items" ref="nav-items" v-if="userInfo.user">
+  <div class="nav-items branch-settings" ref="nav-items" v-if="userInfo.user">
     <b-nav-item :to="{name: 'settings-company'}">
-      <IBiClockFill v-if="isActive('company')"></IBiClockFill>
-      <IBiClock v-else></IBiClock>
       {{ $trans('Company') }}
     </b-nav-item>
 
     <b-nav-item :to="{name: 'settings-users-planningusers'}">
-      <IBiClockFill v-if="isActive('startpage')"></IBiClockFill>
-      <IBiClock v-else></IBiClock>
       {{ $trans('Users') }}
     </b-nav-item>
 
     <b-nav-item :to="{name: 'settings-statuscode-list'}">
-      <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment')"></IBiWrenchAdjustableCircleFill>
-      <IBiWrenchAdjustableCircle v-else></IBiWrenchAdjustableCircle>
       {{ $trans('Statuses') }}
     </b-nav-item>
 
     <b-nav-item :to="{name: 'settings-order-filter-list'}">
-      <IBiBuildingsFill v-if="!isActive('location')"></IBiBuildingsFill>
-      <IBiBuildings v-else></IBiBuildings>
       {{ $trans('Filters') }}
+    </b-nav-item>
+
+    <b-nav-item :to="{name: 'settings-branches'}">
+      {{ $trans('Branches') }}
     </b-nav-item>
 
   </div>
