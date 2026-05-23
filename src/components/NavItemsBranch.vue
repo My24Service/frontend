@@ -23,7 +23,6 @@
       <IBiBuildings v-else></IBiBuildings>
       {{ $trans('Facilitair') }}
     </b-nav-item>
-
   </div>
 </template>
 

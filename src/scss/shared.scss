@@ -94,7 +94,7 @@ tr:focus-within .edit-icon {
   padding: 0;
   height: 100vh;
   overflow-y: scroll;
-  background-image: linear-gradient(to bottom, $primary 11rem, transparent 11rem);
+  background-image: linear-gradient(to bottom, $my24 11rem, transparent 11rem);
   > header {
     margin: 0 0rem 0;
     padding: 1rem 2rem;
@@ -687,8 +687,6 @@ html {
   }
 }
 
-
-
 .badge {
   display: inline-flex;
   min-width: 2em;
@@ -970,7 +968,6 @@ html {
     }
   }
 }
-
 
 //.dispatch-calendar.compact .order-compact {
 //  grid-row: 1;

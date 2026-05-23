@@ -11,10 +11,10 @@ $color-accent: #30BFBF;
 //global-color-1cf88dd:
 
 $my24: #30BFBF;
-$primary: #000;
-$secondary: $my24;
+$primary: $my24;
+$secondary: #000;
 
-$navbar-light-color: $secondary;
+$navbar-light-color: $my24;
 $active-link: $secondary;
 $normal-link: $secondary;
 $font-size-base: 0.9rem;
@@ -52,7 +52,7 @@ $font-size-base: 0.9rem;
 
           &:hover {
             color: #efefef;
-            background-color: $primary;
+            background-color: $secondary;
           }
         }
       }
@@ -60,7 +60,7 @@ $font-size-base: 0.9rem;
 
     .nav-items {
       overflow: auto;
-      padding: 0 1rem;
+      padding: 0;
 
       .has-children {
         padding: .2em;
@@ -88,8 +88,8 @@ $font-size-base: 0.9rem;
     list-style: none;
 
     a {
-      border-radius: .5ex;
-      color: #232c2fa0;
+      border-radius: 0;
+      color: $primary;
       display: flex;
       gap: 1ex;
       align-items: center;
