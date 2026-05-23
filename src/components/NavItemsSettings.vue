@@ -1,21 +1,27 @@
 <template>
   <div class="nav-items" ref="nav-items" v-if="userInfo.user">
-    <b-nav-item :to="{name: 'startpage'}">
+    <b-nav-item :to="{name: 'settings-company'}">
+      <IBiClockFill v-if="isActive('company')"></IBiClockFill>
+      <IBiClock v-else></IBiClock>
+      {{ $trans('Company') }}
+    </b-nav-item>
+
+    <b-nav-item :to="{name: 'settings-users-planningusers'}">
       <IBiClockFill v-if="isActive('startpage')"></IBiClockFill>
       <IBiClock v-else></IBiClock>
-      {{ $trans('Start') }}
+      {{ $trans('Users') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'equipment-equipment-list'}">
+    <b-nav-item :to="{name: 'settings-statuscode-list'}">
       <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment')"></IBiWrenchAdjustableCircleFill>
       <IBiWrenchAdjustableCircle v-else></IBiWrenchAdjustableCircle>
-      {{ $trans('Techniek') }}
+      {{ $trans('Statuses') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'equipment-location-list'}">
+    <b-nav-item :to="{name: 'settings-order-filter-list'}">
       <IBiBuildingsFill v-if="!isActive('location')"></IBiBuildingsFill>
       <IBiBuildings v-else></IBiBuildings>
-      {{ $trans('Facilitair') }}
+      {{ $trans('Filters') }}
     </b-nav-item>
 
   </div>
@@ -31,7 +37,7 @@ import {computed} from "vue";
 import {useAuthStore} from "@/stores/auth";
 
 export default {
-  name: "NavItemsBranch",
+  name: "NavItemsSettings",
   mixins: [componentMixin],
   setup() {
     const mainStore = useMainStore()

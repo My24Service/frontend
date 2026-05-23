@@ -98,19 +98,23 @@
         v-if="memberInfo"
         :member-info="memberInfo"
       />
-      <NavItems v-if="!hasBranches" />
-      <NavItemsBranch v-else />
+      <NavItems v-if="!hasBranches && !onlySettings" />
+      <NavItemsBranch v-if="hasBranches && !onlySettings" />
+      <NavItemsSettings v-if="onlySettings" />
       <hr />
       <b-nav-item-dropdown dropup :text="getUsername" right v-if="userInfo.user">
-        <template slot="button-content">
-          <IBiPersonCircle></IBiPersonCircle>
-          <span>{{ getUsername }}</span>
+        <template #button-content>
+          <IBiPersonCircle class="m-1"></IBiPersonCircle>
+          <span  class="m-1">{{ getUsername }}</span>
         </template>
         <li style="text-align: center;">
           {{ memberInfo.name }}
         </li>
         <li><span class='dropdown-item'><Version /></span></li>
         <b-dropdown-divider></b-dropdown-divider>
+        <b-dropdown-item :to="{name: 'settings-company'}">
+          {{ $trans('Settings') }}
+        </b-dropdown-item>
         <b-dropdown-item v-b-modal.lang-modal>{{ $trans('App Language') }}</b-dropdown-item>
         <b-dropdown-item v-b-modal.password-change-modal>{{ $trans('Change password') }}</b-dropdown-item>
         <b-dropdown-item @click="logout">{{ $trans('Logout') }}</b-dropdown-item>
@@ -143,6 +147,7 @@ import {useAuthStore} from "@/stores/auth";
 import {computed} from "vue";
 import PasswordMeter from "vue-simple-password-meter";
 import NavItemsBranch from "@/components/NavItemsBranch.vue";
+import NavItemsSettings from "@/components/NavItemsSettings.vue";
 
 export default {
   setup() {
@@ -159,8 +164,12 @@ export default {
       userInfo
     }
   },
+  props: {
+    onlySettings: Boolean
+  },
   mixins: [componentMixin],
   components: {
+    NavItemsSettings,
     NavItemsBranch,
     PasswordMeter,
     TheLanguageChooser,

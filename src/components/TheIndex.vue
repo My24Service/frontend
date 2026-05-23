@@ -48,7 +48,7 @@ onMounted(async () => {
     setTimeout(() => {
       if (authStore.isLoggedIn) {
         if (mainStore.getMemberHasBranches) {
-          router.replace({ name: 'orders-schedule' });
+          router.replace({ name: 'startpage' });
         } else {
           router.replace({ name: 'order-list' });
         }

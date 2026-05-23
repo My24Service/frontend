@@ -9,12 +9,13 @@ import UserEmployeeForm from "@/views/company/UserEmployeeForm.vue";
 import UserPlanningList from "@/views/company/UserPlanningList.vue";
 import UserPlanningForm from "@/views/company/UserPlanningForm.vue";
 import UserEmployeeList from "@/views/company/UserEmployeeList.vue";
-import TheAppLayout from "@/components/TheAppLayout.vue";
+import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
 
 export default [
   {
     path: '/settings',
-    component: TheAppLayout,
+    component: TheAppLayoutSettings,
+    props: {settings: true},
     children: [
       {
         name: 'settings-company',
