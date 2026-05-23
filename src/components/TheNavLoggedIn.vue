@@ -101,11 +101,16 @@
       <NavItems v-if="!hasBranches && !onlySettings" />
       <NavItemsBranch v-if="hasBranches && !onlySettings" />
       <NavItemsSettings v-if="onlySettings" />
-      <hr />
-      <b-nav-item-dropdown dropup :text="getUsername" right v-if="userInfo.user">
+      <b-nav-item-dropdown
+        dropup
+        :text="getUsername"
+        right
+        v-if="userInfo.user"
+        class="mb-1 border-top p-1"
+      >
         <template #button-content>
-          <IBiPersonCircle class="m-1"></IBiPersonCircle>
-          <span  class="m-1">{{ getUsername }}</span>
+          <IBiPersonCircle></IBiPersonCircle>&nbsp;
+          <span>{{ getUsername }}</span>
         </template>
         <li style="text-align: center;">
           {{ memberInfo.name }}
