@@ -117,7 +117,7 @@
         </li>
         <li><span class='dropdown-item'><Version /></span></li>
         <b-dropdown-divider></b-dropdown-divider>
-        <b-dropdown-item :to="{name: 'settings-company'}">
+        <b-dropdown-item :to="{name: 'settings-company'}" v-if="hasBranches">
           {{ $trans('Settings') }}
         </b-dropdown-item>
         <b-dropdown-item v-b-modal.lang-modal>{{ $trans('App Language') }}</b-dropdown-item>
