@@ -37,12 +37,6 @@
               <li class="list-group-item px-1 small">{{ street }}</li>
               <li class="list-group-item px-1 small">{{ zipCity }}</li>
             </ul>
-
-            <div class="d-grid gap-2">
-              <a href="#" class="btn btn-secondary mt-2 px-1" @click.prevent>
-                <span class="d-lg-none d-xxl-inline">Gebouwpas</span> openen
-              </a>
-            </div>
           </div>
 
           <!-- Informatie tab -->
