@@ -10,6 +10,7 @@ class BranchModel {
   email
   contact
   mobile
+  image
 
 }
 
@@ -24,6 +25,7 @@ class BranchService extends BaseModel {
     'email': '',
     'contact': '',
     'mobile': '',
+    'image': '',
   }
 
   url = '/company/branch/'

@@ -22,6 +22,9 @@
         </header>
         <div class='page-detail flex-columns'>
           <div class="branch-details panel col-1-3" v-if="!isBranchEmployee">
+            <div v-if="branch.image" class="text-center mb-3">
+              <img :src="branch.image" class="img-fluid branch-image" :alt="branch.name"/>
+            </div>
             <BranchCard :branch="branch"/>
           </div>
 
@@ -387,5 +390,11 @@ span.spacer {
 }
 div.spacer {
   margin: 10px;
+}
+.branch-image {
+  max-height: 200px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 4px;
 }
 </style>

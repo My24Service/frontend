@@ -157,6 +157,30 @@
                     </BFormGroup>
                   </b-col>
                 </b-row>
+                <b-row>
+                  <b-col cols="4" role="group">
+                    <BFormGroup
+                      label-size="sm"
+                      v-bind:label="$trans('Image')"
+                      label-for="branch_image"
+                    >
+                      <b-form-file
+                        id="branch_image"
+                        accept="image/*"
+                        :placeholder="$trans('Choose a file or drop it here...')"
+                        @change="imageSelected"
+                      ></b-form-file>
+                    </BFormGroup>
+                  </b-col>
+                  <b-col cols="4">
+                    <h3>{{ $trans('Current image') }}</h3>
+                    <img width="200px" :src="current_image" alt=""/>
+                  </b-col>
+                  <b-col cols="4">
+                    <h3>{{ $trans('Upload preview') }}</h3>
+                    <img width="200px" :src="upload_preview" alt=""/>
+                  </b-col>
+                </b-row>
           </b-overlay>
         </b-form>
       </div>
@@ -166,6 +190,7 @@
 <script>
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
+import {NO_IMAGE_URL} from "@/constants"
 import {BranchService} from '@/models/company/Branch'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
@@ -214,7 +239,10 @@ export default {
       submitClicked: false,
       branch: null,
       errorMessage: null,
-      branchService: new BranchService()
+      branchService: new BranchService(),
+      current_image: NO_IMAGE_URL,
+      upload_preview: NO_IMAGE_URL,
+      fileChanged: false
     }
   },
   computed: {
@@ -241,6 +269,10 @@ export default {
       if (this.v$.$invalid) {
         console.log('invalid?', this.v$.$invalid)
         return
+      }
+
+      if (!this.fileChanged) {
+        delete this.branch.image
       }
 
       this.isLoading = true
@@ -280,11 +312,27 @@ export default {
         this.isLoading = false
       }
     },
+    imageSelected(event) {
+      const file = event.files[0]
+      if (!file) {
+        return
+      }
+      const reader = new FileReader()
+      reader.onload = (f) => {
+        const b64 = f.target.result
+        this.upload_preview = b64
+        this.branch.image = b64
+      }
+
+      reader.readAsDataURL(file)
+      this.fileChanged = true
+    },
     async loadData() {
       this.isLoading = true
 
       try {
         this.branch = this.isBranchEmployee ? await this.branchService.getMyBranch() : await this.branchService.detail(this.pk)
+        this.current_image = this.branch.image ? this.branch.image : NO_IMAGE_URL
         this.isLoading = false
       } catch(error) {
         console.log('error fetching branch', error)
