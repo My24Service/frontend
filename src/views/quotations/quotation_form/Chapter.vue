@@ -7,7 +7,7 @@
       <b-modal
         id="delete-chapter-modal"
         ref="delete-chapter-modal"
-        v-bind:title="$trans('Delete?')"
+        :title="$trans('Delete?')"
         @ok="doDelete"
       >
         <p class="my-4">
@@ -32,7 +32,7 @@
       >
         <template #cell(chapter)="data">
           <h6>
-            <BLink @click="function() { loadChapter(data.item) }">
+            <BLink @click.prevent="function() { loadChapter(data.item) }">
               {{ data.item.name }}
             </BLink>
           </h6>
@@ -164,7 +164,7 @@ export default {
   ],
   props: {
     quotation: {
-      type: QuotationModel,
+      type: Object,
       default: null
     },
     isView: {
@@ -215,6 +215,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     // delete
     showDeleteModal(id) {
       this.deletePk = id

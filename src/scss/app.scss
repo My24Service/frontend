@@ -64,6 +64,34 @@ details {
   }
 }
 
+.pdf-container {
+  font-size: 12px !important;
+  margin-top: 4px;
+  margin-right: 2em;
+  margin-left: 2em;
+
+  .log, .info {
+    padding-top: 12px;
+  }
+
+  .underline {
+    border-bottom: 1px dotted;
+  }
+
+  div.row {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .panel-body {
+    padding: 10px;
+  }
+
+  .signature {
+    height: 150px;
+  }
+}
+
 // TODO: fix markup?
 td .h2.float-right span a {
   margin-inline-start: 1ex;

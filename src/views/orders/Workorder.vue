@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container-fluid">
     <WorkorderMaintenance v-if="memberType === 'maintenance'" :uuid="uuid" />
   </div>
 </template>

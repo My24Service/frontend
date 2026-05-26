@@ -72,8 +72,7 @@
                   label-for="material-amount"
                 >
                   <BFormInput
-                    :value="Math.round(cost.amount_decimal)"
-                    @change="(amount) => changeAmount(cost, amount)"
+                    @change="(event) => changeAmount(cost, event.target.value)"
                   ></BFormInput>
                 </BFormGroup>
               </b-col>
@@ -222,7 +221,6 @@ import {
   CostService
 } from "@/models/quotations/Cost";
 import {MaterialModel, MaterialService} from "@/models/inventory/Material";
-import {ChapterModel} from "@/models/quotations/Chapter";
 
 import quotationMixin from "./mixin.js";
 import {USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING} from "./constants";
@@ -259,7 +257,7 @@ export default {
   },
   props: {
     chapter: {
-      type: ChapterModel,
+      type: Object,
       default: null
     },
     quotationLinesParent: {
@@ -324,6 +322,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    $trans,
     otherPriceChanged(priceDinero, cost) {
       cost.setPriceField('price_other', priceDinero)
       this.updateTotals()
@@ -434,6 +433,7 @@ export default {
       this.updateTotals()
     },
     changeAmount(cost, amount) {
+      console.debug({cost, amount})
       cost.amount_decimal = amount
       this.updateTotals()
       this.hasChanges = true

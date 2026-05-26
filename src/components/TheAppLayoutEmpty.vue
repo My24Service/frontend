@@ -1,8 +1,6 @@
 <template>
   <div ref="app-layout">
-    <div class="container">
-      <router-view :key="$route.fullPath" name="app-content"></router-view>
-    </div>
+    <router-view :key="$route.fullPath" name="app-content"></router-view>
   </div>
 </template>
 

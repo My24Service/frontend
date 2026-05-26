@@ -308,11 +308,11 @@ export default {
       default: null
     },
     quotation: {
-      type: QuotationModel,
+      type: Object,
       default: null
     },
     chapter: {
-      type: ChapterModel,
+      type: Object,
       default: null
     },
     isView: {

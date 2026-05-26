@@ -190,7 +190,7 @@ export default {
   },
   props: {
     quotation: {
-      type: QuotationModel,
+      type: Object,
       default: null
     },
     isView: {

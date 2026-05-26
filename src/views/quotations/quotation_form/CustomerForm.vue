@@ -40,16 +40,14 @@
 
             :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null"
           ></BFormInput>
-          <b-input-group-append>
-            <BFormInput
-              v-model="quotation.customer_id"
-              readonly
-              :title="$trans('Customer ID')"
-              id="customer_id"
-              style="max-width: 9ch"
-              :state="isSubmitClicked ? !v$.quotation.customer_id.$error : null">
-            </BFormInput>
-          </b-input-group-append>
+          <BFormInput
+            v-model="quotation.customer_id"
+            readonly
+            :title="$trans('Customer ID')"
+            id="customer_id"
+            style="max-width: 9ch"
+            :state="isSubmitClicked ? !v$.quotation.customer_id.$error : null">
+          </BFormInput>
         </b-input-group>
         <b-form-invalid-feedback
           :state="isSubmitClicked ? !v$.quotation.quotation_name.$error : null">

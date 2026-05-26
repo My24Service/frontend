@@ -172,8 +172,6 @@ import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
 
 import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
-import {ChapterModel} from "@/models/quotations/Chapter";
-import {CustomerModel} from "@/models/customer/Customer";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
 import {
@@ -214,11 +212,11 @@ export default {
   },
   props: {
     chapter: {
-      type: ChapterModel,
+      type: Object,
       default: null
     },
     customer:{
-      type: CustomerModel,
+      type: Object,
       default: null
     },
     quotationLinesParent: {
