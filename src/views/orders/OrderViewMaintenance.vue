@@ -187,7 +187,13 @@
               </BLink>
             </dd>
             <dd v-if="!hasBranches" class="flex-columns">
-              <BLink class="btn btn-sm btn-outline" v-if="order.workorder_pdf_url" :href="order.workorder_pdf_url" target="_blank" :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'">
+              <BLink
+                class="btn btn-sm btn-outline"
+                v-if="order.workorder_pdf_url"
+                :href="order.workorder_pdf_url"
+                target="_blank"
+                :title="$trans('Download PDF') + ' (' + order.workorder_pdf_url + ')'"
+              >
                 <IBiFileEarmarkPdf></IBiFileEarmarkPdf>{{ $trans('Download PDF') }}
               </BLink>
             </dd>
@@ -227,9 +233,15 @@
             <dt>{{ $trans("Workorders partners") }}</dt>
             <dd class="flex-columns">
               <div v-for="workorder in order.workorder_pdf_url_partner" :key="workorder.companycode">
-                {{ workorder.companycode }}
+                <span v-if="workorder.url">{{ workorder.companycode }}</span>
                 <span v-if="workorder.via">({{ $trans("via") }} {{ workorder.via }})</span>
-                <BLink class="btn btn-sm btn-outline" :href="workorder.url" target="_blank" :title="$trans('Download PDF') + ' (' + workorder.url + ')'">
+                <BLink
+                  class="btn btn-sm btn-outline"
+                  v-if="workorder.url"
+                  :href="workorder.url"
+                  target="_blank"
+                  :title="$trans('Download PDF') + ' (' + workorder.url + ')'"
+                >
                   <IBiFileEarmarkPdf></IBiFileEarmarkPdf>
                   {{ $trans('Download PDF') }}
                 </BLink>
