@@ -22,7 +22,7 @@
         </header>
         <div class='page-detail flex-columns'>
           <div class="branch-details panel col-1-3" v-if="!isBranchEmployee">
-            <div v-if="branch.image" class="text-center mb-3">
+            <div v-if="branch?.image" class="text-center mb-3">
               <img :src="branch.image" class="img-fluid branch-image" :alt="branch.name"/>
             </div>
             <BranchCard :branch="branch"/>

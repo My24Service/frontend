@@ -16,17 +16,16 @@
           <div class="row">
             <div class="col-lg-3">
               <BranchPhotoCard
-                title="MYSS - Amsterdam"
-                image-url="https://gebouwpas.buro7.net/gebouwpas-1-8/img/gebouw-03.jpg"
-                building-name="Gebouw ELM"
-                street="Stroombaan 10"
-                zip-city="1181 VX Amstelveen"
+                v-if="branch"
+                :title="branch.name"
+                :image-url="branch.image || NO_IMAGE_URL"
+                :building-name="branch.name"
+                :street="branch.address"
+                :zip-city="branch.postal + ' ' + branch.city"
                 :info-items="[
-                  { label: 'Complex', value: 'Opera' },
-                  { label: 'Gebouw', value: 'Wozzeck' },
-                  { label: 'Gebruiker(s)', value: 'Berg, Van Doorn BV, Isis, Neo Digital' },
-                  { label: 'Eigendomssituatie', value: 'Eigendom' },
-                  { label: 'Gebruiksdoel', value: 'Kantoorfunctie' }
+                  { label: 'Tel.', value: branch.tel },
+                  { label: 'Mobiel', value: branch.mobile },
+                  { label: 'E-mail', value: branch.email },
                 ]"
               />
             </div>
@@ -318,6 +317,7 @@
 </template>
 
 <script>
+import {BranchService} from '@/models/company/Branch'
 import BranchPhotoCard from "@/views/company/startpage/BranchPhotoCard.vue"
 import BarChart from "@/components/BarChart.vue"
 import PieChart from "@/components/PieChart.vue"
@@ -347,6 +347,8 @@ export default {
   data() {
     return {
         member: memberModel.getFields(),
+        branch: null,
+        branchService: new BranchService(),
 
         activity: [],
         activityFields: [
@@ -437,6 +439,8 @@ export default {
       try {
         //
         this.member = await memberModel.getMe();
+
+        this.branch = await this.branchService.first()
 
         const activityData = await activityModel.list()
         this.activity = activityData.results
