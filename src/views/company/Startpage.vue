@@ -445,9 +445,11 @@ export default {
         const activityData = await activityModel.list()
         this.activity = activityData.results
 
+        this.equipmentDocumentService.setParentBranchId(this.branch.id)
         await this.equipmentDocumentService.loadCollection()
         this.equipmentDocuments = this.equipmentDocumentService.collection
 
+        this.locationDocumentService.setParentBranchId(this.branch.id)
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
 
