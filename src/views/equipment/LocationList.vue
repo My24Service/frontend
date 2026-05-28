@@ -18,7 +18,10 @@
               v-bind:title="$trans('Download QR-codes')"
             />
           </BButton-group>
-          <router-link :to="{name: newLink}" class="btn btn-primary">{{ $trans('Add location') }}</router-link>
+          <router-link
+            :to="{name: newLink}"
+            class="btn btn-primary"
+          >{{ $trans('Add location') }}</router-link>
         </BButton-toolbar>
       </div>
     </header>
@@ -232,6 +235,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // sorting
     async sortingChanged(ctx) {
       this.sortBy = [{key: ctx.key, order: ctx.order}]

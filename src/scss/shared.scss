@@ -268,12 +268,12 @@ tr:focus-within .edit-icon {
       margin: 2rem 1rem;
     }
   }
-  button.primary,
-  .btn-primary {
+  //button.primary,
+  //.btn-primary {
     //color: $my24;
 
     //color: $normal-link!important;
-  }
+  //}
   h6 {
     text-transform: uppercase;
     color: #232c2f;
@@ -635,34 +635,13 @@ html {
       align-items: center;
     }
 
-    .btn,
     .btn-primary {
       background-color: white;
       border-color: #fff6;
-      color: $my24;
+      color: $primary;
+
       &:not(:disabled):active {
         border-color: white !important;
-      }
-
-      &.outline,
-      &.btn-outline,
-      .outline-primary {
-        background-color: transparent !important;
-        border-color: #fff9 !important;
-        color: white !important;
-      }
-      &.btn-secondary {
-        //background-color: #0009;
-        background-color: $secondary;
-        //border-color:  transparent;
-        color: white;
-        &:hover {
-          /* background-color: $secondary; */
-        }
-      }
-      &[disabled] {
-        opacity: .5;
-        pointer-events: none;
       }
     }
     .btn-toolbar {
@@ -673,11 +652,6 @@ html {
       }
     }
 
-    .btn-group .btn-secondary {
-      margin-inline: 0;
-      background: white !important;
-      color: $primary;
-    }
     .backlink {
       cursor: pointer;
       &:hover {

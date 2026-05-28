@@ -74,7 +74,10 @@
               v-bind:title="$trans('Download QR-codes')"
             />
           </BButton-group>
-          <router-link :to="{name: newLink}" class="btn">{{ $trans("Add Equipment") }}</router-link>
+          <router-link
+            :to="{name: newLink}"
+            class="btn btn-primary"
+          >{{ $trans("Add Equipment") }}</router-link>
         </BButton-toolbar>
       </div>
     </header>
@@ -305,6 +308,7 @@ export default {
     await this.loadData()
   },
   methods: {
+    $trans,
     // download
     downloadList() {
       const url = this.equipmentService.getExportUrl()
