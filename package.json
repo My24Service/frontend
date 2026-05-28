@@ -55,6 +55,6 @@
     "unplugin-icons": "^22.5.0",
     "unplugin-vue-components": "^30.0.0",
     "vite": "7.3.1",
-    "vite-plugin-theme-preprocessor": "git+https://codeberg.org/epso/vite-plugin-theme-preprocessor.git"
+    "vite-plugin-theme-preprocessor": "git+https://codeberg.org/My24Service/vite-plugin-theme-preprocessor.git"
   }
 }
