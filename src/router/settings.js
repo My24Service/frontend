@@ -181,19 +181,19 @@ export default [
           'app-subnav': {}
         },
         props: {
-          'app-content': {},
+          'app-content': {from_settings: true},
           'app-subnav': {}
         },
       },
       {
         name: 'settings-branch-edit',
         path: '/settings/branches/form/:pk',
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
         components: {
           'app-content': BranchForm,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': route => ({...route.params, from_settings: true}),
           'app-subnav': {}
         },
       },

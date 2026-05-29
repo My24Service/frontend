@@ -18,7 +18,7 @@
             />
           </BButton-group>
           <router-link
-            class="btn button"
+            class="btn btn-primary"
             :to="{name:'quotation-add'}"
           >
             <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add quotation') }}

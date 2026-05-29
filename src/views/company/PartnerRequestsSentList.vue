@@ -13,8 +13,10 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <router-link :to="{name: 'partner-request-add'}" class="btn">{{$trans('New partner request')}}</router-link>
-
+          <router-link
+            :to="{name: 'partner-request-add'}"
+            class="btn btn-primary"
+          >{{ $trans('New partner request') }}</router-link>
         </BButton-toolbar>
       </div>
     </header>
@@ -129,6 +131,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

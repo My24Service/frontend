@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Templates") }}</h3>
         <div class="flex-columns">
-          <router-link class="btn button" :to="{ name: 'customer-template-add' }">
+          <router-link class="btn btn-primary" :to="{ name: 'customer-template-add' }">
             <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add template") }}
           </router-link>
         </div>
@@ -146,6 +146,7 @@ export default {
     this.loadData();
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs["search-modal"].hide();

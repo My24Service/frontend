@@ -14,7 +14,12 @@
                 v-bind:method="function() { showSearchModal() }"
               />
             </BButton-group>
-            <BLink :to="{name: 'employee-add'}" class="btn primary"><IBiPersonPlus></IBiPersonPlus>{{ $trans("Add employee") }}</BLink>
+            <BLink
+              :to="{name: 'employee-add'}"
+              class="btn btn-primary"
+            >
+              <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add employee") }}
+            </BLink>
           </BButton-toolbar>
         </div>
       </div>

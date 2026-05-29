@@ -20,7 +20,7 @@
               v-bind:method="function() { showSortModal() }"
             />
           </BButton-group>
-          <router-link class="btn button" :to="{name:'order-add'}">
+          <router-link class="btn btn-primary" :to="{name:'order-add'}">
             <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add order') }}
           </router-link>
         </BButton-toolbar>

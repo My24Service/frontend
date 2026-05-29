@@ -14,14 +14,13 @@
                 v-bind:method="function() { showSearchModal() }"
               />
             </BButton-group>
-            <BLink :to="{name: 'planninguser-add'}" class="btn primary">
+            <BLink :to="{name: 'planninguser-add'}" class="btn btn-primary">
               <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add planner") }}
             </BLink>
           </BButton-toolbar>
         </div>
       </div>
     </header>
-
 
     <SearchModal
       id="search-modal"
@@ -134,6 +133,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
