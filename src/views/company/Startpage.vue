@@ -440,7 +440,11 @@ export default {
         //
         this.member = await memberModel.getMe();
 
-        this.branch = await this.branchService.first()
+        if (this.isBranchEmployee) {
+          this.branch = await this.branchService.getMyBranch()
+        } else {
+          this.branch = await this.branchService.first()
+        }
 
         const activityData = await activityModel.list()
         this.activity = activityData.results
