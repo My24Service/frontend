@@ -7,7 +7,7 @@
             <IBiBuilding></IBiBuilding>
             <span class="backlink" @click="goBack">{{ $trans("Customers") }}</span> / {{  customer.name }}
           </h3>
-          <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
+          <router-link class="btn btn-primary" :to="{name:'customer-edit', pk: pk}">
             <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit customer') }}
           </router-link>
         </div>

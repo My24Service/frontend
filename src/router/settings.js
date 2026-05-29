@@ -205,7 +205,7 @@ export default [
           'app-subnav': {}
         },
         props: {
-          'app-content': {},
+          'app-content': {from_settings: true},
           'app-subnav': {}
         },
       },

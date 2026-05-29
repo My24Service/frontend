@@ -8,7 +8,12 @@
           <span @click="goBack" class="backlink">{{ $trans("Locations") }}</span>
           / {{ location.name }}
         </h3>
-        <router-link :to="{name: editLink, params: {pk: this.pk}}" class="btn primary">{{$trans('Edit location')}}</router-link>
+        <router-link
+          :to="{name: editLink, params: {pk: this.pk}}"
+          class="btn btn-primary"
+        >
+          {{$trans('Edit location')}}
+        </router-link>
       </div>
       <SearchModal
           id="search-modal"

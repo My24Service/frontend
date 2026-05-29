@@ -7,7 +7,12 @@
           <span class="backlink" @click="goBack">{{ $trans('Stock Locations') }}</span> /
           {{ stockLocation.name }} <small class="dimmed">({{ stockLocation.identifier }})</small>
         </h3>
-        <router-link :to="{name: 'stock-location-edit', params: {pk: this.pk}}" class="btn">{{ `${$trans('Edit')} ${$trans('stock location')}` }}</router-link>
+        <router-link
+          :to="{name: 'stock-location-edit', params: {pk: this.pk}}"
+          class="btn btn-primary"
+        >
+          {{ `${$trans('Edit')} ${$trans('stock location')}` }}
+        </router-link>
       </div>
     </header>
 

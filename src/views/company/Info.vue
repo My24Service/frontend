@@ -8,7 +8,13 @@
           <span v-else class="dimmed">{{ $trans('Company name')}}</span>
         </h3>
         <BButton-toolbar>
-          <BButton @click="() => isEditing = !isEditing" class="btn btn-primary" type="button" variant="primary" v-show="!isEditing">
+          <BButton
+            @click="() => isEditing = !isEditing"
+            class="btn btn-primary"
+            type="button"
+            variant="primary"
+            v-show="!isEditing"
+          >
             <b-icon icon="pencil"></b-icon>
             {{ $trans("Edit") }}
           </BButton>
@@ -404,6 +410,7 @@ export default {
     await this.loadData()
   },
   methods: {
+    $trans,
     imageSelected(file) {
       const reader = new FileReader()
       reader.onload = (f) => {

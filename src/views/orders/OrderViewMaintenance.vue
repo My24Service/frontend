@@ -129,7 +129,10 @@
           <span>#<strong>{{ order.order_id }}</strong></span>
         </h3>
         <div class="flex-columns">
-          <router-link class="btn button outline" :to="{name:'order-edit', pk: pk}">
+          <router-link
+            class="btn btn-primary"
+            :to="{name:'order-edit', pk: pk}"
+          >
             <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit order') }}
           </router-link>
           <router-link class="btn" v-if="order.customer_relation" v-bind:title="$trans('Create invoice')"
