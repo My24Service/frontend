@@ -23,6 +23,36 @@ $font-size-base: 0.9rem;
 @import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
 @import "./shared.scss";
 
+table#equipment-table {
+  thead th {
+    text-transform: none;
+    font-weight: 600;
+    color: #212529;
+    background-color: #f4f5f7;
+    letter-spacing: normal;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  td a {
+    text-decoration: none;
+    color: #212529;
+    font-weight: normal;
+  }
+
+  td a:hover {
+    text-decoration: underline;
+  }
+
+  tr:hover > td {
+    background-color: $primary;
+
+    &, & > * {
+      color: white;
+    }
+  }
+}
+
 .main-menu {
   background-color: white;
   box-shadow: 1px 0 #f2f2f2;
