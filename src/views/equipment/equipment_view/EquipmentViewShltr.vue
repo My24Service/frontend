@@ -108,7 +108,7 @@
         </div>
 
         <!-- Col 3: Orders -->
-        <div class="col-12 col-xl-12 col-xxl-7 mb-4">
+        <div class="col-12 col-xl-12 col-xxl-9 mb-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 bg-transparent border-bottom d-flex justify-content-between align-items-center">
               <div></div>
@@ -123,13 +123,15 @@
               </div>
             </div>
             <div class="card-body">
-              <ul class='listing order-list p-0' style="list-style-type: none;">
-                <li v-for="item in orders" :key="item.id">
-                  <OrderTableInfo
-                    v-bind:order="item"
-                  />
-                </li>
-              </ul>
+              <div class="order-list-container">
+                <ul class='listing order-list p-0' style="list-style-type: none;">
+                  <li v-for="item in orders" :key="item.id">
+                    <OrderTableInfo
+                      v-bind:order="item"
+                    />
+                  </li>
+                </ul>
+              </div>
               <b-pagination
                 v-if="orderService.count > 20"
                 class="pt-4"
@@ -143,7 +145,7 @@
         </div>
 
         <!-- Col 4: Documents -->
-        <div class="col-12 col-xl-12 col-xxl-5 mb-4">
+        <div class="col-12 col-xl-12 col-xxl-3 mb-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 bg-transparent border-bottom">
               <h5 class="mb-0 text-center text-primary">{{ this.$trans('Documents') }}</h5>
@@ -152,21 +154,6 @@
               <DocumentsComponent
                 :equipment="equipment"
                 :is-view="true"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Col 5: Insights -->
-        <div class="col-12 col-xl-12 col-xxl-12 mb-4">
-          <div class="card border-0 shadow-sm h-100">
-            <div class="card-header py-3 bg-transparent border-bottom">
-              <h5 class="mb-0 text-center text-primary">{{ this.$trans('Insights') }}</h5>
-            </div>
-            <div class="card-body">
-              <OrderStats
-                :data-in="statsData"
-                ref="order-stats"
               />
             </div>
           </div>
@@ -183,7 +170,6 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import SearchModal from '@/components/SearchModal.vue'
-import OrderStats from "@/components/OrderStats";
 
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import {
@@ -211,7 +197,6 @@ export default {
     ButtonLinkSearch,
     OrderTableInfo,
     SearchModal,
-    OrderStats,
   },
   extends: equipmentViewMixin,
   setup(props, ctx) {
@@ -277,5 +262,19 @@ span.space {
   background-color: rgb(241, 249, 249);
   padding: 1rem;
   border-radius: 0.25rem;
+}
+
+/* Fix Order List Padding and Overflow */
+.order-list-container {
+  overflow-x: auto;
+  width: 100%;
+}
+.order-list :deep(li) {
+  padding-left: 0;
+  padding-right: 0;
+}
+.order-list :deep(.listing-item) {
+  padding-left: 0;
+  padding-right: 0;
 }
 </style>
