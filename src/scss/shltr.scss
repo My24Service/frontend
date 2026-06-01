@@ -37,14 +37,10 @@ $font-size-base: 0.9rem;
       > .listing-item {
         padding-left: 0;
         padding-right: 0;
-        grid-template-columns: max-content repeat(6, 1fr);
+        grid-template-columns: max-content repeat(6, auto);
 
         > :first-child {
-          min-width: auto;
-        }
-
-        .order-status > span {
-          min-width: fit-content;
+          min-width: unset;
         }
       }
     }
