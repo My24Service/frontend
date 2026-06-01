@@ -23,6 +23,35 @@ $font-size-base: 0.9rem;
 @import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
 @import "./shared.scss";
 
+
+/* Fix Order List Padding and Overflow */
+.order-list-container {
+  overflow-x: auto;
+  width: 100%;
+
+  .listing.order-list {
+    li {
+      padding-left: 0;
+      padding-right: 0;
+
+      > .listing-item {
+        padding-left: 0;
+        padding-right: 0;
+        grid-template-columns: max-content repeat(6, 1fr);
+
+        > :first-child {
+          min-width: auto;
+        }
+
+        .order-status > span {
+          min-width: fit-content;
+        }
+      }
+    }
+  }
+}
+
+
 table#equipment-table {
   thead th {
     text-transform: none;

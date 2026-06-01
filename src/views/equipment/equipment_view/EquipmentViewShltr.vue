@@ -108,7 +108,7 @@
         </div>
 
         <!-- Col 3: Orders -->
-        <div class="col-12 col-xl-12 col-xxl-9 mb-4">
+        <div class="col-12 mb-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 bg-transparent border-bottom d-flex justify-content-between align-items-center">
               <div></div>
@@ -145,7 +145,7 @@
         </div>
 
         <!-- Col 4: Documents -->
-        <div class="col-12 col-xl-12 col-xxl-3 mb-4">
+        <div class="col-12 mb-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 bg-transparent border-bottom">
               <h5 class="mb-0 text-center text-primary">{{ this.$trans('Documents') }}</h5>
@@ -262,19 +262,5 @@ span.space {
   background-color: rgb(241, 249, 249);
   padding: 1rem;
   border-radius: 0.25rem;
-}
-
-/* Fix Order List Padding and Overflow */
-.order-list-container {
-  overflow-x: auto;
-  width: 100%;
-}
-.order-list :deep(li) {
-  padding-left: 0;
-  padding-right: 0;
-}
-.order-list :deep(.listing-item) {
-  padding-left: 0;
-  padding-right: 0;
 }
 </style>
