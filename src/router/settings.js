@@ -193,7 +193,7 @@ export default [
           'app-subnav': {}
         },
         props: {
-          'app-content': route => ({...route.params, from_settings: true}),
+          'app-content': route => ({...route.params}),
           'app-subnav': {}
         },
       },
@@ -205,7 +205,7 @@ export default [
           'app-subnav': {}
         },
         props: {
-          'app-content': {from_settings: true},
+          'app-content': {},
           'app-subnav': {}
         },
       },
@@ -217,7 +217,20 @@ export default [
           'app-subnav': {}
         },
         props: {
+          'app-content': route => ({...route.params, from_settings: true}),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
+        name: 'settings-my-branch',
+        path: '/settings/branches/form/my',
+        props: {
           'app-content': route => ({...route.params}),
+          'app-subnav': {}
+        },
+        components: {
+          'app-content': BranchForm,
           'app-subnav': {}
         },
       },

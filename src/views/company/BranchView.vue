@@ -10,12 +10,12 @@
             </h3>
             <router-link
               v-if="!branchEmployeeBranch"
-            :to="{name: 'company-branch-edit', params: {pk: pk}}"
+            :to="{name: linkEdit, params: {pk: pk}}"
             class="btn"
             >{{ $trans("Edit branch") }}</router-link>
             <router-link
               v-if="branchEmployeeBranch"
-              :to="{name: 'company-my-branch'}"
+              :to="{name: linkMyBranch}"
               class="btn"
             >{{ $trans("Edit branch") }}</router-link>
           </div>
@@ -200,7 +200,7 @@ import OrderStats from "../../components/OrderStats";
 
 import BranchCard from '../../components/BranchCard.vue'
 
-import {BranchService, BranchModel} from '@/models/company/Branch'
+import {BranchService} from '@/models/company/Branch'
 import {OrderService} from '@/models/orders/Order'
 import {LocationService} from "@/models/equipment/location";
 import {EquipmentService} from "@/models/equipment/equipment";
@@ -225,7 +225,30 @@ export default {
     SearchModal,
     OrderStats,
     BranchCard
-},
+  },
+  computed: {
+    linkAdd() {
+      if (this.from_settings) {
+        return 'settings-branch-add'
+      }
+
+      return 'company-branch-add'
+    },
+    linkEdit() {
+      if (this.from_settings) {
+        return 'settings-branch-edit'
+      }
+
+      return 'company-branch-edit'
+    },
+    linkMyBranch() {
+      if (this.from_settings) {
+        return 'settings-my-branch'
+      }
+
+      return 'company-my-branch'
+    },
+  },
   data() {
     return {
       currentPage: 1,
@@ -276,6 +299,10 @@ export default {
       type: [String, Number],
       default: null
     },
+    from_settings: {
+      type: Boolean,
+      default: false
+    }
   },
   watch: {
     currentPage: function(val) {
