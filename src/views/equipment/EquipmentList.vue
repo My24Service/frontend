@@ -86,7 +86,7 @@
 
       <b-table
         id="equipment-table"
-        :small="true"
+        :small="!isShltrTheme"
         :busy='isLoading'
         :fields="equipmentFields"
         :items="equipmentObjects"
@@ -224,6 +224,9 @@ export default {
       } else {
         return 'customers-equipment-add'
       }
+    },
+    isShltrTheme() {
+      return document.documentElement.classList.contains('theme-shltr')
     },
   },
   data() {
