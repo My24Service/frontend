@@ -13,6 +13,12 @@ import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
 import BranchList from "@/views/company/BranchList.vue";
 import BranchForm from "@/views/company/BranchForm.vue";
 import BranchView from "@/views/company/BranchView.vue";
+import EquipmentList from "@/views/equipment/EquipmentList.vue";
+import EquipmentForm from "@/views/equipment/EquipmentForm.vue";
+import EquipmentView from "@/views/equipment/EquipmentView.vue";
+import LocationList from "@/views/equipment/LocationList.vue";
+import LocationForm from "@/views/equipment/LocationForm.vue";
+import LocationView from "@/views/equipment/LocationView.vue";
 
 export default [
   {
@@ -243,6 +249,124 @@ export default [
         },
         components: {
           'app-content': BranchForm,
+          'app-subnav': {}
+        },
+      },
+      // equipment
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'settings-equipment-list',
+        path: '/settings/equipment',
+        components: {
+          'app-content': EquipmentList,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': {from_settings: true},
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'settings-equipment-edit',
+        path: '/settings/equipment/form/:pk',
+        components: {
+          'app-content': EquipmentForm,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': route => ({
+            ...route.params,
+            from_settings: true
+          }),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'settings-equipment-view',
+        path: '/settings/equipment/:pk',
+        components: {
+          'app-content': EquipmentView,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': route => ({
+            ...route.params,
+            from_settings: true
+          }),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'settings-equipment-add',
+        path: '/settings/equipment/form',
+        components: {
+          'app-content': EquipmentForm,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': {from_settings: true},
+          'app-subnav': {}
+        },
+      },
+      //locations
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'equipment-location-list',
+        path: '/equipment/locations',
+        components: {
+          'app-content': LocationList,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': {from_settings: true},
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'settings-location-edit',
+        path: '/settings/locations/form/:pk',
+        components: {
+          'app-content': LocationForm,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': route => ({
+            ...route.params,
+            from_settings: true
+          }),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'settings-location-view',
+        path: '/settings/locations/:pk',
+        components: {
+          'app-content': LocationView,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': route => ({
+            ...route.params,
+            from_settings: true
+          }),
+          'app-subnav': {}
+        },
+      },
+      {
+        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        name: 'settings-location-add',
+        path: '/settings/locations/form',
+        components: {
+          'app-content': LocationForm,
+          'app-subnav': {}
+        },
+        props: {
+          'app-content': {from_settings: true},
           'app-subnav': {}
         },
       },

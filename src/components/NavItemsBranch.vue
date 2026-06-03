@@ -15,13 +15,13 @@
     <b-nav-item :to="{name: 'equipment-equipment-list'}">
       <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment')"></IBiWrenchAdjustableCircleFill>
       <IBiWrenchAdjustableCircle v-else></IBiWrenchAdjustableCircle>
-      {{ $trans('Techniek') }}
+      {{ $trans('Technology') }}
     </b-nav-item>
 
     <b-nav-item :to="{name: 'equipment-location-list'}">
       <IBiBuildingsFill v-if="!isActive('location')"></IBiBuildingsFill>
       <IBiBuildings v-else></IBiBuildings>
-      {{ $trans('Facilitair') }}
+      {{ $trans('Facilities') }}
     </b-nav-item>
   </div>
 </template>

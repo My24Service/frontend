@@ -35,6 +35,20 @@
       {{ $trans('Branches') }}
     </b-nav-item>
 
+    <b-nav-item
+      :to="{name: 'settings-equipment'}"
+      :active="isActive('equipment')"
+    >
+      {{ $trans('Technology') }}
+    </b-nav-item>
+
+    <b-nav-item
+      :to="{name: 'settings-locations'}"
+      :active="isActive('locations')"
+    >
+      {{ $trans('Facilities') }}
+    </b-nav-item>
+
   </div>
 </template>
 
