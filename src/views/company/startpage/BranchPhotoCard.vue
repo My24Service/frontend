@@ -14,7 +14,7 @@
               :class="{ active: activeTab === 'adres' }"
               href="#"
               @click.prevent="activeTab = 'adres'"
-            >Adres</a>
+            >{{ $trans('Address') }}</a>
           </li>
           <li class="nav-item" role="presentation">
             <a
@@ -22,7 +22,7 @@
               :class="{ active: activeTab === 'informatie' }"
               href="#"
               @click.prevent="activeTab = 'informatie'"
-            >Informatie</a>
+            >{{ $trans('Information') }}</a>
           </li>
         </ul>
 

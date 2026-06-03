@@ -211,7 +211,7 @@
                       size="sm"
                       type="button"
                       :variant="getTlProduct(material) ? 'success' : 'danger'"
-                      :title="$trans('Koppel materiaal aan product')"
+                      :title="$trans('Link material to product')"
                     >
                       <b-spinner small v-if="materialUpdating"></b-spinner>
                       <span v-if="getTlProduct(material)">Bekijk</span>

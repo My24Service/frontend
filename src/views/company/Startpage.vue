@@ -30,7 +30,7 @@
               />
             </div>
             <div class="col-lg-9">
-              <DashboardBlock v-if="!isLoading" :title="$trans('Logboek')" iconName="card-list">
+              <DashboardBlock v-if="!isLoading" :title="$trans('Log')" iconName="card-list">
                 <b-table
                     id="activity-table"
                     hover

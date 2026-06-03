@@ -38,7 +38,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Gripp API koppeling')"
+            v-bind:label="$trans('Gripp API connection')"
             label-for="api_enabled">
             <BFormCheckbox
               id="api_enabled"
@@ -64,7 +64,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Webhook wachtwoord')"
+            v-bind:label="$trans('Webhook password')"
             label-for="webhook_password">
             <BFormInput
               id="webhook_password"
@@ -92,7 +92,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Werknemer (numeriek)')"
+            v-bind:label="$trans('Employee (numeric)')"
             label-for="default_employee">
             <BFormInput
               id="default_employee"
@@ -105,7 +105,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Projectfase voor importeren (numeriek)')"
+            v-bind:label="$trans('Project phase for import (numeric)')"
             label-for="project_phase_match">
             <BFormInput
               id="project_phase_match"
@@ -119,7 +119,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Projectfase na exporteren (numeriek)')"
+            v-bind:label="$trans('Project phase after export (numeric)')"
             label-for="project_phase_workorder_signed">
             <BFormInput
               id="project_phase_workorder_signed"
@@ -134,7 +134,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Taaktype voor werkuren (numeriek)')"
+            v-bind:label="$trans('Task type for work hours (numeric)')"
             label-for="tasktype_hours">
             <BFormInput
               id="tasktype_hours"
@@ -149,7 +149,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Taaktype voor reisuren (numeriek)')"
+            v-bind:label="$trans('Task type for travel hours (numeric)')"
             label-for="tasktype_travel">
             <BFormInput
               id="tasktype_travel"

@@ -17,10 +17,10 @@
     <b-modal
       id="delete-tokens"
       ref="delete-tokens"
-      :title="$trans('Tokens verwijderen?')"
+      :title="$trans('Delete tokens?')"
       @ok="doEmptyTokens"
     >
-      <p class="my-4">{{ $trans('Weet u zeker dat u de tokens wilt verwijderen?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to delete the tokens?') }}</p>
     </b-modal>
 
     <header>
@@ -41,7 +41,7 @@
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
-                  :label="$trans('Gripp API koppeling')"
+                  :label="$trans('Gripp API connection')"
                   label-for="api_enabled">
                   <b-form-checkbox
                     id="api_enabled"
@@ -66,10 +66,10 @@
               <div class="section rounded-sm revert">
                 <h5>Verbinding</h5>
                 <div class="bg-success p-2 rounded-sm text-white" v-if="settings.has_tokens">
-                  {{ $trans('Actief')}}
+                  {{ $trans('Active')}}
                 </div>
                 <div v-else class="bg-warning p-2 rounded-sm">
-                  {{ $trans('Niet actief')}}
+                  {{ $trans('Not active')}}
                 </div>
 
                 <div class="btn-group d-flex justify-content-end">
@@ -81,7 +81,7 @@
                       class="btn btn-danger m-1"
                       @click="emptyTokens"
                     >
-                      {{ $trans('Verwijder') }}
+                      {{ $trans('Delete') }}
                     </button>
                   </div>
                   <div
@@ -92,7 +92,7 @@
                       class="btn btn-primary m-1"
                       @click="authorize"
                     >
-                      {{ $trans('Verleen toegang') }}
+                      {{ $trans('Grant access') }}
                     </button>
                   </div>
 
@@ -148,7 +148,7 @@
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
-                  v-bind:label="$trans('Rekening')"
+                  v-bind:label="$trans('Account')"
                   label-for="product_category_uuid">
                   <div class="d-flex">
                     <BFormSelect
