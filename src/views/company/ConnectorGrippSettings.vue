@@ -166,10 +166,10 @@
       <h4 class="mt-2">{{ $trans('Automation settings') }}</h4>
       <p>Deze gegevens moeten aan de kant van Gripp worden geconfigureerd bij de Automation opties. Dit zorgt ervoor
       dat My24Service opdrachtgegevens kan ophalen op het moment dat deze wijzigen.</p>
-      <b-alert variant="warning" v-if="!hasWebhookPassword">Er is geen webhook wachtwoord ingesteld. Voer hierboven de gegevens in en sla deze op.</b-alert>
+      <b-alert variant="warning" v-if="!hasWebhookPassword">{{ $trans('No webhook password is set. Enter the details above and save them.') }}</b-alert>
       <table class="data-table" v-if="hasWebhookPassword" style="width:100%;">
-        <tr><td>{{ $trans('Name') }}: </td><td><strong>My24Service verzoek</strong></td></tr>
-        <tr><td>Wanneer: </td><td><strong>{{ $trans('Order') }}</strong> {{ $trans('is') }} <strong>{{ $trans('modified') }}</strong></td></tr>
+        <tr><td>{{ $trans('Name') }}: </td><td><strong>{{ $trans('My24Service request') }}</strong></td></tr>
+        <tr><td>{{ $trans('When') }}: </td><td><strong>{{ $trans('Order') }}</strong> {{ $trans('is') }} <strong>{{ $trans('modified') }}</strong></td></tr>
         <tr><td>{{ $trans('Action') }}: </td><td><strong>{{ $trans('Web request') }}</strong></td></tr>
         <tr><td>{{ $trans('Request method') }}:</td><td><strong>POST</strong></td></tr>
         <tr><td>Headers:</td><td><strong>User-Agent: My24Service/Gripp<br/>Content-Type: application/json</strong></td></tr>

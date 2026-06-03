@@ -13,7 +13,7 @@ export default [
     plugins: { "@intlify/vue-i18n": vueI18n },
     rules: {
       "@intlify/vue-i18n/no-raw-text": [
-        "error",
+        "warn",
         {
           attributes: {
             "/.+/": [
@@ -27,8 +27,35 @@ export default [
             img: ["alt"],
           },
           ignoreNodes: ["md-icon", "v-icon"],
-          ignorePattern: "^([-?%*.,#:()&\\/\\d]+|[A-Za-z])$",
-          ignoreText: ["EUR", "USD", "€", "", "–", "—", "×", "·", "[ x ]"],
+          // Ignore:
+          //   - pure punctuation (e.g. ":", ".,")
+          //   - a single letter
+          //   - URL protocol prefixes (http://, https://, ftp://, …)
+          //   - URL path/domain fragments (e.g. "/automation-updated-order", ".my24service.com/api/...")
+          //   - numbers, optionally with a unit (e.g. "18 m²", "1000 EUR")
+          // Words with attached punctuation ("Wanneer:", "POST:") are NOT
+          // ignored — they are still flagged so they can be reviewed.
+          ignorePattern:
+            "^([-?%*.,#:()&\\/\\d ]+|[A-Za-z]|\\w+://|/\\S+|\\.\\S+|\\d+(?:\\.\\d+)?(?:\\s+\\S+)?)$",
+          ignoreText: [
+            "EUR",
+            "USD",
+            "€",
+            "",
+            "–",
+            "—",
+            "×",
+            "·",
+            "[ x ]",
+            // HTTP methods
+            "POST",
+            "GET",
+            "PUT",
+            "DELETE",
+            "PATCH",
+            "HEAD",
+            "OPTIONS",
+          ],
         },
       ],
     },

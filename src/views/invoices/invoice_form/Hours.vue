@@ -100,7 +100,7 @@
               v-if="teamleaderHours"
             >
               <p class="flex">
-                Teamleader:&nbsp;
+                {{ $trans('Teamleader') }}:&nbsp;
                 <PriceInput
                   v-model="activity.price"
                   :currency="activity.price_currency"

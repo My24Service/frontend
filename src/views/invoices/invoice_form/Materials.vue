@@ -87,7 +87,7 @@
             </div>
             <p class="flex">
               <span v-if="getTlProduct(material.material_id)">
-                Teamleader:&nbsp;
+                {{ $trans('Teamleader') }}:&nbsp;
               </span>
               <span v-else>{{ $trans('not linked') }}</span>
               <PriceInput

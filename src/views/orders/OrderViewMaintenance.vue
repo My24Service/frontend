@@ -331,10 +331,10 @@
                 </div>
               </template>
               <template #cell(reference)="data">
-                {{ data.item.reference ? data.item.reference : '(n/a)'  }}
+                {{ data.item.reference ? data.item.reference : $trans('(n/a)')  }}
               </template>
               <template #cell(description)="data">
-                {{ data.item.description ? data.item.description : '(n/a)'  }}
+                {{ data.item.description ? data.item.description : $trans('(n/a)')  }}
               </template>
               <template #cell(vat)="data">
                 {{ data.item.vat_dinero.toFormat('$0.00') }}
