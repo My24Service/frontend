@@ -188,8 +188,8 @@
                   </span>
                   <span v-else class="text-muted">-</span>
                 </template>
-                <template #cell(workorder_url)="data">
-                  <BLink :href="data.item.workorder_url" target="_blank">
+                <template #cell(url)="data">
+                  <BLink :to="{ name: 'workorder-view', params: { uuid: data.item.uuid } }" target="_blank">
                     <i class="bi bi-box-arrow-up-right"></i>
                   </BLink>
                 </template>
@@ -267,7 +267,7 @@ export default {
         {key: 'order_id', label: this.$trans('Order'), sortable: true},
         {key: 'start_date', label: this.$trans('Date'), sortable: true},
         {key: 'description', label: this.$trans('Description'), sortable: false},
-        {key: 'workorder_url', label: this.$trans('Link')},
+        {key: 'url', label: this.$trans('Link')},
       ],
     }
   },
