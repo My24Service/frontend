@@ -304,7 +304,11 @@
       <div class="row dashboard_row">
         <div class="col-12">
           <DashboardBlock v-if="!isLoading" :title="$trans('Work Orders')" iconName="tools">
+            <p v-if="!workOrders.length">
+              <i>{{ $trans("No work orders") }}</i>
+            </p>
             <b-table
+              v-else
               id="workorders-table"
               hover
               small

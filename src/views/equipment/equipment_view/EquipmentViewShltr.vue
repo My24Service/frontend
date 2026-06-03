@@ -144,6 +144,60 @@
           </div>
         </div>
 
+        <!-- Col 5: Workorders -->
+        <div class="col-12 mb-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header py-3 bg-transparent border-bottom">
+              <h5 class="mb-0 text-center text-primary">{{ this.$trans('Work Orders') }}</h5>
+            </div>
+            <div class="card-body">
+              <p v-if="!equipmentWorkOrders.length">
+                <i>{{ $trans("No work orders") }}</i>
+              </p>
+              <b-table
+                v-else
+                id="workorders-table"
+                hover
+                small
+                :busy="isWorkordersLoading"
+                :fields="workOrderFields"
+                :items="equipmentWorkOrders"
+                responsive="md"
+                class="data-table"
+                sort-icon-left
+              >
+                <template #table-busy>
+                  <div class="text-center my-2">
+                    <br>
+                    <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+                    <strong>{{ $trans('Loading...') }}</strong>
+                    <br>
+                  </div>
+                </template>
+                <template #cell(order_id)="data">
+                  <span>{{ data.item.order_id }}</span>
+                </template>
+                <template #cell(start_date)="data">
+                  <small>{{ data.item.start_date }}</small>
+                </template>
+                <template #cell(description)="data">
+                  <span v-if="data.item.orderlines && data.item.orderlines.length">
+                    {{ data.item.orderlines[0].equipment_view?.name || data.item.orderlines[0].product }}
+                    <span v-if="data.item.orderlines[0].location"> - {{ data.item.orderlines[0].location }}</span>
+                    <span v-else-if="data.item.orderlines[0].equipment_location_view?.name"> - {{ data.item.orderlines[0].equipment_location_view.name }}</span>
+                  </span>
+                  <span v-else class="text-muted">-</span>
+                </template>
+                <template #cell(workorder_url)="data">
+                  <BLink :href="data.item.workorder_url" target="_blank">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </BLink>
+                </template>
+              </b-table>
+            </div>
+          </div>
+        </div>
+
         <!-- Col 4: Documents -->
         <div class="col-12 mb-4">
           <div class="card border-0 shadow-sm h-100">
@@ -181,6 +235,7 @@ import {
   BTabs
 } from "bootstrap-vue-next";
 
+import orderModel from '@/models/orders/Order.js'
 import equipmentViewMixin from './equipmentViewMixin.js'
 
 export default {
@@ -202,6 +257,34 @@ export default {
   setup(props, ctx) {
     return {
       ...equipmentViewMixin.setup(props, ctx)
+    }
+  },
+  data() {
+    return {
+      equipmentWorkOrders: [],
+      isWorkordersLoading: false,
+      workOrderFields: [
+        {key: 'order_id', label: this.$trans('Order'), sortable: true},
+        {key: 'start_date', label: this.$trans('Date'), sortable: true},
+        {key: 'description', label: this.$trans('Description'), sortable: false},
+        {key: 'workorder_url', label: this.$trans('Link')},
+      ],
+    }
+  },
+  async created() {
+    await this.loadEquipmentWorkOrders()
+  },
+  methods: {
+    async loadEquipmentWorkOrders() {
+      this.isWorkordersLoading = true
+      try {
+        this.equipmentWorkOrders = await orderModel.getWorkorders(this.pk)
+      } catch (error) {
+        console.error('error fetching equipment workorders', error)
+        this.equipmentWorkOrders = []
+      } finally {
+        this.isWorkordersLoading = false
+      }
     }
   }
 }
