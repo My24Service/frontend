@@ -165,6 +165,12 @@ class OrderService extends BaseModel {
     return this.axios.get(`${this.url}autocomplete/?q=${query}`).then(response => response.data)
   }
 
+  async getWorkorders() {
+    const url = `/order/workorders-data/?page_size=5`
+    const response = await this.axios.get(url)
+    return response.data?.results ?? []
+  }
+
   getWorkorderData(uuid) {
     return this.axios.get(`/order/workorder-data/${uuid}/`).then(response => response.data)
   }

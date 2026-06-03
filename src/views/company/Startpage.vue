@@ -300,6 +300,54 @@
         </div>
       </div>
     </div>
+    <div class="section dashboard_section mt-2">
+      <div class="row dashboard_row">
+        <div class="col-12">
+          <DashboardBlock v-if="!isLoading" :title="$trans('Work Orders')" iconName="tools">
+            <b-table
+              id="workorders-table"
+              hover
+              small
+              :busy='isLoading'
+              :fields="workOrderFields"
+              :items="workOrders"
+              responsive="md"
+              class="data-table"
+              sort-icon-left>
+              <template #table-busy>
+                <div class="text-center my-2">
+                  <br>
+                  <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
+                  <strong>{{ $trans('Loading...') }}</strong>
+                  <br>
+                </div>
+              </template>
+              <template #cell(id)="data">
+                <BLink :to="{ name: 'order-view', params: { pk: data.item.id } }">
+                  <span>{{ data.item.order_id }}</span>
+                </BLink>
+              </template>
+              <template #cell(start_date)="data">
+                <small>{{ data.item.start_date }}</small>
+              </template>
+              <template #cell(description)="data">
+                <span v-if="data.item.orderlines && data.item.orderlines.length">
+                  {{ data.item.orderlines[0].equipment_view?.name || data.item.orderlines[0].product }}
+                  <span v-if="data.item.orderlines[0].location"> - {{ data.item.orderlines[0].location }}</span>
+                  <span v-else-if="data.item.orderlines[0].equipment_location_view?.name"> - {{ data.item.orderlines[0].equipment_location_view.name }}</span>
+                </span>
+                <span v-else class="text-muted">-</span>
+              </template>
+              <template #cell(url)="data">
+                <BLink :to="{ name: 'workorder-view', params: { uuid: data.item.uuid } }" target="_blank">
+                  <i class="bi bi-box-arrow-up-right"></i>
+                </BLink>
+              </template>
+            </b-table>
+          </DashboardBlock>
+        </div>
+      </div>
+    </div>
     <div class="section dashboard_section mt-2 pb-4">
       <div class="row dashboard_row">
         <div class="col-12">
@@ -326,6 +374,7 @@ import {$trans} from "@/utils";
 import {NO_IMAGE_URL} from "@/constants";
 import memberModel from "@/models/member/Member";
 import activityModel from '@/models/company/Activity.js'
+import orderModel from '@/models/orders/Order.js'
 import {DocumentService, LocationDocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 import moment from 'moment/min/moment-with-locales'
@@ -361,11 +410,18 @@ export default {
         purchaseInvoiceService: new PurchaseInvoiceService(),
         equipmentDocuments: [],
         locationDocuments: [],
+        workOrders: [],
         monthlyCostOverview: [],
         documentFields: [
           {key: 'name', label: this.$trans('Document'), sortable: true},
           {key: 'created', label: this.$trans('Date'), sortable: true},
           {key: 'file', label: this.$trans('File')},
+        ],
+        workOrderFields: [
+          {key: 'id', label: this.$trans('Order'), sortable: true},
+          {key: 'start_date', label: this.$trans('Date'), sortable: true},
+          {key: 'description', label: this.$trans('Description'), sortable: false},
+          {key: 'url', label: this.$trans('Link')},
         ],
       companyLog: '',
       isLoading: false,
@@ -456,6 +512,9 @@ export default {
         this.locationDocumentService.setParentBranchId(this.branch.id)
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
+
+        this.workOrders = await orderModel.getWorkorders()
+        console.log("this.workOrders:", this.workOrders)
 
         this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)
 
