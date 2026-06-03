@@ -300,7 +300,7 @@ export default {
     this.memberNewDataSocket.setOnmessageHandler(this.onContractChange)
     this.memberNewDataSocket.getSocket()
   },
-  async beforeDestroy() {
+  async beforeUnmount() {
     await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
     this.memberNewDataSocket.removeOnmessageHandler()
     this.memberNewDataSocket.removeSocket()

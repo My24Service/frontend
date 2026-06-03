@@ -61,7 +61,7 @@ export default {
     this.checkToken()
     this.intervalIdToken = setInterval(this.checkToken, 1000*60*this.intervalMinutes)
   },
-  beforeDestroy() {
+  beforeUnmount() {
     clearInterval(this.intervalIdToken)
   }
 }
