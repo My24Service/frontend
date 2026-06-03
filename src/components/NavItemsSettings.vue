@@ -36,14 +36,14 @@
     </b-nav-item>
 
     <b-nav-item
-      :to="{name: 'settings-equipment'}"
+      :to="{name: 'settings-equipment-list'}"
       :active="isActive('equipment')"
     >
       {{ $trans('Technology') }}
     </b-nav-item>
 
     <b-nav-item
-      :to="{name: 'settings-locations'}"
+      :to="{name: 'equipment-location-list'}"
       :active="isActive('locations')"
     >
       {{ $trans('Facilities') }}
