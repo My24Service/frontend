@@ -235,6 +235,11 @@ export default [
         },
       },
       // filters
-      ...createUserFilterRoutes('settings-order', 'settings', USER_FILTER_TYPE_ORDER),
+      ...createUserFilterRoutes(
+        'settings-order',
+        'settings',
+        USER_FILTER_TYPE_ORDER,
+        true
+      ),
     ]
 }]

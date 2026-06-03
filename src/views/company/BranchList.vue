@@ -63,14 +63,11 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-
         <template #cell(id)="data">
-
           <router-link :to="{name: linkView, params: {pk: data.item.id}}">
             {{ data.item.name }}, {{ data.item.city }}, {{ data.item.country_code }}
           </router-link>
         </template>
-
         <template #cell(contact)="data">
           <span v-if="data.item.contact && data.item.contact.trim() !== ''">
             <span v-if="data.item.email">

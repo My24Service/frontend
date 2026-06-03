@@ -31,7 +31,10 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <router-link :to="{name: `${route_name_part}-filter-add`}" class="btn">
+          <router-link
+            :to="{name: linkAdd}"
+            class="btn btn-primary"
+          >
             {{$trans('Add filter')}}
           </router-link>
         </BButton-toolbar>
@@ -49,7 +52,7 @@
         class="data-table"
       >
         <template #cell(name)="data">
-          <router-link :to="{name: `${route_name_part}-filter-edit`, params: {pk: data.item.id}}">
+          <router-link :to="{name: linkEdit, params: {pk: data.item.id}}">
             {{ data.item.name }}
           </router-link>
         </template>
@@ -118,6 +121,26 @@ export default {
     route_name_part: {
       type: [String],
       default: null
+    },
+    from_settings: {
+      type: Boolean,
+      default: false
+    },
+  },
+  computed: {
+    linkAdd() {
+      if (this.from_settings) {
+        return 'settings-order-filter-add'
+      }
+
+      return `${this.route_name_part}-filter-add`
+    },
+    linkEdit() {
+      if (this.from_settings) {
+        return 'settings-order-filter-edit'
+      }
+
+      return `${this.route_name_part}-filter-edit`
     },
   },
   data() {

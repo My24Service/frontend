@@ -8,7 +8,7 @@
           <span v-else>{{ $trans('Edit filter') }}</span>
         </h3>
         <div class="flex-columns">
-          <BButton @click="cancelForm" type="button" variant="outline-secondary">
+          <BButton @click="cancelForm" type="button" variant="secondary">
             {{ $trans('Cancel') }}</BButton>
           <BButton @click="submitForm" type="button" variant="primary">
             {{ $trans('Save') }}</BButton>

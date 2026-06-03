@@ -1,22 +1,37 @@
 <template>
   <div class="nav-items branch-settings" ref="nav-items" v-if="userInfo.user">
-    <b-nav-item :to="{name: 'settings-company'}">
+    <b-nav-item
+      :to="{name: 'settings-company'}"
+      :active="isActive('settings-company')"
+    >
       {{ $trans('Company') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'settings-users-planningusers'}">
+    <b-nav-item
+      :to="{name: 'settings-users-planningusers'}"
+      :active="isActive('settings-company')"
+    >
       {{ $trans('Users') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'settings-statuscode-list'}">
+    <b-nav-item
+      :to="{name: 'settings-statuscode-list'}"
+      :active="isActive('statuscodes')"
+    >
       {{ $trans('Statuses') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'settings-order-filter-list'}">
+    <b-nav-item
+      :to="{name: 'settings-order-filter-list'}"
+      :active="isActive('filter')"
+    >
       {{ $trans('Filters') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'settings-branches'}">
+    <b-nav-item
+      :to="{name: 'settings-branches'}"
+      :active="isActive('branches')"
+    >
       {{ $trans('Branches') }}
     </b-nav-item>
 
@@ -54,7 +69,7 @@ export default {
     isActive(item, subsection) {
       const parts = this.$route.path.split('/')
       if(!subsection) {
-        return parts[1] === item
+        return parts[2] === item
       } else {
         return parts[parts.length] === item
       }
