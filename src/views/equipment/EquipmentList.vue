@@ -200,6 +200,12 @@ export default {
     Pagination,
     IconLinkPlus,
   },
+  props: {
+    from_settings: {
+      type: Boolean,
+      default: false,
+    }
+  },
   computed: {
     service() {
       return this.equipmentService
@@ -246,7 +252,7 @@ export default {
         {key: 'brand', label: $trans('Brand'), sortable: true},
         {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons', label: ''}
+        ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       equipmentFieldsBranchPlanning: [
         {key: 'name', label: $trans('Equipment'), sortable: true},
@@ -258,7 +264,7 @@ export default {
         {key: 'brand', label: $trans('Brand'), sortable: true},
         {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons', label: ''}
+        ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       equipmentFieldsCustomerNonPlanning: [
         {key: 'name', label: $trans('Equipment'), sortable: true},
@@ -267,7 +273,7 @@ export default {
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
         {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons', label: ''}
+        ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       equipmentFieldsBranchNonPlanning: [
         {key: 'name', label: $trans('Equipment'), sortable: true},
@@ -276,7 +282,7 @@ export default {
         {key: 'num_orders', label: $trans('Orders'), sortable: true},
         {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons', label: ''}
+        ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       equipment_pk: null,
       state: new EquipmentStateModel({}),
