@@ -44,7 +44,7 @@
               id="api_enabled"
               size="sm"
               v-model="settings.gripp_api_enabled">
-              Actief
+              {{ $trans('Active') }}
             </BFormCheckbox>
           </BFormGroup>
 
@@ -163,17 +163,17 @@
         </div>
       </b-form>
 
-      <h4 class="mt-2">Automation instellingen</h4>
+      <h4 class="mt-2">{{ $trans('Automation settings') }}</h4>
       <p>Deze gegevens moeten aan de kant van Gripp worden geconfigureerd bij de Automation opties. Dit zorgt ervoor
       dat My24Service opdrachtgegevens kan ophalen op het moment dat deze wijzigen.</p>
       <b-alert variant="warning" v-if="!hasWebhookPassword">Er is geen webhook wachtwoord ingesteld. Voer hierboven de gegevens in en sla deze op.</b-alert>
       <table class="data-table" v-if="hasWebhookPassword" style="width:100%;">
-        <tr><td>Naam: </td><td><strong>My24Service verzoek</strong></td></tr>
-        <tr><td>Wanneer: </td><td><strong>Opdracht</strong> wordt <strong>gewijzigd</strong></td></tr>
-        <tr><td>Actie: </td><td><strong>Web verzoek</strong></td></tr>
-        <tr><td>Verzoek methode:</td><td><strong>POST</strong></td></tr>
+        <tr><td>{{ $trans('Name') }}: </td><td><strong>My24Service verzoek</strong></td></tr>
+        <tr><td>Wanneer: </td><td><strong>{{ $trans('Order') }}</strong> {{ $trans('is') }} <strong>{{ $trans('modified') }}</strong></td></tr>
+        <tr><td>{{ $trans('Action') }}: </td><td><strong>{{ $trans('Web request') }}</strong></td></tr>
+        <tr><td>{{ $trans('Request method') }}:</td><td><strong>POST</strong></td></tr>
         <tr><td>Headers:</td><td><strong>User-Agent: My24Service/Gripp<br/>Content-Type: application/json</strong></td></tr>
-        <tr><td>Web adres:</td><td><code>https://{{member["companycode"]}}.my24service.com/api/connector/gripp/{{settings["gripp_webhook_password"]}}/automation-updated-order</code></td></tr>
+        <tr><td>{{ $trans('Web address') }}:</td><td><code>https://{{member["companycode"]}}.my24service.com/api/connector/gripp/{{settings["gripp_webhook_password"]}}/automation-updated-order</code></td></tr>
         <tr><td>Body:</td><td><code>{ "number": {nummer} }</code></td></tr>
       </table>
     </div>

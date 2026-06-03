@@ -37,7 +37,7 @@
           <ol class="m-2">
             <li>
               <div class="section rounded-sm revert">
-                <h5>API Actief</h5>
+                <h5>{{ $trans('API Active') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -47,7 +47,7 @@
                     id="api_enabled"
                     size="sm"
                     v-model="settings.api_enabled">
-                    Actief
+                    {{ $trans('Active') }}
                   </b-form-checkbox>
                 </b-form-group>
                 <div class="btn-group d-flex justify-content-end">
@@ -64,7 +64,7 @@
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Verbinding</h5>
+                <h5>{{ $trans('Connection') }}</h5>
                 <div class="bg-success p-2 rounded-sm text-white" v-if="settings.has_tokens">
                   {{ $trans('Active')}}
                 </div>
@@ -118,16 +118,16 @@
                     <button
                       class="btn btn-primary m-1"
                       @click="chooseDepartment"
-                    >Kies</button>
+                    >{{ $trans('Choose') }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Grootboekrekeningen</h5>
+                <h5>{{ $trans('General ledger accounts') }}</h5>
                 <div>
-                  {{ productCategories.length }} rekeningen aanwezig
+                  {{ productCategories.length }} {{ $trans('accounts present') }}
                 </div>
                 <div class="btn-group d-flex justify-content-end">
                   <div
@@ -137,14 +137,14 @@
                       :disabled="!isDepartmentOk"
                       class="btn btn-primary m-1"
                       @click="resetProductCategories()"
-                    >Ververs</button>
+                    >{{ $trans('Refresh') }}</button>
                   </div>
                 </div>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Rekening</h5>
+                <h5>{{ $trans('Account') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -169,7 +169,7 @@
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Product voor werkuren</h5>
+                <h5>{{ $trans('Product for work hours') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -189,14 +189,14 @@
                       class="btn btn-primary m-1"
                       @click="openWorkHoursProductChooserModal"
                       :disabled="!isDepartmentOk"
-                    >Kies</button>
+                    >{{ $trans("Choose") }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Product voor reisuren</h5>
+                <h5>{{ $trans('Product for travel hours') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -216,14 +216,14 @@
                       class="btn btn-primary m-1"
                       @click="openTravelHoursProductChooserModal"
                       :disabled="!isDepartmentOk"
-                    >Kies</button>
+                    >{{ $trans("Choose") }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Factuur template</h5>
+                <h5>{{ $trans('Invoice template') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -243,14 +243,14 @@
                       :disabled="!isDepartmentOk"
                       class="btn btn-primary m-1"
                       @click="chooseInvoiceTemplate"
-                    >Kies</button>
+                    >{{ $trans("Choose") }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>BTW-tarieven</h5>
+                <h5>{{ $trans('VAT rates') }}</h5>
                 <b-table
                   id="tax-rates-table"
                   small
@@ -261,7 +261,7 @@
                 >
                 </b-table>
                 <p v-if="!taxRates.length">
-                  Nog geen BTW-tarieven aanwezig
+                  {{ $trans('No VAT rates present yet') }}
                 </p>
                 <div class="btn-group d-flex justify-content-end">
                   <div
@@ -271,7 +271,7 @@
                       :disabled="!isDepartmentOk"
                       class="btn btn-primary m-1"
                       @click="resetTaxRates()"
-                    >Ververs</button>
+                    >{{ $trans("Refresh") }}</button>
                   </div>
                 </div>
               </div>
@@ -477,7 +477,7 @@ export default {
     async resetTaxRates() {
       let loader = this.loading.show();
       const response = await this.service.resetTaxRates(this.settings.department_uuid)
-      infoToast(this.create, "BTW-tarieven",
+      infoToast(this.create, this.$trans("VAT rates"),
         `${response.delete_result[0]} verwijderd, ${response.created} aangemaakt`)
       await this.fetchTaxRates()
       loader.hide()
@@ -494,8 +494,8 @@ export default {
     async resetProductCategories() {
       let loader = this.loading.show();
       const response = await this.service.resetProductCategories(this.settings.department_uuid)
-      infoToast(this.create, "Rekeningen",
-        `${response.delete_result[0]} verwijderd, ${response.created} aangemaakt`)
+      infoToast(this.create, this.$trans("Accounts"),
+        `${response.delete_result[0]} ${this.$trans('verwijderd')}, ${response.created} ${this.$trans('created')}`)
       await this.fetchProductCategories()
       loader.hide()
     },

@@ -72,7 +72,7 @@
                               <i class="bi bi-building-fill"></i>
                             </div>
                             <div>
-                                <h6 class="text-primary mt-2 fw-bold">Kantoor&shy;oppervlak vvo</h6>
+                                <h6 class="text-primary mt-2 fw-bold">{{ $trans('Office floor area gfa') }}</h6>
                             </div>
                         </div>
                         <div class="align-self-center">
@@ -112,7 +112,7 @@
                                 <i class="bi bi-p-square-fill"></i>
                             </div>
                             <div>
-                                <h6 class="text-primary mt-2 fw-bold">Parkeerplaatsen</h6>
+                                <h6 class="text-primary mt-2 fw-bold">{{ $trans('Parking spaces') }}</h6>
                             </div>
                         </div>
                         <div class="align-self-center">
@@ -132,7 +132,7 @@
                                 <i class="bi bi-pc-display-horizontal"></i>
                             </div>
                             <div>
-                                <h6 class="text-primary mt-2 fw-bold">m² vvo per werkplek</h6>
+                                <h6 class="text-primary mt-2 fw-bold">{{ $trans('m² gfa per workstation') }}</h6>
                             </div>
                         </div>
                         <div class="align-self-center">
@@ -152,7 +152,7 @@
                                 <i class="bi bi-people-fill"></i>
                             </div>
                             <div>
-                                <h6 class="text-primary mt-2 fw-bold">Werkplek per medewerker</h6>
+                                <h6 class="text-primary mt-2 fw-bold">{{ $trans('Workstation per employee') }}</h6>
                             </div>
                         </div>
                         <div class="align-self-center">
@@ -172,7 +172,7 @@
                                 <i class="bi bi-pc-display-horizontal"></i>
                             </div>
                             <div>
-                                <h6 class="text-primary mt-2 fw-bold">Werkplek per FTE</h6>
+                                <h6 class="text-primary mt-2 fw-bold">{{ $trans('Workstation per FTE') }}</h6>
                             </div>
                         </div>
                         <div class="align-self-center">
@@ -192,7 +192,7 @@
                                 <i class="bi bi-person-fill"></i>
                             </div>
                             <div>
-                                <h6 class="text-primary mt-2 fw-bold">m² vvo per mede&shy;werker</h6>
+                                <h6 class="text-primary mt-2 fw-bold">{{ $trans('m² gfa per employee') }}</h6>
                             </div>
                         </div>
                         <div class="align-self-center">
@@ -212,7 +212,7 @@
                                 <i class="bi bi-square-fill"></i>
                             </div>
                             <div>
-                                <h6 class="text-primary mt-2 fw-bold">m² vvo per FTE</h6>
+                                <h6 class="text-primary mt-2 fw-bold">{{ $trans('m² gfa per FTE') }}</h6>
                             </div>
                         </div>
                         <div class="align-self-center">
@@ -229,7 +229,7 @@
         <div class="col-lgl-6">
           <div class="row">
             <div class="col-lg-6">
-              <DashboardBlock v-if="!isLoading" title="Nieuwe documenten - Techniek" iconName="wrench-adjustable">
+              <DashboardBlock v-if="!isLoading" :title="$trans('New documents - Technical')" iconName="wrench-adjustable">
                 <b-table
                   id="equipment-documents-table"
                   hover
@@ -263,7 +263,7 @@
               </DashboardBlock>
             </div>
             <div class="col-lg-6">
-              <DashboardBlock v-if="!isLoading" title="Nieuwe documenten - Facilitair" iconName="hand-index">
+              <DashboardBlock v-if="!isLoading" :title="$trans('New documents - Facility')" iconName="hand-index">
                 <b-table
                   id="location-documents-table"
                   hover

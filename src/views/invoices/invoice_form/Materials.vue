@@ -89,7 +89,7 @@
               <span v-if="getTlProduct(material.material_id)">
                 Teamleader:&nbsp;
               </span>
-              <span v-else>niet gekoppeld</span>
+              <span v-else>{{ $trans('not linked') }}</span>
               <PriceInput
                 v-model="material.price"
                 :currency="material.price_currency"

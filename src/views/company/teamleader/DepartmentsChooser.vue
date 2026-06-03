@@ -2,7 +2,7 @@
   <b-modal
     id="modal"
     ref="modal"
-    title="Kies afdeling"
+    :title="$trans('Choose department')"
     ok-only
     @ok="hide"
   >
