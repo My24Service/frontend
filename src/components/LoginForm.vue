@@ -32,7 +32,7 @@
         ></BFormInput>
       </BFormGroup>
       <div class='flex-columns align-items-center justify-content-center'>
-        <BButton type="submit">log in</BButton>
+        <BButton type="submit">{{ $trans('Log in') }}</BButton>
         <BLink @click="function() { forgotPassword() }">{{ $trans('Forgot password?') }}</BLink>
       </div>
     </form>

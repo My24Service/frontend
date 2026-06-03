@@ -123,7 +123,7 @@
                     <div class="row">
                       <span class="pull-left col-sm-6"><b>{{ this.$trans('Term of payment') }}</b></span>
                       <span class="col-sm-6 underline">
-                          <span class="pull-right">{{ invoice.term_of_payment_days }} days</span>
+                          <span class="pull-right">{{ invoice.term_of_payment_days }} {{ $trans('days') }}</span>
                       </span>
                     </div>
                   </div>

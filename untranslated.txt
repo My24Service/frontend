@@ -1,6 +1,5 @@
 /Users/evert/Sites/My24Service/frontend/src/components/CustomerCard.vue
   20:11 'Customer ID'
-  23:47 'Ext. ID'
 
 /Users/evert/Sites/My24Service/frontend/src/components/LoginForm.vue
   35:32 'log in'
@@ -9,139 +8,30 @@
   5:47 'pixel'
 
 /Users/evert/Sites/My24Service/frontend/src/components/TeamleaderProductChooser.vue
-    5:11 'Koppel product'
-   13:31 'details'
-   15:15 'Naam'
-   17:15 'Code'
-   19:15 'Omschrijving'
-   21:15 'Rekening'
-   23:15 'Inkoopprijs'
-   25:15 'Verkoopprijs'
-   27:15 'BTW-tarief'
-   29:15 'Aangemaakt'
-   31:15 'Gewijzigd'
-   37:11 'Nieuw teamleader product'
-  113:12 'Maak aan'
-  131:14 'Zoeken'
-  149:12 'Details'
-  161:10 'Voeg nieuw teamleader product toe'
+  13:31 'details'
 
 /Users/evert/Sites/My24Service/frontend/src/views/company/ConnectorGrippSettings.vue
-   19:11  'Gripp API instellingen'
-   20:10  'De volgende gegevens zijn nodig om met de Gripp API te kunnen communiceren. Een'
-   20:98  'API key'
-   20:114 'kan binnen de
-      Gripp omgeving aangemaakt worden bij de API instellingen. Het wordt aangeraden een aparte'
-   21:105 'API rol'
-   21:121 'aan te
-      maken met een beperkt aantal rechten. De volgende rechten op de volgende modules zijn noodzakelijk'
-   24:13  'company'
-   24:30  'read'
-   25:13  'contact'
-   25:30  'read'
-   26:13  'file'
-   26:27  'create read update'
-   27:13  'hour'
-   27:27  'create read update'
-   28:13  'offer'
-   28:28  'read update'
-   29:13  'offerprojectline'
-   29:39  'read update'
-   30:13  'project'
-   30:30  'read update'
-   31:13  'product'
-   31:30  'read'
-   32:13  'task'
-   32:27  'create read update'
-   33:13  'timelineentry'
-   33:36  'create read'
-   46:52  'Actief'
-   61:16  'De'
-   61:27  'API key'
-   61:43  'dat binnen het Gripp platform is aangemaakt dient hieronder ingevuld te worden.'
-   74:16  'Het'
-   74:28  'Webhook wachtwoord'
-   74:55  'is een willekeurige reeks alfanumerieke tekens dat onderdeel
-              wordt van het verzoek dat het Gripp platform stuurt naar My24Service als verificatie dat het verzoek
-              daadwerkelijk van Gripp komt.'
-   89:16  'Dit is het opdracht-type dat aan alle uit Gripp afkomstige opdrachten wordt toegewezen.'
-  102:16  'Dit is de standaard werknemer die aan de taken wordt toegewezen'
-  115:16  'Als de Gripp opdracht in deze fase wordt gezet, alleen dan wordt deze opdracht volledig
-            binnen My24Service geimporteerd.'
-  129:16  'Als de opdracht binnen My24Service in de status "werkbon getekend" wordt gezet, wordt
-              de opdracht naar Gripp gesynchroniseerd en krijgt deze binnen Gripp deze projectfase.
-            Als deze instelling leeg blijft, zal de fase niet worden aangepast.'
-  144:16  'De binnen My24Service geregistreerde uren zullen onder een aparte taak worden gesynchroniseerd
-            binnen Gripp. Deze taak heeft een taaktype nodig (dit kan bijvoorbeeld overeenkomen met Montage of Installatie).
-            Als deze instelling leeg of 0 is, wordt de taak (en bijbehorende uren) niet geëxporteerd.'
-  160:14  'De binnen My24Service geregistreerde uren zullen onder een aparte taak worden gesynchroniseerd
-            binnen Gripp. Deze taak heeft een taaktype nodig. Mogelijk dient een apart taaktype "Reizen" aangemaakt
-            worden. Als deze instelling leeg of 0 is, wordt de taak (en bijbehorende uren) niet geëxporteerd.'
-  166:24  'Automation instellingen'
-  167:10  'Deze gegevens moeten aan de kant van Gripp worden geconfigureerd bij de Automation opties. Dit zorgt ervoor
-      dat My24Service opdrachtgegevens kan ophalen op het moment dat deze wijzigen.'
-  169:61  'Er is geen webhook wachtwoord ingesteld. Voer hierboven de gegevens in en sla deze op.'
-  171:17  'Naam'
-  171:40  'My24Service verzoek'
-  172:17  'Wanneer'
-  172:43  'Opdracht'
-  172:60  'wordt'
-  172:75  'gewijzigd'
-  173:17  'Actie'
-  173:41  'Web verzoek'
-  174:17  'Verzoek methode'
-  176:17  'Web adres'
-  176:150 '/automation-updated-order'
-  177:17  'Body'
+   24:30 'read'
+   25:30 'read'
+   26:27 'create read update'
+   27:27 'create read update'
+   28:28 'read update'
+   29:39 'read update'
+   30:30 'read update'
+   31:30 'read'
+   32:27 'create read update'
+   33:36 'create read'
+   61:16 'The'
+   74:16 'The'
+  102:16 'Dit is de standaard werknemer die aan de taken wordt toegewezen'
+  174:65 'POST'
 
 /Users/evert/Sites/My24Service/frontend/src/views/company/Startpage.vue
-   75:71 'Kantoor­oppervlak vvo'
-   79:69 '1400 m²'
-   95:71 'Bedrijfs­ruimte oppervlak'
-   99:70 '2000 m²'
-  115:71 'Parkeerplaatsen'
-  135:71 'm² vvo per werkplek'
-  139:69 '18 m²'
-  155:71 'Werkplek per medewerker'
-  175:71 'Werkplek per FTE'
-  195:71 'm² vvo per mede­werker'
-  199:69 '12 m²'
-  215:71 'm² vvo per FTE'
-  219:69 '10 m²'
-  232:55 'Nieuwe documenten - Techniek'
-  266:55 'Nieuwe documenten - Facilitair'
-
-/Users/evert/Sites/My24Service/frontend/src/views/company/TeamleaderCallback.vue
-  17:15 'Gelukt'
-  18:29 'Verbinding met Teamleader is gelegd.'
-  21:14 'U kunt dit venster sluiten.'
-  29:15 'Mislukt'
-  30:29 'Verbinding met Teamleader is niet gelegd.'
-  33:14 'U kunt dit venster sluiten.'
+  95:71 'Bedrijfs­ruimte oppervlak'
 
 /Users/evert/Sites/My24Service/frontend/src/views/company/TeamleaderSettings.vue
-   40:21 'API Actief'
-   49:52 'Actief'
-   67:21 'Verbinding'
   104:21 'Department'
-  121:22 'Kies'
-  128:21 'Grootboekrekeningen'
-  130:49 'rekeningen aanwezig'
-  140:22 'Ververs'
-  147:21 'Account'
   165:22 'Submit'
-  172:21 'Product voor werkuren'
-  192:22 'Kies'
-  199:21 'Product voor reisuren'
-  219:22 'Kies'
-  226:21 'Factuur template'
-  246:22 'Kies'
-  253:21 'BTW-tarieven'
-  263:44 'Nog geen BTW-tarieven aanwezig'
-  274:22 'Ververs'
-
-/Users/evert/Sites/My24Service/frontend/src/views/company/teamleader/DepartmentsChooser.vue
-  5:11 'Kies afdeling'
 
 /Users/evert/Sites/My24Service/frontend/src/views/customer/CustomerView.vue
   254:28 'Insights'
@@ -162,34 +52,9 @@
 /Users/evert/Sites/My24Service/frontend/src/views/inventory/SupplierReservationList.vue
   89:45 'material'
 
-/Users/evert/Sites/My24Service/frontend/src/views/invoices/EmailForm.vue
-  49:43 'You must provide at least 1 email recipient'
-
-/Users/evert/Sites/My24Service/frontend/src/views/invoices/InvoiceForm.vue
-  217:59 'Bekijk'
-  218:36 'Nog niet gekoppeld'
-
 /Users/evert/Sites/My24Service/frontend/src/views/invoices/InvoiceView.vue
   126:86 'days'
 
-/Users/evert/Sites/My24Service/frontend/src/views/invoices/invoice_form/Hours.vue
-  102:31 'Teamleader'
-
 /Users/evert/Sites/My24Service/frontend/src/views/invoices/invoice_form/Materials.vue
    86:41 'pixel'
-   89:63 'Teamleader'
-   92:28 'niet gekoppeld'
   110:26 'teamleader'
-
-/Users/evert/Sites/My24Service/frontend/src/views/mobile/Dispatch.vue
-   85:79 'week'
-  110:99 'week'
-  220:43 'clear'
-  341:43 'clear'
-
-/Users/evert/Sites/My24Service/frontend/src/views/mobile/TripAvailability.vue
-  35:140 'trip-'
-
-/Users/evert/Sites/My24Service/frontend/src/views/orders/OrderViewMaintenance.vue
-  334:64 '(n/a)'
-  337:68 '(n/a)'

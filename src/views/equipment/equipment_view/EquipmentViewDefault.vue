@@ -54,7 +54,7 @@
                 class="btn btn-sm btn-outline" :href="equipment.qr_path"
                 target="_blank"
                 :title="$trans('Open QR in new tab')">
-                <img alt="QR code" class="qr-code-image" :src="equipment.qr_path" />
+                <img :alt="$trans('QR code')" class="qr-code-image" :src="equipment.qr_path" />
               </BLink>
               <p>
                 <a href="javascript:" @click="download(equipment)">
@@ -104,7 +104,7 @@
             ></b-pagination>
           </b-tab>
           <b-tab key="stats" :title="$trans('Insights')" @click="renderStats">
-            <h6>Stats for {{ equipment.name }}</h6>
+            <h6>{{ $trans('Stats for') }} {{ equipment.name }}</h6>
             <OrderStats
               :data-in="statsData"
               ref="order-stats"

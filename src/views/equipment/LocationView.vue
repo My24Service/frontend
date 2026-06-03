@@ -35,7 +35,7 @@
                 class="btn btn-sm btn-outline" :href="location.qr_path"
                 target="_blank"
                 :title="$trans('Open QR in new tab')">
-                <img alt="QR code" class="qr-code-image" :src="location.qr_path" />
+                <img :alt="$trans('QR code')" class="qr-code-image" :src="location.qr_path" />
               </BLink>
               <p>
                 <a href="javascript:" @click="download(location)">

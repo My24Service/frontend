@@ -101,7 +101,7 @@
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Department</h5>
+                <h5>{{ $trans('Department') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -162,7 +162,7 @@
                       class="btn btn-primary m-1"
                       @click="updateProductCategory"
                       :disabled="!isDepartmentOk || !isProductCategoriesOk"
-                    >Submit</button>
+                    >{{ $trans('Submit') }}</button>
                   </div>
                 </b-form-group>
               </div>

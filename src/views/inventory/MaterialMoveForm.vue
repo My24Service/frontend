@@ -8,7 +8,7 @@
             <b-dropdown-item-button
               @click="submitFormBulk"
               :disabled="canSubmit"
-              title="Submit and move another material">
+              :title="$trans('Submit and move another material')">
               {{ $trans('Bulk') }}
             </b-dropdown-item-button>
           </b-dropdown>

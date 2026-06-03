@@ -10,7 +10,7 @@
   >
     <div v-if="showDetails && product">
       <div>
-        <h3>{{ product.name }} details</h3>
+        <h3>{{ product.name }} {{ $trans('details') }}</h3>
         <dl>
           <dt>{{ $trans('Name') }}</dt>
           <dd>{{ product.name }}</dd>

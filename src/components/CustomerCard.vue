@@ -17,10 +17,10 @@
         <span v-if="customer.mobile">{{ customer.mobile }}</span>
       </dd>
 
-      <dt>Customer ID</dt>
+      <dt>{{ $trans('Customer ID') }}</dt>
       <dd>{{ customer.customer_id }}</dd>
 
-      <dt v-if="customer.external_identifier">Ext. ID</dt>
+      <dt v-if="customer.external_identifier">{{ $trans('Ext. ID') }}</dt>
       <dd v-if="customer.external_identifier">{{ customer.external_identifier }}</dd>
       <dt v-if="customer.remarks">{{ $trans('Remarks') }}</dt>
       <dd v-if="customer.remarks" class="remarks">{{ customer.remarks.trim() }}</dd>

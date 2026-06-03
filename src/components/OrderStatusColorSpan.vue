@@ -2,7 +2,7 @@
   <div>
     <span v-for="item in data" :key="item.order_id">
       <span class="order-status-img" v-bind:style="{ backgroundColor: item.color }">
-        <img width="12" :src="PIXEL_URL"  alt="pixel"/>
+        <img width="12" :src="PIXEL_URL"  :alt="$trans('pixel')"/>
       </span>
     </span>
   </div>

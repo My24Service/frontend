@@ -251,7 +251,7 @@
                   </span>
                 </b-row>
               </b-tab>
-              <b-tab title="Insights" key="stats" @click="loadOrderStats">
+              <b-tab :title="$trans('Insights')" key="stats" @click="loadOrderStats">
                 <OrderStats
                   :data-in="statsData"
                   ref="order-stats"

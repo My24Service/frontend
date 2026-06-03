@@ -86,7 +86,7 @@
         <template #cell(materials)="data">
 
           <span v-if="data.item.materials.length" :title="`${data.item.materials.length} materials`">
-              {{data.item.materials.length}} material{{  data.item.materials.length > 1 ? 's' : ''}}
+              {{data.item.materials.length}} {{ data.item.materials.length > 1 ? $trans('materials') : $trans('material') }}
               &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
               <span class="dimmed">
                 {{ data.item.materials[0].amount }} {{ data.item.materials[0].material_view.name }}

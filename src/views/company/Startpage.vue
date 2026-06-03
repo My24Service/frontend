@@ -92,7 +92,7 @@
                                 <i class="bi bi-building-fill"></i>
                             </div>
                             <div>
-                                <h6 class="text-primary mt-2 fw-bold">Bedrijfs&shy;ruimte oppervlak</h6>
+                                <h6 class="text-primary mt-2 fw-bold">{{ $trans('Business space area') }}</h6>
                             </div>
                         </div>
                         <div class="align-self-center">

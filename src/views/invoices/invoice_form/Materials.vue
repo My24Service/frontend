@@ -83,7 +83,7 @@
             v-else
           >
             <div :class="getTlProduct(material.material_id) ? 'w-100 bg-success mb-2' : 'w-100 bg-danger mb-2'">
-              <img :src="PIXEL_URL" alt="pixel">
+              <img :src="PIXEL_URL" :alt="$trans('pixel')">
             </div>
             <p class="flex">
               <span v-if="getTlProduct(material.material_id)">
@@ -108,7 +108,7 @@
           />
         </b-col>
         <b-col cols="12">
-          teamleader
+          {{ $trans("teamleader") }}
         </b-col>
       </b-row>
       <TotalRow

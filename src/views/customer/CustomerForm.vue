@@ -303,7 +303,7 @@
             <div class='flex-columns space-between'>
               <p>
                 {{ $trans('Customer has ') }} {{ customer.num_orders }} {{ $trans('orders') }},
-                {{ $trans('branch has') }} {{ selectedBranch ? selectedBranch.num_orders : 0 }} {{ $trans('orders') }}.
+                {{ $trans('branch has') }} {{ selectedBranch ? selectedBranch.num_orders : '0' }} {{ $trans('orders') }}.
               </p>
               <BButton
                 @click="syncOrders"
