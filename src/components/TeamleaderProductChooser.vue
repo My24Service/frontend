@@ -158,7 +158,7 @@
         <BButton
           @click="newTeamleaderProduct"
           variant="primary"
-        {{ $trans('Add new Teamleader product') }}</BButton>
+        >{{ $trans('Add new Teamleader product') }}</BButton>
       </div>
     </div>
   </b-modal>
