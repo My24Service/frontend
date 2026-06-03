@@ -35,23 +35,31 @@ export default [
       },
       // statuscodes
       {
-        name: 'settings-statuscode-list',
+        name: 'settings-order-statuscode-list',
         path: '/settings/statuscodes',
         components: {
           'app-content': StatuscodeList,
           'app-subnav': {}
         },
         props: {
-          'app-content': route => ({...route.params, list_type: 'order'}),
-          'app-subnav': true
+          'app-content': route => ({
+            ...route.params,
+            list_type: 'order',
+            from_settings: true
+          }),
+          'app-subnav': {}
         },
       },
       {
-        name: 'settings-statuscode-edit',
+        name: 'settings-order-statuscode-edit',
         path: '/settings/statuscodes/form/:pk',
         props: {
-          'app-content': route => ({...route.params, list_type: 'order'}),
-          'app-subnav': true
+          'app-content': route => ({
+            ...route.params,
+            list_type: 'order',
+            from_settings: true
+          }),
+          'app-subnav': {}
         },
         components: {
           'app-content': StatuscodeForm,
@@ -59,14 +67,18 @@ export default [
         },
       },
       {
-        name: 'settings-statuscode-add',
+        name: 'settings-order-statuscode-add',
         path: '/settings/statuscodes/form',
         components: {
           'app-content': StatuscodeForm,
           'app-subnav': {}
         },
         props: {
-          'app-content': route => ({...route.params, list_type: 'order'}),
+          'app-content': route => ({
+            ...route.params,
+            list_type: 'order',
+            from_settings: true
+          }),
           'app-subnav': true
         },
       },

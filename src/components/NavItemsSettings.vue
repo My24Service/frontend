@@ -15,7 +15,7 @@
     </b-nav-item>
 
     <b-nav-item
-      :to="{name: 'settings-statuscode-list'}"
+      :to="{name: 'settings-order-statuscode-list'}"
       :active="isActive('statuscodes')"
     >
       {{ $trans('Statuses') }}

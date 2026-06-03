@@ -13,7 +13,6 @@
         </h3>
         <div class="flex-columns">
           <BButton @click="cancelForm" type="button" variant="secondary">
-            <IBiX></IBiX>
             {{ this.$trans('Cancel') }}</BButton>
           <BButton v-if="!isCreate" @click="showDeleteModal" type="button" variant="danger">
             <IBiTrash></IBiTrash>
@@ -572,7 +571,7 @@ export default {
           await this.actionModel.insert(this.action)
           infoToast(this.create, this.$trans('Created'), this.$trans('Action has been created'))
           this.isLoading = false
-          this.$router.go(-1)
+          this.cancelForm()
         } catch(error) {
           console.log('error creating action', error)
           errorToast(this.create, this.$trans('Error creating action'))
@@ -586,7 +585,7 @@ export default {
         await this.actionModel.update(this.pk, this.action)
         infoToast(this.create, this.$trans('Updated'), this.$trans('Action has been updated'))
         this.isLoading = false
-        this.$router.go(-1)
+        this.cancelForm()
       } catch(error) {
         console.log('error updating action', error)
         errorToast(this.create, this.$trans('Error updating action'))
