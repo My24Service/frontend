@@ -119,26 +119,30 @@
                       <b-row>
                         <b-col cols="5">
                           <table class="totals">
-                            <tr>
-                              <td><strong>{{ $trans('Name') }}:</strong></td>
-                              <td>{{ data.item.name }}</td>
-                            </tr>
-                            <tr>
-                              <td><strong>{{ $trans('Contract value') }}:</strong></td>
-                              <td>EUR {{ data.item.contract_value }}</td>
-                            </tr>
+                            <tbody>
+                              <tr>
+                                <td><strong>{{ $trans('Name') }}:</strong></td>
+                                <td>{{ data.item.name }}</td>
+                              </tr>
+                              <tr>
+                                <td><strong>{{ $trans('Contract value') }}:</strong></td>
+                                <td>EUR {{ data.item.contract_value }}</td>
+                              </tr>
+                            </tbody>
                           </table>
                         </b-col>
                         <b-col cols="4">
                           <table class="totals">
-                            <tr>
-                              <td><strong>{{ $trans('Created orders') }}</strong></td>
-                              <td>{{ data.item.created_orders}}</td>
-                            </tr>
-                            <tr>
-                              <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
-                              <td>{{ data.item.num_order_equipment}}</td>
-                            </tr>
+                            <tbody>
+                              <tr>
+                                <td><strong>{{ $trans('Created orders') }}</strong></td>
+                                <td>{{ data.item.created_orders}}</td>
+                              </tr>
+                              <tr>
+                                <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
+                                <td>{{ data.item.num_order_equipment}}</td>
+                              </tr>
+                            </tbody>
                           </table>
                         </b-col>
                         <b-col cols="3">

@@ -135,11 +135,13 @@
                   <p><b>{{ this.$trans('Invoice lines') }}</b></p>
                   <table class="table table-bordered">
                       <thead>
-                          <th>{{ this.$trans('Description') }}</th>
-                          <th>{{ this.$trans('Amount') }}</th>
-                          <th>{{ this.$trans('Price') }}</th>
-                          <th>{{ this.$trans('Total') }}</th>
-                          <th>{{ this.$trans('VAT') }}</th>
+                          <tr>
+                            <th>{{ this.$trans('Description') }}</th>
+                            <th>{{ this.$trans('Amount') }}</th>
+                            <th>{{ this.$trans('Price') }}</th>
+                            <th>{{ this.$trans('Total') }}</th>
+                            <th>{{ this.$trans('VAT') }}</th>
+                          </tr>
                       </thead>
                       <tbody>
                           <tr v-for="invoiceline in invoice.invoicelines" :key="invoiceline.id">
