@@ -151,49 +151,10 @@
               <h5 class="mb-0 text-center text-primary">{{ this.$trans('Work Orders') }}</h5>
             </div>
             <div class="card-body">
-              <p v-if="!equipmentWorkOrders.length">
+              <p v-if="!workOrders.length">
                 <i>{{ $trans("No work orders") }}</i>
               </p>
-              <b-table
-                v-else
-                id="workorders-table"
-                hover
-                small
-                :busy="isWorkordersLoading"
-                :fields="workOrderFields"
-                :items="equipmentWorkOrders"
-                responsive="md"
-                class="data-table"
-                sort-icon-left
-              >
-                <template #table-busy>
-                  <div class="text-center my-2">
-                    <br>
-                    <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-                    <strong>{{ $trans('Loading...') }}</strong>
-                    <br>
-                  </div>
-                </template>
-                <template #cell(order_id)="data">
-                  <span>{{ data.item.order_id }}</span>
-                </template>
-                <template #cell(start_date)="data">
-                  <small>{{ data.item.start_date }}</small>
-                </template>
-                <template #cell(description)="data">
-                  <span v-if="data.item.orderline">
-                    {{ data.item.orderline.equipment_view?.name || data.item.orderline.product }}
-                    <span v-if="data.item.orderline.location"> - {{ data.item.orderline.location }}</span>
-                    <span v-else-if="data.item.orderline.equipment_location_view?.name"> - {{ data.item.orderline.equipment_location_view.name }}</span>
-                  </span>
-                  <span v-else class="text-muted">-</span>
-                </template>
-                <template #cell(url)="data">
-                  <BLink :to="{ name: 'workorder-view', params: { uuid: data.item.uuid } }" target="_blank">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                  </BLink>
-                </template>
-              </b-table>
+              <WorkOrdersTable v-else :work-orders="workOrders" :is-loading="isWorkordersLoading" :hide-columns="['equipment']" />
             </div>
           </div>
         </div>
@@ -235,8 +196,9 @@ import {
   BTabs
 } from "bootstrap-vue-next";
 
-import orderModel from '@/models/orders/Order.js'
+import orderService from '@/models/orders/Order.js'
 import equipmentViewMixin from './equipmentViewMixin.js'
+import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
 
 export default {
   components: {
@@ -252,6 +214,7 @@ export default {
     ButtonLinkSearch,
     OrderTableInfo,
     SearchModal,
+    WorkOrdersTable,
   },
   extends: equipmentViewMixin,
   setup(props, ctx) {
@@ -261,27 +224,21 @@ export default {
   },
   data() {
     return {
-      equipmentWorkOrders: [],
+      workOrders: [],
       isWorkordersLoading: false,
-      workOrderFields: [
-        {key: 'order_id', label: this.$trans('Order'), sortable: true},
-        {key: 'start_date', label: this.$trans('Date'), sortable: true},
-        {key: 'description', label: this.$trans('Description'), sortable: false},
-        {key: 'url', label: this.$trans('Link')},
-      ],
     }
   },
   async created() {
-    await this.loadEquipmentWorkOrders()
+    await this.loadWorkOrders()
   },
   methods: {
-    async loadEquipmentWorkOrders() {
+    async loadWorkOrders() {
       this.isWorkordersLoading = true
       try {
-        this.equipmentWorkOrders = await orderModel.getWorkorders(this.pk)
+        this.workOrders = await orderService.getEquipmentWorkorders(this.pk)
       } catch (error) {
         console.error('error fetching equipment workorders', error)
-        this.equipmentWorkOrders = []
+        this.workOrders = []
       } finally {
         this.isWorkordersLoading = false
       }

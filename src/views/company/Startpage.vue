@@ -284,47 +284,7 @@
             <p v-if="!workOrders.length">
               <i>{{ $trans("No work orders") }}</i>
             </p>
-            <b-table
-              v-else
-              id="workorders-table"
-              hover
-              small
-              :busy='isLoading'
-              :fields="workOrderFields"
-              :items="workOrders"
-              responsive="md"
-              class="data-table"
-              sort-icon-left>
-              <template #table-busy>
-                <div class="text-center my-2">
-                  <br>
-                  <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-                  <strong>{{ $trans('Loading...') }}</strong>
-                  <br>
-                </div>
-              </template>
-              <template #cell(id)="data">
-                <BLink :to="{ name: 'order-view', params: { pk: data.item.id } }">
-                  <span>{{ data.item.order_id }}</span>
-                </BLink>
-              </template>
-              <template #cell(start_date)="data">
-                <small>{{ data.item.start_date }}</small>
-              </template>
-              <template #cell(description)="data">
-                <span v-if="data.item.orderline">
-                  {{ data.item.orderline.equipment_view?.name || data.item.orderline.product }}
-                  <span v-if="data.item.orderline.location"> - {{ data.item.orderline.location }}</span>
-                  <span v-else-if="data.item.orderline.equipment_location_view?.name"> - {{ data.item.orderline.equipment_location_view.name }}</span>
-                </span>
-                <span v-else class="text-muted">-</span>
-              </template>
-              <template #cell(url)="data">
-                <BLink :to="{ name: 'workorder-view', params: { uuid: data.item.uuid } }" target="_blank">
-                  <i class="bi bi-box-arrow-up-right"></i>
-                </BLink>
-              </template>
-            </b-table>
+            <WorkOrdersTable v-else :work-orders="workOrders" :is-loading="isLoading" />
           </DashboardBlock>
         </div>
       </div>
@@ -360,6 +320,7 @@ import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 import {useMainStore} from "@/stores/main";
 import LogComponent from "@/views/company/startpage/LogComponent.vue";
 import DashboardBlock from "@/views/company/startpage/DashboardBlock.vue";
+import WorkOrdersTable from "@/components/WorkOrdersTable.vue";
 
 let d = new Date()
 
@@ -373,7 +334,8 @@ export default {
     BranchPhotoCard,
     BarChart,
     PieChart,
-    DashboardBlock
+    DashboardBlock,
+    WorkOrdersTable,
   },
   mixins: [componentMixin],
   data() {
@@ -394,12 +356,6 @@ export default {
         {key: 'name', label: this.$trans('Document'), sortable: true},
         {key: 'created', label: this.$trans('Date'), sortable: true},
         {key: 'file', label: this.$trans('File')},
-      ],
-      workOrderFields: [
-        {key: 'id', label: this.$trans('Order'), sortable: true},
-        {key: 'start_date', label: this.$trans('Date'), sortable: true},
-        {key: 'description', label: this.$trans('Description'), sortable: false},
-        {key: 'url', label: this.$trans('Link')},
       ],
       companyLog: '',
       isLoading: false,
@@ -487,7 +443,8 @@ export default {
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
 
-        this.workOrders = await this.orderService.getWorkorders()
+        this.workOrders = await this.orderService.getEquipmentWorkorders()
+        console.log(this.workOrders)
 
         this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)
 
