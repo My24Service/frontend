@@ -215,7 +215,8 @@
                   :items="equipmentDocuments"
                   responsive="md"
                   class="data-table"
-                  sort-icon-left>
+                  sort-icon-left
+                >
                   <template #table-busy>
                     <div class="text-center my-2">
                       <br>

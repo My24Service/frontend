@@ -1,7 +1,7 @@
 <template>
   <DashboardBlock v-if="!isLoading" :title="$trans('Log')" iconName="card-list">
     <BContainer>
-      <BRow v-for="status in statuses" :key="status.id">
+      <BRow v-for="status in statuses" :key="status.id" class="log-row">
         <BCol cols="2">
           {{ status.order_id }}
         </BCol>
@@ -33,7 +33,7 @@ export default {
     const mainStore = useMainStore()
     return { mainStore }
   },
-  components: {
+    components: {
     DashboardBlock
   },
   data() {
@@ -70,5 +70,11 @@ export default {
 </script>
 
 <style scoped>
-
+div.log-row {
+  padding: .4em;
+  &:hover {
+    background-color: #179DA0;
+    color: #fff;
+  }
+}
 </style>
