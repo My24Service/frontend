@@ -166,13 +166,13 @@ class OrderService extends BaseModel {
   }
 
   async getWorkorders(equipmentId = null) {
-    let url = `/order/workorders-data/?page_size=5`
+    let url = `/order/order/latest_workorders/`;
     if (equipmentId) {
       url += `&equipment=${equipmentId}`
     }
     
     const response = await this.axios.get(url)
-    return response.data?.results ?? []
+    return response.data ?? []
   }
 
   getWorkorderData(uuid) {
