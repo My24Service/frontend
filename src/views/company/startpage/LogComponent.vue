@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import {StatusService} from '@/models/orders/Status.js'
+import {StatusesService} from '@/models/orders/Status.js'
 import {useMainStore} from "@/stores/main/index.js";
 import my24 from "@/services/my24.js";
 import DashboardBlock from "@/views/company/startpage/DashboardBlock.vue";
@@ -39,7 +39,7 @@ export default {
   data() {
     return {
       isLoading: false,
-      statusService: new StatusService(),
+      statusService: new StatusesService(),
       statuses: [],
       statuscodes: [],
     }
