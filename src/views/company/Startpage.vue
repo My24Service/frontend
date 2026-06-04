@@ -18,7 +18,7 @@
               <BranchPhotoCard
                 v-if="branch"
                 :title="branch.name"
-                :image-url="branch.image || NO_IMAGE_URL"
+                :image-url="branch.image"
                 :building-name="branch.name"
                 :street="branch.address"
                 :zip-city="branch.postal + ' ' + branch.city"
@@ -30,31 +30,7 @@
               />
             </div>
             <div class="col-lg-9">
-              <DashboardBlock v-if="!isLoading" :title="$trans('Log')" iconName="card-list">
-                <b-table
-                    id="activity-table"
-                    hover
-                    small
-                    :busy='isLoading'
-                    :fields="activityFields"
-                    :items="activity"
-                    responsive="md"
-                    class="data-table"
-                    sort-icon-left>
-                    <template #table-busy>
-                      <div class="text-center my-2">
-                        <br>
-                        <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
-                        <strong>{{ $trans('Loading...') }}</strong>
-                        <br>
-                      </div>
-                    </template>
-                    <template #cell(created)="data">
-                      <small>{{  data.item.created }}</small>
-                    </template>
-                </b-table>
-                <!-- <div v-html="companyLog"></div> -->
-              </DashboardBlock>
+              <LogComponent />
             </div>
           </div>
         </div>
@@ -369,20 +345,20 @@
 </template>
 
 <script>
+import moment from 'moment/min/moment-with-locales'
+
 import {BranchService} from '@/models/company/Branch'
 import BranchPhotoCard from "@/views/company/startpage/BranchPhotoCard.vue"
 import BarChart from "@/components/BarChart.vue"
 import PieChart from "@/components/PieChart.vue"
 import componentMixin from "@/mixins/common";
-import {$trans} from "@/utils";
-import {NO_IMAGE_URL} from "@/constants";
-import memberModel from "@/models/member/Member";
-import activityModel from '@/models/company/Activity.js'
-import orderModel from '@/models/orders/Order.js'
+import {MemberService} from "@/models/member/Member";
+import {OrderService} from '@/models/orders/Order.js'
 import {DocumentService, LocationDocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
-import moment from 'moment/min/moment-with-locales'
 import {useMainStore} from "@/stores/main";
+import LogComponent from "@/views/company/startpage/LogComponent.vue";
+import DashboardBlock from "@/views/company/startpage/DashboardBlock.vue";
 
 let d = new Date()
 
@@ -392,41 +368,38 @@ export default {
     return { mainStore }
   },
   components: {
+    LogComponent,
     BranchPhotoCard,
     BarChart,
     PieChart,
+    DashboardBlock
   },
   mixins: [componentMixin],
   data() {
     return {
-        member: memberModel.getFields(),
-        branch: null,
-        branchService: new BranchService(),
-
-        activity: [],
-        activityFields: [
-          {key: 'text', label: this.$trans('Activity'), sortable: true},
-          {key: 'created', label: this.$trans('Date'), sortable: true},
-          {key: 'icons', label: ''},
-        ],
-        equipmentDocumentService: new DocumentService(),
-        locationDocumentService: new LocationDocumentService(),
-        purchaseInvoiceService: new PurchaseInvoiceService(),
-        equipmentDocuments: [],
-        locationDocuments: [],
-        workOrders: [],
-        monthlyCostOverview: [],
-        documentFields: [
-          {key: 'name', label: this.$trans('Document'), sortable: true},
-          {key: 'created', label: this.$trans('Date'), sortable: true},
-          {key: 'file', label: this.$trans('File')},
-        ],
-        workOrderFields: [
-          {key: 'id', label: this.$trans('Order'), sortable: true},
-          {key: 'start_date', label: this.$trans('Date'), sortable: true},
-          {key: 'description', label: this.$trans('Description'), sortable: false},
-          {key: 'url', label: this.$trans('Link')},
-        ],
+      member: null,
+      branch: null,
+      branchService: new BranchService(),
+      memberService: new MemberService(),
+      orderService: new OrderService(),
+      equipmentDocumentService: new DocumentService(),
+      locationDocumentService: new LocationDocumentService(),
+      purchaseInvoiceService: new PurchaseInvoiceService(),
+      equipmentDocuments: [],
+      locationDocuments: [],
+      workOrders: [],
+      monthlyCostOverview: [],
+      documentFields: [
+        {key: 'name', label: this.$trans('Document'), sortable: true},
+        {key: 'created', label: this.$trans('Date'), sortable: true},
+        {key: 'file', label: this.$trans('File')},
+      ],
+      workOrderFields: [
+        {key: 'id', label: this.$trans('Order'), sortable: true},
+        {key: 'start_date', label: this.$trans('Date'), sortable: true},
+        {key: 'description', label: this.$trans('Description'), sortable: false},
+        {key: 'url', label: this.$trans('Link')},
+      ],
       companyLog: '',
       isLoading: false,
       year: d.getYear() + 1900,
@@ -438,7 +411,7 @@ export default {
         responsive: true,
         maintainAspectRatio: false
       },
-      gradient: ['#ff9933','#ff9c36','#fea03a','#fea33d','#fea741','#fdaa44','#fdae48','#fdb14b','#fdb54f','#fcb852','#fcbc56','#fcbf59','#fbc35d','#fbc660']
+      gradient: ['#ff9933','#ff9c36','#fea03a','#fea33d','#fea741','#fdaa44','#fdae48','#fdb14b','#fdb54f','#fcb852','#fcbc56','#fcbf59','#fbc35d','#fbc660'],
     }
   },
   async created() {
@@ -497,17 +470,13 @@ export default {
       this.isLoading = true
 
       try {
-        //
-        this.member = await memberModel.getMe();
+        this.member = await this.memberService.getMe();
 
         if (this.isBranchEmployee) {
           this.branch = await this.branchService.getMyBranch()
         } else {
           this.branch = await this.branchService.first()
         }
-
-        const activityData = await activityModel.list()
-        this.activity = activityData.results
 
         this.equipmentDocumentService.setParentBranchId(this.branch.id)
         await this.equipmentDocumentService.loadCollection()
@@ -517,7 +486,7 @@ export default {
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
 
-        this.workOrders = await orderModel.getWorkorders()
+        this.workOrders = await this.orderService.getWorkorders()
         console.log("this.workOrders:", this.workOrders)
 
         this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)
@@ -540,16 +509,9 @@ export default {
           }]
         }
 
-        // this.companyLog = '<table><tr><td><br/><strong>Data kon niet worden geladen</strong></td></tr></table>';
-        const contactsHtml = this.member.contacts
-          .split(/\r?\n/)
-          .filter(line => line.trim() !== "")
-          .map(line => `<p>${line}</p>`)
-          .join("");
-
         this.isLoading = false
       } catch(error) {
-        console.error('error getting dashboard data', error)
+        console.error('error getting start page data', error)
         this.isLoading = false
       }
     }

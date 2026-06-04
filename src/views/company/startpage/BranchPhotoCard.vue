@@ -30,7 +30,17 @@
         <div class="tab-content">
           <!-- Adres tab -->
           <div v-show="activeTab === 'adres'" class="tab-pane fade" :class="{ 'show active': activeTab === 'adres' }">
-            <img class="img-fluid" :src="imageUrl" :alt="buildingName" />
+            <img
+              v-if="imageUrl"
+              class="img-fluid"
+              :src="imageUrl"
+              :alt="buildingName"
+            />
+            <img v-else
+                 :src="NO_IMAGE_URL"
+                 alt="No image"
+            />
+
 
             <ul class="list-group list-group-light list-group-small">
               <li class="list-group-item px-1 text-secondary fw-bold">{{ buildingName }}</li>
@@ -54,6 +64,8 @@
 </template>
 
 <script>
+import {NO_IMAGE_URL} from "@/constants.js";
+
 export default {
   name: 'BranchPhotoCard',
   props: {
@@ -84,6 +96,7 @@ export default {
   },
   data() {
     return {
+      NO_IMAGE_URL,
       activeTab: 'adres'
     }
   }
