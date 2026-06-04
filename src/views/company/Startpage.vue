@@ -487,7 +487,7 @@ export default {
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
 
-        this.workOrders = await orderModel.getWorkorders()
+        this.workOrders = await this.orderService.getWorkorders()
 
         this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)
 
