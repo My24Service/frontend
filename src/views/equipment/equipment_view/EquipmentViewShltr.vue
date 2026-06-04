@@ -181,10 +181,10 @@
                   <small>{{ data.item.start_date }}</small>
                 </template>
                 <template #cell(description)="data">
-                  <span v-if="data.item.orderlines && data.item.orderlines.length">
-                    {{ data.item.orderlines[0].equipment_view?.name || data.item.orderlines[0].product }}
-                    <span v-if="data.item.orderlines[0].location"> - {{ data.item.orderlines[0].location }}</span>
-                    <span v-else-if="data.item.orderlines[0].equipment_location_view?.name"> - {{ data.item.orderlines[0].equipment_location_view.name }}</span>
+                  <span v-if="data.item.orderline">
+                    {{ data.item.orderline.equipment_view?.name || data.item.orderline.product }}
+                    <span v-if="data.item.orderline.location"> - {{ data.item.orderline.location }}</span>
+                    <span v-else-if="data.item.orderline.equipment_location_view?.name"> - {{ data.item.orderline.equipment_location_view.name }}</span>
                   </span>
                   <span v-else class="text-muted">-</span>
                 </template>
