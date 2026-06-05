@@ -199,6 +199,7 @@ import {
 import orderService from '@/models/orders/Order.js'
 import equipmentViewMixin from './equipmentViewMixin.js'
 import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
+import orderlineService from '@/models/orders/Orderline.js'
 
 export default {
   components: {
@@ -235,7 +236,7 @@ export default {
     async loadWorkOrders() {
       this.isWorkordersLoading = true
       try {
-        this.workOrders = await orderService.getEquipmentWorkorders(this.pk)
+        this.workOrders = await orderlineService.getLatestWorkorders(this.pk)
       } catch (error) {
         console.error('error fetching equipment workorders', error)
         this.workOrders = []

@@ -284,7 +284,7 @@
             <p v-if="!workOrders.length">
               <i>{{ $trans("No work orders") }}</i>
             </p>
-            <WorkOrdersTable v-else :work-orders="workOrders" :is-loading="isLoading" />
+            <WorkOrdersTable v-else :work-orders="workOrders" :is-loading="isLoading" :hideColumns="['link']" />
           </DashboardBlock>
         </div>
       </div>
@@ -315,6 +315,7 @@ import PieChart from "@/components/PieChart.vue"
 import componentMixin from "@/mixins/common";
 import {MemberService} from "@/models/member/Member";
 import {OrderService} from '@/models/orders/Order.js'
+import {OrderlineService} from '@/models/orders/Orderline.js'
 import {DocumentService, LocationDocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 import {useMainStore} from "@/stores/main";
@@ -345,6 +346,7 @@ export default {
       branchService: new BranchService(),
       memberService: new MemberService(),
       orderService: new OrderService(),
+      orderlineService: new OrderlineService(),
       equipmentDocumentService: new DocumentService(),
       locationDocumentService: new LocationDocumentService(),
       purchaseInvoiceService: new PurchaseInvoiceService(),
@@ -443,7 +445,8 @@ export default {
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
 
-        this.workOrders = await this.orderService.getEquipmentWorkorders()
+        // this.workOrders = await this.orderService.getEquipmentWorkorders()
+        this.workOrders = await this.orderlineService.getLatestWorkorders()
         console.log(this.workOrders)
 
         this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)

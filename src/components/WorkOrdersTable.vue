@@ -9,7 +9,6 @@
     responsive="md"
     class="data-table"
     sort-icon-left
-    :sort-compare="sortWorkOrders"
   >
     <template #table-busy>
       <div class="text-center my-2">
@@ -20,20 +19,25 @@
       </div>
     </template>
     <template v-if="isVisible('id')" #cell(id)="data">
-      <BLink :to="{ name: 'order-view', params: { pk: data.item.id } }">
-        <span>{{ data.item.order_id }}</span>
+      <BLink :to="{ name: 'order-view', params: { pk: data.item.order.id } }">
+        <span>{{ data.item.order.order_id }}</span>
       </BLink>
     </template>
     <template v-if="isVisible('equipment')" #cell(equipment)="data">
-      <BLink :to="{ name: 'equipment-equipment-view', params: { pk: data.item.equipment.id } }" target="_blank">
+      <BLink :to="{ name: 'equipment-equipment-view', params: { pk: data.item.equipment.id } }">
         {{ data.item.equipment.name }}
       </BLink>
     </template>
-    <template v-if="isVisible('date')" #cell(date)="data">
-      <small>{{ data.item.order_date }}</small>
+    <template v-if="isVisible('location')" #cell(location)="data">
+      <BLink :to="{ name: 'equipment-location-view', params: { pk: data.item.location.id } }">
+        {{ data.item.location.name }}
+      </BLink>
+    </template>
+    <template v-if="isVisible('start_date')" #cell(start_date)="data">
+      <small>{{ this.$moment(data.item.order.start_date).format('L') }}</small>
     </template>
     <template v-if="isVisible('link')" #cell(link)="data">
-      <BLink :to="{ name: 'workorder-view', params: { uuid: data.item.id } }" target="_blank">
+      <BLink :to="{ name: 'workorder-view', params: { uuid: data.item.order.id } }" target="_blank">
         <i class="bi bi-box-arrow-up-right"></i>
       </BLink>
     </template>
@@ -42,9 +46,16 @@
 
 <script>
 import componentMixin from '@/mixins/common'
+import moment from 'moment/min/moment-with-locales'
+import {useMainStore} from "@/stores/main";
 
 export default {
   mixins: [componentMixin],
+  setup() {
+    return {
+      mainStore: useMainStore()
+    }
+  },
   props: {
     workOrders: {
       type: Array,
@@ -64,39 +75,19 @@ export default {
       const allFields = [
         { key: 'id', label: this.$trans('Work Order'), sortable: true },
         { key: 'equipment', label: this.$trans('Equipment'), sortable: true },
-        { key: 'date', label: this.$trans('Date'), sortable: true },
-        { key: 'link', label: this.$trans('Link') },
+        { key: 'location', label: this.$trans('Location'), sortable: true },
+        { key: 'start_date', label: this.$trans('Date'), sortable: true },
+        { key: 'link', label: '' },
       ]
       return allFields.filter(field => !this.hideColumns.includes(field.key))
     },
   },
+  created() {
+    const lang = this.mainStore.getCurrentLanguage
+    this.$moment = moment
+    this.$moment.locale(lang)
+  },
   methods: {
-    sortWorkOrders(a, b, key) {
-      const getValOf = {
-        id: row => row["order_id"],
-        equipment: row => row["equipment"]["name"],
-        date: row => row["order_date"]
-      }
-
-      let aVal = getValOf[key](a)
-      let bVal = getValOf[key](b)
-
-      // Parse DD/MM/YYYY dates for proper chronological sorting
-      if (key === 'date') {
-        const parseDate = (str) => {
-          if (!str) return 0
-          const parts = str.split('/')
-          if (parts.length !== 3) return 0
-          // Convert to YYYYMMDD number for comparison
-          return parseInt(parts[2] + parts[1] + parts[0], 10)
-        }
-
-        aVal = parseDate(aVal)
-        bVal = parseDate(bVal)
-      }
-
-      return aVal < bVal ? -1 : (aVal > bVal ? 1 : 0)
-    },
     isVisible(column) {
       return !this.hideColumns.includes(column)
     }
