@@ -48,7 +48,8 @@ $font-size-base: 0.9rem;
 }
 
 
-table#equipment-table {
+table#equipment-table,
+table#location-table {
   thead th {
     text-transform: none;
     font-weight: 600;
