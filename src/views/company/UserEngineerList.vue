@@ -18,7 +18,7 @@
           <BButton @click="()=>{ downloadList()}" class="btn primary mr-1">
             <IBiSave></IBiSave> {{$trans('Download')}}
           </BButton>
-          <BLink :to="{name: 'engineer-add'}" class="btn primary">
+          <BLink :to="{name: 'engineer-add'}" class="btn btn-primary">
             <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add engineer") }}
           </BLink>
         </BButton-toolbar>
@@ -156,6 +156,7 @@ export default {
     }
   },
   methods: {
+    $trans,
     // download
     downloadList() {
       if (confirm($trans('Are you sure you want to export all engineers?'))) {

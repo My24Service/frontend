@@ -8,7 +8,12 @@
           <span>{{ maintenanceContract.name }}</span>
         </h3>
         <BButton-toolbar>
-          <router-link class="btn primary" :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}">{{ this.$trans("Edit contract") }}</router-link>
+          <router-link
+            class="btn btn-primary"
+            :to="{name: 'maintenance-contract-edit', params:{ pk: this.pk}}"
+          >
+            {{ this.$trans("Edit contract") }}
+          </router-link>
         </BButton-toolbar>
       </div>
     </header>

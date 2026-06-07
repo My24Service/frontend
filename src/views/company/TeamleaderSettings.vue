@@ -17,10 +17,10 @@
     <b-modal
       id="delete-tokens"
       ref="delete-tokens"
-      :title="$trans('Tokens verwijderen?')"
+      :title="$trans('Delete tokens?')"
       @ok="doEmptyTokens"
     >
-      <p class="my-4">{{ $trans('Weet u zeker dat u de tokens wilt verwijderen?') }}</p>
+      <p class="my-4">{{ $trans('Are you sure you want to delete the tokens?') }}</p>
     </b-modal>
 
     <header>
@@ -37,17 +37,17 @@
           <ol class="m-2">
             <li>
               <div class="section rounded-sm revert">
-                <h5>API Actief</h5>
+                <h5>{{ $trans('API Active') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
-                  :label="$trans('Gripp API koppeling')"
+                  :label="$trans('Gripp API connection')"
                   label-for="api_enabled">
                   <b-form-checkbox
                     id="api_enabled"
                     size="sm"
                     v-model="settings.api_enabled">
-                    Actief
+                    {{ $trans('Active') }}
                   </b-form-checkbox>
                 </b-form-group>
                 <div class="btn-group d-flex justify-content-end">
@@ -64,12 +64,12 @@
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Verbinding</h5>
+                <h5>{{ $trans('Connection') }}</h5>
                 <div class="bg-success p-2 rounded-sm text-white" v-if="settings.has_tokens">
-                  {{ $trans('Actief')}}
+                  {{ $trans('Active')}}
                 </div>
                 <div v-else class="bg-warning p-2 rounded-sm">
-                  {{ $trans('Niet actief')}}
+                  {{ $trans('Not active')}}
                 </div>
 
                 <div class="btn-group d-flex justify-content-end">
@@ -81,7 +81,7 @@
                       class="btn btn-danger m-1"
                       @click="emptyTokens"
                     >
-                      {{ $trans('Verwijder') }}
+                      {{ $trans('Delete') }}
                     </button>
                   </div>
                   <div
@@ -92,7 +92,7 @@
                       class="btn btn-primary m-1"
                       @click="authorize"
                     >
-                      {{ $trans('Verleen toegang') }}
+                      {{ $trans('Grant access') }}
                     </button>
                   </div>
 
@@ -101,7 +101,7 @@
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Department</h5>
+                <h5>{{ $trans('Department') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -118,16 +118,16 @@
                     <button
                       class="btn btn-primary m-1"
                       @click="chooseDepartment"
-                    >Kies</button>
+                    >{{ $trans('Choose') }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Grootboekrekeningen</h5>
+                <h5>{{ $trans('General ledger accounts') }}</h5>
                 <div>
-                  {{ productCategories.length }} rekeningen aanwezig
+                  {{ productCategories.length }} {{ $trans('accounts present') }}
                 </div>
                 <div class="btn-group d-flex justify-content-end">
                   <div
@@ -137,18 +137,18 @@
                       :disabled="!isDepartmentOk"
                       class="btn btn-primary m-1"
                       @click="resetProductCategories()"
-                    >Ververs</button>
+                    >{{ $trans('Refresh') }}</button>
                   </div>
                 </div>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Rekening</h5>
+                <h5>{{ $trans('Account') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
-                  v-bind:label="$trans('Rekening')"
+                  v-bind:label="$trans('Account')"
                   label-for="product_category_uuid">
                   <div class="d-flex">
                     <BFormSelect
@@ -162,14 +162,14 @@
                       class="btn btn-primary m-1"
                       @click="updateProductCategory"
                       :disabled="!isDepartmentOk || !isProductCategoriesOk"
-                    >Submit</button>
+                    >{{ $trans('Submit') }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Product voor werkuren</h5>
+                <h5>{{ $trans('Product for work hours') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -189,14 +189,14 @@
                       class="btn btn-primary m-1"
                       @click="openWorkHoursProductChooserModal"
                       :disabled="!isDepartmentOk"
-                    >Kies</button>
+                    >{{ $trans("Choose") }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Product voor reisuren</h5>
+                <h5>{{ $trans('Product for travel hours') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -216,14 +216,14 @@
                       class="btn btn-primary m-1"
                       @click="openTravelHoursProductChooserModal"
                       :disabled="!isDepartmentOk"
-                    >Kies</button>
+                    >{{ $trans("Choose") }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>Factuur template</h5>
+                <h5>{{ $trans('Invoice template') }}</h5>
                 <b-form-group
                   label-size="sm"
                   label-cols="4"
@@ -243,14 +243,14 @@
                       :disabled="!isDepartmentOk"
                       class="btn btn-primary m-1"
                       @click="chooseInvoiceTemplate"
-                    >Kies</button>
+                    >{{ $trans("Choose") }}</button>
                   </div>
                 </b-form-group>
               </div>
             </li>
             <li>
               <div class="section rounded-sm revert">
-                <h5>BTW-tarieven</h5>
+                <h5>{{ $trans('VAT rates') }}</h5>
                 <b-table
                   id="tax-rates-table"
                   small
@@ -261,7 +261,7 @@
                 >
                 </b-table>
                 <p v-if="!taxRates.length">
-                  Nog geen BTW-tarieven aanwezig
+                  {{ $trans('No VAT rates present yet') }}
                 </p>
                 <div class="btn-group d-flex justify-content-end">
                   <div
@@ -271,7 +271,7 @@
                       :disabled="!isDepartmentOk"
                       class="btn btn-primary m-1"
                       @click="resetTaxRates()"
-                    >Ververs</button>
+                    >{{ $trans("Refresh") }}</button>
                   </div>
                 </div>
               </div>
@@ -477,7 +477,7 @@ export default {
     async resetTaxRates() {
       let loader = this.loading.show();
       const response = await this.service.resetTaxRates(this.settings.department_uuid)
-      infoToast(this.create, "BTW-tarieven",
+      infoToast(this.create, this.$trans("VAT rates"),
         `${response.delete_result[0]} verwijderd, ${response.created} aangemaakt`)
       await this.fetchTaxRates()
       loader.hide()
@@ -494,8 +494,8 @@ export default {
     async resetProductCategories() {
       let loader = this.loading.show();
       const response = await this.service.resetProductCategories(this.settings.department_uuid)
-      infoToast(this.create, "Rekeningen",
-        `${response.delete_result[0]} verwijderd, ${response.created} aangemaakt`)
+      infoToast(this.create, this.$trans("Accounts"),
+        `${response.delete_result[0]} ${this.$trans('verwijderd')}, ${response.created} ${this.$trans('created')}`)
       await this.fetchProductCategories()
       loader.hide()
     },

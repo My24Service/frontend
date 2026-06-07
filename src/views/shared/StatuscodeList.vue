@@ -6,7 +6,10 @@
           <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Statuscodes") }}
         </h3>
         <div class="flex-columns">
-          <router-link class="btn button" :to="'/orders/statuscodes/form'">
+          <router-link
+            class="btn btn-primary"
+            :to="{name: linkAdd }"
+          >
             <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add statuscode") }}
           </router-link>
         </div>
@@ -45,7 +48,9 @@
             </div>
           </template>
           <template #cell(statuscode)="data">
-            <router-link :to="{name: linkEdit, params: {pk: data.item.id}}">{{ data.item.statuscode }} </router-link>
+            <router-link :to="{name: linkEdit, params: {pk: data.item.id}}">
+              {{ data.item.statuscode }}
+            </router-link>
           </template>
           <template #cell(preview)="data">
             <small class="statuscode-preview" :style="`--bg-color: ${data.item.color}; --text-color: ${data.item.text_color || 'black'}`">
@@ -162,6 +167,10 @@ export default {
       type: [String],
       default: 'order'
     },
+    from_settings: {
+      type: Boolean,
+      default: false
+    }
   },
   components: {
     IconLinkPlus,
@@ -210,10 +219,10 @@ export default {
     }
   },
   created() {
-    this.linkAdd = `${this.list_type}-statuscode-add`
-    this.linkEdit = `${this.list_type}-statuscode-edit`
-    this.linkAddAction = `${this.list_type}-statuscode-action-add`
-    this.linkEditAction = `${this.list_type}-statuscode-action-edit`
+    this.linkAdd = this.from_settings ? 'settings-order-statuscode-add' : `${this.list_type}-statuscode-add`
+    this.linkEdit = this.from_settings ? 'settings-order-statuscode-edit' : `${this.list_type}-statuscode-edit`
+    this.linkAddAction = this.from_settings ? 'settings-statuscode-action-add' : `${this.list_type}-statuscode-action-add`
+    this.linkEditAction = this.from_settings ? 'settings-statuscode-action-edit' : `${this.list_type}-statuscode-action-edit`
 
     switch(this.list_type) {
       case 'order':

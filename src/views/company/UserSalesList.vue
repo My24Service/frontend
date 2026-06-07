@@ -17,7 +17,7 @@
             <BLink
               v-if="isStaff || isSuperuser"
               :to="{name: 'salesuser-add'}"
-              class="btn primary"
+              class="btn btn-primary"
             >
               <IBiPersonPlus></IBiPersonPlus>
               {{ $trans("Add sales user") }}
@@ -137,6 +137,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

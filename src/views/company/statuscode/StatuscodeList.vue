@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3><IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>{{ $trans("Statuscodes") }}</h3>
         <div class="flex-columns">
-          <router-link class="btn button" :to="{ name: linkAdd }">
+          <router-link class="btn btn-primary" :to="{ name: linkAdd }">
             <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans("Add statuscode") }}
           </router-link>
         </div>
@@ -258,6 +258,7 @@ export default {
     this.loadData();
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs["search-modal"].hide();

@@ -1,0 +1,32 @@
+/Users/evert/Sites/My24Service/frontend/src/views/company/ConnectorGrippSettings.vue
+   19:11 'Gripp API instellingen'
+   20:10 'De volgende gegevens zijn nodig om met de Gripp API te kunnen communiceren. Een'
+   20:98 'API key'
+   20:114 'kan binnen de
+      Gripp omgeving aangemaakt worden bij de API instellingen. Het wordt aangeraden een aparte'
+   21:105 'API rol'
+   21:121 'aan te
+      maken met een beperkt aantal rechten. De volgende rechten op de volgende modules zijn noodzakelijk:'
+   61:16 'De'
+   61:27 'API key'
+   61:43 'dat binnen het Gripp platform is aangemaakt dient hieronder ingevuld te worden.'
+   74:16 'Het'
+   74:28 'Webhook wachtwoord'
+   74:55 'is een willekeurige reeks alfanumerieke tekens dat onderdeel
+              wordt van het verzoek dat het Gripp platform stuurt naar My24Service als verificatie dat het verzoek
+              daadwerkelijk van Gripp komt.'
+   89:16 'Dit is het opdracht-type dat aan alle uit Gripp afkomstige opdrachten wordt toegewezen.'
+  102:16 'Dit is de standaard werknemer die aan de taken wordt toegewezen'
+  115:16 'Als de Gripp opdracht in deze fase wordt gezet, alleen dan wordt deze opdracht volledig
+            binnen My24Service geimporteerd.'
+  129:16 'Als de opdracht binnen My24Service in de status "werkbon getekend" wordt gezet, wordt
+              de opdracht naar Gripp gesynchroniseerd en krijgt deze binnen Gripp deze projectfase.
+            Als deze instelling leeg blijft, zal de fase niet worden aangepast.'
+  144:16 'De binnen My24Service geregistreerde uren zullen onder een aparte taak worden gesynchroniseerd
+            binnen Gripp. Deze taak heeft een taaktype nodig (dit kan bijvoorbeeld overeenkomen met Montage of Installatie).
+            Als deze instelling leeg of 0 is, wordt de taak (en bijbehorende uren) niet geëxporteerd.'
+  160:14 'De binnen My24Service geregistreerde uren zullen onder een aparte taak worden gesynchroniseerd
+            binnen Gripp. Deze taak heeft een taaktype nodig. Mogelijk dient een apart taaktype "Reizen" aangemaakt
+            worden. Als deze instelling leeg of 0 is, wordt de taak (en bijbehorende uren) niet geëxporteerd.'
+  167:10 'Deze gegevens moeten aan de kant van Gripp worden geconfigureerd bij de Automation opties. Dit zorgt ervoor
+      dat My24Service opdrachtgegevens kan ophalen op het moment dat deze wijzigen.'

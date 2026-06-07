@@ -35,7 +35,7 @@
               v-bind:title="$trans('Download')"
             />
           </BButton-group>
-          <router-link :to="{name: 'customer-add'}" class="btn">
+          <router-link :to="{name: 'customer-add'}" class="btn btn-primary">
             <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
           </router-link>
         </BButton-toolbar>

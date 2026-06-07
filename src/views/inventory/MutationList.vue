@@ -13,7 +13,10 @@
             v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <router-link :to="{name: 'mutation-add'}" class="btn">{{ $trans('Add mutation') }}</router-link>
+          <router-link
+            :to="{name: 'mutation-add'}"
+            class="btn btn-primary"
+          >{{ $trans('Add mutation') }}</router-link>
         </BButton-toolbar>
       </div>
     </header>

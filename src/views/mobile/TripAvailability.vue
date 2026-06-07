@@ -32,7 +32,7 @@
         </div>
       </template>
       <template #cell(trip)="data">
-        <b>{{ $trans('Trip') }}</b>: <router-link class="px-1" :to="{name: 'mobile-trip-availability-detail', params: {pk: data.item.id}}">trip-{{ data.item.id }}</router-link><br/>
+        <b>{{ $trans('Trip') }}</b>: <router-link class="px-1" :to="{name: 'mobile-trip-availability-detail', params: {pk: data.item.id}}">{{ $trans('trip') }}-{{ data.item.id }}</router-link><br/>
         <b>{{ $trans('Description') }}</b>: {{ data.item.description }}<br/>
         <b>{{ $trans('Date') }}</b>: {{ data.item.trip_date }}
       </template>

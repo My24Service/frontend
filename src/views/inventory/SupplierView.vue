@@ -9,7 +9,12 @@
         <div class="flex-columns">
           <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
             {{ $trans('Back') }}</BButton>
-          <router-link :to="{name: 'supplier-edit', params: {pk: this.pk}}" class="btn"> {{$trans('Edit supplier') }}</router-link>
+          <router-link
+            :to="{name: 'supplier-edit', params: {pk: this.pk}}"
+            class="btn btn-primary"
+          >
+            {{$trans('Edit supplier') }}
+          </router-link>
           </div>
       </div>
     </header>

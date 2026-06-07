@@ -18,15 +18,18 @@
               v-bind:title="$trans('Download QR-codes')"
             />
           </BButton-group>
-          <router-link :to="{name: newLink}" class="btn btn-primary">{{ $trans('Add location') }}</router-link>
+          <router-link
+            :to="{name: newLink}"
+            class="btn btn-primary"
+          >{{ $trans('Add location') }}</router-link>
         </BButton-toolbar>
       </div>
     </header>
 
     <div class="panel overflow-auto">
-      <b-table
+        <b-table
         id="location-table"
-        small
+        :small="!isShltrTheme"
         :busy='isLoading'
         :fields="fields"
         :items="locations"
@@ -142,9 +145,18 @@ export default {
     SearchModal,
     Pagination,
   },
+  props: {
+    from_settings: {
+      type: Boolean,
+      default: false,
+    }
+  },
   computed: {
     service() {
       return this.locationService
+    },
+    isShltrTheme() {
+      return document.documentElement.classList.contains('theme-shltr')
     },
     editLink() {
       if (this.hasBranches) {
@@ -180,26 +192,26 @@ export default {
         {key: 'customer', label: $trans('Customer')},
         {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons'}
+        ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       fieldsBranchPlanning: [
         {key: 'name', label: $trans('Name'), sortable: true},
         {key: 'branch', label: $trans('Branch')},
         {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons'}
+        ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       fieldsCustomerNonPlanning: [
         {key: 'name', label: $trans('Name'), sortable: true},
         {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons'}
+        ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       fieldsBranchNonPlanning: [
         {key: 'name', label: $trans('Name'), sortable: true},
         {key: 'created', label: $trans('Created'), sortable: true},
         {key: 'modified', label: $trans('Modified'), sortable: true},
-        {key: 'icons'}
+        ...(this.from_settings ? [{key: 'icons', label: ''}] : []),
       ],
       fields: [],
       sortBy: [{key: 'name', order: 'asc'}],
@@ -232,6 +244,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // sorting
     async sortingChanged(ctx) {
       this.sortBy = [{key: ctx.key, order: ctx.order}]

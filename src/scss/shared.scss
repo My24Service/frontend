@@ -90,128 +90,11 @@ tr:focus-within .edit-icon {
   padding-left: 240px;
 }
 
-.main-menu {
-  background-color: white;
-  box-shadow: 1px 0px #f2f2f2;
-  width: 240px;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  overflow-y: auto;
-  display: flex;
-
-
-  nav {
-    position: sticky;
-    top:0;
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    flex-grow: 1;
-
-    .nav-items {
-      overflow: auto;
-      padding: 0 1rem;
-      .has-children {
-        padding: .2em;
-      }
-      .badge {
-        color: $navbar-light-color !important;
-        background-color: white !important;
-        margin-right: 4px;
-      }
-    }
-
-    .b-nav-dropdown {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      padding: 0 1rem;
-    }
-    .nav {
-      flex-direction: column;
-    }
-
-    .page-subnav ul.nav {
-      &:not(:empty) {
-        //margin-block: 1ex;
-      }
-      a {
-        border-left: 1px solid #232c2f30;
-        border-radius: 0;
-        transition: all .2s, padding-inline-start .3s .2s;
-        &:hover,&:focus,&:active,&.router-link-active,&.active {
-          border-color: currentColor;
-        }
-        &.router-link-active {
-          padding-inline-start: 2ex;
-        }
-      }
-    }
-
-  }
-
-  li {
-    list-style: none;
-
-    a {
-      border-radius: .5ex;
-      color: #232c2fa0;
-      display: flex;
-      gap: 1ex;
-      align-items: center;
-      position: relative;
-      transition: all .2s;
-
-      &.router-link-active {
-        font-weight: bold;
-      }
-
-      &.router-link-active {
-        font-weight: bold;
-        color: #232c2fd9;
-      }
-
-      &.active {
-        font-weight: bold;
-        color: #232c2fd9;
-      }
-
-    }
-    &.has-children a::after {
-        content: '›';
-        position: absolute;
-        right: 1ex;
-    }
-  }
-
-  .page-subnav {
-    padding-inline-start: 1.2rem;
-    transform: translateY(0);
-    opacity: .5;
-    animation: fade .5s .05s cubic-bezier(0.075, 0.82, 0.165, 1) both;
-  }
-
-  @keyframes fade {
-    to {
-      opacity: 1;
-    }
-  }
-
-  .nav-items > li > a.active {
-    background: $navbar-light-color;
-    color: white;
-    padding: 4px;
-  }
-}
-
 .app-page {
   padding: 0;
   height: 100vh;
   overflow-y: scroll;
-  background-image: linear-gradient(to bottom, $primary 11rem, transparent 11rem);
+  background-image: linear-gradient(to bottom, $my24 11rem, transparent 11rem);
   > header {
     margin: 0 0rem 0;
     padding: 1rem 2rem;
@@ -385,12 +268,12 @@ tr:focus-within .edit-icon {
       margin: 2rem 1rem;
     }
   }
-  button.primary,
-  .btn-primary {
+  //button.primary,
+  //.btn-primary {
     //color: $my24;
 
     //color: $normal-link!important;
-  }
+  //}
   h6 {
     text-transform: uppercase;
     color: #232c2f;
@@ -752,34 +635,13 @@ html {
       align-items: center;
     }
 
-    .btn,
     .btn-primary {
       background-color: white;
       border-color: #fff6;
-      color: $my24;
+      color: $primary;
+
       &:not(:disabled):active {
         border-color: white !important;
-      }
-
-      &.outline,
-      &.btn-outline,
-      .outline-primary {
-        background-color: transparent !important;
-        border-color: #fff9 !important;
-        color: white !important;
-      }
-      &.btn-secondary {
-        //background-color: #0009;
-        background-color: $secondary;
-        //border-color:  transparent;
-        color: white;
-        &:hover {
-          /* background-color: $secondary; */
-        }
-      }
-      &[disabled] {
-        opacity: .5;
-        pointer-events: none;
       }
     }
     .btn-toolbar {
@@ -790,11 +652,6 @@ html {
       }
     }
 
-    .btn-group .btn-secondary {
-      margin-inline: 0;
-      background: white !important;
-      color: $primary;
-    }
     .backlink {
       cursor: pointer;
       &:hover {
@@ -803,8 +660,6 @@ html {
     }
   }
 }
-
-
 
 .badge {
   display: inline-flex;
@@ -1087,7 +942,6 @@ html {
     }
   }
 }
-
 
 //.dispatch-calendar.compact .order-compact {
 //  grid-row: 1;

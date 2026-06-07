@@ -30,3 +30,20 @@ defineProps({
   }
 });
 </script>
+
+<style scoped>
+h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+  padding-left: 0.5rem;
+  border-left: 3px solid #179da0;
+  line-height: 1.2;
+}
+
+.d-flex {
+  justify-content: flex-start;
+  width: 100%;
+  color: #1b4f72;
+}
+</style>

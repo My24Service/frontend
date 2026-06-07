@@ -10,7 +10,12 @@
           <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
             {{ $trans('Back') }}
           </BButton>
-          <router-link :to="{name: 'material-edit', params:{pk: this.pk}}" class="btn">{{ $trans('Edit material') }}</router-link>
+          <router-link
+            :to="{name: 'material-edit', params:{pk: this.pk}}"
+            class="btn btn-primary"
+          >
+            {{ $trans('Edit material') }}
+          </router-link>
         </div>
       </div>
     </header>

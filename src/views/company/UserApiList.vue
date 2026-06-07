@@ -13,7 +13,7 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <BLink :to="{name: 'apiuser-add'}" class="btn primary" v-if="isStaff || isSuperuser">
+          <BLink :to="{name: 'apiuser-add'}" class="btn btn-primary" v-if="isStaff || isSuperuser">
             {{$trans('Add API user')}}
           </BLink>
         </BButton-toolbar>
@@ -144,6 +144,7 @@ import Pagination from "../../components/Pagination.vue"
 import {ApiUserService} from '@/models/company/UserApi'
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -155,6 +156,7 @@ export default {
     }
   },
   name: 'UserApiList',
+  mixins: [componentMixin],
   components: {
     PillsCompanyUsers,
     IconLinkEdit,
@@ -186,6 +188,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

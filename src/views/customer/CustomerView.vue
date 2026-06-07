@@ -7,7 +7,7 @@
             <IBiBuilding></IBiBuilding>
             <span class="backlink" @click="goBack">{{ $trans("Customers") }}</span> / {{  customer.name }}
           </h3>
-          <router-link class="btn button" :to="{name:'customer-edit', pk: pk}">
+          <router-link class="btn btn-primary" :to="{name:'customer-edit', pk: pk}">
             <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit customer') }}
           </router-link>
         </div>
@@ -119,26 +119,30 @@
                       <b-row>
                         <b-col cols="5">
                           <table class="totals">
-                            <tr>
-                              <td><strong>{{ $trans('Name') }}:</strong></td>
-                              <td>{{ data.item.name }}</td>
-                            </tr>
-                            <tr>
-                              <td><strong>{{ $trans('Contract value') }}:</strong></td>
-                              <td>EUR {{ data.item.contract_value }}</td>
-                            </tr>
+                            <tbody>
+                              <tr>
+                                <td><strong>{{ $trans('Name') }}:</strong></td>
+                                <td>{{ data.item.name }}</td>
+                              </tr>
+                              <tr>
+                                <td><strong>{{ $trans('Contract value') }}:</strong></td>
+                                <td>EUR {{ data.item.contract_value }}</td>
+                              </tr>
+                            </tbody>
                           </table>
                         </b-col>
                         <b-col cols="4">
                           <table class="totals">
-                            <tr>
-                              <td><strong>{{ $trans('Created orders') }}</strong></td>
-                              <td>{{ data.item.created_orders}}</td>
-                            </tr>
-                            <tr>
-                              <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
-                              <td>{{ data.item.num_order_equipment}}</td>
-                            </tr>
+                            <tbody>
+                              <tr>
+                                <td><strong>{{ $trans('Created orders') }}</strong></td>
+                                <td>{{ data.item.created_orders}}</td>
+                              </tr>
+                              <tr>
+                                <td><strong>{{ $trans('# equipment in orders') }}</strong></td>
+                                <td>{{ data.item.num_order_equipment}}</td>
+                              </tr>
+                            </tbody>
                           </table>
                         </b-col>
                         <b-col cols="3">
@@ -251,7 +255,7 @@
                   </span>
                 </b-row>
               </b-tab>
-              <b-tab title="Insights" key="stats" @click="loadOrderStats">
+              <b-tab :title="$trans('Insights')" key="stats" @click="loadOrderStats">
                 <OrderStats
                   :data-in="statsData"
                   ref="order-stats"

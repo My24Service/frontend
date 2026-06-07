@@ -123,7 +123,7 @@
                     <div class="row">
                       <span class="pull-left col-sm-6"><b>{{ this.$trans('Term of payment') }}</b></span>
                       <span class="col-sm-6 underline">
-                          <span class="pull-right">{{ invoice.term_of_payment_days }} days</span>
+                          <span class="pull-right">{{ invoice.term_of_payment_days }} {{ $trans('days') }}</span>
                       </span>
                     </div>
                   </div>
@@ -135,11 +135,13 @@
                   <p><b>{{ this.$trans('Invoice lines') }}</b></p>
                   <table class="table table-bordered">
                       <thead>
-                          <th>{{ this.$trans('Description') }}</th>
-                          <th>{{ this.$trans('Amount') }}</th>
-                          <th>{{ this.$trans('Price') }}</th>
-                          <th>{{ this.$trans('Total') }}</th>
-                          <th>{{ this.$trans('VAT') }}</th>
+                          <tr>
+                            <th>{{ this.$trans('Description') }}</th>
+                            <th>{{ this.$trans('Amount') }}</th>
+                            <th>{{ this.$trans('Price') }}</th>
+                            <th>{{ this.$trans('Total') }}</th>
+                            <th>{{ this.$trans('VAT') }}</th>
+                          </tr>
                       </thead>
                       <tbody>
                           <tr v-for="invoiceline in invoice.invoicelines" :key="invoiceline.id">

@@ -20,7 +20,7 @@
               v-bind:method="function() { showSortModal() }"
             />
           </BButton-group>
-          <router-link class="btn button" :to="{name:'order-add'}">
+          <router-link class="btn btn-primary" :to="{name:'order-add'}">
             <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add order') }}
           </router-link>
         </BButton-toolbar>
@@ -475,7 +475,7 @@ export default {
     this.memberNewDataSocket.setOnmessageHandler(this.onNewData)
     this.memberNewDataSocket.getSocket()
   },
-  async beforeDestroy() {
+  async beforeUnmount() {
     await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
     this.memberNewDataSocket.removeOnmessageHandler()
     this.memberNewDataSocket.removeSocket()
