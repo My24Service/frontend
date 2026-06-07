@@ -83,12 +83,12 @@
             </div>
             <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
               <template v-if="hasQr">
-                <div v-if="equipment.qr_path" class="qr-container mb-3">
+                <div v-if="qrUrl" class="qr-container mb-3">
                   <BLink
-                    class="btn btn-sm btn-outline mb-2" :href="equipment.qr_path"
+                    class="btn btn-sm btn-outline mb-2" :href="qrUrl"
                     target="_blank"
                     :title="$trans('Open QR in new tab')">
-                    <img :alt="$trans('QR code')" class="qr-code-image img-fluid" :src="equipment.qr_path" />
+                    <img :alt="$trans('QR code')" class="qr-code-image img-fluid" :src="qrUrl" />
                   </BLink>
                   <p class="mb-0">
                     <a href="javascript:" @click="download(equipment)">

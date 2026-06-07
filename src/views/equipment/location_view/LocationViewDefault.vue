@@ -30,12 +30,12 @@
           <dd v-if="location">{{ location.name }}</dd>
           <dt v-if="hasQr" class="align-top-verdomme">{{ $trans('QR code') }}</dt>
           <dd v-if="hasQr">
-            <div v-if="location.qr_path" class="qr-container">
+            <div v-if="qrUrl" class="qr-container">
               <BLink
-                class="btn btn-sm btn-outline" :href="location.qr_path"
+                class="btn btn-sm btn-outline" :href="qrUrl"
                 target="_blank"
                 :title="$trans('Open QR in new tab')">
-                <img :alt="$trans('QR code')" class="qr-code-image" :src="location.qr_path" />
+                <img :alt="$trans('QR code')" class="qr-code-image" :src="qrUrl" />
               </BLink>
               <p>
                 <a href="javascript:" @click="download(location)">

@@ -49,12 +49,12 @@
           <dd>{{ equipment.price_dinero.toFormat('$0.00') }}</dd>
           <dt v-if="hasQr" class="align-top-verdomme">{{ this.$trans('QR code') }}</dt>
           <dd v-if="hasQr">
-            <div v-if="equipment.qr_path" class="qr-container">
+            <div v-if="qrUrl" class="qr-container">
               <BLink
-                class="btn btn-sm btn-outline" :href="equipment.qr_path"
+                class="btn btn-sm btn-outline" :href="qrUrl"
                 target="_blank"
                 :title="$trans('Open QR in new tab')">
-                <img :alt="$trans('QR code')" class="qr-code-image" :src="equipment.qr_path" />
+                <img :alt="$trans('QR code')" class="qr-code-image" :src="qrUrl" />
               </BLink>
               <p>
                 <a href="javascript:" @click="download(equipment)">

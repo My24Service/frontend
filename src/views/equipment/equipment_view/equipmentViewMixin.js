@@ -55,6 +55,9 @@ export default {
       const qrType = this.mainStore.getEquipmentQrType;
       return qrType !== 'none'
     },
+    qrUrl() {
+      return this.equipment?.qr_url ?? this.equipment?.qr_path;
+    },
     editLink() {
       if (this.hasBranches) {
         return 'equipment-equipment-edit'
@@ -101,7 +104,8 @@ export default {
       const result = await this.equipmentService.recreateQr(this.pk)
       this.equipment = {
         ...this.equipment,
-        qr_path: result.qr_path
+        qr_path: result.qr_path,
+        qr_url: result.qr_url,
       }
     },
     listLink() {
