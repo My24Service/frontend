@@ -144,11 +144,13 @@
                 <div class="row" v-if="chapter.quotationLines.length">
                   <table class="table table-bordered">
                     <thead>
-                    <th width="45%">{{ $trans('Info') }}</th>
-                    <th width="10%">{{ $trans('Amount') }}</th>
-                    <th width="15%">{{ $trans('Price') }}</th>
-                    <th width="15%">{{ $trans('Total') }}</th>
-                    <th width="15%">{{ $trans('VAT') }}</th>
+                    <tr>
+                      <th width="45%">{{ $trans('Info') }}</th>
+                      <th width="10%">{{ $trans('Amount') }}</th>
+                      <th width="15%">{{ $trans('Price') }}</th>
+                      <th width="15%">{{ $trans('Total') }}</th>
+                      <th width="15%">{{ $trans('VAT') }}</th>
+                    </tr>
                     </thead>
                     <tbody>
                     <tr v-for="quotationLine in chapter.quotationLines" :key="quotationLine.id">

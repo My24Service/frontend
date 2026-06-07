@@ -88,9 +88,11 @@
             <p><b>{{ $trans('Orderlines') }}</b></p>
             <table class="table table-bordered">
                 <thead>
-                    <th>{{ $trans('Equipment') }}</th>
-                    <th>{{ $trans('Location') }}</th>
-                    <th>{{ $trans('Remarks') }}</th>
+                    <tr>
+                        <th>{{ $trans('Equipment') }}</th>
+                        <th>{{ $trans('Location') }}</th>
+                        <th>{{ $trans('Remarks') }}</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr v-for="orderline in data.order.orderlines" :key="orderline.id">
@@ -105,12 +107,14 @@
         <div class="row">
             <table class="table table-bordered">
                 <thead>
-                    <th>{{ $trans("Date") }}</th>
-                    <th colspan="2">{{ $trans('Work hours') }}</th>
-                    <th>{{ $trans('Engineer') }}</th>
-                    <th colspan="2">{{ $trans('Travel time') }}</th>
-                    <th>{{ $trans('Distance to') }}</th>
-                    <th>{{ $trans('Distance back') }}</th>
+                    <tr>
+                        <th>{{ $trans("Date") }}</th>
+                        <th colspan="2">{{ $trans('Work hours') }}</th>
+                        <th>{{ $trans('Engineer') }}</th>
+                        <th colspan="2">{{ $trans('Travel time') }}</th>
+                        <th>{{ $trans('Distance to') }}</th>
+                        <th>{{ $trans('Distance back') }}</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr>
@@ -155,9 +159,11 @@
             <p><b>{{ $trans('Extra work') }}</b></p>
             <table class="table table-bordered">
                 <thead>
-                    <th>{{ $trans('Engineer') }}</th>
-                    <th>{{ $trans('Description') }}</th>
-                    <th>{{ $trans('Hours') }}</th>
+                    <tr>
+                        <th>{{ $trans('Engineer') }}</th>
+                        <th>{{ $trans('Description') }}</th>
+                        <th>{{ $trans('Hours') }}</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr v-for="extra_work in data.assigned_order_extra_work" :key="extra_work.id">
@@ -177,9 +183,11 @@
             <p><b>{{ $trans('Materials') }}</b></p>
             <table class="table table-bordered">
                 <thead>
-                    <th>{{ $trans('Material') }}</th>
-                    <th>{{ $trans('Identifier') }}</th>
-                    <th>{{ $trans('Amount') }}</th>
+                    <tr>
+                        <th>{{ $trans('Material') }}</th>
+                        <th>{{ $trans('Identifier') }}</th>
+                        <th>{{ $trans('Amount') }}</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr v-for="material in data.assigned_order_materials" :key="material.id">

@@ -5,14 +5,14 @@
     <b-modal
       id="password-change-modal"
       ref="password-change-modal"
-      v-bind:title="$trans('Change password')"
+      :title="$trans('Change password')"
       @show="resetModal"
       @hidden="resetModal"
       @ok="handleOk"
     >
       <form ref="password-change-form" @submit.stop.prevent="doPasswordChange">
         <BFormGroup
-          v-bind:label="$trans('Old password')"
+          :label="$trans('Old password')"
           label-for="old-password-input"
         >
           <BFormInput
@@ -29,7 +29,7 @@
           </b-form-invalid-feedback>
         </BFormGroup>
         <BFormGroup
-          v-bind:label="$trans('New password')"
+          :label="$trans('New password')"
           label-for="new-password1-input"
         >
           <BFormInput
@@ -46,7 +46,7 @@
           </b-form-invalid-feedback>
         </BFormGroup>
         <BFormGroup
-          v-bind:label="$trans('Password again')"
+          :label="$trans('Password again')"
           label-for="new-password2-input"
         >
           <BFormInput
@@ -62,13 +62,12 @@
           </b-form-invalid-feedback>
         </BFormGroup>
       </form>
-      {{ v$.new_password2.sameAs }}
     </b-modal>
 
     <b-modal
       id="logout-modal"
       ref="logout-modal"
-      v-bind:title="$trans('Log out?')"
+      :title="$trans('Log out?')"
       @ok="doLogout"
       auto-focus-button="ok"
     >
@@ -76,17 +75,17 @@
     </b-modal>
 
     <b-modal
-    id="lang-modal"
-    ref="lang-modal"
-    v-bind:title="$trans('Change language')"
-    :ok-disabled="true"
+      id="lang-modal"
+      ref="lang-modal"
+      :title="$trans('Change language')"
+      :ok-disabled="true"
     >
-      <template #modal-footer>
+      <template #footer="{cancel}">
         <BButton
           variant="secondary"
           size="sm"
           class="float-right"
-          @click="$bvModal.hide('lang-modal')"
+          @click="() => cancel()"
         >
           {{ $trans('Close') }}
         </BButton>
@@ -99,11 +98,18 @@
         v-if="memberInfo"
         :member-info="memberInfo"
       />
-      <NavItems />
-      <hr />
-      <b-nav-item-dropdown dropup :text="getUsername" right v-if="userInfo.user">
-        <template slot="button-content">
-          <IBiPersonCircle></IBiPersonCircle>
+      <NavItems v-if="!hasBranches && !onlySettings" />
+      <NavItemsBranch v-if="hasBranches && !onlySettings" />
+      <NavItemsSettings v-if="onlySettings" />
+      <b-nav-item-dropdown
+        dropup
+        :text="getUsername"
+        right
+        v-if="userInfo.user"
+        class="mb-1 border-top p-1"
+      >
+        <template #button-content>
+          <IBiPersonCircle></IBiPersonCircle>&nbsp;
           <span>{{ getUsername }}</span>
         </template>
         <li style="text-align: center;">
@@ -111,6 +117,9 @@
         </li>
         <li><span class='dropdown-item'><Version /></span></li>
         <b-dropdown-divider></b-dropdown-divider>
+        <b-dropdown-item :to="{name: 'settings-company'}" v-if="hasBranches">
+          {{ $trans('Settings') }}
+        </b-dropdown-item>
         <b-dropdown-item v-b-modal.lang-modal>{{ $trans('App Language') }}</b-dropdown-item>
         <b-dropdown-item v-b-modal.password-change-modal>{{ $trans('Change password') }}</b-dropdown-item>
         <b-dropdown-item @click="logout">{{ $trans('Logout') }}</b-dropdown-item>
@@ -142,6 +151,8 @@ import {useMainStore} from "@/stores/main";
 import {useAuthStore} from "@/stores/auth";
 import {computed} from "vue";
 import PasswordMeter from "vue-simple-password-meter";
+import NavItemsBranch from "@/components/NavItemsBranch.vue";
+import NavItemsSettings from "@/components/NavItemsSettings.vue";
 
 export default {
   setup() {
@@ -158,8 +169,13 @@ export default {
       userInfo
     }
   },
+  props: {
+    onlySettings: Boolean
+  },
   mixins: [componentMixin],
   components: {
+    NavItemsSettings,
+    NavItemsBranch,
     PasswordMeter,
     TheLanguageChooser,
     NavItems,
@@ -284,7 +300,7 @@ export default {
     this.memberNewDataSocket.setOnmessageHandler(this.onContractChange)
     this.memberNewDataSocket.getSocket()
   },
-  async beforeDestroy() {
+  async beforeUnmount() {
     await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
     this.memberNewDataSocket.removeOnmessageHandler()
     this.memberNewDataSocket.removeSocket()
@@ -296,7 +312,4 @@ export default {
 }
 </script>
 <style scoped>
-.navbar {
-  padding: 0 !important;
-}
 </style>

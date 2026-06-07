@@ -9,7 +9,10 @@
           <span>#<strong>{{ pk }}</strong></span>
         </h3>
         <div class="flex-columns">
-          <router-link class="btn button" :to="{name:'order-edit', pk: pk}">
+          <router-link
+            class="btn btn-primary"
+            :to="{name:'order-edit', pk: pk}"
+          >
             <IBiPencil font-scale="0.95"></IBiPencil> &nbsp; {{ $trans('Edit order') }}
           </router-link>
         </div>

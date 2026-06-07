@@ -2,7 +2,7 @@
   <b-modal
     id="modal"
     ref="modal"
-    title="Koppel product"
+    :title="$trans('Link product')"
     ok-only
     @ok="hide"
     ok-title="Annuleer"
@@ -10,36 +10,36 @@
   >
     <div v-if="showDetails && product">
       <div>
-        <h3>{{ product.name }} details</h3>
+        <h3>{{ product.name }} {{ $trans('details') }}</h3>
         <dl>
-          <dt>Naam</dt>
+          <dt>{{ $trans('Name') }}</dt>
           <dd>{{ product.name }}</dd>
-          <dt>Code</dt>
+          <dt>{{ $trans('Code') }}</dt>
           <dd>{{ product.code }}</dd>
-          <dt>Omschrijving</dt>
+          <dt>{{ $trans('Description') }}</dt>
           <dd>{{ product.description }}</dd>
-          <dt>Rekening</dt>
+          <dt>{{ $trans('Account') }}</dt>
           <dd>{{ product.product_category_detail.name }}</dd>
-          <dt>Inkoopprijs</dt>
+          <dt>{{ $trans('Purchase price') }}</dt>
           <dd>{{ product.purchase_price ? product.purchase_price.currency : '-' }} {{ product.purchase_price? product.purchase_price.amount : '-' }}</dd>
-          <dt>Verkoopprijs</dt>
+          <dt>{{ $trans('Sales price') }}</dt>
           <dd>{{ product.selling_price? product.selling_price.currency : '-' }} {{ product.selling_price ? product.selling_price.amount : '-' }}</dd>
-          <dt>BTW-tarief</dt>
+          <dt>{{ $trans('VAT rate') }}</dt>
           <dd>{{ product.tax_detail.rate }}</dd>
-          <dt>Aangemaakt</dt>
+          <dt>{{ $trans('Created') }}</dt>
           <dd>{{ product.added_at }}</dd>
-          <dt>Gewijzigd</dt>
+          <dt>{{ $trans('Modified') }}</dt>
           <dd>{{ product.updated_at }}</dd>
         </dl>
       </div>
     </div>
     <div v-else-if="showForm">
-      <h3>Nieuw teamleader product</h3>
+      <h3>{{ $trans('New Teamleader product') }}</h3>
       <form v-if="product">
         <BFormGroup
-          label="Naam"
+          :label="$trans('Name')"
           label-for="name-input"
-          invalid-feedback="Naam is vereist"
+          :invalid-feedback="$trans('Name is required')"
           :state="isSubmitClicked ? !v$.product.name.$error : null"
         >
           <BFormInput
@@ -50,7 +50,7 @@
           ></BFormInput>
         </BFormGroup>
         <BFormGroup
-          label="Code"
+          :label="$trans('Code')"
           label-for="code-input"
         >
           <BFormInput
@@ -59,7 +59,7 @@
           ></BFormInput>
         </BFormGroup>
         <BFormGroup
-          label="Omschrijving"
+          :label="$trans('Description')"
           label-for="description-input"
         >
           <BFormInput
@@ -70,7 +70,7 @@
         <BRow>
           <BCol cols="4">
             <BFormGroup
-              label="Inkoopprijs"
+              :label="$trans('Purchase price')"
               label-for="purchase_price-input"
             >
               <PriceInput
@@ -82,7 +82,7 @@
           </BCol>
           <BCol cols="4">
             <BFormGroup
-              label="Verkoopprijs"
+              :label="$trans('Sales price')"
               label-for="selling_price-input"
             >
               <PriceInput
@@ -94,7 +94,7 @@
           </BCol>
           <BCol cols="4">
             <BFormGroup
-              label="BTW-tarief"
+              :label="$trans('VAT rate')"
               label-for="tax_rate_uuid-input"
             >
               <BFormSelect
@@ -110,7 +110,7 @@
           <BButton
             @click="createLinkProduct"
             variant="primary"
-          >Maak aan</BButton>
+          >{{ $trans('Create') }}</BButton>
         </div>
       </form>
     </div>
@@ -128,7 +128,7 @@
             <BButton
               @click="doSearch"
               type="submit"
-            >Zoeken</BButton>
+            >{{ $trans('Search') }}</BButton>
           </b-col>
         </b-row>
       </BForm>
@@ -147,7 +147,7 @@
           <BButton
             @click="() => showDetail(data.item.id)"
           >
-            Details
+            {{ $trans('Details') }}
           </BButton>
         </template>
       </b-table>
@@ -158,7 +158,7 @@
         <BButton
           @click="newTeamleaderProduct"
           variant="primary"
-        >Voeg nieuw teamleader product toe</BButton>
+        >{{ $trans('Add new Teamleader product') }}</BButton>
       </div>
     </div>
   </b-modal>

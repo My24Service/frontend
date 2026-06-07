@@ -13,7 +13,13 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <BLink :to="{name: 'customeruser-add'}" class="btn primary" v-if="isStaff || isSuperuser">{{$trans('Add customer user')}}</BLink>
+          <BLink
+            :to="{name: 'customeruser-add'}"
+            class="btn btn-primary"
+            v-if="isStaff || isSuperuser"
+          >
+            {{ $trans('Add customer user') }}
+          </BLink>
         </BButton-toolbar>
       </div>
     </header>
@@ -93,6 +99,7 @@ import SearchModal from '../../components/SearchModal.vue'
 import Pagination from "../../components/Pagination.vue"
 import {useToast} from "bootstrap-vue-next";
 import {errorToast, infoToast, $trans} from "@/utils";
+import componentMixin from "@/mixins/common";
 
 export default {
   setup() {
@@ -103,6 +110,7 @@ export default {
       create
     }
   },
+  mixins: [componentMixin],
   name: 'UserCustomerList',
   components: {
     PillsCompanyUsers,
@@ -136,6 +144,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

@@ -72,7 +72,7 @@ export default {
       query: null,
       documents: [],
       fields: [
-        {key: 'name', label: 'Naam'},
+        {key: 'name', label: this.$trans('Name')},
       ]
     }
   },

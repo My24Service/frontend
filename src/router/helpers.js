@@ -2,7 +2,7 @@ import UserFilterList from "../views/shared/UserFilterList";
 import SubNavOrders from "../components/SubNavOrders";
 import UserFilterForm from "../views/shared/UserFilterForm";
 
-function createUserFilterRoutes(name_part, path_part, filter_type) {
+function createUserFilterRoutes(name_part, path_part, filter_type, from_settings=false) {
   return [
     {
       name: `${name_part}-filter-list`,
@@ -15,6 +15,7 @@ function createUserFilterRoutes(name_part, path_part, filter_type) {
         'app-content': () => ({
           type: filter_type,
           route_name_part: name_part,
+          from_settings
         }),
         'app-subnav': true
       },

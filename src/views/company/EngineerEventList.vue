@@ -213,7 +213,7 @@ export default {
     memberNewDataSocket.setOnmessageHandler(this.onNewData)
     memberNewDataSocket.getSocket()
   },
-  beforeDestroy() {
+  beforeUnmount() {
     memberNewDataSocket.removeOnmessageHandler(NEW_DATA_EVENTS.ENGINEER_EVENT)
   },
 }

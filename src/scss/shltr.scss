@@ -11,14 +11,192 @@ $color-accent: #30BFBF;
 //global-color-1cf88dd:
 
 $my24: #30BFBF;
-$primary: #000;
-$secondary: $my24;
+$primary: $my24;
+$secondary: #293133;
 
-$navbar-light-color: $secondary;
-$active-link: $secondary;
+$navbar-light-color: $my24;
+$active-link: $my24;
 $normal-link: $secondary;
 $font-size-base: 0.9rem;
 
 @import 'bootstrap/scss/bootstrap.scss';
 @import "bootstrap-vue-next/dist/bootstrap-vue-next.css";
 @import "./shared.scss";
+
+
+/* Fix Order List Padding and Overflow */
+.order-list-container {
+  overflow-x: auto;
+  width: 100%;
+
+  .listing.order-list {
+    li {
+      padding-left: 0;
+      padding-right: 0;
+
+      > .listing-item {
+        padding-left: 0;
+        padding-right: 0;
+        grid-template-columns: max-content repeat(6, auto);
+
+        > :first-child {
+          min-width: unset;
+        }
+      }
+    }
+  }
+}
+
+.section_block .data-table {
+  overflow-y: visible;
+  height: 0; /* this allows the dashboard block to grow correctly */
+}
+
+table#equipment-table,
+table#location-table {
+  thead th {
+    text-transform: none;
+    font-weight: 600;
+    color: #212529;
+    background-color: #f4f5f7;
+    letter-spacing: normal;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  td a {
+    text-decoration: none;
+    color: #212529;
+    font-weight: normal;
+  }
+
+  td a:hover {
+    text-decoration: underline;
+  }
+
+  tr:hover > td {
+    background-color: $primary;
+
+    &, & > * {
+      color: white;
+    }
+  }
+}
+
+.main-menu {
+  background-color: white;
+  box-shadow: 1px 0 #f2f2f2;
+  width: 240px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  overflow-y: auto;
+  display: flex;
+
+  nav {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    flex-grow: 1;
+
+    div.branch {
+      li {
+        a {
+          font-size: 1.2em !important;
+          font-weight: 600;
+          padding: .2em;
+          color: $secondary;
+
+          &:hover {
+            color: #efefef;
+            background-color: $secondary;
+          }
+        }
+      }
+    }
+
+    div.branch-settings {
+      li {
+        a {
+          padding: .4em;
+        }
+      }
+    }
+
+    .nav-items {
+      overflow: auto;
+      padding: 0;
+
+      .has-children {
+        padding: .2em;
+      }
+      .badge {
+        color: $navbar-light-color !important;
+        background-color: white !important;
+        margin-right: 4px;
+      }
+    }
+
+    .b-nav-dropdown {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 0 1rem;
+    }
+
+    .nav {
+      flex-direction: column;
+    }
+  }
+
+  li {
+    list-style: none;
+
+    a {
+      border-radius: 0;
+      color: $primary;
+      display: flex;
+      gap: 1ex;
+      align-items: center;
+      position: relative;
+      transition: all .2s;
+
+      &.router-link-active {
+        font-weight: bold;
+      }
+
+      &.router-link-active {
+        font-weight: bold;
+        color: $secondary;
+      }
+
+      &.active {
+        font-weight: bold;
+        color: $secondary;
+      }
+    }
+
+    &.has-children a::after {
+      content: '›';
+      position: absolute;
+      right: 1ex;
+    }
+  }
+
+  @keyframes fade {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .nav-items > li > a.active {
+    background: $navbar-light-color;
+    //color: $secondary;
+    color: #efefef;
+    padding: 4px;
+  }
+}

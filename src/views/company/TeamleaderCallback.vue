@@ -14,24 +14,24 @@
           class="bg-success text-white p-4 m-4 rounded-sm"
           v-if="isSuccess !== null && isSuccess === true"
         >
-          <h1>Gelukt</h1>
+          <h1>{{ $trans('Success') }}</h1>
           <p class="strong">
-            Verbinding met Teamleader is gelegd.
+            {{ $trans('Connection with Teamleader has been established.') }}
           </p>
           <p>
-            U kunt dit venster sluiten.
+            {{ $trans('You can close this window.') }}
           </p>
         </div>
         <div
           v-else
           class="bg-warning text-white p-4 m-4 rounded-sm"
         >
-          <h1>Mislukt</h1>
+          <h1>{{ $trans('Failed') }}</h1>
           <p class="strong">
-            Verbinding met Teamleader is niet gelegd.
+            {{ $trans('Connection with Teamleader has not been established.') }}
           </p>
           <p>
-            U kunt dit venster sluiten.
+            {{ $trans('You can close this window.') }}
           </p>
         </div>
       </div>

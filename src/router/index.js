@@ -21,6 +21,7 @@ import {AUTH_LEVELS} from "@/constants";
 import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/utils";
 import { useAuthStore } from '@/stores/auth'
 import startpage from "@/router/startpage";
+import settings from "@/router/settings";
 
 const routes = [
   {
@@ -43,7 +44,8 @@ const routes = [
   ...budget,
   ...catchall,
   ...docks,
-  ...startpage
+  ...startpage,
+  ...settings
 ]
 
 export const router = createRouter({

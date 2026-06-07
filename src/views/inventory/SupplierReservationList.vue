@@ -14,7 +14,10 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <router-link :to="{name: 'supplier-reservation-add'}" class="btn primary">
+          <router-link
+            :to="{name: 'supplier-reservation-add'}"
+            class="btn btn-primary"
+          >
             {{ $trans("Add reservation") }}
           </router-link>
         </BButton-toolbar>
@@ -83,7 +86,7 @@
         <template #cell(materials)="data">
 
           <span v-if="data.item.materials.length" :title="`${data.item.materials.length} materials`">
-              {{data.item.materials.length}} material{{  data.item.materials.length > 1 ? 's' : ''}}
+              {{data.item.materials.length}} {{ data.item.materials.length > 1 ? $trans('materials') : $trans('material') }}
               &nbsp;&nbsp;&mdash;&nbsp;&nbsp;
               <span class="dimmed">
                 {{ data.item.materials[0].amount }} {{ data.item.materials[0].material_view.name }}
@@ -169,6 +172,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()

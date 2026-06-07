@@ -31,6 +31,10 @@ class DocumentService extends BaseModel {
   setParentId( id ) {
     this.setListArgs( `equipment=${id}` )
   }
+  
+  setParentBranchId(id) {
+    this.setListArgs(`equipment__branch=${id}`);
+  }
 }
 
 class LocationDocumentService extends DocumentService {
@@ -46,6 +50,10 @@ class LocationDocumentService extends DocumentService {
 
   setParentId( id ) {
     this.setListArgs( `location=${id}` )
+  }
+
+  setParentBranchId(id) {
+    this.setListArgs(`location__branch=${id}`);
   }
 }
 

@@ -182,6 +182,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    $trans,
     async showEditModal(id) {
       const budgetData = await this.service.detail(id)
       this.budget = new this.service.model(budgetData)

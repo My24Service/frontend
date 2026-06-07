@@ -20,7 +20,7 @@
       <div class='page-title'>
         <h3>
           <IBiShop></IBiShop>
-          {{  $trans('Branches') }}
+          {{ $trans('Branches') }}
         </h3>
         <BButton-toolbar>
           <BButton-group>
@@ -33,8 +33,8 @@
             />
           </BButton-group>
           <router-link
-            :to="{name: 'company-branch-add'}"
-            class="btn"
+            :to="{name: linkAdd}"
+            class="btn btn-primary"
             >{{ $trans('New branch') }}</router-link>
         </BButton-toolbar>
       </div>
@@ -63,14 +63,11 @@
             <strong>{{ $trans('Loading...') }}</strong>
           </div>
         </template>
-
         <template #cell(id)="data">
-
-          <router-link :to="{name: 'company-branch-view', params: {pk: data.item.id}}">
+          <router-link :to="{name: linkView, params: {pk: data.item.id}}">
             {{ data.item.name }}, {{ data.item.city }}, {{ data.item.country_code }}
           </router-link>
         </template>
-
         <template #cell(contact)="data">
           <span v-if="data.item.contact && data.item.contact.trim() !== ''">
             <span v-if="data.item.email">
@@ -94,7 +91,7 @@
         <template #cell(icons)="data">
           <div class="h2 float-right">
             <IconLinkEdit
-              router_name="company-branch-edit"
+              :router_name="linkEdit"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -133,6 +130,35 @@ export default {
     // expose to template and other options API hooks
     return {
       create
+    }
+  },
+  props: {
+    from_settings: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    linkAdd() {
+      if (this.from_settings) {
+        return 'settings-branch-add'
+      }
+
+      return 'company-branch-add'
+    },
+    linkEdit() {
+      if (this.from_settings) {
+        return 'settings-branch-edit'
+      }
+
+      return 'company-branch-edit'
+    },
+    linkView() {
+      if (this.from_settings) {
+        return 'settings-branch-view'
+      }
+
+      return 'company-branch-view'
     }
   },
   mixins: [componentMixin],

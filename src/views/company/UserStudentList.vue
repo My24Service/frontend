@@ -161,6 +161,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // download
     downloadList() {
       if (confirm($trans('Are you sure you want to export all students?'))) {

@@ -27,6 +27,7 @@ import {createPinia} from "pinia";
 
 // style & themes
 import './scss/app.scss'
+import './scss/shltr.scss'
 import 'vue-loading-overlay/dist/css/index.css';
 import '@vuepic/vue-datepicker/dist/main.css'
 
@@ -46,6 +47,7 @@ const themes = {
   'trioworld': 'theme-shltr',
   'smurfit': 'theme-shltr',
   'demo-branches': 'theme-shltr',
+  // 'gls': 'theme-shltr',
 }
 const theme = companycode in themes ? themes[companycode] : defaultTheme
 toggleTheme({

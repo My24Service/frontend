@@ -12,7 +12,11 @@ class StatusService extends BaseModel {
 
 }
 
+class StatusesService extends BaseModel {
+  url = '/order/statuses/'
+}
+
 let statusModel = new StatusService()
 
 export default statusModel
-export { StatusService }
+export { StatusService, StatusesService }

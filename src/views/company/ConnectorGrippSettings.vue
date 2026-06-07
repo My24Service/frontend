@@ -38,13 +38,13 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Gripp API koppeling')"
+            v-bind:label="$trans('Gripp API connection')"
             label-for="api_enabled">
             <BFormCheckbox
               id="api_enabled"
               size="sm"
               v-model="settings.gripp_api_enabled">
-              Actief
+              {{ $trans('Active') }}
             </BFormCheckbox>
           </BFormGroup>
 
@@ -64,7 +64,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Webhook wachtwoord')"
+            v-bind:label="$trans('Webhook password')"
             label-for="webhook_password">
             <BFormInput
               id="webhook_password"
@@ -92,7 +92,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Werknemer (numeriek)')"
+            v-bind:label="$trans('Employee (numeric)')"
             label-for="default_employee">
             <BFormInput
               id="default_employee"
@@ -105,7 +105,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Projectfase voor importeren (numeriek)')"
+            v-bind:label="$trans('Project phase for import (numeric)')"
             label-for="project_phase_match">
             <BFormInput
               id="project_phase_match"
@@ -119,7 +119,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Projectfase na exporteren (numeriek)')"
+            v-bind:label="$trans('Project phase after export (numeric)')"
             label-for="project_phase_workorder_signed">
             <BFormInput
               id="project_phase_workorder_signed"
@@ -134,7 +134,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Taaktype voor werkuren (numeriek)')"
+            v-bind:label="$trans('Task type for work hours (numeric)')"
             label-for="tasktype_hours">
             <BFormInput
               id="tasktype_hours"
@@ -149,7 +149,7 @@
           <BFormGroup
             label-size="sm"
             label-cols="4"
-            v-bind:label="$trans('Taaktype voor reisuren (numeriek)')"
+            v-bind:label="$trans('Task type for travel hours (numeric)')"
             label-for="tasktype_travel">
             <BFormInput
               id="tasktype_travel"
@@ -163,18 +163,20 @@
         </div>
       </b-form>
 
-      <h4 class="mt-2">Automation instellingen</h4>
+      <h4 class="mt-2">{{ $trans('Automation settings') }}</h4>
       <p>Deze gegevens moeten aan de kant van Gripp worden geconfigureerd bij de Automation opties. Dit zorgt ervoor
       dat My24Service opdrachtgegevens kan ophalen op het moment dat deze wijzigen.</p>
-      <b-alert variant="warning" v-if="!hasWebhookPassword">Er is geen webhook wachtwoord ingesteld. Voer hierboven de gegevens in en sla deze op.</b-alert>
+      <b-alert variant="warning" v-if="!hasWebhookPassword">{{ $trans('No webhook password is set. Enter the details above and save them.') }}</b-alert>
       <table class="data-table" v-if="hasWebhookPassword" style="width:100%;">
-        <tr><td>Naam: </td><td><strong>My24Service verzoek</strong></td></tr>
-        <tr><td>Wanneer: </td><td><strong>Opdracht</strong> wordt <strong>gewijzigd</strong></td></tr>
-        <tr><td>Actie: </td><td><strong>Web verzoek</strong></td></tr>
-        <tr><td>Verzoek methode:</td><td><strong>POST</strong></td></tr>
-        <tr><td>Headers:</td><td><strong>User-Agent: My24Service/Gripp<br/>Content-Type: application/json</strong></td></tr>
-        <tr><td>Web adres:</td><td><code>https://{{member["companycode"]}}.my24service.com/api/connector/gripp/{{settings["gripp_webhook_password"]}}/automation-updated-order</code></td></tr>
-        <tr><td>Body:</td><td><code>{ "number": {nummer} }</code></td></tr>
+        <tbody>
+          <tr><td>{{ $trans('Name') }}: </td><td><strong>{{ $trans('My24Service request') }}</strong></td></tr>
+          <tr><td>{{ $trans('When') }}: </td><td><strong>{{ $trans('Order') }}</strong> {{ $trans('is') }} <strong>{{ $trans('modified') }}</strong></td></tr>
+          <tr><td>{{ $trans('Action') }}: </td><td><strong>{{ $trans('Web request') }}</strong></td></tr>
+          <tr><td>{{ $trans('Request method') }}:</td><td><strong>POST</strong></td></tr>
+          <tr><td>Headers:</td><td><strong>User-Agent: My24Service/Gripp<br/>Content-Type: application/json</strong></td></tr>
+          <tr><td>{{ $trans('Web address') }}:</td><td><code>https://{{member["companycode"]}}.my24service.com/api/connector/gripp/{{settings["gripp_webhook_password"]}}/automation-updated-order</code></td></tr>
+          <tr><td>Body:</td><td><code>{ "number": {nummer} }</code></td></tr>
+        </tbody>
       </table>
     </div>
   </div>

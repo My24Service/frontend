@@ -4,6 +4,7 @@ FROM node:24-slim AS base
 RUN apt-get update && apt-get install -y git
 
 WORKDIR /app
+RUN ./save_version.sh
 COPY . .
 RUN npm install
 RUN npm update vite-plugin-theme-preprocessor

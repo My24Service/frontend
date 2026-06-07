@@ -4,7 +4,9 @@
       <div class="page-title">
         <h3>
           <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
-          <router-link :to="{name: 'order-statuscode-list'}">{{ $trans('Statuscodes') }}</router-link> /
+          <router-link
+            :to="{name: linkList}"
+          >{{ $trans('Statuscodes') }}</router-link> /
           <strong>{{ statuscode.statuscode }}</strong>
           <span class="dimmed">
             <span v-if="isCreate && !statuscode.statuscode">{{ $trans('new') }}</span>
@@ -273,6 +275,10 @@ export default {
     pk: {
       type: [String, Number],
       default: null
+    },
+    from_settings: {
+      type: Boolean,
+      default: false
     }
   },
   validations() {
@@ -304,7 +310,14 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
-    }
+    },
+    linkList() {
+      if (this.from_settings) {
+        return 'settings-order-statuscode-list'
+      }
+
+      return 'order-statuscode-list'
+    },
   },
   created() {
     switch(this.list_type) {

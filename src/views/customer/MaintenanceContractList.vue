@@ -13,7 +13,7 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <router-link :to="{name: 'maintenance-contract-add'}" class="btn primary">
+          <router-link :to="{name: 'maintenance-contract-add'}" class="btn btn-primary">
             {{ $trans('Add contract') }}
           </router-link>
         </BButton-toolbar>

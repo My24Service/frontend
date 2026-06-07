@@ -32,7 +32,7 @@
               v-bind:method="function() { showSearchModal() }"
             />
           </BButton-group>
-          <router-link :to="{name: 'company-import-add'}" class="btn">
+          <router-link :to="{name: 'company-import-add'}" class="btn btn-primary">
             <IBiFileArrowDown></IBiFileArrowDown>
             {{$trans('Add import')}}
           </router-link>
@@ -153,6 +153,7 @@ export default {
     this.loadData()
   },
   methods: {
+    $trans,
     // search
     handleSearchOk(val) {
       this.$refs['search-modal'].hide()
