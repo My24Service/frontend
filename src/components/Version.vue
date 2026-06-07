@@ -27,6 +27,7 @@
 import { VERSION } from '@/version.js'
 import {onMounted, onUnmounted, ref} from "vue";
 import {$trans} from "@/utils";
+import axios from "axios";
 
 const version = VERSION
 const newVersionAvailable = ref(false)
@@ -35,17 +36,17 @@ const intervalId = ref(null)
 const message = `Using the latest version (${VERSION})`
 
 async function checkVersion() {
-  // TODO implement this
-  // https://api.github.com/My24Service/frontend/releases
-  // const data = await axios.get('https://api.github.com/repos/OWNER/REPO/tags').then((response) => response.data)
+  if (document.location.protocol === 'https:') {
+    const data = await axios.get(`https://${document.location.origin}/assets/version.json`).then((response) => response.data)
 
-  // if (this.versionToInt(data.version) > this.versionToInt(this.version)) {
-  //   this.newVersionAvailable = true
-  //   this.newVersion = data.version
-  //   this.message = `A new version is available`
-  // } else {
-    newVersionAvailable.value = false
-  // }
+    if (versionToInt(data.version) > versionToInt(this.version)) {
+      newVersionAvailable.value = true
+      newVersion.value = data.version
+      message = `A new version is available`
+    } else {
+      newVersionAvailable.value = false
+    }
+  }
 }
 
 function versionToInt(version) {
