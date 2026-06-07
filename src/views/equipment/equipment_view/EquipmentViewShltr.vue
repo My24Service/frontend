@@ -151,10 +151,7 @@
               <h5 class="mb-0 text-center text-primary">{{ this.$trans('Work Orders') }}</h5>
             </div>
             <div class="card-body">
-              <p v-if="!workOrders.length">
-                <i>{{ $trans("No work orders") }}</i>
-              </p>
-              <WorkOrdersTable v-else :work-orders="workOrders" :is-loading="isWorkordersLoading" :hide-columns="['equipment']" />
+              <WorkOrdersTable :hide-columns="['equipment']" />
             </div>
           </div>
         </div>
@@ -187,29 +184,11 @@ import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import SearchModal from '@/components/SearchModal.vue'
 
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
-import {
-  BButton,
-  BButtonGroup,
-  BButtonToolbar, BLink,
-  BPagination,
-  BTab,
-  BTabs
-} from "bootstrap-vue-next";
-
-import orderService from '@/models/orders/Order.js'
 import equipmentViewMixin from './equipmentViewMixin.js'
 import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
-import orderlineService from '@/models/orders/Orderline.js'
 
 export default {
   components: {
-    BLink,
-    BButton,
-    BTabs,
-    BButtonGroup,
-    BPagination,
-    BTab,
-    BButtonToolbar,
     DocumentsComponent,
     ButtonLinkRefresh,
     ButtonLinkSearch,
@@ -225,26 +204,8 @@ export default {
   },
   data() {
     return {
-      workOrders: [],
-      isWorkordersLoading: false,
     }
   },
-  async created() {
-    await this.loadWorkOrders()
-  },
-  methods: {
-    async loadWorkOrders() {
-      this.isWorkordersLoading = true
-      try {
-        this.workOrders = await orderlineService.getLatestWorkorders(this.pk)
-      } catch (error) {
-        console.error('error fetching equipment workorders', error)
-        this.workOrders = []
-      } finally {
-        this.isWorkordersLoading = false
-      }
-    }
-  }
 }
 </script>
 

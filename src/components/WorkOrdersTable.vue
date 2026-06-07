@@ -45,7 +45,8 @@
 import componentMixin from '@/mixins/common.js'
 import moment from 'moment/min/moment-with-locales'
 import {useMainStore} from "@/stores/main/index.js";
-import {OrderlineService} from '@/models/orders/Orderline.js'
+import orderlineService, {OrderlineService} from '@/models/orders/Orderline.js'
+import {integer} from "@vuelidate/validators";
 
 export default {
   mixins: [componentMixin],
@@ -55,6 +56,10 @@ export default {
     }
   },
   props: {
+    equipmentPk: {
+      type: integer,
+      default: undefined
+    },
     hideColumns: {
       type: Array,
       default: () => [],
@@ -85,7 +90,7 @@ export default {
     this.$moment.locale(lang)
     this.isLoading = true
     try {
-      this.workOrders = await this.orderlineService.getLatestWorkorders()
+      this.workOrders = await this.orderlineService.getLatestWorkordersEquipment(this.equipmentPk)
       this.isLoading = false
     } catch (e) {
       this.isLoading = false

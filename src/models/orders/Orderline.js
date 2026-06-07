@@ -21,7 +21,7 @@ class OrderlineService extends BaseModel {
 
   url = "/order/orderline/";
 
-  async getLatestWorkorders(equipmentId = null) {
+  async getLatestWorkordersEquipment(equipmentId = null) {
     let url = `${this.url}latest_workorders/`;
     if (equipmentId) {
       url += `?equipment=${equipmentId}`;
