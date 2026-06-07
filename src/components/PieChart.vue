@@ -1,5 +1,5 @@
 <template>
-  <Doughnut :chart-data="chartDataLocal" :options="options" />
+  <Doughnut :chart-data="chartData" :options="options" />
 </template>
 <script>
 import {Doughnut} from 'vue-chartjs'
@@ -18,11 +18,6 @@ export default {
       type: Object,
       default: null
     },
-  },
-  data() {
-    return {
-      chartDataLocal: this.chartData
-    }
   }
 }
 </script>

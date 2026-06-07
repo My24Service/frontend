@@ -1,6 +1,6 @@
 <template>
-  <DashboardBlock v-if="!isLoading" :title="$trans('Log')" iconName="card-list">
-    <BContainer>
+  <DashboardBlock v-if="!isLoading" :title="$trans('Log')" iconName="card-list" height="100%">
+    <BContainer class="container">
       <BRow v-for="status in statuses" :key="status.id" class="log-row">
         <BCol cols="2">
           {{ status.order_id }}
@@ -70,6 +70,11 @@ export default {
 </script>
 
 <style scoped>
+.container {
+  height: 0;
+  overflow-y: visible; /* this allows the dashboard block to grow correctly */
+}
+
 div.log-row {
   padding: .4em;
   &:hover {
