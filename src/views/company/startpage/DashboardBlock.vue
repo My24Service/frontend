@@ -23,21 +23,28 @@ defineProps({
   iconName: {
     type: String,
     required: false,
+  },
+  height: {
+    type: String,
+    default: "22rem"
   }
 });
 </script>
 
 <style scoped>
 .section_block {
-  /* Modern Premium Card Block style overrides */
   --head-height: 3.5rem;
+  --margin-bottom: 1.5rem;
+
   border-radius: 4px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
   border: 1px solid #eef2f5;
   background-color: #fff;
-  margin-bottom: 1.5rem;
-  height: 22rem; /* Fixed height for dashboard layout alignment */
+
+  height: v-bind(height);
+  margin-bottom: var(--margin-bottom);
+  max-height: calc(100% - var(--margin-bottom));
 
   /* Card header - clean, transparent, center-aligned layout */
   .section_head {
@@ -52,6 +59,12 @@ defineProps({
   .section_content {
     height: calc(100% - var(--head-height));
     overflow-y: scroll;
+    margin-bottom: 1.25rem;
+
+    &:deep(th) {
+      position: sticky;
+      top: 0;
+    }
   }
 }
 </style>

@@ -9,17 +9,18 @@ const isLoading = ref(false)
 const orderService = new OrderService()
 const options = {
   responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-    // not sure how the plugin works after chartjs upgrade
-    datalabels: {
-      formatter: (value, _ctx) => {
-        return `${value}%`
-      },
-        color: '#fff',
+  maintainAspectRatio: false,
+  plugins: {
+  // not sure how the plugin works after chartjs upgrade
+  datalabels: {
+    formatter: (value, _ctx) => {
+      return `${value}%`
+    },
+      color: '#fff',
     }
   }
 }
+let colorIndex = 0
 const colorsOrderTypes = {}
 const orderTypesDataPie = []
 const orderTypesLabels = []
@@ -28,7 +29,9 @@ const leftOutOrderTypes = {}
 
 function getRandomColorOrderType(txt) {
   if (!(txt in colorsOrderTypes)) {
-    colorsOrderTypes[txt] = `#${Math.floor(Math.random()*16777215).toString(16)}`
+    const hue = (colorIndex * 137.508) % 360; // Golden angle spacing
+    colorsOrderTypes[txt] = `oklch(0.78 0.14 ${hue})`;
+    colorIndex++;
   }
 
   return colorsOrderTypes[txt]
@@ -78,7 +81,7 @@ onMounted(async () => {
 <template>
   <b-overlay :show="isLoading" rounded="sm">
     <pie-chart
-      v-if="chartdataOrderTypesPie"
+      v-if="Object.keys(chartdataOrderTypesPie).length"
       id="pie-chart-order-types"
       :chart-data="chartdataOrderTypesPie"
       :options="options"

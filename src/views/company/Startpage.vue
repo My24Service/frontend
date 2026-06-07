@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="app-page start-page">
     <header><!--
@@ -279,9 +280,14 @@
     </div>
     <div class="section dashboard_section mt-2">
       <div class="row dashboard_row">
-        <div class="col-12">
-          <DashboardBlock :title="$trans('Work Orders')" iconName="tools">
+        <div class="col-8">
+          <DashboardBlock :title="$trans('Work Orders')" iconName="tools" height="100%">
             <WorkOrdersTable />
+          </DashboardBlock>
+        </div>
+        <div class="col-4">
+          <DashboardBlock title="Order Types" iconName="pie-chart-fill" height="auto">
+            <OrderTypesPie />
           </DashboardBlock>
         </div>
       </div>
@@ -306,7 +312,6 @@
 import moment from 'moment/min/moment-with-locales'
 
 import {BranchService} from '@/models/company/Branch'
-import BranchPhotoCard from "@/views/company/startpage/BranchPhotoCard.vue"
 import BarChart from "@/components/BarChart.vue"
 import componentMixin from "@/mixins/common";
 import {MemberService} from "@/models/member/Member";
@@ -314,9 +319,12 @@ import {OrderService} from '@/models/orders/Order.js'
 import {DocumentService, LocationDocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 import {useMainStore} from "@/stores/main";
-import LogComponent from "@/views/company/startpage/LogComponent.vue";
-import DashboardBlock from "@/views/company/startpage/DashboardBlock.vue";
+import LogComponent from "./startpage/LogComponent.vue";
+
+import BranchPhotoCard from "./startpage/BranchPhotoCard.vue"
+import DashboardBlock from "./startpage/DashboardBlock.vue";
 import WorkOrdersTable from "@/components/WorkOrdersTable.vue";
+import OrderTypesPie from "./startpage/OrderTypesPie.vue";
 
 let d = new Date()
 
@@ -331,6 +339,7 @@ export default {
     BarChart,
     DashboardBlock,
     WorkOrdersTable,
+    OrderTypesPie,
   },
   mixins: [componentMixin],
   data() {

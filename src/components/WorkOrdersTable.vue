@@ -11,7 +11,6 @@
       :fields="workOrderFields"
       :items="workOrders"
       responsive="md"
-      :sticky-header="true"
       class="data-table"
       sort-icon-left
     >

@@ -47,6 +47,10 @@ $font-size-base: 0.9rem;
   }
 }
 
+.section_block .data-table {
+  overflow-y: visible;
+  height: 0; /* this allows the dashboard block to grow correctly */
+}
 
 table#equipment-table,
 table#location-table {
