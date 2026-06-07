@@ -151,7 +151,7 @@
               <h5 class="mb-0 text-center text-primary">{{ this.$trans('Latest Workorders') }}</h5>
             </div>
             <div class="card-body">
-              <WorkOrdersTable :hide-columns="['equipment']" />
+              <WorkOrdersTable :equipment-pk="pk" :hide-columns="['equipment']" />
             </div>
           </div>
         </div>
