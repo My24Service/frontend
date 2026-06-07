@@ -280,11 +280,8 @@
     <div class="section dashboard_section mt-2">
       <div class="row dashboard_row">
         <div class="col-12">
-          <DashboardBlock v-if="!isLoading" :title="$trans('Work Orders')" iconName="tools">
-            <p v-if="!workOrders.length">
-              <i>{{ $trans("No work orders") }}</i>
-            </p>
-            <WorkOrdersTable v-else :work-orders="workOrders" :is-loading="isLoading" :hideColumns="['link']" />
+          <DashboardBlock :title="$trans('Work Orders')" iconName="tools">
+            <WorkOrdersTable :hideColumns="['link']" />
           </DashboardBlock>
         </div>
       </div>
@@ -311,11 +308,9 @@ import moment from 'moment/min/moment-with-locales'
 import {BranchService} from '@/models/company/Branch'
 import BranchPhotoCard from "@/views/company/startpage/BranchPhotoCard.vue"
 import BarChart from "@/components/BarChart.vue"
-import PieChart from "@/components/PieChart.vue"
 import componentMixin from "@/mixins/common";
 import {MemberService} from "@/models/member/Member";
 import {OrderService} from '@/models/orders/Order.js'
-import {OrderlineService} from '@/models/orders/Orderline.js'
 import {DocumentService, LocationDocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 import {useMainStore} from "@/stores/main";
@@ -334,7 +329,6 @@ export default {
     LogComponent,
     BranchPhotoCard,
     BarChart,
-    PieChart,
     DashboardBlock,
     WorkOrdersTable,
   },
@@ -346,13 +340,11 @@ export default {
       branchService: new BranchService(),
       memberService: new MemberService(),
       orderService: new OrderService(),
-      orderlineService: new OrderlineService(),
       equipmentDocumentService: new DocumentService(),
       locationDocumentService: new LocationDocumentService(),
       purchaseInvoiceService: new PurchaseInvoiceService(),
       equipmentDocuments: [],
       locationDocuments: [],
-      workOrders: [],
       monthlyCostOverview: [],
       documentFields: [
         {key: 'name', label: this.$trans('Document'), sortable: true},
@@ -444,10 +436,6 @@ export default {
         this.locationDocumentService.setParentBranchId(this.branch.id)
         await this.locationDocumentService.loadCollection()
         this.locationDocuments = this.locationDocumentService.collection
-
-        // this.workOrders = await this.orderService.getEquipmentWorkorders()
-        this.workOrders = await this.orderlineService.getLatestWorkorders()
-        console.log(this.workOrders)
 
         this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)
 
