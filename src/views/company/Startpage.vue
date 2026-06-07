@@ -281,7 +281,7 @@
       <div class="row dashboard_row">
         <div class="col-12">
           <DashboardBlock :title="$trans('Work Orders')" iconName="tools">
-            <WorkOrdersTable :hideColumns="['link']" />
+            <WorkOrdersTable />
           </DashboardBlock>
         </div>
       </div>
@@ -473,50 +473,9 @@ export default {
   padding-inline: 1.5rem;
 }
 
-/* Modern Premium Card Block style overrides */
-:deep(.section_block) {
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-  border: 1px solid #eef2f5;
-  background-color: #fff;
-  margin-bottom: 1.5rem;
-  height: 22rem; /* Fixed height for dashboard layout alignment */
-}
-
 /* Override default height for non-tabbed standard block */
 .dashboard_row_expand .row .section_block {
   height: auto;
-}
-
-/* Card header - clean, transparent, center-aligned layout */
-:deep(.section_head) {
-  height: 3.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start; /* Left-aligned to support vertical line layout */
-  padding-top: 1.25rem;
-  padding-left: 1.25rem;
-}
-
-:deep(.section_head h5) {
-  font-size: 1.1rem;
-  font-weight: 600;
-  text-align: left;
-  padding-left: 0.5rem;
-  border-left: 3px solid #179da0;
-  line-height: 1.2;
-}
-
-:deep(.section_head .d-flex) {
-  justify-content: flex-start;
-  width: 100%;
-  color: #1b4f72;
-}
-
-:deep(.section_head svg.bi) {
-  width: 18px;
-  height: 18px;
 }
 
 /* Text-only uppercase tabs style with active underline */
@@ -670,17 +629,10 @@ export default {
 }
 
 /* Premium Tables styling */
-:deep(.data-table table thead tr) {
+:deep(.data-table table thead th) {
   background-color: #f3f3f3;
   border-top: 1px solid #eef2f5 !important;
   border-bottom: 1px solid #eef2f5;
-
-  th {
-    background-color: transparent;
-  }
-}
-
-:deep(.data-table table thead th) {
   color: #2b2b2b;
   font-weight: 600;
   font-size: 0.85rem;

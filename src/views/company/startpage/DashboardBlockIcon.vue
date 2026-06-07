@@ -23,7 +23,9 @@ defineProps({
 });
 </script>
 <style scoped>
-.bi {
+svg {
+  width: 18px;
+  height: 18px;
   display: inline-block;
   vertical-align: -0.125em;
 }

@@ -148,7 +148,7 @@
         <div class="col-12 mb-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 bg-transparent border-bottom">
-              <h5 class="mb-0 text-center text-primary">{{ this.$trans('Work Orders') }}</h5>
+              <h5 class="mb-0 text-center text-primary">{{ this.$trans('Latest Workorders') }}</h5>
             </div>
             <div class="card-body">
               <WorkOrdersTable :hide-columns="['equipment']" />

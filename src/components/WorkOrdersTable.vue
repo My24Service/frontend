@@ -11,6 +11,7 @@
       :fields="workOrderFields"
       :items="workOrders"
       responsive="md"
+      :sticky-header="true"
       class="data-table"
       sort-icon-left
     >
@@ -75,7 +76,7 @@ export default {
   computed: {
     workOrderFields() {
       const allFields = [
-        { key: 'id', label: this.$trans('Work Order'), sortable: true },
+        { key: 'id', label: this.$trans('Workorder'), sortable: true },
         { key: 'equipment', label: this.$trans('Equipment'), sortable: true },
         { key: 'location', label: this.$trans('Location'), sortable: true },
         { key: 'start_date', label: this.$trans('Date'), sortable: true },
