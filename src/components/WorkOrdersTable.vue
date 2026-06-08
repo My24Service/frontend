@@ -57,7 +57,7 @@ export default {
   },
   props: {
     equipmentPk: {
-      type: integer,
+      type: [Number, String],
       default: undefined
     },
     hideColumns: {

@@ -14,10 +14,10 @@
           <span class="backlink" @click="goBack">{{ this.$trans('Equipment') }}</span> /
           <span v-if="equipment">{{ equipment.name }}</span>
         </h3>
-        <BButton-toolbar>
+        <BButton-toolbar v-if="from_settings">
           <router-link
           :to="{name: editLink, params:{pk: this.pk}}"
-          class="btn"
+          class="btn btn-primary"
           >{{ `${$trans('Edit')} ${$trans('equipment')}`}}</router-link>
         </BButton-toolbar>
       </div>
@@ -157,7 +157,7 @@
         </div>
 
         <!-- Col 4: Documents -->
-        <div class="col-12 mb-4">
+        <div class="col-6 mb-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 bg-transparent border-bottom">
               <h5 class="mb-0 text-center text-primary">{{ this.$trans('Documents') }}</h5>
@@ -166,6 +166,18 @@
               <DocumentsComponent
                 :equipment="equipment"
                 :is-view="true"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-6 mb-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header py-3 bg-transparent border-bottom">
+              <h5 class="mb-0 text-center text-primary">{{ this.$trans('Order types') }}</h5>
+            </div>
+            <div class="card-body">
+              <OrderTypesPie
+                :equipment-pk="pk"
               />
             </div>
           </div>
@@ -186,6 +198,7 @@ import SearchModal from '@/components/SearchModal.vue'
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import equipmentViewMixin from './equipmentViewMixin.js'
 import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
+import OrderTypesPie from "@/components/OrderTypesPie.vue";
 
 export default {
   components: {
@@ -195,6 +208,13 @@ export default {
     OrderTableInfo,
     SearchModal,
     WorkOrdersTable,
+    OrderTypesPie,
+  },
+  props: {
+    from_settings: {
+      type: Boolean,
+      default: false
+    }
   },
   extends: equipmentViewMixin,
   setup(props, ctx) {

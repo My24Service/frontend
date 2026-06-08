@@ -4,6 +4,17 @@ import {OrderService} from "@/models/orders/Order.js";
 import PieChart from "@/components/PieChart.vue"
 // import ChartJsPluginDataLabels from "chartjs-plugin-datalabels";
 
+const props = defineProps({
+  equipmentPk: {
+    type: [Number, String],
+    required: false
+  },
+  locationPk: {
+    type: [Number, String],
+    required: false
+  }
+})
+
 const chartdataOrderTypesPie = ref({})
 const isLoading = ref(false)
 const orderService = new OrderService()
@@ -40,7 +51,14 @@ function getRandomColorOrderType(txt) {
 async function fillPieData() {
   isLoading.value = true
   try {
-    const orderTypeStatsData = await orderService.getOrderTypesStatsBranch()
+    let orderTypeStatsData
+    if (props.equipmentPk) {
+      orderTypeStatsData = await orderService.getOrderTypesStatsEquipment(props.equipmentPk)
+    } else if (props.locationPk) {
+      orderTypeStatsData = await orderService.getOrderTypesStatsLocation(props.locationPk)
+    } else {
+      orderTypeStatsData = await orderService.getOrderTypesStatsBranch()
+    }
     const thresholdOrderType = .15
     for (const [orderType, _data] of Object.entries(orderTypeStatsData.order_types)) {
       if (parseFloat(_data.perc) > thresholdOrderType) {
