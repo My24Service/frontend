@@ -325,7 +325,7 @@ export default [
       },
       //locations
       {
-        meta: meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         name: 'settings-location-list',
         path: '/settings/locations',
         components: {
