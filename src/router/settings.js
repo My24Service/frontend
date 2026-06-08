@@ -325,9 +325,9 @@ export default [
       },
       //locations
       {
-        name: 'equipment-location-list',
-        path: '/equipment/locations',
-        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
+        meta: meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
+        name: 'settings-location-list',
+        path: '/settings/locations',
         components: {
           'app-content': LocationList,
           'app-subnav': {}
