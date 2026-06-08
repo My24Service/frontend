@@ -212,7 +212,7 @@
                   hover
                   small
                   :busy='isLoading'
-                  :fields="documentFields"
+                  :fields="equipmentDocumentFields"
                   :items="equipmentDocuments"
                   responsive="md"
                   class="data-table"
@@ -227,27 +227,31 @@
                     </div>
                   </template>
                   <template #cell(name)="data">
-                    <span class="badge" v-if="data.item.is_new">{{ $trans('New') }}</span> {{ data.item.name }}
+                    <span class="badge" v-if="data.item.is_new">{{ $trans('New') }}</span>
+                    <BLink class="document-link" :href="data.item.url" target="_blank">
+                      <i :class="'fs-3 bi ' + getFileIcon(data.item.url)"></i>
+                      <span class="pl-4">{{ data.item.name }}</span>
+                    </BLink>
+                  </template>
+                  <template #cell(equipment)="data">
+                    <BLink :to="{ name: 'equipment-equipment-view', params: { pk: data.item.equipment.id } }">
+                      {{ data.item.equipment.name }}
+                    </BLink>
                   </template>
                   <template #cell(created)="data">
                     <small>{{  data.item.created }}</small>
-                  </template>
-                  <template #cell(file)="data">
-                    <BLink :href="data.item.url" target="_blank">
-                      <i :class="'fs-3 bi ' + getFileIcon(data.item.url)"></i>
-                    </BLink>
                   </template>
                 </b-table>
               </DashboardBlock>
             </div>
             <div class="col-lg-6">
-              <DashboardBlock v-if="!isLoading" :title="$trans('New documents - Facility')" iconName="hand-index">
+              <DashboardBlock v-if="!isLoading" :title="$trans('New documents - Facility')" iconName="buildings-fill">
                 <b-table
                   id="location-documents-table"
                   hover
                   small
                   :busy='isLoading'
-                  :fields="documentFields"
+                  :fields="locationDocumentFields"
                   :items="locationDocuments"
                   responsive="md"
                   class="data-table"
@@ -261,15 +265,19 @@
                     </div>
                   </template>
                   <template #cell(name)="data">
-                    <span class="badge" v-if="data.item.is_new">{{ $trans('New') }}</span> {{ data.item.name }}
+                    <span class="badge" v-if="data.item.is_new">{{ $trans('New') }}</span>
+                    <BLink class="document-link" :href="data.item.url" target="_blank">
+                      <i :class="'fs-3 bi ' + getFileIcon(data.item.url)"></i>
+                      <span class="pl-4">{{ data.item.name }}</span>
+                    </BLink>
+                  </template>
+                  <template #cell(location)="data">
+                    <BLink :to="{ name: 'equipment-location-view', params: { pk: data.item.location.id } }">
+                      {{ data.item.location.name }}
+                    </BLink>
                   </template>
                   <template #cell(created)="data">
                     <small>{{  data.item.created }}</small>
-                  </template>
-                  <template #cell(file)="data">
-                    <BLink :href="data.item.url" target="_blank">
-                      <i :class="'fs-3 bi ' + getFileIcon(data.item.url)"></i>
-                    </BLink>
                   </template>
                 </b-table>
               </DashboardBlock>
@@ -355,10 +363,15 @@ export default {
       equipmentDocuments: [],
       locationDocuments: [],
       monthlyCostOverview: [],
-      documentFields: [
+      equipmentDocumentFields: [
         {key: 'name', label: this.$trans('Document'), sortable: true},
+        {key: 'equipment', label: this.$trans('Equipment'), sortable: true},
         {key: 'created', label: this.$trans('Date'), sortable: true},
-        {key: 'file', label: this.$trans('File')},
+      ],
+      locationDocumentFields: [
+        {key: 'name', label: this.$trans('Document'), sortable: true},
+        {key: 'location', label: this.$trans('Location'), sortable: true},
+        {key: 'created', label: this.$trans('Date'), sortable: true},
       ],
       companyLog: '',
       isLoading: false,
@@ -734,6 +747,22 @@ span.badge {
 .app-page > header {
   padding: 0;
   min-height: 1rem;
+}
+
+.document-link {
+  i {
+    margin-right: .4rem;
+  }
+
+  span {
+    max-width: 16rem;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-decoration: underline;
+    vertical-align: -1px;
+  }
 }
 </style>
 
