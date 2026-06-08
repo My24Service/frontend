@@ -9,7 +9,7 @@
 
     <b-nav-item
       :to="{name: 'settings-users-planningusers'}"
-      :active="isActive('settings-company')"
+      :active="isActive('users')"
     >
       {{ $trans('Users') }}
     </b-nav-item>

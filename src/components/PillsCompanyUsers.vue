@@ -27,12 +27,12 @@
       </b-nav-item>
       <b-nav-item
         :active="isActive('planning-users')"
-        :to="{ name: 'users-planningusers' }">
+        :to="{ name: linkPlanning}">
         {{ $trans('Planning') }}
       </b-nav-item>
       <b-nav-item
         :active="isActive('employee-users')"
-        :to="{ name: 'users-employees' }">
+        :to="{ name: 'settings-users-employees' }">
         {{ $trans('Employees') }}
       </b-nav-item>
       <b-nav-item
@@ -46,6 +46,7 @@
 </template>
 <script>
 import {useMainStore} from "@/stores/main";
+import {$trans} from "../utils.js";
 
 export default {
   setup() {
@@ -55,12 +56,27 @@ export default {
       mainStore
     }
   },
+  props: {
+    from_settings: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       isLoaded: false,
       memberType: null,
       hasApiUsers: false,
     }
+  },
+  computed: {
+    linkPlanning() {
+      if (this.from_settings) {
+        return 'settings-users-planningusers'
+      }
+
+      return 'users-planningusers'
+    },
   },
   async created() {
     // check api users
@@ -72,6 +88,7 @@ export default {
     this.isLoaded = true
   },
   methods: {
+    $trans,
     hasEngineers() {
       return !this.hasBranches && this.memberType === 'maintenance' && this.hasAccessToModule('company', 'engineer-users')
     },
@@ -87,7 +104,7 @@ export default {
     isActive(item) {
       const parts = this.$route.path.split('/')
       return parts[2] === item
-    }
+    },
   },
 }
 </script>

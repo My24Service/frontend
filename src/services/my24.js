@@ -159,7 +159,7 @@ class My24 extends BaseModel {
 
   hasAccessToModule(config) {
     const debug = true
-    // console.log(config)
+    if (debug) console.log(config)
 
     if (config.isSuperuser) return true
 
@@ -175,17 +175,7 @@ class My24 extends BaseModel {
       return true;
     }
 
-    if (config.module === 'startpage') {
-      return true;
-    }
-
-    if (!(config.module in config.contract)) {
-      if (debug) console.debug(`not allowed: module not in contract (module=${config.module})`)
-      return false;
-    }
-
-    if (!config.part) {
-      if (debug) console.debug(`allowed: no part (module=${config.module})`)
+    if (config.module === 'startpage' || config.module === 'settings') {
       return true;
     }
 
@@ -200,7 +190,14 @@ class My24 extends BaseModel {
     }
 
     if (config.isStaff || config.isSuperuser) {
-      const allowed_staff = ['members', 'contracts', 'deleted-members', 'modules', 'module-parts']
+      const allowed_staff = [
+        'members',
+        'contracts',
+        'deleted-members',
+        'modules',
+        'module-parts',
+        'settings'
+      ]
 
       if (allowed_staff.indexOf(config.part) !== -1) {
         if (debug) console.debug('allowed because member or staff and member', config.part)
@@ -208,9 +205,14 @@ class My24 extends BaseModel {
       }
     }
 
-    // TODO remove when new dispatch (html and no canvas) live
-    if (config.part === 'dispatch-new') {
-      config.part = 'dispatch'
+    if (!(config.module in config.contract)) {
+      if (debug) console.debug(`not allowed: module not in contract (module=${config.module})`)
+      return false;
+    }
+
+    if (!config.part) {
+      if (debug) console.debug(`allowed: no part (module=${config.module})`)
+      return true;
     }
 
     const contract_result = config.contract[config.module].indexOf(config.part) !== -1;

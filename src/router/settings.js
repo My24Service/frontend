@@ -29,7 +29,7 @@ export default [
       {
         name: 'settings-company',
         path: '/settings/company',
-        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE]},
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': Settings,
           'app-subnav': {}
@@ -43,6 +43,7 @@ export default [
       {
         name: 'settings-order-statuscode-list',
         path: '/settings/statuscodes',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': StatuscodeList,
           'app-subnav': {}
@@ -59,6 +60,7 @@ export default [
       {
         name: 'settings-order-statuscode-edit',
         path: '/settings/statuscodes/form/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         props: {
           'app-content': route => ({
             ...route.params,
@@ -75,6 +77,7 @@ export default [
       {
         name: 'settings-order-statuscode-add',
         path: '/settings/statuscodes/form',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': StatuscodeForm,
           'app-subnav': {}
@@ -92,6 +95,7 @@ export default [
       {
         name: 'settings-statuscode-action-edit',
         path: '/settings/statuscodes/action/form/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         props: {
           'app-content': route => ({...route.params, list_type: 'order'}),
           'app-subnav': true
@@ -104,6 +108,7 @@ export default [
       {
         name: 'settings-statuscode-action-add',
         path: '/settings/statuscodes/action/form-new/:statuscode_pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': ActionForm,
           'app-subnav': {}
@@ -116,21 +121,21 @@ export default [
       // employee users
       {
         name: 'settings-users-employees',
-        path: '/settings/employee-users',
-        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE]},
+        path: '/settings/users/employee-users',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': UserEmployeeList,
           'app-subnav': {}
         },
         props: {
-          'app-content': {},
+          'app-content': {from_settings: true},
           'app-subnav': {}
         },
       },
       {
         name: 'settings-employee-edit',
-        path: '/settings/employee-users/form/:pk',
-        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE]},
+        path: '/settings/users/employee-users/form/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         props: {
           'app-content': route => ({...route.params}),
           'app-subnav': {}
@@ -142,8 +147,8 @@ export default [
       },
       {
         name: 'settings-employee-add',
-        path: '/settings/employee-users/form',
-        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE]},
+        path: '/settings/users/employee-users/form',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': UserEmployeeForm,
           'app-subnav': {}
@@ -156,19 +161,21 @@ export default [
       // planning users
       {
         name: 'settings-users-planningusers',
-        path: '/settings/planning-users',
+        path: '/settings/users/planning-users',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': UserPlanningList,
           'app-subnav': {}
         },
         props: {
-          'app-content': {},
+          'app-content': {from_settings: true},
           'app-subnav': {}
         },
       },
       {
         name: 'settings-planninguser-edit',
-        path: '/settings/planning-users/form/:pk',
+        path: '/settings/users/planning-users/form/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         props: {
           'app-content': route => ({...route.params}),
           'app-subnav': {}
@@ -180,7 +187,8 @@ export default [
       },
       {
         name: 'settings-planninguser-add',
-        path: '/settings/planning-users/form',
+        path: '/settings/users/planning-users/form',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': UserPlanningForm,
           'app-subnav': {}
@@ -194,6 +202,7 @@ export default [
       {
         name: 'settings-branches',
         path: '/settings/branches',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': BranchList,
           'app-subnav': {}
@@ -206,6 +215,7 @@ export default [
       {
         name: 'settings-branch-edit',
         path: '/settings/branches/form/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': BranchForm,
           'app-subnav': {}
@@ -218,6 +228,7 @@ export default [
       {
         name: 'settings-branch-add',
         path: '/settings/branches/form',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': BranchForm,
           'app-subnav': {}
@@ -230,6 +241,7 @@ export default [
       {
         name: 'settings-branch-view',
         path: '/settings/branches/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': BranchView,
           'app-subnav': {}
@@ -240,7 +252,7 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
+        meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
         name: 'settings-my-branch',
         path: '/settings/branches/form/my',
         props: {
@@ -254,9 +266,9 @@ export default [
       },
       // equipment
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'settings-equipment-list',
         path: '/settings/equipment',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': EquipmentList,
           'app-subnav': {}
@@ -267,9 +279,9 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'settings-equipment-edit',
         path: '/settings/equipment/form/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': EquipmentForm,
           'app-subnav': {}
@@ -283,9 +295,9 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'settings-equipment-view',
         path: '/settings/equipment/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': EquipmentView,
           'app-subnav': {}
@@ -299,9 +311,9 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'settings-equipment-add',
         path: '/settings/equipment/form',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': EquipmentForm,
           'app-subnav': {}
@@ -313,7 +325,7 @@ export default [
       },
       //locations
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
+        meta: meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         name: 'settings-location-list',
         path: '/settings/locations',
         components: {
@@ -326,9 +338,9 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'settings-location-edit',
         path: '/settings/locations/form/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': LocationForm,
           'app-subnav': {}
@@ -342,9 +354,9 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'settings-location-view',
         path: '/settings/locations/:pk',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': LocationView,
           'app-subnav': {}
@@ -358,9 +370,9 @@ export default [
         },
       },
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'settings-location-add',
         path: '/settings/locations/form',
+        meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': LocationForm,
           'app-subnav': {}
