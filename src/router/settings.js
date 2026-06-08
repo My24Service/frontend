@@ -121,20 +121,20 @@ export default [
       // employee users
       {
         name: 'settings-users-employees',
-        path: '/settings/employee-users',
+        path: '/settings/users/employee-users',
         meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': UserEmployeeList,
           'app-subnav': {}
         },
         props: {
-          'app-content': {},
+          'app-content': {from_settings: true},
           'app-subnav': {}
         },
       },
       {
         name: 'settings-employee-edit',
-        path: '/settings/employee-users/form/:pk',
+        path: '/settings/users/employee-users/form/:pk',
         meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         props: {
           'app-content': route => ({...route.params}),
@@ -147,7 +147,7 @@ export default [
       },
       {
         name: 'settings-employee-add',
-        path: '/settings/employee-users/form',
+        path: '/settings/users/employee-users/form',
         meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': UserEmployeeForm,
@@ -161,20 +161,20 @@ export default [
       // planning users
       {
         name: 'settings-users-planningusers',
-        path: '/settings/planning-users',
+        path: '/settings/users/planning-users',
         meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': UserPlanningList,
           'app-subnav': {}
         },
         props: {
-          'app-content': {},
+          'app-content': {from_settings: true},
           'app-subnav': {}
         },
       },
       {
         name: 'settings-planninguser-edit',
-        path: '/settings/planning-users/form/:pk',
+        path: '/settings/users/planning-users/form/:pk',
         meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         props: {
           'app-content': route => ({...route.params}),
@@ -187,7 +187,7 @@ export default [
       },
       {
         name: 'settings-planninguser-add',
-        path: '/settings/planning-users/form',
+        path: '/settings/users/planning-users/form',
         meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': UserPlanningForm,

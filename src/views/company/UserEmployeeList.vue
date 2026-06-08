@@ -15,7 +15,7 @@
               />
             </BButton-group>
             <BLink
-              :to="{name: 'employee-add'}"
+              :to="{name: linkAdd}"
               class="btn btn-primary"
             >
               <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add employee") }}
@@ -45,6 +45,7 @@
     <div class="page-details panel">
       <PillsCompanyUsers
         v-if="!isBranchEmployee"
+        :from_settings="from_settings"
       />
       <br>
       <b-table
@@ -57,7 +58,6 @@
         class="data-table"
         sort-icon-left
       >
-
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
@@ -65,7 +65,7 @@
           </div>
         </template>
         <template #cell(full_name)="data">
-          <router-link :to="{name: 'employee-edit', params : {pk: data.item.id}}">
+          <router-link :to="{name: linkEdit, params : {pk: data.item.id}}">
           {{  data.item.full_name }}
           </router-link>
         </template>
@@ -107,6 +107,28 @@ export default {
     return {
       create
     }
+  },
+  props: {
+    from_settings: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    linkAdd() {
+      if (this.from_settings) {
+        return 'settings-employee-add'
+      }
+
+      return 'employee-add'
+    },
+    linkEdit() {
+      if (this.from_settings) {
+        return 'settings-employee-edit'
+      }
+
+      return 'employee-edit'
+    },
   },
   mixins: [componentMixin],
   name: 'UserEmployeeList',

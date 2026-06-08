@@ -14,7 +14,7 @@
                 v-bind:method="function() { showSearchModal() }"
               />
             </BButton-group>
-            <BLink :to="{name: 'planninguser-add'}" class="btn btn-primary">
+            <BLink :to="{name: linkAdd}" class="btn btn-primary">
               <IBiPersonPlus></IBiPersonPlus>{{ $trans("Add planner") }}
             </BLink>
           </BButton-toolbar>
@@ -38,11 +38,10 @@
     </b-modal>
 
     <div class="page-details panel">
-
-      <PillsCompanyUsers />
+      <PillsCompanyUsers
+        :from_settings="from_settings"
+      />
       <br>
-
-
       <b-table
         id="planninguser-table"
         small
@@ -53,7 +52,6 @@
         class="data-table"
         sort-icon-left
       >
-
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle"></b-spinner>&nbsp;&nbsp;
@@ -61,7 +59,7 @@
           </div>
         </template>
         <template #cell(full_name)="data">
-          <router-link :to="{name:'planninguser-edit', params : {pk: data.item.id} }">{{ data.item.full_name }}</router-link>
+          <router-link :to="{name: linkEdit, params : {pk: data.item.id} }">{{ data.item.full_name }}</router-link>
         </template>
         <template #cell(icons)="data">
           <div class="h2 float-right">
@@ -101,6 +99,28 @@ export default {
     return {
       create
     }
+  },
+  props: {
+    from_settings: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    linkAdd() {
+      if (this.from_settings) {
+        return 'settings-planninguser-add'
+      }
+
+      return 'planninguser-add'
+    },
+    linkEdit() {
+      if (this.from_settings) {
+        return 'settings-planninguser-edit'
+      }
+
+      return 'planninguser-edit'
+    },
   },
   name: 'UserPlanningList',
   components: {
