@@ -234,8 +234,8 @@
                     </BLink>
                   </template>
                   <template #cell(equipment)="data">
-                    <BLink :to="{ name: 'equipment-equipment-view', params: { pk: data.item.equipment.id } }">
-                      {{ data.item.equipment.name }}
+                    <BLink :to="{ name: 'equipment-equipment-view', params: { pk: data.item.equipment } }">
+                      {{ data.item.equipment_view.name }}
                     </BLink>
                   </template>
                   <template #cell(created)="data">
@@ -272,8 +272,8 @@
                     </BLink>
                   </template>
                   <template #cell(location)="data">
-                    <BLink :to="{ name: 'equipment-location-view', params: { pk: data.item.location.id } }">
-                      {{ data.item.location.name }}
+                    <BLink :to="{ name: 'equipment-location-view', params: { pk: data.item.location } }">
+                      {{ data.item.location_view.name }}
                     </BLink>
                   </template>
                   <template #cell(created)="data">
