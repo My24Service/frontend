@@ -314,8 +314,8 @@ export default [
       //locations
       {
         meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-location-list',
-        path: '/equipment/locations',
+        name: 'settings-location-list',
+        path: '/settings/locations',
         components: {
           'app-content': LocationList,
           'app-subnav': {}
