@@ -30,7 +30,7 @@
         </BLink>
       </template>
       <template v-if="isVisible('start_date')" #cell(start_date)="data">
-        <small>{{ this.$moment(data.item.order.start_date).format('L') }}</small>
+        <small>{{ data.item.order.start_date }}</small>
       </template>
       <template v-if="isVisible('link')" #cell(link)="data">
         <BLink :to="{ name: 'workorder-view', params: { uuid: data.item.order.uuid } }" target="_blank">
@@ -43,18 +43,11 @@
 
 <script>
 import componentMixin from '@/mixins/common.js'
-import moment from 'moment/min/moment-with-locales'
-import {useMainStore} from "@/stores/main/index.js";
-import orderlineService, {OrderlineService} from '@/models/orders/Orderline.js'
+import {OrderlineService} from '@/models/orders/Orderline.js'
 import {integer} from "@vuelidate/validators";
 
 export default {
   mixins: [componentMixin],
-  setup() {
-    return {
-      mainStore: useMainStore()
-    }
-  },
   props: {
     equipmentPk: {
       type: integer,
@@ -78,16 +71,13 @@ export default {
         { key: 'id', label: this.$trans('Workorder'), sortable: true },
         { key: 'equipment', label: this.$trans('Equipment'), sortable: true },
         { key: 'location', label: this.$trans('Location'), sortable: true },
-        { key: 'start_date', label: this.$trans('Date'), sortable: true },
+        { key: 'start_date', label: this.$trans('Date'), sortable: false },
         { key: 'link', label: '' },
       ]
       return allFields.filter(field => !this.hideColumns.includes(field.key))
     },
   },
   async created() {
-    const lang = this.mainStore.getCurrentLanguage
-    this.$moment = moment
-    this.$moment.locale(lang)
     this.isLoading = true
     try {
       this.workOrders = await this.orderlineService.getLatestWorkordersEquipment(this.equipmentPk)
