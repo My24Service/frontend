@@ -75,6 +75,7 @@
             />
           </BButton-group>
           <router-link
+            v-if="from_settings"
             :to="{name: newLink}"
             class="btn btn-primary"
           >{{ $trans("Add Equipment") }}</router-link>

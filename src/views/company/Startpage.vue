@@ -332,7 +332,7 @@ import LogComponent from "./startpage/LogComponent.vue";
 import BranchPhotoCard from "./startpage/BranchPhotoCard.vue"
 import DashboardBlock from "./startpage/DashboardBlock.vue";
 import WorkOrdersTable from "@/components/WorkOrdersTable.vue";
-import OrderTypesPie from "./startpage/OrderTypesPie.vue";
+import OrderTypesPie from "../../components/OrderTypesPie.vue";
 
 let d = new Date()
 

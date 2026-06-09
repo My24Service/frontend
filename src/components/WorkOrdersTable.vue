@@ -50,7 +50,7 @@ export default {
   mixins: [componentMixin],
   props: {
     equipmentPk: {
-      type: integer,
+      type: [Number, String],
       default: undefined
     },
     hideColumns: {
