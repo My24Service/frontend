@@ -157,7 +157,7 @@
         </div>
 
         <!-- Col 4: Documents -->
-        <div class="col-6 mb-4">
+        <div class="col-8 mb-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 bg-transparent border-bottom">
               <h5 class="mb-0 text-center text-primary">{{ this.$trans('Documents') }}</h5>
@@ -170,7 +170,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6 mb-4">
+        <div class="col-4 mb-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-header py-3 bg-transparent border-bottom">
               <h5 class="mb-0 text-center text-primary">{{ this.$trans('Order types') }}</h5>
