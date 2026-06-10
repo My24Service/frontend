@@ -12,13 +12,13 @@
       {{ $trans('Planning') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'equipment-equipment-list', params: { type: 'technical' }}">
+    <b-nav-item :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL }}">
       <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment')"></IBiWrenchAdjustableCircleFill>
       <IBiWrenchAdjustableCircle v-else></IBiWrenchAdjustableCircle>
       {{ $trans('Technical Equipment') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'equipment-equipment-list', params: { type: 'facility' }}">
+    <b-nav-item :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.FACILITY }}">
       <IBiBuildingsFill v-if="!isActive('facility')"></IBiBuildingsFill>
       <IBiBuildings v-else></IBiBuildings>
       {{ $trans('Facility Equipment') }}
@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import {EQUIPMENT_TYPES} from '@/constants'
 import {MemberService} from "@/models/member/Member";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
@@ -53,6 +54,7 @@ export default {
   },
   data() {
     return {
+      EQUIPMENT_TYPES,
       memberService: new MemberService(),
       requestedCount: null
     }

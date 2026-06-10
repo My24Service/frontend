@@ -78,7 +78,7 @@
                     <span class="button-container">
                       <BButton
                         class="btn btn-outline-secondary"
-                        :to="{name: 'equipment-equipment-list', params: { type: 'technical' }}"
+                        :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL }}"
                         size="sm"
                         type="button"
                         variant="outline-secondary"
@@ -200,6 +200,7 @@ import OrderStats from "../../components/OrderStats";
 
 import BranchCard from '../../components/BranchCard.vue'
 
+import {EQUIPMENT_TYPES} from '@/constants'
 import {BranchService} from '@/models/company/Branch'
 import {OrderService} from '@/models/orders/Order'
 import {LocationService} from "@/models/equipment/location";
@@ -251,6 +252,7 @@ export default {
   },
   data() {
     return {
+      EQUIPMENT_TYPES,
       currentPage: 1,
       searchQuery: null,
       isLoading: false,

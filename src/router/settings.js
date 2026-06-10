@@ -1,4 +1,4 @@
-import {AUTH_LEVELS} from "@/constants";
+import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
 import Settings from "@/views/company/Settings.vue";
 import StatuscodeList from "@/views/shared/StatuscodeList.vue";
 import StatuscodeForm from "@/views/shared/StatuscodeForm.vue";
@@ -267,7 +267,7 @@ export default [
       // equipment
       {
         name: 'settings-equipment-list',
-        path: '/settings/equipment/:type(technical|facility)',
+        path: `/settings/equipment/:type(${Object.values(EQUIPMENT_TYPES).join('|')})`,
         meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': EquipmentList,
