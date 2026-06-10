@@ -78,7 +78,7 @@
                     <span class="button-container">
                       <BButton
                         class="btn btn-outline-secondary"
-                        :to="{name: 'equipment-equipment-list'}"
+                        :to="{name: 'equipment-equipment-list', params: { type: 'technical' }}"
                         size="sm"
                         type="button"
                         variant="outline-secondary"

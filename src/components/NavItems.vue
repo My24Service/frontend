@@ -36,7 +36,7 @@
     <b-nav-item
       :active="isActive('equipment')"
       v-if="showEquipment"
-      to="/equipment/equipment"
+      :to="{ name: 'equipment-equipment-list', params: { type: 'technical' } }"
       class="has-children">
       <IBiBriefcase v-if="!isActive('equipment')"></IBiBriefcase>
       <IBiBriefcaseFill v-if="isActive('equipment')"></IBiBriefcaseFill>

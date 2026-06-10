@@ -23,13 +23,13 @@ export default [
       {
         meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         name: 'equipment-equipment-list',
-        path: '/equipment/equipment',
+        path: '/equipment/:type(technical|facility)',
         components: {
           'app-content': EquipmentList,
           'app-subnav': SubNavEquipment
         },
         props: {
-          'app-content': {},
+          'app-content': route => ({...route.params}),
           'app-subnav': {}
         },
       },

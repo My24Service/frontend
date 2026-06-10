@@ -7,6 +7,7 @@ class EquipmentModel {
   location
   name
   brand
+  type
   identifier
   description
   installation_date
@@ -40,6 +41,7 @@ class EquipmentService extends BaseModel {
     'location': null,
     'name': null,
     'brand': null,
+    'type': null,
     'identifier': null,
     'description': null,
     'installation_date': null,
@@ -52,6 +54,10 @@ class EquipmentService extends BaseModel {
   }
 
   url = '/equipment/equipment/'
+
+  setType(type) {
+    this.setListArgs(`type=${type}`)
+  }
 
   recreateQr(pk) {
     return this.axios.post(`${this.url}${pk}/create_qr/`)

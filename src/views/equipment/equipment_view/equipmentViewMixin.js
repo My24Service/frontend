@@ -40,7 +40,7 @@ export default {
       breadcrumb: [
         {
           text: this.$trans('Equipment'),
-          to: { name: this.listLink() }
+          to: this.listLink(),
         },
         {
           text: this.$trans('Detail'),
@@ -110,9 +110,9 @@ export default {
     },
     listLink() {
       if (this.hasBranches) {
-        return 'equipment-equipment-list'
+        return {name: 'equipment-equipment-list', params: {type: 'technical'}}
       } else {
-        return 'customers-equipment-list'
+        return {name: 'customers-equipment-list'}
       }
     },
     handleSearchOk(val) {

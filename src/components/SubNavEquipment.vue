@@ -4,7 +4,7 @@
       <b-nav-item
         :active="isActive('equipment')"
         v-if="hasEquipment"
-        :to="{ name: 'equipment-equipment-list' }">
+        :to="{ name: 'equipment-equipment-list', params: { type: 'technical' } }">
         {{ $trans('Equipment') }}
       </b-nav-item>
       <b-nav-item

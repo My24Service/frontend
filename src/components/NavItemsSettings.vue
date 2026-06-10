@@ -36,17 +36,24 @@
     </b-nav-item>
 
     <b-nav-item
-      :to="{name: 'settings-equipment-list'}"
-      :active="isActive('equipment')"
+      :to="{name: 'settings-equipment-list', params: {type: 'technical'}}"
+      :active="isActive('technical')"
     >
-      {{ $trans('Technology') }}
+      {{ $trans('Technical Equipment') }}
+    </b-nav-item>
+
+    <b-nav-item
+      :to="{name: 'settings-equipment-list', params: {type: 'facility'}}"
+      :active="isActive('facility')"
+    >
+      {{ $trans('Facility Equipment') }}
     </b-nav-item>
 
     <b-nav-item
       :to="{name: 'settings-location-list'}"
       :active="isActive('locations')"
     >
-      {{ $trans('Facilities') }}
+      {{ $trans('Locations') }}
     </b-nav-item>
 
   </div>

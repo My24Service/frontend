@@ -267,14 +267,17 @@ export default [
       // equipment
       {
         name: 'settings-equipment-list',
-        path: '/settings/equipment',
+        path: '/settings/equipment/:type(technical|facility)',
         meta: {authLevelNeeded: [AUTH_LEVELS.PLANNING]},
         components: {
           'app-content': EquipmentList,
           'app-subnav': {}
         },
         props: {
-          'app-content': {from_settings: true},
+          'app-content': route => ({
+            from_settings: true,
+            ...route.params,
+          }),
           'app-subnav': {}
         },
       },
