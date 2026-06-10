@@ -16,7 +16,7 @@
         </h3>
         <BButton-toolbar v-if="from_settings">
           <router-link
-          :to="{name: editLink, params:{pk: this.pk}}"
+          :to="{name: `${this.route_prefix}-edit`, params:{pk: this.pk}}"
           class="btn btn-primary"
           >{{ `${$trans('Edit')} ${$trans('equipment')}`}}</router-link>
         </BButton-toolbar>

@@ -5,178 +5,147 @@ import LocationList from '../views/equipment/LocationList.vue'
 import LocationForm from '../views/equipment/LocationForm.vue'
 
 import SubNavEquipment from "../components/SubNavEquipment";
-import TheAppLayout from "../components/TheAppLayout";
+import TheAppLayout from "../components/TheAppLayout.vue";
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "../constants";
-import EquipmentView from "../views/equipment/EquipmentView";
-import LocationView from "../views/equipment/LocationView";
+import EquipmentView from "../views/equipment/EquipmentView.vue";
+import LocationView from "../views/equipment/LocationView.vue";
 
-import BuildingList from "../views/equipment/BuildingList";
-import BuildingForm from "../views/equipment/BuildingForm";
-import BuildingView from "../views/equipment/BuildingView";
+import BuildingList from "../views/equipment/BuildingList.vue";
+import BuildingForm from "../views/equipment/BuildingForm.vue";
+import BuildingView from "../views/equipment/BuildingView.vue";
 
 export default [
   {
     path: '/equipment',
     component: TheAppLayout,
+    meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
     // equipment
     children: [
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-equipment-list',
-        path: `/equipment/:type(${Object.values(EQUIPMENT_TYPES).join('|')})`,
-        components: {
-          'app-content': EquipmentList,
-          'app-subnav': SubNavEquipment
+        path: 'equipment',
+        meta: {
+          // Using meta instead of props, because meta data,
+          // is automatically passed down to the children.
+          // `TheAppLayout` turns these into actual props.
+          props: {
+            route_prefix: 'equipment-equipment',
+          },
         },
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-equipment-edit',
-        path: '/equipment/equipment/form/:pk',
-        components: {
-          'app-content': EquipmentForm,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-equipment-view',
-        path: '/equipment/equipment/:pk',
-        components: {
-          'app-content': EquipmentView,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-equipment-add',
-        path: '/equipment/equipment/form',
-        components: {
-          'app-content': EquipmentForm,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': {},
-          'app-subnav': true
-        },
+        children: [
+          {
+            name: 'equipment-equipment-list',
+            path: `:type(${Object.values(EQUIPMENT_TYPES).join('|')})`,
+            components: {
+              'app-content': EquipmentList,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-equipment-edit',
+            path: 'form/:pk',
+            components: {
+              'app-content': EquipmentForm,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-equipment-view',
+            path: ':pk',
+            components: {
+              'app-content': EquipmentView,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-equipment-add',
+            path: 'form',
+            components: {
+              'app-content': EquipmentForm,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+        ],
       },
       // locations
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-location-list',
         path: '/equipment/locations',
-        components: {
-          'app-content': LocationList,
-          'app-subnav': SubNavEquipment
+        meta: {
+          props: {
+            route_prefix: 'equipment-location',
+          },
         },
-        props: {
-          'app-content': {},
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-location-edit',
-        path: '/equipment/locations/form/:pk',
-        components: {
-          'app-content': LocationForm,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-location-view',
-        path: '/equipment/locations/:pk',
-        components: {
-          'app-content': LocationView,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-location-add',
-        path: '/equipment/locations/form',
-        components: {
-          'app-content': LocationForm,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': {},
-          'app-subnav': true
-        },
+        children: [
+          {
+            name: 'equipment-location-list',
+            path: '',
+            components: {
+              'app-content': LocationList,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-location-edit',
+            path: 'form/:pk',
+            components: {
+              'app-content': LocationForm,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-location-view',
+            path: ':pk',
+            components: {
+              'app-content': LocationView,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-location-add',
+            path: 'form',
+            components: {
+              'app-content': LocationForm,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+        ],
       },
       // buildings
       {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-building-list',
         path: '/equipment/buildings',
-        components: {
-          'app-content': BuildingList,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': {},
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-building-edit',
-        path: '/equipment/buildings/form/:pk',
-        components: {
-          'app-content': BuildingForm,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-building-view',
-        path: '/equipment/buildings/:pk',
-        components: {
-          'app-content': BuildingView,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': route => ({...route.params}),
-          'app-subnav': {}
-        },
-      },
-      {
-        meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
-        name: 'equipment-building-add',
-        path: '/equipment/buildings/form',
-        components: {
-          'app-content': BuildingForm,
-          'app-subnav': SubNavEquipment
-        },
-        props: {
-          'app-content': {},
-          'app-subnav': true
-        },
+        children: [
+          {
+            name: 'equipment-building-list',
+            path: '/equipment/buildings',
+            components: {
+              'app-content': BuildingList,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-building-edit',
+            path: 'form/:pk',
+            components: {
+              'app-content': BuildingForm,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-building-view',
+            path: ':pk',
+            components: {
+              'app-content': BuildingView,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+          {
+            name: 'equipment-building-add',
+            path: 'form',
+            components: {
+              'app-content': BuildingForm,
+              'app-subnav': SubNavEquipment,
+            },
+          },
+        ],
       },
     ]
   },

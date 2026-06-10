@@ -955,52 +955,62 @@ export default [
 
     // import
     {
-      name: 'company-import-list',
       path: '/company/import',
-      components: {
-        'app-content': ImportList,
-        'app-subnav': SubNavCompany
+      meta: {
+        props: {
+          route_prefix: 'company-import',
+        },
       },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'company-import-add',
-      path: '/company/import/form',
-      components: {
-        'app-content': ImportForm,
-        'app-subnav': SubNavCompany
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'company-import-edit',
-      path: '/company/import/form/:pk',
-      components: {
-        'app-content': ImportForm,
-        'app-subnav': SubNavCompany
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
-    },
-    {
-      name: 'company-import-preview',
-      path: '/company/import/preview/:pk',
-      components: {
-        'app-content': ImportPreview,
-        'app-subnav': SubNavCompany
-      },
-      props: {
-        'app-content': route => ({...route.params}),
-        'app-subnav': true
-      },
+      children: [
+        {
+          name: 'company-import-list',
+          path: '',
+          components: {
+            'app-content': ImportList,
+            'app-subnav': SubNavCompany
+          },
+          props: {
+            'app-content': route => ({...route.params}),
+            'app-subnav': true
+          },
+        },
+        {
+          name: 'company-import-add',
+          path: 'form',
+          components: {
+            'app-content': ImportForm,
+            'app-subnav': SubNavCompany
+          },
+          props: {
+            'app-content': route => ({...route.params}),
+            'app-subnav': true
+          },
+        },
+        {
+          name: 'company-import-edit',
+          path: 'form/:pk',
+          components: {
+            'app-content': ImportForm,
+            'app-subnav': SubNavCompany
+          },
+          props: {
+            'app-content': route => ({...route.params}),
+            'app-subnav': true
+          },
+        },
+        {
+          name: 'company-import-preview',
+          path: 'preview/:pk',
+          components: {
+            'app-content': ImportPreview,
+            'app-subnav': SubNavCompany
+          },
+          props: {
+            'app-content': route => ({...route.params}),
+            'app-subnav': true
+          },
+        },
+      ],
     },
     // Gripp settings
     {

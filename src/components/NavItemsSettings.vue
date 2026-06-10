@@ -8,6 +8,12 @@
     </b-nav-item>
 
     <b-nav-item
+      :to="{ name: 'settings-company-import-list' }"
+      :active="isActive('import')">
+      {{ $trans('Import') }}
+    </b-nav-item>
+
+    <b-nav-item
       :to="{name: 'settings-users-planningusers'}"
       :active="isActive('users')"
     >

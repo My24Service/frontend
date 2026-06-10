@@ -76,7 +76,7 @@
           </BButton-group>
           <router-link
             v-if="from_settings"
-            :to="{name: newLink}"
+            :to="{name: `${route_prefix}-add`}"
             class="btn btn-primary"
           >{{ $trans("Add Equipment") }}</router-link>
         </BButton-toolbar>
@@ -110,7 +110,7 @@
           </div>
         </template>
         <template #cell(name)="data">
-          <router-link :to="{name: viewLink, params: {pk: data.item.id}}">
+          <router-link :to="{name: `${route_prefix}-view`, params: {pk: data.item.id}}">
             {{ data.item.name }}
           </router-link><br/>
         </template>
@@ -144,7 +144,7 @@
               v-bind:method="function() { showAddStateModal(data.item.id) }"
             />
             <IconLinkEdit
-              :router_name="editLink"
+              :router_name="`${route_prefix}-edit`"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
@@ -206,6 +206,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    route_prefix: {
+      type: String,
+      required: true,
+    },
     type: {
       type: String,
       required: true,
@@ -214,27 +218,6 @@ export default {
   computed: {
     service() {
       return this.equipmentService
-    },
-    editLink() {
-      if (this.hasBranches) {
-        return 'equipment-equipment-edit'
-      } else {
-        return 'customers-equipment-edit'
-      }
-    },
-    viewLink() {
-      if (this.hasBranches) {
-        return 'equipment-equipment-view'
-      } else {
-        return 'customers-equipment-view'
-      }
-    },
-    newLink() {
-      if (this.hasBranches) {
-        return 'equipment-equipment-add'
-      } else {
-        return 'customers-equipment-add'
-      }
     },
     isShltrTheme() {
       return document.documentElement.classList.contains('theme-shltr')
