@@ -342,6 +342,27 @@
             </BFormGroup>
 
             <BFormGroup
+              v-if="hasBranches"
+              label-size="sm"
+              label-cols="4"
+              v-bind:label="$trans('Type')"
+              label-for="equipment_type"
+            >
+              <BFormSelect
+                id="equipment_type"
+                v-model="equipment.type"
+                :options="equipmentTypeOptions"
+                size="sm"
+              ></BFormSelect>
+            </BFormGroup>
+            <BFormInput
+              v-else
+              id="equipment_type"
+              type="hidden"
+              v-model="equipment.type"
+            ></BFormInput>
+
+            <BFormGroup
               label-size="sm"
               label-cols="4"
               v-bind:label="$trans('Brand')"
@@ -607,6 +628,12 @@ export default {
     },
     isSubmitClicked() {
       return this.submitClicked
+    },
+    equipmentTypeOptions() {
+      return [
+        { value: 'technical', text: $trans('Technical') },
+        { value: 'facility', text: $trans('Facility') }
+      ]
     }
   },
   async created() {
@@ -621,6 +648,7 @@ export default {
         default_currency: this.mainStore.getDefaultCurrency,
         price: '0.00',
         price_currency: this.mainStore.getDefaultCurrency,
+        type: 'technical',
       })
     },
     priceChanged(priceDinero) {
@@ -731,6 +759,7 @@ export default {
           this.equipment = new EquipmentModel({
             price: "0.00",
             price_currency: this.mainStore.getDefaultCurrency,
+            type: 'technical',
           })
         }
 

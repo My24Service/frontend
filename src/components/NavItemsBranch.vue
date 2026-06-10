@@ -12,23 +12,28 @@
       {{ $trans('Planning') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'equipment-equipment-list'}">
+    <b-nav-item :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL }}">
       <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment')"></IBiWrenchAdjustableCircleFill>
       <IBiWrenchAdjustableCircle v-else></IBiWrenchAdjustableCircle>
-      {{ $trans('Technology') }}
+      {{ $trans('Technical Equipment') }}
+    </b-nav-item>
+
+    <b-nav-item :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.FACILITY }}">
+      <IBiBuildingsFill v-if="!isActive('facility')"></IBiBuildingsFill>
+      <IBiBuildings v-else></IBiBuildings>
+      {{ $trans('Facility Equipment') }}
     </b-nav-item>
 
     <b-nav-item :to="{name: 'equipment-location-list'}">
-      <IBiBuildingsFill v-if="!isActive('location')"></IBiBuildingsFill>
-      <IBiBuildings v-else></IBiBuildings>
-      {{ $trans('Facilities') }}
+      <IBiGeoAltFill v-if="!isActive('location')"></IBiGeoAltFill>
+      <IBiGeoAlt v-else></IBiGeoAlt>
+      {{ $trans('Locations') }}
     </b-nav-item>
   </div>
 </template>
 
 <script>
-
-import SubNav from '@/components/SubNav';
+import {EQUIPMENT_TYPES} from '@/constants'
 import {MemberService} from "@/models/member/Member";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
@@ -49,6 +54,7 @@ export default {
   },
   data() {
     return {
+      EQUIPMENT_TYPES,
       memberService: new MemberService(),
       requestedCount: null
     }
@@ -82,9 +88,6 @@ export default {
   },
   watch: {
   },
-  components: {
-    SubNav,
-  }
 }
 </script>
 <style scoped>

@@ -36,25 +36,31 @@
     </b-nav-item>
 
     <b-nav-item
-      :to="{name: 'settings-equipment-list'}"
-      :active="isActive('equipment')"
+      :to="{name: 'settings-equipment-list', params: {type: EQUIPMENT_TYPES.TECHNICAL}}"
+      :active="isActive('technical')"
     >
-      {{ $trans('Technology') }}
+      {{ $trans('Technical Equipment') }}
+    </b-nav-item>
+
+    <b-nav-item
+      :to="{name: 'settings-equipment-list', params: {type: EQUIPMENT_TYPES.FACILITY}}"
+      :active="isActive('facility')"
+    >
+      {{ $trans('Facility Equipment') }}
     </b-nav-item>
 
     <b-nav-item
       :to="{name: 'settings-location-list'}"
       :active="isActive('locations')"
     >
-      {{ $trans('Facilities') }}
+      {{ $trans('Locations') }}
     </b-nav-item>
 
   </div>
 </template>
 
 <script>
-
-import SubNav from '@/components/SubNav';
+import {EQUIPMENT_TYPES} from '@/constants'
 import {MemberService} from "@/models/member/Member";
 import componentMixin from "@/mixins/common";
 import {useMainStore} from "@/stores/main";
@@ -75,6 +81,7 @@ export default {
   },
   data() {
     return {
+      EQUIPMENT_TYPES,
       memberService: new MemberService(),
       requestedCount: null
     }
@@ -108,9 +115,6 @@ export default {
   },
   watch: {
   },
-  components: {
-    SubNav,
-  }
 }
 </script>
 <style scoped>

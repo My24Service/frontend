@@ -1,4 +1,4 @@
-import { NO_IMAGE_URL } from '@/constants'
+import { NO_IMAGE_URL, EQUIPMENT_TYPES } from '@/constants'
 import my24 from "@/services/my24";
 
 import { OrderService } from '@/models/orders/Order'
@@ -25,6 +25,7 @@ export default {
   data() {
     return {
       NO_IMAGE_URL,
+      EQUIPMENT_TYPES,
       currentPage: 1,
       searchQuery: null,
       isLoading: false,
@@ -40,7 +41,7 @@ export default {
       breadcrumb: [
         {
           text: this.$trans('Equipment'),
-          to: { name: this.listLink() }
+          to: this.listLink(),
         },
         {
           text: this.$trans('Detail'),
@@ -110,9 +111,9 @@ export default {
     },
     listLink() {
       if (this.hasBranches) {
-        return 'equipment-equipment-list'
+        return {name: 'equipment-equipment-list', params: {type: EQUIPMENT_TYPES.TECHNICAL}}
       } else {
-        return 'customers-equipment-list'
+        return {name: 'customers-equipment-list'}
       }
     },
     handleSearchOk(val) {
