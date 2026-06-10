@@ -4,7 +4,7 @@
       <b-nav-item
         :active="isActive('equipment')"
         v-if="hasEquipment"
-        :to="{ name: 'equipment-equipment-list' }">
+        :to="{ name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL } }">
         {{ $trans('Equipment') }}
       </b-nav-item>
       <b-nav-item
@@ -24,11 +24,15 @@
 </template>
 
 <script>
-
+import {EQUIPMENT_TYPES} from '@/constants'
 
 export default {
   name: 'SubNavEquipment',
-
+  data() {
+    return {
+      EQUIPMENT_TYPES,
+    }
+  },
   methods: {
     isActive(item) {
       const parts = this.$route.path.split('/')

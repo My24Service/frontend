@@ -205,7 +205,11 @@ export default {
     from_settings: {
       type: Boolean,
       default: false,
-    }
+    },
+    type: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     service() {
@@ -292,6 +296,7 @@ export default {
   },
   async created() {
     this.equipmentService.resetListArgs()
+    this.equipmentService.setType(this.type)
     this.equipmentService.currentPage = this.$route.query.page || 1
     this.equipmentService.setSearchQuery(this.$route.query.q, !!!this.$route.query.page)
     if (this.$route.query.sort_field) {

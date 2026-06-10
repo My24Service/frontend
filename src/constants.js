@@ -23,5 +23,10 @@ export const AUTH_LEVELS = {
   STAFF: 'is_staff',
 }
 
+export const EQUIPMENT_TYPES = {
+  TECHNICAL: 'technical',
+  FACILITY: 'facility',
+}
+
 export const NO_IMAGE_URL = `${document.location.origin}/assets/no-img.png`
 export const PIXEL_URL = `${document.location.origin}/assets/pixel.png`
