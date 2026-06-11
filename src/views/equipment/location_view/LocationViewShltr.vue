@@ -16,7 +16,7 @@
         </h3>
         <BButton-toolbar>
           <router-link
-          :to="{name: editLink, params:{pk: this.pk}}"
+          :to="{name: `${this.route_prefix}-edit`, params:{pk: this.pk}}"
           class="btn"
           >{{ `${$trans('Edit')} ${$trans('location')}`}}</router-link>
         </BButton-toolbar>
@@ -176,7 +176,6 @@ import ButtonLinkRefresh from '@/components/ButtonLinkRefresh.vue'
 import ButtonLinkSearch from '@/components/ButtonLinkSearch.vue'
 import OrderTableInfo from '@/components/OrderTableInfo.vue'
 import SearchModal from '@/components/SearchModal.vue'
-import OrderStats from "@/components/OrderStats";
 
 import DocumentsComponent from "@/views/equipment/equipment_form/DocumentsComponent.vue";
 import {
@@ -200,7 +199,6 @@ export default {
     ButtonLinkSearch,
     OrderTableInfo,
     SearchModal,
-    OrderStats,
   },
   extends: locationViewMixin,
   setup(props, ctx) {
