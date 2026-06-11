@@ -77,18 +77,9 @@ export default {
     qrUrl() {
       return this.location?.qr_url ?? this.location?.qr_path;
     },
-    editLink() {
-      if (this.hasBranches) {
-        return 'equipment-location-edit'
-      } else {
-        return 'customers-location-edit'
-      }
-    },
     viewMaterialLink() {
-      if (this.hasBranches) {
-        return 'equipment-equipment-view'
-      } else {
-        return 'customers-equipment-view'
+      if (this.route_prefix) {
+        return `${this.route_prefix.replace('location', 'equipment')}-view`
       }
     },
   },
@@ -96,6 +87,10 @@ export default {
     pk: {
       type: [String, Number],
       default: null
+    },
+    route_prefix: {
+      type: String,
+      required: true,
     },
   },
   watch: {
@@ -132,13 +127,6 @@ export default {
         ...this.location,
         qr_path: result.qr_path,
         qr_url: result.qr_url,
-      }
-    },
-    listLink() {
-      if (this.hasBranches) {
-        return 'equipment-location-list'
-      } else {
-        return 'customers-location-list'
       }
     },
     handleSearchOk(val) {

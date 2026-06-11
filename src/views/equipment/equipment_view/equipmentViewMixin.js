@@ -59,18 +59,15 @@ export default {
     qrUrl() {
       return this.equipment?.qr_url ?? this.equipment?.qr_path;
     },
-    editLink() {
-      if (this.hasBranches) {
-        return 'equipment-equipment-edit'
-      } else {
-        return 'customers-equipment-edit'
-      }
-    },
   },
   props: {
     pk: {
       type: [String, Number],
       default: null
+    },
+    route_prefix: {
+      type: String,
+      required: true,
     },
   },
   watch: {
