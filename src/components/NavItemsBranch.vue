@@ -12,16 +12,22 @@
       {{ $trans('Planning') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL }}">
-      <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment')"></IBiWrenchAdjustableCircleFill>
+    <b-nav-item
+      :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL }}"
+      :active="isActive('equipment/technical')"
+    >
+      <IBiWrenchAdjustableCircleFill v-if="!isActive('equipment/technical')"></IBiWrenchAdjustableCircleFill>
       <IBiWrenchAdjustableCircle v-else></IBiWrenchAdjustableCircle>
-      {{ $trans('Technical Equipment') }}
+      {{ $trans('Technical') }}
     </b-nav-item>
 
-    <b-nav-item :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.FACILITY }}">
-      <IBiBuildingsFill v-if="!isActive('facility')"></IBiBuildingsFill>
+    <b-nav-item
+      :to="{name: 'equipment-equipment-list', params: { type: EQUIPMENT_TYPES.FACILITY }}"
+      :active="isActive('equipment/facility')"
+    >
+      <IBiBuildingsFill v-if="!isActive('equipment/facility')"></IBiBuildingsFill>
       <IBiBuildings v-else></IBiBuildings>
-      {{ $trans('Facility Equipment') }}
+      {{ $trans('Facility') }}
     </b-nav-item>
 
     <b-nav-item :to="{name: 'equipment-location-list'}">
@@ -60,13 +66,8 @@ export default {
     }
   },
   methods: {
-    isActive(item, subsection) {
-      const parts = this.$route.path.split('/')
-      if(!subsection) {
-        return parts[1] === item
-      } else {
-        return parts[parts.length] === item
-      }
+    isActive(item) {
+      return this.$route.path.indexOf(item) !== -1
     }
   },
   async created() {

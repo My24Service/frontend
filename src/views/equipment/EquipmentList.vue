@@ -110,9 +110,13 @@
           </div>
         </template>
         <template #cell(name)="data">
-          <router-link :to="{name: `${route_prefix}-view-${type}`, params: {pk: data.item.id}}">
+          <router-link v-if="hasBranches" :to="{name: `${route_prefix}-view-${type}`, params: {pk: data.item.id}}">
             {{ data.item.name }}
-          </router-link><br/>
+          </router-link>
+          <router-link v-else :to="{name: `${route_prefix}-view`, params: {pk: data.item.id}}">
+            {{ data.item.name }}
+          </router-link>
+          <br/>
         </template>
         <template #cell(latest_state)="data">
           <span v-if="data.item.latest_state">
@@ -144,7 +148,14 @@
               v-bind:method="function() { showAddStateModal(data.item.id) }"
             />
             <IconLinkEdit
+              v-if="hasBranches"
               :router_name="`${route_prefix}-edit-${type}`"
+              v-bind:router_params="{pk: data.item.id}"
+              v-bind:title="$trans('Edit')"
+            />
+            <IconLinkEdit
+              v-else
+              :router_name="`${route_prefix}-edit`"
               v-bind:router_params="{pk: data.item.id}"
               v-bind:title="$trans('Edit')"
             />
